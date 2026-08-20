@@ -13,14 +13,6 @@ android {
     defaultConfig {
         minSdk = 26
     }
-
-    sourceSets {
-        getByName("main") {
-            proto {
-                srcDir("src/main/proto")
-            }
-        }
-    }
 }
 
 dependencies {
@@ -34,11 +26,15 @@ dependencies {
 }
 
 protobuf {
-    protoc { artifact = libs.protobuf.protoc.get().toString() }
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
-                create("java") { option("lite") }
+                create("java") { 
+                    option("lite") 
+                }
             }
         }
     }
