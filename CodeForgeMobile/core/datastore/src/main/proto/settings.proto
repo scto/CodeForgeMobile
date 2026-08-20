@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option java_package = "com.codeforge.core.datastore.proto";
+option java_multiple_files = true;
+
+message AppSettings {
+  ThemeConfig theme = 1;
+  TerminalConfig terminal = 2;
+  EditorConfig editor = 3;
+  bool onboarding_completed = 4;
+}
+
+message ThemeConfig {
+  ThemeMode mode = 1;
+  string color_scheme_id = 2;
+  bool use_dynamic_color = 3;
+  CustomPalette custom_palette = 4;
+}
+
+message CustomPalette {
+  string primary = 1;
+  string secondary = 2;
+  string tertiary = 3;
+}
+
+enum ThemeMode {
+  SYSTEM = 0;
+  LIGHT = 1;
+  DARK = 2;
+}
+
+message TerminalConfig {
+  string default_distro = 1;
+  int32 font_size = 2;
+}
+
+message EditorConfig {
+  int32 tab_size = 1;
+  bool use_tree_sitter = 2;
+  string textmate_theme = 3;
+  string lsp_server_path = 4;
+}

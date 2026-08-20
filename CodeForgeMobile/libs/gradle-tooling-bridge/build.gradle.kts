@@ -1,0 +1,18 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace = "com.codeforge.libs.gradle_tooling_bridge"
+    compileSdk = 35
+
+    defaultConfig {
+        minSdk = 26
+    }
+}
+
+dependencies {
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(project(":core:domain"))
+}
