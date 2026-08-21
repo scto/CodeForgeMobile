@@ -1,0 +1,6 @@
+{
+  "files": [
+    { "source": "Main.java.ftl", "target": "src/main/java/${packagePath}/Main.java" },
+    { "source": "build.gradle.kts.ftl", "target": "build.gradle.kts" }
+  ]
+}

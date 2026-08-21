@@ -1,0 +1,8 @@
+{
+  "files": [
+    { "source": "MainActivity.kt.ftl", "target": "app/src/main/kotlin/${packagePath}/MainActivity.kt" },
+    { "source": "AndroidManifest.xml.ftl", "target": "app/src/main/AndroidManifest.xml" },
+    { "source": "build.gradle.kts.ftl", "target": "app/build.gradle.kts" },
+    { "source": "settings.gradle.kts.ftl", "target": "settings.gradle.kts" }
+  ]
+}

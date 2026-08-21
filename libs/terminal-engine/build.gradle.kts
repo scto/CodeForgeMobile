@@ -20,4 +20,8 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    // Tar/Gzip/XZ-Entpacken der Rootfs-Archive (Alpine=.tar.gz, Debian=.tar.xz)
+    implementation(libs.commons.compress)
+    implementation(libs.xz)
 }

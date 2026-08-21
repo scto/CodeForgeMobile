@@ -43,6 +43,9 @@ dependencies {
     implementation(project(":feature:settings"))
 
     implementation(project(":libs:terminal-engine"))
+    implementation(project(":libs:template-engine"))
+    implementation(project(":libs:gradle-tooling-bridge"))
+    implementation(project(":libs:lsp-client"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

@@ -9,37 +9,19 @@ data class OpenFile(
     val isDirty: Boolean = false
 )
 
-enum class DiagnosticSeverity { ERROR, WARNING, INFO, HINT }
-
-data class LspDiagnostic(
-    val path: String,
-    val line: Int,
-    val message: String,
-    val severity: DiagnosticSeverity
-)
-
 @Immutable
 data class EditorUiState(
     val openFiles: List<OpenFile> = emptyList(),
     val activeFileIndex: Int = 0,
     val isLspConnected: Boolean = false,
-    val isLspLoading: Boolean = false,
-    val isLoading: Boolean = false,
-    val canUndo: Boolean = false,
-    val canRedo: Boolean = false,
-    val diagnostics: List<LspDiagnostic> = emptyList()
+    val isLoading: Boolean = false
 )
 
 sealed interface EditorUiEvent {
     data class OpenFile(val path: String) : EditorUiEvent
     data class CloseTab(val index: Int) : EditorUiEvent
-    data class SelectTab(val index: Int) : EditorUiEvent
     data class TextChanged(val text: String) : EditorUiEvent
-    data object SaveFile : EditorUiEvent
-    data object SaveAllFiles : EditorUiEvent
     data object RunLspFormat : EditorUiEvent
-    data object UndoClicked : EditorUiEvent
-    data object RedoClicked : EditorUiEvent
 }
 
 sealed interface EditorUiEffect {

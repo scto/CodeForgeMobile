@@ -1,39 +1,64 @@
 // Modul: :libs:terminal-engine
 package com.codeforge.libs.terminal_engine
 
+import android.content.Context
 import com.codeforge.core.domain.repository.BootstrapProgress
 import com.codeforge.core.domain.repository.DistroBootstrapRepository
-import kotlinx.coroutines.delay
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Bootstrapped die PRoot-Rootfs für die gewählte Distro (Abschnitt 6 des Skills).
- * TODO: Download via bekannter Rootfs-Mirrors (z.B. Alpine Minirootfs, Ubuntu Base),
- * Entpacken via tar/proot-static, Verifikation via Checksumme.
- * Aktuell: Fortschritts-Flow als Grundgerüst, das durch echten Download/Extract-Code
- * ersetzt wird (siehe TerminalSession-Bridge, JNI/PTY analog Termux).
- */
 @Singleton
-class DistroBootstrapRepositoryImpl @Inject constructor() : DistroBootstrapRepository {
+class DistroBootstrapRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context
+) : DistroBootstrapRepository {
+
+    private val downloader = RootfsDownloader()
+    private val extractor = RootfsExtractor()
 
     override fun bootstrap(distro: String): Flow<BootstrapProgress> = flow {
-        try {
-            for (percent in 0..100 step 10) {
-                delay(150)
-                emit(BootstrapProgress.Downloading(percent))
-            }
-            for (percent in 0..100 step 20) {
-                delay(150)
-                emit(BootstrapProgress.Extracting(percent))
-            }
-            emit(BootstrapProgress.Finalizing)
-            delay(200)
-            emit(BootstrapProgress.Completed)
-        } catch (t: Throwable) {
-            emit(BootstrapProgress.Failed(t.message ?: "Unbekannter Fehler beim Bootstrap von $distro"))
+        val source = DistroCatalog.sourceFor(distro)
+        if (source == null) {
+            emit(BootstrapProgress.Failed("Unbekannte Distribution: $distro"))
+            return@flow
         }
+
+        val cacheFile = File(context.cacheDir, "$distro-rootfs.${extensionFor(source.archiveFormat)}")
+        val targetDir = rootfsDir(distro)
+
+        downloader.download(source.url, cacheFile).collect { percent ->
+            emit(BootstrapProgress.Downloading(percent))
+        }
+
+        if (targetDir.exists()) targetDir.deleteRecursively()
+        targetDir.mkdirs()
+
+        extractor.extract(cacheFile, targetDir, source.archiveFormat).collect { percent ->
+            emit(BootstrapProgress.Extracting(percent))
+        }
+
+        emit(BootstrapProgress.Finalizing)
+        cacheFile.delete()
+
+        emit(BootstrapProgress.Completed)
+    }
+        .catch { throwable ->
+            emit(BootstrapProgress.Failed(throwable.message ?: "Unbekannter Fehler beim Bootstrap von $distro"))
+        }
+        .flowOn(Dispatchers.IO)
+
+    override fun rootfsPath(distro: String): String = rootfsDir(distro).path
+
+    private fun rootfsDir(distro: String): File = File(context.filesDir, "distro/$distro")
+
+    private fun extensionFor(format: ArchiveFormat): String = when (format) {
+        ArchiveFormat.TAR_GZ -> "tar.gz"
+        ArchiveFormat.TAR_XZ -> "tar.xz"
     }
 }

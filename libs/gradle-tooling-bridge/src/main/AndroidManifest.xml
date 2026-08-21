@@ -1,2 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!--
+          Läuft im eigenen Prozess (:gradletooling), damit die Gradle-Tooling-API
+          (org.gradle.tooling.*) mit ihrer eigenen Classloader-Hierarchie isoliert
+          vom App-Hauptprozess bleibt. Kommunikation ausschließlich über die
+          AIDL-Interfaces IGradleBridgeService / IGradleBridgeCallback.
+        -->
+        <service
+            android:name="com.codeforge.libs.gradle_tooling_bridge.GradleBridgeService"
+            android:process=":gradletooling"
+            android:exported="false" />
+    </application>
+
+</manifest>

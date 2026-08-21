@@ -1,6 +1,7 @@
 // Modul: :app
 package com.codeforge.app
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -8,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.codeforge.feature.editor.EditorRoute
+import com.codeforge.feature.filetree.FileTreeRoute
 import com.codeforge.feature.onboarding.OnboardingRoute
 import com.codeforge.feature.projectwizard.ProjectWizardRoute
 import com.codeforge.feature.welcome.WelcomeRoute
@@ -19,14 +21,10 @@ private object Routes {
     const val IMPORT_PROJECT = "import_project"
     const val CLONE_PROJECT = "clone_project"
     const val SETTINGS = "settings"
-
-    // Editor mit optionalem projectPath-Argument:
-    // navigate(Routes.editorWithPath("/sdcard/MyApp")) oder Routes.EDITOR (ohne Pfad)
     const val EDITOR = "editor"
-    const val EDITOR_PATH_ARG = "projectPath"
-    const val EDITOR_WITH_PATH = "editor?$EDITOR_PATH_ARG={$EDITOR_PATH_ARG}"
+    const val FILE_TREE_PATTERN = "filetree/{rootPath}"
 
-    fun editorWithPath(path: String): String = "editor?$EDITOR_PATH_ARG=$path"
+    fun fileTree(rootPath: String) = "filetree/${Uri.encode(rootPath)}"
 }
 
 @Composable
@@ -44,59 +42,42 @@ fun CodeForgeNavHost(startOnboarding: Boolean) {
                 }
             )
         }
-
         composable(Routes.WELCOME) {
             WelcomeRoute(
                 onNavigateToProjectWizard = { navController.navigate(Routes.PROJECT_WIZARD) },
                 onNavigateToImportPicker = { navController.navigate(Routes.IMPORT_PROJECT) },
                 onNavigateToCloneDialog = { navController.navigate(Routes.CLONE_PROJECT) },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
-                onOpenProject = { projectPath ->
-                    navController.navigate(Routes.editorWithPath(projectPath))
-                }
+                onOpenProject = { projectPath -> navController.navigate(Routes.fileTree(projectPath)) }
             )
         }
-
         composable(Routes.PROJECT_WIZARD) {
             ProjectWizardRoute(
-                onNavigateToEditor = { projectPath ->
-                    navController.navigate(Routes.editorWithPath(projectPath)) {
-                        // Wizard aus dem Back-Stack entfernen – nicht zurück in den Wizard
-                        popUpTo(Routes.PROJECT_WIZARD) { inclusive = true }
-                    }
-                },
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateToEditor = { projectPath -> navController.navigate(Routes.fileTree(projectPath)) },
+                onCancel = { navController.popBackStack() }
             )
         }
-
         composable(Routes.IMPORT_PROJECT) {
-            // TODO :feature:filetree / SAF-Picker – Projekt importieren
+            // :feature:filetree / SAF-Picker – Projekt importieren
         }
-
         composable(Routes.CLONE_PROJECT) {
-            // TODO :feature:git – Clone-Dialog
+            // :feature:git – Clone-Dialog
         }
-
         composable(Routes.SETTINGS) {
-            // TODO :feature:settings – App-Settings, Multitheme-Auswahl
+            // :feature:settings – App-Settings, Multitheme-Auswahl
         }
-
         composable(
-            route = Routes.EDITOR_WITH_PATH,
-            arguments = listOf(
-                navArgument(Routes.EDITOR_PATH_ARG) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            )
+            route = Routes.FILE_TREE_PATTERN,
+            arguments = listOf(navArgument("rootPath") { type = NavType.StringType })
         ) { backStackEntry ->
-            val projectPath = backStackEntry.arguments?.getString(Routes.EDITOR_PATH_ARG)
-            EditorRoute(
-                projectPath = projectPath,
-                onNavigate = { route -> navController.navigate(route) }
+            val rootPath = backStackEntry.arguments?.getString("rootPath").orEmpty()
+            FileTreeRoute(
+                rootPath = rootPath,
+                onOpenFile = { navController.navigate(Routes.EDITOR) }
             )
+        }
+        composable(Routes.EDITOR) {
+            EditorRoute(onNavigate = { route -> navController.navigate(route) })
         }
     }
 }
-

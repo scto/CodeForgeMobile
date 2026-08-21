@@ -5,7 +5,9 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.codeforge.core.data.repository.FileSystemRepositoryImpl
 import com.codeforge.core.data.repository.RecentProjectsRepositoryImpl
+import com.codeforge.core.domain.repository.FileSystemRepository
 import com.codeforge.core.domain.repository.RecentProjectsRepository
 import dagger.Binds
 import dagger.Module
@@ -34,4 +36,10 @@ abstract class DataModule {
     abstract fun bindRecentProjectsRepository(
         impl: RecentProjectsRepositoryImpl
     ): RecentProjectsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFileSystemRepository(
+        impl: FileSystemRepositoryImpl
+    ): FileSystemRepository
 }

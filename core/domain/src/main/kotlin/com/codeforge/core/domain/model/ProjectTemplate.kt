@@ -1,10 +1,19 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
-import androidx.compose.runtime.Immutable
+enum class TemplateParamType { STRING, PACKAGE_NAME, BOOLEAN, MIN_SDK, DIRECTORY }
 
-@Immutable
-data class ProjectTemplate(
+data class TemplateParam(
+    val key: String,
+    val label: String,
+    val type: TemplateParamType,
+    val defaultValue: String,
+    val required: Boolean = true
+)
+
+enum class TemplateCategory { COMPOSE, JAVA, KOTLIN_CLI, MULTI_MODULE }
+
+data class ProjectTemplateDescriptor(
     val id: String,
     val name: String,
     val description: String,
@@ -12,27 +21,7 @@ data class ProjectTemplate(
     val requiredParams: List<TemplateParam>
 )
 
-enum class TemplateCategory {
-    COMPOSE, MULTIMODULE, JAVA, KOTLIN_CLI
-}
-
-@Immutable
-data class TemplateParam(
-    val key: String,
-    val label: String,
-    val hint: String,
-    val defaultValue: String,
-    val type: ParamType
-)
-
-enum class ParamType {
-    TEXT, PACKAGE_NAME, DIRECTORY_PATH, BOOLEAN
-}
-
-@Immutable
 data class ProjectHandle(
-    val id: String,
-    val name: String,
-    val path: String,
-    val templateId: String
+    val rootPath: String,
+    val projectName: String
 )

@@ -18,4 +18,7 @@ sealed interface BootstrapProgress {
  */
 interface DistroBootstrapRepository {
     fun bootstrap(distro: String): Flow<BootstrapProgress>
+
+    /** Lokaler Pfad der (bereits oder noch zu bootstrappenden) Rootfs für [distro]. */
+    fun rootfsPath(distro: String): String
 }
