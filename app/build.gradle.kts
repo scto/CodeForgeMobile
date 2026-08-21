@@ -1,11 +1,14 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.detekt)   // ← hier unkritisch, AGP bereits geladen
-    id("analysis-tools")          // liefert nur die Custom-Tasks
+    alias(libs.plugins.detekt)
+    id("analysis-tools")
 }
 
 android {
@@ -60,15 +63,21 @@ dependencies {
     detektPlugins(libs.detekt.rules.compose)
 }
 
-detekt {
+extensions.configure<DetektExtension> {
     buildUponDefaultConfig = true
+    allRules = false
     config.setFrom(files("${rootDir}/config/detekt/detekt.yml"))
+    baseline = file("${rootDir}/config/detekt/baseline.xml")
+    source.setFrom(files("src/main/kotlin", "src/main/java"))
 }
 
-tasks.named<io.gitlab.arturbosch.detekt.Detekt>("detekt") {
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "17"
     reports {
         html.required.set(true)
         xml.required.set(true)
+        sarif.required.set(false)
+        txt.required.set(false)
     }
 }
 

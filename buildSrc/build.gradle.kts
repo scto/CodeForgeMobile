@@ -1,4 +1,3 @@
-// buildSrc/build.gradle.kts
 plugins {
     `kotlin-dsl`
 }
@@ -10,10 +9,9 @@ repositories {
 }
 
 dependencies {
-    implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.6")
-    // AGP muss im buildSrc-Classpath verfügbar sein, damit Detekt's optionale
-    // Android-Integration (BaseExtension-Referenz) beim Plugin-Apply auflösbar ist
-    compileOnly("com.android.tools.build:gradle:8.5.2")
+    // KEIN AGP-Dependency notwendig, da Detekt-Plugin-Apply
+    // aus dem Convention-Plugin entfernt wurde (Fix 3).
+    // Custom-Tasks nutzen ausschließlich reine Kotlin/Gradle-APIs.
 }
 
 kotlin {

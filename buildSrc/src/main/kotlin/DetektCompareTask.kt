@@ -1,85 +1,105 @@
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.file.ConfigurableFileCollection
 import java.io.File
+import javax.xml.parsers.DocumentBuilderFactory
 
 /**
- * Vergleicht Detekt-XML-Reports (Checkstyle-Format) zweier Projektstände
- * anhand der Violation-Anzahl pro Rule-Set.
+ * Vergleicht Detekt-XML-Reports (Baseline vs. aktueller Stand)
+ * und erzeugt eine Markdown-Zusammenfassung der Delta-Findings.
  */
 abstract class DetektCompareTask : DefaultTask() {
 
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val baselineReports: ConfigurableFileCollection
 
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val compareReports: ConfigurableFileCollection
 
     @get:OutputFile
     abstract val reportFile: RegularFileProperty
 
-    init {
-        group = "verification"
-        description = "Vergleicht Detekt-Violation-Counts zwischen Baseline und Compare-Projekt."
-    }
-
     @TaskAction
     fun compare() {
-        val mainCounts = aggregateCounts(baselineReports.files)
-        val compareCounts = aggregateCounts(compareReports.files)
+        val baselineIssues = collectIssues(baselineReports.files)
+        val compareIssues = collectIssues(compareReports.files)
 
-        val allRuleSets = (mainCounts.keys + compareCounts.keys).sorted()
+        val newIssues = compareIssues - baselineIssues
+        val resolvedIssues = baselineIssues - compareIssues
 
-        var totalMain = 0
-        var totalCompare = 0
-
-        val sb = StringBuilder()
-        sb.appendLine("# Detekt-Vergleichsreport")
-        sb.appendLine()
-        sb.appendLine("| Rule-Set | Baseline | Compare | Delta |")
-        sb.appendLine("|---|---|---|---|")
-
-        allRuleSets.forEach { rule ->
-            val m = mainCounts[rule] ?: 0
-            val c = compareCounts[rule] ?: 0
-            totalMain += m
-            totalCompare += c
-            val delta = c - m
-            val marker = when {
-                delta > 0 -> "+$delta ⚠️"
-                delta < 0 -> "$delta ✅"
-                else -> "0"
+        val report = buildString {
+            appendLine("# Detekt Compare Report")
+            appendLine()
+            appendLine("Baseline: ${baselineIssues.size} Findings")
+            appendLine("Aktuell: ${compareIssues.size} Findings")
+            appendLine()
+            appendLine("## Neue Findings (${newIssues.size})")
+            if (newIssues.isEmpty()) {
+                appendLine("_Keine neuen Findings._")
+            } else {
+                newIssues.sortedBy { it.location }.forEach {
+                    appendLine("- **${it.ruleId}** — `${it.location}`: ${it.message}")
+                }
             }
-            sb.appendLine("| $rule | $m | $c | $marker |")
+            appendLine()
+            appendLine("## Behobene Findings (${resolvedIssues.size})")
+            if (resolvedIssues.isEmpty()) {
+                appendLine("_Keine behobenen Findings._")
+            } else {
+                resolvedIssues.sortedBy { it.location }.forEach {
+                    appendLine("- **${it.ruleId}** — `${it.location}`")
+                }
+            }
         }
 
-        val totalDelta = totalCompare - totalMain
-        sb.appendLine("| **Total** | **$totalMain** | **$totalCompare** | **$totalDelta** |")
+        reportFile.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(report)
+        }
 
-        val outFile = reportFile.get().asFile
-        outFile.parentFile.mkdirs()
-        outFile.writeText(sb.toString())
+        logger.lifecycle("Detekt Compare: +${newIssues.size} neue / -${resolvedIssues.size} behobene Findings")
 
-        logger.lifecycle(sb.toString())
-
-        if (totalDelta > 0) {
-            logger.warn("⚠️ Detekt-Regression: +$totalDelta neue Violations gegenüber Baseline.")
+        if (newIssues.isNotEmpty()) {
+            logger.warn("⚠️ ${newIssues.size} neue Detekt-Findings gegenüber Baseline entdeckt.")
         }
     }
 
-    private fun aggregateCounts(files: Set<File>): Map<String, Int> {
-        val result = mutableMapOf<String, Int>()
-        val regex = Regex("""source="detekt\.([\w.]+)\.\w+"""")
+    private data class Issue(val ruleId: String, val location: String, val message: String)
+
+    private fun collectIssues(files: Set<File>): Set<Issue> {
+        val issues = mutableSetOf<Issue>()
+        val factory = DocumentBuilderFactory.newInstance()
 
         files.filter { it.exists() }.forEach { file ->
-            regex.findAll(file.readText()).forEach { match ->
-                val ruleSet = match.groupValues[1]
-                result[ruleSet] = (result[ruleSet] ?: 0) + 1
+            runCatching {
+                val doc = factory.newDocumentBuilder().parse(file)
+                val fileNodes = doc.getElementsByTagName("file")
+
+                for (i in 0 until fileNodes.length) {
+                    val fileNode = fileNodes.item(i)
+                    val filePath = fileNode.attributes.getNamedItem("name")?.nodeValue ?: "unknown"
+                    val errorNodes = (fileNode as org.w3c.dom.Element).getElementsByTagName("error")
+
+                    for (j in 0 until errorNodes.length) {
+                        val errorNode = errorNodes.item(j)
+                        val attrs = errorNode.attributes
+                        val ruleId = attrs.getNamedItem("source")?.nodeValue ?: "unknown"
+                        val line = attrs.getNamedItem("line")?.nodeValue ?: "?"
+                        val message = attrs.getNamedItem("message")?.nodeValue ?: ""
+                        issues += Issue(ruleId, "$filePath:$line", message)
+                    }
+                }
+            }.onFailure {
+                logger.warn("Konnte Detekt-Report nicht parsen: ${file.absolutePath} (${it.message})")
             }
         }
-        return result
+        return issues
     }
 }
