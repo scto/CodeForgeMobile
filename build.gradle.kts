@@ -35,3 +35,9 @@ subprojects {
 tasks.register("clean", Delete::class) {
     delete(rootProject.layout.buildDirectory)
 }
+
+tasks.register("analyzeCodeForge") {
+    group = "verification"
+    description = "Führt Catalog-Diff und Detekt-Compare aus."
+    dependsOn(":app:diffVersionCatalogs", ":app:detektCompareReport")
+}
