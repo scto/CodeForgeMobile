@@ -4,7 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
-    id("analysis-tools")
+    alias(libs.plugins.detekt)   // ← hier unkritisch, AGP bereits geladen
+    id("analysis-tools")          // liefert nur die Custom-Tasks
 }
 
 android {
@@ -55,4 +56,22 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    detektPlugins(libs.detekt.rules.compose)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(files("${rootDir}/config/detekt/detekt.yml"))
+}
+
+tasks.named<io.gitlab.arturbosch.detekt.Detekt>("detekt") {
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+    }
+}
+
+tasks.named("detektCompareReport") {
+    dependsOn("detekt")
 }
