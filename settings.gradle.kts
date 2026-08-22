@@ -39,6 +39,7 @@ include(
     ":feature:git",
     ":feature:plugins",
     ":feature:settings",
+    ":feature:sdkmanager",
 
     ":libs:terminal-engine",
     ":libs:gradle-tooling-bridge",

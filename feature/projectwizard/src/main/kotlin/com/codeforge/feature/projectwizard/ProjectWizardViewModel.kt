@@ -41,9 +41,12 @@ class ProjectWizardViewModel @Inject constructor(
 
     fun onEvent(event: ProjectWizardUiEvent) {
         when (event) {
+            is ProjectWizardUiEvent.CategorySelected ->
+                _uiState.update { it.copy(selectedCategory = event.category) }
+
             is ProjectWizardUiEvent.TemplateSelected -> selectTemplate(event.templateId)
             ProjectWizardUiEvent.TemplateConfirmed ->
-                _uiState.update { it.copy(step = WizardStep.PARAMETERS) }
+                _uiState.update { it.copy(step = WizardStep.CONFIGURE_PARAMS) }
 
             is ProjectWizardUiEvent.ParamChanged -> updateParam(event.key, event.value)
             is ProjectWizardUiEvent.TargetDirChanged ->
@@ -53,7 +56,15 @@ class ProjectWizardViewModel @Inject constructor(
                 _uiState.update { it.copy(step = WizardStep.TEMPLATE_SELECTION) }
 
             ProjectWizardUiEvent.GenerateClicked -> validateAndGenerate()
-            ProjectWizardUiEvent.RetryClicked -> validateAndGenerate()
+            ProjectWizardUiEvent.RetryClicked -> {
+                _uiState.update { it.copy(step = WizardStep.CONFIGURE_PARAMS, generationPhase = GenerationPhase.IDLE, generationError = null) }
+            }
+            ProjectWizardUiEvent.OpenGeneratedProjectClicked -> {
+                val project = _uiState.value.generatedProject ?: return
+                viewModelScope.launch { _effect.emit(ProjectWizardUiEffect.NavigateToEditor(project.rootPath)) }
+            }
+            ProjectWizardUiEvent.DismissError ->
+                _uiState.update { it.copy(step = WizardStep.CONFIGURE_PARAMS, generationPhase = GenerationPhase.IDLE, generationError = null) }
         }
     }
 
@@ -82,7 +93,7 @@ class ProjectWizardViewModel @Inject constructor(
             return
         }
 
-        _uiState.update { it.copy(step = WizardStep.GENERATING, generationPhase = GenerationPhase.RUNNING, generationError = null) }
+        _uiState.update { it.copy(step = WizardStep.GENERATING, generationPhase = GenerationPhase.RUNNING, generationProgress = 0f, generationError = null) }
 
         viewModelScope.launch {
             templateEngineRepository.generate(
@@ -90,20 +101,30 @@ class ProjectWizardViewModel @Inject constructor(
                 params = state.paramValues,
                 targetDir = state.targetDir
             ).onSuccess { handle ->
-                _uiState.update { it.copy(generationPhase = GenerationPhase.DONE) }
+                _uiState.update {
+                    it.copy(
+                        generationPhase = GenerationPhase.DONE,
+                        generationProgress = 1f,
+                        generatedProject = handle,
+                        step = WizardStep.SUCCESS
+                    )
+                }
                 recentProjectsRepository.addOrUpdate(
                     RecentProject(
                         id = handle.rootPath,
-                        name = handle.projectName,
+                        name = handle.name,
                         path = handle.rootPath,
                         lastOpenedEpochMillis = System.currentTimeMillis(),
                         moduleCount = 1
                     )
                 )
-                _effect.emit(ProjectWizardUiEffect.NavigateToEditor(handle.rootPath))
             }.onFailure { throwable ->
                 _uiState.update {
-                    it.copy(generationPhase = GenerationPhase.FAILED, generationError = throwable.message)
+                    it.copy(
+                        generationPhase = GenerationPhase.FAILED,
+                        generationError = throwable.message,
+                        step = WizardStep.ERROR
+                    )
                 }
             }
         }

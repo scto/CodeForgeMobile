@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":feature:git"))
     implementation(project(":feature:plugins"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:sdkmanager"))
 
     implementation(project(":libs:terminal-engine"))
     implementation(project(":libs:template-engine"))

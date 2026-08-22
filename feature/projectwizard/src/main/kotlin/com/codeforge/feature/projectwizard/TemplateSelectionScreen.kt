@@ -1,15 +1,19 @@
 // Modul: :feature:projectwizard
 package com.codeforge.feature.projectwizard
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +27,8 @@ import com.codeforge.core.domain.model.TemplateCategory
 fun TemplateSelectionScreen(
     isLoading: Boolean,
     templates: List<ProjectTemplateDescriptor>,
+    selectedCategory: TemplateCategory? = null,
+    onCategorySelected: (TemplateCategory?) -> Unit = {},
     onTemplateClick: (ProjectTemplateDescriptor) -> Unit
 ) {
     if (isLoading) {
@@ -36,6 +42,11 @@ fun TemplateSelectionScreen(
         return
     }
 
+    val filteredTemplates = if (selectedCategory != null)
+        templates.filter { it.category == selectedCategory }
+    else
+        templates
+
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -47,9 +58,30 @@ fun TemplateSelectionScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
             )
+            // Kategorie-Filter-Chips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = selectedCategory == null,
+                    onClick = { onCategorySelected(null) },
+                    label = { Text("Alle") }
+                )
+                TemplateCategory.entries.forEach { category ->
+                    FilterChip(
+                        selected = selectedCategory == category,
+                        onClick = { onCategorySelected(if (selectedCategory == category) null else category) },
+                        label = { Text(categoryLabel(category)) }
+                    )
+                }
+            }
         }
 
-        val grouped = templates.groupBy { it.category }
+        val grouped = filteredTemplates.groupBy { it.category }
         TemplateCategory.entries.forEach { category ->
             val categoryTemplates = grouped[category].orEmpty()
             if (categoryTemplates.isNotEmpty()) {

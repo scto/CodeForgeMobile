@@ -21,7 +21,32 @@ data class ProjectTemplateDescriptor(
     val requiredParams: List<TemplateParam>
 )
 
+data class ProjectTemplate(
+    val id: String,
+    val name: String,
+    val description: String,
+    val iconResId: Int = 0,
+    val category: String = "General"
+)
+
+data class TemplateParameter(
+    val key: String,
+    val label: String,
+    val defaultValue: String,
+    val description: String = ""
+)
+
+data class CreationConfig(
+    val templateId: String,
+    val projectName: String,
+    val packageName: String,
+    val targetDirectory: String,
+    val parameters: Map<String, String> = emptyMap()
+)
+
 data class ProjectHandle(
+    val id: String,
+    val name: String,
     val rootPath: String,
-    val projectName: String
+    val templateId: String? = null
 )

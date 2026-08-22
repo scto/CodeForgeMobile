@@ -21,6 +21,7 @@ private object Routes {
     const val IMPORT_PROJECT = "import_project"
     const val CLONE_PROJECT = "clone_project"
     const val SETTINGS = "settings"
+    const val SDK_MANAGER = "sdk_manager"
     const val EDITOR = "editor"
     const val FILE_TREE_PATTERN = "filetree/{rootPath}"
 
@@ -65,6 +66,11 @@ fun CodeForgeNavHost(startOnboarding: Boolean) {
         }
         composable(Routes.SETTINGS) {
             // :feature:settings – App-Settings, Multitheme-Auswahl
+        }
+        composable(Routes.SDK_MANAGER) {
+            com.codeforge.feature.sdkmanager.SdkManagerRoute(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
         composable(
             route = Routes.FILE_TREE_PATTERN,

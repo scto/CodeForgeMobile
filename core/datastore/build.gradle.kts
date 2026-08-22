@@ -32,7 +32,8 @@ afterEvaluate {
 dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.proto)
-    api("com.google.protobuf:protobuf-javalite:4.30.0")
+    api("com.google.protobuf:protobuf-javalite:4.35.1")
+    compileOnly("javax.annotation:javax.annotation-api:1.3.2")
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
@@ -41,9 +42,9 @@ dependencies {
 
 protobuf {
     protoc {
-        val localProtoc = file("/data/data/com.termux/files/usr/bin/protoc")
-        if (localProtoc.exists()) {
-            path = localProtoc.absolutePath
+        val localProtocPath = findProperty("termux.protoc.path")?.toString()
+        if (localProtocPath != null && file(localProtocPath).exists()) {
+            path = localProtocPath
         } else {
             artifact = libs.protobuf.protoc.get().toString()
         }
@@ -51,8 +52,8 @@ protobuf {
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
-                create("java") { 
-                    option("lite") 
+                create("java") {
+                    option("lite")
                 }
             }
         }

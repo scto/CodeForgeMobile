@@ -42,4 +42,10 @@ abstract class DataModule {
     abstract fun bindFileSystemRepository(
         impl: FileSystemRepositoryImpl
     ): FileSystemRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSdkRepository(
+        impl: com.codeforge.core.data.repository.CommandlineSdkRepository
+    ): com.codeforge.core.domain.repository.SdkRepository
 }
