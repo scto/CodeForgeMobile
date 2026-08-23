@@ -2,6 +2,7 @@
 agp = "8.6.0"
 kotlin = "2.0.20"
 ksp = "2.0.20-1.0.25"
+desugarJdkLibs = "2.1.2" 
 coreKtx = "1.13.1"
 lifecycle = "2.8.6"
 composeBom = "2024.09.03"
@@ -51,6 +52,8 @@ protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
 jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.ref = "jgit" }
 freemarker = { group = "org.freemarker", name = "freemarker", version.ref = "freemarker" }
