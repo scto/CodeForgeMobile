@@ -1,0 +1,47 @@
+name: Update Dokka Documentation
+
+# Erlaubt das manuelle Ausführen des Workflows über die GitHub UI
+on:
+  workflow_dispatch:
+    inputs:
+      commit_message:
+        description: 'Commit Nachricht für das Update der Dokumentation'
+        required: true
+        default: 'docs: Update Kotlin Dokka Dokumentation'
+        type: string
+
+# Berechtigungen festlegen (wichtig für den Push auf gh-pages)
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Java JDK 17 einrichten
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Gradle einrichten und cachen
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Dokka Dokumentation generieren
+        # HINWEIS: Wenn du ein Multi-Module Projekt hast, verwende stattdessen: ./gradlew dokkaHtmlMultiModule
+        run: ./gradlew dokkaHtmlMultiModule
+
+      - name: Auf GitHub Pages (gh-pages Branch) veröffentlichen/updaten
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Der Standard-Ausgabeordner von Dokka für HTML
+          publish_dir: ./build/dokka/html
+          # Hier wird die Eingabe aus dem Input-Feld (workflow_dispatch) verwendet
+          commit_message: ${{ inputs.commit_message }}
+          # Verhindert, dass die GitHub-Page ohne Jekyll-Theme fehlerhaft gerendert wird
+          force_orphan: true
