@@ -18,17 +18,39 @@ import com.codeforge.core.datastore.proto.CustomPalette
  */
 fun resolveCustomScheme(colorSchemeId: String, customPalette: CustomPalette, isDark: Boolean): ColorScheme {
     if (colorSchemeId == "custom" && customPalette.primary.isNotBlank()) {
-        val primary = Color(android.graphics.Color.parseColor(customPalette.primary))
-        val secondary = Color(android.graphics.Color.parseColor(customPalette.secondary.ifBlank { customPalette.primary }))
-        val tertiary = Color(android.graphics.Color.parseColor(customPalette.tertiary.ifBlank { customPalette.primary }))
-        return if (isDark) {
-            darkColorScheme(primary = primary, secondary = secondary, tertiary = tertiary)
-        } else {
-            lightColorScheme(primary = primary, secondary = secondary, tertiary = tertiary)
-        }
+        return buildColorScheme(
+            primaryHex = customPalette.primary,
+            secondaryHex = customPalette.secondary.ifBlank { customPalette.primary },
+            tertiaryHex = customPalette.tertiary.ifBlank { customPalette.primary },
+            isDark = isDark
+        )
+    }
+
+    val preset = ThemePresets.findById(colorSchemeId)
+    if (preset != null) {
+        return buildColorScheme(
+            primaryHex = preset.primaryHex,
+            secondaryHex = preset.secondaryHex,
+            tertiaryHex = preset.tertiaryHex,
+            isDark = isDark
+        )
     }
 
     return if (isDark) darkColorScheme() else lightColorScheme()
+}
+
+private fun buildColorScheme(primaryHex: String, secondaryHex: String, tertiaryHex: String, isDark: Boolean): ColorScheme {
+    val primary = runCatching { Color(android.graphics.Color.parseColor(primaryHex)) }.getOrNull()
+    val secondary = runCatching { Color(android.graphics.Color.parseColor(secondaryHex)) }.getOrNull()
+    val tertiary = runCatching { Color(android.graphics.Color.parseColor(tertiaryHex)) }.getOrNull()
+
+    if (primary == null) return if (isDark) darkColorScheme() else lightColorScheme()
+
+    return if (isDark) {
+        darkColorScheme(primary = primary, secondary = secondary ?: primary, tertiary = tertiary ?: primary)
+    } else {
+        lightColorScheme(primary = primary, secondary = secondary ?: primary, tertiary = tertiary ?: primary)
+    }
 }
 
 val CodeForgeTypography = Typography(

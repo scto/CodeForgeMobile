@@ -1,0 +1,4 @@
+interface: 
+ display_name: "CodeForge Data & DataStore" 
+ short_description: "Umgang mit Proto DataStore, Repositories und Kotlin Flow" 
+ default_prompt: "Prüfe mit CodeForge Data, wie Daten gespeichert oder aus dem DataStore gelesen werden sollen." 

@@ -15,25 +15,18 @@ android {
     }
 
     sourceSets {
-        getByName("debug") {
-            java.srcDirs(layout.buildDirectory.dir("generated/source/proto/debug/java"))
-        }
         getByName("main") {
-            java.srcDirs(layout.buildDirectory.dir("generated/source/proto/main/java"))
+            proto {
+                srcDir("src/main/proto")
+            }
         }
     }
-}
-
-afterEvaluate {
-    tasks.findByName("kspDebugKotlin")?.dependsOn("generateDebugProto")
-    tasks.findByName("kspReleaseKotlin")?.dependsOn("generateReleaseProto")
 }
 
 dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.proto)
-    api("com.google.protobuf:protobuf-javalite:4.35.1")
-    compileOnly("javax.annotation:javax.annotation-api:1.3.2")
+    implementation(libs.protobuf.javalite)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
@@ -41,20 +34,11 @@ dependencies {
 }
 
 protobuf {
-    protoc {
-        val localProtocPath = findProperty("termux.protoc.path")?.toString()
-        if (localProtocPath != null && file(localProtocPath).exists()) {
-            path = localProtocPath
-        } else {
-            artifact = libs.protobuf.protoc.get().toString()
-        }
-    }
+    protoc { artifact = libs.protobuf.protoc.get().toString() }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
-                create("java") {
-                    option("lite")
-                }
+                create("java") { option("lite") }
             }
         }
     }

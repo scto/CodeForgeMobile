@@ -1,0 +1,4 @@
+interface: 
+ display_name: "CodeForge Architektur & Navigation" 
+ short_description: "Navigation durch die Multi-Modul-Architektur von CodeForgeMobile" 
+ default_prompt: "Nutze CodeForge Architektur, um zu prüfen, in welches Modul diese Änderung gehört und welche Abhängigkeiten beachtet werden müssen." 

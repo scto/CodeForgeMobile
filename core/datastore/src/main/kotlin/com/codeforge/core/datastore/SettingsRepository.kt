@@ -3,6 +3,8 @@ package com.codeforge.core.datastore
 
 import androidx.datastore.core.DataStore
 import com.codeforge.core.datastore.proto.AppSettings
+import com.codeforge.core.datastore.proto.EditorConfig
+import com.codeforge.core.datastore.proto.TerminalConfig
 import com.codeforge.core.datastore.proto.ThemeConfig
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -26,6 +28,22 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun updateEditor(transform: (EditorConfig) -> EditorConfig) {
+        dataStore.updateData { current ->
+            current.toBuilder()
+                .setEditor(transform(current.editor))
+                .build()
+        }
+    }
+
+    suspend fun updateTerminal(transform: (TerminalConfig) -> TerminalConfig) {
+        dataStore.updateData { current ->
+            current.toBuilder()
+                .setTerminal(transform(current.terminal))
+                .build()
+        }
+    }
+
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.updateData { current ->
             current.toBuilder()
@@ -35,10 +53,6 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun updateTerminalDistro(distro: String) {
-        dataStore.updateData { current ->
-            current.toBuilder()
-                .setTerminal(current.terminal.toBuilder().setDefaultDistro(distro))
-                .build()
-        }
+        updateTerminal { it.toBuilder().setDefaultDistro(distro).build() }
     }
 }

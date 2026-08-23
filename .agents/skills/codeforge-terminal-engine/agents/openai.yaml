@@ -1,0 +1,4 @@
+interface: 
+ display_name: "CodeForge Terminal & PRoot" 
+ short_description: "Entwicklung von Shell, PRoot-Umgebungen und Gradle Tooling" 
+ default_prompt: "Prüfe mit CodeForge Terminal & PRoot Änderungen am Distro-Bootstrap oder IPC." 

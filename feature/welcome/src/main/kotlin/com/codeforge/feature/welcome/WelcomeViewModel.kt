@@ -39,6 +39,7 @@ class WelcomeViewModel @Inject constructor(
             WelcomeUiEvent.CreateProjectClicked -> emit(WelcomeUiEffect.NavigateToProjectWizard)
             WelcomeUiEvent.ImportProjectClicked -> emit(WelcomeUiEffect.NavigateToImportPicker)
             WelcomeUiEvent.CloneProjectClicked -> emit(WelcomeUiEffect.NavigateToCloneDialog)
+            WelcomeUiEvent.TerminalClicked -> emit(WelcomeUiEffect.NavigateToTerminal)
             WelcomeUiEvent.SettingsClicked -> emit(WelcomeUiEffect.NavigateToSettings)
             is WelcomeUiEvent.RecentProjectSelected ->
                 _uiState.update { it.copy(selectedProjectId = event.projectId) }

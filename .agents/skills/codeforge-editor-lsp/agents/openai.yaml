@@ -1,0 +1,4 @@
+interface: 
+ display_name: "CodeForge Editor & LSP" 
+ short_description: "Modifikation von Sora-Editor, TreeSitter und JSON-RPC LSP Client" 
+ default_prompt: "Analysiere mit CodeForge Editor & LSP diese Änderungen an Textdarstellung oder Language Servern." 

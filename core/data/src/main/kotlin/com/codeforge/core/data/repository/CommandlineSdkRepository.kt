@@ -1,47 +1,91 @@
-// Modul: :core:data
 /**
+ * Modul: :core:data
  * @author Thomas Schmid
  */
 package com.codeforge.core.data.repository
 
 import com.codeforge.core.domain.model.SdkInstallEvent
 import com.codeforge.core.domain.model.ToolItem
-import com.codeforge.core.domain.model.ToolType
 import com.codeforge.core.domain.repository.SdkRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * TODO: "sdkmanager" muss auf das Binary innerhalb der PRoot-Rootfs zeigen (analog zu
+ * den anderen ProcessBuilder-Aufrufen im Projekt, siehe ProotCommandBuilder in
+ * :libs:terminal-engine), sobald die Commandline-Tools dort bereitgestellt werden.
+ * Aktuell wird der Befehl direkt ausgeführt, wie es das Skill vorgibt.
+ */
 @Singleton
 class CommandlineSdkRepository @Inject constructor() : SdkRepository {
 
-    private val progressRegex = Regex("""\[(=*)\s*\]\s+(\d+)%\s*(.*)""")
+    private val progressRegex = Regex("""\[(=*)\s*]\s+(\d+)%\s*(.*)""")
+    private val packageRowRegex = Regex("""^([\w.\-;]+)\s*\|\s*([\w.\-]+)\s*\|""")
 
-    override fun getAvailableTools(): Flow<List<ToolItem>> = flow {
-        val dummyList = listOf(
-            ToolItem("jdk-17", "OpenJDK 17", "17.0.9", ToolType.JDK, isInstalled = true, path = "/usr/lib/jvm/java-17"),
-            ToolItem("jdk-21", "OpenJDK 21", "21.0.1", ToolType.JDK, isInstalled = false),
-            ToolItem("platforms;android-35", "Android SDK Platform 35", "35.0.0", ToolType.PLATFORM, isInstalled = true, path = "/sdcard/Android/sdk/platforms/android-35"),
-            ToolItem("build-tools;35.0.0", "Android SDK Build-Tools 35.0.0", "35.0.0", ToolType.BUILD_TOOLS, isInstalled = true),
-            ToolItem("ndk;26.1.10909125", "NDK (Side by side) 26.1", "26.1.10909125", ToolType.NDK, isInstalled = false),
-            ToolItem("cmake;3.22.1", "CMake 3.22.1", "3.22.1", ToolType.CMAKE, isInstalled = false)
-        )
-        emit(dummyList)
-    }.flowOn(Dispatchers.IO)
+    private enum class ListSection { NONE, INSTALLED, AVAILABLE }
 
-    override fun getInstalledTools(): Flow<List<ToolItem>> = flow {
-        val dummyList = listOf(
-            ToolItem("jdk-17", "OpenJDK 17", "17.0.9", ToolType.JDK, isInstalled = true, path = "/usr/lib/jvm/java-17"),
-            ToolItem("platforms;android-35", "Android SDK Platform 35", "35.0.0", ToolType.PLATFORM, isInstalled = true, path = "/sdcard/Android/sdk/platforms/android-35"),
-            ToolItem("build-tools;35.0.0", "Android SDK Build-Tools 35.0.0", "35.0.0", ToolType.BUILD_TOOLS, isInstalled = true)
+    override suspend fun listAvailablePackages(): Result<List<ToolItem>> = withContext(Dispatchers.IO) {
+        runCatching {
+            val process = ProcessBuilder("sdkmanager", "--list")
+                .redirectErrorStream(true)
+                .start()
+
+            val items = mutableListOf<ToolItem>()
+            var section = ListSection.NONE
+
+            BufferedReader(InputStreamReader(process.inputStream)).useLines { lines ->
+                lines.forEach { rawLine ->
+                    val line = rawLine.trim()
+                    when {
+                        line.isEmpty() || line.startsWith("---") || line.startsWith("Path") -> Unit
+                        line.startsWith("Installed packages", ignoreCase = true) -> section = ListSection.INSTALLED
+                        line.startsWith("Available Packages", ignoreCase = true) -> section = ListSection.AVAILABLE
+                        else -> parsePackageRow(line, section)?.let(items::add)
+                    }
+                }
+            }
+
+            process.waitFor()
+            items
+        }
+    }
+
+    private fun parsePackageRow(line: String, section: ListSection): ToolItem? {
+        if (section == ListSection.NONE) return null
+        val match = packageRowRegex.find(line) ?: return null
+        val path = match.groupValues[1].trim()
+        val version = match.groupValues[2].trim()
+        val installed = section == ListSection.INSTALLED
+        return ToolItem(
+            id = path,
+            version = version,
+            isInstalled = installed,
+            path = if (installed) resolveInstalledPath(path) else null
         )
-        emit(dummyList)
-    }.flowOn(Dispatchers.IO)
+    }
+
+    /**
+     * Sdkmanager installiert Pakete konventionsgemäß unter <sdkRoot>/<path mit ';' -> '/'>
+     * (z.B. "build-tools;34.0.0" -> "<sdkRoot>/build-tools/34.0.0"). Wird nur als echter
+     * Pfad zurückgegeben, wenn das Verzeichnis auch tatsächlich existiert — kein bloßes
+     * String-Zusammensetzen ohne Verifikation.
+     */
+    private fun resolveInstalledPath(packagePath: String): String? {
+        val root = sdkRootPath() ?: return null
+        val dir = File(root, packagePath.replace(';', '/'))
+        return dir.takeIf { it.isDirectory }?.absolutePath
+    }
+
+    override fun sdkRootPath(): String? =
+        System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
 
     override fun installSdkTool(packagePath: String): Flow<SdkInstallEvent> = flow {
         try {
@@ -69,27 +113,21 @@ class CommandlineSdkRepository @Inject constructor() : SdkRepository {
             if (exitCode == 0) {
                 emit(SdkInstallEvent.Success(packagePath))
             } else {
-                emit(SdkInstallEvent.Error(RuntimeException("sdkmanager exited with code $exitCode")))
+                emit(SdkInstallEvent.Error(RuntimeException("Code $exitCode")))
             }
         } catch (e: Exception) {
             emit(SdkInstallEvent.Error(e))
         }
     }.flowOn(Dispatchers.IO)
 
-    override fun uninstallSdkTool(packagePath: String): Flow<SdkInstallEvent> = flow {
-        try {
+    override suspend fun uninstallSdkTool(packagePath: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
             val process = ProcessBuilder("sdkmanager", "--uninstall", packagePath)
                 .redirectErrorStream(true)
                 .start()
-
+            process.inputStream.bufferedReader().forEachLine { /* Ausgabe wird verworfen, nur Exit-Code zählt */ }
             val exitCode = process.waitFor()
-            if (exitCode == 0) {
-                emit(SdkInstallEvent.Success(packagePath))
-            } else {
-                emit(SdkInstallEvent.Error(RuntimeException("Uninstall failed with code $exitCode")))
-            }
-        } catch (e: Exception) {
-            emit(SdkInstallEvent.Error(e))
+            if (exitCode != 0) error("sdkmanager --uninstall beendet mit Code $exitCode")
         }
-    }.flowOn(Dispatchers.IO)
+    }
 }

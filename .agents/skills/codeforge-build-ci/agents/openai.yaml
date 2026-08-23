@@ -1,0 +1,4 @@
+interface: 
+ display_name: "CodeForge Build & CI" 
+ short_description: "Verwaltung von Gradle, Version Catalogs, ktfmt und GitHub Actions" 
+ default_prompt: "Prüfe mit CodeForge Build & CI mögliche Gradle-Probleme oder CI/CD-Pipelines." 

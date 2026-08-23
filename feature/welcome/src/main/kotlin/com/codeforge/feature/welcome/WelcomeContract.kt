@@ -15,6 +15,7 @@ sealed interface WelcomeUiEvent {
     data object CreateProjectClicked : WelcomeUiEvent
     data object ImportProjectClicked : WelcomeUiEvent
     data object CloneProjectClicked : WelcomeUiEvent
+    data object TerminalClicked : WelcomeUiEvent
     data object SettingsClicked : WelcomeUiEvent
     data class RecentProjectSelected(val projectId: String) : WelcomeUiEvent
     data class RecentProjectOpened(val projectId: String) : WelcomeUiEvent
@@ -25,6 +26,7 @@ sealed interface WelcomeUiEffect {
     data object NavigateToProjectWizard : WelcomeUiEffect
     data object NavigateToImportPicker : WelcomeUiEffect
     data object NavigateToCloneDialog : WelcomeUiEffect
+    data object NavigateToTerminal : WelcomeUiEffect
     data object NavigateToSettings : WelcomeUiEffect
     data class NavigateToEditor(val projectPath: String) : WelcomeUiEffect
     data class ShowSnackbar(val message: String) : WelcomeUiEffect

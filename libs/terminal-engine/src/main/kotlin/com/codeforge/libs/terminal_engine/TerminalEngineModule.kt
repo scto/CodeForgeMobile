@@ -2,6 +2,7 @@
 package com.codeforge.libs.terminal_engine
 
 import com.codeforge.core.domain.repository.DistroBootstrapRepository
+import com.codeforge.core.domain.repository.TerminalSessionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -16,4 +17,10 @@ abstract class TerminalEngineModule {
     abstract fun bindDistroBootstrapRepository(
         impl: DistroBootstrapRepositoryImpl
     ): DistroBootstrapRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTerminalSessionRepository(
+        impl: TerminalSessionRepositoryImpl
+    ): TerminalSessionRepository
 }

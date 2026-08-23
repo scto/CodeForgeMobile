@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Source
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -50,6 +51,7 @@ private val actions = listOf(
     WelcomeAction("Neues Projekt", Icons.Filled.Add) { it.onEvent(WelcomeUiEvent.CreateProjectClicked) },
     WelcomeAction("Importieren", Icons.Filled.FolderOpen) { it.onEvent(WelcomeUiEvent.ImportProjectClicked) },
     WelcomeAction("Klonen", Icons.Filled.CloudDownload) { it.onEvent(WelcomeUiEvent.CloneProjectClicked) },
+    WelcomeAction("Terminal", Icons.Filled.Terminal) { it.onEvent(WelcomeUiEvent.TerminalClicked) },
     WelcomeAction("Einstellungen", Icons.Filled.Settings) { it.onEvent(WelcomeUiEvent.SettingsClicked) }
 )
 
@@ -59,6 +61,7 @@ fun WelcomeRoute(
     onNavigateToProjectWizard: () -> Unit,
     onNavigateToImportPicker: () -> Unit,
     onNavigateToCloneDialog: () -> Unit,
+    onNavigateToTerminal: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onOpenProject: (path: String) -> Unit,
     viewModel: WelcomeViewModel = hiltViewModel()
@@ -71,6 +74,7 @@ fun WelcomeRoute(
                 WelcomeUiEffect.NavigateToProjectWizard -> onNavigateToProjectWizard()
                 WelcomeUiEffect.NavigateToImportPicker -> onNavigateToImportPicker()
                 WelcomeUiEffect.NavigateToCloneDialog -> onNavigateToCloneDialog()
+                WelcomeUiEffect.NavigateToTerminal -> onNavigateToTerminal()
                 WelcomeUiEffect.NavigateToSettings -> onNavigateToSettings()
                 is WelcomeUiEffect.NavigateToEditor -> onOpenProject(effect.projectPath)
                 is WelcomeUiEffect.ShowSnackbar -> { /* an lokalen SnackbarHostState weiterreichen */ }

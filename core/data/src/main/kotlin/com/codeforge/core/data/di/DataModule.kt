@@ -5,10 +5,16 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.codeforge.core.data.repository.CommandlineSdkRepository
+import com.codeforge.core.data.repository.ComposeSourceAnalyzerImpl
 import com.codeforge.core.data.repository.FileSystemRepositoryImpl
+import com.codeforge.core.data.repository.GitRepositoryImpl
 import com.codeforge.core.data.repository.RecentProjectsRepositoryImpl
+import com.codeforge.core.domain.repository.ComposeSourceAnalyzer
 import com.codeforge.core.domain.repository.FileSystemRepository
+import com.codeforge.core.domain.repository.GitRepository
 import com.codeforge.core.domain.repository.RecentProjectsRepository
+import com.codeforge.core.domain.repository.SdkRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -45,7 +51,19 @@ abstract class DataModule {
 
     @Binds
     @Singleton
+    abstract fun bindGitRepository(
+        impl: GitRepositoryImpl
+    ): GitRepository
+
+    @Binds
+    @Singleton
     abstract fun bindSdkRepository(
-        impl: com.codeforge.core.data.repository.CommandlineSdkRepository
-    ): com.codeforge.core.domain.repository.SdkRepository
+        impl: CommandlineSdkRepository
+    ): SdkRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindComposeSourceAnalyzer(
+        impl: ComposeSourceAnalyzerImpl
+    ): ComposeSourceAnalyzer
 }

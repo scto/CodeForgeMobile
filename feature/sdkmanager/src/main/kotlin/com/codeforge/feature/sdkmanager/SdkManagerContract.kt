@@ -1,5 +1,5 @@
-// Modul: :feature:sdkmanager
 /**
+ * Modul: :feature:sdkmanager
  * @author Thomas Schmid
  */
 package com.codeforge.feature.sdkmanager
@@ -10,19 +10,20 @@ import com.codeforge.core.domain.model.ToolType
 
 @Immutable
 data class SdkManagerState(
-    val selectedTab: ToolType = ToolType.JDK,
-    val availableTools: List<ToolItem> = emptyList(),
-    val installedTools: List<ToolItem> = emptyList(),
-    val activeDownloads: Map<String, Int> = emptyMap(), // Tool-ID -> Progress %
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val availableJdks: List<ToolItem> = emptyList(),
+    val installedJdks: List<ToolItem> = emptyList(),
+    val buildToolsVersions: List<ToolItem> = emptyList(),
+    val platformVersions: List<ToolItem> = emptyList(),
+    val ndkVersions: List<ToolItem> = emptyList(),
+    val cmakeVersions: List<ToolItem> = emptyList(),
+    val activeDownloads: Map<String, Int> = emptyMap(),
+    val isLoading: Boolean = false
 )
 
 sealed interface SdkManagerEvent {
-    data class SelectTab(val tab: ToolType) : SdkManagerEvent
-    data class InstallTool(val toolId: String, val packagePath: String) : SdkManagerEvent
-    data class UninstallTool(val toolId: String, val packagePath: String) : SdkManagerEvent
-    data object RefreshTools : SdkManagerEvent
+    data class InstallTool(val toolId: String, val version: String, val toolType: ToolType) : SdkManagerEvent
+    data class UninstallTool(val toolId: String, val version: String) : SdkManagerEvent
+    data object RefreshRemoteList : SdkManagerEvent
 }
 
 sealed interface SdkManagerEffect {

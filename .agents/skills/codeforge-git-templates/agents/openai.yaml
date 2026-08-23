@@ -1,0 +1,4 @@
+interface: 
+ display_name: "CodeForge Git & Templates" 
+ short_description: "Entwicklung mit JGit und dem Freemarker Template Engine Repository" 
+ default_prompt: "Analysiere mit CodeForge Git & Templates diese Versionierungs- oder Generierungs-Logik." 

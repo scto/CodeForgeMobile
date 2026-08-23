@@ -34,24 +34,20 @@ fun ProjectWizardRoute(
 
     Scaffold(
         modifier = modifier,
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackBarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         androidx.compose.foundation.layout.Box(modifier = Modifier.padding(padding)) {
             when (uiState.step) {
                 WizardStep.TEMPLATE_SELECTION -> TemplateSelectionScreen(
                     isLoading = uiState.isLoadingTemplates,
                     templates = uiState.templates,
-                    selectedCategory = uiState.selectedCategory,
-                    onCategorySelected = { category ->
-                        viewModel.onEvent(ProjectWizardUiEvent.CategorySelected(category))
-                    },
                     onTemplateClick = { template ->
                         viewModel.onEvent(ProjectWizardUiEvent.TemplateSelected(template.id))
                         viewModel.onEvent(ProjectWizardUiEvent.TemplateConfirmed)
                     }
                 )
 
-                WizardStep.CONFIGURE_PARAMS -> uiState.selectedTemplate?.let { template ->
+                WizardStep.PARAMETERS -> uiState.selectedTemplate?.let { template ->
                     ParameterFormScreen(
                         template = template,
                         paramValues = uiState.paramValues,
@@ -70,24 +66,8 @@ fun ProjectWizardRoute(
 
                 WizardStep.GENERATING -> GeneratingScreen(
                     phase = uiState.generationPhase,
-                    progress = uiState.generationProgress,
                     errorMessage = uiState.generationError,
                     onRetry = { viewModel.onEvent(ProjectWizardUiEvent.RetryClicked) }
-                )
-
-                WizardStep.SUCCESS -> GeneratingScreen(
-                    phase = GenerationPhase.DONE,
-                    progress = 1f,
-                    errorMessage = null,
-                    onRetry = {},
-                    onOpenProject = { viewModel.onEvent(ProjectWizardUiEvent.OpenGeneratedProjectClicked) }
-                )
-
-                WizardStep.ERROR -> GeneratingScreen(
-                    phase = GenerationPhase.FAILED,
-                    progress = 0f,
-                    errorMessage = uiState.generationError,
-                    onRetry = { viewModel.onEvent(ProjectWizardUiEvent.DismissError) }
                 )
             }
         }

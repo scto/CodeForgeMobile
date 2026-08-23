@@ -1,0 +1,4 @@
+interface: 
+ display_name: "CodeForge Compose UI & Theme" 
+ short_description: "Entwicklung von Jetpack Compose UI, Material 3 Adaptive und Theming" 
+ default_prompt: "Nutze CodeForge Compose UI, um das Theming, adaptive Layouts oder UI-Komponenten anzupassen." 

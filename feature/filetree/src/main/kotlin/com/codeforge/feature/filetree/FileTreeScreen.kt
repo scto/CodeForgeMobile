@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Source
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -51,6 +52,7 @@ fun FileTreeRoute(
     modifier: Modifier = Modifier,
     rootPath: String,
     onOpenFile: (path: String) -> Unit,
+    onOpenGit: (rootPath: String) -> Unit,
     viewModel: FileTreeViewModel = hiltViewModel()
 ) {
     LaunchedEffect(rootPath) { viewModel.initialize(rootPath) }
@@ -71,7 +73,8 @@ fun FileTreeRoute(
         modifier = modifier,
         uiState = uiState,
         snackbarHostState = snackbarHostState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        onOpenGit = { onOpenGit(uiState.rootPath) }
     )
 }
 
@@ -80,7 +83,8 @@ private fun FileTreeScreen(
     modifier: Modifier = Modifier,
     uiState: FileTreeUiState,
     snackbarHostState: SnackbarHostState,
-    onEvent: (FileTreeUiEvent) -> Unit
+    onEvent: (FileTreeUiEvent) -> Unit,
+    onOpenGit: () -> Unit
 ) {
     Scaffold(
         modifier = modifier,
@@ -91,6 +95,9 @@ private fun FileTreeScreen(
                     Text(uiState.rootPath.substringAfterLast('/').ifBlank { "Projekt" })
                 },
                 actions = {
+                    IconButton(onClick = onOpenGit) {
+                        Icon(Icons.Filled.Source, contentDescription = "Git")
+                    }
                     IconButton(onClick = { onEvent(FileTreeUiEvent.CreateFileClicked) }) {
                         Icon(Icons.Filled.NoteAdd, contentDescription = "Neue Datei")
                     }

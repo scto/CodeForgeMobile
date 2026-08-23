@@ -36,12 +36,7 @@ class TemplateEngineRepositoryImpl @Inject constructor(
             val enrichedParams = params + ("projectName" to projectName)
             renderer.render(templateId = descriptor.id, params = enrichedParams, targetRoot = root)
 
-            ProjectHandle(
-                id = root.path,
-                name = projectName,
-                rootPath = root.path,
-                templateId = descriptor.id
-            )
+            ProjectHandle(rootPath = root.path, projectName = projectName)
         }
     }
 }

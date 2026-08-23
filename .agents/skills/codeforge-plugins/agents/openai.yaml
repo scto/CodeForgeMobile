@@ -1,0 +1,4 @@
+interface: 
+ display_name: "CodeForge Plugins" 
+ short_description: "Modifikation der Plugin-API, JSON-Registries und Archiv-Extraktion" 
+ default_prompt: "Prüfe Plugin-Änderungen mit CodeForge Plugins." 
