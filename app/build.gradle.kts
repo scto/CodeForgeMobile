@@ -22,6 +22,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -58,4 +64,5 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
