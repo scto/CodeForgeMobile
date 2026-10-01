@@ -1,0 +1,35 @@
+Die Infrastruktur für zentralisierte Strings in `:core:resources` (mit `ResGetter` und `strings.xml`) existiert bereits. Allerdings wurden in den UI-Modulen (z.B. `:feature:editor`, `:feature:filetree`, `:feature:settings`) noch extrem viele Strings hartkodiert belassen.
+
+Bitte führe nun einen rigorosen "Sweep" (Bereinigungsdurchlauf) durch alle `.kt` Dateien (besonders Compose UIs) in allen Modulen (außer `:core:resources`) durch, um ALLE verbleibenden hartkodierten Strings zu extrahieren.
+
+### 1. Ziele für die Extraktion (Suchmuster)
+Suche explizit nach harten Strings in folgenden Szenarien:
+- `Text("Hartkodierter Text")`
+- `contentDescription = "Hartkodierter Text"`
+- `title = "..."`, `subtitle = "..."`, `description = "..."`, `placeholder = "..."`
+- Texte in Dialogen (`AlertDialog`), DropdownMenus, Tabs und Settings-Screens (z.B. `SettingSwitchRow`).
+
+### 2. Handhabung von String-Templates (Variablen)
+Viele harte Strings enthalten Variablen, z.B. `"Editor - $it"` oder `"Name: ${file.name}"`.
+- **XML:** Übertrage diese in die `strings.xml` mit Formatierungs-Platzhaltern: 
+  `<string name="feature_editor_title_dynamic">Editor - %1$s</string>`
+  `<string name="feature_filetree_prop_name">Name: %1$s</string>`
+- **Code:** Rufe diese Parameter über den überladenen ResGetter auf:
+  `ResGetter.get(com.codeforge.core.resources.R.string.feature_editor_title_dynamic, it)`
+  `ResGetter.get(com.codeforge.core.resources.R.string.feature_filetree_prop_name, file.name)`
+
+### 3. Vorgehen bei der Umsetzung
+1. Öffne die Datei `CodeForgeMobile/core/resources/src/main/res/values/strings.xml`.
+2. Beginne **zuerst** mit den folgenden Dateien, da diese nachweislich noch viele harte Strings enthalten:
+   - `EditorScreen.kt` (im `:feature:editor` Modul)
+   - `FileTreeDrawer.kt` (im `:feature:filetree` Modul)
+   - `FileTreeSettingsScreen.kt` (im `:feature:settings` Modul)
+   - `EditorSettingsScreen.kt` (im `:feature:settings` Modul)
+3. Füge die neuen Strings zur `strings.xml` hinzu, gruppiert unter XML-Kommentaren wie `<!-- :feature:editor -->`.
+4. Ersetze die harten Strings im Quellcode durch `ResGetter.get(com.codeforge.core.resources.R.string.neu_generierte_id)`.
+5. Stelle sicher, dass `import com.codeforge.core.resources.ResGetter` in allen geänderten Dateien vorhanden ist.
+
+### 4. Wichtiger Hinweis zur Sorgfalt
+Lasse keine "contentDescriptions" oder "Abbrechen"/"OK" Buttons aus! Jedes für den User sichtbare Wort oder für Screenreader relevante Wort MUSS über den `ResGetter` bezogen werden. Mache lieber mehrere kleine Commits/Schritte, Modul für Modul, damit nichts vergessen wird.
+
+Bitte starte jetzt mit der Bereinigung der ersten Datei: `EditorScreen.kt`.

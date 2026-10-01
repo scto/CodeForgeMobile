@@ -1,0 +1,196 @@
+syntax = "proto3";
+
+option java_package = "com.codeforge.core.datastore.proto";
+option java_multiple_files = true;
+
+message AppSettings {
+  ThemeConfig theme = 1;
+  TerminalConfig terminal = 2;
+  EditorConfig editor = 3;
+  bool onboarding_completed = 4;
+  string workspace_directory = 5;
+  DebugConfig debug = 6;
+  SdkManagerConfig sdk_manager = 7;
+  FileTreeConfig file_tree = 8;
+}
+
+enum UpdateIntervalProto {
+  UPDATE_INTERVAL_HOURLY = 0;
+  UPDATE_INTERVAL_SIX_HOURS = 1;
+  UPDATE_INTERVAL_DAILY = 2;
+  UPDATE_INTERVAL_WEEKLY = 3;
+  UPDATE_INTERVAL_MONTHLY = 4;
+}
+
+message ToolItemProto {
+  string id = 1;
+  string version = 2;
+  string description = 3;
+  bool is_installed = 4;
+  string path = 5;
+}
+
+message SdkManagerConfig {
+  bool first_run_completed = 1;
+  UpdateIntervalProto update_interval = 2;
+  int64 last_update_timestamp = 3;
+  repeated ToolItemProto cached_build_tools = 4;
+  repeated ToolItemProto cached_platform_tools = 5;
+  repeated ToolItemProto cached_ndk_tools = 6;
+  repeated ToolItemProto cached_cmake_tools = 7;
+  repeated ToolItemProto cached_java_tools = 8;
+  bool cmdline_tools_installed = 9;
+  string last_diagnostic_message = 10;
+  bool java_installed = 11;
+  string java_version = 12;
+  string java_path = 13;
+}
+
+message DebugConfig {
+  bool logging_enabled = 1;
+  LogLevelProto log_level = 2;
+  bool excessive_tracing_enabled = 3;
+}
+
+enum LogLevelProto {
+  LOG_LEVEL_VERBOSE = 0;
+  LOG_LEVEL_DEBUG = 1;
+  LOG_LEVEL_INFO = 2;
+  LOG_LEVEL_WARN = 3;
+  LOG_LEVEL_ERROR = 4;
+}
+
+message ThemeConfig {
+  ThemeMode mode = 1;
+  string color_scheme_id = 2;
+  bool use_dynamic_color = 3;
+  CustomPalette custom_palette = 4;
+  bool use_amoled = 5;
+}
+
+message CustomPalette {
+  string primary = 1;
+  string secondary = 2;
+  string tertiary = 3;
+}
+
+enum ThemeMode {
+  SYSTEM = 0;
+  LIGHT = 1;
+  DARK = 2;
+}
+
+message TerminalConfig {
+  string default_distro = 1;
+  int32 font_size = 2;
+  bool is_virtual_keys_visible = 3;
+  string terminal_color_scheme = 4;
+  bool bell_enabled = 5;
+  bool terminal_installed = 6;
+  int32 scrollback_lines = 7;
+}
+
+enum FileTreeSortOrderProto {
+  SORT_ORDER_ASCENDING = 0;
+  SORT_ORDER_DESCENDING = 1;
+}
+
+enum FileTreeSortByProto {
+  SORT_BY_NAME = 0;
+  SORT_BY_TYPE = 1;
+  SORT_BY_SIZE = 2;
+  SORT_BY_DATE = 3;
+}
+
+enum FileTreeViewModeProto {
+  VIEW_MODE_MODULE = 0;
+  VIEW_MODE_PROJECT = 1;
+  VIEW_MODE_FILE = 2;
+}
+
+message FileTreeConfig {
+  FileTreeSortOrderProto sort_order = 1;
+  FileTreeSortByProto sort_by = 2;
+  bool show_hidden_files = 3;
+  FileTreeViewModeProto view_mode = 4;
+  int32 font_size = 5;
+  bool show_indent_lines = 6;
+  bool show_file_details = 7;
+  bool compact_mode = 8;
+}
+
+message EditorConfig {
+  int32 tab_size = 1;
+  bool use_tree_sitter = 2;
+  string textmate_theme = 3;
+  string lsp_server_path = 4;
+  bool word_wrap = 5;
+  bool read_only = 6;
+  bool disable_virtual_keyboard = 7;
+  float line_spacing = 8;
+  bool cursor_animation = 9;
+  bool show_minimap = 10;
+  bool show_line_numbers = 11;
+  bool pin_line_numbers = 12;
+  bool show_whitespace = 13;
+  bool show_keyboard_suggestions = 14;
+  bool sticky_scroll = 15;
+  bool quick_delete = 16;
+  string font_family = 17;
+  int32 font_size = 18;
+  bool auto_close_brackets = 19;
+  bool textmate_autocomplete = 20;
+  bool insert_tabs = 21;
+  string default_encoding = 22;
+  string line_ending = 23;
+  bool auto_save = 24;
+  int32 auto_save_delay_ms = 25;
+  bool enable_editor_config = 26;
+
+  // General (NeonIDE parity)
+  bool hover_info_enabled = 27;
+  bool inlay_hints_enabled = 28;
+  bool magnifier_enabled = 29;
+  bool ligature_enabled = 30;
+  bool signature_help_enabled = 31;
+  bool symbol_bar_visible = 32;
+
+  // Display (NeonIDE parity)
+  bool completion_anim_enabled = 33;
+  bool highlight_current_line_enabled = 34;
+  bool highlight_current_block_enabled = 35;
+  bool sticky_text_selection_enabled = 36;
+  bool scrollbar_enabled = 37;
+  bool first_line_number_always_visible = 38;
+  bool bidi_indicator_enabled = 39;
+  bool round_text_background_enabled = 40;
+  bool side_block_line_enabled = 41;
+  bool scroll_fling_enabled = 42;
+  bool overscroll_enabled = 43;
+
+  // CodeEditing (NeonIDE parity)
+  bool auto_indent_enabled = 44;
+  bool delete_multi_spaces_enabled = 45;
+  bool bracket_highlight_enabled = 46;
+  bool bold_matching_brackets_enabled = 47;
+  bool delete_empty_line_fast_enabled = 48;
+  bool format_pasted_text_enabled = 49;
+  bool symbol_pair_completion_enabled = 50;
+  bool use_icu_enabled = 51;
+
+  // Input Method (NeonIDE parity)
+  bool soft_keyboard_enabled = 52;
+  bool disable_soft_kbd_if_hard_kbd = 53;
+  bool enhanced_home_end_enabled = 54;
+  bool row_based_home_end_enabled = 55;
+  bool auto_completion_on_composing_enabled = 56;
+  bool allow_fullscreen_enabled = 57;
+  bool mouse_context_menu_enabled = 58;
+
+  // Extra Sora Editor configuration
+  int32 line_info_panel_mode = 59;
+  int32 line_info_panel_position = 60;
+  string symbol_set_preset = 61;
+  string custom_symbols = 62;
+}
+

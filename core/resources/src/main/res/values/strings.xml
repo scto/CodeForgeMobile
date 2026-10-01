@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App & General -->
+    <string name="app_name">CodeForge Mobile</string>
+    <string name="action_back">Zurück</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_delete">Löschen</string>
+    <string name="action_confirm">Bestätigen</string>
+    <string name="action_close">Schließen</string>
+    <string name="action_search">Suchen</string>
+    <string name="action_format">Formatieren</string>
+    <string name="action_copy">Kopieren</string>
+    <string name="action_cut">Ausschneiden</string>
+    <string name="action_paste">Einfügen</string>
+    <string name="action_rename">Umbenennen</string>
+    <string name="action_properties">Eigenschaften</string>
+    <string name="action_copy_path">Pfad kopieren</string>
+    <string name="action_undo">Rückgängig</string>
+    <string name="action_redo">Wiederholen</string>
+    <string name="action_refresh">Aktualisieren</string>
+    <string name="action_apply">Anwenden</string>
+
+    <!-- Buttons & Titles -->
+    <string name="btn_create_project">Neues Projekt erstellen</string>
+    <string name="btn_open_project">Projekt öffnen</string>
+    <string name="btn_clone_repo">Repository klonen</string>
+    <string name="btn_open_terminal">Terminal öffnen</string>
+    <string name="btn_cancel">Abbrechen</string>
+    <string name="btn_create">Erstellen</string>
+    <string name="btn_clone">Klonen</string>
+    <string name="btn_back">Zurück</string>
+    <string name="title_new_project">Neues Projekt</string>
+    <string name="title_git">Git Version Control</string>
+    <string name="title_plugins">Plugins &amp; Extensions</string>
+    <string name="title_about">Über CodeForge Mobile</string>
+    <string name="label_project_name">Projektname</string>
+    <string name="git_url">Git Repository URL</string>
+
+    <!-- Content Descriptions & Accessibility -->
+    <string name="cd_navigate_back">Zurück navigieren</string>
+    <string name="cd_close">Schließen</string>
+    <string name="cd_collapse_all">Alle einklappen</string>
+    <string name="cd_expand_all">Alle ausklappen</string>
+    <string name="cd_search">Suchen</string>
+    <string name="cd_clear_search">Suche löschen</string>
+    <string name="cd_toggle_compact">Kompaktmodus umschalten</string>
+    <string name="cd_regex">Regex Umschalter</string>
+    <string name="cd_case_sensitive">Groß-/Kleinschreibung Umschalter</string>
+    <string name="cd_more_options">Weitere Optionen</string>
+    <string name="cd_file_icon">Datei Icon</string>
+    <string name="cd_folder_icon">Ordner Icon</string>
+    <string name="cd_editor">Code Editor</string>
+    <string name="cd_preview">Vorschau</string>
+    <string name="cd_theme_preview">Theme Vorschau</string>
+    <string name="cd_color_picker">Color Picker</string>
+    <string name="cd_extension_icon">Erweiterungs-Icon</string>
+    <string name="cd_menu">Menü</string>
+    <string name="cd_settings">Einstellungen Icon</string>
+
+    <!-- Settings Hub Categories -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_category_appearance">1. Erscheinungsbild &amp; Theme</string>
+    <string name="settings_category_appearance_desc">Farbschema, Dark/Light Mode &amp; Theme Studio Anpassungen</string>
+    <string name="settings_category_editor">2. Editor</string>
+    <string name="settings_category_editor_desc">Zeilenumbruch, Schriftart, Einrückung, Formatierung &amp; Verhalten</string>
+    <string name="settings_category_filetree">3. Dateibaum &amp; Ansichten</string>
+    <string name="settings_category_filetree_desc">Sortierung, Versteckte Dateien, Module/Projekt/Datei-Ansichtsmodus</string>
+    <string name="settings_category_terminal">4. Terminal</string>
+    <string name="settings_category_terminal_desc">Distro-Auswahl, Virtuelle Tasten &amp; Farbschemas</string>
+    <string name="settings_category_sdkmanager">5. SDK Manager</string>
+    <string name="settings_category_sdkmanager_desc">Android SDK Build-Tools, NDK, CMake &amp; Java 17 verwalten</string>
+    <string name="settings_category_extensions">6. Plugins &amp; Erweiterungen (Extensions)</string>
+    <string name="settings_category_extensions_desc">Installierte Erweiterungen, Language Server &amp; Tooling Bridge</string>
+    <string name="settings_category_debug">7. Debug &amp; Diagnose</string>
+    <string name="settings_category_debug_desc">Logging-Level, Tracing &amp; Systemdiagnose konfigurieren</string>
+    <string name="settings_category_about">8. Über CodeForge Mobile</string>
+    <string name="settings_category_about_desc">App-Version, Lizenzen, Systemübersicht &amp; Entwickler-Informationen</string>
+
+    <!-- FileTree Settings & UI -->
+    <string name="filetree_settings_title">Dateibaum-Einstellungen</string>
+    <string name="filetree_section_fontsize">Schriftgröße &amp; Skalierung</string>
+    <string name="filetree_fontsize_label">Schriftgröße</string>
+    <string name="filetree_section_display">Anzeige-Optionen</string>
+    <string name="filetree_show_indent_lines">Einrückungslinien anzeigen</string>
+    <string name="filetree_show_indent_lines_sub">Zeigt vertikale Führungslinien für verschachtelte Ordner-Ebenen</string>
+    <string name="filetree_show_file_details">Dateidetails anzeigen</string>
+    <string name="filetree_show_file_details_sub">Zeigt Dateigröße und Änderungsdatum unterhalb des Dateinamens an</string>
+    <string name="filetree_show_hidden">Versteckte Dateien anzeigen</string>
+    <string name="filetree_show_hidden_sub">Dateien und Ordner mit vorangestelltem Punkt (.gitignore) einblenden</string>
+    <string name="filetree_section_sort">Sortierung &amp; Reihenfolge</string>
+    <string name="filetree_sort_order">Reihenfolge</string>
+    <string name="filetree_sort_asc">Aufsteigend (A-Z)</string>
+    <string name="filetree_sort_desc">Absteigend (Z-A)</string>
+    <string name="filetree_sort_by">Sortieren nach</string>
+    <string name="filetree_sort_name">Name</string>
+    <string name="filetree_sort_type">Typ</string>
+    <string name="filetree_sort_size">Größe</string>
+    <string name="filetree_sort_date">Datum</string>
+    <string name="filetree_section_viewmode">FileTree Ansichtsmodus (Android Studio Parität)</string>
+    <string name="filetree_viewmode_module">📦 Module Ansicht (Android)</string>
+    <string name="filetree_viewmode_module_sub">Blendet interne Gradle-Strukturen aus und gruppiert das Projekt nach Modulen.</string>
+    <string name="filetree_viewmode_project">📂 Projekt Ansicht</string>
+    <string name="filetree_viewmode_project_sub">Klassische Verzeichnisdarstellung aller Dateien und Ordner im Dateisystem.</string>
+    <string name="filetree_viewmode_file">📄 Datei Ansichtsmodus</string>
+    <string name="filetree_viewmode_file_sub">Flache Liste aller veränderten Quellcode-Dateien.</string>
+    <string name="filetree_folder_label">Ordner</string>
+
+    <!-- FileTree Dialogs & Context Menu -->
+    <string name="dialog_delete_title">Datei löschen</string>
+    <string name="dialog_delete_message">Möchtest du \"%1$s\" wirklich unwiderruflich löschen?</string>
+    <string name="dialog_properties_title">Eigenschaften</string>
+    <string name="dialog_properties_name">Name:</string>
+    <string name="dialog_properties_path">Pfad:</string>
+    <string name="dialog_properties_type">Typ:</string>
+    <string name="dialog_properties_size">Größe:</string>
+    <string name="dialog_properties_modified">Zuletzt geändert:</string>
+    <string name="dialog_properties_permissions">Berechtigungen:</string>
+
+    <!-- Theme Studio -->
+    <string name="theme_studio_title">Erscheinungsbild &amp; Theme Studio</string>
+    <string name="theme_presets_title">Theme Presets</string>
+    <string name="theme_custom_colors">Eigene Akzentfarben &amp; Color Picker</string>
+
+    <!-- Editor Settings -->
+    <string name="editor_settings_title">Editor-Einstellungen</string>
+    <string name="editor_option_wordwrap">Zeilenumbruch (Word Wrap)</string>
+    <string name="editor_option_line_numbers">Zeilennummern anzeigen</string>
+    <string name="editor_option_pin_line_numbers">Zeilennummern anheften</string>
+    <string name="editor_option_minimap">Minimap anzeigen</string>
+    <string name="editor_option_sticky_scroll">Sticky Scroll</string>
+    <string name="editor_option_scrollbars">Scrollbalken aktivieren</string>
+
+    <!-- Extensions Settings -->
+    <string name="extensions_settings_title">Erweiterungen (Extensions)</string>
+    <string name="extensions_installed">Installierte Erweiterungen</string>
+
+    <!-- Debug Settings -->
+    <string name="debug_settings_title">Debug &amp; Diagnose</string>
+    <string name="debug_logging_level">Logging-Level</string>
+    <!-- Plurals -->
+    <plurals name="files_count">
+        <item quantity="one">%d Datei</item>
+        <item quantity="other">%d Dateien</item>
+    </plurals>
+
+    <!-- Project Wizard Strings -->
+    <string name="choose_template">Vorlage auswählen</string>
+    <string name="pick_template_hint">Wähle eine Vorlage als Startpunkt für dein neues Android-Projekt.</string>
+    <string name="project_configuration">Projekt konfigurieren</string>
+    <string name="package_name">Package Name</string>
+    <string name="project_location">Speicherort</string>
+    <string name="language">Sprache</string>
+    <string name="minimum_sdk">Minimum SDK</string>
+    <string name="use_gradle_kotlin_dsl">Gradle Kotlin DSL (.kts) verwenden</string>
+    <string name="create_project_error_invalid_name">Ungültiger Projektname (erfordert 2-50 Zeichen, Buchstaben/Zahlen/Unterstrich/Bindestrich)</string>
+    <string name="create_project_error_invalid_package">Ungültiger Package Name (z.B. com.example.myapp)</string>
+    <string name="create_project_error_dir_exists">Das Zielverzeichnis existiert bereits.</string>
+    <string name="compose_requires_kotlin">Jetpack Compose erfordert Kotlin als Programmiersprache.</string>
+    <string name="create_project_success">Projekt erfolgreich in %1$s erstellt!</string>
+
+    <string name="tpl_no_activity_name">No Activity</string>
+    <string name="tpl_no_activity_desc">Erstellt ein leeres Android-Projekt ohne Start-Activity.</string>
+    <string name="tpl_empty_activity_name">Empty Views Activity</string>
+    <string name="tpl_empty_activity_desc">Erstellt ein klassisches Android-Projekt mit einer einfachen Activity und Layout XML.</string>
+    <string name="tpl_compose_activity_name">Empty Compose Activity</string>
+    <string name="tpl_compose_activity_desc">Erstellt ein modernes Android-Projekt mit Jetpack Compose UI Framework.</string>
+    <string name="tpl_basic_activity_name">Basic Views Activity</string>
+    <string name="tpl_basic_activity_desc">Erstellt eine Activity mit App Bar, FloatingActionButton und Navigation Host.</string>
+    <string name="tpl_bottom_nav_activity_name">Bottom Navigation Activity</string>
+    <string name="tpl_bottom_nav_activity_desc">Erstellt ein Projekt mit Unterer Navigationsleiste (BottomNavigationView) und Fragments.</string>
+    <string name="tpl_nav_drawer_activity_name">Navigation Drawer Activity</string>
+    <string name="tpl_nav_drawer_activity_desc">Erstellt eine Activity mit seitlicher Navigationsschublade (DrawerLayout).</string>
+    <string name="tpl_tabbed_activity_name">Tabbed Activity</string>
+    <string name="tpl_tabbed_activity_desc">Erstellt ein Projekt mit ViewPager2 und TabLayout für Wisch-Gesten.</string>
+    <string name="tpl_cpp_activity_name">Native C++ Activity</string>
+    <string name="tpl_cpp_activity_desc">Erstellt ein Android-Projekt mit C++ JNI Unterstützung (NDK / CMake).</string>
+    <string name="tpl_no_androidx_activity_name">No AndroidX Activity</string>
+    <string name="tpl_no_androidx_activity_desc">Erstellt ein minimalistisches Legacy-Projekt ohne AndroidX Bibliotheken.</string>
+
+    <!-- Welcome Screen Strings -->
+    <string name="welcome_subtitle">Profi IDE &amp; Android Studio für Android Devices</string>
+    <string name="welcome_quick_start">Schnellstart</string>
+    <string name="welcome_tools">Entwickler Tools</string>
+    <string name="welcome_create_desc">Neues Android, Kotlin, Java oder C++ Projekt erstellen</string>
+    <string name="welcome_open_desc">Bestehendes Projekt aus dem Speicher laden</string>
+    <string name="welcome_clone_desc">Git Repository von GitHub oder URL klonen</string>
+    <string name="welcome_terminal_desc">Linux PRoot Terminal &amp; Bash Tools öffnen</string>
+    <string name="welcome_sdk_desc">Android SDK, Build-Tools, NDK &amp; JDK verwalten</string>
+    <string name="welcome_settings_desc">IDE-Einstellungen, Theme Studio &amp; Editor konfigurieren</string>
+    <string name="welcome_extensions_desc">Plugins, Language Server (LSP) &amp; Erweiterungen</string>
+    <string name="welcome_about_desc">Systemstatus, App-Informationen &amp; Lizenzen</string>
+
+    <!-- ================= :feature:composepreview ================= -->
+    <string name="feature_composepreview_title">Preview</string>
+    <string name="feature_composepreview_cd_rerender">Neu rendern</string>
+    <string name="feature_composepreview_cd_preview">@Preview</string>
+    <string name="feature_composepreview_select_function_hint">Wähle eine Funktion für die Vorschau.</string>
+    <string name="feature_composepreview_compiling_rendering">Vorschau wird kompiliert &amp; gerendert...</string>
+    <string name="feature_composepreview_error_decode">Bild konnte nicht dekodiert werden.</string>
+    <string name="feature_composepreview_no_image">Kein Vorschau-Bild verfügbar.</string>
+    <string name="feature_composepreview_retry">Neu versuchen</string>
+
+    <!-- ================= :feature:welcome ================= -->
+    <string name="feature_welcome_open_existing_desc">Bestehendes Projekt im Dateisystem öffnen</string>
+
+    <!-- ================= :feature:themebuilder ================= -->
+    <string name="feature_themebuilder_title">Erscheinungsbild &amp; Theme</string>
+    <string name="feature_themebuilder_preview">Theme Vorschau</string>
+    <string name="feature_themebuilder_btn_primary">Primär-Button</string>
+    <string name="feature_themebuilder_btn_outlined">Outlined</string>
+    <string name="feature_themebuilder_preview_header">CodeForge Mobile UI</string>
+    <string name="feature_themebuilder_preview_sub">Vorschau der System-, Hell-, Dunkel- und AMOLED-Oberflächenfarben.</string>
+
+    <!-- ================= :feature:sdkmanager ================= -->
+    <string name="feature_sdkmanager_auto_update_title">Auto-Update Einstellungen</string>
+    <string name="feature_sdkmanager_change_interval">Intervall ändern</string>
+    <string name="feature_sdkmanager_diag_status">Diagnose &amp; SDK-Manager Status</string>
+    <string name="feature_sdkmanager_filter_hint">Versionen &amp; Pakete filtern...</string>
+    <string name="feature_sdkmanager_interval_label">Auto-Update Intervall</string>
+
+    <!-- ================= :feature:filetree ================= -->
+    <string name="feature_filetree_clear_clipboard">Zwischenablage leeren</string>
+    <string name="feature_filetree_new_file">Neue Datei</string>
+    <string name="feature_filetree_new_folder">Neuer Ordner</string>
+    <string name="feature_filetree_close_drawer">Schublade schließen</string>
+    <string name="feature_filetree_switch_viewmode">Ansichtsmodus wechseln</string>
+    <string name="feature_filetree_viewmode_module">📦 Modul-Ansicht (Android)</string>
+    <string name="feature_filetree_confirm_delete_title">Löschen bestätigen</string>
+
+    <!-- ================= :feature:onboarding ================= -->
+    <string name="feature_onboarding_perm_title">Berechtigungen</string>
+    <string name="feature_onboarding_perm_desc">CodeForge Mobile benötigt verschiedene Systemrechte für Terminals, Hintergrund-Builds und App-Installationen.</string>
+    <string name="feature_onboarding_storage_access">Speicherzugriff</string>
+    <string name="feature_onboarding_storage_access_desc">Zum Öffnen, Erstellen und Bearbeiten von Projekten (MANAGE_EXTERNAL_STORAGE).</string>
+    <string name="feature_onboarding_notifications">Benachrichtigungen</string>
+    <string name="feature_onboarding_notifications_desc">Für Build-Status und lang laufende Gradle-Tasks im Hintergrund.</string>
+    <string name="feature_onboarding_battery_opt">Akku-Optimierung ausnehmen</string>
+    <string name="feature_onboarding_battery_opt_desc">Verhindert das Beenden von Hintergrund-Builds und PRoot-Terminals durch das System.</string>
+    <string name="feature_onboarding_write_settings">Systemeinstellungen schreiben</string>
+    <string name="feature_onboarding_write_settings_desc">Erlaubt erweiterte Systemeinstellungen (WRITE_SECURE_SETTINGS, z. B. per ADB).</string>
+    <string name="feature_onboarding_welcome_title">Willkommen bei CodeForgeMobile</string>
+    <string name="feature_onboarding_welcome_sub">Ihre Smartphone IDE für Unterwegs</string>
+    <string name="feature_onboarding_code_on_phone">Code direkt auf dem Smartphone</string>
+    <string name="feature_onboarding_editor_desc">Vollwertiger Kotlin/Java-Editor mit LSP-Unterstützung, Syntax-Highlighting und Auto-Completion.</string>
+    <string name="feature_onboarding_linux_terminal">Echtes Linux-Terminal</string>
+    <string name="feature_onboarding_setup_linux_title">Linux-Umgebung einrichten</string>
+    <string name="feature_onboarding_setup_linux_desc">Wähle eine Distribution für Terminal, Der Download erfolgt einmalig.</string>
+    <string name="feature_onboarding_start_setup">Einrichtung starten</string>
+    <string name="feature_onboarding_setup_complete">Einrichtung abgeschlossen ✓</string>
+
+    <!-- ================= :feature:terminal ================= -->
+    <string name="feature_terminal_new_session">Neue Sitzung</string>
+    <string name="feature_terminal_settings">Einstellungen</string>
+    <string name="feature_terminal_rename">Umbenennen</string>
+    <string name="feature_terminal_close">Schließen</string>
+    <string name="feature_terminal_menu">Menü</string>
+    <string name="feature_terminal_loading_ubuntu">Lade Ubuntu Base...</string>
+
+    <!-- ================= :feature:settings ================= -->
+    <string name="feature_settings_ext_lsp_kotlin">LSP Smart Code completion &amp; diagnostics for Kotlin</string>
+    <string name="feature_settings_ext_jdt_java">Eclipse JDT LS Language Server support for Java</string>
+    <string name="feature_settings_ext_clangd_cpp">LLVM Clangd C and C++ code intelligence</string>
+    <string name="feature_settings_editor_gen_title">General (Allgemein)</string>
+    <string name="feature_settings_editor_hover_info">Hover Info</string>
+    <string name="feature_settings_editor_hover_info_sub">LSP Hover-Informationen und Dokumentation anzeigen</string>
+    <string name="feature_settings_editor_icu_lib">ICU Bibliothek nutzen</string>
+    <string name="feature_settings_editor_icu_lib_sub">Erweiterte ICU-Wortauswahl bei Doppel-Tippen nutzen</string>
+    <string name="feature_settings_editor_input_method">Input Method (Eingabemethoden)</string>
+    <string name="feature_settings_editor_soft_kbd">Soft-Keyboard aktivieren</string>
+    <string name="feature_settings_editor_soft_kbd_sub">Bildschirmtastatur beim Tippen im Editor verwenden</string>
+    <string name="feature_settings_editor_hide_soft_kbd">Soft-Keyboard bei Hardware-Tastatur verbergen</string>
+    <string name="feature_settings_editor_hide_soft_kbd_sub">Bildschirmtastatur automatisch ausblenden wenn Hardware-Tastatur angeschlossen ist</string>
+    <string name="feature_settings_editor_advanced_home_end">Erweitertes Pos1/Ende (Home/End)</string>
+    <string name="feature_settings_editor_advanced_home_end_sub">Pos1/Ende springt zuerst zum ersten Zeichen, dann zum Zeilenanfang</string>
+    <string name="feature_settings_editor_line_home_end">Zeilenbasiertes Pos1/Ende</string>
+    <string name="feature_settings_editor_line_home_end_sub">Pos1/Ende am visuellen Umbruchzeilenrand ausrichten</string>
+    <string name="feature_settings_editor_completion_typing">Vervollständigung bei Texteingabe</string>
+    <string name="feature_settings_editor_completion_typing_sub">Autovervollständigung auch während aktiver Tastatureingabe (Composing) anzeigen</string>
+    <string name="feature_settings_editor_fullscreen_mode">Vollbildmodus erlauben</string>
+    <string name="feature_settings_editor_fullscreen_mode_sub">Tastatur-Vollbildmodus auf mobilen Geräten zulassen</string>
+    <string name="feature_settings_editor_mouse_context">Maus-Kontextmenü</string>
+    <string name="feature_settings_editor_mouse_context_sub">Rechtsklick-Kontextmenü für Maussteuerung aktivieren</string>
+    <string name="feature_settings_terminal_scrollback_lines">Scrollback Lines</string>
+    <string name="feature_settings_terminal_scrollback_sub">Anzahl der Zeilen im Terminal-Puffer</string>
+    <string name="feature_settings_terminal_display_behavior">Anzeige &amp; Verhalten</string>
+    <string name="feature_settings_terminal_virtual_keys">Virtuelle Tasten (Extra Keys)</string>
+    <string name="feature_settings_terminal_virtual_keys_sub">Spezialtasten (Tab, Ctrl, Alt, ESC, Pfad-Tasten) einblenden</string>
+    <string name="feature_settings_terminal_bell">Terminal Bell (Glocke)</string>
+    <string name="feature_settings_terminal_bell_sub">Akustische/visuelle Signale bei BEL-Zeichen</string>
+    <string name="feature_settings_terminal_color_scheme">Farbschema (Color Scheme)</string>
+    <string name="feature_settings_terminal_maintenance">Wartung &amp; Aktionen</string>
+    <string name="feature_settings_terminal_reset_settings">Terminal-Einstellungen zurücksetzen</string>
+    <string name="feature_settings_debug_logging_title">Protokollierung &amp; Tracing</string>
+    <string name="feature_settings_debug_enable_logging">Globales Logging aktivieren</string>
+    <string name="feature_settings_debug_enable_logging_sub">AppLogger Schritt- und Statusausgaben erfassen</string>
+    <string name="feature_settings_debug_excessive_tracing">Erweitertes Tracing (Excessive Tracing)</string>
+    <string name="feature_settings_debug_excessive_tracing_sub">Ausführliches Event- und Flow-Tracing für Fehlersuche</string>
+    <string name="feature_settings_debug_log_level">Protokollierstufe (Log Level)</string>
+    <string name="feature_settings_debug_onboarding_status">Onboarding &amp; App-Start Status</string>
+    <string name="feature_settings_debug_onboarding_complete">Onboarding abgeschlossen</string>
+    <string name="feature_settings_debug_onboarding_complete_sub">Aktiviert = Direktstart auf Welcome Screen. Deaktiviert = Onboarding beim nächsten App-Start erzwingen.</string>
+    <string name="feature_settings_debug_reset_onboarding">Onboarding zurücksetzen (Beim nächsten Start anzeigen)</string>
+    <string name="feature_settings_debug_terminal_wipe">Terminal &amp; Guest OS Wartung (Wipe)</string>
+
+    <!-- ================= :feature:editor ================= -->
+    <string name="feature_editor_open_filetree">Dateibaum öffnen</string>
+    <string name="feature_editor_search_replace">Suchen &amp; Ersetzen</string>
+    <string name="feature_editor_lsp_connected">LSP Connected</string>
+    <string name="feature_editor_compose_preview">Compose Preview (Vorschau)</string>
+    <string name="feature_editor_format_code">Code Formatieren</string>
+    <string name="feature_editor_change_language">Sprache wechseln</string>
+    <string name="feature_editor_change_theme">Farbschema wechseln</string>
+    <string name="feature_editor_change_font">Schriftart wechseln</string>
+    <string name="feature_editor_goto_line">Gehe zu Zeile...</string>
+    <string name="feature_editor_settings">Editor-Einstellungen</string>
+    <string name="feature_editor_tab_options">Tab Optionen</string>
+    <string name="feature_editor_close_tab">Schließen (Close)</string>
+    <string name="feature_editor_close_others">Andere schließen (Close Others)</string>
+    <string name="feature_editor_close_all">Alle schließen (Close All)</string>
+    <string name="feature_editor_search_hint">Suchen...</string>
+    <string name="feature_editor_replace_hint">Ersetzen...</string>
+    <string name="feature_editor_replace">Ersetzen</string>
+    <string name="feature_editor_replace_all">Alle</string>
+    <string name="feature_editor_match_case">Match Case</string>
+    <string name="feature_editor_regex">Regex</string>
+    <string name="feature_editor_whole_word">Whole Word</string>
+    <string name="feature_editor_select_language">Sprache wählen</string>
+
+    <!-- ================= :app ================= -->
+    <string name="app_editor_tab">Editor</string>
+    <string name="app_preview_tab">Preview</string>
+
+    <!-- ================= Sweep Target Strings ================= -->
+    <string name="feature_editor_title_file">Editor - %1$s</string>
+    <string name="feature_editor_title_default">CodeForge Editor</string>
+    <string name="feature_editor_diag_line_msg">[Zeile %1$d] %2$s</string>
+    <string name="feature_editor_build_logs">Build Logs</string>
+    <string name="feature_editor_dialog_select_theme">Farbschema wählen</string>
+    <string name="feature_editor_dialog_select_font">Schriftart wählen</string>
+    <string name="feature_editor_dialog_goto_line">Gehe zu Zeile</string>
+    <string name="feature_editor_dialog_goto_line_hint">Zeilennummer z.B. 42</string>
+    <string name="feature_filetree_delete_confirm_msg">Möchtest du '%1$s' wirklich unwiderruflich löschen?</string>
+    <string name="feature_filetree_unknown">Unbekannt</string>
+    <string name="feature_filetree_folder">Ordner</string>
+    <string name="feature_filetree_file">Datei</string>
+    <string name="feature_filetree_hidden"> [Versteckt]</string>
+    <string name="feature_filetree_prop_name">Name: %1$s</string>
+    <string name="feature_filetree_prop_path">Pfad: %1$s</string>
+    <string name="feature_filetree_prop_type">Typ: %1$s</string>
+    <string name="feature_filetree_prop_size">Größe: %1$s</string>
+    <string name="feature_filetree_prop_modified">Zuletzt geändert: %1$s</string>
+    <string name="feature_filetree_prop_permissions">Berechtigungen: %1$s</string>
+    <string name="feature_filetree_title_new_file">Neue Datei erstellen</string>
+    <string name="feature_filetree_title_new_folder">Neuen Ordner erstellen</string>
+    <string name="feature_filetree_err_create_file">Datei konnte nicht erstellt werden</string>
+    <string name="feature_filetree_err_create_dir">Ordner konnte nicht erstellt werden</string>
+    <string name="feature_filetree_err_rename">Fehler beim Umbenennen</string>
+    <string name="feature_settings_filetree_sp_fmt">%1$d sp</string>
+    <string name="feature_settings_filetree_preview_sample">Vorschau: SampleClass.kt</string>
+    <string name="feature_settings_editor_theme_dark">Dunkles Farbschema</string>
+    <string name="feature_settings_editor_theme_light">Helles Farbschema</string>
+
+    <!-- ================= Final Sweep Strings ================= -->
+    <string name="feature_filetree_ctx_new_file">Neue Datei</string>
+    <string name="feature_filetree_ctx_new_folder">Neuer Ordner</string>
+    <string name="feature_filetree_ctx_cut">Ausschneiden</string>
+    <string name="feature_filetree_ctx_copy">Kopieren</string>
+    <string name="feature_filetree_ctx_paste">Einfügen</string>
+    <string name="feature_filetree_ctx_rename">Umbenennen</string>
+    <string name="feature_filetree_ctx_delete">Löschen</string>
+    <string name="feature_filetree_ctx_copy_path">Pfad kopieren</string>
+    <string name="feature_filetree_ctx_properties">Eigenschaften</string>
+    <string name="feature_filetree_tb_collapse_all">Alle einklappen</string>
+    <string name="feature_filetree_tb_expand_all">Alle ausklappen</string>
+    <string name="feature_terminal_rename_title">Sitzung umbenennen</string>
+    <string name="feature_terminal_session_title_hint">Titel der Sitzung</string>
+    <string name="feature_terminal_no_open_session">Keine offene Session.</string>
+    <string name="feature_settings_hub_title">Einstellungen</string>
+    <string name="feature_onboarding_install_packages">APKs &amp; Pakete installieren</string>
+    <string name="feature_onboarding_retry">Erneut versuchen</string>
+    <string name="feature_composepreview_hint_open_file">Öffne eine Datei mit @Composable-Funktionen im Editor.</string>
+
+    <!-- ================= Ultimate Sweep Strings ================= -->
+    <string name="feature_settings_ext_title">Erweiterungen (Extensions)</string>
+    <string name="feature_settings_ext_installing">Installiere...</string>
+    <string name="feature_settings_ext_uninstall">Deinstallieren</string>
+    <string name="feature_settings_ext_install">Installieren</string>
+    <string name="feature_settings_editor_inlay_hints">Inlay Hints</string>
+    <string name="feature_settings_editor_inlay_hints_sub">Inlay-Parameter- und Typ-Hinweise im Code einblenden</string>
+    <string name="feature_terminal_title">Terminal-Einstellungen</string>
+    <string name="feature_terminal_default_distro">Standard-Distribution (Guest OS)</string>
+    <string name="feature_terminal_scrollback_puffer">Scrollback &amp; Puffer</string>
+    <string name="feature_welcome_choose_folder_import">Ordner wählen &amp; importieren</string>
+    <string name="feature_welcome_devkit">DevKit</string>
+    <string name="feature_welcome_plugins">Plugins</string>
+    <string name="feature_welcome_about">Über</string>
+    <string name="feature_projectwizard_select_folder">Select Folder</string>
+    <string name="feature_projectwizard_api_level">API %1$s (Android %2$s)</string>
+    <string name="app_nav_back">Zurück</string>
+</resources>

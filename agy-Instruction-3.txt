@@ -1,0 +1,36 @@
+Dies ist eine strikte Anweisung für einen ultimativen, projektweiten "Sweep" zur String-Zentralisierung. In vorherigen Durchläufen wurden viele hartkodierte Strings (insbesondere in `contentDescription`, `label`, Dialogen) übersehen und notwendige Imports weggelassen. 
+
+Deine Aufgabe ist es, das GESAMTE Projekt rekursiv zu durchsuchen und restlos ALLE verbleibenden hartkodierten User-Facing-Strings in die zentrale `strings.xml` auszulagern.
+
+### 1. Geltungsbereich (Scope)
+- **Einschließen:** Durchsuche rekursiv ALLE Ordner und Unterordner des Projekts nach `.kt` und `.java` Dateien.
+- **Ausschließen:** Das Modul `:core:resources` (Pfad: `core/resources/...`) darf NICHT nach auszulagernden Strings durchsucht werden. Es dient ausschließlich als Ziel für die generierten Strings.
+
+### 2. Was extrahiert werden MUSS (Suchmuster)
+Suche nach jeglichem Text, der in Anführungszeichen `""` steht und in der UI sichtbar ist oder für Screenreader benötigt wird. Achte EXPLIZIT und OHNE AUSNAHME auf:
+- `contentDescription = "..."`
+- `label = { Text("...") }`
+- `title = "..."`, `subtitle = "..."`, `placeholder = { Text("...") }`
+- `Text("...")`
+- Texte in `DropdownMenuItem`, `AlertDialog`, `Button`, `Tab`, `Checkbox`, `RadioButton`.
+- Texte in Custom Components (z.B. `SettingSwitchRow(title = "...", subtitle = "...")`).
+- Hardkodierte Fallbacks (z.B. `?: "Unbekannt"`, `else -> "Ordner"`).
+
+### 3. Umgang mit Variablen (String Interpolation)
+Strings wie `"Name: ${file.name}"` oder `"Vorschau: $name"` DÜRFEN NICHT ignoriert werden.
+- XML: Konvertiere sie zu `<string name="...">Name: %1$s</string>`.
+- Code: Nutze die Parameter-Übergabe: `ResGetter.get(com.codeforge.core.resources.R.string..., file.name)`.
+
+### 4. Durchführung der Ersetzung & Imports (Kritischer Schritt)
+Wenn du einen String in einer `.kt` oder `.java` Datei ersetzt, MUSST du folgende Regeln zwingend einhalten:
+1. **Ersetzung:** Ersetze den `"String"` durch: 
+   `ResGetter.get(com.codeforge.core.resources.R.string.deine_generierte_id)`
+   *(Verwende exakt diesen vollqualifizierten Pfad für die R-Klasse, um Import-Konflikte mit lokalen R-Klassen zu vermeiden!)*
+2. **Pflicht-Import:** Du MUSST am Anfang der modifizierten Datei prüfen, ob der Import für den ResGetter existiert. Falls nicht, füge zwingend hinzu:
+   `import com.codeforge.core.resources.ResGetter`
+3. **XML Eintrag:** Füge die generierte ID in die `CodeForgeMobile/core/resources/src/main/res/values/strings.xml` ein, gruppiert nach Modulnamen (z.B. `<!-- :feature:settings -->`).
+
+### 5. Vorgehensweise für diesen Run
+Gehe systematisch das gesamte Projekt durch. Beginne mit den Modulen `:feature:settings`, `:feature:filetree`, `:feature:editor` und arbeite dich dann durch alle anderen Module (`:feature:*`, `:core:*`, `:app`). 
+
+Lies die Dateien, extrahiere ALLE Strings nach den obigen Regeln, füge sie in die `strings.xml` ein und speichere die modifizierten `.kt`/`.java` Dateien MIT dem korrekten `ResGetter` Import ab. Bestätige den Start und führe dies nun Modul für Modul aus, bis keine hartkodierten Strings mehr im Projekt existieren.

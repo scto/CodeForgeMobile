@@ -1,0 +1,61 @@
+Bitte führe im aktuellen Android-Projekt ("CodeForgeMobile") ein systematisches Refactoring zur Zentralisierung von Strings durch. Gehe dabei streng nach den folgenden Schritten vor:
+
+### 1. Projektstruktur parsen
+Lese die Datei `settings.gradle.kts` (bzw. `settings.gradle.ktd`, falls so benannt) im Root-Verzeichnis aus. Identifiziere alle darin definierten Module und Submodule anhand der `include(...)`-Deklarationen (z.B. `:app`, `:core:data`, `:feature:editor`, etc.). Merke dir diese Pfade für die spätere Durchsuchung.
+
+### 2. ResGetter Utility erstellen
+Erstelle im Ordner des `:core:resources`-Moduls die Datei `CodeForgeMobile/core/resources/src/main/java/com/codeforge/core/resources/Res.kt` (erstelle die fehlenden Ordner, falls nötig). Füge dort exakt folgenden Code ein:
+
+```kotlin
+package com.codeforge.core.resources
+
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.res.stringResource
+
+/**
+ * Simple accessor for Compose string resources.
+ *
+ * Usage:
+ *   ResGetter.get(R.string.someStr)
+ *   ResGetter.get(R.string.someStrWithArgs, "value")
+ *   @author nullij @ https://github.com/nullij
+ */
+object ResGetter {
+
+    @Composable
+    @ReadOnlyComposable
+    fun get(@StringRes resId: Int): String {
+        return stringResource(id = resId)
+    }
+
+    @Composable
+    @ReadOnlyComposable
+    fun get(@StringRes resId: Int, vararg formatArgs: Any): String {
+        return stringResource(id = resId, formatArgs = formatArgs)
+    }
+}
+```
+
+### 3. Strings extrahieren und zentralisieren (`strings.xml`)
+Öffne oder erstelle die Datei `CodeForgeMobile/core/resources/src/main/res/values/strings.xml`.
+- Durchsuche alle in Schritt 1 identifizierten Module nach hartkodierten Strings in UI-Komponenten (z.B. in `Text("...")`, `title = "..."`, `description = "..."`, `label = "..."` innerhalb von `.kt` Dateien).
+- **Wichtige Ausnahme:** Schließe das Modul `:core:resources` von dieser Suche komplett aus! Suche dort nicht nach hartkodierten Strings.
+- Verschiebe die gefundenen Strings als neue `<string name="...">` Einträge in die `strings.xml` des `:core:resources` Moduls.
+- **Strukturierung:** Gruppiere die XML-Einträge systematisch nach dem Modul/Submodul, aus dem sie stammen, indem du XML-Kommentare nutzt. Beispiel:
+  ```xml
+  <!-- ================= :feature:editor ================= -->
+  <string name="feature_editor_title_main">Editor</string>
+  ```
+- Verwende eine eindeutige Namenskonvention für die IDs, z.B. `[modul]_[submodul]_[zweck]`.
+
+### 4. Code refaktorieren (Hardcodes ersetzen)
+Ersetze die gefundenen hartkodierten Strings in den jeweiligen Quellcode-Dateien (außer in `:core:resources`) durch den Aufruf unserer neuen Hilfsklasse:
+`ResGetter.get(com.codeforge.core.resources.R.string.deine_generierte_id)`
+
+- Achte zwingend darauf, dass du den Import `import com.codeforge.core.resources.ResGetter` in allen modifizierten Dateien hinzufügst.
+- Ebenfalls muss darauf geachtet werden, dass die R-Klasse von core.resources genutzt wird (ggf. als voll qualifizierter Name beim Aufruf: `com.codeforge.core.resources.R.string...`).
+- Falls Parameter im String verwendet werden (z.B. String Templates `$variable`), formatiere den XML-String mit `%1$s`, `%2$d` usw. und übergebe die Parameter entsprechend an die überladene `ResGetter.get()` Funktion.
+
+Bitte bestätige kurz die gefundenen Module, den Ausschluss von `:core:resources` und beginne dann Modul für Modul mit der Umsetzung.
