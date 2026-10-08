@@ -1,37 +1,31 @@
-# Gradle files
+# Gradle / Build
 .gradle/
 build/
-
-# Local configuration file (sdk path, etc)
+!gradle/wrapper/gradle-wrapper.jar
 local.properties
-
-# Log/OS Files
-*.log
-
-# Android Studio generated files and folders
+*.apk
+*.aab
+*.ap_
+*.dex
 captures/
 .externalNativeBuild/
 .cxx/
-*.aab
-*.apk
-output-metadata.json
 
-# IntelliJ
-*.iml
+# IDE
 .idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+*.iml
+.vscode/
+.DS_Store
 
-# Keystore files
+# Signing
 *.jks
 *.keystore
+keystore.properties
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
-
-# Project Temp Assrts
-/assets/
+# Schlüssel/Artefakte der Repo-Build-Pipeline (build_codeforge_repo.sh) – niemals einchecken
+.gpg/
+output/
+github_repo_ready/
+terminal-packages-codeforge/
+.gpg/private/
+tmp/
