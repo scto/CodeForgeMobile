@@ -1,5 +1,6 @@
 plugins {
-    id("codeforge.android.library.compose")
+    alias(libs.plugins.codeforge.android.library.compose)
+    alias(libs.plugins.codeforge.quality)
 }
 
 android {
@@ -7,6 +8,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.annotation)
+    implementation(libs.androidx.startup)
 }

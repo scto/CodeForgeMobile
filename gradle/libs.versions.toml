@@ -1,92 +1,52 @@
 [versions]
-agp = "8.13.1"
-kotlin = "2.2.21"
-ksp = "2.2.21-2.0.5"
+agp = "8.13.2"
+kotlin = "2.1.21"
+ksp = "2.1.21-2.0.1"
 
+# Code Quality (build-logic: codeforge.quality)
 ktlint = "14.2.0"
 detekt = "2.0.0-alpha.5"
-
-coreKtx = "1.17.0"
-activity = "1.11.0"
-androidxAnnotation = "1.8.2"
-appcompat = "1.7.1"
-material = "1.13.0"
-
-# Compose
-composeBom = "2024.10.01"
+coreKtx = "1.13.1"
+lifecycle = "2.8.6"
+composeBom = "2025.09.00"
 composeCompiler = "1.5.15"
-material3Adaptive = "1.0.0"
-
-# Hilt
-hilt = "2.57.1"
+material3Adaptive = "1.1.0"
+hilt = "2.56.2"
 hiltNavigationCompose = "1.2.0"
-
-# Datastore & Protobuf
 datastore = "1.1.1"
-protobuf = "4.35.1"
+protobuf = "3.25.3"
 protobufPlugin = "0.9.4"
-
-# Kotlin & Coroutines
 coroutines = "1.9.0"
-serialization = "1.7.1"
-
-# Syntax & Regex (Monarch, etc.)
-monarch = "1.0.3"
-monarch-json = "1.0.2"
-monarch-lang = "1.0.2"
-regex-oniguruma = "1.0.3"
-regex-re2j = "1.0.2"
-jhighlight = "2.0.0"
-jcodings = "1.0.64"
-joni = "2.2.7"
-
-# Editor (Rosemoe)
-rosemoe-editor = "0.24.6"
-
-# Parser (Tree-sitter)
-treesitter = "4.3.2"
-
-# Markdown (Markwon)
-markwon = "4.6.2"
-compose-richtext = "1.0.0-alpha05"
-
-# Navigation & Lifecycle
-bonsai = "1.2.0"
 navigationCompose = "2.8.1"
-lifecycle = "2.10.0"
-
-# IO, Networking & Parsing
-okio = "3.9.1"
-commons-io = "2.22.0"
-gson = "2.14.0"
-moshi = "1.15.2"
-snakeyaml = "3.0.1"
-
-coil = "3.5.0"
-
-# Tools, LSP & System
-lsp4j = "1.0.0"
 jgit = "6.10.0.202406032230-r"
 freemarker = "2.3.32"
 gradleToolingApi = "8.9"
-utilcode = "1.31.1"
+serialization = "1.7.1"
+commonsCompress = "1.26.2"
+xz = "1.9"
+desugarJdkLibs = "2.1.3"
+androidxAnnotation = "1.8.2"
+bonsai = "1.2.0"
+documentfile = "1.0.1"
+activityCompose = "1.10.1"
+startup = "1.2.0"
+junit = "4.13.2"
 
-# Compressing
-commonsCompress = "1.28.0"
-xz = "1.12"
-
-desugarJdkLibs = "2.1.5"
+# --- Termux-Vendoring (:libs:termux-*, siehe TERMUX-PORTING.md) ---
+ndk = "26.3.11579264"
+material = "1.12.0"
+guava = "33.3.1-android"
+markwon = "4.6.2"
+hiddenApiBypass = "6.1"
+androidxPreference = "1.2.1"
+androidxDrawerlayout = "1.2.0"
+androidxViewpager2 = "1.1.0"
+androidxAppcompat = "1.7.0"
+androidxWindow = "1.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
-androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidxAnnotation" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
-androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -97,104 +57,69 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "material3Adaptive" }
 androidx-compose-material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "material3Adaptive" }
 androidx-compose-material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "material3Adaptive" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-androidx-datastore-proto = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
-protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
-protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
-protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltNavigationCompose" }
-hilt-work-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltNavigationCompose" }
-androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version = "2.10.0" }
 
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-datastore-proto = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidxAnnotation" }
+protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
+protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
+protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
+
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 
-desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
-
-# Syntax & Regex (Monarch, etc.)
-monarch-core = { group = "io.github.dingyi222666.monarch", name = "monarch", version.ref = "monarch" }
-monarch-json-loader = { group = "io.github.dingyi222666.monarch", name = "monarch-json-loader", version.ref = "monarch-json" }
-monarch-language-pack = { group = "io.github.dingyi222666.monarch", name = "monarch-language-pack", version.ref = "monarch-lang" }
-regex-oniguruma = { group = "io.github.dingyi222666.regex-lib", name = "regex-lib-oniguruma", version.ref = "regex-oniguruma" }
-regex-re2j = { group = "io.github.dingyi222666.regex-lib", name = "regex-lib-re2j", version.ref = "regex-re2j" }
-jhighlight = { group = "org.codelibs", name = "jhighlight", version.ref = "jhighlight" }
-jcodings = { group = "org.jruby.jcodings", name = "jcodings", version.ref = "jcodings" }
-joni = { group = "org.jruby.joni", name = "joni", version.ref = "joni" }
-
-# Parser (Tree-sitter)
-treesitter-core = { group = "com.itsaky.androidide.treesitter", name = "android-tree-sitter", version.ref = "treesitter" }
-treesitter-java = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-java", version.ref = "treesitter" }
-treesitter-kotlin = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-kotlin", version.ref = "treesitter" }
-treesitter-xml = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-xml", version.ref = "treesitter" }
-treesitter-aidl = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-aidl", version.ref = "treesitter" }
-treesitter-python = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-python", version.ref = "treesitter" }
-treesitter-c = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-c", version.ref = "treesitter" }
-treesitter-cpp = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-cpp", version.ref = "treesitter" }
-treesitter-json = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-json", version.ref = "treesitter" }
-treesitter-log = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-log", version.ref = "treesitter" }
-treesitter-properties = { group = "com.itsaky.androidide.treesitter", name = "tree-sitter-properties", version.ref = "treesitter" }
-treesitter-annotations = { group = "com.itsaky.androidide.treesitter", name = "annotations", version.ref = "treesitter" }
-
-# Editor (Rosemoe)
-rosemoe-editor = { group = "io.github.rosemoe", name = "editor", version.ref = "rosemoe-editor" }
-rosemoe-editor-bom = { group = "io.github.rosemoe", name = "editor-bom", version.ref = "rosemoe-editor" }
-rosemoe-editor-lsp = { group = "io.github.rosemoe", name = "editor-lsp", version.ref = "rosemoe-editor" }
-rosemoe-language-java = { group = "io.github.rosemoe", name = "language-java", version.ref = "rosemoe-editor" }
-rosemoe-language-monarch = { group = "io.github.rosemoe", name = "language-monarch", version.ref = "rosemoe-editor" }
-rosemoe-language-textmate = { group = "io.github.rosemoe", name = "language-textmate", version.ref = "rosemoe-editor" }
-rosemoe-language-treesitter = { group = "io.github.rosemoe", name = "language-treesitter", version.ref = "rosemoe-editor" }
-rosemoe-oniguruma-native = { group = "io.github.rosemoe", name = "oniguruma-native", version.ref = "rosemoe-editor" }
-
-# Markdown (Markwon)
-markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
-markwon-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version.ref = "markwon" }
-markwon-linkify = { group = "io.noties.markwon", name = "linkify", version.ref = "markwon" }
-markwon-recycler = { group = "io.noties.markwon", name = "recycler", version.ref = "markwon" }
-
-# -- RichText Compose --
-compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
-compose-richtext-markdown = { group = "com.halilibo.compose-richtext", name = "richtext-markdown", version.ref = "compose-richtext" }
-compose-richtext-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }
-compose-richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "compose-richtext" }
-
-# -- File Tree Compose --
-bonsai-core = { group = "cafe.adriel.bonsai", name = "bonsai-core", version.ref = "bonsai" }
-bonsai-filesystem = { group = "cafe.adriel.bonsai", name = "bonsai-file-system", version.ref = "bonsai" }
-bonsai-json = { group = "cafe.adriel.bonsai", name = "bonsai-json", version.ref = "bonsai" }
-
-coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
-coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
-coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
-
-lsp4j = { group = "org.eclipse.lsp4j", name = "org.eclipse.lsp4j", version.ref = "lsp4j" }
 jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.ref = "jgit" }
 freemarker = { group = "org.freemarker", name = "freemarker", version.ref = "freemarker" }
 gradle-tooling-api = { group = "org.gradle", name = "gradle-tooling-api", version.ref = "gradleToolingApi" }
-
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
 xz = { group = "org.tukaani", name = "xz", version.ref = "xz" }
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
-# IO, Networking & Parsing
-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
-commons-io = { group = "commons-io", name = "commons-io", version.ref = "commons-io" }
-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
-snakeyaml = { group = "org.snakeyaml", name = "snakeyaml-engine", version.ref = "snakeyaml" }
-# Dependencies for build-logic
+# Bonsai: multiplatform Compose-Tree-View (https://github.com/adrielcafe/bonsai), Maven Central.
+# bonsai-file-system liefert FileSystemTree/FileSystemBonsaiStyle für die Dateibaum-Anzeige
+# als NavigationDrawer-Inhalt (siehe :feature:filetree/FileTreeScreen.kt).
+bonsai-core = { group = "cafe.adriel.bonsai", name = "bonsai-core", version.ref = "bonsai" }
+bonsai-file-system = { group = "cafe.adriel.bonsai", name = "bonsai-file-system", version.ref = "bonsai" }
+
+# Für ProjectImportRepositoryImpl: DocumentFile.fromTreeUri() zum rekursiven Ablesen eines
+# per SAF (ActivityResultContracts.OpenDocumentTree) ausgewählten Verzeichnisbaums.
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
+# setContent (MainActivity) + rememberLauncherForActivityResult/ActivityResultContracts
+# (ProjectImportRoute, SAF-Verzeichnisbaum-Picker) — bislang implizit/transitiv erwartet,
+# jetzt explizit deklariert, da beides direkt von diesem Artefakt stammt.
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+
+androidx-startup = { group = "androidx.startup", name = "startup-runtime", version.ref = "startup" }
+
+# --- Termux-Vendoring ---
+google-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+google-guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "markwon" }
+markwon-ext-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version.ref = "markwon" }
+markwon-linkify = { group = "io.noties.markwon", name = "linkify", version.ref = "markwon" }
+markwon-recycler = { group = "io.noties.markwon", name = "recycler", version.ref = "markwon" }
+hidden-api-bypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version.ref = "hiddenApiBypass" }
+androidx-preference = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidxPreference" }
+androidx-drawerlayout = { group = "androidx.drawerlayout", name = "drawerlayout", version.ref = "androidxDrawerlayout" }
+androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "androidxViewpager2" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppcompat" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "androidxWindow" }
+
+# --- Abhängigkeiten von build-logic (Convention-Plugins, siehe build-logic/convention) ---
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 hilt-gradlePlugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }
 compose-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
-
-utilcode = { group = "com.blankj", name = "utilcodex", version.ref = "utilcode" }
+ktlint-gradlePlugin = { group = "org.jlleitschuh.gradle", name = "ktlint-gradle", version.ref = "ktlint" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -202,19 +127,19 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 # Code Quality Tools
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
 
-[bundles]
-markwon = ["markwon-core", "markwon-strikethrough", "markwon-linkify", "markwon-recycler"]
-monarch = ["monarch-core", "monarch-json-loader", "monarch-language-pack"]
-regex = ["regex-oniguruma", "regex-re2j"]
-treesitter = ["treesitter-core", "treesitter-java", "treesitter-kotlin", "treesitter-xml", "treesitter-aidl", "treesitter-python", "treesitter-c", "treesitter-cpp", "treesitter-json", "treesitter-log", "treesitter-properties", "treesitter-annotations"]
-rosemoe = ["rosemoe-editor", "rosemoe-editor-lsp", "rosemoe-language-java", "rosemoe-language-monarch", "rosemoe-language-textmate", "rosemoe-language-treesitter", "rosemoe-oniguruma-native"]
-richtext = ["compose-richtext-commonmark", "compose-richtext-markdown", "compose-richtext-ui", "compose-richtext-material3"]
-filetree = ["bonsai-core", "bonsai-filesystem", "bonsai-json"]
+# Convention-Plugins aus build-logic (ohne Version: kommen aus dem Included Build)
+codeforge-android-application = { id = "codeforge.android.application" }
+codeforge-android-library = { id = "codeforge.android.library" }
+codeforge-android-library-compose = { id = "codeforge.android.library.compose" }
+codeforge-android-hilt = { id = "codeforge.android.hilt" }
+codeforge-kotlin-library = { id = "codeforge.kotlin.library" }
+codeforge-quality = { id = "codeforge.quality" }
+codeforge-terminal-bootstrap = { id = "codeforge.terminal.bootstrap" }

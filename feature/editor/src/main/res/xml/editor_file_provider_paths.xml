@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modul: :feature:editor — @author Thomas Schmid -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- App-privates internes Verzeichnis: Termux-Prefix und Projekte liegen unter filesDir -->
+    <files-path name="internal_files" path="." />
+    <!-- App-privater Cache, z.B. temporäre Export-/Diff-Dateien des Editors -->
+    <cache-path name="internal_cache" path="." />
+    <!-- Externer, app-spezifischer Speicher (falls Projekte dort angelegt werden) -->
+    <external-files-path name="external_files" path="." />
+    <external-cache-path name="external_cache" path="." />
+</paths>

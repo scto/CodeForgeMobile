@@ -1,0 +1,21 @@
+{
+  "name": "light_plus",
+  "type": "light",
+  "_comment": "Platzhalter-Minimaltheme, analog zu dark_plus.json — siehe ASSETS.md.",
+  "colors": {
+    "editor.background": "#FFFFFF",
+    "editor.foreground": "#000000",
+    "editor.selectionBackground": "#ADD6FF",
+    "editorLineNumber.foreground": "#237893",
+    "editorCursor.foreground": "#000000"
+  },
+  "tokenColors": [
+    { "scope": "comment", "settings": { "foreground": "#008000" } },
+    { "scope": "keyword", "settings": { "foreground": "#0000FF" } },
+    { "scope": "string", "settings": { "foreground": "#A31515" } },
+    { "scope": "constant.numeric", "settings": { "foreground": "#098658" } },
+    { "scope": "entity.name.function", "settings": { "foreground": "#795E26" } },
+    { "scope": "entity.name.type, entity.name.class", "settings": { "foreground": "#267F99" } },
+    { "scope": "variable", "settings": { "foreground": "#001080" } }
+  ]
+}

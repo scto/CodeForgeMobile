@@ -5,22 +5,13 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ProgressEvent
+import org.gradle.tooling.ProgressListener
 import org.gradle.tooling.ProjectConnection
-import org.gradle.tooling.events.OperationType
-import org.gradle.tooling.events.ProgressListener
-import org.gradle.tooling.events.task.TaskFinishEvent
-import org.gradle.tooling.events.task.TaskStartEvent
-import org.gradle.tooling.events.task.TaskSuccessResult
-import org.gradle.tooling.model.GradleProject
-import org.gradle.tooling.model.build.BuildEnvironment
-import org.gradle.tooling.model.idea.IdeaProject
-import org.json.JSONArray
-import org.json.JSONObject
+import org.gradle.tooling.ResultHandler
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStream
@@ -32,18 +23,16 @@ private const val TAG = "GradleBridgeService"
  * aus dem App-Prozess kommt über den Binder-IPC-Mechanismus hier an — es gibt keine
  * gemeinsam genutzten Klassenobjekte mit der Activity/dem ViewModel-Layer, wodurch
  * Konflikte zwischen der Gradle-Tooling-API-Classloader-Hierarchie und ART vermieden
- * werden (siehe Design-Entscheidung im Projekt-README von MobileIDE).
+ * werden (siehe Design-Entscheidung im Projekt-README).
  *
  * TODO: GradleConnector.useInstallation(...) bzw. useGradleUserHomeDir(...) auf die
  * JDK/Gradle-Distribution innerhalb der PRoot-Rootfs zeigen lassen (JAVA_HOME aus
- * :libs:termix beziehen), sobald der Distro-Bootstrap produktiv ist.
+ * :libs:terminal-engine beziehen), sobald die Termux-Umgebung (TermuxEnvironment) produktiv ist.
  */
 class GradleBridgeService : Service() {
 
     private var connection: ProjectConnection? = null
     private var currentCancellationHandle: org.gradle.tooling.CancellationTokenSource? = null
-    
-    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val binder = object : IGradleBridgeService.Stub() {
 
@@ -64,96 +53,39 @@ class GradleBridgeService : Service() {
             }
         }
 
-        override fun getAvailableTasks(): List<String> {
-            return try {
-                val model = connection?.getModel(GradleProject::class.java)
-                model?.tasks?.map { it.name }?.distinct()?.sorted() ?: emptyList()
-            } catch (t: Throwable) {
-                Log.e(TAG, "Fehler beim Laden der Tasks", t)
-                emptyList()
-            }
-        }
-
-        override fun getBuildEnvironment(): String {
-            return try {
-                val env = connection?.getModel(BuildEnvironment::class.java)
-                val json = JSONObject().apply {
-                    put("gradleVersion", env?.gradle?.gradleVersion ?: "unknown")
-                    put("javaHome", env?.java?.javaHome?.absolutePath ?: "unknown")
-                    put("javaArguments", env?.java?.jvmArguments?.joinToString(" ") ?: "")
-                }
-                json.toString()
-            } catch (t: Throwable) {
-                Log.e(TAG, "Fehler beim Laden des BuildEnvironments", t)
-                "{}"
-            }
-        }
-
-        override fun getIdeaProjectModel(): String {
-            return try {
-                val ideaProject = connection?.getModel(IdeaProject::class.java)
-                val projectJson = JSONObject().apply {
-                    put("name", ideaProject?.name)
-                    put("description", ideaProject?.description)
-                    
-                    val modulesArray = JSONArray()
-                    ideaProject?.modules?.forEach { module ->
-                        val moduleJson = JSONObject().apply {
-                            put("name", module.name)
-                            put("gradleProject", module.gradleProject?.path)
-                            
-                            val contentRootsArray = JSONArray()
-                            module.contentRoots.forEach { root ->
-                                contentRootsArray.put(root.rootDirectory.absolutePath)
-                            }
-                            put("contentRoots", contentRootsArray)
-                        }
-                        modulesArray.put(moduleJson)
-                    }
-                    put("modules", modulesArray)
-                }
-                projectJson.toString()
-            } catch (t: Throwable) {
-                Log.e(TAG, "Fehler beim Laden des IdeaProject-Modells", t)
-                "{}"
-            }
-        }
-
-        override fun runBuild(tasks: List<String>, arguments: List<String>, callback: IGradleBridgeCallback) {
-            val activeConnection = connection ?: run {
-                callback.onBuildFailed("Keine aktive Verbindung. connect() zuerst aufrufen.")
+        override fun runTask(taskName: String, callback: IGradleBridgeCallback) {
+            val activeConnection = connection
+            if (activeConnection == null) {
+                callback.onBuildFailed(Res.string(R.string.gradle_keine_aktive_verbindung_connect_zuerst))
                 return
             }
 
-            serviceScope.launch {
-                val cancellationSource = GradleConnector.newCancellationTokenSource()
-                currentCancellationHandle = cancellationSource
-                val outputStream = SafeCallbackOutputStream(callback)
+            val cancellationSource = GradleConnector.newCancellationTokenSource()
+            currentCancellationHandle = cancellationSource
 
-                try {
-                    activeConnection.newBuild()
-                        .forTasks(*tasks.toTypedArray())
-                        .withArguments(*arguments.toTypedArray())
-                        .withCancellationToken(cancellationSource.token())
-                        .setStandardOutput(outputStream)
-                        .setStandardError(outputStream)
-                        .addProgressListener(ProgressListener { event ->
-                            when (event) {
-                                is TaskStartEvent -> callback.onTaskStarted(event.descriptor.name)
-                                is TaskFinishEvent -> callback.onTaskFinished(
-                                    event.descriptor.name,
-                                    event.result is TaskSuccessResult
-                                )
-                                else -> callback.onProgress(event.displayName, -1)
-                            }
-                        }, setOf(OperationType.TASK))
-                        .run()
+            val outputStream = CallbackOutputStream(callback)
 
-                    callback.onBuildFinished(true)
-                } catch (t: Throwable) {
-                    callback.onBuildFailed(t.message ?: "Build fehlgeschlagen: ${t.message}")
-                }
-            }
+            callback.onTaskStarted(taskName)
+
+            activeConnection.newBuild()
+                .forTasks(taskName)
+                .withCancellationToken(cancellationSource.token())
+                .setStandardOutput(outputStream)
+                .setStandardError(outputStream)
+                .addProgressListener(ProgressListener { event: ProgressEvent ->
+                    callback.onProgress(event.description, -1)
+                })
+                .run(object : ResultHandler<Void> {
+                    override fun onComplete(result: Void?) {
+                        callback.onTaskFinished(taskName, true)
+                        callback.onBuildFinished(true)
+                    }
+
+                    override fun onFailure(failure: org.gradle.tooling.GradleConnectionException) {
+                        callback.onTaskFinished(taskName, false)
+                        callback.onBuildFailed(failure.message ?: Res.string(R.string.gradle_build_fehlgeschlagen, taskName))
+                    }
+                })
         }
 
         override fun cancelBuild() {
@@ -177,21 +109,21 @@ class GradleBridgeService : Service() {
 
 /**
  * Leitet Gradle-Standard-Output/-Error zeilenweise über den AIDL-Callback weiter,
- * damit :feature:terminal den Build-Log live darstellen kann. Thread-Safe und reinigt Returns (\r).
+ * damit :feature:terminal den Build-Log live darstellen kann.
  */
-private class SafeCallbackOutputStream(private val callback: IGradleBridgeCallback) : OutputStream() {
+private class CallbackOutputStream(private val callback: IGradleBridgeCallback) : OutputStream() {
     private val buffer = ByteArrayOutputStream()
 
-    @Synchronized
     override fun write(b: Int) {
-        buffer.write(b)
         if (b == '\n'.code) {
             flushLine()
+        } else {
+            buffer.write(b)
         }
     }
 
     private fun flushLine() {
-        val line = buffer.toString(Charsets.UTF_8.name()).trimEnd('\r', '\n')
+        val line = buffer.toString(Charsets.UTF_8.name())
         buffer.reset()
         if (line.isNotEmpty()) {
             callback.onOutput(line)

@@ -1,11 +1,8 @@
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
-
 plugins {
-    id("codeforge.android.application")
-    id("codeforge.android.hilt")
+    alias(libs.plugins.codeforge.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ktlint)
-    alias(libs.plugins.detekt)
+    alias(libs.plugins.codeforge.android.hilt)
+    alias(libs.plugins.codeforge.quality)
 }
 
 android {
@@ -13,72 +10,21 @@ android {
 
     defaultConfig {
         applicationId = "com.codeforge.app"
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 30000
+        versionName = "3.0.0"
     }
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
     }
-
-    buildFeatures {
-        compose = true
-    }
-
-    lint {
-        disable += "ProtectedPermissions"
-        disable += "ExpiredTargetSdkVersion"
-        abortOnError = false
-        checkReleaseBuilds = false
-    }
-
-    packaging {
-        resources {
-            // kotlin-compiler-embeddable conflicts with kotlin-stdlib
-            excludes += "/kotlin/**"
-            excludes += "META-INF/**.kotlin_module"
-            pickFirsts += "kotlin/coroutines/coroutines.kotlin_builtins"
-            pickFirsts += "kotlin/reflect/reflect.kotlin_builtins"
-            pickFirsts += "kotlin/kotlin.kotlin_builtins"
-            pickFirsts += "kotlin/collections/collections.kotlin_builtins"
-            pickFirsts += "kotlin/annotation/annotation.kotlin_builtins"
-            pickFirsts += "kotlin/ranges/ranges.kotlin_builtins"
-            pickFirsts += "kotlin/internal/internal.kotlin_builtins"
-        }
-    }
-}
-
-ktlint {
-    android.set(true)
-    ignoreFailures.set(true)
-    reporters {
-        reporter(ReporterType.PLAIN)
-        reporter(ReporterType.HTML)
-    }
-}
-
-detekt {
-    config.setFrom(files("config/detekt/detekt.yml"))
-    allRules = true
-    autoCorrect = true
-}
-
-tasks.named("preBuild") {
-    dependsOn(":app:ktlintFormat")
-    dependsOn(":app:ktlintCheck")
-    // dependsOn(":app:detekt")
 }
 
 dependencies {
-    implementation(project(":core:designsystem"))
-    implementation(project(":core:domain"))
-    implementation(libs.androidx.datastore.proto)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(project(":core:ui"))
     implementation(project(":core:resources"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":core:datastore"))
-    implementation(project(":core:common"))
     implementation(project(":core:data"))
 
     implementation(project(":feature:onboarding"))
@@ -92,27 +38,34 @@ dependencies {
     implementation(project(":feature:layoutdesigner"))
     implementation(project(":feature:themebuilder"))
     implementation(project(":feature:git"))
+    implementation(project(":feature:search"))
+    implementation(project(":feature:modulemaker"))
     implementation(project(":feature:plugins"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:dependencyupdates"))
 
     implementation(project(":libs:terminal-engine"))
     implementation(project(":libs:template-engine"))
     implementation(project(":libs:gradle-tooling-bridge"))
     implementation(project(":libs:lsp-client"))
     implementation(project(":libs:plugin-api"))
+    // Hilt-Bindings für Indexierung + Dependency-Updater (Features sehen nur die -api-Module)
+    implementation(project(":libs:indexing-api"))
+    implementation(project(":libs:indexing-impl"))
+    implementation(project(":libs:dependency-updater-api"))
+    implementation(project(":libs:dependency-updater-impl"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.material)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.activity.compose)
+    // Theme.Material3.DayNight.NoActionBar (XML-Fenster-Theme in res/values/themes.xml)
+    implementation(libs.google.material)
+    implementation("androidx.compose.material:material-icons-extended:1.7.3")
 
     implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.hilt.work)
-    implementation(libs.androidx.work.runtime.ktx)
     ksp(libs.hilt.compiler)
-    ksp(libs.hilt.work.compiler)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

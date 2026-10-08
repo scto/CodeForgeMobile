@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- :app — Basisfarben für Fenster-Hintergrund (Start ohne Weißblitz) und Adaptive-Icon. Compose-Farben: :core:designsystem. -->
+<resources>
+    <color name="codeforge_window_background">#FFFBFE</color>
+    <color name="codeforge_icon_background">#1E2430</color>
+    <color name="codeforge_icon_foreground">#FFFFFF</color>
+    <color name="codeforge_icon_accent">#7DD3A8</color>
+</resources>

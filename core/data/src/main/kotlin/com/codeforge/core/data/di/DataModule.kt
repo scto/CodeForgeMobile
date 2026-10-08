@@ -5,18 +5,18 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-
 import com.codeforge.core.data.repository.ComposeSourceAnalyzerImpl
 import com.codeforge.core.data.repository.FileSystemRepositoryImpl
 import com.codeforge.core.data.repository.GitRepositoryImpl
+import com.codeforge.core.data.repository.GitSettingsRepositoryImpl
+import com.codeforge.core.data.repository.ProjectImportRepositoryImpl
 import com.codeforge.core.data.repository.RecentProjectsRepositoryImpl
-import com.codeforge.core.data.repository.SystemPathsRepositoryImpl
 import com.codeforge.core.domain.repository.ComposeSourceAnalyzer
 import com.codeforge.core.domain.repository.FileSystemRepository
-import com.codeforge.core.domain.repository.SystemPathsRepository
 import com.codeforge.core.domain.repository.GitRepository
+import com.codeforge.core.domain.repository.GitSettingsRepository
+import com.codeforge.core.domain.repository.ProjectImportRepository
 import com.codeforge.core.domain.repository.RecentProjectsRepository
-
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -47,12 +47,6 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    abstract fun bindSystemPathsRepository(
-        impl: SystemPathsRepositoryImpl
-    ): SystemPathsRepository
-
-    @Binds
-    @Singleton
     abstract fun bindFileSystemRepository(
         impl: FileSystemRepositoryImpl
     ): FileSystemRepository
@@ -65,13 +59,19 @@ abstract class DataModule {
 
     @Binds
     @Singleton
+    abstract fun bindGitSettingsRepository(
+        impl: GitSettingsRepositoryImpl
+    ): GitSettingsRepository
+
+    @Binds
+    @Singleton
     abstract fun bindComposeSourceAnalyzer(
         impl: ComposeSourceAnalyzerImpl
     ): ComposeSourceAnalyzer
 
     @Binds
     @Singleton
-    abstract fun bindTemplateEngineRepository(
-        impl: com.codeforge.core.data.repository.TemplateEngineRepositoryImpl
-    ): com.codeforge.core.domain.repository.TemplateEngineRepository
+    abstract fun bindProjectImportRepository(
+        impl: ProjectImportRepositoryImpl
+    ): ProjectImportRepository
 }

@@ -1,21 +1,45 @@
 /**
  * Modul: :feature:composepreview
  * @author Thomas Schmid
+ *
+ * Orchestriert die vollständige On-Device-Rendering-Pipeline:
+ *   1. Quelltext kompilieren (PreviewCompiler, Kotlin-Compiler-Embeddable + Compose-Plugin)
+ *   2. .class → classes.dex (PreviewDexer, ruft d8 auf)
+ *   3. classes.dex laden (dalvik.system.DexClassLoader)
+ *   4. Zielfunktion reflektiv in eine echte Composition einhängen (ReflectiveComposableHost)
+ *   5. Ergebnis in ein Bitmap rendern (ComposeViewBitmapRenderer) und als PNG kodieren
+ *
+ * STATUS DIESER IMPLEMENTIERUNG: Schritte 2-3 nutzen Standard-Android-Framework-APIs
+ * (ProcessBuilder, DexClassLoader) — hohe Zuversicht, dass sie wie geschrieben
+ * funktionieren. Schritt 1 (Kotlin-Compiler-Embeddable-API) und Schritte 4-5
+ * (reflektive Composer-Injektion, ComposeView außerhalb einer Activity) sind nach
+ * bestem Wissen korrekt geschrieben, konnten aber in der Umgebung, in der dieser Code
+ * entstand, mangels Netzwerkzugriff (Dependency-Auflösung) und fehlender
+ * Android-Laufzeit NICHT kompiliert oder ausgeführt werden. Vor Produktiveinsatz:
+ * auf einem echten Gerät/Emulator verifizieren.
+ *
+ * ECHTE, UNGELÖSTE EINSCHRÄNKUNG (kein Implementierungsdetail, sondern ein
+ * grundsätzliches Problem): Der Kotlin-Compiler braucht zum Typchecken der
+ * @Composable-Funktion Classpath-Jars für Kotlin-Stdlib und die Compose-Runtime/-UI-
+ * Bibliotheken. Auf einem Android-Gerät liegen App-Abhängigkeiten aber nur als bereits
+ * gedexter, in die APK gemergter Code vor — NICHT als einzelne .jar-Dateien. Diese
+ * Implementierung erwartet daher, dass die nötigen Jars unter
+ * assets/compiler-runtime/ (alle .jar-Dateien) mitgeliefert werden (spürbare APK-Größenzunahme).
+ * Fehlen sie, schlägt render() mit einer klaren Fehlermeldung fehl, statt stillschweigend
+ * nichts zu tun.
  */
 package com.codeforge.feature.composepreview
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.codeforge.core.common.logging.AppLogger
+import com.codeforge.core.domain.model.PreviewRenderResult
+import com.codeforge.core.domain.repository.ComposePreviewRenderer
 import com.codeforge.core.domain.repository.SdkRepository
-import com.codeforge.libs.terminal_engine.RootfsDownloader
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-import com.codeforge.core.domain.repository.ComposePreviewRenderer
-import com.codeforge.core.domain.model.PreviewRenderResult
-import kotlinx.coroutines.flow.collect
 import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
@@ -29,16 +53,10 @@ class ComposePreviewRendererImpl @Inject constructor(
 
     private val compiler = PreviewCompiler()
     private val dexer = PreviewDexer()
-    private val TAG = "ComposePreviewRenderer"
 
     override suspend fun render(filePath: String, sourceCode: String, functionName: String): Result<PreviewRenderResult> =
         withContext(Dispatchers.Default) {
             runCatching {
-                if (AppLogger.isEnabled) {
-                    AppLogger.step(TAG, "Starting render pipeline for function '$functionName' in $filePath")
-                    AppLogger.d(TAG, "Source code length: ${sourceCode.length} characters")
-                }
-
                 val workDir = File(context.cacheDir, "compose_preview/${System.currentTimeMillis()}")
                 workDir.mkdirs()
 
@@ -46,22 +64,15 @@ class ComposePreviewRendererImpl @Inject constructor(
                     val runtimeJars = resolveRuntimeJars()
                     val composePluginJar = resolveComposeCompilerPluginJar()
                         ?: error(
-                            "Compose-Compiler-Plugin-Jar fehlt (assets/compiler-runtime/" +
-                                "kotlin-compose-compiler-plugin-embeddable.jar). Ohne dieses Plugin " +
-                                "können @Composable-Funktionen nicht korrekt kompiliert werden."
+                            Res.string(R.string.composepreview_compose_compiler_plugin_jar_fehlt)
                         )
                     val d8Path = resolveD8BinaryPath()
                         ?: error(
-                            "d8 nicht gefunden. Build-Tools über den SDK Manager installieren " +
-                                "(Einstellungen → SDK Manager → Build-Tools)."
+                            Res.string(R.string.composepreview_d8_nicht_gefunden_build_tools)
                         )
 
                     val sourceFile = File(workDir, "PreviewTarget.kt").apply { writeText(sourceCode) }
                     val classesDir = File(workDir, "classes")
-
-                    if (AppLogger.isEnabled) {
-                        AppLogger.step(TAG, "Compiling source file PreviewTarget.kt...")
-                    }
 
                     val compileResult = compiler.compile(
                         sourceFile = sourceFile,
@@ -70,29 +81,17 @@ class ComposePreviewRendererImpl @Inject constructor(
                         runtimeClasspathJars = runtimeJars
                     )
                     if (!compileResult.success) {
-                        val err = "Kompilierung fehlgeschlagen:\n${compileResult.errorMessages.joinToString("\n")}"
-                        if (AppLogger.isEnabled) AppLogger.e(TAG, err)
-                        error(err)
+                        error(Res.string(R.string.composepreview_kompilierung_fehlgeschlagen, compileResult.errorMessages.joinToString("\n")))
                     }
 
                     val classFiles = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
-                    if (classFiles.isEmpty()) error("Kompilierung lieferte keine .class-Dateien.")
-
-                    if (AppLogger.isEnabled) {
-                        AppLogger.step(TAG, "Dexing ${classFiles.size} compiled class files...")
-                    }
+                    if (classFiles.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
 
                     val dexOutputDir = File(workDir, "dex")
                     val dexResult = dexer.dex(classFiles, dexOutputDir, d8Path)
                     val dexFile = dexResult.dexFile
                     if (!dexResult.success || dexFile == null) {
-                        val err = "Dexing fehlgeschlagen: ${dexResult.errorOutput}"
-                        if (AppLogger.isEnabled) AppLogger.e(TAG, err)
-                        error(err)
-                    }
-
-                    if (AppLogger.isEnabled) {
-                        AppLogger.step(TAG, "Loading DEX file with DexClassLoader: ${dexFile.absolutePath}")
+                        error(Res.string(R.string.composepreview_dexing_fehlgeschlagen, dexResult.errorOutput))
                     }
 
                     val optimizedDir = File(context.codeCacheDir, "compose_preview_dex").apply { mkdirs() }
@@ -103,13 +102,11 @@ class ComposePreviewRendererImpl @Inject constructor(
                         context.classLoader
                     )
 
+                    // Top-Level-Funktionen landen im Kotlin-Bytecode in einer synthetischen
+                    // Klasse "<DateinameKt>" — hier "PreviewTargetKt".
                     val hostClass = classLoader.loadClass("PreviewTargetKt")
                     val targetMethod = hostClass.methods.firstOrNull { it.name == functionName }
-                        ?: error("Funktion '$functionName' nicht in kompiliertem Code gefunden.")
-
-                    if (AppLogger.isEnabled) {
-                        AppLogger.step(TAG, "Reflectively invoking Composable method '${targetMethod.name}' & rendering bitmap...")
-                    }
+                        ?: error(Res.string(R.string.composepreview_funktion_nicht_in_kompiliertem_code, functionName))
 
                     val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap(
                         widthPx = 1080,
@@ -118,16 +115,7 @@ class ComposePreviewRendererImpl @Inject constructor(
                         ReflectiveComposableHost(targetMethod)
                     }
 
-                    if (AppLogger.isEnabled) {
-                        AppLogger.step(TAG, "Bitmap rendered successfully (${bitmap.width}x${bitmap.height})")
-                    }
-
                     PreviewRenderResult(functionName = functionName, imageBytes = bitmap.toPngBytes())
-                } catch (e: Exception) {
-                    if (AppLogger.isEnabled) {
-                        AppLogger.e(TAG, "Render pipeline error for '$functionName': ${e.message}", e)
-                    }
-                    throw e
                 } finally {
                     workDir.deleteRecursively()
                 }
@@ -140,125 +128,30 @@ class ComposePreviewRendererImpl @Inject constructor(
             stream.toByteArray()
         }
 
-    private suspend fun resolveRuntimeJars(): List<File> = withContext(Dispatchers.IO) {
-        val runtimeDir = File(context.filesDir, "compiler-runtime").apply { mkdirs() }
+    private fun resolveRuntimeJars(): List<File> =
+        File(context.filesDir, "compiler-runtime").listFiles { f -> f.extension == "jar" }?.toList().orEmpty()
 
-        val jarDownloads = mapOf(
-            "kotlin-stdlib-2.0.20.jar" to "https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.0.20/kotlin-stdlib-2.0.20.jar",
-            "compose-runtime-1.7.0.jar" to "https://repo1.maven.org/maven2/org/jetbrains/compose/runtime/runtime/1.7.0/runtime-1.7.0.jar",
-            "compose-ui-1.7.0.jar" to "https://repo1.maven.org/maven2/org/jetbrains/compose/ui/ui/1.7.0/ui-1.7.0.jar",
-            "kotlinx-coroutines-core-jvm-1.9.0.jar" to "https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.9.0/kotlinx-coroutines-core-jvm-1.9.0.jar"
-        )
+    private fun resolveComposeCompilerPluginJar(): File? =
+        File(context.filesDir, "compiler-runtime/kotlin-compose-compiler-plugin-embeddable.jar").takeIf { it.isFile }
 
-        for ((fileName, url) in jarDownloads) {
-            val targetFile = File(runtimeDir, fileName)
-            if (!targetFile.exists() || targetFile.length() == 0L) {
-                val assetPath = "compiler-runtime/$fileName"
-                val copiedFromAsset = runCatching {
-                    context.assets.open(assetPath).use { input ->
-                        targetFile.outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                    true
-                }.getOrDefault(false)
-
-                if (!copiedFromAsset) {
-                    runCatching {
-                        RootfsDownloader().download(url, targetFile).collect { }
-                    }.onFailure { e ->
-                        if (AppLogger.isEnabled) {
-                            AppLogger.e(TAG, "Failed to download $fileName: ${e.message}", e)
-                        }
-                    }
-                }
-            }
-        }
-
-        runtimeDir.listFiles { f -> f.extension == "jar" && !f.name.contains("compose-compiler-plugin") }?.toList().orEmpty()
-    }
-
-    private suspend fun resolveComposeCompilerPluginJar(): File? = withContext(Dispatchers.IO) {
-        val runtimeDir = File(context.filesDir, "compiler-runtime").apply { mkdirs() }
-        val fileName = "kotlin-compose-compiler-plugin-embeddable-2.0.20.jar"
-        val targetFile = File(runtimeDir, fileName)
-
-        if (!targetFile.exists() || targetFile.length() == 0L) {
-            val assetPath = "compiler-runtime/$fileName"
-            val copiedFromAsset = runCatching {
-                context.assets.open(assetPath).use { input ->
-                    targetFile.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                true
-            }.getOrDefault(false)
-
-            if (!copiedFromAsset) {
-                val url = "https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-compose-compiler-plugin-embeddable/2.0.20/kotlin-compose-compiler-plugin-embeddable-2.0.20.jar"
-                runCatching {
-                    RootfsDownloader().download(url, targetFile).collect { }
-                }
-            }
-        }
-        targetFile.takeIf { it.isFile && it.length() > 0L }
-    }
-
-    private suspend fun resolveD8BinaryPath(): String? = withContext(Dispatchers.IO) {
-        val packages = sdkRepository.listAvailablePackages().getOrNull().orEmpty()
+    /**
+     * Nutzt jetzt echte, verifizierte Installationspfade aus SdkRepository (ToolItem.path
+     * wird dort gegen das Dateisystem geprüft, kein bloßes String-Zusammensetzen mehr).
+     * Unter den installierten build-tools-Paketen wird die höchste Version gewählt.
+     */
+    private suspend fun resolveD8BinaryPath(): String? {
+        val packages = sdkRepository.listAvailablePackages().getOrNull() ?: return null
 
         val latestBuildTools = packages
             .filter { it.isInstalled && it.id.startsWith("build-tools;") && it.path != null }
             .maxWithOrNull(compareBy(VersionComparator) { it.version })
+            ?: return null
 
-        if (latestBuildTools?.path != null) {
-            val d8File = File(latestBuildTools.path!!, "d8")
-            if (d8File.isFile) {
-                return@withContext d8File.absolutePath
-            }
-        }
-
-        val runtimeDir = File(context.filesDir, "compiler-runtime").apply { mkdirs() }
-        val d8JarFile = File(runtimeDir, "d8.jar")
-        if (d8JarFile.exists() && d8JarFile.length() > 0L) {
-            return@withContext d8JarFile.absolutePath
-        }
-
-        val copiedFromAsset = runCatching {
-            context.assets.open("compiler-runtime/d8.jar").use { input ->
-                d8JarFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-            true
-        }.getOrDefault(false)
-
-        if (copiedFromAsset && d8JarFile.exists() && d8JarFile.length() > 0L) {
-            return@withContext d8JarFile.absolutePath
-        }
-
-        val d8Urls = listOf(
-            "https://dl.google.com/dl/android/maven2/com/android/tools/r8/8.2.42/r8-8.2.42.jar",
-            "https://dl.google.com/dl/android/maven2/com/android/tools/r8/8.5.35/r8-8.5.35.jar"
-        )
-        for (d8Url in d8Urls) {
-            if (d8JarFile.exists() && d8JarFile.length() > 0L) break
-            runCatching {
-                RootfsDownloader().download(d8Url, d8JarFile).collect { }
-            }.onFailure { e ->
-                if (AppLogger.isEnabled) {
-                    AppLogger.e(TAG, "Failed to download d8.jar: ${e.message}", e)
-                }
-            }
-        }
-
-        if (d8JarFile.exists() && d8JarFile.length() > 0L) {
-            return@withContext d8JarFile.absolutePath
-        }
-
-        null
+        val d8File = File(latestBuildTools.path!!, "d8")
+        return d8File.takeIf { it.isFile }?.absolutePath
     }
 
+    /** Vergleicht Versionsstrings wie "34.0.0" numerisch je Segment statt lexikografisch. */
     private object VersionComparator : Comparator<String> {
         override fun compare(a: String, b: String): Int {
             val partsA = a.split('.', '-')

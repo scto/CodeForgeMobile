@@ -1,0 +1,7 @@
+{
+  "id": "com.example.kotlin-lsp",
+  "name": "Kotlin Language Server",
+  "version": "1.0.0",
+  "description": "Startet den offiziellen Kotlin Language Server innerhalb der PRoot-Rootfs und bindet ihn an den CodeForge-Editor an.",
+  "entryPointClass": "com.example.codeforgeplugin.kotlinlsp.KotlinLspPlugin"
+}

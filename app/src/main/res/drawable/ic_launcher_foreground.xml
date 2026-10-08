@@ -1,117 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive-Icon-Vordergrund (Sicherheitszone 66 dp von 108 dp): Code-Klammern mit Funke. Eigenentwurf. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-
-    <group
-        android:scaleX="0.66"
-        android:scaleY="0.66"
-        android:translateX="21"
-        android:translateY="21">
-
-        <!-- 1. Drop Shadow für Code-Brackets -->
-        <path
-            android:strokeWidth="6.5"
-            android:strokeAlpha="0.25"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round"
-            android:fillColor="@android:color/transparent"
-            android:pathData="M27,34 L19,49 L27,64 M53,34 L61,49 L53,64 M36,64 L45,34">
-            <aapt:attr name="android:strokeColor">
-                <gradient
-                    android:type="linear"
-                    android:startX="19"
-                    android:startY="34"
-                    android:endX="61"
-                    android:endY="64"
-                    android:startColor="#000000"
-                    android:endColor="#000000" />
-            </aapt:attr>
-        </path>
-
-        <!-- 2. Linke Code-Klammer { -->
-        <path
-            android:strokeWidth="5.5"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round"
-            android:fillColor="@android:color/transparent"
-            android:pathData="M26,32 C21,32 19,36 19,41 C19,45 22,47 24,48 C22,49 19,51 19,55 C19,60 21,64 26,64">
-            <aapt:attr name="android:strokeColor">
-                <gradient
-                    android:type="linear"
-                    android:startX="19"
-                    android:startY="32"
-                    android:endX="26"
-                    android:endY="64"
-                    android:startColor="#6366F1"
-                    android:endColor="#06B6D4" />
-            </aapt:attr>
-        </path>
-
-        <!-- 3. Rechte Code-Klammer } -->
-        <path
-            android:strokeWidth="5.5"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round"
-            android:fillColor="@android:color/transparent"
-            android:pathData="M54,32 C59,32 61,36 61,41 C61,45 58,47 56,48 C58,49 61,51 61,55 C61,60 59,64 54,64">
-            <aapt:attr name="android:strokeColor">
-                <gradient
-                    android:type="linear"
-                    android:startX="54"
-                    android:startY="32"
-                    android:endX="61"
-                    android:endY="64"
-                    android:startColor="#6366F1"
-                    android:endColor="#06B6D4" />
-            </aapt:attr>
-        </path>
-
-        <!-- 4. Slash (/) im Zentrum -->
-        <path
-            android:strokeWidth="5.5"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round"
-            android:fillColor="@android:color/transparent"
-            android:pathData="M35,62 L44,34">
-            <aapt:attr name="android:strokeColor">
-                <gradient
-                    android:type="linear"
-                    android:startX="35"
-                    android:startY="62"
-                    android:endX="44"
-                    android:endY="34"
-                    android:startColor="#6366F1"
-                    android:endColor="#06B6D4" />
-            </aapt:attr>
-        </path>
-
-        <!-- 5. Puzzleteil oben rechts -->
-        <group
-            android:pivotX="45"
-            android:pivotY="15"
-            android:rotation="42"
-            android:scaleX="0.800"
-            android:scaleY="0.800"
-            android:translateX="42"
-            android:translateY="14">
-            <path
-                android:pathData="M21,6a2,2 0,0 1,2 2 v2h9v7a4,4 0,0 0,0 8 v7H25a4,4 0,0 0,-8 0 H10V23H8a2,2 0,0 1,0 -4 h2V10h9V8a2,2 0,0 1,2 -2 m0,-2a4,4 0,0 0,-4 4 H10a2,2 0,0 0,-2 2 v7a4,4 0,0 0,0 8 v7a2,2 0,0 0,2 2 h9V32a2,2 0,0 1,4 0 v2h9a2,2 0,0 0,2 -2 V23H32a2,2 0,0 1,0 -4 h2V10a2,2 0,0 0,-2 -2 H25a4,4 0,0 0,-4 -4Z">
-                <aapt:attr name="android:fillColor">
-                    <gradient
-                        android:type="linear"
-                        android:startX="8"
-                        android:startY="4"
-                        android:endX="34"
-                        android:endY="34"
-                        android:startColor="#38BDF8"
-                        android:endColor="#818CF8" />
-                </aapt:attr>
-            </path>
-        </group>
-    </group>
-
+    <path
+        android:fillColor="@color/codeforge_icon_foreground"
+        android:pathData="M44,36 L30,54 L44,72 L49,68 L38,54 L49,40 Z" />
+    <path
+        android:fillColor="@color/codeforge_icon_foreground"
+        android:pathData="M64,36 L78,54 L64,72 L59,68 L70,54 L59,40 Z" />
+    <path
+        android:fillColor="@color/codeforge_icon_accent"
+        android:pathData="M56,34 L48,56 L53,56 L50,74 L62,50 L56,50 Z" />
 </vector>

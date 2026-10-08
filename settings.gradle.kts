@@ -1,67 +1,78 @@
 pluginManagement {
+    // Convention-Plugins (codeforge.*) — siehe build-logic/README.md
     includeBuild("build-logic")
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
-        maven { url = uri("https://repo.gradle.org/gradle/libs-releases") }
         gradlePluginPortal()
-        maven { url = uri("https://jitpack.io")}
-        maven {
-            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-        }
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
         maven { url = uri("https://repo.gradle.org/gradle/libs-releases") }
-        maven { url = uri("https://jitpack.io")}
-        maven {
-            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-        }
     }
 }
 
 rootProject.name = "CodeForgeMobile"
-include(":app")
 
-include(":core:common")
-include(":core:data")
-include(":core:datastore")
-include(":core:designsystem")
-include(":core:domain")
-include(":core:navigation")
-include(":core:resources")
-include(":core:testing")
-include(":core:ui")
+include(
+    ":app",
 
-include(":feature:composepreview")
-include(":feature:editor")
-include(":feature:filetree")
-include(":feature:git")
-include(":feature:layoutdesigner")
-include(":feature:onboarding")
-include(":feature:plugins")
-include(":feature:projectwizard")
-include(":feature:sdkmanager")
-include(":feature:settings")
-include(":feature:terminal")
-include(":feature:themebuilder")
-include(":feature:welcome")
+    ":core:resources",
+    ":core:designsystem",
+    ":core:ui",
+    ":core:common",
+    ":core:data",
+    ":core:domain",
+    ":core:datastore",
+    ":core:navigation",
+    ":core:testing",
 
-include(":libs:gradle-tooling-bridge")
-include(":libs:lsp-client")
-include(":libs:plugin-api")
-include(":libs:template-engine")
-include(":libs:terminal-engine")
-include(":examples:lsp-plugin-common")
-include(":examples:kotlin-lsp-plugin")
-include(":examples:java-lsp-plugin")
+    ":feature:onboarding",
+    ":feature:welcome",
+    ":feature:projectwizard",
+    ":feature:editor",
+    ":feature:composepreview",
+    ":feature:filetree",
+    ":feature:terminal",
+    ":feature:sdkmanager",
+    ":feature:layoutdesigner",
+    ":feature:themebuilder",
+    ":feature:git",
+    ":feature:plugins",
+    ":feature:settings",
+    ":feature:dependencyupdates",
+    ":feature:search",
+    ":feature:modulemaker",
+
+    ":libs:terminal-engine",
+    ":libs:gradle-tooling-bridge",
+    ":libs:lsp-client",
+    ":libs:template-engine",
+    ":libs:plugin-api",
+
+    // Projekt-Indexierung + Dependency-Updater (siehe docs/indexing-and-dependency-updater.md)
+    ":libs:indexing-api",
+    ":libs:indexing-impl",
+    ":libs:dependency-updater-api",
+    ":libs:dependency-updater-impl",
+    ":libs:code-tools",
+
+    // Termux-Vendoring (siehe docs/sub/TERMUX-PORTING.md) — :libs:terminal-engine nutzt
+    // diese jetzt statt PRoot für die interaktive :feature:terminal-Session
+    ":libs:termux-emulator",
+    ":libs:termux-view",
+    ":libs:termux-shared",
+    ":libs:termux-app",
+
+    // Eigenständige Beispiel-Plugins — bewusst NICHT von :app abhängig (siehe jeweilige
+    // README.md), werden als ZIP über :feature:plugins sideloaded, nicht in die App
+    // einkompiliert.
+    ":examples:lsp-plugin-common",
+    ":examples:kotlin-lsp-plugin",
+    ":examples:java-lsp-plugin",
+)

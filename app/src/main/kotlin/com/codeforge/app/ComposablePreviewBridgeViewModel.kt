@@ -17,10 +17,8 @@ import javax.inject.Inject
  * und :feature:composepreview sich direkt kennen (Dependency-Regel).
  */
 @HiltViewModel
-class ComposablePreviewBridgeViewModel
-    @Inject
-    constructor(
-        bridge: ActiveComposablePreviewBridge,
-    ) : ViewModel() {
-        val activeFile: StateFlow<ActiveComposableFile?> = bridge.activeFile
-    }
+class ComposablePreviewBridgeViewModel @Inject constructor(
+    bridge: ActiveComposablePreviewBridge
+) : ViewModel() {
+    val activeFile: StateFlow<ActiveComposableFile?> = bridge.activeFile
+}

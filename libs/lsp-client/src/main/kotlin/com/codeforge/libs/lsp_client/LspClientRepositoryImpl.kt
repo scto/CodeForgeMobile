@@ -1,26 +1,24 @@
 // Modul: :libs:lsp-client
 package com.codeforge.libs.lsp_client
 
-import com.codeforge.core.common.logging.AppLogger
 import com.codeforge.core.domain.model.LspCompletionItem
 import com.codeforge.core.domain.model.LspDiagnostic
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspServerState
 import com.codeforge.core.domain.repository.LspClientRepository
-import com.codeforge.libs.terminal_engine.ProotExecutor
-import com.codeforge.libs.terminal_engine.ProotProcessHandle
-
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -32,14 +30,18 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * TODO: [serverCommand] muss auf ein Binary innerhalb der PRoot-Rootfs zeigen
+ * (z.B. ["proot", ..., "kotlin-language-server"] oder analog für andere Sprachen),
+ * sobald :libs:terminal-engine die Termux-Umgebung (TermuxEnvironment) bereitstellt. Aktuell wird
+ * das übergebene Kommando direkt per ProcessBuilder gestartet.
+ */
 @Singleton
-class LspClientRepositoryImpl @Inject constructor(
-    private val prootExecutor: ProotExecutor
-) : LspClientRepository {
+class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private var processHandle: ProotProcessHandle? = null
+    private var process: Process? = null
     private var connection: LspRpcConnection? = null
     private val documentVersions = ConcurrentHashMap<String, Int>()
 
@@ -49,22 +51,23 @@ class LspClientRepositoryImpl @Inject constructor(
     private val _diagnostics = MutableSharedFlow<Pair<String, List<LspDiagnostic>>>(extraBufferCapacity = 32)
     override val diagnostics: Flow<Pair<String, List<LspDiagnostic>>> = _diagnostics.asSharedFlow()
 
-    override suspend fun start(serverCommand: List<String>, workspaceRootPath: String): Result<Unit> =
+    override suspend fun start(
+        serverCommand: List<String>,
+        workspaceRootPath: String,
+        extraProcessEnv: Map<String, String>
+    ): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
                 _serverState.value = LspServerState.STARTING
 
-                // Starte via PRoot
-                val handle = prootExecutor.startProcess(
-                    command = serverCommand,
-                    workingDirectory = workspaceRootPath
-                )
-                processHandle = handle
+                val processBuilder = ProcessBuilder(serverCommand).redirectErrorStream(false)
+                if (extraProcessEnv.isNotEmpty()) {
+                    processBuilder.environment().putAll(extraProcessEnv)
+                }
+                val startedProcess = processBuilder.start()
+                process = startedProcess
 
-                val rpcConnection = LspRpcConnection(
-                    inputStream = handle.stdOut,
-                    outputStream = handle.stdIn
-                )
+                val rpcConnection = LspRpcConnection(startedProcess)
                 connection = rpcConnection
                 rpcConnection.start(scope, ::handleNotification)
 
@@ -77,8 +80,7 @@ class LspClientRepositoryImpl @Inject constructor(
                 rpcConnection.sendNotification("initialized", buildJsonObject { })
 
                 _serverState.value = LspServerState.RUNNING
-            }.onFailure { e ->
-                AppLogger.e("LspClientRepositoryImpl", "Failed to start LSP server", e)
+            }.onFailure {
                 _serverState.value = LspServerState.FAILED
             }
         }
@@ -89,134 +91,107 @@ class LspClientRepositoryImpl @Inject constructor(
             connection?.sendNotification("exit", buildJsonObject { })
         }
         connection?.close()
-        processHandle?.destroy()
+        process?.destroy()
         connection = null
-        processHandle = null
+        process = null
         documentVersions.clear()
         _serverState.value = LspServerState.STOPPED
         Unit
     }
 
-    override suspend fun didOpen(path: String, languageId: String, content: String) = withContext(Dispatchers.IO) {
-        runCatching {
-            documentVersions[path] = 1
-            connection?.sendNotification(
-                "textDocument/didOpen",
-                buildJsonObject {
-                    put(
-                        "textDocument",
-                        buildJsonObject {
-                            put("uri", "file://$path")
-                            put("languageId", languageId)
-                            put("version", 1)
-                            put("text", content)
-                        }
-                    )
-                }
-            )
-        }.onFailure { e ->
-            AppLogger.e("LspClientRepositoryImpl", "didOpen failed for $path", e)
-        }
-        Unit
+    override suspend fun didOpen(path: String, languageId: String, content: String) {
+        documentVersions[path] = 1
+        connection?.sendNotification(
+            "textDocument/didOpen",
+            buildJsonObject {
+                put(
+                    "textDocument",
+                    buildJsonObject {
+                        put("uri", "file://$path")
+                        put("languageId", languageId)
+                        put("version", 1)
+                        put("text", content)
+                    }
+                )
+            }
+        )
     }
 
-    override suspend fun didChange(path: String, newContent: String, version: Int) = withContext(Dispatchers.IO) {
-        runCatching {
-            documentVersions[path] = version
-            connection?.sendNotification(
-                "textDocument/didChange",
-                buildJsonObject {
-                    put(
-                        "textDocument",
-                        buildJsonObject {
-                            put("uri", "file://$path")
-                            put("version", version)
-                        }
-                    )
-                    put(
-                        "contentChanges",
-                        buildJsonArray {
-                            add(buildJsonObject { put("text", newContent) })
-                        }
-                    )
-                }
-            )
-        }.onFailure { e ->
-            AppLogger.e("LspClientRepositoryImpl", "didChange failed for $path", e)
-        }
-        Unit
+    override suspend fun didChange(path: String, newContent: String, version: Int) {
+        documentVersions[path] = version
+        connection?.sendNotification(
+            "textDocument/didChange",
+            buildJsonObject {
+                put(
+                    "textDocument",
+                    buildJsonObject {
+                        put("uri", "file://$path")
+                        put("version", version)
+                    }
+                )
+                put(
+                    "contentChanges",
+                    buildJsonArray {
+                        add(buildJsonObject { put("text", newContent) })
+                    }
+                )
+            }
+        )
     }
 
-    override suspend fun didClose(path: String) = withContext(Dispatchers.IO) {
-        runCatching {
-            documentVersions.remove(path)
-            connection?.sendNotification(
-                "textDocument/didClose",
-                buildJsonObject {
-                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                }
-            )
-        }.onFailure { e ->
-            AppLogger.e("LspClientRepositoryImpl", "didClose failed for $path", e)
-        }
-        Unit
+    override suspend fun didClose(path: String) {
+        documentVersions.remove(path)
+        connection?.sendNotification(
+            "textDocument/didClose",
+            buildJsonObject {
+                put("textDocument", buildJsonObject { put("uri", "file://$path") })
+            }
+        )
     }
 
     override suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>> =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                val activeConnection = connection ?: error("LSP-Server nicht gestartet.")
-                val response = activeConnection.sendRequest(
-                    "textDocument/completion",
-                    buildJsonObject {
-                        put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                        put("position", positionToJson(position))
-                    }
-                )
-                parseCompletionResult(response["result"])
-            }.onFailure { e ->
-                AppLogger.e("LspClientRepositoryImpl", "requestCompletion failed for $path", e)
-            }
+        runCatching {
+            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+            val response = activeConnection.sendRequest(
+                "textDocument/completion",
+                buildJsonObject {
+                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
+                    put("position", positionToJson(position))
+                }
+            )
+            parseCompletionResult(response["result"])
         }
 
     override suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                val activeConnection = connection ?: error("LSP-Server nicht gestartet.")
-                val response = activeConnection.sendRequest(
-                    "textDocument/hover",
-                    buildJsonObject {
-                        put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                        put("position", positionToJson(position))
-                    }
-                )
-                parseHoverResult(response["result"])
-            }.onFailure { e ->
-                AppLogger.e("LspClientRepositoryImpl", "requestHover failed for $path", e)
-            }
+        runCatching {
+            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+            val response = activeConnection.sendRequest(
+                "textDocument/hover",
+                buildJsonObject {
+                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
+                    put("position", positionToJson(position))
+                }
+            )
+            parseHoverResult(response["result"])
         }
 
     override suspend fun requestFormat(path: String, content: String): Result<String> =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                val activeConnection = connection ?: error("LSP-Server nicht gestartet.")
-                val response = activeConnection.sendRequest(
-                    "textDocument/formatting",
-                    buildJsonObject {
-                        put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                        put(
-                            "options",
-                            buildJsonObject {
-                                put("tabSize", 4)
-                                put("insertSpaces", true)
-                            }
-                        )
-                    }
-                )
-                applyTextEdits(content, response["result"])
-            }.onFailure { e ->
-                AppLogger.e("LspClientRepositoryImpl", "requestFormat failed for $path", e)
-            }
+        runCatching {
+            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+            val response = activeConnection.sendRequest(
+                "textDocument/formatting",
+                buildJsonObject {
+                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
+                    put(
+                        "options",
+                        buildJsonObject {
+                            put("tabSize", 4)
+                            put("insertSpaces", true)
+                        }
+                    )
+                }
+            )
+            applyTextEdits(content, response["result"])
         }
 
     private fun handleNotification(method: String, params: JsonObject?) {

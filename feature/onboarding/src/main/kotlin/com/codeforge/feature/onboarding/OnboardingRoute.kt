@@ -1,46 +1,39 @@
+// Modul: :feature:onboarding
 package com.codeforge.feature.onboarding
 
 import android.Manifest
-import android.content.Intent
-import android.net.Uri
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Build
-import android.os.Environment
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.codeforge.app.TermuxInstaller
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun OnboardingRoute(
     modifier: Modifier = Modifier,
-    onFinished: () -> Unit,
+    /** [setupCommand]: im Terminal auszuführendes `codeforge-env setup …`. */
+    onFinished: (setupCommand: String) -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
-    val genericActivityResultLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { _ ->
-        checkPermissions(context, viewModel)
-    }
-
-    val legacyStorageLauncher = rememberLauncherForActivityResult(
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted -> viewModel.onEvent(OnboardingUiEvent.StoragePermissionResult(granted)) }
 
@@ -48,173 +41,77 @@ fun OnboardingRoute(
         ActivityResultContracts.RequestPermission()
     ) { granted -> viewModel.onEvent(OnboardingUiEvent.NotificationPermissionResult(granted)) }
 
-    fun requestStorage() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                    data = Uri.parse("package:${context.packageName}")
-                }
-                genericActivityResultLauncher.launch(intent)
-            } catch (e: Exception) {
-                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                genericActivityResultLauncher.launch(intent)
-            }
-        } else {
-            legacyStorageLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-    }
-
-    fun requestBatteryOptimization() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
-                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                    data = Uri.parse("package:${context.packageName}")
-                }
-                genericActivityResultLauncher.launch(intent)
-            } catch (e: Exception) {
-                val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-                genericActivityResultLauncher.launch(intent)
-            }
-        }
-    }
-
-    fun requestWriteSecureSettings() {
-        try {
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.parse("package:${context.packageName}")
-            }
-            genericActivityResultLauncher.launch(intent)
-        } catch (e: Exception) {
-            checkPermissions(context, viewModel)
-        }
-    }
-
-    fun requestInstallPackages() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                    data = Uri.parse("package:${context.packageName}")
-                }
-                genericActivityResultLauncher.launch(intent)
-            } catch (e: Exception) {
-                checkPermissions(context, viewModel)
-            }
-        }
-    }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                checkPermissions(context, viewModel)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
     LaunchedEffect(Unit) {
-        checkPermissions(context, viewModel)
         viewModel.effect.collectLatest { effect ->
             when (effect) {
-                OnboardingUiEffect.RequestStoragePermission -> requestStorage()
+                OnboardingUiEffect.RequestStoragePermission ->
+                    storagePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
 
                 OnboardingUiEffect.RequestNotificationPermission ->
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
 
-                OnboardingUiEffect.RequestBatteryOptimization -> requestBatteryOptimization()
+                OnboardingUiEffect.RunTermuxBootstrapSetup -> {
+                    val activity = context.findActivity()
+                    if (activity == null) {
+                        viewModel.onEvent(OnboardingUiEvent.TermuxBootstrapSetupCompleted(false, Res.string(R.string.onboarding_keine_activity_verfuegbar)))
+                    } else {
+                        runCatching {
+                            TermuxInstaller.setupBootstrapIfNeeded(activity) {
+                                viewModel.onEvent(OnboardingUiEvent.TermuxBootstrapSetupCompleted(true))
+                            }
+                        }.onFailure {
+                            viewModel.onEvent(OnboardingUiEvent.TermuxBootstrapSetupCompleted(false, it.message))
+                        }
+                    }
+                }
 
-                OnboardingUiEffect.RequestWriteSecureSettings -> requestWriteSecureSettings()
-
-                OnboardingUiEffect.RequestInstallPackages -> requestInstallPackages()
-
-                OnboardingUiEffect.NavigateToWelcome -> onFinished()
+                is OnboardingUiEffect.NavigateToSetupTerminal -> onFinished(effect.command)
             }
         }
     }
 
-    Scaffold(modifier = modifier) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
-            when (uiState.step) {
-                OnboardingStep.INTRO -> IntroPagerScreen(
-                    currentPage = uiState.currentIntroPage,
-                    onPageChanged = { page -> viewModel.onEvent(OnboardingUiEvent.IntroPageChanged(page)) },
-                    onFinished = { viewModel.onEvent(OnboardingUiEvent.IntroFinished) }
-                )
+    // Edge-to-Edge: Schritte ohne eigenes Scaffold halten Abstand zu System-/Navigationsleiste, Cutout und IME.
+    Box(modifier = modifier.fillMaxSize().safeDrawingPadding()) {
+        when (uiState.step) {
+            OnboardingStep.INTRO -> IntroPagerScreen(
+                currentPage = uiState.currentIntroPage,
+                onPageChanged = { page -> viewModel.onEvent(OnboardingUiEvent.IntroPageChanged(page)) },
+                onFinished = { viewModel.onEvent(OnboardingUiEvent.IntroFinished) }
+            )
 
-                OnboardingStep.PERMISSIONS -> PermissionScreen(
-                    storageGranted = uiState.storagePermissionGranted,
-                    notificationGranted = uiState.notificationPermissionGranted,
-                    batteryOptimizationGranted = uiState.batteryOptimizationGranted,
-                    writeSecureSettingsGranted = uiState.writeSecureSettingsGranted,
-                    installPackagesGranted = uiState.installPackagesGranted,
-                    onRequestStorage = { requestStorage() },
-                    onRequestNotification = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        } else {
-                            viewModel.onEvent(OnboardingUiEvent.NotificationPermissionResult(true))
-                        }
-                    },
-                    onRequestBatteryOptimization = { requestBatteryOptimization() },
-                    onRequestWriteSecureSettings = { requestWriteSecureSettings() },
-                    onRequestInstallPackages = { requestInstallPackages() },
-                    onContinue = { viewModel.onEvent(OnboardingUiEvent.PermissionsContinueClicked) }
-                )
+            OnboardingStep.PERMISSIONS -> PermissionScreen(
+                storageGranted = uiState.storagePermissionGranted,
+                notificationGranted = uiState.notificationPermissionGranted,
+                onRequestStorage = { storagePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE) },
+                onRequestNotification = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        viewModel.onEvent(OnboardingUiEvent.NotificationPermissionResult(true))
+                    }
+                },
+                onContinue = { viewModel.onEvent(OnboardingUiEvent.PermissionsContinueClicked) }
+            )
 
-                OnboardingStep.SETUP -> SetupScreen(
-                    selectedDistro = uiState.selectedDistro,
-                    setupPhase = uiState.setupPhase,
-                    setupProgressPercent = uiState.setupProgressPercent,
-                    setupErrorMessage = uiState.setupErrorMessage,
-                    onDistroSelected = { distro -> viewModel.onEvent(OnboardingUiEvent.DistroSelected(distro)) },
-                    onStartSetup = { viewModel.onEvent(OnboardingUiEvent.StartSetupClicked) },
-                    onRetry = { viewModel.onEvent(OnboardingUiEvent.RetrySetupClicked) }
-                )
-            }
+            OnboardingStep.SETUP -> SetupScreen(
+                options = uiState.sdkOptions,
+                setupPhase = uiState.setupPhase,
+                setupErrorMessage = uiState.setupErrorMessage,
+                onJdkSelected = { viewModel.onEvent(OnboardingUiEvent.JdkSelected(it)) },
+                onNdkSelected = { viewModel.onEvent(OnboardingUiEvent.NdkSelected(it)) },
+                onInstallNdkChanged = { viewModel.onEvent(OnboardingUiEvent.InstallNdkChanged(it)) },
+                onInstallCmakeChanged = { viewModel.onEvent(OnboardingUiEvent.InstallCmakeChanged(it)) },
+                onStartSetup = { viewModel.onEvent(OnboardingUiEvent.StartSetupClicked) },
+                onRetry = { viewModel.onEvent(OnboardingUiEvent.RetrySetupClicked) }
+            )
         }
     }
 }
 
-private fun checkPermissions(context: android.content.Context, viewModel: OnboardingViewModel) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        viewModel.onEvent(OnboardingUiEvent.StoragePermissionResult(Environment.isExternalStorageManager()))
-    } else {
-        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
-            context, Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        viewModel.onEvent(OnboardingUiEvent.StoragePermissionResult(granted))
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
-            context, Manifest.permission.POST_NOTIFICATIONS
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        viewModel.onEvent(OnboardingUiEvent.NotificationPermissionResult(granted))
-    } else {
-        viewModel.onEvent(OnboardingUiEvent.NotificationPermissionResult(true))
-    }
-
-    val powerManager = context.getSystemService(android.content.Context.POWER_SERVICE) as? android.os.PowerManager
-    val batteryIgnored = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && powerManager != null) {
-        powerManager.isIgnoringBatteryOptimizations(context.packageName)
-    } else {
-        true
-    }
-    viewModel.onEvent(OnboardingUiEvent.BatteryOptimizationResult(batteryIgnored))
-
-    val secureGranted = androidx.core.content.ContextCompat.checkSelfPermission(
-        context, "android.permission.WRITE_SECURE_SETTINGS"
-    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-    viewModel.onEvent(OnboardingUiEvent.WriteSecureSettingsResult(secureGranted))
-
-    val installGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        context.packageManager.canRequestPackageInstalls()
-    } else {
-        true
-    }
-    viewModel.onEvent(OnboardingUiEvent.InstallPackagesResult(installGranted))
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

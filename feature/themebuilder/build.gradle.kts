@@ -1,30 +1,15 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.codeforge.android.library.compose)
+    alias(libs.plugins.codeforge.android.hilt)
+    alias(libs.plugins.codeforge.quality)
 }
 
 android {
     namespace = "com.codeforge.feature.themebuilder"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 26
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    buildFeatures {
-        compose = true
-    }
 }
 
 dependencies {
+    implementation(project(":core:resources"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:datastore"))
     implementation(project(":core:ui"))
@@ -34,7 +19,6 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation("androidx.compose.material:material-icons-extended:1.7.3")
 
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)

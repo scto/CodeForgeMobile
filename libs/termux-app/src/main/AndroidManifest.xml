@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <uses-feature
+    android:name="android.hardware.touchscreen"
+    android:required="false" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission
+    android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+    tools:ignore="ScopedStorage" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <uses-permission android:name="android.permission.VIBRATE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+  <uses-permission android:name="android.permission.READ_LOGS" />
+  <uses-permission android:name="android.permission.DUMP" />
+  <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+  <uses-permission
+    android:name="android.permission.PACKAGE_USAGE_STATS"
+    tools:ignore="ProtectedPermissions" />
+
+  <application>
+
+    <activity
+      android:configChanges="orientation|screenSize|smallestScreenSize|density|screenLayout|keyboard|keyboardHidden|navigation"
+      android:exported="true"
+      android:launchMode="singleTask"
+      android:name="com.codeforge.app.TermuxActivity"
+      android:resizeableActivity="true" />
+
+    <!-- TODO(Thomas)-ANGEPASST: war ursprünglich relativer Name ".shared.activities.ReportActivity",
+         was (relativ zum Modul-Namespace com.codeforge.app) zu com.codeforge.app.shared.activities.ReportActivity
+         aufgelöst worden wäre — die Klasse liegt aber im ANDEREN Modul :libs:termux-shared unter
+         com.codeforge.shared.activities.ReportActivity. Daher jetzt voll qualifiziert. -->
+    <activity
+      android:documentLaunchMode="intoExisting"
+      android:name="com.codeforge.shared.activities.ReportActivity" />
+
+    <!-- TODO(Thomas)-ANGEPASST: war ursprünglich ".app.api.file.FileReceiverActivity", was zu
+         com.codeforge.app.app.api.file.FileReceiverActivity (doppeltes ".app") aufgelöst worden
+         wäre. Tatsächliches Package ist com.codeforge.app.api.file.FileReceiverActivity. -->
+    <activity
+      android:excludeFromRecents="true"
+      android:exported="false"
+      android:name=".api.file.FileReceiverActivity"
+      android:noHistory="true"
+      android:resizeableActivity="true"
+      android:taskAffinity="${TERMUX_PACKAGE_NAME}.filereceiver" />
+
+    <meta-data
+      android:name="android.max_aspect"
+      android:value="10.0" />
+
+    <meta-data
+      android:name="com.samsung.android.keepalive.density"
+      android:value="true" />
+
+    <meta-data
+      android:name="com.samsung.android.multidisplay.keep_process_alive"
+      android:value="true" />
+
+    <meta-data
+      android:name="com.sec.android.support.multiwindow"
+      android:value="true" />
+
+
+    <!-- https://developer.samsung.com/samsung-dex/modify-optimizing.html -->
+
+    <!-- Version < 3.0. DeX Mode and Screen Mirroring support -->
+    <!-- TODO(Thomas)-ANGEPASST: gleicher Fix wie oben bei ReportActivity — voll qualifiziert, da
+         Klasse in :libs:termux-shared liegt, nicht in diesem Modul (:libs:termux-app). -->
+    <receiver
+      android:exported="false"
+      android:name="com.codeforge.shared.activities.ReportActivity$ReportActivityBroadcastReceiver" />
+
+    <!-- Version >= 3.0. DeX Dual Mode support -->
+    <!-- TODO(Thomas)-ANGEPASST: war ".app.TermuxService" -> com.codeforge.app.app.TermuxService
+         (doppeltes ".app"). TermuxService liegt direkt in com.codeforge.app. -->
+    <service
+      android:exported="false"
+      android:name=".TermuxService" />
+
+  </application>
+
+</manifest>

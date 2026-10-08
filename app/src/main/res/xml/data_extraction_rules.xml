@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ (android:dataExtractionRules): Cloud-Backup und Gerät-zu-Gerät-Übertragung. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="usr" />
+        <exclude domain="file" path="home" />
+        <exclude domain="sharedpref" path="codeforge_git.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="usr" />
+        <exclude domain="file" path="home" />
+        <exclude domain="sharedpref" path="codeforge_git.xml" />
+    </device-transfer>
+</data-extraction-rules>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Englische Übersetzung (bisher nur Projekt-Assistent) -->
+<resources>
+    <string name="pw_title">New project</string>
+    <string name="pw_back">Back</string>
+    <string name="pw_ok">OK</string>
+    <string name="pw_error_title">Project could not be created</string>
+
+    <string name="pw_field_name">Project name</string>
+    <string name="pw_field_package">Package name</string>
+    <string name="pw_field_location">Save location</string>
+    <string name="pw_field_language">Language</string>
+    <string name="pw_field_min_sdk">Minimum SDK</string>
+    <string name="pw_field_kts">Gradle Kotlin DSL (.kts)</string>
+    <string name="pw_field_git">Create Git repository (git init + initial commit)</string>
+    <string name="pw_git_identity_missing">Git name/email are not set (Settings → Git). The repository is created but the initial commit is skipped.</string>
+    <string name="pw_create">Create project</string>
+    <string name="pw_creating">Creating project…</string>
+
+    <string name="pw_err_name">Invalid name (starts with a letter, 2–51 characters of A–Z, 0–9, _ - +)</string>
+    <string name="pw_err_package">Invalid package name (e.g. com.example.app)</string>
+    <string name="pw_err_package_reserved">Package contains a reserved Java keyword</string>
+    <string name="pw_err_dir_exists">A folder with this name already exists at the location</string>
+    <string name="pw_err_target_blank">Location must not be empty</string>
+    <string name="pw_err_compose_kotlin">Compose supports Kotlin only</string>
+
+    <string name="pw_tpl_no_activity">No Activity</string>
+    <string name="pw_tpl_no_activity_desc">Gradle skeleton only, no source code</string>
+    <string name="pw_tpl_empty">Empty Activity</string>
+    <string name="pw_tpl_empty_desc">A single activity with a simple layout</string>
+    <string name="pw_tpl_cpp">Native C++</string>
+    <string name="pw_tpl_cpp_desc">Activity with JNI binding to C++</string>
+    <string name="pw_tpl_basic">Basic Activity</string>
+    <string name="pw_tpl_basic_desc">Toolbar, FAB and content area</string>
+    <string name="pw_tpl_drawer">Navigation Drawer</string>
+    <string name="pw_tpl_drawer_desc">Side menu with fragments and navigation</string>
+    <string name="pw_tpl_bottom_nav">Bottom Navigation</string>
+    <string name="pw_tpl_bottom_nav_desc">Bottom navigation bar with three destinations</string>
+    <string name="pw_tpl_tabbed">Tabs</string>
+    <string name="pw_tpl_tabbed_desc">Tabs with ViewPager and fragments</string>
+    <string name="pw_tpl_no_androidx">No AndroidX</string>
+    <string name="pw_tpl_no_androidx_desc">Classic activity without AndroidX</string>
+    <string name="pw_tpl_compose">Jetpack Compose</string>
+    <string name="pw_tpl_compose_desc">Empty Compose activity with Material 3</string>
+</resources>

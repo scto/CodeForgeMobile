@@ -1,40 +1,37 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 // Modul: :feature:themebuilder
 package com.codeforge.feature.themebuilder
 
-import com.codeforge.core.resources.ResGetter
-
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -42,43 +39,37 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-
 import com.codeforge.core.datastore.proto.ThemeConfig
 import com.codeforge.core.datastore.proto.ThemeMode
 import com.codeforge.core.designsystem.CodeForgeTheme
+import com.codeforge.core.designsystem.ThemePreset
+import com.codeforge.core.designsystem.ThemePresets
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
+import com.codeforge.core.resources.stringRes
 
 @Composable
 fun ThemeBuilderRoute(
-    onNavigateBack: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ThemeBuilderViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    ThemeBuilderScreen(onNavigateBack = onNavigateBack, modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
+    ThemeBuilderScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
 }
 
 @Composable
 private fun ThemeBuilderScreen(
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     uiState: ThemeBuilderUiState,
     onEvent: (ThemeBuilderUiEvent) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zurück")
-                    }
-                },
-                title = { Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_themebuilder_title)) }
-            )
-        }
+        topBar = { TopAppBar(title = { Text(stringRes(R.string.themebuilder_theme)) }) }
     ) { padding ->
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -88,33 +79,13 @@ private fun ThemeBuilderScreen(
         }
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = padding.calculateTopPadding() + 16.dp,
-                bottom = padding.calculateBottomPadding() + 16.dp
-            ),
+            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Live Theme Preview Box
             item { ThemePreviewCard(uiState.previewTheme) }
 
-            // Dark/Light/System Mode Selector
-            item {
-                Column {
-                    Text(
-                        text = "Design-Modus",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    ModeSelector(uiState.themeMode, onEvent)
-                }
-            }
+            item { ModeSelector(uiState.themeMode, onEvent) }
 
-            // Dynamic Color Toggle (Material You)
             item {
                 DynamicColorRow(
                     enabled = uiState.isDynamicColorSupported,
@@ -123,13 +94,46 @@ private fun ThemeBuilderScreen(
                 )
             }
 
-            // AMOLED True Black Toggle
             item {
-                AmoledRow(
-                    checked = uiState.useAmoled,
-                    onToggle = { onEvent(ThemeBuilderUiEvent.AmoledToggled) }
+                Text(stringRes(R.string.themebuilder_farbschema), style = MaterialTheme.typography.titleMedium)
+            }
+
+            item {
+                PresetGrid(
+                    selectedId = uiState.colorSchemeId,
+                    dynamicColorActive = uiState.useDynamicColor,
+                    onPresetSelected = { id -> onEvent(ThemeBuilderUiEvent.PresetSelected(id)) }
                 )
             }
+
+            item {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(stringRes(R.string.themebuilder_eigene_farben), style = MaterialTheme.typography.titleMedium)
+            }
+
+            item {
+                CustomColorField(
+                    label = Res.string(R.string.themebuilder_primaer),
+                    value = uiState.customPrimary,
+                    onChange = { onEvent(ThemeBuilderUiEvent.CustomColorChanged(PaletteSlot.PRIMARY, it)) }
+                )
+            }
+            item {
+                CustomColorField(
+                    label = Res.string(R.string.themebuilder_sekundaer),
+                    value = uiState.customSecondary,
+                    onChange = { onEvent(ThemeBuilderUiEvent.CustomColorChanged(PaletteSlot.SECONDARY, it)) }
+                )
+            }
+            item {
+                CustomColorField(
+                    label = Res.string(R.string.themebuilder_tertiaer),
+                    value = uiState.customTertiary,
+                    onChange = { onEvent(ThemeBuilderUiEvent.CustomColorChanged(PaletteSlot.TERTIARY, it)) }
+                )
+            }
+
+            item { Spacer(modifier = Modifier.height(8.dp)) }
         }
     }
 }
@@ -143,27 +147,18 @@ private fun ThemePreviewCard(previewTheme: ThemeConfig) {
             tonalElevation = 2.dp
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Theme Vorschau", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Icon(Icons.Filled.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                }
+                Text(stringRes(R.string.common_vorschau), style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = {}) { Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_themebuilder_btn_primary)) }
-                    OutlinedButton(onClick = {}) { Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_themebuilder_btn_outlined)) }
+                    Button(onClick = {}) { Text(stringRes(R.string.themebuilder_primaer_button)) }
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 ElevatedCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("CodeForge Mobile UI", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                        Text("Beispiel-Karte", style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            "Vorschau der System-, Hell-, Dunkel- und AMOLED-Oberflächenfarben.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            stringRes(R.string.themebuilder_so_sehen_text_und_oberflaechen),
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
@@ -175,9 +170,9 @@ private fun ThemePreviewCard(previewTheme: ThemeConfig) {
 @Composable
 private fun ModeSelector(selected: ThemeMode, onEvent: (ThemeBuilderUiEvent) -> Unit) {
     val options = listOf(
-        ThemeMode.SYSTEM to "System",
-        ThemeMode.LIGHT to "Hell",
-        ThemeMode.DARK to "Dunkel"
+        ThemeMode.SYSTEM to Res.string(R.string.themebuilder_system),
+        ThemeMode.LIGHT to Res.string(R.string.themebuilder_hell),
+        ThemeMode.DARK to Res.string(R.string.themebuilder_dunkel)
     )
 
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -201,71 +196,102 @@ private fun DynamicColorRow(enabled: Boolean, checked: Boolean, onToggle: () -> 
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(stringRes(R.string.themebuilder_dynamische_farben), style = MaterialTheme.typography.titleSmall)
                 Text(
-                    text = "Dynamische Farben (Material You)",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = if (enabled) {
-                        "Verwendet die Farben deines System-Wallpapers."
+                    if (enabled) {
+                        Res.string(R.string.themebuilder_verwendet_die_systemfarben_deines_wall)
                     } else {
-                        "Nicht verfügbar auf diesem Gerät (Android 12+ erforderlich)."
+                        Res.string(R.string.themebuilder_nicht_verfuegbar_auf_diesem_geraet)
                     },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
-            Switch(
-                checked = checked && enabled,
-                onCheckedChange = { onToggle() },
-                enabled = enabled,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    uncheckedBorderColor = MaterialTheme.colorScheme.outline
-                )
+            Switch(checked = checked && enabled, onCheckedChange = { onToggle() }, enabled = enabled)
+        }
+    }
+}
+
+@Composable
+private fun PresetGrid(
+    selectedId: String,
+    dynamicColorActive: Boolean,
+    onPresetSelected: (String) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.height(180.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(ThemePresets.all) { preset ->
+            PresetCard(
+                preset = preset,
+                isSelected = !dynamicColorActive && preset.id == selectedId,
+                onClick = { onPresetSelected(preset.id) }
             )
         }
     }
 }
 
 @Composable
-private fun AmoledRow(checked: Boolean, onToggle: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+private fun PresetCard(preset: ThemePreset, isSelected: Boolean, onClick: () -> Unit) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        colors = if (isSelected) {
+            CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        } else {
+            CardDefaults.elevatedCardColors()
+        }
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                Text(
-                    text = "AMOLED True Black",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Nutzt tiefes Reinschwarz (#000000) im Dunkelmodus für maximale Energieersparnis.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Row {
+                ColorDot(preset.primaryHex)
+                ColorDot(preset.secondaryHex)
+                ColorDot(preset.tertiaryHex)
             }
-            Switch(
-                checked = checked,
-                onCheckedChange = { onToggle() },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    uncheckedBorderColor = MaterialTheme.colorScheme.outline
-                )
-            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(stringRes(preset.labelRes), style = MaterialTheme.typography.bodyMedium)
         }
+    }
+}
+
+@Composable
+private fun ColorDot(hex: String) {
+    val color = runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray)
+    Box(
+        modifier = Modifier
+            .size(20.dp)
+            .padding(2.dp)
+            .clip(CircleShape)
+            .background(color)
+    )
+}
+
+@Composable
+private fun CustomColorField(label: String, value: String, onChange: (String) -> Unit) {
+    val color = runCatching { Color(android.graphics.Color.parseColor(value)) }.getOrNull()
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(color ?: Color.LightGray)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onChange,
+            label = { Text(label) },
+            placeholder = { Text(stringRes(R.string.themebuilder_hex_hint)) },
+            singleLine = true,
+            isError = value.isNotBlank() && color == null,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

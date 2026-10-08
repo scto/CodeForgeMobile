@@ -15,6 +15,17 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
+                if (file("consumer-rules.pro").exists()) {
+                    defaultConfig { consumerProguardFiles("consumer-rules.pro") }
+                }
+                // proguard-rules.pro nur verdrahten, wenn vorhanden; minify steuert das Modul selbst.
+                if (file("proguard-rules.pro").exists()) {
+                    buildTypes {
+                        getByName("release") {
+                            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+                        }
+                    }
+                }
             }
             configureKotlin()
         }

@@ -16,6 +16,14 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
+                // proguard-rules.pro nur verdrahten, wenn vorhanden; minify steuert das Modul selbst.
+                if (file("proguard-rules.pro").exists()) {
+                    buildTypes {
+                        getByName("release") {
+                            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+                        }
+                    }
+                }
                 defaultConfig.targetSdk = BuildConfig.targetSdk
             }
             configureKotlin()

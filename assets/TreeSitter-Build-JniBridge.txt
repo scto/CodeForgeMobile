@@ -1,0 +1,81 @@
+Erstelle eine Datei namens `build_jni_all_abis.sh` im aktuellen Verzeichnis, mache sie ausführbar (`chmod +x build_jni_all_abis.sh`) und führe sie anschließend aus. 
+Das Skript muss exakt den folgenden Bash-Code enthalten. Ersetze `/pfad/zu/CodeForgeMobile` durch den tatsächlichen absoluten Pfad zum Projektverzeichnis!
+
+#!/bin/bash
+set -e
+
+PROJECT_DIR="/pfad/zu/CodeForgeMobile"
+EDITOR_MAIN="$PROJECT_DIR/feature/editor/src/main"
+WORK_DIR="$HOME/treesitter_jni_all_abis"
+NDK_DIR="$WORK_DIR/android-ndk-r26d"
+ABIS=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
+
+echo "=== 1. Workspace & NDK vorbereiten ==="
+mkdir -p "$WORK_DIR"
+cd "$WORK_DIR"
+apt-get update && apt-get install -y wget unzip git cmake ninja-build clang default-jdk
+
+if [ ! -d "$NDK_DIR" ]; then
+    echo "Lade Android NDK herunter..."
+    wget -q https://dl.google.com/android/repository/android-ndk-r26d-linux.zip -O ndk.zip
+    unzip -q ndk.zip
+    rm ndk.zip
+fi
+TOOLCHAIN="$NDK_DIR/build/cmake/android.toolchain.cmake"
+
+echo "=== 2. AndroidIDE Tree-sitter Repository klonen ==="
+if [ ! -d "android-tree-sitter" ]; then
+    git clone --recursive https://github.com/AndroidIDE-Official/android-tree-sitter.git
+fi
+cd android-tree-sitter
+
+echo "=== 3. C++ Source-Ordner lokalisieren ==="
+CMAKE_FILE=$(find "$(pwd)" -name "CMakeLists.txt" | grep "src/main/cpp" | head -n 1)
+
+if [ -z "$CMAKE_FILE" ]; then
+    CMAKE_FILE=$(find "$(pwd)" -name "CMakeLists.txt" | grep -v "/\.git/" | grep -i "jni\|cpp" | head -n 1)
+fi
+
+if [ -z "$CMAKE_FILE" ]; then
+    echo "Kritischer Fehler: CMakeLists.txt für JNI nicht gefunden!"
+    exit 1
+fi
+
+CMAKE_DIR=$(dirname "$CMAKE_FILE")
+echo "CMake Verzeichnis für JNI gefunden: $CMAKE_DIR"
+cd "$CMAKE_DIR"
+
+echo "=== 4. Strikte Cross-Kompilierung für alle ABIs ==="
+for ABI in "${ABIS[@]}"; do
+    echo ">>> Baue libtreesitter-android.so für $ABI..."
+    
+    BUILD_DIR="build_$ABI"
+    
+    # WICHTIG: Lösche den Build-Ordner falls vorhanden, um Cache-Probleme zwischen Architekturen zu vermeiden
+    rm -rf "$BUILD_DIR"
+    
+    # CMake konfigurieren mit strikter ABI-Vorgabe
+    cmake -B "$BUILD_DIR" -G Ninja \
+        -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN" \
+        -DANDROID_ABI="$ABI" \
+        -DANDROID_PLATFORM=android-21
+        
+    # Build ausführen
+    cmake --build "$BUILD_DIR"
+    
+    # Zielverzeichnis im Projekt erstellen
+    DEST_DIR="$EDITOR_MAIN/jniLibs/$ABI"
+    mkdir -p "$DEST_DIR"
+    
+    # Finde die generierte .so-Datei
+    SO_FILE=$(find "$BUILD_DIR" -name "*.so" | head -n 1)
+    
+    if [ -n "$SO_FILE" ]; then
+        cp "$SO_FILE" "$DEST_DIR/libtreesitter-android.so"
+        echo "✅ Erfolgreich für $ABI kompiliert und kopiert nach:$DEST_DIR/libtreesitter-android.so"
+    else
+        echo "❌ Warnung: Keine .so Datei im Build-Ordner für $ABI gefunden!"
+    fi
+done
+
+echo "=== Cross-Kompilierung der JNI-Brücke für alle ABIs abgeschlossen! ==="

@@ -4,31 +4,43 @@
  */
 package com.codeforge.feature.editor
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.codeforge.core.common.logging.AppLogger
 import com.codeforge.core.datastore.SettingsRepository
-import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.repository.ComposeSourceAnalyzer
-import com.codeforge.core.domain.repository.GradleBuildRepository
+import com.codeforge.core.domain.repository.FileSystemRepository
 import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.domain.usecase.OpenFileUseCase
 import com.codeforge.core.navigation.ActiveComposableFile
 import com.codeforge.core.navigation.ActiveComposablePreviewBridge
+import com.codeforge.core.navigation.FileSyncBridge
+import com.codeforge.core.navigation.OpenFileRequestBridge
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
+import com.codeforge.feature.editor.lsp.LspCompletionProvider
+import com.codeforge.feature.editor.textmate.TextMateAssetLoader
+import com.codeforge.libs.dependency_updater_api.DependencyUpdate
+import com.codeforge.libs.dependency_updater_api.DependencyUpdateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,13 +48,13 @@ class EditorViewModel @Inject constructor(
     private val openFileUseCase: OpenFileUseCase,
     private val lspClient: LspClientRepository,
     private val composeSourceAnalyzer: ComposeSourceAnalyzer,
-    private val gradleBuildRepository: GradleBuildRepository,
     private val previewBridge: ActiveComposablePreviewBridge,
     private val settingsRepository: SettingsRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val openFileRequestBridge: OpenFileRequestBridge,
+    private val fileSystemRepository: FileSystemRepository,
+    private val updateRepository: DependencyUpdateRepository,
+    private val fileSyncBridge: FileSyncBridge
 ) : ViewModel() {
-
-    private val TAG = "EditorViewModel"
 
     private val _uiState = MutableStateFlow(EditorUiState())
     val uiState: StateFlow<EditorUiState> = _uiState.asStateFlow()
@@ -50,358 +62,324 @@ class EditorViewModel @Inject constructor(
     private val _effect = MutableSharedFlow<EditorUiEffect>()
     val effect: SharedFlow<EditorUiEffect> = _effect.asSharedFlow()
 
+    /** Dokumentversion je Pfad, für LSP `textDocument/didChange` (versionierte Syncs). */
+    private val documentVersions = mutableMapOf<String, Int>()
+
+    /** Vom Composable konsumiert, um LSP-Completion-Vorschläge in [LspAwareLanguage] einzuspeisen. */
+    val completionProvider = LspCompletionProvider(lspClient) { _uiState.value.activeFile?.path }
+
     init {
-        // Observe Editor Settings from Proto DataStore
-        settingsRepository.appSettings
-            .onEach { settings ->
-                if (AppLogger.isEnabled && AppLogger.excessiveTracingEnabled) {
-                    AppLogger.d(TAG, "Updated EditorConfig applied to state")
-                }
-                _uiState.update { s -> s.copy(editorConfig = settings.editor, fileTreeConfig = settings.fileTree) }
-            }
-            .launchIn(viewModelScope)
+        observeSettings()
+        observeDiagnostics()
+        observeOpenFileRequests()
+        observeJumpRequests()
+        observeFlushRequests()
+        observeExternalChanges()
+        observeDirectoryChanges()
+        observeUpdateAnnotations()
+    }
 
-        val rawRootPath = savedStateHandle.get<String>("rootPath").orEmpty()
-        val rawFilePath = savedStateHandle.get<String>("filePath").orEmpty()
-        val rootPath = android.net.Uri.decode(rawRootPath)
-        val filePath = android.net.Uri.decode(rawFilePath)
-        
-        viewModelScope.launch {
-            val effectiveRootPath = if (rootPath.isNotBlank()) {
-                rootPath
-            } else {
-                val settings = settingsRepository.appSettings.first()
-                settings.workspaceDirectory.takeIf { it.isNotBlank() } ?: "/storage/emulated/0"
-            }
-            if (AppLogger.isEnabled) {
-                AppLogger.step(TAG, "Initialized EditorViewModel with rootPath: $effectiveRootPath")
-            }
-            _uiState.update { it.copy(rootPath = effectiveRootPath) }
+    private val projectRoot = MutableStateFlow<String?>(null)
 
-            lspClient.serverState.collect { state ->
-                if (AppLogger.isEnabled) AppLogger.d(TAG, "LSP Server state changed: $state")
-                _uiState.update { it.copy(isLspConnected = state == com.codeforge.core.domain.model.LspServerState.RUNNING) }
-            }
-        }
+    /** Zuletzt gemeldete, nicht dismissed Updates des Projekts (Basis für „Update All“). */
+    private var pendingUpdates: List<DependencyUpdate> = emptyList()
 
-        if (rootPath.isNotBlank()) {
-            viewModelScope.launch {
-                lspClient.diagnostics.collect { (path, diagnostics) ->
-                    if (AppLogger.isEnabled && AppLogger.excessiveTracingEnabled) {
-                        AppLogger.d(TAG, "Received ${diagnostics.size} LSP diagnostics for $path")
-                    }
-                    _uiState.update { s ->
-                        val updated = s.openFiles.map { file ->
-                            if (file.path == path) file.copy(diagnostics = diagnostics) else file
-                        }
-                        s.copy(openFiles = updated)
-                    }
-                }
+    /**
+     * Berechnet die Update-Chips für die aktive Datei aus dem LIVE-Puffer (leicht verzögert, damit
+     * nicht jeder Tastendruck neu geparst wird) und dem Update-Zustand des Projekts.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    private fun observeUpdateAnnotations() = viewModelScope.launch {
+        projectRoot.filterNotNull().flatMapLatest { root ->
+            combine(
+                updateRepository.observe(root),
+                _uiState.map { s -> s.activeFile?.let { it.path to it.content } }.distinctUntilChanged().debounce(250)
+            ) { state, active -> Triple(root, state, active) }
+        }.collect { (root, state, active) ->
+            pendingUpdates = state.pending
+            val annotations = if (active == null) emptyList()
+            else withContext(Dispatchers.Default) { updateRepository.annotate(root, active.first, active.second) }
+            _uiState.update {
+                it.copy(
+                    updateAnnotations = annotations,
+                    updateAnnotationsPath = active?.first,
+                    pendingUpdateCount = state.pending.size
+                )
             }
-            viewModelScope.launch {
-                if (AppLogger.isEnabled) AppLogger.step(TAG, "Starting LSP client for root: $rootPath")
-                lspClient.start(listOf("kotlin-language-server"), rootPath)
-            }
-        }
-
-        if (filePath.isNotBlank()) {
-            openFile(filePath)
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        viewModelScope.launch { lspClient.stop() }
+    /** Fremdmodul (Update-Dialog) bittet vor einer Dateiänderung darum, ungespeicherte Puffer zu sichern. */
+    private fun observeFlushRequests() = viewModelScope.launch {
+        fileSyncBridge.flushRequests.collect { request ->
+            val wanted = request.paths.map(::normalize).toSet()
+            val targets = if (request.directory) {
+                _uiState.value.openFiles.map { normalize(it.path) }.filter { f -> wanted.any { dir -> isUnder(f, dir) } }.toSet()
+            } else wanted
+            persistDirty(targets)
+            request.done.complete(Unit)
+        }
+    }
+
+    /** Dateien wurden extern geändert (z. B. Version aktualisiert) → betroffene offene Tabs neu laden. */
+    private fun observeExternalChanges() = viewModelScope.launch {
+        fileSyncBridge.externalChanges.collect { changed ->
+            val normalized = changed.map(::normalize).toSet()
+            _uiState.value.openFiles.filter { normalize(it.path) in normalized }.forEach { reloadFile(it.path) }
+        }
+    }
+
+    /** Ordner wurde extern verändert (Git) → alle offenen Tabs darunter neu laden; gelöschte Dateien bleiben unverändert offen. */
+    private fun observeDirectoryChanges() = viewModelScope.launch {
+        fileSyncBridge.directoryChanges.collect { dir ->
+            val root = normalize(dir)
+            _uiState.value.openFiles.filter { isUnder(normalize(it.path), root) && File(it.path).isFile }.forEach { reloadFile(it.path) }
+        }
+    }
+
+    private fun isUnder(path: String, dir: String): Boolean = path == dir || path.startsWith(dir.trimEnd('/') + "/")
+
+    private suspend fun reloadFile(path: String) {
+        openFileUseCase(path).onSuccess { file ->
+            _uiState.update { s ->
+                s.copy(openFiles = s.openFiles.map { if (it.path == path) it.copy(content = file.content, isDirty = false) else it })
+            }
+            val nextVersion = (documentVersions[path] ?: 1) + 1
+            documentVersions[path] = nextVersion
+            lspClient.didChange(path, file.content, nextVersion)
+            if (_uiState.value.activeFile?.path == path) publishActiveFileToBridge()
+        }
+    }
+
+    /** Schreibt ungespeicherte Puffer der [normalizedPaths] auf die Platte. `false`, wenn ein Schreibvorgang scheiterte. */
+    private suspend fun persistDirty(normalizedPaths: Set<String>): Boolean {
+        var ok = true
+        for (file in _uiState.value.openFiles.filter { it.isDirty && normalize(it.path) in normalizedPaths }) {
+            fileSystemRepository.writeFile(file.path, file.content)
+                .onSuccess {
+                    _uiState.update { s ->
+                        s.copy(openFiles = s.openFiles.map { f ->
+                            // nur als sauber markieren, wenn der Puffer seitdem nicht weiter geändert wurde
+                            if (f.path == file.path && f.content == file.content) f.copy(isDirty = false) else f
+                        })
+                    }
+                }
+                .onFailure {
+                    ok = false
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_speichern_fehlgeschlagen, it.message)))
+                }
+        }
+        return ok
+    }
+
+    private fun saveActive() = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        if (persistDirty(setOf(normalize(active.path)))) _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_gespeichert)))
+    }
+
+    private fun applyUpdates(updates: List<DependencyUpdate>) {
+        val root = projectRoot.value ?: return
+        if (updates.isEmpty() || _uiState.value.isApplyingUpdate) return
+        _uiState.update { it.copy(isApplyingUpdate = true) }
+        viewModelScope.launch {
+            val paths = updates.flatMap { u -> u.locations.map { normalize(it.filePath) } }.toSet()
+            if (!persistDirty(paths)) {
+                _uiState.update { it.copy(isApplyingUpdate = false) }
+                return@launch
+            }
+            updateRepository.apply(root, updates)
+                .onSuccess { result ->
+                    fileSyncBridge.notifyExternalChange(result.changedFiles)
+                    val message = if (result.failed.isEmpty()) Res.string(R.string.editor_update_angewendet, result.applied.size)
+                    else Res.string(R.string.editor_angewendet_fehlgeschlagen, result.applied.size, result.failed.size, result.failed.first().second)
+                    _effect.emit(EditorUiEffect.ShowSnackbar(message))
+                }
+                .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_update_fehlgeschlagen, it.message))) }
+            _uiState.update { it.copy(isApplyingUpdate = false, updateDialog = null) }
+        }
+    }
+
+    private fun normalize(path: String): String = File(path).absoluteFile.normalize().path
+
+    /**
+     * Konsumiert Klicks aus dem Bonsai-Dateibaum im NavigationDrawer (:feature:filetree),
+     * verdrahtet über :core:navigation — siehe [OpenFileRequestBridge]-KDoc zur Begründung
+     * dieser Entkopplung (keine direkte :feature:*→:feature:*-Abhängigkeit erlaubt).
+     */
+    private fun observeOpenFileRequests() = viewModelScope.launch {
+        openFileRequestBridge.openRequests.collect { path -> openFile(path) }
+    }
+
+    /** Sprung aus der Projektsuche: Ziel merken; [EditorRoute] positioniert den Cursor, sobald die Datei aktiv ist. */
+    private fun observeJumpRequests() = viewModelScope.launch {
+        openFileRequestBridge.jumpRequests.collect { target ->
+            _uiState.update { it.copy(pendingJump = target) }
+        }
+    }
+
+    private fun observeSettings() = viewModelScope.launch {
+        settingsRepository.appSettings.collect { settings ->
+            _uiState.update {
+                it.copy(
+                    displaySettings = EditorDisplaySettings(
+                        tabSize = settings.editor.tabSize.takeIf { v -> v > 0 } ?: 4,
+                        useTreeSitter = settings.editor.useTreeSitter,
+                        textmateTheme = settings.editor.textmateTheme.ifBlank { TextMateAssetLoader.DEFAULT_DARK_THEME },
+                        fontSizeSp = settings.editor.fontSize.takeIf { v -> v > 0 }?.toFloat() ?: 14f,
+                        fontFamilyAssetPath = settings.editor.fontFamily,
+                        wordWrap = settings.editor.wordWrap,
+                        showNonPrintableChars = settings.editor.showNonPrintableChars,
+                        stickyScrollEnabled = settings.editor.stickyScrollEnabled,
+                        magnifierEnabled = settings.editor.magnifierEnabled,
+                        symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled
+                    )
+                )
+            }
+        }
+    }
+
+    private fun observeDiagnostics() = viewModelScope.launch {
+        lspClient.diagnostics.collect { (path, diagnostics) ->
+            _uiState.update { s ->
+                s.copy(diagnosticsByPath = s.diagnosticsByPath + (path to diagnostics))
+            }
+        }
     }
 
     fun onEvent(event: EditorUiEvent) {
-        if (AppLogger.isEnabled) {
-            AppLogger.step(TAG, "onEvent: ${event::class.simpleName}")
-        }
         when (event) {
             is EditorUiEvent.OpenFile -> openFile(event.path)
             is EditorUiEvent.CloseTab -> closeTab(event.index)
-            is EditorUiEvent.CloseOthersTab -> closeOthersTab(event.index)
-            EditorUiEvent.CloseAllTabs -> closeAllTabs()
             is EditorUiEvent.SelectTab -> selectTab(event.index)
             is EditorUiEvent.TextChanged -> updateBuffer(event.text)
-            is EditorUiEvent.CursorPositionChanged -> updateCursorPosition(event.line, event.column)
-            EditorUiEvent.CompletionRequested -> requestCompletion()
-            is EditorUiEvent.CompletionItemSelected -> selectCompletionItem(event.item)
-            EditorUiEvent.SaveFile -> saveFile()
             EditorUiEvent.RunLspFormat -> formatViaLsp()
-            EditorUiEvent.BackClicked -> viewModelScope.launch { _effect.emit(EditorUiEffect.NavigateBack) }
-            EditorUiEvent.RunBuild -> runGradleBuild()
-            EditorUiEvent.ToggleBuildLogs -> _uiState.update { it.copy(showBuildLogs = !it.showBuildLogs) }
+            EditorUiEvent.Save -> saveActive()
+            is EditorUiEvent.SetProjectRoot -> projectRoot.value = event.rootPath
+            is EditorUiEvent.UpdateChipClicked -> _uiState.update { it.copy(updateDialog = event.update) }
+            EditorUiEvent.UpdateDialogCancel -> _uiState.update { it.copy(updateDialog = null) }
+            is EditorUiEvent.ApplyUpdate -> applyUpdates(listOf(event.update))
+            EditorUiEvent.ApplyAllUpdates -> applyUpdates(pendingUpdates)
 
-            // Extended Editor events
-            EditorUiEvent.ToggleSearchPanel -> _uiState.update { it.copy(isSearchPanelVisible = !it.isSearchPanelVisible) }
-            is EditorUiEvent.SearchQueryChanged -> _uiState.update { it.copy(searchQuery = event.query) }
-            is EditorUiEvent.ReplaceQueryChanged -> _uiState.update { it.copy(replaceQuery = event.query) }
-            EditorUiEvent.ToggleRegex -> _uiState.update { it.copy(isRegex = !it.isRegex, isWholeWord = if (!it.isRegex) false else it.isWholeWord) }
-            EditorUiEvent.ToggleMatchCase -> _uiState.update { it.copy(isMatchCase = !it.isMatchCase) }
-            EditorUiEvent.ToggleWholeWord -> _uiState.update { it.copy(isWholeWord = !it.isWholeWord, isRegex = if (!it.isWholeWord) false else it.isRegex) }
-            EditorUiEvent.FindNext -> { }
-            EditorUiEvent.FindPrev -> { }
-            EditorUiEvent.ReplaceCurrent -> { }
-            EditorUiEvent.ReplaceAll -> { }
-            EditorUiEvent.Undo -> viewModelScope.launch { _effect.emit(EditorUiEffect.TriggerEditorUndo) }
-            EditorUiEvent.Redo -> viewModelScope.launch { _effect.emit(EditorUiEffect.TriggerEditorRedo) }
-            is EditorUiEvent.GotoLine -> viewModelScope.launch { _effect.emit(EditorUiEffect.TriggerGotoLine(event.line)) }
-            is EditorUiEvent.SelectLanguage -> {
-                _uiState.update { s ->
-                    val updated = s.openFiles.toMutableList()
-                    if (s.activeFileIndex in updated.indices) {
-                        updated[s.activeFileIndex] = updated[s.activeFileIndex].copy(languageName = event.languageName)
-                    }
-                    s.copy(openFiles = updated)
-                }
-            }
-            is EditorUiEvent.SelectTheme -> {
-                viewModelScope.launch {
-                    settingsRepository.updateEditor { config -> config.toBuilder().setTextmateTheme(event.themeName).build() }
-                }
-            }
-            is EditorUiEvent.SelectTypeface -> {
-                viewModelScope.launch {
-                    settingsRepository.updateEditor { config -> config.toBuilder().setFontFamily(event.fontName).build() }
-                }
-            }
-            is EditorUiEvent.SelectLinePanelPosition -> {
-                viewModelScope.launch {
-                    settingsRepository.updateEditor { config ->
-                        config.toBuilder()
-                            .setLineInfoPanelMode(event.mode)
-                            .setLineInfoPanelPosition(event.position)
-                            .build()
-                    }
-                }
-            }
-            is EditorUiEvent.PositionTextChanged -> _uiState.update { it.copy(positionText = event.text) }
-            is EditorUiEvent.UpdateUndoRedoState -> _uiState.update { it.copy(canUndo = event.canUndo, canRedo = event.canRedo) }
-            EditorUiEvent.NavigateToSettings -> viewModelScope.launch { _effect.emit(EditorUiEffect.NavigateTo("settings_editor")) }
-            EditorUiEvent.ToggleComposePreview -> viewModelScope.launch { _effect.emit(EditorUiEffect.TriggerComposePreview) }
-            else -> {}
-        }
-    }
-
-    private fun saveFile() = viewModelScope.launch {
-        val active = _uiState.value.openFiles.getOrNull(_uiState.value.activeFileIndex) ?: return@launch
-        if (AppLogger.isEnabled) AppLogger.step(TAG, "Saving active file: ${active.path}")
-        try {
-            File(active.path).writeText(active.content)
-            _uiState.update { s ->
-                val updated = s.openFiles.toMutableList()
-                if (s.activeFileIndex in updated.indices) {
-                    updated[s.activeFileIndex] = active.copy(isDirty = false)
-                }
-                s.copy(openFiles = updated)
-            }
-            _effect.emit(EditorUiEffect.ShowSnackbar("Gespeichert"))
-        } catch (e: Exception) {
-            if (AppLogger.isEnabled) AppLogger.e(TAG, "Failed to save file: ${active.path}", e)
-            _effect.emit(EditorUiEffect.ShowSnackbar("Fehler beim Speichern: ${e.message}"))
-        }
-    }
-
-    private fun openFile(path: String) = viewModelScope.launch {
-        if (AppLogger.isEnabled) AppLogger.step(TAG, "Opening file: $path")
-        _uiState.update { it.copy(isLoading = true) }
-
-        if (com.codeforge.feature.editor.ui.isImageFilePath(path)) {
-            _uiState.update { s ->
-                val existingIndex = s.openFiles.indexOfFirst { it.path == path }
-                if (existingIndex >= 0) {
-                    s.copy(activeFileIndex = existingIndex, isLoading = false)
-                } else {
-                    val newFiles = s.openFiles + OpenFile(path = path, content = "[Image File]")
-                    s.copy(
-                        openFiles = newFiles,
-                        activeFileIndex = newFiles.size - 1,
-                        isLoading = false
-                    )
-                }
-            }
-            publishActiveFileToBridge()
-            return@launch
-        }
-        openFileUseCase(path)
-            .onSuccess { file ->
-                if (AppLogger.isEnabled) {
-                    AppLogger.d(TAG, "File loaded successfully (${file.content.length} bytes): $path")
-                }
-                _uiState.update { s ->
-                    val existingIndex = s.openFiles.indexOfFirst { it.path == file.path }
-                    if (existingIndex >= 0) {
-                        s.copy(activeFileIndex = existingIndex, isLoading = false)
-                    } else {
-                        val ext = File(file.path).extension.lowercase()
-                        val detectedLang = SoraLanguageProvider.extensions[ext] ?: ext
-                        val newFiles = s.openFiles + OpenFile(
-                            path = file.path,
-                            content = file.content,
-                            languageName = detectedLang
-                        )
-                        s.copy(
-                            openFiles = newFiles,
-                            activeFileIndex = newFiles.size - 1,
-                            isLoading = false
-                        )
-                    }
-                }
-                publishActiveFileToBridge()
-                val langId = SoraLanguageProvider.extensions[File(file.path).extension.lowercase()] ?: "text.plain"
-                lspClient.didOpen(file.path, langId, file.content)
-            }
-            .onFailure {
-                if (AppLogger.isEnabled) AppLogger.e(TAG, "Failed to open file: $path", it)
-                _uiState.update { it.copy(isLoading = false) }
-                _effect.emit(EditorUiEffect.ShowSnackbar("Fehler beim Öffnen: ${it.message}"))
-            }
-    }
-
-    private fun closeTab(index: Int) {
-        val closedFile = _uiState.value.openFiles.getOrNull(index)
-        if (AppLogger.isEnabled) AppLogger.step(TAG, "Closing tab at index $index: ${closedFile?.path}")
-        _uiState.update { s ->
-            if (index !in s.openFiles.indices) return@update s
-            val updated = s.openFiles.toMutableList().apply { removeAt(index) }
-            val newActive = if (updated.isEmpty()) 0 else s.activeFileIndex.coerceIn(0, updated.size - 1)
-            s.copy(openFiles = updated, activeFileIndex = newActive)
-        }
-        publishActiveFileToBridge()
-        if (closedFile != null) {
-            viewModelScope.launch { lspClient.didClose(closedFile.path) }
-        }
-    }
-
-    private fun closeOthersTab(index: Int) {
-        val targetFile = _uiState.value.openFiles.getOrNull(index) ?: return
-        if (AppLogger.isEnabled) AppLogger.step(TAG, "Closing other tabs except index $index: ${targetFile.path}")
-        val filesToClose = _uiState.value.openFiles.filterIndexed { i, _ -> i != index }
-        _uiState.update { s ->
-            s.copy(openFiles = listOf(targetFile), activeFileIndex = 0)
-        }
-        publishActiveFileToBridge()
-        filesToClose.forEach { file ->
-            viewModelScope.launch { lspClient.didClose(file.path) }
-        }
-    }
-
-    private fun closeAllTabs() {
-        if (AppLogger.isEnabled) AppLogger.step(TAG, "Closing all open editor tabs")
-        val filesToClose = _uiState.value.openFiles
-        _uiState.update { s ->
-            s.copy(openFiles = emptyList(), activeFileIndex = 0)
-        }
-        publishActiveFileToBridge()
-        filesToClose.forEach { file ->
-            viewModelScope.launch { lspClient.didClose(file.path) }
+            EditorUiEvent.ToggleSearchBar -> _uiState.update { it.copy(isSearchBarVisible = !it.isSearchBarVisible) }
+            is EditorUiEvent.SearchQueryChanged -> _uiState.update { it.copy(searchQuery = event.value) }
+            is EditorUiEvent.ReplaceQueryChanged -> _uiState.update { it.copy(replaceQuery = event.value) }
+            EditorUiEvent.ToggleCaseSensitiveSearch ->
+                _uiState.update { it.copy(isCaseSensitiveSearch = !it.isCaseSensitiveSearch) }
+            EditorUiEvent.ToggleRegexSearch -> _uiState.update { it.copy(isRegexSearch = !it.isRegexSearch) }
+            EditorUiEvent.ToggleWholeWordSearch -> _uiState.update { it.copy(isWholeWordSearch = !it.isWholeWordSearch) }
+            EditorUiEvent.JumpHandled -> _uiState.update { it.copy(pendingJump = null) }
         }
     }
 
     private fun selectTab(index: Int) {
-        if (index in _uiState.value.openFiles.indices) {
-            if (AppLogger.isEnabled) AppLogger.step(TAG, "Selected tab index $index")
-            _uiState.update { it.copy(activeFileIndex = index) }
-            publishActiveFileToBridge()
+        if (index !in _uiState.value.openFiles.indices) return
+        _uiState.update { it.copy(activeFileIndex = index) }
+        publishActiveFileToBridge()
+    }
+
+    private fun openFile(path: String) = viewModelScope.launch {
+        val existingIndex = _uiState.value.openFiles.indexOfFirst { it.path == path }
+        if (existingIndex >= 0) {
+            selectTab(existingIndex)
+            return@launch
         }
+
+        _uiState.update { it.copy(isLoading = true) }
+        openFileUseCase(path)
+            .onSuccess { file ->
+                _uiState.update { s ->
+                    s.copy(
+                        openFiles = s.openFiles + OpenFile(path = file.path, content = file.content),
+                        activeFileIndex = s.openFiles.size,
+                        isLoading = false
+                    )
+                }
+                documentVersions[file.path] = 1
+                lspClient.didOpen(file.path, languageIdFor(file.path), file.content)
+                publishActiveFileToBridge()
+            }
+            .onFailure {
+                _uiState.update { it.copy(isLoading = false) }
+                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_fehler_beim_oeffnen, it.message)))
+            }
+    }
+
+    private fun closeTab(index: Int) {
+        val closedPath = _uiState.value.openFiles.getOrNull(index)?.path
+        _uiState.update { s ->
+            val updated = s.openFiles.toMutableList().apply { removeAt(index) }
+            val newActive = when {
+                updated.isEmpty() -> 0
+                s.activeFileIndex >= updated.size -> updated.size - 1
+                else -> s.activeFileIndex
+            }
+            s.copy(openFiles = updated, activeFileIndex = newActive)
+        }
+        if (closedPath != null) {
+            documentVersions.remove(closedPath)
+            viewModelScope.launch { lspClient.didClose(closedPath) }
+        }
+        publishActiveFileToBridge()
     }
 
     private fun updateBuffer(text: String) {
-        val s = _uiState.value
-        val active = s.openFiles.getOrNull(s.activeFileIndex) ?: return
-        if (active.content == text) return
-
-        val updatedFile = active.copy(content = text, isDirty = true)
-        _uiState.update { state ->
-            val updatedList = state.openFiles.toMutableList()
-            if (state.activeFileIndex in updatedList.indices) {
-                updatedList[state.activeFileIndex] = updatedFile
-            }
-            state.copy(openFiles = updatedList)
+        val activePath = _uiState.value.activeFile?.path
+        _uiState.update { s ->
+            if (s.openFiles.isEmpty()) return@update s
+            val updated = s.openFiles.toMutableList()
+            val current = updated[s.activeFileIndex]
+            // sora feuert ContentChangeEvent auch bei programmatischem setText (Tab-Wechsel/Reload):
+            // identischer Inhalt ist keine Benutzeränderung und darf nicht „dirty“ markieren
+            if (current.content == text) return@update s
+            updated[s.activeFileIndex] = current.copy(content = text, isDirty = true)
+            s.copy(openFiles = updated)
         }
-
+        if (activePath != null) {
+            val nextVersion = (documentVersions[activePath] ?: 1) + 1
+            documentVersions[activePath] = nextVersion
+            viewModelScope.launch { lspClient.didChange(activePath, text, nextVersion) }
+        }
         publishActiveFileToBridge()
-        viewModelScope.launch {
-            lspClient.didChange(active.path, text, 1)
-        }
-    }
-
-    private fun updateCursorPosition(line: Int, column: Int) {
-        // No-op for current LSP bridge
-    }
-
-    private fun requestCompletion() = viewModelScope.launch {
-        val s = _uiState.value
-        val active = s.openFiles.getOrNull(s.activeFileIndex) ?: return@launch
-        if (AppLogger.isEnabled && AppLogger.excessiveTracingEnabled) {
-            AppLogger.d(TAG, "Requesting LSP completions for ${active.path}")
-        }
-        val result = lspClient.requestCompletion(active.path, LspPosition(line = 0, character = 0))
-        result.onSuccess { items ->
-            // Update items if needed
-        }
-    }
-
-    private fun selectCompletionItem(item: Any) {
-        // Handle completion item selection
     }
 
     private fun formatViaLsp() = viewModelScope.launch {
-        val s = _uiState.value
-        val active = s.openFiles.getOrNull(s.activeFileIndex) ?: return@launch
-        val ext = File(active.path).extension.lowercase()
-        if (AppLogger.isEnabled) AppLogger.step(TAG, "Formatting file: ${active.path}")
-
-        var formattedContent: String? = null
-
-        runCatching {
-            val result = lspClient.requestFormat(active.path, active.content)
-            if (result.isSuccess) {
-                formattedContent = result.getOrNull()
-            }
-        }
-
-        if (formattedContent.isNullOrBlank() || formattedContent == active.content) {
-            formattedContent = com.codeforge.feature.editor.utils.CodeFormatter.format(active.content, ext)
-        }
-
-        if (formattedContent != active.content && !formattedContent.isNullOrBlank()) {
-            updateBuffer(formattedContent)
-            _effect.emit(EditorUiEffect.ShowSnackbar("Formatierung angewendet"))
-        } else {
-            _effect.emit(EditorUiEffect.ShowSnackbar("Code bereits formatiert"))
-        }
+        val active = _uiState.value.activeFile ?: return@launch
+        lspClient.requestFormat(active.path, active.content)
+            .onSuccess { formatted -> updateBuffer(formatted) }
+            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_lsp_formatierung_fehlgeschlagen, it.message))) }
     }
 
-    private fun runGradleBuild() = viewModelScope.launch {
-        val rootPath = _uiState.value.rootPath
-        if (rootPath.isBlank()) return@launch
-        if (AppLogger.isEnabled) AppLogger.step(TAG, "Running Gradle build for root: $rootPath")
-        _uiState.update { it.copy(isBuilding = true, showBuildLogs = true) }
+    private fun languageIdFor(path: String): String = when (EditorLanguageType.fromPath(path)) {
+        EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
+        EditorLanguageType.JAVA -> "java"
+        EditorLanguageType.XML -> "xml"
+        EditorLanguageType.JSON -> "json"
+        EditorLanguageType.PLAIN -> "plaintext"
     }
 
+    /**
+     * Erkennt @Composable-Funktionen in der aktiven Datei und meldet das Ergebnis an die
+     * :core:navigation-Bridge — von dort konsumiert :feature:composepreview sowie der
+     * :app-NavHost (zur Entscheidung, ob ein "Preview"-Tab neben dem Editor erscheint).
+     */
     private fun publishActiveFileToBridge() {
-        val s = _uiState.value
-        val active = s.openFiles.getOrNull(s.activeFileIndex)
-        if (active != null) {
-            val file = File(active.path)
-            val extension = file.extension.lowercase()
-            val isKotlinFile = extension == "kt" || extension == "kts"
-            val composables = if (isKotlinFile) {
-                composeSourceAnalyzer.findComposables(active.content).map { it.functionName }
-            } else emptyList()
+        val active = _uiState.value.activeFile
+        if (active == null || !active.path.endsWith(".kt")) {
+            previewBridge.publish(null)
+            return
+        }
 
-            previewBridge.publish(
+        val composables = composeSourceAnalyzer.findComposables(active.content)
+        previewBridge.publish(
+            if (composables.isEmpty()) {
+                null
+            } else {
                 ActiveComposableFile(
                     path = active.path,
                     content = active.content,
-                    composableFunctionNames = composables
+                    composableFunctionNames = composables.map { it.functionName }
                 )
-            )
-        } else {
-            previewBridge.publish(null)
-        }
+            }
+        )
     }
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto-Backup bis Android 11 (android:fullBackupContent). -->
+<full-backup-content>
+    <!-- Termux-Prefix/Home: mehrere hundert MB, vom Bootstrap/Setup reproduzierbar. -->
+    <exclude domain="file" path="usr" />
+    <exclude domain="file" path="home" />
+    <!-- Git-Zugangsdaten sind mit einem gerätegebundenen Keystore-Schlüssel verschlüsselt: auf neuem Gerät unbrauchbar. -->
+    <exclude domain="sharedpref" path="codeforge_git.xml" />
+</full-backup-content>

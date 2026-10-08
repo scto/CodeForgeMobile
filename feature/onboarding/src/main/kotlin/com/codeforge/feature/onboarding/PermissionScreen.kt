@@ -1,8 +1,5 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 // Modul: :feature:onboarding
 package com.codeforge.feature.onboarding
-
-import com.codeforge.core.resources.ResGetter
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -12,14 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.GetApp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Button
@@ -32,40 +24,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
+import com.codeforge.core.resources.stringRes
 
 @Composable
 fun PermissionScreen(
     storageGranted: Boolean,
     notificationGranted: Boolean,
-    batteryOptimizationGranted: Boolean,
-    writeSecureSettingsGranted: Boolean,
-    installPackagesGranted: Boolean,
     onRequestStorage: () -> Unit,
     onRequestNotification: () -> Unit,
-    onRequestBatteryOptimization: () -> Unit,
-    onRequestWriteSecureSettings: () -> Unit,
-    onRequestInstallPackages: () -> Unit,
     onContinue: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(scrollState)
-    ) {
-        Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_onboarding_perm_title), style = MaterialTheme.typography.headlineSmall)
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+        Text(stringRes(R.string.onboarding_berechtigungen), style = MaterialTheme.typography.headlineSmall)
         Text(
-            "CodeForge Mobile benötigt verschiedene Systemrechte für Terminals, Hintergrund-Builds und App-Installationen.",
+            stringRes(R.string.onboarding_codeforge_mobile_benoetigt_zugriff_auf),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
         )
 
         PermissionRow(
             icon = Icons.Filled.Folder,
-            title = "Speicherzugriff",
-            description = "Zum Öffnen, Erstellen und Bearbeiten von Projekten (MANAGE_EXTERNAL_STORAGE).",
+            title = Res.string(R.string.onboarding_speicherzugriff),
+            description = Res.string(R.string.onboarding_zum_oeffnen_erstellen_und_bearbeiten),
             granted = storageGranted,
             onRequest = onRequestStorage
         )
@@ -74,40 +56,10 @@ fun PermissionScreen(
 
         PermissionRow(
             icon = Icons.Filled.Notifications,
-            title = "Benachrichtigungen",
-            description = "Für Build-Status und lang laufende Gradle-Tasks im Hintergrund.",
+            title = Res.string(R.string.onboarding_benachrichtigungen),
+            description = Res.string(R.string.onboarding_fuer_build_status_und_lang),
             granted = notificationGranted,
             onRequest = onRequestNotification
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        PermissionRow(
-            icon = Icons.Filled.BatterySaver,
-            title = "Akku-Optimierung ausnehmen",
-            description = "Verhindert das Beenden von Hintergrund-Builds und PRoot-Terminals durch das System.",
-            granted = batteryOptimizationGranted,
-            onRequest = onRequestBatteryOptimization
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        PermissionRow(
-            icon = Icons.Filled.AdminPanelSettings,
-            title = "Systemeinstellungen schreiben",
-            description = "Erlaubt erweiterte Systemeinstellungen (WRITE_SECURE_SETTINGS, z. B. per ADB).",
-            granted = writeSecureSettingsGranted,
-            onRequest = onRequestWriteSecureSettings
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        PermissionRow(
-            icon = Icons.Filled.GetApp,
-            title = "APKs & Pakete installieren",
-            description = "Ermöglicht die direkte Installation selbst erstellter APKs (REQUEST_INSTALL_PACKAGES).",
-            granted = installPackagesGranted,
-            onRequest = onRequestInstallPackages
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -117,7 +69,7 @@ fun PermissionScreen(
             modifier = Modifier.fillMaxWidth(),
             enabled = storageGranted
         ) {
-            Text("Weiter")
+            Text(stringRes(R.string.onboarding_weiter))
         }
     }
 }
@@ -143,13 +95,13 @@ private fun PermissionRow(
             if (granted) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = "Erteilt",
+                    contentDescription = stringRes(R.string.onboarding_erteilt),
                     tint = MaterialTheme.colorScheme.primary
                 )
             } else {
                 Icon(
                     imageVector = Icons.Filled.RadioButtonUnchecked,
-                    contentDescription = "Ausstehend",
+                    contentDescription = stringRes(R.string.onboarding_ausstehend),
                     modifier = Modifier.clickable(onClick = onRequest)
                 )
             }

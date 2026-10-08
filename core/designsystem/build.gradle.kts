@@ -1,5 +1,6 @@
 plugins {
-    id("codeforge.android.library.compose")
+    alias(libs.plugins.codeforge.android.library.compose)
+    alias(libs.plugins.codeforge.quality)
 }
 
 android {
@@ -7,6 +8,9 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:resources"))
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive)
-    implementation(project(":core:datastore"))
 }

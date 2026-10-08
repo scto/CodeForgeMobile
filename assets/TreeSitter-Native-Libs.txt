@@ -1,0 +1,91 @@
+Erstelle eine Datei namens `build_treesitter_languages.sh` im aktuellen Verzeichnis, mache sie ausführbar (`chmod +x build_treesitter_languages.sh`) und führe sie anschließend aus. 
+Das Skript muss exakt den folgenden Bash-Code enthalten. Ersetze `/pfad/zu/CodeForgeMobile` durch den tatsächlichen absoluten Pfad zum Projektverzeichnis!
+
+#!/bin/bash
+set -e
+
+PROJECT_DIR="/pfad/zu/CodeForgeMobile"
+EDITOR_MAIN="$PROJECT_DIR/feature/editor/src/main"
+WORK_DIR="$HOME/treesitter_master_workspace"
+NDK_DIR="$WORK_DIR/android-ndk-r26d"
+ABIS=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
+LANGUAGES=("java" "kotlin" "xml" "json" "properties" "c" "cpp" "python" "aidl" "log" "bash" "yaml" "toml" "cmake")
+
+echo "=== 1. Workspace & NDK vorbereiten ==="
+mkdir -p "$WORK_DIR"
+cd "$WORK_DIR"
+apt-get update && apt-get install -y wget unzip git cmake ninja-build clang default-jdk
+
+if [ ! -d "$NDK_DIR" ]; then
+    echo "Lade Android NDK herunter..."
+    wget -q https://dl.google.com/android/repository/android-ndk-r26d-linux.zip -O ndk.zip
+    unzip -q ndk.zip
+    rm ndk.zip
+fi
+TOOLCHAIN="$NDK_DIR/build/cmake/android.toolchain.cmake"
+
+echo "=== 2. Sprachen (.so) kompilieren und Queries (.scm) kopieren ==="
+for LANG in "${LANGUAGES[@]}"; do
+    cd "$WORK_DIR"
+    
+    # Standard-URL und Ausnahmen für spezielle Forks
+    REPO_URL="https://github.com/tree-sitter/tree-sitter-$LANG"
+    [ "$LANG" == "kotlin" ] && REPO_URL="https://github.com/fwcd/tree-sitter-kotlin"
+    [ "$LANG" == "cmake" ] && REPO_URL="https://github.com/uyha/tree-sitter-cmake"
+    [ "$LANG" == "log" ] && REPO_URL="https://github.com/AndroidIDEOfficial/tree-sitter-log"
+    [ "$LANG" == "aidl" ] && REPO_URL="https://github.com/AndroidIDEOfficial/tree-sitter-aidl"
+
+    if [ ! -d "ts-$LANG" ]; then
+        git clone "$REPO_URL" "ts-$LANG" \vert{}\vert{} echo "Warnung: Konnte $LANG nicht klonen."
+    fi
+    
+    if [ -d "ts-$LANG" ]; then
+        cd "ts-$LANG"
+        
+        # Queries in den assets Ordner kopieren
+        if [ -d "queries" ]; then
+            ASSET_DIR="$EDITOR_MAIN/assets/treesitter/$LANG"
+            mkdir -p "$ASSET_DIR"
+            cp queries/*.scm "$ASSET_DIR/" 2>/dev/null || true
+            echo "Queries für $LANG kopiert."
+        fi
+
+        # CMakeLists.txt generieren
+        cat <<EOF > CMakeLists.txt
+cmake_minimum_required(VERSION 3.10)
+project(tree-sitter-$LANG C CXX)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 14)
+include_directories(src)
+file(GLOB SOURCES "src/parser.c" "src/scanner.c" "src/scanner.cc")
+add_library(tree-sitter-$LANG SHARED \${SOURCES})
+EOF
+
+        # Strikte Cross-Kompilierung für alle ABIs
+        for ABI in "${ABIS[@]}"; do
+            echo ">>> Baue libtree-sitter-$LANG.so für $ABI..."
+            BUILD_DIR="build_$ABI"
+            
+            # WICHTIG: Cache vor jedem Build bereinigen
+            rm -rf "$BUILD_DIR"
+            
+            cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN" -DANDROID_ABI="$ABI" -DANDROID_PLATFORM=android-21 || continue
+            cmake --build "$BUILD_DIR" || continue
+            
+            # Zielverzeichnis erstellen falls nicht vorhanden
+            mkdir -p "$EDITOR_MAIN/jniLibs/$ABI/"
+            cp "$BUILD_DIR/libtree-sitter-$LANG.so" "$EDITOR_MAIN/jniLibs/$ABI/" 2>/dev/null || true
+        done
+    fi
+done
+
+echo "=== 3. Version Catalog prüfen ==="
+TOML_FILE="$PROJECT_DIR/gradle/libs.versions.toml"
+if [ -f "$TOML_FILE" ]; then
+    if ! grep -q "language-treesitter" "$TOML_FILE"; then
+        echo "Füge Treesitter zu TOML hinzu..."
+        echo 'sora-treesitter = { module = "io.github.Rosemoe.sora-editor:language-treesitter", version.ref = "sora" }' >> "$TOML_FILE"
+    fi
+fi
+
+echo "=== Sprachen-Build komplett! Alle nativen Libs und Queries sind in CodeForgeMobile integriert. ==="

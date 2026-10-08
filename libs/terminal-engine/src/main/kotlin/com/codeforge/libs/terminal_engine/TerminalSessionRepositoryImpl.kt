@@ -1,239 +1,168 @@
-// Modul: :libs:terminal-engine
+/**
+ * Modul: :libs:terminal-engine
+ * @author Thomas Schmid
+ *
+ * Interaktive Shell im Termux-Bootstrap (/data/data/com.codeforge.app/files/usr) über den
+ * vendorten Termux-Terminal-Emulator (:libs:termux-emulator). Es gibt kein PRoot und keine
+ * Distro-Auswahl mehr — genau ein Prefix. [start] nimmt optional ein Startkommando entgegen
+ * (z. B. `codeforge-env setup …` am Ende des Onboardings).
+ *
+ * TerminalSession/JNI erwarten den Main-Thread (Handler mit Looper.getMainLooper()) für
+ * Konstruktion und I/O-Callbacks — Erstellung und write()/updateSize() laufen auf Dispatchers.Main.
+ */
 package com.codeforge.libs.terminal_engine
 
 import android.content.Context
-import com.codeforge.core.domain.repository.TerminalSession
+import com.codeforge.core.domain.model.TerminalSessionState
 import com.codeforge.core.domain.repository.TerminalSessionRepository
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
+import com.codeforge.terminal.TerminalSession
+import com.codeforge.terminal.TerminalSessionClient
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
-import java.util.UUID
 import javax.inject.Inject
-import com.codeforge.core.domain.repository.SystemPathsRepository
-import com.codeforge.core.datastore.SettingsRepository
-import kotlinx.coroutines.flow.first
 import javax.inject.Singleton
+
+private const val TERMINAL_COLUMNS = 100
+private const val TERMINAL_ROWS = 40
 
 @Singleton
 class TerminalSessionRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val systemPaths: SystemPathsRepository,
-    private val settingsRepository: SettingsRepository,
-    private val rootfsBootstrapper: RootfsBootstrapper
-) : TerminalSessionRepository {
+    @ApplicationContext private val context: Context
+) : TerminalSessionRepository, TerminalSessionClient {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val _sessions = MutableStateFlow<List<TerminalSession>>(emptyList())
-    override val activeSessions: StateFlow<List<TerminalSession>> = _sessions.asStateFlow()
+    private var session: TerminalSession? = null
 
-    private val _isWakeLockAcquired = MutableStateFlow(false)
-    override val isWakeLockAcquired: StateFlow<Boolean> = _isWakeLockAcquired.asStateFlow()
+    private val _sessionState = MutableStateFlow(TerminalSessionState.STOPPED)
+    override val sessionState: StateFlow<TerminalSessionState> = _sessionState.asStateFlow()
 
-    private val nativeSessions = mutableMapOf<String, com.nyamux.terminal.TerminalSession>()
+    /**
+     * Emittiert den vollständigen sichtbaren Bildschirminhalt bei jeder Änderung — kein
+     * Zeilen-Log-Anhängen, ein echter Terminal-Emulator rendert einen aktuellen
+     * Bildschirmzustand, keine anwachsende Textliste (siehe TerminalViewModel in
+     * :feature:terminal, unverändert).
+     */
+    private val _output = MutableSharedFlow<String>(extraBufferCapacity = 64)
+    override val output: Flow<String> = _output.asSharedFlow()
 
-    override suspend fun createSession(command: String?): TerminalSession = withContext(Dispatchers.IO) {
-        val rootfsDir = File(systemPaths.getDistroDir("ubuntu"))
-        if (!rootfsDir.exists()) rootfsDir.mkdirs()
-
-        rootfsBootstrapper.ensureRootfsReady { }
-
-        val localDir = File(systemPaths.getLocalDir())
-        val localTmpDir = File(localDir, "tmp")
-        if (!localTmpDir.exists()) localTmpDir.mkdirs()
-        if (!localDir.exists()) localDir.mkdirs()
-        File(localDir, "stat").apply { if (!exists()) writeText("") }
-        File(localDir, "vmstat").apply { if (!exists()) writeText("") }
-
-        val localBinDir = File(systemPaths.getLocalBinDir())
-        if (!localBinDir.exists()) localBinDir.mkdirs()
-
-        // Extract Ubuntu bootstrap init scripts
-        val initUbuntuHostFile = File(localBinDir, "init-ubuntu-host")
+    override suspend fun start(initialCommand: String?) {
+        _sessionState.value = TerminalSessionState.STARTING
         runCatching {
-            context.assets.open("init-ubuntu-host.sh").use { input ->
-                FileOutputStream(initUbuntuHostFile).use { output -> input.copyTo(output) }
+            if (!TermuxEnvironment.isBootstrapInstalled()) {
+                error(
+                    Res.string(R.string.terminal_engine_termux_bootstrap_ist_unter_nicht, TermuxEnvironment.prefix)
+                )
             }
-            initUbuntuHostFile.setExecutable(true)
-        }
-        val initUbuntuRootFile = File(localBinDir, "init-ubuntu-root")
-        runCatching {
-            context.assets.open("init-ubuntu-root.sh").use { input ->
-                FileOutputStream(initUbuntuRootFile).use { output -> input.copyTo(output) }
+
+            val homeDir = File(TermuxEnvironment.home).apply { mkdirs() }
+            val shellPath = TermuxEnvironment.bashPath
+            val argv = arrayOf(shellPath, "-l") // Login-Shell (lädt profile.d/codeforge-android.sh)
+            val env = TermuxEnvironment.environment().map { (k, v) -> "$k=$v" }.toTypedArray()
+
+            withContext(Dispatchers.Main) {
+                val newSession = TerminalSession(
+                    shellPath,
+                    homeDir.absolutePath,
+                    argv,
+                    env,
+                    4000,
+                    this@TerminalSessionRepositoryImpl
+                )
+                session = newSession
+                newSession.updateSize(TERMINAL_COLUMNS, TERMINAL_ROWS)
             }
-            initUbuntuRootFile.setExecutable(true)
-        }
-        val initUbuntuFile = File(localBinDir, "init-ubuntu")
-        runCatching {
-            context.assets.open("init-ubuntu.sh").use { input ->
-                FileOutputStream(initUbuntuFile).use { output -> input.copyTo(output) }
-            }
-            initUbuntuFile.setExecutable(true)
-        }
 
-        val prefix = context.filesDir.absolutePath
-        val linkerPath = "/system/bin/linker64"
-        val prootBinaryPath = "${context.applicationInfo.nativeLibraryDir}/libproot.so"
-
-        val envMap = ProotCommandBuilder.defaultEnv(rootfsDir.absolutePath).toMutableMap()
-        envMap["PREFIX"] = prefix
-        envMap["LD_LIBRARY_PATH"] = context.applicationInfo.nativeLibraryDir
-        envMap["LINKER"] = linkerPath
-        envMap["NATIVE_LIB_DIR"] = context.applicationInfo.nativeLibraryDir
-        envMap["PKG"] = context.packageName
-        envMap["PROOT_TMP_DIR"] = systemPaths.getLocalTmpDir()
-        envMap["TMPDIR"] = systemPaths.getLocalTmpDir()
-        envMap["PROOT_BINARY"] = prootBinaryPath
-        envMap["PROOT_LOADER"] = "${context.applicationInfo.nativeLibraryDir}/libproot-loader.so"
-        envMap["PROOT_LOADER_32"] = "${context.applicationInfo.nativeLibraryDir}/libproot-loader32.so"
-
-        val envList = envMap.map { (k, v) -> "$k=$v" }.toMutableList()
-
-        val termSettings = settingsRepository.appSettings.first().terminal
-        val scrollback = if (termSettings.scrollbackLines > 0) termSettings.scrollbackLines else 2000
-        val initHostFile = File(localBinDir, "init-ubuntu-host")
-
-        val statFile = File(localDir, "stat")
-        if (!statFile.exists()) statFile.createNewFile()
-        val vmstatFile = File(localDir, "vmstat")
-        if (!vmstatFile.exists()) vmstatFile.createNewFile()
-
-        val prootArgs = arrayOf("-c", initHostFile.absolutePath)
-        val shell = "/system/bin/sh"
-
-        val nativeSession = withContext(Dispatchers.Main) {
-            com.nyamux.terminal.TerminalSession(
-                shell,
-                rootfsDir.absolutePath,
-                prootArgs,
-                envList.toTypedArray(),
-                scrollback,
-                object : com.nyamux.terminal.TerminalSessionClient {
-                    override fun onTextChanged(session: com.nyamux.terminal.TerminalSession) {}
-                    override fun onTitleChanged(session: com.nyamux.terminal.TerminalSession) {}
-                    override fun onSessionFinished(session: com.nyamux.terminal.TerminalSession) {
-                        val sessionEntry = nativeSessions.entries.firstOrNull { it.value == session }
-                        val targetId = sessionEntry?.key
-                        if (targetId != null) {
-                            scope.launch {
-                                killSession(targetId)
-                            }
-                        }
-                    }
-                    override fun onCopyTextToClipboard(session: com.nyamux.terminal.TerminalSession, text: String?) {}
-                    override fun onPasteTextFromClipboard(session: com.nyamux.terminal.TerminalSession?) {}
-                    override fun onBell(session: com.nyamux.terminal.TerminalSession) {}
-                    override fun onColorsChanged(session: com.nyamux.terminal.TerminalSession) {}
-                    override fun onTerminalCursorStateChange(state: Boolean) {}
-                    override fun setTerminalShellPid(session: com.nyamux.terminal.TerminalSession, pid: Int) {}
-                    override fun getTerminalCursorStyle(): Int = 0
-                    override fun logError(tag: String?, message: String?) {}
-                    override fun logWarn(tag: String?, message: String?) {}
-                    override fun logInfo(tag: String?, message: String?) {}
-                    override fun logDebug(tag: String?, message: String?) {}
-                    override fun logVerbose(tag: String?, message: String?) {}
-                    override fun logStackTraceWithMessage(tag: String?, message: String?, e: Exception?) {}
-                    override fun logStackTrace(tag: String?, e: Exception?) {}
-                }
-            )
-        }
-
-        val id = UUID.randomUUID().toString()
-        val pid = nativeSession.pid
-
-        val sessionCount = _sessions.value.size
-        val titleName = if (sessionCount == 0) "main" else "main #$sessionCount"
-        val newSession = TerminalSession(id = id, processId = pid, title = titleName, isRunning = true)
-        nativeSessions[id] = nativeSession
-        _sessions.update { it + newSession }
-        newSession
-    }
-
-    override suspend fun killSession(sessionId: String) {
-        nativeSessions[sessionId]?.finishIfRunning()
-        nativeSessions.remove(sessionId)
-        _sessions.update { it.filter { session -> session.id != sessionId } }
-    }
-
-    override suspend fun killAllSessions() {
-        nativeSessions.values.forEach { session ->
-            runCatching { session.finishIfRunning() }
-        }
-        nativeSessions.clear()
-        _sessions.update { emptyList() }
-    }
-
-    override suspend fun renameSession(sessionId: String, newTitle: String) {
-        _sessions.update { list ->
-            list.map { session ->
-                if (session.id == sessionId) session.copy(title = newTitle) else session
-            }
+            _sessionState.value = TerminalSessionState.RUNNING
+            initialCommand?.takeIf { it.isNotBlank() }?.let { sendInput(it) }
+        }.onFailure { throwable ->
+            _output.tryEmit(Res.string(R.string.terminal_engine_fehler_beim_starten_der_shell, throwable.message))
+            _sessionState.value = TerminalSessionState.FAILED
         }
     }
 
-    override fun setWakeLockState(acquired: Boolean) {
-        _isWakeLockAcquired.value = acquired
-    }
-
-    override suspend fun sendVirtualKey(sessionId: String, key: String) {
-        val session = nativeSessions[sessionId] ?: return
-        when (key.uppercase()) {
-            "ESC" -> session.write("\u001B")
-            "TAB" -> session.write("\t")
-            "UP", "▲" -> session.write("\u001B[A")
-            "DN", "DOWN", "▼" -> session.write("\u001B[B")
-            "LEFT", "◀" -> session.write("\u001B[D")
-            "RIGHT", "▶" -> session.write("\u001B[C")
-            "HOME" -> session.write("\u001B[H")
-            "END" -> session.write("\u001B[F")
-            "PGUP" -> session.write("\u001B[5~")
-            "PGDN" -> session.write("\u001B[6~")
-            "DEL" -> session.write("\u001B[3~")
-            "CTRL+A", "CTRL-A" -> session.write("\u0001")
-            "CTRL+B", "CTRL-B" -> session.write("\u0002")
-            "CTRL+C", "CTRL-C" -> session.write("\u0003")
-            "CTRL+D", "CTRL-D" -> session.write("\u0004")
-            "CTRL+E", "CTRL-E" -> session.write("\u0005")
-            "CTRL+F", "CTRL-F" -> session.write("\u0006")
-            "CTRL+G", "CTRL-G" -> session.write("\u0007")
-            "CTRL+H", "CTRL-H" -> session.write("\u0008")
-            "CTRL+I", "CTRL-I" -> session.write("\t")
-            "CTRL+J", "CTRL-J" -> session.write("\n")
-            "CTRL+K", "CTRL-K" -> session.write("\u000B")
-            "CTRL+L", "CTRL-L" -> session.write("\u000C")
-            "CTRL+M", "CTRL-M" -> session.write("\r")
-            "CTRL+N", "CTRL-N" -> session.write("\u000E")
-            "CTRL+O", "CTRL-O" -> session.write("\u000F")
-            "CTRL+P", "CTRL-P" -> session.write("\u0010")
-            "CTRL+Q", "CTRL-Q" -> session.write("\u0011")
-            "CTRL+R", "CTRL-R" -> session.write("\u0012")
-            "CTRL+S", "CTRL-S" -> session.write("\u0013")
-            "CTRL+T", "CTRL-T" -> session.write("\u0014")
-            "CTRL+U", "CTRL-U" -> session.write("\u0015")
-            "CTRL+V", "CTRL-V" -> session.write("\u0016")
-            "CTRL+W", "CTRL-W" -> session.write("\u0017")
-            "CTRL+X", "CTRL-X" -> session.write("\u0018")
-            "CTRL+Y", "CTRL-Y" -> session.write("\u0019")
-            "CTRL+Z", "CTRL-Z" -> session.write("\u001A")
-            else -> session.write(key)
+    override suspend fun sendInput(text: String) {
+        val activeSession = session
+        if (activeSession == null) {
+            _output.emit(Res.string(R.string.terminal_engine_fehler_beim_senden_keine_aktive))
+            return
+        }
+        withContext(Dispatchers.Main) {
+            // TerminalSession kennt nur write(byte[], offset, count), kein write(String) —
+            // anders als die vorherige PRoot-Implementierung angenommen hatte.
+            val bytes = "$text\n".toByteArray(Charsets.UTF_8)
+            activeSession.write(bytes, 0, bytes.size)
         }
     }
 
-    override fun getNativeSession(sessionId: String): Any? {
-        return nativeSessions[sessionId]
+    override suspend fun stop() {
+        withContext(Dispatchers.Main) {
+            session?.finishIfRunning()
+        }
+        session = null
+        _sessionState.value = TerminalSessionState.STOPPED
+    }
+
+    // ---- TerminalSessionClient: Callbacks von TerminalSession, laufen auf Main-Thread ----
+
+    override fun onTextChanged(changedSession: TerminalSession) {
+        val screenText = changedSession.emulator?.screen?.transcriptText ?: return
+        _output.tryEmit(screenText)
+    }
+
+    override fun onTitleChanged(changedSession: TerminalSession) = Unit
+
+    override fun onSessionFinished(finishedSession: TerminalSession) {
+        _sessionState.value = TerminalSessionState.EXITED
+    }
+
+    override fun onCopyTextToClipboard(session: TerminalSession, text: String?) = Unit
+
+    override fun onPasteTextFromClipboard(session: TerminalSession?) = Unit
+
+    override fun onBell(session: TerminalSession) = Unit
+
+    override fun onColorsChanged(session: TerminalSession) = Unit
+
+    override fun onTerminalCursorStateChange(state: Boolean) = Unit
+
+    override fun setTerminalShellPid(session: TerminalSession, pid: Int) = Unit
+
+    override fun getTerminalCursorStyle(): Int? = null
+
+    override fun logError(tag: String?, message: String?) {
+        android.util.Log.e(tag ?: "TerminalSession", message ?: "")
+    }
+
+    override fun logWarn(tag: String?, message: String?) {
+        android.util.Log.w(tag ?: "TerminalSession", message ?: "")
+    }
+
+    override fun logInfo(tag: String?, message: String?) {
+        android.util.Log.i(tag ?: "TerminalSession", message ?: "")
+    }
+
+    override fun logDebug(tag: String?, message: String?) {
+        android.util.Log.d(tag ?: "TerminalSession", message ?: "")
+    }
+
+    override fun logVerbose(tag: String?, message: String?) {
+        android.util.Log.v(tag ?: "TerminalSession", message ?: "")
+    }
+
+    override fun logStackTraceWithMessage(tag: String?, message: String?, e: Exception?) {
+        android.util.Log.e(tag ?: "TerminalSession", message ?: "", e)
+    }
+
+    override fun logStackTrace(tag: String?, e: Exception?) {
+        android.util.Log.e(tag ?: "TerminalSession", "", e)
     }
 }
-
-private fun com.nyamux.terminal.TerminalSession.write(text: String) {
-    val bytes = text.toByteArray(Charsets.UTF_8)
-    write(bytes, 0, bytes.size)
-}
-

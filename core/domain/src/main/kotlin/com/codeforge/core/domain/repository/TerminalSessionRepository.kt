@@ -1,24 +1,23 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.repository
 
+import com.codeforge.core.domain.model.TerminalSessionState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-data class TerminalSession(
-    val id: String,
-    val processId: Int = 0,
-    val title: String,
-    val isRunning: Boolean = true
-)
-
+/**
+ * Interaktive Shell-Session im Termux-Bootstrap (echtes PTY über :libs:termux-emulator).
+ * Implementiert in :libs:terminal-engine, konsumiert von :feature:terminal.
+ */
 interface TerminalSessionRepository {
-    val activeSessions: StateFlow<List<TerminalSession>>
-    val isWakeLockAcquired: StateFlow<Boolean>
+    val sessionState: StateFlow<TerminalSessionState>
+    val output: Flow<String>
 
-    suspend fun createSession(command: String? = null): TerminalSession
-    suspend fun killSession(sessionId: String)
-    suspend fun killAllSessions()
-    suspend fun renameSession(sessionId: String, newTitle: String)
-    fun setWakeLockState(acquired: Boolean)
-    suspend fun sendVirtualKey(sessionId: String, key: String)
-    fun getNativeSession(sessionId: String): Any?
+    /**
+     * Startet die Login-Shell. [initialCommand] wird nach dem Start einmalig eingegeben
+     * (z. B. `codeforge-env setup --jdk 17` am Ende des Onboardings).
+     */
+    suspend fun start(initialCommand: String? = null)
+    suspend fun sendInput(text: String)
+    suspend fun stop()
 }

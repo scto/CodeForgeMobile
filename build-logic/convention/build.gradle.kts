@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     `kotlin-dsl`
 }
@@ -9,6 +11,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 dependencies {
@@ -17,6 +25,7 @@ dependencies {
     compileOnly(libs.findLibrary("ksp-gradlePlugin").get())
     compileOnly(libs.findLibrary("hilt-gradlePlugin").get())
     compileOnly(libs.findLibrary("compose-gradlePlugin").get())
+    compileOnly(libs.findLibrary("ktlint-gradlePlugin").get())
 }
 
 gradlePlugin {

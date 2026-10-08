@@ -1,18 +1,17 @@
 // Modul: :libs:lsp-client
 package com.codeforge.libs.lsp_client
 
-import com.codeforge.core.common.logging.AppLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.int
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -25,15 +24,16 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Kapselt die rohe JSON-RPC-2.0-Kommunikation mit einem Language-Server-Prozess.
+ * Kapselt die rohe JSON-RPC-2.0-Kommunikation mit einem Language-Server-Prozess
+ * gemäß LSP-Spec: jede Nachricht besitzt einen "Content-Length: N"-Header, eine
+ * Leerzeile, dann N Bytes UTF-8-kodiertes JSON. Läuft im :libs:lsp-client-Modul
+ * innerhalb des App-Prozesses (der Server selbst läuft als separater Subprozess,
+ * gestartet z.B. innerhalb der PRoot-Rootfs von :libs:terminal-engine).
  */
-class LspRpcConnection(
-    inputStream: InputStream,
-    outputStream: OutputStream
-) {
+class LspRpcConnection(process: Process) {
 
-    private val output: OutputStream = BufferedOutputStream(outputStream)
-    private val input: InputStream = BufferedInputStream(inputStream)
+    private val output: OutputStream = BufferedOutputStream(process.outputStream)
+    private val input: InputStream = BufferedInputStream(process.inputStream)
 
     private val requestIdCounter = AtomicInteger(0)
     private val pendingRequests = ConcurrentHashMap<Int, CompletableDeferred<JsonObject>>()
@@ -58,6 +58,7 @@ class LspRpcConnection(
         val method = (message["method"] as? JsonPrimitive)?.content
 
         if (method != null) {
+            // Notification oder Server->Client-Request (z.B. textDocument/publishDiagnostics)
             notificationHandler?.invoke(method, message["params"] as? JsonObject)
             return
         }
@@ -66,7 +67,7 @@ class LspRpcConnection(
         pendingRequests.remove(id)?.complete(message)
     }
 
-    suspend fun sendRequest(method: String, params: JsonObject): JsonObject = withContext(Dispatchers.IO) {
+    suspend fun sendRequest(method: String, params: JsonObject): JsonObject {
         val id = requestIdCounter.incrementAndGet()
         val deferred = CompletableDeferred<JsonObject>()
         pendingRequests[id] = deferred
@@ -77,22 +78,18 @@ class LspRpcConnection(
             put("method", method)
             put("params", params)
         }
-        val success = writeMessage(output, payload)
-        if (!success) {
-            pendingRequests.remove(id)
-            throw java.io.IOException("Failed to write RPC message: Stream closed")
-        }
+        writeMessage(output, payload)
 
-        deferred.await()
+        return deferred.await()
     }
 
-    fun sendNotification(method: String, params: JsonObject): Boolean {
+    fun sendNotification(method: String, params: JsonObject) {
         val payload = buildJsonObject {
             put("jsonrpc", "2.0")
             put("method", method)
             put("params", params)
         }
-        return writeMessage(output, payload)
+        writeMessage(output, payload)
     }
 
     fun close() {
@@ -107,29 +104,27 @@ class LspRpcConnection(
         private val json = Json { ignoreUnknownKeys = true }
 
         private fun readMessage(input: InputStream): JsonObject? {
-            return runCatching {
-                val headers = mutableMapOf<String, String>()
-                while (true) {
-                    val line = readHeaderLine(input) ?: return null
-                    if (line.isEmpty()) break
-                    val separatorIndex = line.indexOf(':')
-                    if (separatorIndex > 0) {
-                        headers[line.substring(0, separatorIndex).trim()] = line.substring(separatorIndex + 1).trim()
-                    }
+            val headers = mutableMapOf<String, String>()
+            while (true) {
+                val line = readHeaderLine(input) ?: return null
+                if (line.isEmpty()) break
+                val separatorIndex = line.indexOf(':')
+                if (separatorIndex > 0) {
+                    headers[line.substring(0, separatorIndex).trim()] = line.substring(separatorIndex + 1).trim()
                 }
+            }
 
-                val contentLength = headers["Content-Length"]?.toIntOrNull() ?: return null
-                val bodyBytes = ByteArray(contentLength)
-                var readTotal = 0
-                while (readTotal < contentLength) {
-                    val readCount = input.read(bodyBytes, readTotal, contentLength - readTotal)
-                    if (readCount == -1) return null
-                    readTotal += readCount
-                }
+            val contentLength = headers["Content-Length"]?.toIntOrNull() ?: return null
+            val bodyBytes = ByteArray(contentLength)
+            var readTotal = 0
+            while (readTotal < contentLength) {
+                val readCount = input.read(bodyBytes, readTotal, contentLength - readTotal)
+                if (readCount == -1) return null
+                readTotal += readCount
+            }
 
-                val bodyText = String(bodyBytes, Charsets.UTF_8)
-                json.parseToJsonElement(bodyText).jsonObject
-            }.getOrNull()
+            val bodyText = String(bodyBytes, Charsets.UTF_8)
+            return runCatching { json.parseToJsonElement(bodyText).jsonObject }.getOrNull()
         }
 
         private fun readHeaderLine(input: InputStream): String? {
@@ -143,24 +138,14 @@ class LspRpcConnection(
             }
         }
 
-        private fun writeMessage(output: OutputStream, payload: JsonObject): Boolean {
-            return runCatching {
-                val bodyText = json.encodeToString(JsonObject.serializer(), payload)
-                val bodyBytes = bodyText.toByteArray(Charsets.UTF_8)
-                val header = "Content-Length: ${bodyBytes.size}\r\n\r\n".toByteArray(Charsets.UTF_8)
-                synchronized(output) {
-                    output.write(header)
-                    output.write(bodyBytes)
-                    output.flush()
-                }
-                true
-            }.getOrElse { e ->
-                if (e is java.io.IOException) {
-                    AppLogger.w("LspRpcConnection", "RPC stream closed: ${e.message}")
-                } else {
-                    AppLogger.e("LspRpcConnection", "Failed to write RPC message", e)
-                }
-                false
+        private fun writeMessage(output: OutputStream, payload: JsonObject) {
+            val bodyText = json.encodeToString(JsonObject.serializer(), payload)
+            val bodyBytes = bodyText.toByteArray(Charsets.UTF_8)
+            val header = "Content-Length: ${bodyBytes.size}\r\n\r\n".toByteArray(Charsets.UTF_8)
+            synchronized(output) {
+                output.write(header)
+                output.write(bodyBytes)
+                output.flush()
             }
         }
     }

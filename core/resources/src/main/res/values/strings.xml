@@ -1,401 +1,791 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Zentrale Texte aller Module. Zugriff: Res.string(R.string.key) bzw. stringRes(...) im Composable. -->
 <resources>
-    <!-- App & General -->
+
+    <!-- common -->
+    <string name="common_aa">Aa</string>
+    <string name="common_abbrechen">Abbrechen</string>
+    <string name="common_aktualisieren">Aktualisieren</string>
+    <string name="common_aktuell">Aktuell</string>
+    <string name="common_benutzername_fehlt">Benutzername fehlt</string>
+    <string name="common_datei">Datei</string>
+    <string name="common_deinstallation_fehlgeschlagen">Deinstallation fehlgeschlagen.</string>
+    <string name="common_editor">Editor</string>
+    <string name="common_entfernen">Entfernen</string>
+    <string name="common_erkannt">Erkannt: %1$s</string>
+    <string name="common_erneut_versuchen">Erneut versuchen</string>
+    <string name="common_ersetzen_durch">Ersetzen durch</string>
+    <string name="common_git">Git</string>
+    <string name="common_installation_fehlgeschlagen">Installation fehlgeschlagen.</string>
+    <string name="common_installiert">%1$s installiert.</string>
+    <string name="common_keine_treffer">Keine Treffer</string>
+    <string name="common_klonen_fehlgeschlagen">Klonen fehlgeschlagen.</string>
+    <string name="common_loeschen">Löschen</string>
+    <string name="common_name">Name</string>
+    <string name="common_noch_kein_commit_zum_aendern">Noch kein Commit zum Ändern vorhanden.</string>
+    <string name="common_ordner">Ordner</string>
+    <string name="common_preview">Preview</string>
+    <string name="common_projekt">Projekt</string>
+    <string name="common_schliessen">Schließen</string>
+    <string name="common_speichern">Speichern</string>
+    <string name="common_termux_umgebung_ist_noch_nicht">Termux-Umgebung ist noch nicht eingerichtet (Onboarding abschließen).</string>
+    <string name="common_token_fehlt">Token fehlt</string>
+    <string name="common_ueberspringen">Überspringen</string>
+    <string name="common_umbenennen">Umbenennen</string>
+    <string name="common_update">Update</string>
+    <string name="common_vorschau">Vorschau</string>
+    <string name="common_wort">Wort</string>
+
+    <!-- app -->
+    <string name="app_import_fehlgeschlagen">Import fehlgeschlagen</string>
+    <string name="app_importiere_projekt_dateien_kopiert">Importiere Projekt… (%1$s Dateien kopiert)</string>
+    <string name="app_kein_verzeichnis_ausgewaehlt">Kein Verzeichnis ausgewählt.</string>
+    <string name="app_menue_oeffnen">Menü öffnen</string>
+    <string name="app_projekt_importieren">Projekt importieren</string>
+    <string name="app_projekt_importiert_oeffne_arbeitsberei">Projekt importiert, öffne Arbeitsbereich…</string>
+    <string name="app_terminal_initialcommand">terminal?initialCommand=%1$s</string>
+    <string name="app_verzeichnisauswahl_wird_geoeffnet">Verzeichnisauswahl wird geöffnet…</string>
+
+    <!-- composepreview -->
+    <string name="composepreview_bild_konnte_nicht_dekodiert_werden">Bild konnte nicht dekodiert werden.</string>
+    <string name="composepreview_compose_compiler_plugin_jar_fehlt">Compose-Compiler-Plugin-Jar fehlt (assets/compiler-runtime/kotlin-compose-compiler-plugin-embeddable.jar). Ohne dieses Plugin können @Composable-Funktionen nicht korrekt kompiliert werden.</string>
+    <string name="composepreview_d8_konnte_nicht_gestartet_werden">d8 konnte nicht gestartet werden.</string>
+    <string name="composepreview_d8_nicht_gefunden_build_tools">d8 nicht gefunden. Build-Tools über den SDK Manager installieren (Einstellungen → SDK Manager → Build-Tools).</string>
+    <string name="composepreview_dexing_fehlgeschlagen">Dexing fehlgeschlagen: %1$s</string>
+    <string name="composepreview_die_grafische_rendering_pipeline_ist">Die grafische Rendering-Pipeline ist architektonisch vorbereitet, aber noch nicht angeschlossen (dynamische Kompilierung + Klassenladen zur Laufzeit). Siehe KDoc in ComposePreviewRendererImpl.</string>
+    <string name="composepreview_funktion_nicht_in_kompiliertem_code">Funktion \'%1$s\' nicht in kompiliertem Code gefunden.</string>
+    <string name="composepreview_kompilierung_fehlgeschlagen">Kompilierung fehlgeschlagen:\n%1$s</string>
+    <string name="composepreview_kompilierung_lieferte_keine_class_date">Kompilierung lieferte keine .class-Dateien.</string>
+    <string name="composepreview_neu_rendern">Neu rendern</string>
+    <string name="composepreview_oeffne_eine_datei_mit_composable">Öffne eine Datei mit @Composable-Funktionen im Editor.</string>
+    <string name="composepreview_rendering_fehlgeschlagen">Rendering fehlgeschlagen.</string>
+    <string name="composepreview_waehle_eine_funktion_fuer_die">Wähle eine Funktion für die Vorschau.</string>
+
+    <!-- data -->
+    <string name="data_aktion_im_aktuellen_zustand_nicht">Aktion im aktuellen Zustand nicht möglich: %1$s</string>
+    <string name="data_auf_dem_remote_existiert_nicht">Auf dem Remote existiert „%1$s“ nicht.</string>
+    <string name="data_auf_gibt_es_keinen_branch">Auf „%1$s“ gibt es keinen Branch „%2$s“ – zuerst pushen.</string>
+    <string name="data_ausgewaehltes_verzeichnis_konnte_nicht">Ausgewähltes Verzeichnis konnte nicht gelesen werden.</string>
+    <string name="data_authentifizierung_fehlgeschlagen_benut">Authentifizierung fehlgeschlagen – Benutzername/Token in den Git-Einstellungen prüfen.</string>
+    <string name="data_authentifizierung_fehlgeschlagen_ssh_w">Authentifizierung fehlgeschlagen (SSH wird nicht unterstützt, bitte HTTPS + Token verwenden).</string>
+    <string name="data_binaerdateien_lassen_sich_nicht_hunk">Binärdateien lassen sich nicht hunk-weise bearbeiten.</string>
+    <string name="data_bitte_zuerst_name_und_mail">Bitte zuerst Name und E-Mail in den Git-Einstellungen setzen.</string>
+    <string name="data_branch_existiert_bereits">Branch „%1$s“ existiert bereits.</string>
+    <string name="data_branch_ist_noch_nicht_gemergt">Branch ist noch nicht gemergt (zum Löschen erzwingen).</string>
+    <string name="data_branch_nicht_gefunden">Branch „%1$s“ nicht gefunden.</string>
+    <string name="data_commit_nachricht_darf_nicht_leer">Commit-Nachricht darf nicht leer sein.</string>
+    <string name="data_commit_nicht_gefunden">Commit „%1$s“ nicht gefunden.</string>
+    <string name="data_datei_nicht_gefunden">Datei nicht gefunden: %1$s</string>
+    <string name="data_der_aktuell_ausgecheckte_branch_kann">Der aktuell ausgecheckte Branch kann nicht gelöscht werden.</string>
+    <string name="data_es_gibt_noch_ungeloeste_konflikte">Es gibt noch ungelöste Konflikte – lösen und vormerken.</string>
+    <string name="data_fuer_annotierte_tags_zuerst_name">Für annotierte Tags zuerst Name und E-Mail in den Git-Einstellungen setzen.</string>
+    <string name="data_host_fehlt">Host fehlt</string>
+    <string name="data_import_fehlgeschlagen">Import fehlgeschlagen.</string>
+    <string name="data_importiertes_projekt">Importiertes Projekt</string>
+    <string name="data_initial_commit_uebersprungen_name_und">Initial-Commit übersprungen: Name und E-Mail in den Git-Einstellungen setzen.</string>
+    <string name="data_ist_im_letzten_commit_nicht">„%1$s“ ist im letzten Commit nicht enthalten (nicht versioniert).</string>
+    <string name="data_ist_nicht_im_konflikt">„%1$s“ ist nicht im Konflikt.</string>
+    <string name="data_ist_nicht_utf_8_kodiert">„%1$s“ ist nicht UTF-8-kodiert – hunk-weises Bearbeiten nicht möglich.</string>
+    <string name="data_kein_git_repository">Kein Git-Repository: %1$s</string>
+    <string name="data_kein_hunk_gewaehlt">Kein Hunk gewählt.</string>
+    <string name="data_kein_remote_konfiguriert">Kein Remote „%1$s“ konfiguriert.</string>
+    <string name="data_kein_remote_konfiguriert_git_panel">Kein Remote „%1$s“ konfiguriert (Git-Panel → Remote setzen).</string>
+    <string name="data_kein_verzeichnis">Kein Verzeichnis: %1$s</string>
+    <string name="data_keine_aenderungen_in">Keine Änderungen in „%1$s“.</string>
+    <string name="data_konnte_nicht_geloescht_werden">Konnte nicht gelöscht werden: %1$s</string>
+    <string name="data_lokale_aenderungen_wuerden_ueberschrie">Lokale Änderungen würden überschrieben: %1$s</string>
+    <string name="data_merge_commits_koennen_hier_nicht">Merge-Commits können hier nicht zurückgenommen werden.</string>
+    <string name="data_merge_commits_koennen_nicht_per">Merge-Commits können nicht per Cherry-Pick übernommen werden.</string>
+    <string name="data_name_existiert_bereits">Name existiert bereits.</string>
+    <string name="data_nicht_gefunden">Nicht gefunden: %1$s</string>
+    <string name="data_nichts_zu_committen_keine_vorgemerkten">Nichts zu committen – keine vorgemerkten Änderungen.</string>
+    <string name="data_noch_kein_commit_vorhanden">Noch kein Commit vorhanden.</string>
+    <string name="data_noch_kein_commit_vorhanden_es">Noch kein Commit vorhanden – es gibt nichts zu stashen.</string>
+    <string name="data_push_abgelehnt_remote_hat_neuere">Push abgelehnt: Remote hat neuere Commits – zuerst Pull.</string>
+    <string name="data_push_fehlgeschlagen">Push fehlgeschlagen (%1$s): %2$s</string>
+    <string name="data_remote_nicht_erreichbar">Remote nicht erreichbar: %1$s</string>
+    <string name="data_stash_laesst_sich_nicht_anwenden">Stash lässt sich nicht anwenden – Konflikte mit lokalen Änderungen (zuerst committen oder stashen).</string>
+    <string name="data_tag_existiert_bereits">Tag „%1$s“ existiert bereits.</string>
+    <string name="data_tag_existiert_nicht">Tag „%1$s“ existiert nicht.</string>
+    <string name="data_umbenennen_fehlgeschlagen">Umbenennen fehlgeschlagen: %1$s</string>
+    <string name="data_unbekannter_remote_in">Unbekannter Remote in „%1$s“.</string>
+    <string name="data_ungueltiger_branch">Ungültiger Branch.</string>
+    <string name="data_ungueltiger_branch_name">Ungültiger Branch-Name: %1$s</string>
+    <string name="data_ungueltiger_remote_name">Ungültiger Remote-Name.</string>
+    <string name="data_ungueltiger_tag_name">Ungültiger Tag-Name.</string>
+    <string name="data_ungueltiger_tag_name_2">Ungültiger Tag-Name: %1$s</string>
+    <string name="data_ungueltiges_muster">Ungültiges Muster.</string>
+    <string name="data_url_darf_nicht_leer_sein">URL darf nicht leer sein.</string>
+    <string name="data_zielverzeichnis_konnte_nicht_angelegt">Zielverzeichnis konnte nicht angelegt werden: %1$s</string>
+    <string name="data_zuerst_einen_commit_erstellen">Zuerst einen Commit erstellen.</string>
+
+    <!-- datastore -->
+    <string name="datastore_konnte_appsettings_proto_nicht_lesen">Konnte AppSettings-Proto nicht lesen.</string>
+
+    <!-- dependencyupdates -->
+    <string name="dependencyupdates_ask_later">Ask later</string>
+    <string name="dependencyupdates_dependency_update_verfuegbar">Dependency-Update verfügbar</string>
+    <string name="dependencyupdates_dismiss">Dismiss</string>
+    <string name="dependencyupdates_fundstellen_in_dateien">%1$s Fundstellen in %2$s Dateien</string>
+    <string name="dependencyupdates_update_fehlgeschlagen">Update fehlgeschlagen</string>
+    <string name="dependencyupdates_weitere_updates">Weitere Updates: %1$s</string>
+
+    <!-- depupdate -->
+    <string name="depupdate_datei_hat_sich_geaendert_erwartet">Datei hat sich geändert: erwartet \'%1$s\'</string>
+    <string name="depupdate_http_fuer">HTTP %1$s für %2$s</string>
+    <string name="depupdate_nicht_mehr_gefunden_datei_wurde">Nicht mehr gefunden — Datei wurde zwischenzeitlich geändert</string>
+    <string name="depupdate_server_nicht_erreichbar">Server nicht erreichbar</string>
+    <string name="depupdate_ueberlappende_aenderungen">Überlappende Änderungen</string>
+    <string name="depupdate_ungueltiger_bereich">Ungültiger Bereich %1$s..%2$s</string>
+
+    <!-- domain -->
+    <string name="domain_hunk_passt_nicht_mehr_zum">Hunk passt nicht mehr zum Dateiinhalt – bitte neu laden.</string>
+    <string name="domain_hunk_ueberlappt_oder_liegt_hinter">Hunk überlappt oder liegt hinter dem Dateiende.</string>
+    <string name="domain_unbekannter_hunk">Unbekannter Hunk.</string>
+    <string name="domain_ungueltiger_hunk_kopf">Ungültiger Hunk-Kopf: %1$s</string>
+
+    <!-- editor -->
+    <string name="editor_alle">Alle</string>
+    <string name="editor_alles_auswaehlen">Alles auswählen</string>
+    <string name="editor_angewendet_fehlgeschlagen">%1$s angewendet, %2$s fehlgeschlagen: %3$s</string>
+    <string name="editor_ausruecken">Ausrücken</string>
+    <string name="editor_ausschneiden">Ausschneiden</string>
+    <string name="editor_bereits_formatiert">Bereits formatiert</string>
+    <string name="editor_core_bibliothek_nicht_gefunden_treesit">Core-Bibliothek \'%1$s\' nicht gefunden — TreeSitter komplett nicht verfügbar (siehe TREESITTER.md). Fallback auf TextMate für alle Sprachen.</string>
+    <string name="editor_diese_fundstelle_ersetzen">Diese Fundstelle ersetzen</string>
+    <string name="editor_einfuegen">Einfügen</string>
+    <string name="editor_einruecken">Einrücken</string>
+    <string name="editor_fehler_beim_oeffnen">Fehler beim Öffnen: %1$s</string>
+    <string name="editor_formatieren">Formatieren</string>
+    <string name="editor_formatieren_lsp">Formatieren (LSP)</string>
+    <string name="editor_formatiert">Formatiert</string>
+    <string name="editor_gehe_zu_zeile">Gehe zu Zeile</string>
+    <string name="editor_gespeichert">Gespeichert</string>
+    <string name="editor_grammar_registrierung_fehlgeschlagen_a">Grammar-Registrierung fehlgeschlagen — Assets unter textmate/ fehlen vermutlich (siehe ASSETS.md). Fällt auf Plain-Text-Highlighting zurück.</string>
+    <string name="editor_kommentar_umschalten">Kommentar umschalten</string>
+    <string name="editor_kopieren">Kopieren</string>
+    <string name="editor_los">Los</string>
+    <string name="editor_lsp_formatierung_fehlgeschlagen">LSP-Formatierung fehlgeschlagen: %1$s</string>
+    <string name="editor_naechste_fundstelle">Nächste Fundstelle</string>
+    <string name="editor_rueckgaengig">Rückgängig</string>
+    <string name="editor_speichern_fehlgeschlagen">Speichern fehlgeschlagen: %1$s</string>
+    <string name="editor_suche_schliessen">Suche schließen</string>
+    <string name="editor_suchen">Suchen</string>
+    <string name="editor_teilen">Teilen</string>
+    <string name="editor_textmate_asset_nicht_gefunden_siehe">TextMate-Asset nicht gefunden: %1$s (siehe ASSETS.md)</string>
+    <string name="editor_treesitter_query_assets_fuer_fehlen">TreeSitter-Query-Assets für %1$s fehlen (siehe TREESITTER.md) — Fallback auf TextMate.</string>
+    <string name="editor_update_all">Update All (%1$s)</string>
+    <string name="editor_update_angewendet">%1$s Update(s) angewendet</string>
+    <string name="editor_update_fehlgeschlagen">Update fehlgeschlagen: %1$s</string>
+    <string name="editor_vorherige_fundstelle">Vorherige Fundstelle</string>
+    <string name="editor_wiederholen">Wiederholen</string>
+    <string name="editor_zeile_duplizieren">Zeile duplizieren</string>
+    <string name="editor_zeile_loeschen">Zeile löschen</string>
+    <string name="editor_zeile_nach_oben">Zeile nach oben</string>
+    <string name="editor_zeile_nach_unten">Zeile nach unten</string>
+
+    <!-- filetree -->
+    <string name="filetree_aktion_fehlgeschlagen">Aktion fehlgeschlagen.</string>
+    <string name="filetree_loeschen_fehlgeschlagen">Löschen fehlgeschlagen.</string>
+    <string name="filetree_neue_datei">Neue Datei</string>
+    <string name="filetree_neuer_ordner">Neuer Ordner</string>
+
+    <!-- git -->
+    <string name="git_abbrechen_zuruecksetzen">Abbrechen &amp; zurücksetzen</string>
+    <string name="git_abgebrochen">Abgebrochen</string>
+    <string name="git_abgebrochen_2">%1$s abgebrochen</string>
+    <string name="git_abgeschlossen">%1$s abgeschlossen</string>
+    <string name="git_abschliessen_commit">Abschließen (Commit)</string>
+    <string name="git_achtung_dieser_commit_ist_vermutlich">Achtung: dieser Commit ist vermutlich schon gepusht – Push würde sonst abgelehnt.</string>
+    <string name="git_aenderungen">Änderungen</string>
+    <string name="git_aenderungen_an_datei_en_gehen">Änderungen an %1$s Datei(en) gehen unwiderruflich verloren (neue Dateien werden gelöscht).</string>
+    <string name="git_aenderungen_bleiben_im_arbeitsverzeich">Änderungen bleiben im Arbeitsverzeichnis, nichts vorgemerkt.</string>
+    <string name="git_aenderungen_im_stash_abgelegt">Änderungen im Stash abgelegt</string>
+    <string name="git_aenderungen_stashen">Änderungen stashen</string>
+    <string name="git_aenderungen_verwerfen">Änderungen verwerfen</string>
+    <string name="git_aktuelle_version_head">Aktuelle Version (HEAD)</string>
+    <string name="git_aktuellen_branch_darauf_rebasen">Aktuellen Branch darauf rebasen</string>
+    <string name="git_alle_aktuell">Alle: Aktuell</string>
+    <string name="git_alle_beide">Alle: Beide</string>
+    <string name="git_alle_eingehend">Alle: Eingehend</string>
+    <string name="git_alle_konflikte_geloest_merge_commit">Alle Konflikte gelöst: Merge-Commit erstellen.</string>
+    <string name="git_alle_vormerken">Alle vormerken</string>
+    <string name="git_alle_zurueck">Alle zurück</string>
+    <string name="git_alles_verwerfen_lokale_aenderungen_geh">Alles verwerfen – lokale Änderungen gehen verloren!</string>
+    <string name="git_alles_vormerken">Alles vormerken…</string>
+    <string name="git_als_geloest_vormerken">Als gelöst vormerken</string>
+    <string name="git_anlegen">Anlegen</string>
+    <string name="git_annotiert">" · annotiert"</string>
+    <string name="git_anwenden_stash_behalten">Anwenden (Stash behalten)</string>
+    <string name="git_arbeitsverzeichnis">Arbeitsverzeichnis</string>
+    <string name="git_arbeitsverzeichnis_sauber">Arbeitsverzeichnis sauber</string>
+    <string name="git_auch_wenn_nicht_gemergt_erzwingen">Auch wenn nicht gemergt (erzwingen)</string>
+    <string name="git_auf">"Auf "</string>
+    <string name="git_auf_dem_remote_geloescht">Auf dem Remote gelöscht</string>
+    <string name="git_auf_dem_remote_loeschen">Auf dem Remote löschen</string>
+    <string name="git_auf_rebasen_die_eigenen_commits">„%1$s“ auf „%2$s“ rebasen? Die eigenen Commits werden neu aufgesetzt (neue Hashes). Bereits gepushte Commits sollten nicht rebased werden. Das Arbeitsverzeichnis muss sauber sein.</string>
+    <string name="git_auf_setzen">„%1$s“ auf „%2$s“ setzen:</string>
+    <string name="git_auschecken">Auschecken</string>
+    <string name="git_auschecken_loser_head">Auschecken (loser HEAD)</string>
+    <string name="git_ausgangspunkt">Ausgangspunkt: %1$s</string>
+    <string name="git_beide">Beide</string>
+    <string name="git_beide_umgekehrt">Beide (umgekehrt)</string>
+    <string name="git_bereits_aktuell">Bereits aktuell</string>
+    <string name="git_binaerdatei">Binärdatei</string>
+    <string name="git_blame">Blame</string>
+    <string name="git_blame_2">Blame: %1$s</string>
+    <string name="git_block_bloecke_noch_offen">%1$s Block/Blöcke noch offen</string>
+    <string name="git_branch_anlegen">Branch anlegen…</string>
+    <string name="git_branch_hier">Branch hier</string>
+    <string name="git_branch_loeschen">Branch löschen</string>
+    <string name="git_branch_loeschen_2">Branch löschen…</string>
+    <string name="git_branch_umbenennen">Branch umbenennen</string>
+    <string name="git_branches">Branches</string>
+    <string name="git_cherry_pick_laeuft">Cherry-Pick läuft</string>
+    <string name="git_commit_aendern">Commit ändern…</string>
+    <string name="git_commit_aendern_datei_neu">Commit ändern (%1$s Datei%2$s neu)</string>
+    <string name="git_commit_ansehen">Commit ansehen</string>
+    <string name="git_commit_ausgecheckt_loser_head">Commit ausgecheckt (loser HEAD)</string>
+    <string name="git_commit_datei">Commit (%1$s Datei%2$s)</string>
+    <string name="git_commit_erstellt">Commit erstellt</string>
+    <string name="git_commit_geaendert">Commit geändert</string>
+    <string name="git_commit_nicht_gefunden">Commit nicht gefunden.</string>
+    <string name="git_commit_ueberspringen">Commit überspringen…</string>
+    <string name="git_commit_zuruecknehmen">Commit zurücknehmen</string>
+    <string name="git_committer">Committer: %1$s</string>
+    <string name="git_datei_existiert_nicht_mehr">Datei existiert nicht mehr: %1$s</string>
+    <string name="git_datei_existiert_nicht_mehr_konflikt">Datei existiert nicht (mehr) – Konflikt über „Eigene/Eingehende Version“ lösen.</string>
+    <string name="git_der_branch_wird_auf_den">Der Branch wird auf den Stand vor dem Rebase zurückgesetzt.</string>
+    <string name="git_diese_aenderung_wird_in_der">Diese Änderung wird in der Datei unwiderruflich zurückgesetzt.</string>
+    <string name="git_diese_datei_hat_noch_keine">Diese Datei hat noch keine Commits.</string>
+    <string name="git_dieses_projekt_wird_noch_nicht">Dieses Projekt wird noch nicht von Git verwaltet. Mit „git init“ wird ein Repository (Branch main) angelegt.</string>
+    <string name="git_eigene_version_commit">Eigene Version (Commit)</string>
+    <string name="git_eingehend">Eingehend</string>
+    <string name="git_eingehende_version">Eingehende Version</string>
+    <string name="git_einstellen">Einstellen</string>
+    <string name="git_entfernen">„%1$s“ entfernen</string>
+    <string name="git_erzeugt_einen_neuen_commit_der">Erzeugt einen neuen Commit, der die Änderungen von „%1$s“ rückgängig macht.</string>
+    <string name="git_fast_forward">%1$s: Fast-Forward</string>
+    <string name="git_fetch">Fetch</string>
+    <string name="git_fetch_erfolgreich">Fetch erfolgreich</string>
+    <string name="git_fortsetzen">Fortsetzen</string>
+    <string name="git_geaenderte_dateien">Geänderte Dateien (%1$s)</string>
+    <string name="git_gegen_ersten_elternteil">" – gegen ersten Elternteil"</string>
+    <string name="git_git_init">git init…</string>
+    <string name="git_git_vorgang_laeuft">Git-Vorgang läuft</string>
+    <string name="git_graph">Graph</string>
+    <string name="git_hard">Hard</string>
+    <string name="git_head_losgeloest">(HEAD losgelöst)</string>
+    <string name="git_hunk_verwerfen">Hunk verwerfen</string>
+    <string name="git_hunk_vormerken">Hunk vormerken</string>
+    <string name="git_hunk_zuruecknehmen">Hunk zurücknehmen</string>
+    <string name="git_in_aktuellen_branch_mergen">In aktuellen Branch mergen</string>
+    <string name="git_in_gitignore_eingetragen">In .gitignore eingetragen</string>
+    <string name="git_in_mergen">„%1$s“ in „%2$s“ mergen?</string>
+    <string name="git_kein_git_repository">Kein Git-Repository</string>
+    <string name="git_kein_upstream">kein Upstream</string>
+    <string name="git_keine_konfliktmarker_gefunden">Keine Konfliktmarker gefunden.</string>
+    <string name="git_keine_konfliktmarker_gefunden_datei_ka">Keine Konfliktmarker gefunden – Datei kann direkt vorgemerkt werden.</string>
+    <string name="git_keine_lokalen_aenderungen_zum_stashen">Keine lokalen Änderungen zum Stashen.</string>
+    <string name="git_keine_stashes">Keine Stashes</string>
+    <string name="git_keine_tags">Keine Tags</string>
+    <string name="git_keine_unterschiede">Keine Unterschiede.</string>
+    <string name="git_keine_weiteren_aenderungen">Keine weiteren Änderungen</string>
+    <string name="git_keiner_konfiguriert_zum_pushen_eine">Keiner konfiguriert – zum Pushen eine URL eintragen.</string>
+    <string name="git_klonen">Klonen</string>
+    <string name="git_klonen_laeuft">Klonen läuft …</string>
+    <string name="git_konflikt_geloest_und_vorgemerkt">Konflikt gelöst und vorgemerkt</string>
+    <string name="git_konflikt_loesen">Konflikt lösen…</string>
+    <string name="git_konflikt_loesen_und_vormerken_dann">%1$s Konflikt(e): lösen und vormerken, dann „Fortsetzen“.</string>
+    <string name="git_konflikt_loesen_vormerken_committen">%1$s Konflikt(e): lösen, vormerken, committen.</string>
+    <string name="git_konflikt_loesen_vormerken_committen_od">%1$s: %2$s Konflikt(e) – lösen, vormerken, committen (oder abbrechen)</string>
+    <string name="git_konfliktblock_bloecke_gewaehlt">%1$s Konfliktblock/-blöcke · %2$s gewählt</string>
+    <string name="git_konflikte">Konflikte</string>
+    <string name="git_konflikte_geloest_commit_erstellen">Konflikte gelöst: Commit erstellen.</string>
+    <string name="git_konflikte_geloest_fortsetzen_oder_comm">Konflikte gelöst: „Fortsetzen“ (oder Commit überspringen).</string>
+    <string name="git_konflikte_in_datei_en_loesen">Konflikte in %1$s Datei(en) – lösen, vormerken, committen (oder Merge abbrechen)</string>
+    <string name="git_leer">(leer)</string>
+    <string name="git_leere_datei">Leere Datei.</string>
+    <string name="git_legt_alle_lokalen_aenderungen_inkl">Legt alle lokalen Änderungen (inkl. neuer Dateien) beiseite und stellt den letzten Commit wieder her.</string>
+    <string name="git_letzten_commit_aendern_amend">Letzten Commit ändern (Amend)</string>
+    <string name="git_lokale_branches">Lokale Branches (%1$s)</string>
+    <string name="git_mehr">Mehr</string>
+    <string name="git_merge">Merge</string>
+    <string name="git_merge_laeuft">Merge läuft</string>
+    <string name="git_mergen">Mergen</string>
+    <string name="git_mit_nachricht_wird_ein_annotierter">Mit Nachricht wird ein annotierter Tag angelegt.</string>
+    <string name="git_mixed">Mixed</string>
+    <string name="git_nachricht_leer_einfacher_tag">Nachricht (leer = einfacher Tag)</string>
+    <string name="git_nachricht_optional">Nachricht (optional)</string>
+    <string name="git_name_feature_login">Name (z. B. feature/login)</string>
+    <string name="git_name_und_mail_fuer_commits">Name und E-Mail für Commits fehlen.</string>
+    <string name="git_neu">Neu</string>
+    <string name="git_neue_nachricht_amend">Neue Nachricht (Amend)</string>
+    <string name="git_neue_untracked_dateien_einschliessen">Neue (untracked) Dateien einschließen</string>
+    <string name="git_neuer_branch">Neuer Branch</string>
+    <string name="git_neuer_name">Neuer Name</string>
+    <string name="git_neuer_tag">Neuer Tag</string>
+    <string name="git_nicht_moeglich_lokale_aenderungen_im">%1$s nicht möglich (lokale Änderungen im Weg?)</string>
+    <string name="git_nichts_vorgemerkt">Nichts vorgemerkt</string>
+    <string name="git_nichts_zu_committen_commit_mit">Nichts zu committen – Commit mit „Überspringen“ verwerfen</string>
+    <string name="git_nichts_zu_stashen_keine_aenderungen">Nichts zu stashen – keine Änderungen</string>
+    <string name="git_noch_kein_commit">(noch kein Commit)</string>
+    <string name="git_noch_keine_commits">Noch keine Commits</string>
+    <string name="git_nur_der_branch_bewegt_sich">Nur der Branch bewegt sich; alles bleibt vorgemerkt.</string>
+    <string name="git_nur_https_mit_token_wird">Nur HTTPS mit Token wird unterstützt (Einstellungen → Git).</string>
+    <string name="git_operation_fehlgeschlagen">Operation fehlgeschlagen</string>
+    <string name="git_pop_anwenden_und_loeschen">Pop: anwenden und löschen</string>
+    <string name="git_pull">Pull</string>
+    <string name="git_pull_mit_rebase_statt_merge">Pull mit Rebase statt Merge</string>
+    <string name="git_push">Push</string>
+    <string name="git_push_erfolgreich">Push erfolgreich</string>
+    <string name="git_pushen">Pushen</string>
+    <string name="git_rebase">Rebase</string>
+    <string name="git_rebase_abbrechen">Rebase abbrechen</string>
+    <string name="git_rebase_abbrechen_2">Rebase abbrechen…</string>
+    <string name="git_rebase_abgebrochen">Rebase abgebrochen</string>
+    <string name="git_rebase_angehalten_konflikt_loesen_vorm">Rebase angehalten: %1$s Konflikt(e) – lösen, vormerken, dann „Fortsetzen“</string>
+    <string name="git_rebase_fortsetzen">Rebase fortsetzen…</string>
+    <string name="git_rebase_laeuft">Rebase läuft</string>
+    <string name="git_remote">Remote</string>
+    <string name="git_remote_branch_loeschen">Remote-Branch löschen</string>
+    <string name="git_remote_branch_loeschen_2">Remote-Branch löschen…</string>
+    <string name="git_remote_entfernen">Remote entfernen</string>
+    <string name="git_remote_entfernen_2">Remote entfernen…</string>
+    <string name="git_remote_entfernt">Remote entfernt</string>
+    <string name="git_remote_gespeichert">Remote gespeichert</string>
+    <string name="git_remote_setzen">Remote setzen</string>
+    <string name="git_remote_speichern">Remote speichern…</string>
+    <string name="git_repository_angelegt">Repository angelegt</string>
+    <string name="git_repository_geklont">Repository geklont ✓</string>
+    <string name="git_repository_initialisieren">Repository initialisieren</string>
+    <string name="git_repository_klonen">Repository klonen</string>
+    <string name="git_reset">Reset</string>
+    <string name="git_reset_auf_commit">Reset auf Commit</string>
+    <string name="git_reset_hierhin">Reset hierhin</string>
+    <string name="git_revert">Revert</string>
+    <string name="git_revert_laeuft">Revert läuft</string>
+    <string name="git_setzt_arbeitsverzeichnis_und_index_auf">Setzt Arbeitsverzeichnis und Index auf den letzten Commit zurück (Merge, Cherry-Pick oder Revert wird verworfen). Nicht committete Änderungen gehen verloren.</string>
+    <string name="git_sofort_auschecken">Sofort auschecken</string>
+    <string name="git_soft">Soft</string>
+    <string name="git_stand_des_letzten_commits">Stand des letzten Commits · %1$s</string>
+    <string name="git_stash">Stash</string>
+    <string name="git_stash_anwenden">Stash anwenden…</string>
+    <string name="git_stash_anwenden_loeschen">Stash anwenden &amp; löschen…</string>
+    <string name="git_stash_loeschen">Stash löschen</string>
+    <string name="git_stash_loeschen_2">Stash löschen…</string>
+    <string name="git_stashen">Stashen</string>
+    <string name="git_status_konnte_nicht_geladen_werden">Status konnte nicht geladen werden.</string>
+    <string name="git_tag">Tag</string>
+    <string name="git_tag_angelegt">Tag angelegt</string>
+    <string name="git_tag_anlegen">Tag anlegen…</string>
+    <string name="git_tag_gepusht">Tag gepusht</string>
+    <string name="git_tag_hier">Tag hier</string>
+    <string name="git_tag_loeschen">Tag löschen</string>
+    <string name="git_tag_loeschen_2">Tag löschen…</string>
+    <string name="git_tag_lokal_loeschen_ein_bereits">Tag „%1$s“ lokal löschen? (Ein bereits gepushter Tag bleibt auf dem Server.)</string>
+    <string name="git_tag_pushen">Tag pushen…</string>
+    <string name="git_uebernehmen_offen">Übernehmen (%1$s offen)</string>
+    <string name="git_uebernehmen_vormerken">Übernehmen &amp; vormerken</string>
+    <string name="git_und_seine_remote_branches_aus">„%1$s“ und seine Remote-Branches aus diesem Repository entfernen? Auf dem Server bleibt alles bestehen.</string>
+    <string name="git_unveraenderte_zeilen">⋯ %1$s unveränderte Zeilen</string>
+    <string name="git_unwiderruflich_loeschen">„%1$s“ unwiderruflich löschen?</string>
+    <string name="git_url_https">URL (https://…)</string>
+    <string name="git_url_und_zielverzeichnis_duerfen_nicht">URL und Zielverzeichnis dürfen nicht leer sein.</string>
+    <string name="git_verlauf">Verlauf</string>
+    <string name="git_verlauf_2">Verlauf: %1$s</string>
+    <string name="git_verwerfen">Verwerfen</string>
+    <string name="git_vorgang_abbrechen">Vorgang abbrechen</string>
+    <string name="git_vorgemerkt">Vorgemerkt</string>
+    <string name="git_vormerken">Vormerken</string>
+    <string name="git_wird_auf_dem_server_geloescht">„%1$s“ wird auf dem Server gelöscht. Das betrifft alle, die diesen Branch nutzen.</string>
+    <string name="git_wirklich_loeschen">„%1$s“ wirklich löschen?</string>
+    <string name="git_zielverzeichnis">Zielverzeichnis</string>
+    <string name="git_zu_gitignore_hinzufuegen">Zu .gitignore hinzufügen</string>
+    <string name="git_zurueck">Zurück</string>
+    <string name="git_zurueckgesetzt">Zurückgesetzt</string>
+    <string name="git_zuruecknehmen">Zurücknehmen</string>
+    <string name="git_zuruecknehmen_2">Zurücknehmen…</string>
+    <string name="git_zusammengefuehrt">Zusammengeführt</string>
+    <string name="git_zustand_wird_von_der_app">Zustand wird von der App nicht vollständig unterstützt – im Terminal prüfen.</string>
+
+    <!-- gradle -->
+    <string name="gradle_bridge_service_nicht_gebunden_connect">Bridge-Service nicht gebunden. connect() zuerst aufrufen.</string>
+    <string name="gradle_build_fehlgeschlagen">Build fehlgeschlagen: %1$s</string>
+    <string name="gradle_gradlebridgeservice_ist_nicht_verbunde">GradleBridgeService ist nicht verbunden.</string>
+    <string name="gradle_gradlebridgeservice_konnte_nicht_gebun">GradleBridgeService konnte nicht gebunden werden.</string>
+    <string name="gradle_keine_aktive_verbindung_connect_zuerst">Keine aktive Verbindung. connect() zuerst aufrufen.</string>
+
+    <!-- index -->
+    <string name="index_projektordner_existiert_nicht">Projektordner existiert nicht: %1$s</string>
+
+    <!-- lsp -->
+    <string name="lsp_lsp_server_nicht_gestartet">LSP-Server nicht gestartet.</string>
+
+    <!-- modulemaker -->
+    <string name="modulemaker_android_library">Android-Library</string>
+    <string name="modulemaker_angelegt">"  %1$s angelegt"</string>
+    <string name="modulemaker_anlegen_fehlgeschlagen">Anlegen fehlgeschlagen</string>
+    <string name="modulemaker_basis_package_optional">Basis-Package (optional)</string>
+    <string name="modulemaker_bereits_in_settings_vorhanden">Bereits in settings vorhanden</string>
+    <string name="modulemaker_build">Build</string>
+    <string name="modulemaker_hinweis_gradle_sync_ist_noetig">Hinweis: Gradle-Sync ist nötig, damit das Modul im Build erscheint.</string>
+    <string name="modulemaker_in_settings_eingetragen">In settings eingetragen</string>
+    <string name="modulemaker_keine_settings_gradle_kts_im">Keine settings.gradle(.kts) im Projekt gefunden — Modul kann nicht eingetragen werden.</string>
+    <string name="modulemaker_kotlin_jvm">Kotlin/JVM</string>
+    <string name="modulemaker_modul_angelegt">Modul %1$s angelegt</string>
+    <string name="modulemaker_modul_erstellen">Modul erstellen</string>
+    <string name="modulemaker_notation_wie_in_settings_gradle">Notation wie in settings.gradle: Doppelpunkt trennt Ordner</string>
+    <string name="modulemaker_ordner_existiert_bereits">Ordner existiert bereits: %1$s</string>
+    <string name="modulemaker_package">Package</string>
+    <string name="modulemaker_root_build_ergaenzt">" · Root-Build ergänzt"</string>
+    <string name="modulemaker_submodul_erstellen">Submodul erstellen</string>
+    <string name="modulemaker_typ">Typ</string>
+
+    <!-- onboarding -->
+    <string name="onboarding_ausstehend">Ausstehend</string>
+    <string name="onboarding_benachrichtigungen">Benachrichtigungen</string>
+    <string name="onboarding_berechtigungen">Berechtigungen</string>
+    <string name="onboarding_bereite_setup_skript_vor">Bereite Setup-Skript vor …</string>
+    <string name="onboarding_cmake_installieren">CMake %1$s installieren</string>
+    <string name="onboarding_codeforge_mobile_benoetigt_zugriff_auf">CodeForge Mobile benötigt Zugriff auf deinen Projektspeicher und darf dich über den Build-Status informieren.</string>
+    <string name="onboarding_codeforge_nutzt_termux_als_umgebung">CodeForge nutzt Termux als Umgebung. Zuerst wird sie entpackt, danach öffnet sich das Terminal und das Skript codeforge-env installiert Android-SDK, Tools, JDK, NDK und CMake. Später verwaltest du alles im SDK-Manager.</string>
+    <string name="onboarding_einrichtung_fehlgeschlagen">Einrichtung fehlgeschlagen.</string>
+    <string name="onboarding_einrichtung_starten">Einrichtung starten</string>
+    <string name="onboarding_entpacke_termux_umgebung">Entpacke Termux-Umgebung …</string>
+    <string name="onboarding_entwicklungsumgebung_einrichten">Entwicklungsumgebung einrichten</string>
+    <string name="onboarding_erteilt">Erteilt</string>
+    <string name="onboarding_fuer_build_status_und_lang">Für Build-Status und lang laufende Gradle-Tasks im Hintergrund.</string>
+    <string name="onboarding_keine_activity_verfuegbar">Keine Activity verfügbar.</string>
+    <string name="onboarding_loslegen">Loslegen</string>
+    <string name="onboarding_ndk_installieren">NDK installieren</string>
+    <string name="onboarding_setup_skript_konnte_nicht_bereitgestel">Setup-Skript konnte nicht bereitgestellt werden.</string>
+    <string name="onboarding_speicherzugriff">Speicherzugriff</string>
+    <string name="onboarding_termux_bootstrap_konnte_nicht_eingeric">Termux-Bootstrap konnte nicht eingerichtet werden.</string>
+    <string name="onboarding_umgebung_bereit_das_terminal_oeffnet">Umgebung bereit — das Terminal öffnet sich ✓</string>
+    <string name="onboarding_weiter">Weiter</string>
+    <string name="onboarding_zum_oeffnen_erstellen_und_bearbeiten">Zum Öffnen, Erstellen und Bearbeiten von Projekten (MANAGE_EXTERNAL_STORAGE).</string>
+
+    <!-- plugin -->
+    <string name="plugin_implementiert_nicht_codeforgeplugin">%1$s implementiert nicht CodeForgePlugin.</string>
+    <string name="plugin_kein_classes_dex_oder_jar">Kein classes.dex oder .jar mit Dex-Code im Plugin-Verzeichnis gefunden.</string>
+    <string name="plugin_konnte_plugin_verzeichnis_nicht_finali">Konnte Plugin-Verzeichnis nicht finalisieren.</string>
+    <string name="plugin_plugin_archiv_nicht_gefunden">Plugin-Archiv nicht gefunden: %1$s</string>
+    <string name="plugin_plugin_hat_keine_entrypointclass_im">Plugin \'%1$s\' hat keine entryPointClass im Manifest angegeben.</string>
+    <string name="plugin_plugin_json_fehlt_im_archiv">plugin.json fehlt im Archiv-Root.</string>
+    <string name="plugin_plugin_nicht_gefunden">Plugin nicht gefunden: %1$s</string>
+
+    <!-- plugins -->
+    <string name="plugins_keine_plugins_installiert_tippe_oben">Keine Plugins installiert. Tippe oben rechts, um ein Plugin-Archiv (.zip mit plugin.json) zu importieren.</string>
+    <string name="plugins_konnte_status_nicht_aendern">Konnte Status nicht ändern.</string>
+    <string name="plugins_plugin_installieren">Plugin installieren</string>
+    <string name="plugins_plugins">Plugins</string>
+
+    <!-- projectwizard -->
+    <string name="projectwizard_java">Java</string>
+    <string name="projectwizard_kotlin">Kotlin</string>
+
+    <!-- sdkmanager -->
+    <string name="sdkmanager_installiert">Installiert</string>
+    <string name="sdkmanager_keine_versionen_verfuegbar">Keine Versionen verfügbar.</string>
+    <string name="sdkmanager_paketliste_konnte_nicht_geladen_werden">Paketliste konnte nicht geladen werden.</string>
+    <string name="sdkmanager_uebernehmen">Übernehmen</string>
+    <string name="sdkmanager_von_installiert">%1$s von %2$s installiert</string>
+
+    <!-- search -->
+    <string name="search_1_treffer_ersetzt">1 Treffer ersetzt</string>
+    <string name="search_alle_ersetzen">Alle ersetzen?</string>
+    <string name="search_alle_ersetzen_2">Alle ersetzen</string>
+    <string name="search_ausschliessen_json">Ausschließen (z. B. *.json)</string>
+    <string name="search_dateifilter">Dateifilter</string>
+    <string name="search_diesen_treffer_ersetzen">Diesen Treffer ersetzen</string>
+    <string name="search_erneut_suchen">Erneut suchen</string>
+    <string name="search_ersetzen">Ersetzen</string>
+    <string name="search_ersetzen_durch_1_name">Ersetzen durch ($1, ${name})</string>
+    <string name="search_ersetzen_ein_ausblenden">Ersetzen ein-/ausblenden</string>
+    <string name="search_ersetzen_fehlgeschlagen">Ersetzen fehlgeschlagen: %1$s</string>
+    <string name="search_ersetzung_en_in_datei_en">%1$s Ersetzung(en) in %2$s Datei(en)</string>
+    <string name="search_fehlgeschlagen">, %1$s fehlgeschlagen</string>
+    <string name="search_im_projekt_suchen">Im Projekt suchen</string>
+    <string name="search_in_dieser_datei_ersetzen">In dieser Datei ersetzen</string>
+    <string name="search_nur_dateien_kt_kts">Nur Dateien (z. B. *.kt, *.kts)</string>
+    <string name="search_suchbegriff_eingeben">Suchbegriff eingeben</string>
+    <string name="search_suche_fehlgeschlagen">Suche fehlgeschlagen</string>
+    <string name="search_suche_laeuft">Suche läuft …</string>
+    <string name="search_treffer_in_datei_en">%1$s%2$s Treffer in %3$s Datei(en)</string>
+    <string name="search_treffer_in_datei_en_werden">%1$s Treffer in %2$s Datei(en) werden durch „%3$s“ ersetzt. Dies schreibt direkt auf die Platte.</string>
+    <string name="search_treffer_nicht_mehr_aktuell_suche">Treffer nicht mehr aktuell — Suche wird erneuert</string>
+
+    <!-- settings -->
+    <string name="settings_benutzername">Benutzername</string>
+    <string name="settings_dark_plus">z.B. dark_plus</string>
+    <string name="settings_die_shell_laeuft_in_der">Die Shell läuft in der Termux-Umgebung (eine Umgebung, keine Distro-Auswahl). Android-SDK, JDK, NDK und CMake verwaltest du im SDK-Manager.</string>
+    <string name="settings_fonts_jetbrainsmono_regular_ttf">z.B. fonts/JetBrainsMono-Regular.ttf</string>
+    <string name="settings_gespeicherten_token_fuer_loeschen">Gespeicherten Token für %1$s (%2$s) löschen?</string>
+    <string name="settings_host">Host</string>
+    <string name="settings_host_fehlt_github_com">Host fehlt (z. B. github.com)</string>
+    <string name="settings_identitaet">Identität</string>
+    <string name="settings_identitaet_gespeichert">Identität gespeichert</string>
+    <string name="settings_klammern_anfuehrungszeichen_automatisc">Klammern/Anführungszeichen automatisch schließen</string>
+    <string name="settings_leerzeichen_tabs_und_zeilenumbrueche_a">Leerzeichen, Tabs und Zeilenumbrüche als Symbole darstellen.</string>
+    <string name="settings_mail">E-Mail</string>
+    <string name="settings_nicht_druckbare_zeichen_anzeigen">Nicht druckbare Zeichen anzeigen</string>
+    <string name="settings_noch_keine_zugaenge_gespeichert">Noch keine Zugänge gespeichert.</string>
+    <string name="settings_personal_access_token_pro_host">Personal Access Token pro Host, z. B. GitHub: Settings → Developer settings → Tokens (Scope „repo“).</string>
+    <string name="settings_praeziseres_syntax_highlighting_statt">Präziseres Syntax-Highlighting statt regelbasiertem TextMate-Grammar.</string>
+    <string name="settings_schriftart_asset_pfad">Schriftart (Asset-Pfad)</string>
+    <string name="settings_schriftgroesse">Schriftgröße</string>
+    <string name="settings_speichern_fehlgeschlagen">Speichern fehlgeschlagen</string>
+    <string name="settings_sticky_scroll">Sticky Scroll</string>
+    <string name="settings_tab_groesse">Tab-Größe</string>
+    <string name="settings_terminal">Terminal</string>
+    <string name="settings_text_lupe_magnifier">Text-Lupe (Magnifier)</string>
+    <string name="settings_token_anzeigen">Token anzeigen</string>
+    <string name="settings_token_gespeichert">%1$s · Token gespeichert ••••••••</string>
+    <string name="settings_token_passwort">Token / Passwort</string>
+    <string name="settings_token_verbergen">Token verbergen</string>
+    <string name="settings_tokens_werden_verschluesselt_im_androi">Tokens werden verschlüsselt im Android Keystore abgelegt und nur für Fetch/Pull/Push/Clone an den passenden Host gesendet. SSH-Schlüssel werden nicht unterstützt – nutze HTTPS mit einem Personal Access Token.</string>
+    <string name="settings_tree_sitter_verwenden">Tree-sitter verwenden</string>
+    <string name="settings_ungueltige_mail_adresse">Ungültige E-Mail-Adresse</string>
+    <string name="settings_vergroesserungsglas_bei_cursor_platzie">Vergrößerungsglas bei Cursor-Platzierung per Long-Press.</string>
+    <string name="settings_wird_als_autor_in_jedem">Wird als Autor in jedem Commit und in neuen Projekten (Initial-Commit) verwendet.</string>
+    <string name="settings_zeigt_den_umschliessenden_code_block">Zeigt den umschließenden Code-Block (Klasse/Funktion) fixiert am oberen Rand.</string>
+    <string name="settings_zeilenumbruch_word_wrap">Zeilenumbruch (Word Wrap)</string>
+    <string name="settings_zugang_entfernen">Zugang entfernen</string>
+    <string name="settings_zugang_fuer_entfernt">Zugang für %1$s entfernt</string>
+    <string name="settings_zugang_fuer_gespeichert">Zugang für %1$s gespeichert</string>
+    <string name="settings_zugang_hinzufuegen">Zugang hinzufügen</string>
+    <string name="settings_zugangsdaten_https">Zugangsdaten (HTTPS)</string>
+
+    <!-- template -->
+    <string name="template_git_init_fehlgeschlagen">git init fehlgeschlagen: %1$s</string>
+    <string name="template_verzeichnis_existiert_bereits">Verzeichnis existiert bereits: %1$s</string>
+    <string name="template_verzeichnis_nicht_anlegbar">Verzeichnis nicht anlegbar: %1$s</string>
+
+    <!-- terminal -->
+    <string name="terminal_ausgabe_loeschen">Ausgabe löschen</string>
+    <string name="terminal_befehl_eingeben">Befehl eingeben …</string>
+    <string name="terminal_keine_aktive_sitzung_tippe_auf">Keine aktive Sitzung. Tippe auf ▶, um eine Shell zu starten.</string>
+    <string name="terminal_senden">Senden</string>
+    <string name="terminal_shell_konnte_nicht_gestartet_werden">Shell konnte nicht gestartet werden.</string>
+    <string name="terminal_shell_starten">Shell starten</string>
+    <string name="terminal_shell_wird_gestartet">Shell wird gestartet …</string>
+    <string name="terminal_shell_wurde_beendet">Shell wurde beendet.</string>
+    <string name="terminal_sitzung_beenden">Sitzung beenden</string>
+    <string name="terminal_terminal_termux">Terminal (Termux)</string>
+
+    <!-- terminal_engine -->
+    <string name="terminal_engine_codeforge_env_endete_mit_code">codeforge-env endete mit Code %1$s</string>
+    <string name="terminal_engine_codeforge_env_list_endete_mit">codeforge-env list endete mit Code %1$s</string>
+    <string name="terminal_engine_fehler_beim_senden_keine_aktive">Fehler beim Senden: keine aktive Sitzung.\n</string>
+    <string name="terminal_engine_fehler_beim_starten_der_shell">Fehler beim Starten der Shell: %1$s\n</string>
+    <string name="terminal_engine_termux_bootstrap_ist_nicht_installiert">Termux-Bootstrap ist nicht installiert.</string>
+    <string name="terminal_engine_termux_bootstrap_ist_unter_nicht">Termux-Bootstrap ist unter \"%1$s\" nicht installiert. TermuxInstaller.setupBootstrapIfNeeded() läuft im Onboarding — siehe TERMUX-PORTING.md.</string>
+    <string name="terminal_engine_unbekannter_fehler">Unbekannter Fehler</string>
+    <string name="terminal_engine_ungueltige_paket_id">Ungültige Paket-ID: %1$s</string>
+
+    <!-- themebuilder -->
+    <string name="themebuilder_dunkel">Dunkel</string>
+    <string name="themebuilder_dynamische_farben">Dynamische Farben</string>
+    <string name="themebuilder_eigene_farben">Eigene Farben</string>
+    <string name="themebuilder_farbschema">Farbschema</string>
+    <string name="themebuilder_hell">Hell</string>
+    <string name="themebuilder_nicht_verfuegbar_auf_diesem_geraet">Nicht verfügbar auf diesem Gerät (Android 12+ erforderlich).</string>
+    <string name="themebuilder_primaer">Primär</string>
+    <string name="themebuilder_primaer_button">Primär-Button</string>
+    <string name="themebuilder_sekundaer">Sekundär</string>
+    <string name="themebuilder_so_sehen_text_und_oberflaechen">So sehen Text und Oberflächen mit diesem Theme aus.</string>
+    <string name="themebuilder_system">System</string>
+    <string name="themebuilder_tertiaer">Tertiär</string>
+    <string name="themebuilder_theme">Theme</string>
+    <string name="themebuilder_verwendet_die_systemfarben_deines_wall">Verwendet die Systemfarben deines Wallpapers (Android 12+).</string>
+
+    <!-- welcome -->
+    <string name="welcome_aus_liste_entfernen">Aus Liste entfernen</string>
+    <string name="welcome_codeforge_mobile">CodeForge Mobile</string>
+    <string name="welcome_module">Module: %1$s</string>
+    <string name="welcome_oeffnen">Öffnen</string>
+    <string name="welcome_projekt_nicht_gefunden">Projekt nicht gefunden.</string>
+    <string name="welcome_zuletzt_geoeffnet">Zuletzt geöffnet</string>
+
+    <!-- manuell: Enum-/Listen-Labels (@StringRes) -->
+    <string name="sdkmanager_category_jdk">JDK</string>
+    <string name="sdkmanager_category_cmdline_tools">Commandline-Tools</string>
+    <string name="sdkmanager_category_platform_tools">Platform-Tools (adb)</string>
+    <string name="sdkmanager_category_build_tools">Build-Tools</string>
+    <string name="sdkmanager_category_platforms">SDK Platforms</string>
+    <string name="sdkmanager_category_ndk">NDK</string>
+    <string name="sdkmanager_category_cmake">CMake</string>
+    <string name="sdkmanager_title">SDK Manager</string>
+    <string name="sdkmanager_intro">Grafische Oberfläche für das Termux-Skript codeforge-env: JDKs kommen aus Termux, Android-spezifische Teile (SDK-Tools, NDK, CMake) aus eigenen Builds. Fehlen Einträge, prüfe die Repo-Konfiguration in $PREFIX/etc/codeforge/sdk.conf.</string>
+    <string name="settings_hub_theme">Theme</string>
+    <string name="settings_hub_terminal">Terminal</string>
+    <string name="settings_hub_git">Git (Name, E-Mail, Token)</string>
+    <string name="settings_hub_plugins">Plugins</string>
+    <string name="settings_hub_title">Einstellungen</string>
+    <string name="welcome_action_new_project">Neues Projekt</string>
+    <string name="welcome_action_import">Importieren</string>
+    <string name="welcome_action_clone">Klonen</string>
+    <string name="intro_code_title">Code direkt auf dem Smartphone</string>
+    <string name="intro_code_desc">Vollwertiger Kotlin/Java-Editor mit LSP-Unterstützung, Syntax-Highlighting und Auto-Completion.</string>
+    <string name="intro_terminal_title">Echtes Linux-Terminal</string>
+    <string name="intro_terminal_desc">Termux-Umgebung mit Shell, JDK, Gradle und Build-Tools – direkt auf dem Gerät, ohne Root.</string>
+    <string name="intro_custom_title">Individuell anpassbar</string>
+    <string name="intro_custom_desc">Themes, Editor-Konfiguration und Plugins nach deinen Wünschen.</string>
+    <string name="intro_plugin_title">Erweiterbar per Plugin-API</string>
+    <string name="intro_plugin_desc">Installiere Plugins oder entwickle eigene über das offene Plugin-API-Surface.</string>
+    <string name="drawer_files">Dateien</string>
+    <string name="drawer_search">Suche</string>
+    <string name="drawer_modules">Module</string>
+    <string name="theme_preset_forest">Wald</string>
+    <string name="theme_preset_ocean">Ozean</string>
+    <string name="theme_preset_sunset">Sonnenuntergang</string>
+    <string name="theme_preset_monochrome">Monochrom</string>
+    <string name="theme_preset_violet">Violett</string>
+    <string name="domain_ungueltige_versionsangabe">Ungültige Versionsangabe</string>
+
+    <!-- projectwizard (aus :feature:projectwizard übernommen) -->
+    <string name="pw_title">Neues Projekt</string>
+    <string name="pw_back">Zurück</string>
+    <string name="pw_ok">OK</string>
+    <string name="pw_error_title">Projekt konnte nicht erstellt werden</string>
+
+    <string name="pw_field_name">Projektname</string>
+    <string name="pw_field_package">Package-Name</string>
+    <string name="pw_field_location">Speicherort</string>
+    <string name="pw_field_language">Sprache</string>
+    <string name="pw_field_min_sdk">Minimale SDK-Version</string>
+    <string name="pw_field_kts">Gradle Kotlin DSL (.kts)</string>
+    <string name="pw_field_git">Git-Repository anlegen (git init + Initial-Commit)</string>
+    <string name="pw_git_identity_missing">Name/E-Mail für Git fehlen (Einstellungen → Git). Das Repository wird angelegt, der Initial-Commit aber übersprungen.</string>
+    <string name="pw_create">Projekt erstellen</string>
+    <string name="pw_creating">Projekt wird erstellt…</string>
+
+    <string name="pw_err_name">Ungültiger Name (Buchstabe am Anfang, 2–51 Zeichen aus A–Z, 0–9, _ - +)</string>
+    <string name="pw_err_package">Ungültiger Package-Name (z. B. com.example.app)</string>
+    <string name="pw_err_package_reserved">Package enthält ein reserviertes Java-Schlüsselwort</string>
+    <string name="pw_err_dir_exists">Am Speicherort existiert bereits ein Ordner mit diesem Namen</string>
+    <string name="pw_err_target_blank">Speicherort darf nicht leer sein</string>
+    <string name="pw_err_compose_kotlin">Compose unterstützt nur Kotlin</string>
+
+    <string name="pw_tpl_no_activity">Keine Activity</string>
+    <string name="pw_tpl_no_activity_desc">Nur Gradle-Grundgerüst ohne Quellcode</string>
+    <string name="pw_tpl_empty">Leere Activity</string>
+    <string name="pw_tpl_empty_desc">Eine Activity mit einfachem Layout</string>
+    <string name="pw_tpl_cpp">Native C++</string>
+    <string name="pw_tpl_cpp_desc">Activity mit JNI-Anbindung an C++</string>
+    <string name="pw_tpl_basic">Basic Activity</string>
+    <string name="pw_tpl_basic_desc">Toolbar, FAB und Inhaltsbereich</string>
+    <string name="pw_tpl_drawer">Navigation Drawer</string>
+    <string name="pw_tpl_drawer_desc">Seitenmenü mit Fragmenten und Navigation</string>
+    <string name="pw_tpl_bottom_nav">Bottom Navigation</string>
+    <string name="pw_tpl_bottom_nav_desc">Untere Navigationsleiste mit drei Zielen</string>
+    <string name="pw_tpl_tabbed">Tabs</string>
+    <string name="pw_tpl_tabbed_desc">Tabs mit ViewPager und Fragmenten</string>
+    <string name="pw_tpl_no_androidx">Ohne AndroidX</string>
+    <string name="pw_tpl_no_androidx_desc">Klassische Support-freie Activity ohne AndroidX</string>
+    <string name="pw_tpl_compose">Jetpack Compose</string>
+    <string name="pw_tpl_compose_desc">Leere Compose-Activity mit Material 3</string>
+
+    <!-- Nachgezogene Einzeltexte -->
+    <string name="git_op_stage">Vormerken…</string>
+    <string name="git_op_discard">Verwerfen…</string>
+    <string name="git_op_push">Push…</string>
+    <string name="git_op_fetch">Fetch…</string>
+    <string name="git_op_pull">Pull…</string>
+    <string name="git_op_hunk">Hunk…</string>
+    <string name="git_op_ignore">Ignorieren…</string>
+    <string name="git_op_checkout">Checkout…</string>
+    <string name="git_op_rename">Umbenennen…</string>
+    <string name="git_op_merge">Merge…</string>
+    <string name="git_op_rebase">Rebase…</string>
+    <string name="git_op_abort">Abbrechen…</string>
+    <string name="git_op_stash">Stash…</string>
+    <string name="git_op_cherry_pick">Cherry-Pick…</string>
+    <string name="git_op_revert">Revert…</string>
+    <string name="git_op_reset">Reset…</string>
+    <string name="git_op_commit">Commit…</string>
+    <string name="git_tags_count">Tags (%1$s)</string>
+    <string name="git_conflict_n">Konflikt %1$s</string>
+    <string name="git_tag_name_hint">Name (z. B. v1.0.0)</string>
+    <string name="git_commit_short">Commit %1$s</string>
+    <string name="settings_lsp_path_hint">z. B. $PREFIX/bin/kotlin-language-server (Pfad im Termux-Prefix)</string>
+    <string name="themebuilder_hex_hint">#RRGGBB</string>
+
+    <!-- :feature:layoutdesigner -->
+    <string name="layout_title">Layout-Designer</string>
+    <string name="layout_w_linear_vertical">Linear vertikal</string>
+    <string name="layout_w_linear_horizontal">Linear horizontal</string>
+    <string name="layout_w_frame">Frame</string>
+    <string name="layout_w_scroll">Scroll</string>
+    <string name="layout_w_constraint">Constraint</string>
+    <string name="layout_w_text">Text</string>
+    <string name="layout_w_button">Button</string>
+    <string name="layout_w_edit">Eingabefeld</string>
+    <string name="layout_w_checkbox">Checkbox</string>
+    <string name="layout_w_switch">Schalter</string>
+    <string name="layout_w_image">Bild</string>
+    <string name="layout_w_progress">Fortschritt</string>
+    <string name="layout_w_view">Trennlinie</string>
+    <string name="layout_w_space">Abstand</string>
+    <string name="layout_cat_layout">Layouts</string>
+    <string name="layout_cat_text">Text</string>
+    <string name="layout_cat_button">Schaltflächen</string>
+    <string name="layout_cat_input">Eingabe</string>
+    <string name="layout_cat_media">Medien</string>
+    <string name="layout_cat_other">Sonstiges</string>
+    <string name="layout_tab_preview">Vorschau</string>
+    <string name="layout_tab_tree">Struktur</string>
+    <string name="layout_tab_props">Eigenschaften</string>
+    <string name="layout_tab_xml">XML</string>
+    <string name="layout_undo">Rückgängig</string>
+    <string name="layout_redo">Wiederholen</string>
+    <string name="layout_add_widget">Widget hinzufügen</string>
+    <string name="layout_duplicate">Duplizieren</string>
+    <string name="layout_move_up">Nach oben</string>
+    <string name="layout_move_down">Nach unten</string>
+    <string name="layout_indent">In vorherigen Container einrücken</string>
+    <string name="layout_outdent">Aus Container herausnehmen</string>
+    <string name="layout_open_in_editor">Im Editor öffnen</string>
+    <string name="layout_back">Zurück</string>
+    <string name="layout_device">Gerätegröße</string>
+    <string name="layout_device_phone">Phone</string>
+    <string name="layout_device_phone_large">Phone groß</string>
+    <string name="layout_device_tablet7">Tablet 7″</string>
+    <string name="layout_device_tablet10">Tablet 10″</string>
+    <string name="layout_apply_xml">XML übernehmen</string>
+    <string name="layout_revert_xml">Zurücksetzen</string>
+    <string name="layout_xml_invalid">XML ungültig: %1$s</string>
+    <string name="layout_xml_pending">Nicht übernommene XML-Änderungen</string>
+    <string name="layout_add_attribute">Attribut hinzufügen</string>
+    <string name="layout_attr_name">Attributname (z. B. android:alpha)</string>
+    <string name="layout_attr_value">Wert</string>
+    <string name="layout_remove_attribute">Attribut entfernen</string>
+    <string name="layout_other_attributes">Weitere Attribute</string>
+    <string name="layout_set_attribute">Setzen</string>
+    <string name="layout_no_selection">Kein Element ausgewählt</string>
+    <string name="layout_select_hint">Tippe in der Vorschau oder in der Struktur auf ein Element.</string>
+    <string name="layout_approx_note">Näherungsdarstellung: Constraint-, Relative- und unbekannte Layouts werden gestapelt gezeichnet.</string>
+    <string name="layout_discard_title">Änderungen verwerfen?</string>
+    <string name="layout_discard_text">Es gibt ungespeicherte Änderungen am Layout.</string>
+    <string name="layout_discard_confirm">Verwerfen</string>
+    <string name="layout_saved">Gespeichert</string>
+    <string name="layout_save_failed">Speichern fehlgeschlagen: %1$s</string>
+    <string name="layout_load_failed">Laden fehlgeschlagen: %1$s</string>
+    <string name="layout_unsaved_marker">Ungespeichert</string>
+    <string name="layout_loading">Layout wird geladen …</string>
+    <string name="layout_files_title">Layouts</string>
+    <string name="layout_files_empty">Keine Layout-Dateien gefunden.</string>
+    <string name="layout_new">Neues Layout</string>
+    <string name="layout_new_name">Dateiname (ohne .xml)</string>
+    <string name="layout_new_module">Ressourcen-Ordner</string>
+    <string name="layout_create">Erstellen</string>
+    <string name="layout_name_invalid">Ungültiger Name: nur a–z, 0–9 und _, Beginn mit Buchstabe.</string>
+    <string name="layout_exists">Die Datei existiert bereits.</string>
+    <string name="layout_create_failed">Erstellen fehlgeschlagen: %1$s</string>
+    <string name="layout_scan_failed">Suche fehlgeschlagen: %1$s</string>
+    <string name="drawer_layouts">Layouts</string>
+
+    <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
-    <string name="action_back">Zurück</string>
-    <string name="action_save">Speichern</string>
-    <string name="action_cancel">Abbrechen</string>
-    <string name="action_delete">Löschen</string>
-    <string name="action_confirm">Bestätigen</string>
-    <string name="action_close">Schließen</string>
-    <string name="action_search">Suchen</string>
-    <string name="action_format">Formatieren</string>
-    <string name="action_copy">Kopieren</string>
-    <string name="action_cut">Ausschneiden</string>
-    <string name="action_paste">Einfügen</string>
-    <string name="action_rename">Umbenennen</string>
-    <string name="action_properties">Eigenschaften</string>
-    <string name="action_copy_path">Pfad kopieren</string>
-    <string name="action_undo">Rückgängig</string>
-    <string name="action_redo">Wiederholen</string>
-    <string name="action_refresh">Aktualisieren</string>
-    <string name="action_apply">Anwenden</string>
-
-    <!-- Buttons & Titles -->
-    <string name="btn_create_project">Neues Projekt erstellen</string>
-    <string name="btn_open_project">Projekt öffnen</string>
-    <string name="btn_clone_repo">Repository klonen</string>
-    <string name="btn_open_terminal">Terminal öffnen</string>
-    <string name="btn_cancel">Abbrechen</string>
-    <string name="btn_create">Erstellen</string>
-    <string name="btn_clone">Klonen</string>
-    <string name="btn_back">Zurück</string>
-    <string name="title_new_project">Neues Projekt</string>
-    <string name="title_git">Git Version Control</string>
-    <string name="title_plugins">Plugins &amp; Extensions</string>
-    <string name="title_about">Über CodeForge Mobile</string>
-    <string name="label_project_name">Projektname</string>
-    <string name="git_url">Git Repository URL</string>
-
-    <!-- Content Descriptions & Accessibility -->
-    <string name="cd_navigate_back">Zurück navigieren</string>
-    <string name="cd_close">Schließen</string>
-    <string name="cd_collapse_all">Alle einklappen</string>
-    <string name="cd_expand_all">Alle ausklappen</string>
-    <string name="cd_search">Suchen</string>
-    <string name="cd_clear_search">Suche löschen</string>
-    <string name="cd_toggle_compact">Kompaktmodus umschalten</string>
-    <string name="cd_regex">Regex Umschalter</string>
-    <string name="cd_case_sensitive">Groß-/Kleinschreibung Umschalter</string>
-    <string name="cd_more_options">Weitere Optionen</string>
-    <string name="cd_file_icon">Datei Icon</string>
-    <string name="cd_folder_icon">Ordner Icon</string>
-    <string name="cd_editor">Code Editor</string>
-    <string name="cd_preview">Vorschau</string>
-    <string name="cd_theme_preview">Theme Vorschau</string>
-    <string name="cd_color_picker">Color Picker</string>
-    <string name="cd_extension_icon">Erweiterungs-Icon</string>
-    <string name="cd_menu">Menü</string>
-    <string name="cd_settings">Einstellungen Icon</string>
-
-    <!-- Settings Hub Categories -->
-    <string name="settings_title">Einstellungen</string>
-    <string name="settings_category_appearance">1. Erscheinungsbild &amp; Theme</string>
-    <string name="settings_category_appearance_desc">Farbschema, Dark/Light Mode &amp; Theme Studio Anpassungen</string>
-    <string name="settings_category_editor">2. Editor</string>
-    <string name="settings_category_editor_desc">Zeilenumbruch, Schriftart, Einrückung, Formatierung &amp; Verhalten</string>
-    <string name="settings_category_filetree">3. Dateibaum &amp; Ansichten</string>
-    <string name="settings_category_filetree_desc">Sortierung, Versteckte Dateien, Module/Projekt/Datei-Ansichtsmodus</string>
-    <string name="settings_category_terminal">4. Terminal</string>
-    <string name="settings_category_terminal_desc">Distro-Auswahl, Virtuelle Tasten &amp; Farbschemas</string>
-    <string name="settings_category_sdkmanager">5. SDK Manager</string>
-    <string name="settings_category_sdkmanager_desc">Android SDK Build-Tools, NDK, CMake &amp; Java 17 verwalten</string>
-    <string name="settings_category_extensions">6. Plugins &amp; Erweiterungen (Extensions)</string>
-    <string name="settings_category_extensions_desc">Installierte Erweiterungen, Language Server &amp; Tooling Bridge</string>
-    <string name="settings_category_debug">7. Debug &amp; Diagnose</string>
-    <string name="settings_category_debug_desc">Logging-Level, Tracing &amp; Systemdiagnose konfigurieren</string>
-    <string name="settings_category_about">8. Über CodeForge Mobile</string>
-    <string name="settings_category_about_desc">App-Version, Lizenzen, Systemübersicht &amp; Entwickler-Informationen</string>
-
-    <!-- FileTree Settings & UI -->
-    <string name="filetree_settings_title">Dateibaum-Einstellungen</string>
-    <string name="filetree_section_fontsize">Schriftgröße &amp; Skalierung</string>
-    <string name="filetree_fontsize_label">Schriftgröße</string>
-    <string name="filetree_section_display">Anzeige-Optionen</string>
-    <string name="filetree_show_indent_lines">Einrückungslinien anzeigen</string>
-    <string name="filetree_show_indent_lines_sub">Zeigt vertikale Führungslinien für verschachtelte Ordner-Ebenen</string>
-    <string name="filetree_show_file_details">Dateidetails anzeigen</string>
-    <string name="filetree_show_file_details_sub">Zeigt Dateigröße und Änderungsdatum unterhalb des Dateinamens an</string>
-    <string name="filetree_show_hidden">Versteckte Dateien anzeigen</string>
-    <string name="filetree_show_hidden_sub">Dateien und Ordner mit vorangestelltem Punkt (.gitignore) einblenden</string>
-    <string name="filetree_section_sort">Sortierung &amp; Reihenfolge</string>
-    <string name="filetree_sort_order">Reihenfolge</string>
-    <string name="filetree_sort_asc">Aufsteigend (A-Z)</string>
-    <string name="filetree_sort_desc">Absteigend (Z-A)</string>
-    <string name="filetree_sort_by">Sortieren nach</string>
-    <string name="filetree_sort_name">Name</string>
-    <string name="filetree_sort_type">Typ</string>
-    <string name="filetree_sort_size">Größe</string>
-    <string name="filetree_sort_date">Datum</string>
-    <string name="filetree_section_viewmode">FileTree Ansichtsmodus (Android Studio Parität)</string>
-    <string name="filetree_viewmode_module">📦 Module Ansicht (Android)</string>
-    <string name="filetree_viewmode_module_sub">Blendet interne Gradle-Strukturen aus und gruppiert das Projekt nach Modulen.</string>
-    <string name="filetree_viewmode_project">📂 Projekt Ansicht</string>
-    <string name="filetree_viewmode_project_sub">Klassische Verzeichnisdarstellung aller Dateien und Ordner im Dateisystem.</string>
-    <string name="filetree_viewmode_file">📄 Datei Ansichtsmodus</string>
-    <string name="filetree_viewmode_file_sub">Flache Liste aller veränderten Quellcode-Dateien.</string>
-    <string name="filetree_folder_label">Ordner</string>
-
-    <!-- FileTree Dialogs & Context Menu -->
-    <string name="dialog_delete_title">Datei löschen</string>
-    <string name="dialog_delete_message">Möchtest du \"%1$s\" wirklich unwiderruflich löschen?</string>
-    <string name="dialog_properties_title">Eigenschaften</string>
-    <string name="dialog_properties_name">Name:</string>
-    <string name="dialog_properties_path">Pfad:</string>
-    <string name="dialog_properties_type">Typ:</string>
-    <string name="dialog_properties_size">Größe:</string>
-    <string name="dialog_properties_modified">Zuletzt geändert:</string>
-    <string name="dialog_properties_permissions">Berechtigungen:</string>
-
-    <!-- Theme Studio -->
-    <string name="theme_studio_title">Erscheinungsbild &amp; Theme Studio</string>
-    <string name="theme_presets_title">Theme Presets</string>
-    <string name="theme_custom_colors">Eigene Akzentfarben &amp; Color Picker</string>
-
-    <!-- Editor Settings -->
-    <string name="editor_settings_title">Editor-Einstellungen</string>
-    <string name="editor_option_wordwrap">Zeilenumbruch (Word Wrap)</string>
-    <string name="editor_option_line_numbers">Zeilennummern anzeigen</string>
-    <string name="editor_option_pin_line_numbers">Zeilennummern anheften</string>
-    <string name="editor_option_minimap">Minimap anzeigen</string>
-    <string name="editor_option_sticky_scroll">Sticky Scroll</string>
-    <string name="editor_option_scrollbars">Scrollbalken aktivieren</string>
-
-    <!-- Extensions Settings -->
-    <string name="extensions_settings_title">Erweiterungen (Extensions)</string>
-    <string name="extensions_installed">Installierte Erweiterungen</string>
-
-    <!-- Debug Settings -->
-    <string name="debug_settings_title">Debug &amp; Diagnose</string>
-    <string name="debug_logging_level">Logging-Level</string>
-    <!-- Plurals -->
-    <plurals name="files_count">
-        <item quantity="one">%d Datei</item>
-        <item quantity="other">%d Dateien</item>
-    </plurals>
-
-    <!-- Project Wizard Strings -->
-    <string name="choose_template">Vorlage auswählen</string>
-    <string name="pick_template_hint">Wähle eine Vorlage als Startpunkt für dein neues Android-Projekt.</string>
-    <string name="project_configuration">Projekt konfigurieren</string>
-    <string name="package_name">Package Name</string>
-    <string name="project_location">Speicherort</string>
-    <string name="language">Sprache</string>
-    <string name="minimum_sdk">Minimum SDK</string>
-    <string name="use_gradle_kotlin_dsl">Gradle Kotlin DSL (.kts) verwenden</string>
-    <string name="create_project_error_invalid_name">Ungültiger Projektname (erfordert 2-50 Zeichen, Buchstaben/Zahlen/Unterstrich/Bindestrich)</string>
-    <string name="create_project_error_invalid_package">Ungültiger Package Name (z.B. com.example.myapp)</string>
-    <string name="create_project_error_dir_exists">Das Zielverzeichnis existiert bereits.</string>
-    <string name="compose_requires_kotlin">Jetpack Compose erfordert Kotlin als Programmiersprache.</string>
-    <string name="create_project_success">Projekt erfolgreich in %1$s erstellt!</string>
-
-    <string name="tpl_no_activity_name">No Activity</string>
-    <string name="tpl_no_activity_desc">Erstellt ein leeres Android-Projekt ohne Start-Activity.</string>
-    <string name="tpl_empty_activity_name">Empty Views Activity</string>
-    <string name="tpl_empty_activity_desc">Erstellt ein klassisches Android-Projekt mit einer einfachen Activity und Layout XML.</string>
-    <string name="tpl_compose_activity_name">Empty Compose Activity</string>
-    <string name="tpl_compose_activity_desc">Erstellt ein modernes Android-Projekt mit Jetpack Compose UI Framework.</string>
-    <string name="tpl_basic_activity_name">Basic Views Activity</string>
-    <string name="tpl_basic_activity_desc">Erstellt eine Activity mit App Bar, FloatingActionButton und Navigation Host.</string>
-    <string name="tpl_bottom_nav_activity_name">Bottom Navigation Activity</string>
-    <string name="tpl_bottom_nav_activity_desc">Erstellt ein Projekt mit Unterer Navigationsleiste (BottomNavigationView) und Fragments.</string>
-    <string name="tpl_nav_drawer_activity_name">Navigation Drawer Activity</string>
-    <string name="tpl_nav_drawer_activity_desc">Erstellt eine Activity mit seitlicher Navigationsschublade (DrawerLayout).</string>
-    <string name="tpl_tabbed_activity_name">Tabbed Activity</string>
-    <string name="tpl_tabbed_activity_desc">Erstellt ein Projekt mit ViewPager2 und TabLayout für Wisch-Gesten.</string>
-    <string name="tpl_cpp_activity_name">Native C++ Activity</string>
-    <string name="tpl_cpp_activity_desc">Erstellt ein Android-Projekt mit C++ JNI Unterstützung (NDK / CMake).</string>
-    <string name="tpl_no_androidx_activity_name">No AndroidX Activity</string>
-    <string name="tpl_no_androidx_activity_desc">Erstellt ein minimalistisches Legacy-Projekt ohne AndroidX Bibliotheken.</string>
-
-    <!-- Welcome Screen Strings -->
-    <string name="welcome_subtitle">Profi IDE &amp; Android Studio für Android Devices</string>
-    <string name="welcome_quick_start">Schnellstart</string>
-    <string name="welcome_tools">Entwickler Tools</string>
-    <string name="welcome_create_desc">Neues Android, Kotlin, Java oder C++ Projekt erstellen</string>
-    <string name="welcome_open_desc">Bestehendes Projekt aus dem Speicher laden</string>
-    <string name="welcome_clone_desc">Git Repository von GitHub oder URL klonen</string>
-    <string name="welcome_terminal_desc">Linux PRoot Terminal &amp; Bash Tools öffnen</string>
-    <string name="welcome_sdk_desc">Android SDK, Build-Tools, NDK &amp; JDK verwalten</string>
-    <string name="welcome_settings_desc">IDE-Einstellungen, Theme Studio &amp; Editor konfigurieren</string>
-    <string name="welcome_extensions_desc">Plugins, Language Server (LSP) &amp; Erweiterungen</string>
-    <string name="welcome_about_desc">Systemstatus, App-Informationen &amp; Lizenzen</string>
-
-    <!-- ================= :feature:composepreview ================= -->
-    <string name="feature_composepreview_title">Preview</string>
-    <string name="feature_composepreview_cd_rerender">Neu rendern</string>
-    <string name="feature_composepreview_cd_preview">@Preview</string>
-    <string name="feature_composepreview_select_function_hint">Wähle eine Funktion für die Vorschau.</string>
-    <string name="feature_composepreview_compiling_rendering">Vorschau wird kompiliert &amp; gerendert...</string>
-    <string name="feature_composepreview_error_decode">Bild konnte nicht dekodiert werden.</string>
-    <string name="feature_composepreview_no_image">Kein Vorschau-Bild verfügbar.</string>
-    <string name="feature_composepreview_retry">Neu versuchen</string>
-
-    <!-- ================= :feature:welcome ================= -->
-    <string name="feature_welcome_open_existing_desc">Bestehendes Projekt im Dateisystem öffnen</string>
-
-    <!-- ================= :feature:themebuilder ================= -->
-    <string name="feature_themebuilder_title">Erscheinungsbild &amp; Theme</string>
-    <string name="feature_themebuilder_preview">Theme Vorschau</string>
-    <string name="feature_themebuilder_btn_primary">Primär-Button</string>
-    <string name="feature_themebuilder_btn_outlined">Outlined</string>
-    <string name="feature_themebuilder_preview_header">CodeForge Mobile UI</string>
-    <string name="feature_themebuilder_preview_sub">Vorschau der System-, Hell-, Dunkel- und AMOLED-Oberflächenfarben.</string>
-
-    <!-- ================= :feature:sdkmanager ================= -->
-    <string name="feature_sdkmanager_auto_update_title">Auto-Update Einstellungen</string>
-    <string name="feature_sdkmanager_change_interval">Intervall ändern</string>
-    <string name="feature_sdkmanager_diag_status">Diagnose &amp; SDK-Manager Status</string>
-    <string name="feature_sdkmanager_filter_hint">Versionen &amp; Pakete filtern...</string>
-    <string name="feature_sdkmanager_interval_label">Auto-Update Intervall</string>
-
-    <!-- ================= :feature:filetree ================= -->
-    <string name="feature_filetree_clear_clipboard">Zwischenablage leeren</string>
-    <string name="feature_filetree_new_file">Neue Datei</string>
-    <string name="feature_filetree_new_folder">Neuer Ordner</string>
-    <string name="feature_filetree_close_drawer">Schublade schließen</string>
-    <string name="feature_filetree_switch_viewmode">Ansichtsmodus wechseln</string>
-    <string name="feature_filetree_viewmode_module">📦 Modul-Ansicht (Android)</string>
-    <string name="feature_filetree_confirm_delete_title">Löschen bestätigen</string>
-
-    <!-- ================= :feature:onboarding ================= -->
-    <string name="feature_onboarding_perm_title">Berechtigungen</string>
-    <string name="feature_onboarding_perm_desc">CodeForge Mobile benötigt verschiedene Systemrechte für Terminals, Hintergrund-Builds und App-Installationen.</string>
-    <string name="feature_onboarding_storage_access">Speicherzugriff</string>
-    <string name="feature_onboarding_storage_access_desc">Zum Öffnen, Erstellen und Bearbeiten von Projekten (MANAGE_EXTERNAL_STORAGE).</string>
-    <string name="feature_onboarding_notifications">Benachrichtigungen</string>
-    <string name="feature_onboarding_notifications_desc">Für Build-Status und lang laufende Gradle-Tasks im Hintergrund.</string>
-    <string name="feature_onboarding_battery_opt">Akku-Optimierung ausnehmen</string>
-    <string name="feature_onboarding_battery_opt_desc">Verhindert das Beenden von Hintergrund-Builds und PRoot-Terminals durch das System.</string>
-    <string name="feature_onboarding_write_settings">Systemeinstellungen schreiben</string>
-    <string name="feature_onboarding_write_settings_desc">Erlaubt erweiterte Systemeinstellungen (WRITE_SECURE_SETTINGS, z. B. per ADB).</string>
-    <string name="feature_onboarding_welcome_title">Willkommen bei CodeForgeMobile</string>
-    <string name="feature_onboarding_welcome_sub">Ihre Smartphone IDE für Unterwegs</string>
-    <string name="feature_onboarding_code_on_phone">Code direkt auf dem Smartphone</string>
-    <string name="feature_onboarding_editor_desc">Vollwertiger Kotlin/Java-Editor mit LSP-Unterstützung, Syntax-Highlighting und Auto-Completion.</string>
-    <string name="feature_onboarding_linux_terminal">Echtes Linux-Terminal</string>
-    <string name="feature_onboarding_setup_linux_title">Linux-Umgebung einrichten</string>
-    <string name="feature_onboarding_setup_linux_desc">Wähle eine Distribution für Terminal, Der Download erfolgt einmalig.</string>
-    <string name="feature_onboarding_start_setup">Einrichtung starten</string>
-    <string name="feature_onboarding_setup_complete">Einrichtung abgeschlossen ✓</string>
-
-    <!-- ================= :feature:terminal ================= -->
-    <string name="feature_terminal_new_session">Neue Sitzung</string>
-    <string name="feature_terminal_settings">Einstellungen</string>
-    <string name="feature_terminal_rename">Umbenennen</string>
-    <string name="feature_terminal_close">Schließen</string>
-    <string name="feature_terminal_menu">Menü</string>
-    <string name="feature_terminal_loading_ubuntu">Lade Ubuntu Base...</string>
-
-    <!-- ================= :feature:settings ================= -->
-    <string name="feature_settings_ext_lsp_kotlin">LSP Smart Code completion &amp; diagnostics for Kotlin</string>
-    <string name="feature_settings_ext_jdt_java">Eclipse JDT LS Language Server support for Java</string>
-    <string name="feature_settings_ext_clangd_cpp">LLVM Clangd C and C++ code intelligence</string>
-    <string name="feature_settings_editor_gen_title">General (Allgemein)</string>
-    <string name="feature_settings_editor_hover_info">Hover Info</string>
-    <string name="feature_settings_editor_hover_info_sub">LSP Hover-Informationen und Dokumentation anzeigen</string>
-    <string name="feature_settings_editor_icu_lib">ICU Bibliothek nutzen</string>
-    <string name="feature_settings_editor_icu_lib_sub">Erweiterte ICU-Wortauswahl bei Doppel-Tippen nutzen</string>
-    <string name="feature_settings_editor_input_method">Input Method (Eingabemethoden)</string>
-    <string name="feature_settings_editor_soft_kbd">Soft-Keyboard aktivieren</string>
-    <string name="feature_settings_editor_soft_kbd_sub">Bildschirmtastatur beim Tippen im Editor verwenden</string>
-    <string name="feature_settings_editor_hide_soft_kbd">Soft-Keyboard bei Hardware-Tastatur verbergen</string>
-    <string name="feature_settings_editor_hide_soft_kbd_sub">Bildschirmtastatur automatisch ausblenden wenn Hardware-Tastatur angeschlossen ist</string>
-    <string name="feature_settings_editor_advanced_home_end">Erweitertes Pos1/Ende (Home/End)</string>
-    <string name="feature_settings_editor_advanced_home_end_sub">Pos1/Ende springt zuerst zum ersten Zeichen, dann zum Zeilenanfang</string>
-    <string name="feature_settings_editor_line_home_end">Zeilenbasiertes Pos1/Ende</string>
-    <string name="feature_settings_editor_line_home_end_sub">Pos1/Ende am visuellen Umbruchzeilenrand ausrichten</string>
-    <string name="feature_settings_editor_completion_typing">Vervollständigung bei Texteingabe</string>
-    <string name="feature_settings_editor_completion_typing_sub">Autovervollständigung auch während aktiver Tastatureingabe (Composing) anzeigen</string>
-    <string name="feature_settings_editor_fullscreen_mode">Vollbildmodus erlauben</string>
-    <string name="feature_settings_editor_fullscreen_mode_sub">Tastatur-Vollbildmodus auf mobilen Geräten zulassen</string>
-    <string name="feature_settings_editor_mouse_context">Maus-Kontextmenü</string>
-    <string name="feature_settings_editor_mouse_context_sub">Rechtsklick-Kontextmenü für Maussteuerung aktivieren</string>
-    <string name="feature_settings_terminal_scrollback_lines">Scrollback Lines</string>
-    <string name="feature_settings_terminal_scrollback_sub">Anzahl der Zeilen im Terminal-Puffer</string>
-    <string name="feature_settings_terminal_display_behavior">Anzeige &amp; Verhalten</string>
-    <string name="feature_settings_terminal_virtual_keys">Virtuelle Tasten (Extra Keys)</string>
-    <string name="feature_settings_terminal_virtual_keys_sub">Spezialtasten (Tab, Ctrl, Alt, ESC, Pfad-Tasten) einblenden</string>
-    <string name="feature_settings_terminal_bell">Terminal Bell (Glocke)</string>
-    <string name="feature_settings_terminal_bell_sub">Akustische/visuelle Signale bei BEL-Zeichen</string>
-    <string name="feature_settings_terminal_color_scheme">Farbschema (Color Scheme)</string>
-    <string name="feature_settings_terminal_maintenance">Wartung &amp; Aktionen</string>
-    <string name="feature_settings_terminal_reset_settings">Terminal-Einstellungen zurücksetzen</string>
-    <string name="feature_settings_debug_logging_title">Protokollierung &amp; Tracing</string>
-    <string name="feature_settings_debug_enable_logging">Globales Logging aktivieren</string>
-    <string name="feature_settings_debug_enable_logging_sub">AppLogger Schritt- und Statusausgaben erfassen</string>
-    <string name="feature_settings_debug_excessive_tracing">Erweitertes Tracing (Excessive Tracing)</string>
-    <string name="feature_settings_debug_excessive_tracing_sub">Ausführliches Event- und Flow-Tracing für Fehlersuche</string>
-    <string name="feature_settings_debug_log_level">Protokollierstufe (Log Level)</string>
-    <string name="feature_settings_debug_onboarding_status">Onboarding &amp; App-Start Status</string>
-    <string name="feature_settings_debug_onboarding_complete">Onboarding abgeschlossen</string>
-    <string name="feature_settings_debug_onboarding_complete_sub">Aktiviert = Direktstart auf Welcome Screen. Deaktiviert = Onboarding beim nächsten App-Start erzwingen.</string>
-    <string name="feature_settings_debug_reset_onboarding">Onboarding zurücksetzen (Beim nächsten Start anzeigen)</string>
-    <string name="feature_settings_debug_terminal_wipe">Terminal &amp; Guest OS Wartung (Wipe)</string>
-
-    <!-- ================= :feature:editor ================= -->
-    <string name="feature_editor_open_filetree">Dateibaum öffnen</string>
-    <string name="feature_editor_search_replace">Suchen &amp; Ersetzen</string>
-    <string name="feature_editor_lsp_connected">LSP Connected</string>
-    <string name="feature_editor_compose_preview">Compose Preview (Vorschau)</string>
-    <string name="feature_editor_format_code">Code Formatieren</string>
-    <string name="feature_editor_change_language">Sprache wechseln</string>
-    <string name="feature_editor_change_theme">Farbschema wechseln</string>
-    <string name="feature_editor_change_font">Schriftart wechseln</string>
-    <string name="feature_editor_goto_line">Gehe zu Zeile...</string>
-    <string name="feature_editor_settings">Editor-Einstellungen</string>
-    <string name="feature_editor_tab_options">Tab Optionen</string>
-    <string name="feature_editor_close_tab">Schließen (Close)</string>
-    <string name="feature_editor_close_others">Andere schließen (Close Others)</string>
-    <string name="feature_editor_close_all">Alle schließen (Close All)</string>
-    <string name="feature_editor_search_hint">Suchen...</string>
-    <string name="feature_editor_replace_hint">Ersetzen...</string>
-    <string name="feature_editor_replace">Ersetzen</string>
-    <string name="feature_editor_replace_all">Alle</string>
-    <string name="feature_editor_match_case">Match Case</string>
-    <string name="feature_editor_regex">Regex</string>
-    <string name="feature_editor_whole_word">Whole Word</string>
-    <string name="feature_editor_select_language">Sprache wählen</string>
-
-    <!-- ================= :app ================= -->
-    <string name="app_editor_tab">Editor</string>
-    <string name="app_preview_tab">Preview</string>
-
-    <!-- ================= Sweep Target Strings ================= -->
-    <string name="feature_editor_title_file">Editor - %1$s</string>
-    <string name="feature_editor_title_default">CodeForge Editor</string>
-    <string name="feature_editor_diag_line_msg">[Zeile %1$d] %2$s</string>
-    <string name="feature_editor_build_logs">Build Logs</string>
-    <string name="feature_editor_dialog_select_theme">Farbschema wählen</string>
-    <string name="feature_editor_dialog_select_font">Schriftart wählen</string>
-    <string name="feature_editor_dialog_goto_line">Gehe zu Zeile</string>
-    <string name="feature_editor_dialog_goto_line_hint">Zeilennummer z.B. 42</string>
-    <string name="feature_filetree_delete_confirm_msg">Möchtest du '%1$s' wirklich unwiderruflich löschen?</string>
-    <string name="feature_filetree_unknown">Unbekannt</string>
-    <string name="feature_filetree_folder">Ordner</string>
-    <string name="feature_filetree_file">Datei</string>
-    <string name="feature_filetree_hidden"> [Versteckt]</string>
-    <string name="feature_filetree_prop_name">Name: %1$s</string>
-    <string name="feature_filetree_prop_path">Pfad: %1$s</string>
-    <string name="feature_filetree_prop_type">Typ: %1$s</string>
-    <string name="feature_filetree_prop_size">Größe: %1$s</string>
-    <string name="feature_filetree_prop_modified">Zuletzt geändert: %1$s</string>
-    <string name="feature_filetree_prop_permissions">Berechtigungen: %1$s</string>
-    <string name="feature_filetree_title_new_file">Neue Datei erstellen</string>
-    <string name="feature_filetree_title_new_folder">Neuen Ordner erstellen</string>
-    <string name="feature_filetree_err_create_file">Datei konnte nicht erstellt werden</string>
-    <string name="feature_filetree_err_create_dir">Ordner konnte nicht erstellt werden</string>
-    <string name="feature_filetree_err_rename">Fehler beim Umbenennen</string>
-    <string name="feature_settings_filetree_sp_fmt">%1$d sp</string>
-    <string name="feature_settings_filetree_preview_sample">Vorschau: SampleClass.kt</string>
-    <string name="feature_settings_editor_theme_dark">Dunkles Farbschema</string>
-    <string name="feature_settings_editor_theme_light">Helles Farbschema</string>
-
-    <!-- ================= Final Sweep Strings ================= -->
-    <string name="feature_filetree_ctx_new_file">Neue Datei</string>
-    <string name="feature_filetree_ctx_new_folder">Neuer Ordner</string>
-    <string name="feature_filetree_ctx_cut">Ausschneiden</string>
-    <string name="feature_filetree_ctx_copy">Kopieren</string>
-    <string name="feature_filetree_ctx_paste">Einfügen</string>
-    <string name="feature_filetree_ctx_rename">Umbenennen</string>
-    <string name="feature_filetree_ctx_delete">Löschen</string>
-    <string name="feature_filetree_ctx_copy_path">Pfad kopieren</string>
-    <string name="feature_filetree_ctx_properties">Eigenschaften</string>
-    <string name="feature_filetree_tb_collapse_all">Alle einklappen</string>
-    <string name="feature_filetree_tb_expand_all">Alle ausklappen</string>
-    <string name="feature_terminal_rename_title">Sitzung umbenennen</string>
-    <string name="feature_terminal_session_title_hint">Titel der Sitzung</string>
-    <string name="feature_terminal_no_open_session">Keine offene Session.</string>
-    <string name="feature_settings_hub_title">Einstellungen</string>
-    <string name="feature_onboarding_install_packages">APKs &amp; Pakete installieren</string>
-    <string name="feature_onboarding_retry">Erneut versuchen</string>
-    <string name="feature_composepreview_hint_open_file">Öffne eine Datei mit @Composable-Funktionen im Editor.</string>
-
-    <!-- ================= Ultimate Sweep Strings ================= -->
-    <string name="feature_settings_ext_title">Erweiterungen (Extensions)</string>
-    <string name="feature_settings_ext_installing">Installiere...</string>
-    <string name="feature_settings_ext_uninstall">Deinstallieren</string>
-    <string name="feature_settings_ext_install">Installieren</string>
-    <string name="feature_settings_editor_inlay_hints">Inlay Hints</string>
-    <string name="feature_settings_editor_inlay_hints_sub">Inlay-Parameter- und Typ-Hinweise im Code einblenden</string>
-    <string name="feature_terminal_title">Terminal-Einstellungen</string>
-    <string name="feature_terminal_default_distro">Standard-Distribution (Guest OS)</string>
-    <string name="feature_terminal_scrollback_puffer">Scrollback &amp; Puffer</string>
-    <string name="feature_welcome_choose_folder_import">Ordner wählen &amp; importieren</string>
-    <string name="feature_welcome_devkit">DevKit</string>
-    <string name="feature_welcome_plugins">Plugins</string>
-    <string name="feature_welcome_about">Über</string>
-    <string name="feature_projectwizard_select_folder">Select Folder</string>
-    <string name="feature_projectwizard_api_level">API %1$s (Android %2$s)</string>
-    <string name="app_nav_back">Zurück</string>
 </resources>

@@ -1,0 +1,7 @@
+{
+  "id": "com.example.java-lsp",
+  "name": "Java Language Server",
+  "version": "1.0.0",
+  "description": "Installiert und startet den Eclipse JDT Language Server innerhalb der PRoot-Rootfs und bindet ihn an den CodeForge-Editor an.",
+  "entryPointClass": "com.example.codeforgeplugin.javalsp.JavaLspPlugin"
+}

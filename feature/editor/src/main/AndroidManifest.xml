@@ -1,4 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Modul: :feature:editor
+  @author Thomas Schmid
+
+  FileProvider für content://-URIs: wird benötigt, um Dateien aus dem Editor heraus per
+  Intent.ACTION_SEND / ACTION_VIEW zu teilen oder in einer externen App ("Öffnen mit...")
+  zu öffnen, ohne file://-URIs preiszugeben (FileUriExposedException ab Android 7+).
+  Die Authority wird dynamisch aus applicationId zusammengesetzt, damit :app weiterhin die
+  einzige Quelle der applicationId bleibt (keine feature→app-Abhängigkeit).
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.feature.editor.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/editor_file_provider_paths" />
+        </provider>
+    </application>
 
 </manifest>

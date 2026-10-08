@@ -2,10 +2,12 @@
 package com.codeforge.feature.onboarding
 
 import androidx.compose.runtime.Immutable
+import com.codeforge.core.domain.repository.SdkSetupOptions
 
 enum class OnboardingStep { INTRO, PERMISSIONS, SETUP }
 
-enum class SetupPhase { IDLE, DOWNLOADING, EXTRACTING, FINALIZING, DONE, FAILED }
+/** Einrichtung: Termux-Bootstrap entpacken → Setup-Skript bereitstellen → Terminal öffnet und führt es aus. */
+enum class SetupPhase { IDLE, INSTALLING_TERMUX, PREPARING_SCRIPT, DONE, FAILED }
 
 @Immutable
 data class OnboardingUiState(
@@ -14,12 +16,8 @@ data class OnboardingUiState(
     val currentIntroPage: Int = 0,
     val storagePermissionGranted: Boolean = false,
     val notificationPermissionGranted: Boolean = false,
-    val batteryOptimizationGranted: Boolean = false,
-    val writeSecureSettingsGranted: Boolean = false,
-    val installPackagesGranted: Boolean = false,
-    val selectedDistro: String = "alpine",
+    val sdkOptions: SdkSetupOptions = SdkSetupOptions(),
     val setupPhase: SetupPhase = SetupPhase.IDLE,
-    val setupProgressPercent: Int = 0,
     val setupErrorMessage: String? = null
 )
 
@@ -28,11 +26,14 @@ sealed interface OnboardingUiEvent {
     data object IntroFinished : OnboardingUiEvent
     data class StoragePermissionResult(val granted: Boolean) : OnboardingUiEvent
     data class NotificationPermissionResult(val granted: Boolean) : OnboardingUiEvent
-    data class BatteryOptimizationResult(val granted: Boolean) : OnboardingUiEvent
-    data class WriteSecureSettingsResult(val granted: Boolean) : OnboardingUiEvent
-    data class InstallPackagesResult(val granted: Boolean) : OnboardingUiEvent
     data object PermissionsContinueClicked : OnboardingUiEvent
-    data class DistroSelected(val distro: String) : OnboardingUiEvent
+    data class JdkSelected(val version: String) : OnboardingUiEvent
+    data class NdkSelected(val version: String) : OnboardingUiEvent
+    data class InstallNdkChanged(val install: Boolean) : OnboardingUiEvent
+    data class InstallCmakeChanged(val install: Boolean) : OnboardingUiEvent
+
+    /** Von der UI-Schicht gemeldet, nachdem `TermuxInstaller.setupBootstrapIfNeeded` fertig ist. */
+    data class TermuxBootstrapSetupCompleted(val success: Boolean, val errorMessage: String? = null) : OnboardingUiEvent
     data object StartSetupClicked : OnboardingUiEvent
     data object RetrySetupClicked : OnboardingUiEvent
 }
@@ -40,8 +41,10 @@ sealed interface OnboardingUiEvent {
 sealed interface OnboardingUiEffect {
     data object RequestStoragePermission : OnboardingUiEffect
     data object RequestNotificationPermission : OnboardingUiEffect
-    data object RequestBatteryOptimization : OnboardingUiEffect
-    data object RequestWriteSecureSettings : OnboardingUiEffect
-    data object RequestInstallPackages : OnboardingUiEffect
-    data object NavigateToWelcome : OnboardingUiEffect
+
+    /** Activity-abhängig: UI ruft `TermuxInstaller.setupBootstrapIfNeeded(activity, …)` auf. */
+    data object RunTermuxBootstrapSetup : OnboardingUiEffect
+
+    /** Onboarding fertig: Terminal öffnen und [command] (`codeforge-env setup …`) ausführen. */
+    data class NavigateToSetupTerminal(val command: String) : OnboardingUiEffect
 }

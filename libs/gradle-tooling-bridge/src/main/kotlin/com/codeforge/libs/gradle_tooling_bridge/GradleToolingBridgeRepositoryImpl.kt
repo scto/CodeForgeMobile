@@ -6,17 +6,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import com.codeforge.core.domain.repository.BuildStatus
+import com.codeforge.core.domain.repository.BuildEvent
 import com.codeforge.core.domain.repository.GradleBuildRepository
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -29,101 +27,77 @@ class GradleToolingBridgeRepositoryImpl @Inject constructor(
 
     private var service: IGradleBridgeService? = null
     private var projectRootPath: String? = null
-    
-    private val mutex = Mutex()
-    private var boundConnection: ServiceConnection? = null
 
-    override fun executeTask(projectPath: String, taskName: String): Flow<BuildStatus> = callbackFlow {
-        trySend(BuildStatus.Building("Verbinde mit Gradle Bridge..."))
-        val activeService = service
-        if (activeService == null) {
-            runCatching {
-                connect(projectPath)
-            }
-        }
-
-        val currentService = service
-        if (currentService == null) {
-            trySend(BuildStatus.Failed("Bridge-Service nicht gebunden."))
-            close()
-            return@callbackFlow
-        }
-
-        val callback = object : IGradleBridgeCallback.Stub() {
-            override fun onOutput(line: String) {
-                trySend(BuildStatus.Building(line))
-            }
-
-            override fun onProgress(message: String, percent: Int) {
-                trySend(BuildStatus.Building("$message ($percent%)"))
-            }
-
-            override fun onTaskStarted(name: String) {
-                trySend(BuildStatus.Building("Task gestartet: $name"))
-            }
-
-            override fun onTaskFinished(name: String, success: Boolean) {}
-
-            override fun onBuildFinished(success: Boolean) {
-                if (success) {
-                    trySend(BuildStatus.Success)
-                } else {
-                    trySend(BuildStatus.Failed("Build fehlgeschlagen"))
-                }
-                close()
-            }
-
-            override fun onBuildFailed(message: String) {
-                trySend(BuildStatus.Failed(message))
-                close()
-            }
-        }
-
-        currentService.runBuild(listOf(taskName), emptyList(), callback)
-
-        awaitClose {
-            runCatching { service?.cancelBuild() }
-        }
-    }
-
-    suspend fun connect(projectRootPath: String): Result<Unit> = runCatching {
+    override suspend fun connect(projectRootPath: String): Result<Unit> = runCatching {
         this.projectRootPath = projectRootPath
         bindServiceIfNeeded()
         val gradleUserHome = context.getExternalFilesDir("gradle_home")?.path.orEmpty()
         requireService().connect(projectRootPath, gradleUserHome)
     }
 
-    suspend fun getAvailableTasks(): Result<List<String>> = runCatching {
-        withContext(Dispatchers.IO) {
-            requireService().availableTasks
+    override fun runTask(taskName: String): Flow<BuildEvent> = callbackFlow {
+        val activeService = service
+        if (activeService == null) {
+            trySend(BuildEvent.BuildFailed(Res.string(R.string.gradle_bridge_service_nicht_gebunden_connect)))
+            close()
+            return@callbackFlow
+        }
+
+        val callback = object : IGradleBridgeCallback.Stub() {
+            override fun onOutput(line: String) {
+                trySend(BuildEvent.Output(line))
+            }
+
+            override fun onProgress(message: String, percent: Int) {
+                trySend(BuildEvent.Progress(message, percent))
+            }
+
+            override fun onTaskStarted(taskName: String) {
+                trySend(BuildEvent.TaskStarted(taskName))
+            }
+
+            override fun onTaskFinished(taskName: String, success: Boolean) {
+                trySend(BuildEvent.TaskFinished(taskName, success))
+            }
+
+            override fun onBuildFinished(success: Boolean) {
+                trySend(BuildEvent.BuildFinished(success))
+                close()
+            }
+
+            override fun onBuildFailed(message: String) {
+                trySend(BuildEvent.BuildFailed(message))
+                close()
+            }
+        }
+
+        activeService.runTask(taskName, callback)
+
+        awaitClose {
+            runCatching { service?.cancelBuild() }
         }
     }
 
-    suspend fun getBuildEnvironment(): Result<String> = runCatching {
-        withContext(Dispatchers.IO) {
-            requireService().buildEnvironment
-        }
-    }
-
-    suspend fun getProjectStructure(): Result<String> = runCatching {
-        withContext(Dispatchers.IO) {
-            requireService().ideaProjectModel
-        }
-    }
-
-    suspend fun cancelBuild() {
+    override suspend fun cancelBuild() {
         service?.cancelBuild()
     }
 
-    suspend fun disconnect() {
+    override suspend fun disconnect() {
         service?.disconnect()
         boundConnection?.let { runCatching { context.unbindService(it) } }
         boundConnection = null
         service = null
     }
 
-    private suspend fun bindServiceIfNeeded() = mutex.withLock {
-        if (service != null) return@withLock
+    private var boundConnection: ServiceConnection? = null
+
+    /**
+     * Bindet den Service (aus Sicht des Aufrufers synchron) via suspendCancellableCoroutine,
+     * da bindService() selbst asynchron ist und der Bridge-Service erst nach onServiceConnected
+     * nutzbar ist.
+     */
+    private suspend fun bindServiceIfNeeded() {
+        if (service != null) return
 
         suspendCancellableCoroutine { continuation ->
             val intent = Intent(context, GradleBridgeService::class.java)
@@ -141,11 +115,11 @@ class GradleToolingBridgeRepositoryImpl @Inject constructor(
 
             val bound = context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
             if (!bound && continuation.isActive) {
-                continuation.resumeWithException(IllegalStateException("GradleBridgeService konnte nicht gebunden werden."))
+                continuation.resumeWithException(IllegalStateException(Res.string(R.string.gradle_gradlebridgeservice_konnte_nicht_gebun)))
             }
         }
     }
 
     private fun requireService(): IGradleBridgeService =
-        service ?: error("GradleBridgeService ist nicht verbunden.")
+        service ?: error(Res.string(R.string.gradle_gradlebridgeservice_ist_nicht_verbunde))
 }

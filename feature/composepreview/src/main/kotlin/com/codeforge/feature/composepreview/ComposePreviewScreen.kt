@@ -1,11 +1,8 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 /**
  * Modul: :feature:composepreview
  * @author Thomas Schmid
  */
 package com.codeforge.feature.composepreview
-
-import com.codeforge.core.resources.ResGetter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +33,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.ComposableCandidate
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.stringRes
 
 @Composable
 fun ComposePreviewRoute(
@@ -52,15 +51,14 @@ private fun ComposePreviewScreen(
     uiState: ComposePreviewUiState,
     onEvent: (ComposePreviewUiEvent) -> Unit
 ) {
-    @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_composepreview_title)) },
+                title = { Text(stringRes(R.string.common_preview)) },
                 actions = {
                     IconButton(onClick = { onEvent(ComposePreviewUiEvent.Rerender) }) {
-                        Icon(Icons.Filled.Refresh, contentDescription = ResGetter.get(com.codeforge.core.resources.R.string.feature_composepreview_cd_rerender))
+                        Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.composepreview_neu_rendern))
                     }
                 }
             )
@@ -70,7 +68,7 @@ private fun ComposePreviewScreen(
             if (uiState.availableComposables.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        "Öffne eine Datei mit @Composable-Funktionen im Editor.",
+                        stringRes(R.string.composepreview_oeffne_eine_datei_mit_composable),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -84,10 +82,7 @@ private fun ComposePreviewScreen(
             )
 
             Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-                RenderStateContent(
-                    state = uiState.renderState,
-                    onRetry = { onEvent(ComposePreviewUiEvent.Rerender) }
-                )
+                RenderStateContent(uiState.renderState)
             }
         }
     }
@@ -109,7 +104,7 @@ private fun ComposableChipRow(
                 onClick = { onSelected(candidate.functionName) },
                 label = { Text(candidate.functionName) },
                 leadingIcon = if (candidate.hasPreviewAnnotation) {
-                    { Icon(Icons.Filled.Star, contentDescription = ResGetter.get(com.codeforge.core.resources.R.string.feature_composepreview_cd_preview), modifier = Modifier.padding(2.dp)) }
+                    { Icon(Icons.Filled.Star, contentDescription = "@Preview", modifier = Modifier.padding(2.dp)) }
                 } else {
                     null
                 }
@@ -119,22 +114,13 @@ private fun ComposableChipRow(
 }
 
 @Composable
-private fun RenderStateContent(
-    state: PreviewRenderState,
-    onRetry: () -> Unit = {}
-) {
+private fun RenderStateContent(state: PreviewRenderState) {
     when (state) {
         PreviewRenderState.Idle ->
-            Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_composepreview_select_function_hint), style = MaterialTheme.typography.bodyMedium)
+            Text(stringRes(R.string.composepreview_waehle_eine_funktion_fuer_die), style = MaterialTheme.typography.bodyMedium)
 
         PreviewRenderState.Rendering ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                CircularProgressIndicator()
-                Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_composepreview_compiling_rendering), style = MaterialTheme.typography.bodyMedium)
-            }
+            CircularProgressIndicator()
 
         is PreviewRenderState.Rendered -> {
             if (state.imageBytes != null) {
@@ -148,26 +134,24 @@ private fun RenderStateContent(
                         modifier = Modifier.fillMaxWidth()
                     )
                 } else {
-                    Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_composepreview_error_decode), color = MaterialTheme.colorScheme.error)
+                    Text(stringRes(R.string.composepreview_bild_konnte_nicht_dekodiert_werden), color = MaterialTheme.colorScheme.error)
                 }
             } else {
-                Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_composepreview_no_image), style = MaterialTheme.typography.bodyMedium)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        stringRes(R.string.common_erkannt, state.functionName),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        stringRes(R.string.composepreview_die_grafische_rendering_pipeline_ist),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
         }
 
         is PreviewRenderState.Failed ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = state.message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                androidx.compose.material3.Button(onClick = onRetry) {
-                    Text(ResGetter.get(com.codeforge.core.resources.R.string.feature_composepreview_retry))
-                }
-            }
+            Text(state.message, color = MaterialTheme.colorScheme.error)
     }
 }

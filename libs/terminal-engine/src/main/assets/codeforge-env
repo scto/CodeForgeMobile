@@ -1,0 +1,296 @@
+#!@TERMUX_PREFIX@/bin/bash
+# codeforge-env — Einrichtung und Verwaltung der Android-Entwicklungsumgebung unter Termux.
+#
+# Wird als Termux-Paket im Bootstrap ausgeliefert (Quelle: packages/codeforge-env/ im
+# terminal-packages-codeforge-Fork). Fehlt es dort, kopiert die App diese Datei beim
+# Onboarding/Start nach $PREFIX/bin (ScriptInstaller). Die Platzhalter @…@ ersetzt entweder
+# der Paket-Build oder die App.
+#
+# Aufruf:  codeforge-env [--machine] <befehl> [argumente]
+#   list                         alle bekannten Komponenten mit Installationsstatus
+#   install <id>                 z. B. jdk;21  ndk;30b  cmake;4.3.0  platforms;android-35
+#   uninstall <id>
+#   setup [--jdk 17|21] [--ndk 27d|30b] [--cmake 4.3.0] [--no-ndk] [--no-cmake]
+#   env                          schreibt/zeigt die Umgebungsdatei (ANDROID_HOME, JAVA_HOME …)
+#   doctor                       prüft die Umgebung
+#
+# --machine: maschinenlesbare Zeilen "CFSDK|TYP|…" (für den SDK-Manager der App):
+#   CFSDK|ITEM|id|version|installiert(0/1)|pfad
+#   CFSDK|PROGRESS|prozent|nachricht
+#   CFSDK|OK|id
+#   CFSDK|ERR|nachricht
+#
+# Quellen: JDKs kommen aus den Termux-Paketen (openjdk-17/-21). Android-spezifische Teile
+# (cmdline-tools, platform-tools, build-tools mit aapt2, NDK, CMake) kommen aus EIGENEN
+# Builds, die ein Manifest beschreibt ($CODEFORGE_SDK_REPO/manifest.txt), Zeilenformat:
+#   id|version|kind|source|sha256|dest|extra
+#   kind=archive     source=URL (relativ zum Repo, wenn ohne "://"), dest relativ zu $SDK_ROOT,
+#                    extra z. B. "strip=1"
+#   kind=sdkmanager  source=Paketpfad für Googles sdkmanager (z. B. platforms;android-35)
+#   kind=pkg         source=Termux-Paketname (wird per pkg installiert)
+
+set -u
+
+MACHINE=0
+if [ "${1:-}" = "--machine" ]; then MACHINE=1; shift; fi
+
+PREFIX="${PREFIX:-@TERMUX_PREFIX@}"
+HOME="${HOME:-@TERMUX_HOME@}"
+# SDK-Root: CODEFORGE_SDK_ROOT > ANDROID_SDK_ROOT aus $PREFIX/etc/codeforge-environment.properties
+# (optionale Override-Datei) > $PREFIX/opt/android-sdk.
+# Muss mit TermuxDevEnvironment.getSdkRoot() (App) übereinstimmen.
+ENV_PROPS="$PREFIX/etc/codeforge-environment.properties"
+props_sdk_root() {
+  [ -f "$ENV_PROPS" ] || return 0
+  sed -n 's/^ANDROID_SDK_ROOT=//p' "$ENV_PROPS" | head -n1 | tr -d '"'"'" \
+    | sed -e "s|\${HOME}|$HOME|g" -e "s|\$HOME|$HOME|g" -e "s|\${PREFIX}|$PREFIX|g" -e "s|\$PREFIX|$PREFIX|g" \
+          -e "s|\${SYSROOT}|$PREFIX|g" -e "s|\$SYSROOT|$PREFIX|g"
+}
+SDK_ROOT="${CODEFORGE_SDK_ROOT:-$(props_sdk_root)}"
+SDK_ROOT="${SDK_ROOT:-$PREFIX/opt/android-sdk}"
+CONF="$PREFIX/etc/codeforge/sdk.conf"
+# shellcheck disable=SC1090
+[ -f "$CONF" ] && . "$CONF"
+REPO_URL="${CODEFORGE_SDK_REPO:-@CODEFORGE_SDK_REPO@}"
+MANIFEST_URL="${CODEFORGE_SDK_MANIFEST:-$REPO_URL/manifest.txt}"
+TMP="${TMPDIR:-$PREFIX/tmp}"
+ENV_FILE="$PREFIX/etc/profile.d/codeforge-android.sh"
+JVM_DIR="$PREFIX/lib/jvm"
+mkdir -p "$TMP" "$SDK_ROOT" 2>/dev/null
+
+DEFAULT_MANIFEST='jdk;17|17|pkg|openjdk-17|||
+jdk;21|21|pkg|openjdk-21|||'
+
+# ---------- Ausgabe ----------
+clean() { printf '%s' "$*" | tr '|\n\r' '   '; }
+say()   { [ "$MACHINE" = 1 ] || printf '%s\n' "$*"; }
+progress() { # prozent nachricht
+  if [ "$MACHINE" = 1 ]; then printf 'CFSDK|PROGRESS|%s|%s\n' "$1" "$(clean "$2")"; else printf '[%3s%%] %s\n' "$1" "$2"; fi
+}
+ok()  { if [ "$MACHINE" = 1 ]; then printf 'CFSDK|OK|%s\n' "$1"; else printf 'OK: %s\n' "$1"; fi; }
+err() { if [ "$MACHINE" = 1 ]; then printf 'CFSDK|ERR|%s\n' "$(clean "$*")"; else printf 'FEHLER: %s\n' "$*" >&2; fi; }
+die() { err "$*"; exit 1; }
+
+# ---------- Manifest ----------
+MANIFEST_CACHE=""
+manifest() {
+  if [ -z "$MANIFEST_CACHE" ]; then
+    local remote=""
+    case "$MANIFEST_URL" in
+      *@*) remote="" ;; # nicht ersetzter Platzhalter
+      *) remote=$(curl -fsSL --max-time 20 "$MANIFEST_URL" 2>/dev/null | tr -d '\r' | grep -v '^[[:space:]]*#' | grep '|' || true) ;;
+    esac
+    MANIFEST_CACHE="$DEFAULT_MANIFEST"
+    [ -n "$remote" ] && MANIFEST_CACHE="$MANIFEST_CACHE"$'\n'"$remote"
+  fi
+  printf '%s\n' "$MANIFEST_CACHE"
+}
+
+# entry_field <id> <feldnummer> — das letzte Vorkommen gewinnt (Remote überschreibt Default)
+entry_field() { manifest | awk -F'|' -v id="$1" -v n="$2" '$1==id{v=$n} END{print v}'; }
+entry_exists() { manifest | awk -F'|' -v id="$1" '$1==id{f=1} END{exit f?0:1}'; }
+
+jdk_home() { printf '%s/java-%s-openjdk' "$JVM_DIR" "$1"; }
+
+# Pfad der installierten Komponente (leer = nicht installiert)
+installed_path() { # id
+  local id=$1 kind ver dest src
+  kind=$(entry_field "$id" 3); ver=$(entry_field "$id" 2); src=$(entry_field "$id" 4); dest=$(entry_field "$id" 6)
+  case "$kind" in
+    pkg)
+      case "$id" in jdk\;*) [ -x "$(jdk_home "$ver")/bin/java" ] && printf '%s' "$(jdk_home "$ver")" ;; esac ;;
+    archive)
+      [ -n "$dest" ] && [ -d "$SDK_ROOT/$dest" ] && printf '%s' "$SDK_ROOT/$dest" ;;
+    sdkmanager)
+      local p="$SDK_ROOT/${src//;//}"; [ -d "$p" ] && printf '%s' "$p" ;;
+  esac
+  return 0
+}
+
+# ---------- Hilfen ----------
+need_tools() {
+  local missing=() t
+  for t in curl tar unzip sha256sum; do command -v "$t" >/dev/null 2>&1 || missing+=("$t"); done
+  command -v xz >/dev/null 2>&1 || missing+=(xz-utils)
+  if [ ${#missing[@]} -gt 0 ]; then
+    progress 1 "Installiere Werkzeuge: ${missing[*]}"
+    local pkgs=() m
+    for m in "${missing[@]}"; do case "$m" in sha256sum) pkgs+=(coreutils) ;; *) pkgs+=("$m") ;; esac; done
+    pkg install -y "${pkgs[@]}" >/dev/null 2>&1 || die "Werkzeuge konnten nicht installiert werden: ${pkgs[*]}"
+  fi
+}
+
+download() { # url ziel basis-prozent spanne
+  local url=$1 dest=$2 base=$3 span=$4 total size pid pct
+  total=$(curl -sIL "$url" 2>/dev/null | tr -d '\r' | awk 'tolower($1)=="content-length:"{v=$2} END{print v+0}')
+  curl -fsSL -o "$dest" "$url" 2>"$TMP/.cfsdk-curl-err" &
+  pid=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    size=$(stat -c %s "$dest" 2>/dev/null || echo 0)
+    if [ "${total:-0}" -gt 0 ]; then pct=$(( base + size * span / total )); [ "$pct" -gt $(( base + span )) ] && pct=$(( base + span )); progress "$pct" "Lade herunter …"; fi
+    sleep 1
+  done
+  wait "$pid" || { err "Download fehlgeschlagen: $url ($(head -c 200 "$TMP/.cfsdk-curl-err" 2>/dev/null))"; return 1; }
+}
+
+extract() { # archiv ziel strip
+  local file=$1 dest=$2 strip=$3
+  rm -rf "$dest.tmp"; mkdir -p "$dest.tmp"
+  case "$file" in
+    *.zip) unzip -q "$file" -d "$dest.tmp" || return 1
+           if [ "$strip" -gt 0 ]; then
+             local d; d=$(find "$dest.tmp" -mindepth 1 -maxdepth 1 | head -n1)
+             if [ -n "$d" ] && [ -d "$d" ]; then mv "$d" "$dest.tmp.inner" && rm -rf "$dest.tmp" && mv "$dest.tmp.inner" "$dest.tmp"; fi
+           fi ;;
+    *) tar -xf "$file" -C "$dest.tmp" --strip-components="$strip" || return 1 ;;
+  esac
+  rm -rf "$dest"; mkdir -p "$(dirname "$dest")"; mv "$dest.tmp" "$dest"
+}
+
+# ---------- install / uninstall ----------
+do_install() { # id
+  local id=$1 kind ver src sha dest extra strip=0 url file
+  entry_exists "$id" || die "Unbekannte Komponente: $id"
+  kind=$(entry_field "$id" 3); ver=$(entry_field "$id" 2); src=$(entry_field "$id" 4)
+  sha=$(entry_field "$id" 5); dest=$(entry_field "$id" 6); extra=$(entry_field "$id" 7)
+  case "$extra" in *strip=*) strip=${extra##*strip=}; strip=${strip%%[!0-9]*} ;; esac
+  : "${strip:=0}"
+
+  case "$kind" in
+    pkg)
+      progress 5 "Installiere Paket $src …"
+      pkg install -y "$src" >/dev/null 2>&1 || die "pkg install $src fehlgeschlagen"
+      ;;
+    archive)
+      need_tools
+      case "$src" in *://*) url=$src ;; *) url="$REPO_URL/$src" ;; esac
+      file="$TMP/cfsdk-$(printf '%s' "$id" | tr -c 'A-Za-z0-9.' '_')-${src##*/}"
+      progress 2 "Starte Download $id"
+      download "$url" "$file" 2 78 || { rm -f "$file"; exit 1; }
+      if [ -n "$sha" ]; then
+        progress 82 "Prüfe Prüfsumme …"
+        local got; got=$(sha256sum "$file" | awk '{print $1}')
+        [ "$got" = "$sha" ] || { rm -f "$file"; die "Prüfsumme stimmt nicht für $id (erwartet $sha, erhalten $got)"; }
+      else
+        say "Warnung: keine Prüfsumme im Manifest für $id"
+      fi
+      progress 88 "Entpacke …"
+      extract "$file" "$SDK_ROOT/$dest" "$strip" || { rm -f "$file"; die "Entpacken fehlgeschlagen für $id"; }
+      rm -f "$file"
+      [ -d "$SDK_ROOT/$dest/bin" ] && chmod -R u+x "$SDK_ROOT/$dest/bin" 2>/dev/null
+      ;;
+    sdkmanager)
+      local sm="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+      [ -x "$sm" ] || { say "cmdline-tools fehlen — installiere sie zuerst"; do_install 'cmdline-tools;latest' || exit 1; }
+      progress 10 "sdkmanager installiert $src …"
+      export JAVA_HOME="${JAVA_HOME:-$(first_jdk)}"
+      yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "$src" >/dev/null 2>&1 \
+        || die "sdkmanager konnte $src nicht installieren"
+      ;;
+    *) die "Unbekannter Typ '$kind' im Manifest für $id" ;;
+  esac
+  progress 100 "Fertig"
+  ok "$id"
+}
+
+do_uninstall() { # id
+  local id=$1 kind src p
+  entry_exists "$id" || die "Unbekannte Komponente: $id"
+  kind=$(entry_field "$id" 3); src=$(entry_field "$id" 4)
+  p=$(installed_path "$id")
+  [ -n "$p" ] || { ok "$id"; return 0; }
+  case "$kind" in
+    pkg) pkg uninstall -y "$src" >/dev/null 2>&1 || die "Deinstallation von $src fehlgeschlagen" ;;
+    archive) rm -rf "$p" ;;
+    sdkmanager) rm -rf "$p" ;;
+  esac
+  ok "$id"
+}
+
+first_jdk() { local d; for d in "$JVM_DIR"/java-*-openjdk; do [ -x "$d/bin/java" ] && { printf '%s' "$d"; return; }; done; }
+
+# ---------- list ----------
+do_list() {
+  local line id ver kind p inst
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    id=${line%%|*}; ver=$(entry_field "$id" 2)
+    p=$(installed_path "$id"); inst=0; [ -n "$p" ] && inst=1
+    if [ "$MACHINE" = 1 ]; then printf 'CFSDK|ITEM|%s|%s|%s|%s\n' "$id" "$ver" "$inst" "$p"
+    else printf '%-28s %-12s %s\n' "$id" "$ver" "$([ "$inst" = 1 ] && echo "installiert ($p)" || echo '-')"; fi
+  done < <(manifest | awk -F'|' '!seen[$1]++{print $1}')
+}
+
+# ---------- env ----------
+write_env() { # jdkVer ndkId cmakeId
+  local jdkver=$1 ndk=${2:-} cmake=${3:-} jh p
+  jh=$(jdk_home "$jdkver"); [ -x "$jh/bin/java" ] || jh=$(first_jdk)
+  mkdir -p "$(dirname "$ENV_FILE")"
+  {
+    echo "# erzeugt von codeforge-env — nicht von Hand ändern"
+    echo "export ANDROID_HOME=\"$SDK_ROOT\""
+    echo "export ANDROID_SDK_ROOT=\"$SDK_ROOT\""
+    [ -n "$jh" ] && echo "export JAVA_HOME=\"$jh\""
+    if [ -n "$ndk" ]; then p=$(installed_path "$ndk"); [ -n "$p" ] && echo "export ANDROID_NDK_HOME=\"$p\""; fi
+    local path_add="$SDK_ROOT/cmdline-tools/latest/bin:$SDK_ROOT/platform-tools"
+    if [ -n "$cmake" ]; then p=$(installed_path "$cmake"); [ -n "$p" ] && path_add="$p/bin:$path_add"; fi
+    echo "export PATH=\"$path_add:\$PATH\""
+  } > "$ENV_FILE"
+  # Gradle braucht das zum Gerät passende aapt2 aus den eigenen build-tools
+  local bt aapt2
+  bt=$(ls -d "$SDK_ROOT"/build-tools/* 2>/dev/null | sort -V | tail -n1)
+  aapt2="$bt/aapt2"
+  if [ -n "$bt" ] && [ -x "$aapt2" ]; then
+    mkdir -p "$HOME/.gradle"
+    local gp="$HOME/.gradle/gradle.properties"
+    grep -v '^android.aapt2FromMavenOverride=' "$gp" 2>/dev/null > "$gp.new" || true
+    echo "android.aapt2FromMavenOverride=$aapt2" >> "$gp.new"; mv "$gp.new" "$gp"
+  fi
+}
+
+do_setup() {
+  local jdk=17 ndk=27d cmake=4.3.0 want_ndk=1 want_cmake=1
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --jdk) jdk=$2; shift 2 ;; --ndk) ndk=$2; shift 2 ;; --cmake) cmake=$2; shift 2 ;;
+      --no-ndk) want_ndk=0; shift ;; --no-cmake) want_cmake=0; shift ;;
+      *) die "Unbekannte Option: $1" ;;
+    esac
+  done
+  local steps=("jdk;$jdk" 'cmdline-tools;latest' 'platform-tools;latest')
+  [ "$want_ndk" = 1 ] && steps+=("ndk;$ndk")
+  [ "$want_cmake" = 1 ] && steps+=("cmake;$cmake")
+  local total=${#steps[@]} i=0 id
+  for id in "${steps[@]}"; do
+    i=$((i+1))
+    if ! entry_exists "$id"; then say "Überspringe $id (nicht im Manifest)"; continue; fi
+    if [ -n "$(installed_path "$id")" ]; then say "$id bereits installiert"; continue; fi
+    say "== ($i/$total) $id =="
+    ( do_install "$id" ) || die "Einrichtung abgebrochen bei $id"
+  done
+  write_env "$jdk" "$( [ "$want_ndk" = 1 ] && echo "ndk;$ndk")" "$( [ "$want_cmake" = 1 ] && echo "cmake;$cmake")"
+  progress 100 "Umgebung eingerichtet"
+  say "Neue Shell öffnen oder 'source $ENV_FILE' ausführen."
+  ok setup
+}
+
+do_doctor() {
+  local rc=0 t
+  for t in bash curl tar unzip java; do command -v "$t" >/dev/null 2>&1 && say "ok   $t" || { say "FEHLT $t"; rc=1; }; done
+  [ -d "$SDK_ROOT" ] && say "ok   SDK_ROOT=$SDK_ROOT" || { say "FEHLT SDK_ROOT"; rc=1; }
+  [ -f "$ENV_FILE" ] && say "ok   $ENV_FILE" || { say "FEHLT $ENV_FILE (codeforge-env setup)"; rc=1; }
+  case "$MANIFEST_URL" in *@*) say "WARN  CODEFORGE_SDK_REPO ist nicht konfiguriert ($CONF)"; rc=1 ;; esac
+  exit $rc
+}
+
+cmd=${1:-help}; [ $# -gt 0 ] && shift
+case "$cmd" in
+  list) do_list ;;
+  install) [ $# -ge 1 ] || die "install braucht eine ID"; do_install "$1" ;;
+  uninstall) [ $# -ge 1 ] || die "uninstall braucht eine ID"; do_uninstall "$1" ;;
+  setup) do_setup "$@" ;;
+  env) [ -f "$ENV_FILE" ] && cat "$ENV_FILE" || die "Noch nicht eingerichtet (codeforge-env setup)" ;;
+  doctor) do_doctor ;;
+  help|-h|--help) sed -n '2,/^set -u/p' "$0" | sed 's/^# \{0,1\}//' | head -n 40 ;;
+  *) die "Unbekannter Befehl: $cmd (codeforge-env help)" ;;
+esac

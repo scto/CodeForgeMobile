@@ -1,8 +1,7 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 // Modul: :feature:onboarding
 package com.codeforge.feature.onboarding
 
-import androidx.compose.foundation.Image
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,36 +27,31 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.stringRes
 
-private data class IntroPage(val title: String, val description: String, val icon: ImageVector)
+private data class IntroPage(@StringRes val title: Int, @StringRes val description: Int, val icon: ImageVector)
 
 private val introPages = listOf(
     IntroPage(
-        title = "Willkommen bei CodeForgeMobile",
-        description = "Ihre Smartphone IDE für Unterwegs",
+        title = R.string.intro_code_title,
+        description = R.string.intro_code_desc,
         icon = Icons.Filled.Code
     ),
     IntroPage(
-        title = "Code direkt auf dem Smartphone",
-        description = "Vollwertiger Kotlin/Java-Editor mit LSP-Unterstützung, Syntax-Highlighting und Auto-Completion.",
-        icon = Icons.Filled.Code
-    ),
-    IntroPage(
-        title = "Echtes Linux-Terminal",
-        description = "Alpine, Ubuntu oder Debian per PRoot – Shell, Gradle und Build-Tools direkt auf dem Gerät.",
+        title = R.string.intro_terminal_title,
+        description = R.string.intro_terminal_desc,
         icon = Icons.Filled.Terminal
     ),
     IntroPage(
-        title = "Individuell anpassbar",
-        description = "Themes, Editor-Konfiguration und Plugins nach deinen Wünschen.",
+        title = R.string.intro_custom_title,
+        description = R.string.intro_custom_desc,
         icon = Icons.Filled.SettingsSuggest
     ),
     IntroPage(
-        title = "Erweiterbar per Plugin-API",
-        description = "Installiere Plugins oder entwickle eigene über das offene Plugin-API-Surface.",
+        title = R.string.intro_plugin_title,
+        description = R.string.intro_plugin_desc,
         icon = Icons.Filled.Extension
     )
 )
@@ -79,7 +73,7 @@ fun IntroPagerScreen(
             state = pagerState,
             modifier = Modifier.weight(1f).fillMaxWidth()
         ) { page ->
-            IntroPageContent(page = introPages[page], isFirstPage = page == 0)
+            IntroPageContent(introPages[page])
         }
 
         PagerIndicator(pagerState = pagerState, pageCount = introPages.size)
@@ -87,11 +81,11 @@ fun IntroPagerScreen(
         Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
             if (pagerState.currentPage == introPages.lastIndex) {
                 Button(onClick = onFinished, modifier = Modifier.fillMaxWidth()) {
-                    Text("Loslegen")
+                    Text(stringRes(R.string.onboarding_loslegen))
                 }
             } else {
                 TextButton(onClick = onFinished, modifier = Modifier.fillMaxWidth()) {
-                    Text("Überspringen")
+                    Text(stringRes(R.string.common_ueberspringen))
                 }
             }
         }
@@ -99,40 +93,18 @@ fun IntroPagerScreen(
 }
 
 @Composable
-private fun IntroPageContent(page: IntroPage, isFirstPage: Boolean = false) {
+private fun IntroPageContent(page: IntroPage) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (isFirstPage) {
-            Image(
-                painter = painterResource(id = R.drawable.icon),
-                contentDescription = "CodeForge App Logo",
-                modifier = Modifier
-                    .size(140.dp)
-                    .padding(bottom = 24.dp)
-            )
-        } else {
-            Icon(
-                imageVector = page.icon,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(72.dp)
-                    .padding(bottom = 24.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
+        Icon(imageVector = page.icon, contentDescription = null, modifier = Modifier.padding(bottom = 24.dp))
+        Text(stringRes(page.title), style = MaterialTheme.typography.headlineSmall)
         Text(
-            text = page.title,
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = page.description,
+            stringRes(page.description),
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 8.dp),
-            textAlign = TextAlign.Center
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }

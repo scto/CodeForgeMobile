@@ -4,35 +4,24 @@
  */
 package com.codeforge.core.domain.repository
 
-import com.codeforge.core.domain.model.JavaInfo
 import com.codeforge.core.domain.model.SdkInstallEvent
-import com.codeforge.core.domain.model.SdkUpdateInterval
 import com.codeforge.core.domain.model.ToolItem
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Kapselt Befehle an das `sdkmanager`-CLI (Teil der Android-Commandline-Tools, läuft
- * innerhalb der PRoot-Rootfs — nicht im App-Prozess, dort existiert kein sdkmanager-
- * Binary) sowie die JDK-Verwaltung (kein reales sdkmanager-Paket, siehe JdkCatalog-KDoc
- * in :libs:terminal-engine). Implementiert dort, konsumiert von :feature:sdkmanager.
+ * Grafischer Aufsatz auf das Termux-Skript `codeforge-env` (`--machine`-Ausgabe). Das
+ * Skript installiert JDK (Termux-Pakete) sowie cmdline-tools, platform-tools, build-tools,
+ * NDK und CMake aus eigenen Builds; die App führt es nur aus und zeigt Status/Fortschritt.
+ * Implementiert in :libs:terminal-engine, konsumiert von :feature:sdkmanager.
+ *
+ * Paket-IDs: `jdk;21`, `cmdline-tools;latest`, `platform-tools;latest`, `build-tools;35.0.0`,
+ * `platforms;android-35`, `ndk;27d`, `cmake;4.3.0`.
  */
 interface SdkRepository {
     suspend fun listAvailablePackages(): Result<List<ToolItem>>
-    suspend fun refreshAndCachePackages(): Result<List<ToolItem>>
-    suspend fun getUpdateInterval(): SdkUpdateInterval
-    suspend fun setUpdateInterval(interval: SdkUpdateInterval)
-    suspend fun getCmdlineToolsInstalled(): Boolean
-    suspend fun getLastDiagnosticMessage(): String
-    suspend fun isJavaInstalled(): Boolean
-    suspend fun getJavaInfo(): JavaInfo
     fun installSdkTool(packagePath: String): Flow<SdkInstallEvent>
     suspend fun uninstallSdkTool(packagePath: String): Result<Unit>
-    suspend fun syncInstalledToolsToDataStore(): Result<Unit>
 
-    /**
-     * SDK-Root-Verzeichnis INNERHALB der Rootfs (ANDROID_HOME/ANDROID_SDK_ROOT, dort per
-     * Shell-Probe ermittelt — nicht die (nicht existente) Umgebungsvariable des
-     * App-Prozesses). null falls nicht gesetzt oder Rootfs nicht eingerichtet.
-     */
+    /** ANDROID_HOME im Termux-Prefix; `null`, wenn der Termux-Bootstrap fehlt. */
     suspend fun sdkRootPath(): String?
 }

@@ -4,11 +4,8 @@
  */
 package com.codeforge.app
 
-import com.codeforge.core.resources.ResGetter
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -19,6 +16,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.stringRes
 
 /**
  * Beherbergt Editor- und Preview-Tab nebeneinander (Skill-Abschnitt 4: "zusätzliches
@@ -27,9 +26,10 @@ import androidx.compose.ui.Modifier
  */
 @Composable
 fun EditorWithPreviewHost(
+    modifier: Modifier = Modifier,
     hasComposables: Boolean,
     editorContent: @Composable () -> Unit,
-    previewContent: @Composable () -> Unit,
+    previewContent: @Composable () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
@@ -37,16 +37,11 @@ fun EditorWithPreviewHost(
         if (!hasComposables) selectedTab = 0
     }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .statusBarsPadding(),
-    ) {
+    Column(modifier = modifier.fillMaxSize()) {
         if (hasComposables) {
             TabRow(selectedTabIndex = selectedTab) {
-                Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text(ResGetter.get(com.codeforge.core.resources.R.string.app_editor_tab)) })
-                Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text(ResGetter.get(com.codeforge.core.resources.R.string.app_preview_tab)) })
+                Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text(stringRes(R.string.common_editor)) })
+                Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text(stringRes(R.string.common_preview)) })
             }
         }
 

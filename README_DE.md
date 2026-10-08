@@ -3,163 +3,160 @@
 <div align="center">
 
 # 🚀 CodeForge Mobile IDE
-### *High-Performance Native Entwicklungsumgebung für Android*
+### *Native Entwicklungsumgebung für Android – mit Termux-Shell im Gerät*
 
-Eine moderne, native Android-IDE mit **Sora Editor**, **Terminal-Engine (Linux Bootstrap)**, **Language Server Protocol (LSP)**, **Real-Time Jetpack Compose Preview** & **Microsoft Fluent 2 Design System**.
+Eine native Android-IDE mit **Sora Editor**, **Termux-basierter Shell** (JDK, Android SDK, NDK per `codeforge-env`), **Git (JGit)**, **Language Server Protocol**, **Compose-Live-Preview**, **visuellem Layout-Designer** und **Material 3 Expressive**.
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-7F52FF.svg?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
-[![Android](https://img.shields.io/badge/Android-AGP_8.13.1-3DDC84.svg?style=for-the-badge&logo=android)](https://developer.android.com/)
-[![Compose](https://img.shields.io/badge/Jetpack_Compose-2024.10.01-4285F4.svg?style=for-the-badge&logo=jetpackcompose)](https://developer.android.com/)
-[![Design](https://img.shields.io/badge/Design-Microsoft_Fluent_2_%26_M3-0078D4.svg?style=for-the-badge&logo=microsoft)](file:///data/data/com.termux/files/home/storage/shared/Download/CodeForgeMobile/FLUENT2_JETPACK_COMPOSE_GUIDE.md)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](file:///data/data/com.termux/files/home/storage/shared/Download/CodeForgeMobile/LICENSE)
+[![Version](https://img.shields.io/badge/Version-3.0.0-blueviolet.svg?style=for-the-badge)](CHANGELOG.md)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.21-7F52FF.svg?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
+[![Android](https://img.shields.io/badge/Android-AGP_8.13.2-3DDC84.svg?style=for-the-badge&logo=android)](https://developer.android.com/)
+[![Compose](https://img.shields.io/badge/Jetpack_Compose-BOM_2025.09.00-4285F4.svg?style=for-the-badge&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
+[![Design](https://img.shields.io/badge/Design-Material_3_Expressive-0078D4.svg?style=for-the-badge)](docs/adaptive-edge-to-edge-expressive.md)
+[![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge)](LICENSE)
+[![Build](https://img.shields.io/badge/Build-ungepr%C3%BCft-orange.svg?style=for-the-badge)](STATUS.md)
 
-[Über das Projekt](#-über-das-projekt) • [Features](#-hauptmerkmale) • [Architektur](#-systemarchitektur) • [Tech Stack](#-tech-stack) • [Erste Schritte](#-erste-schritte) • [Dokumentation](#-dokumentation) • [🇬🇧 English Version](file:///data/data/com.termux/files/home/storage/shared/Download/CodeForgeMobile/README.md)
+[Über das Projekt](#-über-das-projekt) • [Features](#-hauptmerkmale) • [Architektur](#-systemarchitektur) • [Tech Stack](#-tech-stack--bibliotheken) • [Erste Schritte](#-erste-schritte) • [Dokumentation](#-dokumentation--referenzen) • [🇬🇧 English Version](README.md)
 
 </div>
 
 ---
 
+> ⚠️ **Entwicklungsstand:** Der Code wurde ohne Android-SDK/Gradle-Lauf geschrieben. Es gibt noch **keinen verifizierten Build**; nur reine JVM-Logik (Git, Code-Tools, Layout-Modell) ist getestet. Details in [STATUS.md](STATUS.md).
+
 ## 📌 Über das Projekt
 
-**CodeForge Mobile** ist eine vollwertige, hochgradig modularisierte integrierte Entwicklungsumgebung (IDE) für Android-Smartphones, Tablets und Falt-Geräte. Sie bringt die Leistungsfähigkeit und Flexibilität von Desktop-Entwicklungswerkzeugen direkt auf mobile Endgeräte.
+**CodeForge Mobile** ist eine hochgradig modularisierte integrierte Entwicklungsumgebung (IDE) für Android-Smartphones, Tablets und Falt-Geräte. Das Projekt folgt **Clean Architecture** (UI → Domain → Data), MVI/MVVM, Kotlin Coroutines/Flow und Jetpack Compose mit **Material 3 Expressive**. Die Oberfläche ist adaptiv (Compact/Medium/Expanded) und Edge-to-Edge.
 
-Das Projekt folgt strikt den Prinzipien der **Clean Architecture** und des **Modern Android Development (MAD)**. Die Benutzeroberfläche nutzt das **Microsoft Fluent 2** Designsystem gemeinsam mit **Material 3**, um eine elegante, adaptive und hochgradig anpassbare Arbeitsumgebung im Light- und Dark-Mode zu bieten.
+Die Entwicklungsumgebung (Shell, JDK, Android SDK, NDK) läuft in einem **Termux-Prefix** unter `/data/data/com.codeforge.app/files/usr`; PRoot, Rootfs und Multi-Distro gibt es nicht mehr. Wegen der eingebundenen Termux-Module ist das Projekt **GPLv3**.
 
 ---
 
 ## ✨ Hauptmerkmale
 
-### ⚡ 1. Sora Code Editor Ultimate Setup (`:feature:editor`)
-* 🗺️ **Minimap Overview**: Visuelle Code-Übersicht für schnelle Navigation in großen Quelldateien.
-* 📌 **Sticky Scroll**: Behält Funktions- und Klassendeklarationen am oberen Editorrand fixiert.
-* 🌈 **Rainbow Brackets & Inlay Hints**: Farbliche Hervorhebung von Klammerpaaren und dynamische Typ-Hinweise.
-* 🔤 **Syntax Highlighting Engine**: Unterstützung für Kotlin, Java, Python, C/C++, XML, JSON, AIDL, Logcat via Tree-Sitter & Monarch.
-* 🔍 **Gesten & Tastatur-Support**: Pinch-to-Zoom zur Schriftgrößenanpassung, Lupe (Magnifier), Diagnose-UI und Desktop-Tastaturkürzel.
-* 🛠️ **Code Formatting & Autovervollständigung**: Integrierte Formatierung und intellektuelle Codevervollständigung.
+Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 
-### 💻 2. Integrierte Terminal Engine (`:feature:terminal` / `:libs:terminal-engine`)
-* 🐚 **Nyamux Terminal Core**: Native Emulation basierend auf `nyamux-terminal.jar`.
-* 🐧 **Linux-Umgebung & Termix Engine**: Linux Distro Bootstrap, Rootfs Downloader und automatisierter JDK Installer.
-* ⚙️ **Hintergrund-Ausführung**: Robuste Befehlsausführung über `WorkManager` & `TerminalForegroundService`.
+### ⚡ 1. Sora Code Editor (`:feature:editor`) 🟡
+* 🔍 Sora-Editor-Wrapper für Compose mit Magnifier, Sticky Scroll, Zeilenumbruch und LSP-Anbindung (Decorator `LspAwareLanguage`).
+* 🌈 TextMate- und Tree-Sitter-Gerüst; **Grammars und Native-Libs müssen noch beschafft werden** (`agy-tasks/01`, `02`).
+* 🧩 Overlays: Versions-Hinweis (`4.0.1 → 4.0.3`) in TOML-Katalogen mit Update/Update-All, Farb-Kästchen neben Farbwerten.
+* 🔎 Suchen & Ersetzen (Datei und Projekt, Regex/Case/Wort) 🧪, Formatter/Highlighter-Logik 🧪 (`:libs:code-tools`).
 
-### 🎨 3. UI Preview & Visual Layout Designer (`:feature:composepreview` & `:feature:layoutdesigner`)
-* 👁️ **Jetpack Compose Live Preview**: Rendern von `@Composable` Komponenten in Echtzeit auf dem mobilen Gerät.
-* ✏️ **Visual Drag & Drop Designer**: Visuelles Erstellen von Layouts mit Code-Generierung.
+### 💻 2. Terminal & Umgebung (`:feature:terminal`, `:libs:terminal-engine`, `:libs:termux-*`) ✅
+* 🐚 Echte Termux-Shell (vendort aus `scto/AndroidIDE`, Paket `com.codeforge`).
+* 🧰 **`codeforge-env`**: installiert JDK 17/21, Android SDK (`$PREFIX/opt/android-sdk`), cmdline-tools, platform-tools, CMake und NDK; der SDK-Manager ist eine GUI darüber.
+* 🚀 Onboarding: Intro → Berechtigungen → Bootstrap → Setup-Skript im Terminal.
 
-### 🚀 4. Android Studio Style Project Wizard (`:feature:projectwizard` & `:libs:template-engine`)
-* 🧙 **2-Schritt Assistent**: Schnelle Erstellung neuer Android- und Kotlin-Projekte mit konfigurierbaren Paketnamen, SDK-Versionen und Modulstrukturen.
-* 📋 **Projekt-Templates**: Vorgefertigte Vorlagen (Compose App, Clean Architecture, Empty Activity, Multi-Module Engine etc.).
-* 📁 **SAF Storage Picker**: Nahtlose Ordnerauswahl über das Android Storage Access Framework.
+### 🎨 3. Compose-Preview & Layout-Designer (`:feature:composepreview`, `:feature:layoutdesigner`)
+* 👁️ Compose-Live-Preview für `@Composable`-Funktionen 🟡.
+* ✏️ **Layout-Designer** ✅🧪: visueller Editor für Android-Layout-XML mit Palette, Vorschau (4 Gerätegrößen), Struktur-Baum, Eigenschaften, XML-Tab, Undo/Redo und Drawer-Bereich „Layouts“. Näherungsvorschau, kein Drag-and-Drop – siehe [docs/layout-designer.md](docs/layout-designer.md).
 
-### 🔍 5. Language Server Protocol (LSP) & Extensions (`:libs:lsp-client` & `:feature:settings`)
-* 🔌 **LSP Client Engine**: Integrierter Eclipse `lsp4j` Client für Auto-Vervollständigung, Go-to-Definition, Symbol-Suche und Diagnostics.
-* 🧩 **Erweiterungs-Manager**: Download, SHA-256 Verifizierung und Verwendungsprüfung von Sprachserver-Paketen (Kotlin, Java, Python, C/C++).
+### 🚀 4. Projekt-Wizard & Template-Engine (`:feature:projectwizard`, `:libs:template-engine`) ✅
+* 🧙 2-Schritt-Assistent mit 9 Vorlagen (u. a. Compose-App, Empty Activity, Multi-Modul), typisierte Validierung, SAF-Import; `git init` bei Projekterstellung.
 
-### 🌿 6. Native Git Versionskontrolle (`:feature:git`)
-* 🐙 **Eclipse JGit Integration**: Branches verwalten, Commits erstellen, Remotes anbinden, Pull/Push-Operationen und Dateistatus-Anzeige.
+### 🌿 5. Git (`:feature:git`, `:feature:settings`) ✅🧪
+* 🐙 JGit-Panel: Diff, Merge, Commit, Push/Pull, Graph, Stash, Tags, Rebase, Cherry-Pick, Revert, Reset, Amend, Blame, Hunk-weises Stage, Konflikt-Editor; Settings für Name/E-Mail/Token.
 
-### 🎨 7. Theme Studio & Microsoft Fluent 2 Integration (`:feature:themebuilder`)
-* 🎭 **15 Integrierte Presets**: Monokai, Darcula, GitHub Light, VS Code Dark+, Cyberpunk Neon, Ocean u.v.m.
-* 🎨 **RGB Color Picker**: Vollständig anpassbare Markenfarben und Live-Farbkarten-Vorschau.
-* 🌓 **Adaptive Dark/Light Themes**: Nahtlose Unterstützung für System-Dunkelmodus und Barrierefreiheit.
+### 🔌 6. Language Server & Plugins (`:libs:lsp-client`, `:libs:plugin-api`) 🟡
+* 🔌 LSP-Client (JSON-RPC) und Plugin-API; Beispiel-Plugins in `examples/` (Kotlin/Java). Ein Extensions-Manager mit Download und SHA-256-Prüfung existiert nur im lokalen Experimentzweig (`agy-tasks/16`).
+
+### 📐 7. Indexierung & Dependency-Updater (`:libs:indexing-*`, `:libs:dependency-updater-*`) ✅
+* 🔄 Projektindexierung und Versions-Check (TOML-Katalog bzw. `build.gradle(.kts)` aller Module) mit Dialog Dismiss / Ask later / Update.
+
+### 🎭 8. Theme & Design (`:core:designsystem`, `:feature:themebuilder`) ✅
+* 🎨 Material 3 Expressive, Dynamic Color, 5 Presets, eigene Paletten; adaptive Layouts und Edge-to-Edge. Der Fluent-2-Leitfaden ([FLUENT2_JETPACK_COMPOSE_GUIDE.md](FLUENT2_JETPACK_COMPOSE_GUIDE.md)) ist bisher nur Designrichtung, nicht umgesetzt.
+
+### 🌍 9. Zentrale Strings (`:core:resources`) ✅🧪
+* 📝 Alle sichtbaren Texte in einer `strings.xml` (~720 Einträge), Zugriff über `Res`/`stringRes`; `TestRes` für JVM-Tests.
 
 ---
 
 ## 🏗️ Systemarchitektur
 
-CodeForge Mobile ist in über 20 spezialisierte Gradle-Module strukturiert, was für hohe Wartbarkeit, schnelle Build-Zeiten und klare Schnittstellen sorgt:
+43 Gradle-Module mit klarer Abhängigkeitsrichtung (`:feature:*` → nur `:core:*`/`:libs:*-api`; Feature-Module kennen einander nicht, Kommunikation über Bridges in `:core:navigation`):
 
 ```text
 CodeForgeMobile/
-├── app/                        # App-Einstiegspunkt, Hilt Setup & App Navigation
-├── core/                       # Zentrale Kern-Module & Shared Logic
-│   ├── common/                 # Utilities, Coroutine Dispatchers & Extensions
-│   ├── data/                   # Repository Implementierungen & Datenquellen
-│   ├── datastore/              # Protobuf DataStore (AppSettings, EditorConfig)
-│   ├── designsystem/           # Fluent 2 & Material 3 Theme System
-│   ├── domain/                 # Business-Logik, UseCases & Domain-Modelle
-│   ├── navigation/             # Navigation Routes & Destinations
-│   ├── resources/              # Centralized String Resources & ResGetter Utility
-│   ├── testing/                # Test-Utilities & Mocks
-│   └── ui/                     # Wiederverwendbare Compose UI Komponenten
-├── feature/                    # Feature-Module (UI, State & ViewModel)
-│   ├── composepreview/         # Jetpack Compose Live Renderer
-│   ├── editor/                 # Sora Editor Ultimate Setup
-│   ├── filetree/               # Bonsai Tree-View File Explorer
-│   ├── git/                    # Git Integration & Status UI
-│   ├── layoutdesigner/         # Drag & Drop UI Layout Builder
-│   ├── onboarding/             # Quick Setup & Einführung
-│   ├── plugins/                # Plugin-Verwaltung
-│   ├── projectwizard/          # Android Studio-Style Project Creator
-│   ├── sdkmanager/             # Toolchain & SDK Manager
-│   ├── settings/               # Einstellungen & LSP Extension Manager
-│   ├── terminal/               # Linux Terminal & Console UI
-│   ├── themebuilder/           # Theme Studio & Color Picker
-│   └── welcome/                # IDE Dashboard & Welcome Screen
-├── libs/                       # Standalone Bibliotheken & Engine Bridges
-│   ├── gradle-tooling-bridge/  # Integration der Gradle Tooling API
-│   ├── lsp-client/             # Language Server Protocol Client (LSP4J)
-│   ├── plugin-api/             # Schnittstellen für Entwickler-Plugins
-│   ├── template-engine/        # Code- & Projekt-Generierung (Freemarker)
-│   └── terminal-engine/        # Terminal Emulation & Native JNI Layer
-└── examples/                   # Beispiel-Plugins für LSP (Kotlin & Java)
+├── app/                          # Einstieg, Hilt, Navigation, Workspace/Drawer
+├── build-logic/                  # Convention-Plugins
+├── core/
+│   ├── common/ data/ datastore/  # Utilities · Repositories · Proto-DataStore
+│   ├── designsystem/ ui/         # Theme (M3 Expressive) · WidthClass/Compose-Helfer
+│   ├── domain/ navigation/       # UseCases/Modelle · Bridges
+│   ├── resources/ testing/       # Zentrale Strings · Test-Helfer
+├── feature/
+│   ├── composepreview/ dependencyupdates/ editor/ filetree/ git/
+│   ├── layoutdesigner/ modulemaker/ onboarding/ plugins/ projectwizard/
+│   └── sdkmanager/ search/ settings/ terminal/ themebuilder/ welcome/
+├── libs/
+│   ├── code-tools/               # Format, Suche, Modul-Maker (reine JVM)
+│   ├── indexing-api|impl/ dependency-updater-api|impl/
+│   ├── lsp-client/ plugin-api/ gradle-tooling-bridge/ template-engine/
+│   ├── terminal-engine/          # Termux-Anbindung, `codeforge-env`
+│   └── termux-emulator|view|shared|app/   # Vendort, GPLv3
+├── agy-tasks/                    # Aufträge für den KI-Coding-Agenten agy
+├── docs/                         # Architektur, Features, `sub/` mit Termux-/Lizenzdokumenten
+└── examples/                     # Beispiel-Plugins (Kotlin/Java LSP)
 ```
 
 ---
 
 ## 🛠️ Tech Stack & Bibliotheken
 
-| Kategorie | Technologie / Bibliothek | Version | Beschreibung |
-| :--- | :--- | :--- | :--- |
-| **Sprache** | Kotlin | `2.2.21` | Coroutines, Flow & Serialization |
-| **Build System** | Gradle / AGP | `9.5.1` / `8.13.1` | KSP (`2.2.21-2.0.5`), KtLint (`14.2.0`) |
-| **UI Framework** | Jetpack Compose | `2024.10.01` (BOM) | Material 3 & Adaptive Navigation |
-| **Design System** | Microsoft Fluent 2 | Custom Tokens | Fluent Controls & Design Tokens |
-| **Code Editor** | Rosemoe Sora-Editor | `0.24.6` | Tree-Sitter (`4.3.2`) & Monarch (`1.0.3`) |
-| **Dependency Injection** | Dagger Hilt | `2.57.1` | Multi-Modul Dependency Injection |
-| **Persistence** | Proto DataStore | `1.1.1` | Protobuf (`4.35.1`) Typsichere Einstellungen |
-| **Terminal Engine** | Nyamux / JNI | Prebuilt JAR | Terminal Session, Termix Rootfs & JDK Installer |
-| **Git Client** | Eclipse JGit | `6.10.0` | Native Git-Befehle in Pure Java |
-| **LSP** | Eclipse LSP4J | `1.0.0` | Language Server Protocol Client |
-| **File Tree** | Bonsai | `1.2.0` | Jetpack Compose High-Performance Tree View |
+| Kategorie | Technologie | Version |
+| :--- | :--- | :--- |
+| Sprache | Kotlin | `2.1.21` |
+| Build | Gradle / AGP / KSP | `8.14.3` / `8.13.2` / `2.1.21-2.0.1` |
+| UI | Jetpack Compose BOM / Material 3 Adaptive | `2025.09.00` / `1.1.0` |
+| DI | Dagger Hilt | `2.56.2` |
+| Persistenz | Proto DataStore / Protobuf | `1.1.1` / `3.25.3` |
+| Editor | Rosemoe Sora-Editor (`editor`, `language-textmate`, `language-treesitter`) | `0.23.4` |
+| Git | Eclipse JGit | `6.10.0` |
+| LSP | Eclipse LSP4J | `0.24.0` |
+| Dateibaum | Bonsai | `1.2.0` |
+| SDK | minSdk / targetSdk / compileSdk | `26` / `35` / `36` |
+| Quality | ktlint plugin / detekt | `14.2.0` / `2.0.0-alpha.5` |
+
+> Die Versionen stammen aus `gradle/libs.versions.toml` und sind teilweise **nicht gegen Maven/Google verifiziert** (siehe [STATUS.md](STATUS.md)).
 
 ---
 
 ## 🚀 Erste Schritte
 
 ### Voraussetzungen
-* **Android Studio**: Ladybug (2024.2.1) oder neuer.
-* **JDK**: OpenJDK 17 oder JDK 21.
-* **Min. SDK**: Android 6.0 (API 23+), empfohlen Android 10+ (API 29+).
+* **Android Studio** (aktuell) mit Android-SDK-Plattform 36
+* **JDK 17** oder 21
+* Gerät/Emulator ab Android 8.0 (API 26)
 
-### Projekt bauen
-
+### Bauen
 ```bash
-# Repository klonen
-git clone https://github.com/your-org/CodeForgeMobile.git
+git clone https://github.com/scto/CodeForgeMobile.git
 cd CodeForgeMobile
-
-# Debug APK kompilieren
-./gradlew assembleDebug
-
-# Code Quality & Linter ausführen
+./gradlew :app:assembleDebug     # noch nie ausgeführt – Fehler sind zu erwarten
 ./gradlew ktlintCheck
 ```
+
+### Termux-Bootstrap
+Die App braucht einen Bootstrap für `com.codeforge.app`. Bauen und veröffentlichen mit `build_codeforge_repo.sh` ([Anleitung](build_codeforge_repo.md)); die GPG-Passphrase kommt aus der Umgebungsvariable `CODEFORGE_GPG_PASSPHRASE`.
 
 ---
 
 ## 📚 Dokumentation & Referenzen
 
-* 📊 [STATUS.md](file:///data/data/com.termux/files/home/storage/shared/Download/CodeForgeMobile/STATUS.md) – Detaillierter Entwicklungs- & Komponenten-Status.
-* 🎨 [FLUENT2_JETPACK_COMPOSE_GUIDE.md](file:///data/data/com.termux/files/home/storage/shared/Download/CodeForgeMobile/FLUENT2_JETPACK_COMPOSE_GUIDE.md) – Fluent 2 UI Design-Leitfaden.
-* 📜 [CHANGELOG.md](file:///data/data/com.termux/files/home/storage/shared/Download/CodeForgeMobile/CHANGELOG.md) – Chronologisches Änderungsprotokoll.
-* ⚙️ [settings.gradle.kts](file:///data/data/com.termux/files/home/storage/shared/Download/CodeForgeMobile/settings.gradle.kts) – Deklaration aller 20+ Gradle-Module.
+* 📊 [STATUS.md](STATUS.md) – implementierte und offene Features
+* 📜 [CHANGELOG.md](CHANGELOG.md) – Änderungsprotokoll
+* 🤖 [agy-tasks/README.md](agy-tasks/README.md) – Prüf- und Umsetzungsaufträge (01–16)
+* 🏛️ [docs/architecture-decisions.md](docs/architecture-decisions.md), [docs/overview.md](docs/overview.md)
+* 🧱 [docs/build-logic.md](docs/build-logic.md), [docs/resources-and-strings.md](docs/resources-and-strings.md), [docs/module-files-and-app-resources.md](docs/module-files-and-app-resources.md)
+* 📱 [docs/adaptive-edge-to-edge-expressive.md](docs/adaptive-edge-to-edge-expressive.md), [docs/layout-designer.md](docs/layout-designer.md)
+* ✍️ [docs/editor-tools-git-drawer.md](docs/editor-tools-git-drawer.md), [docs/bonsai-sora-app-integration.md](docs/bonsai-sora-app-integration.md), [docs/indexing-and-dependency-updater.md](docs/indexing-and-dependency-updater.md), [docs/project-wizard-and-template-engine.md](docs/project-wizard-and-template-engine.md)
+* 🐧 [docs/sub/TERMUX-PORTING.md](docs/sub/TERMUX-PORTING.md), [libs/terminal-engine/BOOTSTRAP.md](libs/terminal-engine/BOOTSTRAP.md), [docs/sub/NOTICE.md](docs/sub/NOTICE.md)
+* 🎨 [FLUENT2_JETPACK_COMPOSE_GUIDE.md](FLUENT2_JETPACK_COMPOSE_GUIDE.md), [Flutter.md](Flutter.md) (Flutter-Setup unter Termux, Notizen)
 
 ---
 
 ## 📄 Lizenz
 
-Dieses Projekt steht unter der **Apache 2.0 Lizenz**. Details siehe [LICENSE](file:///data/data/com.termux/files/home/storage/shared/Download/CodeForgeMobile/LICENSE).
+**GNU GPL v3** – siehe [LICENSE](LICENSE); Termux-Herkunft und Folgen in [docs/sub/NOTICE.md](docs/sub/NOTICE.md) und [docs/sub/LICENSE.termux](docs/sub/LICENSE.termux).
 
 ---
 

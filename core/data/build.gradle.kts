@@ -1,6 +1,7 @@
 plugins {
-    id("codeforge.android.library")
-    id("codeforge.android.hilt")
+    alias(libs.plugins.codeforge.android.library)
+    alias(libs.plugins.codeforge.android.hilt)
+    alias(libs.plugins.codeforge.quality)
 }
 
 android {
@@ -8,16 +9,19 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:resources"))
     implementation(project(":core:common"))
     implementation(project(":core:domain"))
-    implementation(project(":libs:template-engine"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.datastore.preferences)
 
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.hilt.work)
-    ksp(libs.hilt.work.compiler)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 
     implementation(libs.jgit)
+    implementation(libs.androidx.documentfile)
+
+    testImplementation(project(":core:testing"))
+    testImplementation(libs.junit)
 }
