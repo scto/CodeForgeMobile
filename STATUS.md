@@ -66,6 +66,8 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilw
 
 ## ⚠️ Risiken
 
+* **Erster realer Build (On-Device)**: kam bis `:app:processDebugResources`; fehlende Termux-Ressourcen und Namespace-Kollision sind behoben (siehe `CHANGELOG.md` [Unreleased]), aber **nicht erneut gebaut**. Als Nächstes sind Java-/Kotlin-Compile-Fehler der vendorten Module (`:libs:termux-*`) und Hilt/Compose wahrscheinlich.
+
 * Alle Punkte unter „Plattform & Build“ sind ungebaut; rechne mit einer Runde Compile-Fehler.
 * `build_codeforge_repo.sh` erzeugt einen privaten GPG-Schlüssel unter `.gpg/` – nicht einchecken (steht jetzt in `.gitignore`). Die früher im Klartext eingecheckte Passphrase gilt als kompromittiert, falls das Repository öffentlich war.
 * Hinweise zur Termux-Umgebung und W^X: `libs/terminal-engine/BOOTSTRAP.md`.

@@ -16,7 +16,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.codeforge.R;
+import com.codeforge.termux.R;
 import com.codeforge.app.event.SystemEventReceiver;
 import com.codeforge.app.terminal.TermuxTerminalSessionActivityClient;
 import com.codeforge.app.terminal.TermuxTerminalSessionServiceClient;

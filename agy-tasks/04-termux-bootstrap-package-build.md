@@ -1,3 +1,5 @@
+> **ERLEDIGT (2026-10-08):** Release `bootstrap-2026.10.08` in `scto/terminal-packages-codeforge` existiert (aarch64, arm, x86_64, i686). URL-Template und SHA-256 stehen in `gradle.properties`; Prüfsummen und Prefix `com.codeforge.app` wurden stichprobenartig kontrolliert. Offen bleibt nur der Test auf dem Gerät (`11-verify-termux-sdk-script.md`).
+
 # Auftrag: Eigenen Bootstrap-Release (Prefix com.codeforge.app) einbinden
 
 ## Kontext

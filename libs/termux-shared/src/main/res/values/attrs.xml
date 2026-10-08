@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ExtraKeysView: werden per ThemeUtils aus dem Activity-Theme aufgelöst. -->
+    <attr name="extraKeysButtonTextColor" format="color|reference" />
+    <attr name="extraKeysButtonActiveTextColor" format="color|reference" />
+    <attr name="extraKeysButtonBackgroundColor" format="color|reference" />
+    <attr name="extraKeysButtonActiveBackgroundColor" format="color|reference" />
+    <!-- Hintergrund des Sitzungs-Drawers in activity_termux.xml. -->
+    <attr name="termuxActivityDrawerBackground" format="color|reference" />
+</resources>

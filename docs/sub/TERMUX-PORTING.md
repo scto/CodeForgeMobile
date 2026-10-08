@@ -177,3 +177,12 @@ beabsichtigt: dein Wunsch war "die ganze Struktur haben", nicht zwingend
 `NOTICE.md` im Projekt-Root dokumentiert die GPLv3-Pflicht des
 Gesamtprojekts ab Einbindung dieser Module. `LICENSE.termux` enthält den
 vollständigen Lizenztext.
+
+## Ressourcen & Namespaces (Stand 2026-10-08)
+
+* `:libs:termux-shared` (`com.codeforge.shared`) und `:libs:termux-app` (**`com.codeforge.termux`**) besitzen ihre Strings/Farben/Dimens/Styles selbst
+  (`res/values`, `values-de`). Ausnahme von der Regel „Texte zentral in `:core:resources`": Der vendorte Java-Code nutzt die eigene nicht-transitive `R`.
+* Die Java-Klassen von `:libs:termux-app` liegen weiterhin im Package `com.codeforge.app`; nur der Android-Namespace (für `R`/`BuildConfig`) ist getrennt von `:app`.
+  Manifest-Komponenten sind deshalb voll qualifiziert.
+* `TERMUX_PACKAGE_VARIANT` steht in `BuildConfig` von `:app` (Reflection über `TermuxConstants.BUILD_CONFIG_CLASS_NAME`).
+* Theme-Attribute (`termuxActivityDrawerBackground`, `extraKeys*`) setzt `Theme.CodeForge` in `app/src/main/res/values/themes.xml`.

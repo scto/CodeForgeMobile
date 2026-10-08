@@ -7,7 +7,7 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import com.codeforge.R;
+import com.codeforge.termux.R;
 import com.codeforge.app.TermuxActivity;
 import com.codeforge.shared.termux.extrakeys.ExtraKeysView;
 import com.codeforge.terminal.TerminalSession;

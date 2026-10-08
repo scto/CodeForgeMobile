@@ -1,76 +1,22 @@
-Act as an expert Bash developer and Termux build system engineer. Your task is to write a comprehensive, automated Bash script that sets up a custom Termux build environment, modifies the app package name, builds the bootstraps via binary patching for all architectures, and generates a fully signed APT repository ready for GitHub Pages.
+Act as an expert Bash developer and Termux build system engineer. Write one robust Bash script `build_codeforge_repo.sh` that builds Termux bootstrap archives and a signed APT repository for the app package `com.codeforge.app` (prefix `/data/data/com.codeforge.app/files/usr`) from source, ready for GitHub Pages and a GitHub Release.
 
-Please generate a script (e.g., `build_codeforge_repo.sh`) that sequentially executes the following requirements:
+**Hard rules**
+- NEVER rewrite `com.termux` -> `com.codeforge.app` with `sed`/binary patching in ELF files: the strings differ in length (10 vs 16 bytes), which corrupts the ELF (section headers/offsets). Packages must be COMPILED with `TERMUX_APP__PACKAGE_NAME=com.codeforge.app`.
+- No fallback logic, no `|| true`, no `2>/dev/null` on commands that can fail, no dummy archives. `set -eo pipefail`; fail with a clear message.
+- Do not touch system paths; use `$WORKSPACE_DIR/tmp` (set `TMPDIR`), never rewrite `/tmp` inside upstream scripts.
+- Never hardcode or print the GPG passphrase. Load it with `load_gpg_passphrase`: environment variable `CODEFORGE_GPG_PASSPHRASE`, otherwise the last matching assignment in `~/.bashrc` (do NOT `source` it; strip one pair of quotes). Pass it to gpg only via `--passphrase-fd 0`. `umask 077`.
 
-1. **Environment Setup & Cloning:**
-   - Clone the repository: `https://github.com/scto/terminal-packages-codeforge` (Do NOT clone the official termux-packages repo).
-   - Install required build dependencies (like `apt-ftparchive`, `gnupg`, `wget`, `curl`, `rsync`).
-   - Append the following entries to the project's `.gitignore` (idempotent, each only once): `.gpg/`, `.gpg/private/`, `output/`, `github_repo_ready/`, `tmp/`, `terminal-packages-codeforge/`, so that key material and build artefacts are never committed.
-   - Do NOT use `|| true` when installing dependencies; a failed install must abort the script. Also require `unzip` (used for the bootstrap verification).
+**Environment**: Linux x86_64 with Docker (PC, VPS or GitHub Actions) — abort with a clear message on other machines (e.g. the phone). Required tools: docker git gpg curl zip unzip jq python3 readelf dpkg-deb apt-ftparchive sha256sum. Configuration via env: `ARCHS` (default `aarch64 arm i686 x86_64`), `EXTRA_PACKAGES` (comma list; packages INSIDE the bootstrap via `--add`, enlarges every ZIP and the APK, normally empty), `REPO_PACKAGES` (comma list, e.g. `openjdk-17,git,protobuf,aapt2,wget`; built per architecture with `./scripts/run-docker.sh ./build-package.sh -a <arch> -o output <pkg>`, only put into the APT repo, each resulting .deb must not contain `com.termux`), `CODEFORGE_APT_URL` (default `https://scto.github.io/terminal-packages-codeforge`), `CODEFORGE_FORK_URL`.
 
-2. **Namespace & Prefix Refactoring:**
-   - Programmatically patch the Termux build environment to replace all instances of `com.termux` with `com.codeforge.app`.
-   - Specifically, ensure `TERMUX_APP_PACKAGE` is set to `com.codeforge.app` and the `TERMUX_PREFIX` is changed from `/data/data/com.termux/files/usr` to `/data/data/com.codeforge.app/files/usr` in the relevant configuration files (e.g., `properties.sh` or build scripts).
+**Steps**
+1. Clone `https://github.com/scto/terminal-packages-codeforge` (not the official termux-packages); append `.gpg/`, `.gpg/private/`, `output/`, `github_repo_ready/`, `tmp/`, `terminal-packages-codeforge/` to `.gitignore` (idempotent).
+2. Assert (do not sed) that `scripts/properties.sh` has `TERMUX_APP__PACKAGE_NAME="com.codeforge.app"` and `TERMUX_REPO__PREFIX="/data/data/com.codeforge.app/files/usr"`.
+3. GPG: create the key ONCE (Thomas Schmid <tschmid35@gmail.com>, RSA 4096, no expiry, batch mode) and store the passphrase-protected private key in `.gpg/private/codeforge.gpg` (mode 600); on later runs IMPORT it (stable fingerprint — a new key per run would break every installed trust anchor). Export the public key BINARY to `.gpg/codeforge.gpg` (apt only accepts binary `.gpg` in `trusted.gpg.d`) and armored to `.gpg/codeforge.asc`; write SHA-256 to `.gpg/sha256.txt` and `.gpg/private/sha256.txt`. Use a temporary GNUPGHOME below `tmp/` removed by `trap`.
+4. Patch the fork (idempotent, assert success): copy the public key to `packages/termux-keyring/codeforge.gpg` and `codeforge_pub.gpg`, make sure `termux-keyring/build.sh` installs `codeforge.gpg`; replace the `sources.list` block in `packages/apt/build.sh` with `deb <CODEFORGE_APT_URL> stable main` (the official `packages-cf.termux.dev` repo contains packages built for `com.termux` and MUST NOT be used); replace the old `gpg --list-keys …` block in `build-package.sh` with the dynamic key-id block (placeholder replaced by the real fingerprint).
+5. Build from source: `./scripts/run-docker.sh ./scripts/build-bootstraps.sh --architectures <csv> [--add <EXTRA_PACKAGES>]`. Result: `bootstrap-<arch>.zip` and `output/*.deb`. Do NOT use `generate-bootstraps.sh` (it downloads com.termux debs).
+6. Verify every zip, abort on any failure: no path or text file containing `com.termux`; every ELF passes `readelf -h -l -S -W` without warnings/errors and does not contain `com.termux`; `etc/apt/sources.list` contains the APT URL; `etc/apt/trusted.gpg.d/codeforge.gpg` exists; `SYMLINKS.txt` references the prefix.
+7. Move zips to `output/bootstraps/`, write `<zip>.sha256` for each.
+8. APT repo in `github_repo_ready/`: `pool/main/<first letter | lib+letter>/<package>/*.deb` from `output/*.deb`; per architecture `dists/stable/main/binary-<arch>/Packages(.gz)` via `apt-ftparchive --arch <arch> packages pool` (fail if empty); `Release` via `apt-ftparchive` with Origin, Label, Suite=stable, Codename=stable, Architectures, Components=main — written to a temp file and moved (Release must not list itself); sign: `Release.gpg` (`--armor --detach-sign`) and `InRelease` (`--clearsign`) with `--local-user <fingerprint>`; verify both signatures; check that every `Filename` in `Packages` exists with matching SHA-256; add `codeforge.gpg`, `codeforge.asc`, `.nojekyll`, `index.html`; warn about files > 95 MB.
+9. Write `docs/overview_and_summary.md`: date, architectures, package count, bootstrap SHA-256s, a ready `gradle.properties` snippet (`codeforgeBootstrapVersion`, `codeforgeBootstrapSha256.<abi>`), repo URL and publishing instructions (push `github_repo_ready/` to `gh-pages`), key fingerprint and checksums; state that the passphrase was not stored.
 
-3. **GPG Key Generation & Checksum:**
-   - Create a `.gpg` directory and a `.gpg/private` directory in the project root (`$WORKSPACE_DIR/.gpg` and `$WORKSPACE_DIR/.gpg/private`).
-   - Generate a new local GPG key in batch mode. The Key Name is `codeforge.gpg`, User Name is `Thomas Schmid`, and E-Mail is `tschmid35@gmail.com`.
-   - The GPG passphrase is already stored by the user in `~/.bashrc` as `CODEFORGE_GPG_PASSPHRASE`. **Never prompt the user for it.** Load it automatically with a function `load_gpg_passphrase`: (1) use the environment variable if it is already set and non-empty; (2) otherwise read ONLY the last line matching `^[[:space:]]*(export[[:space:]]+)?CODEFORGE_GPG_PASSPHRASE=` from `"$HOME/.bashrc"` with `grep` and strip one pair of surrounding single or double quotes. Do NOT `source ~/.bashrc` (it returns early in non-interactive shells and may have side effects). Abort with a clear message (without printing any value) if the file is unreadable, the line is missing or the value is empty. Never hardcode the passphrase and never print or log it. Set `umask 077` and create the GPG home directory with mode 700 inside `$WORKSPACE_DIR/tmp` (removed via `trap ... EXIT`).
-   - Pass the passphrase to every `gpg` call that needs it (secret-key export, signing) via `printf '%s\n' "$CODEFORGE_GPG_PASSPHRASE" | gpg --pinentry-mode loopback --passphrase-fd 0 ...`, never as `--passphrase <value>` on the command line. Set the exported private key to mode 600.
-   - Export the generated GPG public key and save it to `<Project Root>/.gpg/codeforge.gpg`.
-   - Export the generated GPG private key and save it to `<Project Root>/.gpg/private/codeforge.gpg`.
-   - Calculate the SHA256 checksum of the public key and save the hash to `<Project Root>/.gpg/sha256.txt`.
-   - Calculate the SHA256 checksum of the private key and save the hash to `<Project Root>/.gpg/private/sha256.txt`.
-
-4. **Patching the Build Environment (Direct File Substitution):**
-   - Dynamically extract the key ID / fingerprint of the newly generated GPG key for Thomas Schmid.
-   - Copy the exported public GPG key to `packages/termux-keyring/codeforge_pub.gpg` and `packages/termux-keyring/codeforge.gpg` inside the cloned repository.
-   - Inject the command `install -Dm600 $TERMUX_PKG_BUILDER_DIR/codeforge.gpg $GPG_SHARE_DIR` directly into `packages/termux-keyring/build.sh` so it executes during the package build.
-   - Locate the dependency PGP key setup block in `build-package.sh` (around line 631). Remove the old `gpg --list-keys` logic blocks entirely using sed/awk.
-   - Inject the following clean Bash code directly into `build-package.sh`:
-     ```bash
-     gpg --list-keys <YOUR_DYNAMIC_KEY_ID> >/dev/null 2>&1 || {
-         gpg --import "$TERMUX_SCRIPTDIR/packages/termux-keyring/codeforge_pub.gpg"
-         gpg --no-tty --command-file <(echo -e "trust\n5\ny") --edit-key <YOUR_DYNAMIC_KEY_ID>
-     }
-     ```
-   - Ensure that the placeholder `<YOUR_DYNAMIC_KEY_ID>` in the injected block is programmatically replaced with the actual newly extracted fingerprint/key ID.
-   - In `scripts/properties.sh` replace `com.termux` → `com.codeforge.app` and then collapse `com.codeforge.app.app` → `com.codeforge.app`. Do NOT use a rule such as `s/com.codeforge /com.codeforge.app/` (it matches a trailing space and corrupts text).
-
-5. **Bootstrap Generation (On-Device Binary Patching):**
-   - Use `generate-bootstraps.sh` instead of `build-bootstraps.sh`. Since this script runs directly on an Android device inside a PRoot/Termux environment, compiling the entire toolchain from C/C++ source is not feasible.
-   - You must inject a Python or `sed` script that patches `generate-bootstraps.sh` on the fly before executing it.
-   - This patch must do the following inside `generate-bootstraps.sh`:
-     1. Intercept the extraction phase of the downloaded `.deb` packages.
-     2. **Important:** The repository `terminal-packages-codeforge` already contains logic to rename the rootfs from `com.termux` to `com.codeforge.app`. Do **NOT** run a blanket "search & replace" over the shell script itself for `com.termux` -> `com.codeforge.app`, as this breaks the existing `cp`/`mv` logic.
-     3. Run a recursive `sed` command over all extracted **text** files in the rootfs (select them with `find … -exec grep -Iq . {} \;`; escape the dots in the pattern):
-        - `com\.termux` -> `com.codeforge.app`
-        - Fix double extensions if they occur (e.g., replacing `com.codeforge.app.app` with `com.codeforge.app`).
-        - Apply the same replacement to the symlink targets and to `var/lib/dpkg/info/*.list`.
-        - **Do NOT run the length-changing `sed` over ELF binaries**: `com.termux` is 10 bytes, `com.codeforge.app` is 16 bytes, so string tables and offsets would be corrupted. Binaries must come from packages that were already built with the prefix `/data/data/com.codeforge.app/files/usr`.
-     4. After generation, extract every `bootstrap-*.zip` into `$WORKSPACE_DIR/tmp/verify` and **fail immediately** (exit 1, list the files) if any ELF file still contains the string `com.termux`.
-     5. Prevent the script from attempting to touch or write to system root paths like `/data/TERMUX_ARCH`: replace that path with `$WORKSPACE_DIR/tmp/TERMUX_ARCH`. Also route temporary directories below `$WORKSPACE_DIR/tmp` instead of `/tmp` by replacing the `/tmp` string. **Do NOT inject absolute path templates or `-p` into `mktemp -d` commands**, as Termux's `mktemp` does not support absolute templates alongside `--tmpdir`. Replacing `/tmp` is sufficient.
-   - **CRITICAL INSTRUCTION:** Do NOT include any fallback logic, error suppression (`|| true`, `2>/dev/null` on commands that can fail), or dummy archive generation. The script MUST run the generator script explicitly and fail immediately if the build process fails.
-   - Move the generated and patched bootstrap archives (.zip or .tar.xz) into a designated `output/bootstraps/` directory.
-
-6. **Checksum Generation:**
-   - Iterate over the compiled bootstrap archives and generate a `sha256sum` file for each one. 
-
-7. **GitHub APT Repository Generation:**
-   - Create a standard Debian APT repository structure (`pool/main/` and `dists/stable/main/binary-{aarch64,arm,i686,x86_64}`).
-   - Use `apt-ftparchive` to generate the `Packages`, `Packages.gz`, and `Release` files.
-   - Sign the `Release` file with the generated GPG key to create `Release.gpg` and `InRelease`. Ensure you use a secure piping method (e.g., `printf '%s\n' "$KEY_PASS" | gpg --passphrase-fd 0 --pinentry-mode loopback`) instead of exposing the passphrase as a direct command-line argument.
-   - Organize all files in a `github_repo_ready/` directory so it can be directly committed and pushed to a GitHub Pages branch.
-
-8. **Documentation Generation:**
-   - Create a `docs/` directory in the project root.
-   - Generate a Markdown file named `overview_and_summary.md` inside `docs/`.
-   - Write a detailed summary into this file containing the execution date, built architectures, paths to all generated outputs (bootstraps, APT repo), and paths to the public/private GPG keys and their respective checksums.
-
-Ensure the final script is robust, includes error handling (`set -eo pipefail`), securely handles secrets, and prints clear status messages for each step of the build pipeline.
-
-9. **Integration with the CodeForgeMobile app (context):**
-   - `applicationId`, `TERMUX_PACKAGE_NAME` and the prefix must be exactly `com.codeforge.app` / `/data/data/com.codeforge.app/files/usr` (the Android namespace of the `:libs:termux-app` module is separate: `com.codeforge.termux`).
-   - The Gradle plugin `codeforge.terminal.bootstrap` downloads the ABI archives (`aarch64`, `arm`, `x86_64`) and verifies SHA-256. After publishing, set `codeforgeBootstrapUrlTemplate` (with `%1$s` = version, `%2$s` = ABI) and `codeforgeBootstrapSha256.<abi>` from the generated `.sha256` files; the `i686` archive is produced but not embedded.
-   - Document in `docs/overview_and_summary.md` that the passphrase was loaded from the environment / `~/.bashrc` and was not stored or written anywhere.
-
+**App integration**: the Gradle plugin `codeforge.terminal.bootstrap` downloads `bootstrap-<abi>.zip` (`aarch64`, `arm`, `x86_64`) from the GitHub Release `bootstrap-<version>` of `scto/terminal-packages-codeforge` and verifies the SHA-256 given in `gradle.properties`; `i686` is built but not embedded.

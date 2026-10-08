@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 import androidx.drawerlayout.widget.DrawerLayout;
-import com.codeforge.R;
+import com.codeforge.termux.R;
 import com.codeforge.app.TermuxActivity;
 import com.codeforge.app.models.UserAction;
 import com.codeforge.app.terminal.io.KeyboardShortcut;

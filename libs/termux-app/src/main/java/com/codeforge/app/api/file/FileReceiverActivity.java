@@ -8,7 +8,7 @@ import android.provider.OpenableColumns;
 import android.util.Patterns;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.codeforge.R;
+import com.codeforge.termux.R;
 import com.codeforge.app.TermuxService;
 import com.codeforge.shared.android.PackageUtils;
 import com.codeforge.shared.data.DataUtils;

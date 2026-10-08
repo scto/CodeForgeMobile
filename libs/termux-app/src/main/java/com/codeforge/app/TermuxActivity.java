@@ -27,7 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
-import com.codeforge.R;
+import com.codeforge.termux.R;
 import com.codeforge.app.activities.HelpActivity;
 import com.codeforge.app.api.file.FileReceiverActivity;
 import com.codeforge.app.terminal.TermuxActivityRootView;

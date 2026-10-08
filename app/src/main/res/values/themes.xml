@@ -12,5 +12,15 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
-    <style name="Theme.CodeForge" parent="Base.Theme.CodeForge" />
+    <!--
+      Termux-Attribute (deklariert in :libs:termux-shared/res/values/attrs.xml). Bewusst im Theme.CodeForge und nicht
+      im Base-Style, weil values-v28/-v29 den Base-Style ersetzen und die Items sonst verloren gingen.
+    -->
+    <style name="Theme.CodeForge" parent="Base.Theme.CodeForge">
+        <item name="termuxActivityDrawerBackground">?attr/colorSurface</item>
+        <item name="extraKeysButtonTextColor">?attr/colorOnSurface</item>
+        <item name="extraKeysButtonActiveTextColor">?attr/colorPrimary</item>
+        <item name="extraKeysButtonBackgroundColor">@android:color/transparent</item>
+        <item name="extraKeysButtonActiveBackgroundColor">?attr/colorSurfaceVariant</item>
+    </style>
 </resources>

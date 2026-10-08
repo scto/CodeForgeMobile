@@ -1,0 +1,247 @@
+name: Build Bootstraps & APT-Repo
+
+# Baut mit build_codeforge_repo.sh (Termux-Docker-Builder, Prefix com.codeforge.app) die Bootstraps
+# und das signierte APT-Repository. Läuft nur manuell.
+#
+# Benötigte Repository-Secrets (Settings -> Secrets and variables -> Actions):
+#   CODEFORGE_GPG_PASSPHRASE   Passphrase des Signaturschlüssels
+#   GPG_PRIVATE_KEY_B64        Privater Schlüssel, armored und base64-kodiert (einzeilig)
+#   PACKAGES_REPO_TOKEN        Nur für "publish": PAT (fine-grained) mit Contents: Read and write
+#                              auf dem Ziel-Repo (scto/terminal-packages-codeforge)
+
+on:
+  workflow_dispatch:
+    inputs:
+      archs:
+        description: "Architekturen, durch Komma getrennt (aarch64, arm, i686, x86_64)"
+        required: true
+        default: "aarch64,arm"
+        type: string
+      extra_packages:
+        description: "Pakete IM Bootstrap (vergrößert die APK!), durch Komma getrennt, z. B. zip. Normalerweise leer."
+        required: false
+        default: ""
+        type: string
+      repo_packages:
+        description: "Pakete NUR im APT-Repo (per pkg install nachladbar), durch Komma getrennt, z. B. openjdk-17,git,protobuf,aapt2,wget"
+        required: false
+        default: ""
+        type: string
+      publish:
+        description: "Nach dem Build Release anlegen und APT-Repo auf gh-pages pushen"
+        required: true
+        default: false
+        type: boolean
+      target_repo:
+        description: "Ziel-Repo für Release und gh-pages (nur bei publish)"
+        required: false
+        default: "scto/terminal-packages-codeforge"
+        type: string
+      release_tag:
+        description: "Release-Tag (leer = bootstrap-JJJJ.MM.TT, UTC)"
+        required: false
+        default: ""
+        type: string
+      apt_url:
+        description: "Öffentliche URL des APT-Repos (leer = Standard des Scripts)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-bootstrap-repo
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350   # GitHub-Limit pro Job: 360 Minuten
+
+    steps:
+      - name: Eingaben prüfen
+        env:
+          IN_ARCHS: ${{ inputs.archs }}
+          IN_EXTRA: ${{ inputs.extra_packages }}
+          IN_REPO_PKGS: ${{ inputs.repo_packages }}
+          IN_TAG: ${{ inputs.release_tag }}
+          IN_REPO: ${{ inputs.target_repo }}
+          IN_APT_URL: ${{ inputs.apt_url }}
+        run: |
+          set -euo pipefail
+
+          # Architekturen: nur bekannte Werte, ohne Duplikate
+          archs=""
+          IFS=',' read -ra parts <<< "${IN_ARCHS// /}"
+          for a in "${parts[@]}"; do
+            case "$a" in
+              aarch64|arm|i686|x86_64) ;;
+              *) echo "::error::Unbekannte Architektur '$a' (erlaubt: aarch64, arm, i686, x86_64)"; exit 1 ;;
+            esac
+            case " $archs " in *" $a "*) ;; *) archs="${archs:+$archs }$a" ;; esac
+          done
+          [ -n "$archs" ] || { echo "::error::Keine Architektur angegeben"; exit 1; }
+
+          extra="${IN_EXTRA// /}"
+          if [ -n "$extra" ] && ! [[ "$extra" =~ ^[a-z0-9+._-]+(,[a-z0-9+._-]+)*$ ]]; then
+            echo "::error::extra_packages: nur Paketnamen, durch Komma getrennt"; exit 1
+          fi
+
+          repo_pkgs="${IN_REPO_PKGS// /}"
+          if [ -n "$repo_pkgs" ] && ! [[ "$repo_pkgs" =~ ^[a-z0-9+._-]+(,[a-z0-9+._-]+)*$ ]]; then
+            echo "::error::repo_packages: nur Paketnamen, durch Komma getrennt"; exit 1
+          fi
+
+          tag="${IN_TAG:-bootstrap-$(date -u +%Y.%m.%d)}"
+          [[ "$tag" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Ungültiger release_tag"; exit 1; }
+
+          [[ "$IN_REPO" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]] || { echo "::error::Ungültiges target_repo"; exit 1; }
+
+          if [ -n "$IN_APT_URL" ] && ! [[ "$IN_APT_URL" =~ ^https://[A-Za-z0-9._~/:%@+-]+$ ]]; then
+            echo "::error::apt_url muss eine https-URL sein"; exit 1
+          fi
+
+          {
+            echo "ARCHS=$archs"
+            echo "EXTRA_PACKAGES=$extra"
+            echo "REPO_PACKAGES=$repo_pkgs"
+            echo "RELEASE_TAG=$tag"
+          } >> "$GITHUB_ENV"
+          if [ -n "$IN_APT_URL" ]; then echo "CODEFORGE_APT_URL=$IN_APT_URL" >> "$GITHUB_ENV"; fi
+          echo "Architekturen: $archs | Bootstrap-Extras: ${extra:-keine} | Nur Repo: ${repo_pkgs:-keine} | Tag: $tag"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Secrets prüfen
+        env:
+          KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          PASS: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+        run: |
+          [ -n "$KEY_B64" ] || { echo "::error::Secret GPG_PRIVATE_KEY_B64 fehlt (siehe Kommentar am Dateianfang)"; exit 1; }
+          [ -n "$PASS" ]    || { echo "::error::Secret CODEFORGE_GPG_PASSPHRASE fehlt"; exit 1; }
+
+      - name: Speicherplatz freigeben
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost \
+                      /opt/hostedtoolcache/CodeQL /usr/local/.ghcup /usr/share/swift
+          sudo docker image prune -af >/dev/null
+          df -h /
+
+      - name: Abhängigkeiten installieren
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            git gnupg curl zip unzip jq python3 binutils dpkg apt-utils rsync
+
+      - name: Privaten Schlüssel bereitstellen
+        env:
+          KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p .gpg/private
+          printf '%s' "$KEY_B64" | base64 -d > .gpg/private/codeforge.gpg
+          chmod 600 .gpg/private/codeforge.gpg
+          grep -q 'BEGIN PGP PRIVATE KEY BLOCK' .gpg/private/codeforge.gpg \
+            || { echo "::error::GPG_PRIVATE_KEY_B64 enthält keinen armored privaten Schlüssel"; exit 1; }
+
+      - name: Bootstraps und APT-Repo bauen
+        env:
+          CODEFORGE_GPG_PASSPHRASE: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          chmod +x build_codeforge_repo.sh
+          ./build_codeforge_repo.sh
+
+      - name: Zusammenfassung
+        if: success()
+        run: |
+          {
+            echo "## Ergebnis"
+            echo
+            echo "Architekturen: \`$ARCHS\` · Bootstrap-Extras: \`${EXTRA_PACKAGES:-keine}\` · Nur Repo: \`${REPO_PACKAGES:-keine}\` · Tag: \`$RELEASE_TAG\`"
+            echo
+            echo "Eintrag für \`gradle.properties\`:"
+            echo '```properties'
+            echo "codeforgeBootstrapVersion=${RELEASE_TAG#bootstrap-}"
+            for f in output/bootstraps/bootstrap-*.zip.sha256; do
+              [ -f "$f" ] || continue
+              abi="$(basename "$f" .zip.sha256)"; abi="${abi#bootstrap-}"
+              echo "codeforgeBootstrapSha256.${abi}=$(awk '{print $1; exit}' "$f")"
+            done
+            echo '```'
+            echo
+            echo "Größen:"
+            echo '```'
+            ls -lh output/bootstraps/
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Artefakte hochladen (ohne privaten Schlüssel)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeforge-bootstraps-${{ github.run_number }}
+          path: |
+            output/bootstraps/
+            github_repo_ready/
+            .gpg/codeforge.gpg
+            .gpg/codeforge.asc
+            .gpg/sha256.txt
+            docs/overview_and_summary.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Release anlegen
+        if: success() && inputs.publish
+        env:
+          GH_TOKEN: ${{ secrets.PACKAGES_REPO_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+        run: |
+          set -euo pipefail
+          [ -n "$GH_TOKEN" ] || { echo "::error::Secret PACKAGES_REPO_TOKEN fehlt"; exit 1; }
+          gh release create "$RELEASE_TAG" output/bootstraps/* \
+            --repo "$TARGET_REPO" \
+            --title "$RELEASE_TAG" \
+            --notes "Bootstraps (Prefix com.codeforge.app) für: $ARCHS. SHA-256 in den .sha256-Dateien."
+
+      - name: APT-Repo auf gh-pages veröffentlichen
+        if: success() && inputs.publish
+        env:
+          GH_TOKEN: ${{ secrets.PACKAGES_REPO_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+        run: |
+          set -euo pipefail
+          gh auth setup-git
+          work="$(mktemp -d)"
+          if git ls-remote --exit-code --heads "https://github.com/${TARGET_REPO}.git" gh-pages >/dev/null 2>&1; then
+            git clone --depth 1 --branch gh-pages "https://github.com/${TARGET_REPO}.git" "$work/pages"
+          else
+            git init -b gh-pages "$work/pages"
+            git -C "$work/pages" remote add origin "https://github.com/${TARGET_REPO}.git"
+          fi
+          cd "$work/pages"
+          # Snapshot ersetzen: dists/ und pool/ müssen zueinander passen.
+          # Hinweis: Nicht gebaute Architekturen/Pakete verschwinden dadurch aus dem Repo.
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          rsync -a "$GITHUB_WORKSPACE/github_repo_ready/" ./
+          touch .nojekyll
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen am APT-Repo."
+          else
+            git commit -m "APT-Repo $RELEASE_TAG ($ARCHS)"
+            git push origin gh-pages
+          fi
+
+      - name: Aufräumen
+        if: always()
+        run: |
+          rm -rf .gpg/private tmp
+          docker system prune -af >/dev/null 2>&1 || true

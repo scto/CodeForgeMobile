@@ -28,6 +28,8 @@
     android:name="android.permission.PACKAGE_USAGE_STATS"
     tools:ignore="ProtectedPermissions" />
 
+  <!-- HINWEIS: Der Modul-Namespace ist com.codeforge.termux (nur für R/BuildConfig); die Java-Klassen liegen weiter
+       im Package com.codeforge.app. Daher sind alle Komponentennamen hier VOLL QUALIFIZIERT (keine relativen ".Name"). -->
   <application>
 
     <activity
@@ -51,7 +53,7 @@
     <activity
       android:excludeFromRecents="true"
       android:exported="false"
-      android:name=".api.file.FileReceiverActivity"
+      android:name="com.codeforge.app.api.file.FileReceiverActivity"
       android:noHistory="true"
       android:resizeableActivity="true"
       android:taskAffinity="${TERMUX_PACKAGE_NAME}.filereceiver" />
@@ -87,7 +89,7 @@
          (doppeltes ".app"). TermuxService liegt direkt in com.codeforge.app. -->
     <service
       android:exported="false"
-      android:name=".TermuxService" />
+      android:name="com.codeforge.app.TermuxService" />
 
   </application>
 

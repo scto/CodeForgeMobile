@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  :libs:termux-shared — Strings der vendorten Termux-Shared-Klassen (Java greift über die eigene,
+  nicht-transitive R-Klasse darauf zu). Bewusste Ausnahme von der Regel „Texte zentral in :core:resources":
+  Java-Code in diesem Modul kann nicht auf :core:resources zugreifen. Siehe docs/sub/TERMUX-PORTING.md.
+  Platzhalter positionell (%1$s …), damit Übersetzungen die Reihenfolge ändern dürfen.
+-->
+<resources>
+    <!-- Menüs / Toolbar -->
+    <string name="action_share">Share</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_save_to_file">Save to file</string>
+    <string name="action_cancel">Cancel</string>
+
+    <!-- Titel -->
+    <string name="title_report_text">Report text</string>
+    <string name="title_share_with">Share with</string>
+    <string name="title_open_url_with">Open URL with</string>
+
+    <!-- Log-Level -->
+    <string name="log_level_off">Off</string>
+    <string name="log_level_normal">Normal</string>
+    <string name="log_level_debug">Debug</string>
+    <string name="log_level_verbose">Verbose</string>
+    <string name="log_level_unknown">Unknown</string>
+    <string name="log_level_value">Log level set to \"%1$s\".</string>
+
+    <!-- Meldungen -->
+    <string name="msg_report_truncated">**Report Truncated**\n\nThe report was too large and has been truncated.\n\n</string>
+    <string name="msg_directory_absolute_path">%1$s directory absolute path: \"%2$s\"</string>
+    <string name="msg_file_saved_successfully">%1$s saved to \"%2$s\"</string>
+    <string name="msg_storage_permission_not_granted">Storage permission not granted.</string>
+    <string name="msg_storage_permission_granted_on_request">Storage permission granted.</string>
+    <string name="msg_storage_permission_not_granted_on_request">Storage permission denied.</string>
+    <string name="msg_requires_dump_and_package_usage_stats_permissions">Requires DUMP and PACKAGE_USAGE_STATS permissions</string>
+    <string name="msg_termux_app_required_by_app">The terminal app is required by this app.</string>
+    <string name="msg_report_issue">Report issues at %1$s</string>
+
+    <!-- Fehler -->
+    <string name="error_execution_cancelled">Execution cancelled.</string>
+    <string name="error_executable_unset">The executable for the command %1$s is not set.</string>
+    <string name="error_failed_to_execute_app_shell_command">Failed to execute app shell command %1$s.</string>
+    <string name="error_exception_received_while_executing_app_shell_command">Exception received while executing app shell command %1$s.</string>
+    <string name="error_failed_to_execute_termux_session_command">Failed to execute terminal session command %1$s.</string>
+    <string name="error_sending_sigkill_to_process">Failed to send SIGKILL to the process.</string>
+    <string name="error_allow_external_apps_ungranted">%1$s requires the \"allow-external-apps\" property to be set to \"true\" in \"%2$s\".</string>
+    <string name="error_display_over_other_apps_permission_not_granted">The \"Display over other apps\" permission has not been granted to %1$s.</string>
+    <string name="error_app_not_installed_or_disabled_warning">The app %1$s (%2$s) is not installed or is disabled.</string>
+    <string name="error_attempted_to_check_for_permissions_not_requested">Attempted to check for permissions that are not requested in the manifest: %1$s</string>
+    <string name="error_attempted_to_ask_for_permissions_not_requested">Attempted to ask for permissions that are not requested in the manifest: %1$s</string>
+    <string name="error_failed_to_request_permissions">Failed to request permissions (request code %1$s): %2$s</string>
+    <string name="error_has_not_requested_legacy_external_storage">%1$s (target SDK %2$s) has not requested legacy external storage, but the device runs Android SDK %3$s.</string>
+    <string name="error_get_package_context_failed_title">Package context unavailable</string>
+    <string name="error_get_package_context_failed_message">Failed to get the package context of %1$s.</string>
+    <string name="error_get_package_context_failed_help_url_message">See %1$s for help.</string>
+    <string name="error_enable_component_failed">Failed to enable component %2$s of package %1$s</string>
+    <string name="error_disable_component_failed">Failed to disable component %2$s of package %1$s</string>
+    <string name="error_get_component_state_failed">Failed to get the state of component %2$s of package %1$s</string>
+    <string name="error_termux_app_package_context_not_accessible">The terminal app package context is not accessible.</string>
+    <string name="error_termux_prefix_dir_path_not_accessible">The terminal prefix directory is not accessible for %1$s.</string>
+</resources>

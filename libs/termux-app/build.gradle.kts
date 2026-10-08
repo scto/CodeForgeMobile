@@ -30,11 +30,12 @@ plugins {
 }
 
 android {
-    namespace = "com.codeforge.app"
+    // Eigener Namespace (NICHT com.codeforge.app wie :app): sonst doppelte R-/BuildConfig-Klassen.
+    // Die Java-Quellen bleiben im Package com.codeforge.app; sie importieren com.codeforge.termux.R.
+    namespace = "com.codeforge.termux"
     ndkVersion = libs.versions.ndk.get()
 
     defaultConfig {
-        buildConfigField("String", "TERMUX_PACKAGE_VARIANT", "\"apt-android-7\"")
         manifestPlaceholders["TERMUX_PACKAGE_NAME"] = "com.codeforge.app"
         manifestPlaceholders["TERMUX_APP_NAME"] = "CodeForge"
 
@@ -43,10 +44,6 @@ android {
                 cFlags("-std=c11", "-Wall", "-Wextra", "-Werror", "-Os", "-fno-stack-protector", "-Wl,--gc-sections")
             }
         }
-    }
-
-    buildFeatures {
-        buildConfig = true
     }
 
     externalNativeBuild {

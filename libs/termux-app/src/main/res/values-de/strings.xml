@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_new_session">Neu</string>
+    <string name="action_toggle_soft_keyboard">Tastatur</string>
+    <string name="action_yes">Ja</string>
+    <string name="action_no">Nein</string>
+    <string name="action_select_url">URL auswählen</string>
+    <string name="action_share_transcript">Protokoll teilen</string>
+    <string name="action_share_selected_text">Markierten Text teilen</string>
+    <string name="action_autofill_password">Passwort automatisch ausfüllen</string>
+    <string name="action_reset_terminal">Terminal zurücksetzen</string>
+    <string name="action_kill_process">Prozess beenden (PID %1$s)</string>
+    <string name="action_toggle_keep_screen_on">Bildschirm anlassen</string>
+    <string name="action_open_help">Hilfe</string>
+    <string name="action_report_issue">Problem melden</string>
+    <string name="action_create_named_session_confirm">OK</string>
+    <string name="action_new_session_failsafe">Failsafe</string>
+    <string name="action_rename_session_confirm">OK</string>
+    <string name="action_file_received_edit">Bearbeiten</string>
+    <string name="action_file_received_open_directory">Verzeichnis öffnen</string>
+
+    <string name="title_create_named_session">Benannte Sitzung erstellen</string>
+    <string name="title_rename_session">Sitzung umbenennen</string>
+    <string name="title_max_terminals_reached">Maximale Terminalanzahl erreicht</string>
+    <string name="title_confirm_kill_process">Aktuellen Prozess beenden?</string>
+    <string name="title_file_received">Datei empfangen</string>
+    <string name="title_select_url_dialog">URL auswählen</string>
+    <string name="title_select_url_none_found">Keine URL im Protokoll gefunden.</string>
+    <string name="title_share_transcript">Terminal-Protokoll</string>
+    <string name="title_share_transcript_with">Protokoll teilen mit</string>
+    <string name="title_share_selected_text">Markierter Text</string>
+    <string name="title_share_selected_text_with">Markierten Text teilen mit</string>
+
+    <string name="msg_max_terminals_reached">Schließe eine Sitzung, bevor du eine neue öffnest.</string>
+    <string name="msg_terminal_reset">Terminal zurückgesetzt.</string>
+    <string name="msg_enabling_terminal_toolbar">Terminal-Symbolleiste wird aktiviert.</string>
+    <string name="msg_disabling_terminal_toolbar">Terminal-Symbolleiste wird deaktiviert.</string>
+    <string name="msg_select_url_copied_to_clipboard">URL in die Zwischenablage kopiert.</string>
+    <string name="msg_generating_report">Bericht wird erstellt…</string>
+    <string name="msg_add_termux_debug_info">Terminal-Debuginfos zum Bericht hinzufügen?</string>
+
+    <string name="bootstrap_installer_body">Terminal-Pakete werden installiert…</string>
+    <string name="bootstrap_error_title">Terminal-Installation fehlgeschlagen</string>
+    <string name="bootstrap_error_body">Die Terminal-Bootstrap-Pakete konnten nicht installiert werden.</string>
+    <string name="bootstrap_error_abort">Abbrechen</string>
+    <string name="bootstrap_error_try_again">Erneut versuchen</string>
+    <string name="bootstrap_error_not_primary_user_message">Das Terminal läuft nur für den primären Benutzer. Das Prefix %1$s ist nicht erreichbar.</string>
+    <string name="bootstrap_error_installed_on_portable_sd">Die App ist auf externem Speicher installiert. Das Prefix %1$s ist dort nicht erreichbar; verschiebe die App in den internen Speicher.</string>
+
+    <string name="notification_action_exit">Beenden</string>
+    <string name="notification_action_wake_lock">Wakelock anfordern</string>
+    <string name="notification_action_wake_unlock">Wakelock freigeben</string>
+    <string name="error_display_over_other_apps_permission_not_granted_to_start_terminal">Erteile „Über anderen Apps einblenden“, um Terminals im Hintergrund zu starten.</string>
+    <string name="error_termux_service_start_failed_bg">Der Terminal-Dienst konnte im Hintergrund nicht gestartet werden.</string>
+    <string name="error_termux_service_start_failed_general">Der Terminal-Dienst konnte nicht gestartet werden.</string>
+    <string name="error_termux_service_invalid_execution_command_runner">Ungültiger Befehls-Runner \"%1$s\".</string>
+    <string name="error_termux_service_unsupported_execution_command_runner">Nicht unterstützter Befehls-Runner \"%1$s\".</string>
+    <string name="error_termux_service_execution_command_shell_name_unset">Shell-Name nicht gesetzt (Erstellmodus \"%1$s\").</string>
+    <string name="error_termux_service_unsupported_execution_command_shell_create_mode">Nicht unterstützter Shell-Erstellmodus \"%1$s\".</string>
+</resources>

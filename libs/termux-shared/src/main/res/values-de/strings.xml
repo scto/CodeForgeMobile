@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_share">Teilen</string>
+    <string name="action_copy">Kopieren</string>
+    <string name="action_save_to_file">In Datei speichern</string>
+    <string name="action_cancel">Abbrechen</string>
+
+    <string name="title_report_text">Berichtstext</string>
+    <string name="title_share_with">Teilen mit</string>
+    <string name="title_open_url_with">URL öffnen mit</string>
+
+    <string name="log_level_off">Aus</string>
+    <string name="log_level_normal">Normal</string>
+    <string name="log_level_debug">Debug</string>
+    <string name="log_level_verbose">Ausführlich</string>
+    <string name="log_level_unknown">Unbekannt</string>
+    <string name="log_level_value">Log-Level auf \"%1$s\" gesetzt.</string>
+
+    <string name="msg_report_truncated">**Bericht gekürzt**\n\nDer Bericht war zu groß und wurde gekürzt.\n\n</string>
+    <string name="msg_directory_absolute_path">%1$s-Verzeichnis, absoluter Pfad: \"%2$s\"</string>
+    <string name="msg_file_saved_successfully">%1$s gespeichert unter \"%2$s\"</string>
+    <string name="msg_storage_permission_not_granted">Speicherberechtigung nicht erteilt.</string>
+    <string name="msg_storage_permission_granted_on_request">Speicherberechtigung erteilt.</string>
+    <string name="msg_storage_permission_not_granted_on_request">Speicherberechtigung abgelehnt.</string>
+    <string name="msg_requires_dump_and_package_usage_stats_permissions">Erfordert die Berechtigungen DUMP und PACKAGE_USAGE_STATS</string>
+    <string name="msg_termux_app_required_by_app">Die Terminal-App wird von dieser App benötigt.</string>
+    <string name="msg_report_issue">Probleme melden unter %1$s</string>
+
+    <string name="error_execution_cancelled">Ausführung abgebrochen.</string>
+    <string name="error_executable_unset">Für den Befehl %1$s ist keine ausführbare Datei gesetzt.</string>
+    <string name="error_failed_to_execute_app_shell_command">App-Shell-Befehl %1$s konnte nicht ausgeführt werden.</string>
+    <string name="error_exception_received_while_executing_app_shell_command">Ausnahme bei der Ausführung des App-Shell-Befehls %1$s.</string>
+    <string name="error_failed_to_execute_termux_session_command">Terminal-Sitzungsbefehl %1$s konnte nicht ausgeführt werden.</string>
+    <string name="error_sending_sigkill_to_process">SIGKILL konnte nicht an den Prozess gesendet werden.</string>
+    <string name="error_allow_external_apps_ungranted">%1$s erfordert, dass die Eigenschaft \"allow-external-apps\" in \"%2$s\" auf \"true\" gesetzt ist.</string>
+    <string name="error_display_over_other_apps_permission_not_granted">Die Berechtigung „Über anderen Apps einblenden“ wurde für %1$s nicht erteilt.</string>
+    <string name="error_app_not_installed_or_disabled_warning">Die App %1$s (%2$s) ist nicht installiert oder deaktiviert.</string>
+    <string name="error_attempted_to_check_for_permissions_not_requested">Prüfung von Berechtigungen, die nicht im Manifest angefordert sind: %1$s</string>
+    <string name="error_attempted_to_ask_for_permissions_not_requested">Anfrage von Berechtigungen, die nicht im Manifest angefordert sind: %1$s</string>
+    <string name="error_failed_to_request_permissions">Berechtigungen konnten nicht angefordert werden (Request-Code %1$s): %2$s</string>
+    <string name="error_has_not_requested_legacy_external_storage">%1$s (Ziel-SDK %2$s) hat kein Legacy-External-Storage angefordert, das Gerät läuft aber mit Android-SDK %3$s.</string>
+    <string name="error_get_package_context_failed_title">Paketkontext nicht verfügbar</string>
+    <string name="error_get_package_context_failed_message">Der Paketkontext von %1$s konnte nicht ermittelt werden.</string>
+    <string name="error_get_package_context_failed_help_url_message">Hilfe unter %1$s.</string>
+    <string name="error_enable_component_failed">Komponente %2$s des Pakets %1$s konnte nicht aktiviert werden</string>
+    <string name="error_disable_component_failed">Komponente %2$s des Pakets %1$s konnte nicht deaktiviert werden</string>
+    <string name="error_get_component_state_failed">Status der Komponente %2$s des Pakets %1$s konnte nicht ermittelt werden</string>
+    <string name="error_termux_app_package_context_not_accessible">Der Paketkontext der Terminal-App ist nicht erreichbar.</string>
+    <string name="error_termux_prefix_dir_path_not_accessible">Das Terminal-Prefix-Verzeichnis ist für %1$s nicht erreichbar.</string>
+</resources>

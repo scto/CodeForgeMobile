@@ -11,7 +11,7 @@ import android.text.TextUtils;
 import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.codeforge.R;
+import com.codeforge.termux.R;
 import com.codeforge.app.TermuxActivity;
 import com.codeforge.app.TermuxService;
 import com.codeforge.shared.interact.ShareUtils;
@@ -265,7 +265,7 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).build()).build();
 
             try {
-                mBellSoundId = mBellSoundPool.load(mActivity, R.raw.bell, 1);
+                mBellSoundId = mBellSoundPool.load(mActivity, com.codeforge.shared.R.raw.bell, 1);
             } catch (Exception e){
                 // Catch java.lang.RuntimeException: Unable to resume activity {com.codeforge/dev.mutwakil.androidide.activities.TermuxActivity}: android.content.res.Resources$NotFoundException: File res/raw/bell.ogg from drawable resource ID
                 Logger.logStackTraceWithMessage(LOG_TAG, "Failed to load bell sound pool", e);

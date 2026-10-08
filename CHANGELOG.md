@@ -9,6 +9,28 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 > **Alle Einträge seit 3.0.0 sind ungebaut** (kein Gradle-/Android-Lauf); geprüft wurde nur die
 > reine JVM-Logik (Git, Code-Tools, Layout-Modell, XML) und die Kotlin-Syntax. Siehe `STATUS.md`.
 
+## [Unreleased]
+
+### ➕ Tooling
+
+* `scripts/find_hardcoded_strings.py` (Suche nach harten UI-Texten, `--check`/`--json`/Allowlist) und `agy-tasks/17-externalize-hardcoded-strings.md` (wiederkehrende Auslagerung nach `:core:resources`).
+
+* Bootstrap-Release `bootstrap-2026.10.08` (`scto/terminal-packages-codeforge`) in `gradle.properties` eingetragen (URL-Template + SHA-256 je ABI). Stichprobe: Prüfsummen stimmen, keine `com.termux`-Strings in Text-/ELF-Dateien, Shebangs und `SYMLINKS.txt` auf `com.codeforge.app`. Nicht auf dem Gerät gestartet.
+
+### 🐛 Fixes nach dem ersten echten On-Device-Build (`error2.log`)
+
+* **`:app:processDebugResources` (AAPT „resource … not found")**: Die vendorten Termux-Module hatten keine `res/values`. Ergänzt:
+  `:libs:termux-shared` → `strings.xml` (+`values-de`), `colors.xml` (`black`, `red_400`, `background_markdown_code_block/_inline`),
+  `dimens.xml` (`content_padding`, `content_padding_half`), `styles.xml` (`TextAppearance.Widget.BaseToolbar.Title/Subtitle`),
+  `attrs.xml` (`termuxActivityDrawerBackground`, `extraKeys*`), Drawables `ic_share`, `ic_copy`;
+  `:libs:termux-app` → `strings.xml` (+`values-de`).
+* **Theme**: `Theme.CodeForge` setzt die Termux-Attribute (`termuxActivityDrawerBackground`, `extraKeys*`).
+* **Doppelter Namespace**: `:libs:termux-app` hat jetzt `com.codeforge.termux` (vorher wie `:app` `com.codeforge.app` → doppelte `R`/`BuildConfig`).
+  Java-Imports `com.codeforge.R` (existierte nicht) → `com.codeforge.termux.R`; Manifest-Komponentennamen voll qualifiziert.
+* `BuildConfig.TERMUX_PACKAGE_VARIANT` liegt jetzt in `:app` (Reflection von `:libs:termux-shared` liest `com.codeforge.app.BuildConfig`).
+* `R.raw.bell` und `R.style.Theme_AppCompat_Light_Dialog` über die richtigen (nicht-transitiven) R-Klassen angesprochen.
+* Bewusste Ausnahme: Termux-Strings stehen in den jeweiligen Libs, nicht in `:core:resources` (Java-Code greift per eigener R darauf zu).
+
 ## [3.0.0] - 2026-10-08
 
 ### 🏗️ Termux statt Rootfs, zentrale Strings, Build-Logic, Adaptive/Expressive, Layout-Designer

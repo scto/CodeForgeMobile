@@ -12,6 +12,14 @@ android {
         applicationId = "com.codeforge.app"
         versionCode = 30000
         versionName = "3.0.0"
+
+        // Wird von :libs:termux-shared per Reflection aus `com.codeforge.app.BuildConfig` gelesen
+        // (TermuxConstants.BUILD_CONFIG_CLASS_NAME / TermuxBootstrap) — muss zum Bootstrap-Paketformat passen.
+        buildConfigField("String", "TERMUX_PACKAGE_VARIANT", "\"apt-android-7\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     compileOptions {

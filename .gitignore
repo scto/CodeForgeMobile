@@ -27,5 +27,3 @@ keystore.properties
 output/
 github_repo_ready/
 terminal-packages-codeforge/
-.gpg/private/
-tmp/

@@ -40,6 +40,7 @@ Initialisierung: `ResInitializer` (androidx.startup) – läuft in jedem App-Pro
   Module mit eigener `R` (z. B. `:feature:projectwizard` mit Drawables) importieren `… R as CoreR`.
 * Sprachen: Standard ist Deutsch (`values/`). Englisch: `values-en/strings.xml` (bisher nur Projekt-Assistent `pw_*`).
 * Neue Texte **nie** als Literal im Code; Enum-/Listen-Labels als `@StringRes Int`.
+* Regelmäßige Kontrolle/Migration: `python3 scripts/find_hardcoded_strings.py --check` und `agy-tasks/17-externalize-hardcoded-strings.md`.
 
 ## Bewusst nicht migriert
 

@@ -14,7 +14,7 @@ import android.os.Environment;
 import android.system.Os;
 import android.util.Pair;
 import android.view.WindowManager;
-import com.codeforge.R;
+import com.codeforge.termux.R;
 import com.codeforge.shared.android.PackageUtils;
 import com.codeforge.shared.errors.Error;
 import com.codeforge.shared.file.FileUtils;

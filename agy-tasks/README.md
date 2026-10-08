@@ -32,8 +32,21 @@ immer mit dem Projekt-Root als Arbeitsverzeichnis, damit relative Pfade stimmen.
 | 14 | `14-verify-adaptive-expressive.md` | — | Build-/Gerätetest: Adaptive Layouts, Edge-to-Edge, Expressive, Versionsanhebung |
 | 15 | `15-verify-layout-designer.md` | — | Build-/Gerätetest: `:feature:layoutdesigner` (Layout-Designer) |
 | 16 | `16-port-local-experiment-features.md` | 12 (Build muss laufen) | Umsetzung: Features des lokalen Experimentzweigs (Minimap, Rainbow Brackets, Extensions-Manager, 15 Presets, Dateibaum-Details) |
+| 17 | `17-externalize-hardcoded-strings.md` | 13 (Konventionen) | **wiederkehrend**: harte UI-Texte finden (`scripts/find_hardcoded_strings.py`), nach `:core:resources` auslagern; vor Commits/PRs ausführen |
 
-**Empfohlene Reihenfolge:** erst 12 (Build-Logic/Wrapper), dann 13, 14, 15, 11, 08–10; 16 erst, wenn der Build läuft.
+**Stand 2026-10-08 / empfohlene Reihenfolge** (nicht bauen-verifiziert):
+
+| Phase | Tasks | Ziel |
+|---|---|---|
+| 0 | — | Fix-Stand einspielen (Termux-Ressourcen, Namespace `com.codeforge.termux`, Bootstrap-Properties) und `./gradlew :app:assembleDebug --no-build-cache` laufen lassen |
+| 1 Build grün | **12**, dann **13** | build-logic/Wrapper, `:core:resources`; Compile-Fehler iterativ beheben |
+| 2 App startet | **14**, **15**, **11** | Adaptive/Expressive, Layout-Designer, Termux-Umgebung inkl. Bootstrap auf dem Gerät (W^X prüfen) |
+| 3 Module prüfen | **08**, **09**, **10** | Indexierung/Updater, Wizard, Editor/Git/Drawer |
+| 4 Inhalte vervollständigen | **01**, **02**, **07** | TextMate-Grammars/Themes, Tree-sitter-Libs, CMake-Erkennung |
+| 5 Features nachziehen | **16** | Funktionen des lokalen Experimentzweigs |
+| laufend | **17** | harte UI-Texte nach `:core:resources` (vor jedem Commit/PR) |
+| entfällt | 03, 04, 05 | erledigt/überholt |
+| optional | 06 | volle Termux-UI |
 
 01–03, 05, 07, 08, 09 und 10 kannst du sofort und unabhängig voneinander laufen lassen. 04 braucht
 zwingend zuerst einen echten GitHub-Release deines `terminal-packages-codeforge`-

@@ -16,7 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import com.codeforge.R;
+import com.codeforge.termux.R;
 import com.codeforge.app.TermuxActivity;
 import com.codeforge.shared.termux.shell.command.runner.terminal.TermuxSession;
 import com.codeforge.shared.theme.NightMode;
