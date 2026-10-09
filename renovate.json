@@ -1,10 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "CodeForgeMobile: Gradle-Version-Catalog, Gradle-Wrapper und GitHub Actions. Kein Automerge, solange kein CI-Build die Änderungen prüft.",
-  "extends": ["config:recommended", "group:monorepos"],
+  "extends": [
+    "config:recommended",
+    "group:monorepos"
+  ],
   "timezone": "Europe/Zurich",
-  "schedule": ["before 6am on monday"],
-  "labels": ["dependencies"],
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "labels": [
+    "dependencies"
+  ],
   "commitMessagePrefix": "build(deps):",
   "prConcurrentLimit": 8,
   "prHourlyLimit": 2,
@@ -13,6 +20,7 @@
   "ignorePaths": [
     "**/node_modules/**",
     "assets/**",
+    "libs/template-engine/src/main/assets/**",
     "examples/**",
     "terminal-packages-codeforge/**",
     "output/**",
@@ -20,61 +28,95 @@
   ],
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
-    "labels": ["dependencies", "security"],
-    "schedule": ["at any time"],
+    "labels": [
+      "dependencies",
+      "security"
+    ],
+    "schedule": [
+      "at any time"
+    ],
     "minimumReleaseAge": null
   },
   "packageRules": [
     {
       "description": "Major-Updates erst nach Freigabe im Dependency Dashboard (Android/Compose-Majors brechen oft den Build).",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "dependencyDashboardApproval": true,
-      "addLabels": ["major"]
+      "addLabels": [
+        "major"
+      ]
     },
     {
       "description": "Übrige AndroidX-Bibliotheken (core, datastore, startup, annotation, preference, ...) gebündelt. Spätere Regeln überschreiben die Gruppe für Compose und Hilt.",
-      "matchPackageNames": ["/^androidx\\./"],
+      "matchPackageNames": [
+        "/^androidx\\./"
+      ],
       "groupName": "AndroidX"
     },
     {
       "description": "Jetpack Compose, Navigation, Lifecycle, Activity gemeinsam.",
-      "matchPackageNames": ["/^androidx\\.(compose|navigation|lifecycle|activity)[.:]/"],
+      "matchPackageNames": [
+        "/^androidx\\.(compose|navigation|lifecycle|activity)[.:]/"
+      ],
       "groupName": "Jetpack Compose & AndroidX UI"
     },
     {
       "description": "Hilt/Dagger und androidx.hilt zusammen.",
-      "matchPackageNames": ["/^com\\.google\\.dagger[.:]/", "/^androidx\\.hilt[.:]/"],
+      "matchPackageNames": [
+        "/^com\\.google\\.dagger[.:]/",
+        "/^androidx\\.hilt[.:]/"
+      ],
       "groupName": "Hilt"
     },
     {
       "description": "Kotlin und KSP müssen zusammenpassen (KSP-Version = Kotlin-Version plus KSP-Version): ein gemeinsamer PR, nur nach Freigabe.",
-      "matchPackageNames": ["/^org\\.jetbrains\\.kotlin[.:]/", "/^com\\.google\\.devtools\\.ksp/"],
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.kotlin[.:]/",
+        "/^com\\.google\\.devtools\\.ksp/"
+      ],
       "groupName": "Kotlin & KSP",
       "dependencyDashboardApproval": true
     },
     {
       "description": "kotlinx (Coroutines, Serialization) gemeinsam.",
-      "matchPackageNames": ["/^org\\.jetbrains\\.kotlinx[.:]/"],
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.kotlinx[.:]/"
+      ],
       "groupName": "kotlinx"
     },
     {
       "description": "Android Gradle Plugin hängt an Gradle-Wrapper, Android Studio und SDK: nur nach Freigabe.",
-      "matchPackageNames": ["com.android.tools.build:gradle", "/^com\\.android\\.(application|library)/"],
+      "matchPackageNames": [
+        "com.android.tools.build:gradle",
+        "/^com\\.android\\.(application|library)/"
+      ],
       "groupName": "Android Gradle Plugin",
       "dependencyDashboardApproval": true,
-      "addLabels": ["build-tooling"]
+      "addLabels": [
+        "build-tooling"
+      ]
     },
     {
       "description": "Gradle-Wrapper getrennt vom AGP, nur nach Freigabe.",
-      "matchManagers": ["gradle-wrapper"],
+      "matchManagers": [
+        "gradle-wrapper"
+      ],
       "dependencyDashboardApproval": true,
-      "addLabels": ["build-tooling"]
+      "addLabels": [
+        "build-tooling"
+      ]
     },
     {
       "description": "Protobuf: protoc, javalite, kotlin-lite und Gradle-Plugin zusammen. Auf dem Gerät kommt protoc aus dem Termux-Paket 'protobuf': Version abgleichen.",
-      "matchPackageNames": ["/^com\\.google\\.protobuf/"],
+      "matchPackageNames": [
+        "/^com\\.google\\.protobuf/"
+      ],
       "groupName": "Protobuf",
-      "addLabels": ["protobuf"]
+      "addLabels": [
+        "protobuf"
+      ]
     },
     {
       "description": "Code-Qualität (ktlint, detekt).",
@@ -99,15 +141,23 @@
     },
     {
       "description": "gradle-tooling-api liegt auf repo.gradle.org (nicht Maven Central) und ist an die eingebettete Gradle-Version gebunden: manuell pflegen.",
-      "matchPackageNames": ["org.gradle:gradle-tooling-api"],
+      "matchPackageNames": [
+        "org.gradle:gradle-tooling-api"
+      ],
       "enabled": false
     },
     {
       "description": "GitHub Actions gebündelt, monatlich.",
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "groupName": "GitHub Actions",
-      "schedule": ["before 6am on the first day of the month"],
-      "addLabels": ["ci"]
+      "schedule": [
+        "before 6am on the first day of the month"
+      ],
+      "addLabels": [
+        "ci"
+      ]
     }
   ]
 }
