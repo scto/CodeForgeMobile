@@ -135,6 +135,44 @@ repair_mangled_references() {
 }
 repair_mangled_references "${CLONE_DIR}"
 
+# Symlinks wiederherstellen: Der Fork enthält nur noch wenige echte Symlinks. Die übrigen wurden beim Kopieren zu kleinen
+# Textdateien, deren Inhalt der Link-Pfad ist (z. B. packages/procps/hsearch -> ../../root-packages/arp-scan/hsearch/).
+# Folge: "cp: cannot stat '.../procps/hsearch/*.h': Not a directory". Nur eindeutige Fälle: <150 Byte, eine Zeile,
+# reiner Pfad, Ziel existiert. Idempotent.
+restore_symlinks() {
+    python3 - "$1" <<'PY'
+import os, re, subprocess, sys
+root = sys.argv[1]
+out = subprocess.run(["git", "-C", root, "ls-files", "-s", "-z"], capture_output=True, check=True).stdout.decode("utf8", "surrogateescape")
+restored = []
+for entry in out.split("\0"):
+    if not entry:
+        continue
+    meta, path = entry.split("\t", 1)
+    if meta.split()[0] != "100644":
+        continue
+    p = os.path.join(root, path)
+    if os.path.islink(p) or not os.path.isfile(p) or os.path.getsize(p) > 150:
+        continue
+    try:
+        text = open(p, "rb").read().decode("utf8")
+    except UnicodeDecodeError:
+        continue
+    target = text.rstrip("\n")
+    if not target or "\n" in target or not re.fullmatch(r"[A-Za-z0-9._/+@~-]+/?", target):
+        continue
+    resolved = os.path.normpath(os.path.join(os.path.dirname(p), target))
+    if not os.path.exists(resolved) or os.path.abspath(resolved) == os.path.abspath(p):
+        continue
+    os.remove(p)
+    os.symlink(target, p)
+    restored.append(path)
+print(f"Symlinks wiederhergestellt: {len(restored)}")
+PY
+}
+restore_symlinks "${CLONE_DIR}"
+[ -d "${CLONE_DIR}/packages/procps/hsearch" ] || die "packages/procps/hsearch ist kein Verzeichnis – Symlink-Reparatur unvollständig."
+
 # ----------------------------------------------------
 # Step 3: GPG-Schlüssel (einmal erzeugen, danach wiederverwenden)
 # ----------------------------------------------------
