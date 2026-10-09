@@ -135,8 +135,6 @@ repair_mangled_references() {
 }
 repair_mangled_references "${CLONE_DIR}"
 
-<<<<<<< HEAD
-=======
 # Ausführbar-Bits wiederherstellen: Der Fork hat bei Dateien das Bit +x verloren (z. B. packages/termux-core/build/scripts/
 # termux-replace-termux-core-src-scripts -> "Permission denied", make Error 126). Liste = Dateien, die im offiziellen
 # termux-packages ausführbar sind (ohne .patch). Nur vorhandene Dateien; idempotent.
@@ -236,7 +234,6 @@ EXEC_LIST
     echo "Ausführbar-Bits wiederhergestellt: ${n}"
 }
 
->>>>>>> d70d357 (build: Fork-Reparatur (Symlinks, Exec-Bits) im Bootstrap-Script.)
 # Symlinks wiederherstellen: Der Fork enthält nur noch wenige echte Symlinks. Die übrigen wurden beim Kopieren zu kleinen
 # Textdateien, deren Inhalt der Link-Pfad ist (z. B. packages/procps/hsearch -> ../../root-packages/arp-scan/hsearch/).
 # Folge: "cp: cannot stat '.../procps/hsearch/*.h': Not a directory". Nur eindeutige Fälle: <150 Byte, eine Zeile,
@@ -273,11 +270,8 @@ print(f"Symlinks wiederhergestellt: {len(restored)}")
 PY
 }
 restore_symlinks "${CLONE_DIR}"
-<<<<<<< HEAD
-=======
 restore_exec_bits "${CLONE_DIR}"
 [ -x "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || [ ! -e "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || die "termux-replace-termux-core-src-scripts ist nicht ausführbar."
->>>>>>> d70d357 (build: Fork-Reparatur (Symlinks, Exec-Bits) im Bootstrap-Script.)
 [ -d "${CLONE_DIR}/packages/procps/hsearch" ] || die "packages/procps/hsearch ist kein Verzeichnis – Symlink-Reparatur unvollständig."
 
 # ----------------------------------------------------
