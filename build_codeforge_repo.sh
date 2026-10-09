@@ -90,11 +90,23 @@ PROPS="${CLONE_DIR}/scripts/properties.sh"
 [ -f "${PROPS}" ] || die "scripts/properties.sh nicht gefunden."
 grep -q "^TERMUX_APP__PACKAGE_NAME=\"${APP_PACKAGE}\"" "${PROPS}" \
     || die "TERMUX_APP__PACKAGE_NAME in scripts/properties.sh ist nicht \"${APP_PACKAGE}\". Im Fork setzen und committen."
-grep -q "^TERMUX_REPO__PREFIX=\"${PREFIX_PATH}\"" "${PROPS}" \
-    || die "TERMUX_REPO__PREFIX in scripts/properties.sh ist nicht \"${PREFIX_PATH}\"."
-# Ein früherer globaler Ersetzungslauf hat URLs in Kommentaren zu 'github.com.codeforge.app' verunstaltet.
+# TERMUX_REPO_* beschreiben das Paket-Repo, aus dem -i/-I Abhängigkeiten laden würde. Zeigt repo.json weiter auf das
+# offizielle Termux-Repo (Pakete für com.termux), MÜSSEN diese Werte auf com.termux bleiben (so steht es im Kommentar
+# von properties.sh): Dann stimmt der Prefix nicht überein, -i/-I wird ignoriert und alles wird lokal mit dem
+# Prefix com.codeforge.app gebaut. Wären sie ebenfalls com.codeforge.app, würden Binaries mit falschem Prefix geladen.
+REPO_JSON="${CLONE_DIR}/repo.json"
+REPO_PKG_NAME="$(sed -n 's/^TERMUX_REPO_APP__PACKAGE_NAME="\(.*\)"/\1/p' "${PROPS}" | head -n1)"
+[ -n "${REPO_PKG_NAME}" ] || die "TERMUX_REPO_APP__PACKAGE_NAME nicht in scripts/properties.sh gefunden."
+if [ -f "${REPO_JSON}" ] && grep -q 'termux\.dev' "${REPO_JSON}"; then
+    [ "${REPO_PKG_NAME}" != "${APP_PACKAGE}" ] \
+        || die "repo.json zeigt auf das offizielle Termux-Repo, aber TERMUX_REPO_APP__PACKAGE_NAME ist '${APP_PACKAGE}'. Auf \"com.termux\" zurücksetzen (und TERMUX_REPO_APP__DATA_DIR, TERMUX_REPO__CORE_DIR, __APPS_DIR, __ROOTFS, __HOME, __PREFIX entsprechend), sonst lädt build-package.sh -i/-I Pakete mit falschem Prefix."
+    echo "repo.json zeigt auf das offizielle Repo; TERMUX_REPO_APP__PACKAGE_NAME='${REPO_PKG_NAME}' (richtig: Abhängigkeiten werden lokal gebaut)."
+else
+    echo "Hinweis: repo.json nicht gefunden bzw. ohne termux.dev – prüfe selbst, dass TERMUX_REPO_* zum Repo in repo.json passen."
+fi
+# Ein früherer globaler Ersetzungslauf hat URLs und Pfade in Kommentaren verunstaltet (z. B. 'github.com.codeforge.app').
 if grep -q "github\.com\.codeforge\.app" "${PROPS}"; then
-    echo "Hinweis: 'github.com.codeforge.app' in properties.sh gefunden (alter Ersetzungsfehler, nur Kommentare/URLs). Bitte im Fork zu 'github.com/termux' zurücksetzen."
+    echo "Hinweis: 'github.com.codeforge.app' in properties.sh gefunden (alter Ersetzungsfehler, betrifft nur Kommentare). Die Meldung ist harmlos; eine bereinigte properties.sh wurde mitgeliefert."
 fi
 
 # ----------------------------------------------------
