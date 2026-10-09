@@ -109,6 +109,32 @@ if grep -q "github\.com\.codeforge\.app" "${PROPS}"; then
     echo "Hinweis: 'github.com.codeforge.app' in properties.sh gefunden (alter Ersetzungsfehler, betrifft nur Kommentare). Die Meldung ist harmlos; eine bereinigte properties.sh wurde mitgeliefert."
 fi
 
+# Verweise reparieren, die ein früherer globaler `sed s/com.termux/com.codeforge/` zerstört hat (der Punkt matcht auch '/'):
+#   github.com/termux/<repo>   ->  github.com.codeforge/<repo>   (kaputte Downloads, z. B. termux-elf-cleaner, flang, ghc)
+# Idempotent und eng begrenzt; im Fork sollten die Änderungen zusätzlich einmal committet werden (fork-fix.patch).
+repair_mangled_references() {
+    local d="$1" f changed=0
+    while IFS= read -r f; do
+        sed -i -e 's#github\.com\.codeforge\.app/#github.com/termux/#g' -e 's#github\.com\.codeforge/#github.com/termux/#g' "${f}"
+        changed=$((changed + 1))
+    done < <(grep -rlIE 'github\.com\.codeforge(\.app)?/' --exclude-dir=.git "${d}" || true)
+    # Pfad INNERHALB des heruntergeladenen offiziellen glibc-Pakets: bleibt com.termux.
+    local cgct="${d}/scripts/build/termux_step_setup_cgct_environment.sh"
+    if [ -f "${cgct}" ] && grep -q 'data/data/com\.codeforge/files/usr/glibc' "${cgct}"; then
+        sed -i 's#data/data/com\.codeforge/files/usr/glibc#data/data/com.termux/files/usr/glibc#' "${cgct}"; changed=$((changed + 1))
+    fi
+    if [ -f "${d}/scripts/test-runner.sh" ] && head -n1 "${d}/scripts/test-runner.sh" | grep -q 'data/data/com\.codeforge/files'; then
+        sed -i "1s#/data/data/com\.codeforge/files#/data/data/${APP_PACKAGE}/files#" "${d}/scripts/test-runner.sh"; changed=$((changed + 1))
+    fi
+    if [ -f "${d}/scripts/build-bootstraps.sh" ]; then
+        sed -i "s#It defaults to 'com\.codeforge'\.#It defaults to '${APP_PACKAGE}'.#" "${d}/scripts/build-bootstraps.sh"
+    fi
+    echo "Reparatur beschädigter Verweise: ${changed} Datei(en) angepasst."
+    bad="$(grep -rlIE 'github\.com\.codeforge' --exclude-dir=.git "${d}" || true)"
+    [ -z "${bad}" ] || die "Beschädigte Verweise bleiben: ${bad}"
+}
+repair_mangled_references "${CLONE_DIR}"
+
 # ----------------------------------------------------
 # Step 3: GPG-Schlüssel (einmal erzeugen, danach wiederverwenden)
 # ----------------------------------------------------
