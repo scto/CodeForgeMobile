@@ -24,6 +24,8 @@ keystore.properties
 
 # Schlüssel/Artefakte der Repo-Build-Pipeline (build_codeforge_repo.sh) – niemals einchecken
 .gpg/
+.gpg/private/
 output/
 github_repo_ready/
+tmp/
 terminal-packages-codeforge/
