@@ -234,6 +234,27 @@ EXEC_LIST
     echo "Ausführbar-Bits wiederhergestellt: ${n}"
 }
 
+# Paketnamen in build-bootstraps.sh, die nur als Subpackage existieren (z. B. "bzip2" ist Subpackage von "libbz2"):
+# build-package.sh kennt nur Verzeichnisse und bricht mit "No package bzip2 found in any of the enabled repositories" ab.
+# Ersetzt den Namen durch das Elternpaket; dessen Build erzeugt das Subpackage-.deb mit. Idempotent.
+fix_bootstrap_subpackage_names() {
+    local d="$1" f="$1/scripts/build-bootstraps.sh" name sub parent n=0
+    [ -f "${f}" ] || die "scripts/build-bootstraps.sh fehlt im Fork."
+    while IFS= read -r name; do
+        [ -n "${name}" ] || continue
+        if [ -d "${d}/packages/${name}" ] || [ -d "${d}/root-packages/${name}" ] || [ -d "${d}/x11-packages/${name}" ]; then
+            continue
+        fi
+        sub="$(ls "${d}"/packages/*/"${name}".subpackage.sh "${d}"/root-packages/*/"${name}".subpackage.sh "${d}"/x11-packages/*/"${name}".subpackage.sh 2>/dev/null | head -n1 || true)"
+        [ -n "${sub}" ] || die "Paket '${name}' aus build-bootstraps.sh existiert weder als Paket noch als Subpackage."
+        parent="$(basename "$(dirname "${sub}")")"
+        sed -i "s#PACKAGES+=(\"${name}\")#PACKAGES+=(\"${parent}\") \# ${name} ist Subpackage von ${parent}#" "${f}"
+        echo "build-bootstraps.sh: '${name}' -> '${parent}' (Subpackage)"
+        n=$((n + 1))
+    done < <(grep -oE 'PACKAGES\+=\("[a-z0-9+._-]+"\)' "${f}" | sed -E 's/.*\("(.*)"\)/\1/' | sort -u || true)
+    echo "Subpackage-Namen korrigiert: ${n}"
+}
+
 # Symlinks wiederherstellen: Der Fork enthält nur noch wenige echte Symlinks. Die übrigen wurden beim Kopieren zu kleinen
 # Textdateien, deren Inhalt der Link-Pfad ist (z. B. packages/procps/hsearch -> ../../root-packages/arp-scan/hsearch/).
 # Folge: "cp: cannot stat '.../procps/hsearch/*.h': Not a directory". Nur eindeutige Fälle: <150 Byte, eine Zeile,
@@ -271,6 +292,7 @@ PY
 }
 restore_symlinks "${CLONE_DIR}"
 restore_exec_bits "${CLONE_DIR}"
+fix_bootstrap_subpackage_names "${CLONE_DIR}"
 [ -x "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || [ ! -e "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || die "termux-replace-termux-core-src-scripts ist nicht ausführbar."
 [ -d "${CLONE_DIR}/packages/procps/hsearch" ] || die "packages/procps/hsearch ist kein Verzeichnis – Symlink-Reparatur unvollständig."
 
