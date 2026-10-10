@@ -476,8 +476,16 @@ if [ -n "${REPO_PACKAGES}" ]; then
     for arch in "${ARCHS_LIST[@]}"; do
         for pkg in "${REPO_PKG_LIST[@]}"; do
             [ -n "${pkg}" ] || continue
-            echo "  -> ${pkg} (${arch})"
-            ./scripts/run-docker.sh ./build-package.sh -a "${arch}" -o output "${pkg}"
+            # Unterpakete (z. B. protobuf -> libprotobuf, aapt2 -> aapt) haben kein eigenes packages/<name>/build.sh:
+            # dann das Elternpaket bauen; die .deb des Unterpakets entsteht dabei mit.
+            build_pkg="${pkg}"
+            if [ ! -f "packages/${pkg}/build.sh" ]; then
+                sub="$(ls packages/*/"${pkg}".subpackage.sh 2>/dev/null | head -n1 || true)"
+                [ -n "${sub}" ] || die "${pkg}: weder packages/${pkg}/build.sh noch packages/*/${pkg}.subpackage.sh im Fork."
+                build_pkg="$(basename "$(dirname "${sub}")")"
+            fi
+            echo "  -> ${pkg} (${arch})$([ "${build_pkg}" != "${pkg}" ] && echo " via ${build_pkg}")"
+            ./scripts/run-docker.sh ./build-package.sh -a "${arch}" -o output "${build_pkg}"
             ls output/"${pkg}"_*_"${arch}".deb >/dev/null 2>&1 \
                 || die "${pkg}: keine ${pkg}_*_${arch}.deb in output/ (Paketname im Fork vorhanden? Baut es für ${arch}?)."
             # Das fertige Paket darf keinen alten Prefix enthalten (ELF und Text).
