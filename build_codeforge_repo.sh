@@ -255,6 +255,25 @@ fix_bootstrap_subpackage_names() {
     echo "Subpackage-Namen korrigiert: ${n}"
 }
 
+# Das Docker-Profil (scripts/profile-restricted.apparmor) verbietet dem Container Schreibzugriff auf das Repo-Root
+# ("deny /home/builder/termux-packages/[^o]** wlk"); erlaubt ist nur output/. build-bootstraps.sh verschiebt die fertige ZIP
+# aber ins Repo-Root -> "mv: cannot create regular file ... Permission denied" nach Stunden Bauzeit. Ziel nach output/ umbiegen
+# und bei Fehlschlag sofort abbrechen. Idempotent; bricht ab, wenn die Zeile nicht gefunden wird.
+fix_bootstrap_zip_destination() {
+    local f="$1/scripts/build-bootstraps.sh" before after
+    [ -f "${f}" ] || die "scripts/build-bootstraps.sh fehlt im Fork."
+    if grep -qF 'bootstrap-${1}.zip" "$TERMUX_PACKAGES_DIRECTORY/output/" || exit 1' "${f}"; then
+        echo "build-bootstraps.sh: ZIP-Ziel bereits output/."
+        return 0
+    fi
+    before="$(grep -cF 'mv -f "${BOOTSTRAP_TMPDIR}/bootstrap-${1}.zip" "$TERMUX_PACKAGES_DIRECTORY/"' "${f}" || true)"
+    [ "${before}" = "1" ] || die "mv-Zeile für bootstrap-<arch>.zip in build-bootstraps.sh nicht eindeutig gefunden (Treffer: ${before})."
+    sed -i 's#mv -f "${BOOTSTRAP_TMPDIR}/bootstrap-${1}.zip" "$TERMUX_PACKAGES_DIRECTORY/"#mv -f "${BOOTSTRAP_TMPDIR}/bootstrap-${1}.zip" "$TERMUX_PACKAGES_DIRECTORY/output/" || exit 1#' "${f}"
+    after="$(grep -cF 'bootstrap-${1}.zip" "$TERMUX_PACKAGES_DIRECTORY/output/" || exit 1' "${f}" || true)"
+    [ "${after}" = "1" ] || die "Patch der mv-Zeile in build-bootstraps.sh fehlgeschlagen."
+    echo "build-bootstraps.sh: ZIP-Ziel -> output/ (AppArmor erlaubt nur dort Schreibzugriff)."
+}
+
 # Symlinks wiederherstellen: Der Fork enthält nur noch wenige echte Symlinks. Die übrigen wurden beim Kopieren zu kleinen
 # Textdateien, deren Inhalt der Link-Pfad ist (z. B. packages/procps/hsearch -> ../../root-packages/arp-scan/hsearch/).
 # Folge: "cp: cannot stat '.../procps/hsearch/*.h': Not a directory". Nur eindeutige Fälle: <150 Byte, eine Zeile,
@@ -293,6 +312,7 @@ PY
 restore_symlinks "${CLONE_DIR}"
 restore_exec_bits "${CLONE_DIR}"
 fix_bootstrap_subpackage_names "${CLONE_DIR}"
+fix_bootstrap_zip_destination "${CLONE_DIR}"
 [ -x "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || [ ! -e "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || die "termux-replace-termux-core-src-scripts ist nicht ausführbar."
 [ -d "${CLONE_DIR}/packages/procps/hsearch" ] || die "packages/procps/hsearch ist kein Verzeichnis – Symlink-Reparatur unvollständig."
 
@@ -439,11 +459,12 @@ ARCH_CSV="$(IFS=,; echo "${ARCHS_LIST[*]}")"
 BUILD_ARGS=(--architectures "${ARCH_CSV}")
 [ -n "${EXTRA_PACKAGES}" ] && BUILD_ARGS+=(--add "${EXTRA_PACKAGES}")
 
-rm -f "${CLONE_DIR}"/bootstrap-*.zip
+mkdir -p "${CLONE_DIR}/output"
+rm -f "${CLONE_DIR}"/bootstrap-*.zip "${CLONE_DIR}"/output/bootstrap-*.zip
 ./scripts/run-docker.sh ./scripts/build-bootstraps.sh "${BUILD_ARGS[@]}"
 
 for arch in "${ARCHS_LIST[@]}"; do
-    [ -s "${CLONE_DIR}/bootstrap-${arch}.zip" ] || die "bootstrap-${arch}.zip wurde nicht erzeugt."
+    [ -s "${CLONE_DIR}/output/bootstrap-${arch}.zip" ] || die "output/bootstrap-${arch}.zip wurde nicht erzeugt."
 done
 ls "${CLONE_DIR}"/output/*.deb >/dev/null 2>&1 || die "Keine .deb-Dateien in ${CLONE_DIR}/output (build-bootstraps.sh hätte sie erzeugen müssen)."
 
@@ -484,7 +505,7 @@ rm -rf "${VERIFY_DIR}"; mkdir -p "${VERIFY_DIR}"
 verify_failed=0
 for arch in "${ARCHS_LIST[@]}"; do
     dest="${VERIFY_DIR}/${arch}"; mkdir -p "${dest}"
-    unzip -q "${CLONE_DIR}/bootstrap-${arch}.zip" -d "${dest}"
+    unzip -q "${CLONE_DIR}/output/bootstrap-${arch}.zip" -d "${dest}"
 
     # a) kein Pfad und kein Textinhalt mit com.termux
     bad_paths="$(find "${dest}" -path '*com.termux*')"
@@ -522,7 +543,7 @@ rm -rf "${VERIFY_DIR}"
 echo "[Step 7/9] Bootstraps ablegen & Prüfsummen..."
 mkdir -p "${BOOTSTRAP_DIR}"
 for arch in "${ARCHS_LIST[@]}"; do
-    mv -f "${CLONE_DIR}/bootstrap-${arch}.zip" "${BOOTSTRAP_DIR}/"
+    mv -f "${CLONE_DIR}/output/bootstrap-${arch}.zip" "${BOOTSTRAP_DIR}/"
 done
 (cd "${BOOTSTRAP_DIR}" && for z in bootstrap-*.zip; do sha256sum "${z}" > "${z}.sha256"; echo "  $(cat "${z}.sha256")"; done)
 
