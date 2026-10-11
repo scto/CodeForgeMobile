@@ -522,7 +522,12 @@ for arch in "${ARCHS_LIST[@]}"; do
     fi
     bad_text="$(grep -rIl 'com\.termux' "${dest}" || true)"
     if [ -n "${bad_text}" ]; then
-        echo "[${arch}] Textdateien mit com.termux:" >&2; printf '%s\n' "${bad_text}" | head >&2; verify_failed=1
+        echo "[${arch}] Textdateien mit com.termux:" >&2; printf '%s\n' "${bad_text}" | head -n 50 >&2; verify_failed=1
+        # Treffer-Zeilen ausgeben (max. 3 pro Datei), damit die Ursache im Log sichtbar ist.
+        while IFS= read -r tf; do
+            echo "  --- ${tf#"${dest}"/}" >&2
+            grep -naI 'com\.termux' "${tf}" | head -n 3 | cut -c1-240 >&2
+        done < <(printf '%s\n' "${bad_text}" | head -n 50)
     fi
     # b) jede ELF-Datei muss gültige Header haben und darf com.termux nicht enthalten
     while IFS= read -r f; do
@@ -538,7 +543,10 @@ for arch in "${ARCHS_LIST[@]}"; do
     done < <(find "${dest}" -type f)
     # c) apt-Quelle und Keyring
     grep -qF "${APT_URL}" "${dest}/etc/apt/sources.list" || { echo "[${arch}] etc/apt/sources.list zeigt nicht auf ${APT_URL}" >&2; verify_failed=1; }
-    [ -e "${dest}/etc/apt/trusted.gpg.d/codeforge.gpg" ] || { echo "[${arch}] trusted.gpg.d/codeforge.gpg fehlt" >&2; verify_failed=1; }
+    # Keys liegen als echte Datei in share/termux-keyring/; trusted.gpg.d/codeforge.gpg ist ein Symlink (steht nur in SYMLINKS.txt, nicht als Datei im ZIP).
+    [ -s "${dest}/share/termux-keyring/codeforge.gpg" ] || { echo "[${arch}] share/termux-keyring/codeforge.gpg fehlt" >&2; verify_failed=1; }
+    grep -qF '/share/termux-keyring/codeforge.gpg←./etc/apt/trusted.gpg.d/codeforge.gpg' "${dest}/SYMLINKS.txt" \
+        || { echo "[${arch}] SYMLINKS.txt ohne Link etc/apt/trusted.gpg.d/codeforge.gpg" >&2; verify_failed=1; }
     grep -q "${PREFIX_PATH}" "${dest}/SYMLINKS.txt" || { echo "[${arch}] SYMLINKS.txt ohne ${PREFIX_PATH}" >&2; verify_failed=1; }
     echo "[${arch}] geprüft: $(find "${dest}" -type f | wc -l) Dateien"
 done
