@@ -609,7 +609,9 @@ for deb in "${CLONE_DIR}"/output/*.deb; do
     [ -n "${pkg}" ] || die "Kein Package-Feld in ${deb}"
     case "${pkg}" in lib?*) bucket="${pkg:0:4}" ;; *) bucket="${pkg:0:1}" ;; esac
     mkdir -p "${REPO_DIR}/pool/main/${bucket}/${pkg}"
-    cp -f "${deb}" "${REPO_DIR}/pool/main/${bucket}/${pkg}/"
+    # Epoche (z. B. "1:2026.09.25") steht nicht im Dateinamen (wie bei Debian): ":" ist in Artefakt-Uploads/Windows ungültig.
+    deb_name="$(basename "${deb}" | sed -E 's/_[0-9]+:/_/')"
+    cp -f "${deb}" "${REPO_DIR}/pool/main/${bucket}/${pkg}/${deb_name}"
     deb_count=$((deb_count + 1))
 done
 shopt -u nullglob
