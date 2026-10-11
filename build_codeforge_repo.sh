@@ -446,6 +446,20 @@ open(path, "w", encoding="utf8").write(s[:m.end()] + ins + s[m.end():])
 print("termux-tools: TERMUX_APP_PACKAGE & Pfade exportiert")
 PY
 
+# Quell-Downloads robuster machen: salsa.debian.org bricht HTTP/2-Downloads gelegentlich mit "nghttp2 ... PROTOCOL_ERROR" ab
+# (hat den Lauf nach ~1 h bei 'apt' beendet). HTTP/1.1 erzwingen und öfter wiederholen.
+DL_SCRIPT="${CLONE_DIR}/scripts/build/termux_download.sh"
+if [ -f "${DL_SCRIPT}" ]; then
+    if grep -q -- '--http1.1' "${DL_SCRIPT}"; then
+        echo "termux_download.sh: bereits gepatcht"
+    else
+        sed -i -e 's/^\(\t\t\)--location           # Follow redirects$/\1--location           # Follow redirects\n\1--http1.1            # CodeForge: HTTP\/2-PROTOCOL_ERROR bei salsa.debian.org vermeiden/' \
+               -e 's/^\t\tlocal retry=2$/\t\tlocal retry=5/' "${DL_SCRIPT}"
+        grep -q -- '--http1.1' "${DL_SCRIPT}" || die "termux_download.sh: Patch (--http1.1) nicht angewendet; Datei im Fork prüfen."
+        echo "termux_download.sh: --http1.1, 5 Wiederholungen"
+    fi
+fi
+
 # Schlüssel für Abhängigkeits-Downloads (-I) von build-package.sh; für build-bootstraps.sh nicht nötig, aber konsistent.
 BUILD_PKG_SCRIPT="${CLONE_DIR}/build-package.sh"
 if [ -f "${BUILD_PKG_SCRIPT}" ]; then
