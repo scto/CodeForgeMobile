@@ -424,6 +424,28 @@ else:
     sys.exit("FEHLER: sources.list-Block in packages/apt/build.sh nicht gefunden")
 PY
 
+# termux-tools 1.45.0 liest TERMUX_APP_PACKAGE/TERMUX_PREFIX per configure aus der Umgebung (Default: com.termux).
+# build-package.sh exportiert diese Variablen nicht -> alle Skripte (login, pkg, termux-*) landen mit com.termux in der APK.
+TOOLS_BUILD="${CLONE_DIR}/packages/termux-tools/build.sh"
+[ -f "${TOOLS_BUILD}" ] || die "packages/termux-tools/build.sh fehlt im Fork."
+python3 - "${TOOLS_BUILD}" <<'PY'
+import re, sys
+path = sys.argv[1]
+s = open(path, encoding="utf8").read()
+if "export TERMUX_APP_PACKAGE" in s:
+    print("termux-tools: Export bereits vorhanden")
+    sys.exit(0)
+m = re.search(r'^termux_step_pre_configure\(\) \{\n', s, re.M)
+if not m:
+    sys.exit("FEHLER: termux_step_pre_configure in termux-tools/build.sh nicht gefunden")
+ins = ('\t# Wird von configure.ac gelesen; Prefix/Home/Base-Dir leiten sich daraus ab (/data/data/<pkg>/files/...).\n'
+       '\texport TERMUX_APP_PACKAGE\n'
+       '\texport TERMUX_BASE_DIR="$TERMUX__ROOTFS" TERMUX_PREFIX="$TERMUX__PREFIX" TERMUX_ANDROID_HOME="$TERMUX__HOME"\n'
+       '\texport TERMUX_CACHE_DIR="$TERMUX_APP__DATA_DIR/cache"\n')
+open(path, "w", encoding="utf8").write(s[:m.end()] + ins + s[m.end():])
+print("termux-tools: TERMUX_APP_PACKAGE & Pfade exportiert")
+PY
+
 # Schlüssel für Abhängigkeits-Downloads (-I) von build-package.sh; für build-bootstraps.sh nicht nötig, aber konsistent.
 BUILD_PKG_SCRIPT="${CLONE_DIR}/build-package.sh"
 if [ -f "${BUILD_PKG_SCRIPT}" ]; then
@@ -520,14 +542,23 @@ for arch in "${ARCHS_LIST[@]}"; do
     if [ -n "${bad_paths}" ]; then
         echo "[${arch}] Pfade mit com.termux gefunden:" >&2; printf '%s\n' "${bad_paths}" | head >&2; verify_failed=1
     fi
-    bad_text="$(grep -rIl 'com\.termux' "${dest}" || true)"
-    if [ -n "${bad_text}" ]; then
-        echo "[${arch}] Textdateien mit com.termux:" >&2; printf '%s\n' "${bad_text}" | head -n 50 >&2; verify_failed=1
-        # Treffer-Zeilen ausgeben (max. 3 pro Datei), damit die Ursache im Log sichtbar ist.
-        while IFS= read -r tf; do
+    # Erlaubt: Kommentarzeilen (Beispielpfade in Doku/Header) und die Java-Klasse com.termux.termuxam.Am
+    # (liegt fest in am.apk; nur der Paketname der App wird per @TERMUX_APP_PACKAGE@ ersetzt, nicht diese Klasse).
+    bad_text=""
+    while IFS= read -r tf; do
+        hits="$(grep -naI 'com\.termux' "${tf}" \
+            | sed -E 's/com\.termux\.termuxam\.Am//g' \
+            | grep -a 'com\.termux' \
+            | grep -avE '^[0-9]+:[[:space:]]*(#|\*|//|/\*)' || true)"
+        if [ -n "${hits}" ]; then
+            bad_text+="${tf}"$'\n'
             echo "  --- ${tf#"${dest}"/}" >&2
-            grep -naI 'com\.termux' "${tf}" | head -n 3 | cut -c1-240 >&2
-        done < <(printf '%s\n' "${bad_text}" | head -n 50)
+            printf '%s\n' "${hits}" | head -n 3 | cut -c1-240 >&2
+        fi
+    done < <(grep -rIl 'com\.termux' "${dest}" || true)
+    if [ -n "${bad_text}" ]; then
+        echo "[${arch}] Textdateien mit com.termux (siehe Zeilen oben):" >&2
+        printf '%s' "${bad_text}" | head -n 50 >&2; verify_failed=1
     fi
     # b) jede ELF-Datei muss gültige Header haben und darf com.termux nicht enthalten
     while IFS= read -r f; do
