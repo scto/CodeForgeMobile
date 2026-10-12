@@ -73,29 +73,29 @@ Das Gradle-Plugin bettet die Bootstrap-ZIPs in die APK ein. Alles, was in der ZI
 
 `codeforge-env` bezieht Android-SDK-Teile so (Vorbild: `scto/termux-android-setup`):
 
-- **Termux-Pakete aus diesem Repo:** JDK, CMake, Ninja und die Hilfswerkzeuge `jq` und `p7zip`.
+- **Termux-Pakete aus diesem Repo:** JDK, Ninja und das Hilfswerkzeug `jq`; CMake nur als Alternative (`cmake;termux`). `p7zip` lädt das Skript nur bei `.7z`-Assets nach.
 - **Google:** cmdline-tools (`sdkmanager`, reines Java), darüber `platforms;android-N` und die Java-Teile der build-tools.
-- **GitHub-Releases von HomuHomu833:** aarch64-Binaries für build-tools und platform-tools (`aapt2`, `aidl`, `zipalign`, `adb`) sowie das NDK. Das sind Drittanbieter-Builds, die nicht über dieses Repo laufen.
+- **Mirror `scto/codeforge-tools` (GitHub-Releases):** aarch64-Binaries für build-tools und platform-tools (`aapt2`, `aidl`, `zipalign`, `adb`), NDK und CMake. Der Mirror kopiert Drittanbieter-Builds (HomuHomu833, AndroidIDEOfficial, Lzhiyong); er läuft über eigenen Workflow und nicht über dieses Repo, siehe `docs/CODEFORGE-TOOLS.md`. Ist der Mirror leer oder nicht erreichbar, nutzt das Skript die HomuHomu833-Repos direkt.
 
 | Paket | Empfehlung | Begründung |
 |---|---|---|
 | `openjdk-17` | ja (Repo) | Für Gradle/Kotlin und den `sdkmanager` nötig, sehr groß |
-| `cmake` | ja | Wird von `codeforge-env` als `$ANDROID_HOME/cmake/<version>` für Gradle verlinkt. Die Abhängigkeiten werden mitgebaut, das verlängert den Lauf |
-| `ninja` | ja | Build-Backend für CMake |
-| `jq` | ja | `codeforge-env` liest damit die GitHub-API (NDK, SDK-Binaries) |
-| `p7zip` | ja | Für `.7z`-Assets der GitHub-Releases |
+| `cmake` | optional | Nur für die Alternative `cmake;termux` (per Symlink als `$ANDROID_HOME/cmake/<version>`). Die CMake-Versionen kommen sonst als fertige aarch64-Builds aus dem Mirror. Die Abhängigkeiten werden mitgebaut, das verlängert den Lauf |
+| `ninja` | ja | Ninja für die Mirror-CMake-Builds (die kein eigenes `ninja` mitbringen) und für `cmake;termux` |
+| `jq` | ja | `codeforge-env` liest damit die GitHub-API (Versionslisten, Mirror) |
+| `p7zip` | nicht nötig | Wird nur bei `.7z`-Assets nachgeladen; die Mirror-Assets sind `.tar.xz` und `.zip` |
 | `git` | ja | Git-Funktionen im Terminal |
 | `zip` | ja | Gehört meist nicht zur Basis |
 | `protobuf` | optional | Liefert `protoc`. Das Gradle-Plugin lädt sonst ein x86-Binary, das auf Android nicht läuft |
-| `aapt2` | nicht nötig | Das aarch64-`aapt2` kommt aus den SDK-Binaries (HomuHomu833). Nur als Rückfall sinnvoll, falls diese Quelle ausfällt |
+| `aapt2` | nicht nötig | Das aarch64-`aapt2` kommt aus den SDK-Binaries des Mirrors (`scto/codeforge-tools`). Nur als Rückfall sinnvoll, falls diese Quelle ausfällt |
 | `android-tools` | nicht nötig | `adb` kommt aus den platform-tools derselben Quelle |
 | `wget` | optional | Komfort |
 | `curl`, `nano`, `unzip`, `tar`, `xz-utils` | wahrscheinlich schon in der Basis | Vorher in der Paketliste des Bootstraps prüfen |
 | `gradle` | optional | Mit dem Gradle-Wrapper (`gradlew`) nicht nötig; nur sinnvoll für Projekte ohne Wrapper |
 | `kotlin` | optional | Das Kotlin-Gradle-Plugin bringt seinen Compiler selbst mit; nur für das CLI `kotlinc` |
 
-Vorschlag: `extra_packages` leer, `repo_packages` = `openjdk-17,cmake,ninja,jq,p7zip,git,zip`
+Vorschlag: `extra_packages` leer, `repo_packages` = `openjdk-17,ninja,jq,git,zip` (plus `cmake`, wenn du `cmake;termux` anbieten willst)
 
-Zum Einstieg reicht `openjdk-17,cmake,ninja,jq,p7zip`. Ein späterer Lauf mit `publish` ersetzt `gh-pages` komplett: Wenn du `git` oder `zip` nachträglich willst, gib im neuen Lauf wieder **alle** gewünschten Pakete an, sonst verschwinden die früheren aus dem Repo.
+Zum Einstieg reicht `openjdk-17,ninja,jq`. Ein späterer Lauf mit `publish` ersetzt `gh-pages` komplett: Wenn du `git` oder `zip` nachträglich willst, gib im neuen Lauf wieder **alle** gewünschten Pakete an, sonst verschwinden die früheren aus dem Repo.
 
-**Nicht geprüft:** ob alle Paketnamen im Fork für alle Architekturen bauen (insbesondere `openjdk-17` und `cmake` auf `arm`) und ob die Binaries von HomuHomu833 unter dem Prefix `com.codeforge.app` laufen. Der bisher erfolgreiche Lauf hatte `repo_packages` leer.
+**Nicht geprüft:** ob alle Paketnamen im Fork für alle Architekturen bauen (insbesondere `openjdk-17` und `cmake` auf `arm`) und ob die Binaries aus dem Mirror (HomuHomu833, AndroidIDEOfficial, Lzhiyong) unter dem Prefix `com.codeforge.app` laufen. Der bisher erfolgreiche Lauf hatte `repo_packages` leer.
