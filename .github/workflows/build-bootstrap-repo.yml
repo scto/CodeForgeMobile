@@ -204,10 +204,20 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "$GH_TOKEN" ] || { echo "::error::Secret PACKAGES_REPO_TOKEN fehlt"; exit 1; }
-          gh release create "$RELEASE_TAG" output/bootstraps/* \
-            --repo "$TARGET_REPO" \
-            --title "$RELEASE_TAG" \
-            --notes "Bootstraps (Prefix com.codeforge.app) für: $ARCHS. SHA-256 in den .sha256-Dateien."
+          notes="Bootstraps (Prefix com.codeforge.app) für: $ARCHS. SHA-256 in den .sha256-Dateien."
+          if gh release view "$RELEASE_TAG" --repo "$TARGET_REPO" >/dev/null 2>&1; then
+            # Release existiert bereits (z. B. erneuter Lauf mit gleichem Tag):
+            # Assets ersetzen statt abbrechen, Notes aktualisieren.
+            echo "Release $RELEASE_TAG existiert – Assets werden ersetzt."
+            gh release upload "$RELEASE_TAG" output/bootstraps/* \
+              --repo "$TARGET_REPO" --clobber
+            gh release edit "$RELEASE_TAG" --repo "$TARGET_REPO" --notes "$notes"
+          else
+            gh release create "$RELEASE_TAG" output/bootstraps/* \
+              --repo "$TARGET_REPO" \
+              --title "$RELEASE_TAG" \
+              --notes "$notes"
+          fi
 
       - name: APT-Repo auf gh-pages veröffentlichen
         if: success() && inputs.publish
