@@ -20,9 +20,16 @@
 #   CFSDK|OK|id
 #   CFSDK|ERR|nachricht
 #
-# Quellen: JDKs kommen aus den Termux-Paketen (openjdk-17/-21). Android-spezifische Teile
-# (cmdline-tools, platform-tools, build-tools mit aapt2, NDK, CMake) kommen aus EIGENEN
-# Builds, die ein Manifest beschreibt ($CODEFORGE_SDK_REPO/manifest.txt), Zeilenformat:
+# Quellen (ohne eigenes Manifest-Repo):
+#   - JDK, adb (android-tools) und aapt2 kommen als Termux-Pakete aus dem CodeForge-APT-Repo.
+#   - cmdline-tools (sdkmanager, reines Java) kommen von Google. URL und SHA-256 sind unten als
+#     Standard eingetragen (Version 15859902), überschreibbar in $PREFIX/etc/codeforge/sdk.conf
+#     (CMDLINE_TOOLS_URL, CMDLINE_TOOLS_SHA256) oder per CODEFORGE_CMDLINE_TOOLS_URL / _SHA256.
+#     Die Prüfsumme ist Pflicht.
+#   - platforms;* und build-tools;* installiert Googles sdkmanager. Die x86-Binaries darin
+#     (aapt2, zipalign …) laufen auf Android nicht; Gradle nutzt das Termux-aapt2 (siehe write_env).
+#   - NDK und CMake: nur über ein eigenes Manifest, siehe unten (Googles Builds sind x86).
+# Optional zusätzlich ein Manifest ($CODEFORGE_SDK_REPO/manifest.txt), Zeilenformat:
 #   id|version|kind|source|sha256|dest|extra
 #   kind=archive     source=URL (relativ zum Repo, wenn ohne "://"), dest relativ zu $SDK_ROOT,
 #                    extra z. B. "strip=1"
@@ -58,8 +65,21 @@ ENV_FILE="$PREFIX/etc/profile.d/codeforge-android.sh"
 JVM_DIR="$PREFIX/lib/jvm"
 mkdir -p "$TMP" "$SDK_ROOT" 2>/dev/null
 
+# Standard: Googles Command-line Tools (reines Java, läuft mit dem Termux-JDK). Überschreibbar über sdk.conf
+# (CMDLINE_TOOLS_URL / CMDLINE_TOOLS_SHA256) oder CODEFORGE_CMDLINE_TOOLS_URL / _SHA256.
+# Bei einem Versionswechsel URL UND Prüfsumme gemeinsam ändern (Prüfsumme steht auf developer.android.com/studio).
+CMDLINE_TOOLS_URL="${CODEFORGE_CMDLINE_TOOLS_URL:-${CMDLINE_TOOLS_URL:-https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip}}"
+CMDLINE_TOOLS_SHA256="${CODEFORGE_CMDLINE_TOOLS_SHA256:-${CMDLINE_TOOLS_SHA256:-4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583}}"
+
 DEFAULT_MANIFEST='jdk;17|17|pkg|openjdk-17|||
-jdk;21|21|pkg|openjdk-21|||'
+jdk;21|21|pkg|openjdk-21|||
+platform-tools;latest|latest|pkg|android-tools|||
+aapt2;termux|termux|pkg|aapt2|||'
+if [ -n "$CMDLINE_TOOLS_URL" ]; then
+  DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"cmdline-tools;latest|latest|archive|$CMDLINE_TOOLS_URL|$CMDLINE_TOOLS_SHA256|cmdline-tools/latest|strip=1"
+  DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''platforms;android-35|35|sdkmanager|platforms;android-35|||'
+  DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''build-tools;35.0.0|35.0.0|sdkmanager|build-tools;35.0.0|||'
+fi
 
 # ---------- Ausgabe ----------
 clean() { printf '%s' "$*" | tr '|\n\r' '   '; }
@@ -98,7 +118,11 @@ installed_path() { # id
   kind=$(entry_field "$id" 3); ver=$(entry_field "$id" 2); src=$(entry_field "$id" 4); dest=$(entry_field "$id" 6)
   case "$kind" in
     pkg)
-      case "$id" in jdk\;*) [ -x "$(jdk_home "$ver")/bin/java" ] && printf '%s' "$(jdk_home "$ver")" ;; esac ;;
+      case "$id" in
+        jdk\;*) [ -x "$(jdk_home "$ver")/bin/java" ] && printf '%s' "$(jdk_home "$ver")" ;;
+        platform-tools\;*) [ -x "$PREFIX/bin/adb" ] && printf '%s' "$PREFIX/bin" ;;
+        aapt2\;*) [ -x "$PREFIX/bin/aapt2" ] && printf '%s' "$PREFIX/bin/aapt2" ;;
+      esac ;;
     archive)
       [ -n "$dest" ] && [ -d "$SDK_ROOT/$dest" ] && printf '%s' "$SDK_ROOT/$dest" ;;
     sdkmanager)
@@ -171,6 +195,8 @@ do_install() { # id
         progress 82 "Prüfe Prüfsumme …"
         local got; got=$(sha256sum "$file" | awk '{print $1}')
         [ "$got" = "$sha" ] || { rm -f "$file"; die "Prüfsumme stimmt nicht für $id (erwartet $sha, erhalten $got)"; }
+      elif [ "$id" = 'cmdline-tools;latest' ]; then
+        rm -f "$file"; die "Keine SHA-256 für cmdline-tools gesetzt (CMDLINE_TOOLS_SHA256 in $CONF)"
       else
         say "Warnung: keine Prüfsumme im Manifest für $id"
       fi
@@ -181,7 +207,10 @@ do_install() { # id
       ;;
     sdkmanager)
       local sm="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-      [ -x "$sm" ] || { say "cmdline-tools fehlen — installiere sie zuerst"; do_install 'cmdline-tools;latest' || exit 1; }
+      if [ ! -x "$sm" ]; then
+        entry_exists 'cmdline-tools;latest' || die "cmdline-tools nicht konfiguriert: CMDLINE_TOOLS_URL und CMDLINE_TOOLS_SHA256 in $CONF setzen"
+        say "cmdline-tools fehlen — installiere sie zuerst"; ( do_install 'cmdline-tools;latest' ) || exit 1
+      fi
       progress 10 "sdkmanager installiert $src …"
       export JAVA_HOME="${JAVA_HOME:-$(first_jdk)}"
       yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "$src" >/dev/null 2>&1 \
@@ -236,11 +265,10 @@ write_env() { # jdkVer ndkId cmakeId
     if [ -n "$cmake" ]; then p=$(installed_path "$cmake"); [ -n "$p" ] && path_add="$p/bin:$path_add"; fi
     echo "export PATH=\"$path_add:\$PATH\""
   } > "$ENV_FILE"
-  # Gradle braucht das zum Gerät passende aapt2 aus den eigenen build-tools
-  local bt aapt2
-  bt=$(ls -d "$SDK_ROOT"/build-tools/* 2>/dev/null | sort -V | tail -n1)
-  aapt2="$bt/aapt2"
-  if [ -n "$bt" ] && [ -x "$aapt2" ]; then
+  # Gradle braucht ein aapt2, das auf dem Gerät läuft: das Termux-Paket 'aapt2'. Das x86-aapt2
+  # aus den Google-build-tools ist hier nicht lauffähig und wird nicht verwendet.
+  local aapt2="$PREFIX/bin/aapt2"
+  if [ -x "$aapt2" ]; then
     mkdir -p "$HOME/.gradle"
     local gp="$HOME/.gradle/gradle.properties"
     grep -v '^android.aapt2FromMavenOverride=' "$gp" 2>/dev/null > "$gp.new" || true
@@ -257,7 +285,7 @@ do_setup() {
       *) die "Unbekannte Option: $1" ;;
     esac
   done
-  local steps=("jdk;$jdk" 'cmdline-tools;latest' 'platform-tools;latest')
+  local steps=("jdk;$jdk" 'platform-tools;latest' 'aapt2;termux' 'cmdline-tools;latest' 'platforms;android-35' 'build-tools;35.0.0')
   [ "$want_ndk" = 1 ] && steps+=("ndk;$ndk")
   [ "$want_cmake" = 1 ] && steps+=("cmake;$cmake")
   local total=${#steps[@]} i=0 id
@@ -276,7 +304,7 @@ do_setup() {
 
 do_doctor() {
   local rc=0 t
-  for t in bash curl tar unzip java; do command -v "$t" >/dev/null 2>&1 && say "ok   $t" || { say "FEHLT $t"; rc=1; }; done
+  for t in bash curl tar unzip java adb aapt2; do command -v "$t" >/dev/null 2>&1 && say "ok   $t" || { say "FEHLT $t"; rc=1; }; done
   [ -d "$SDK_ROOT" ] && say "ok   SDK_ROOT=$SDK_ROOT" || { say "FEHLT SDK_ROOT"; rc=1; }
   [ -f "$ENV_FILE" ] && say "ok   $ENV_FILE" || { say "FEHLT $ENV_FILE (codeforge-env setup)"; rc=1; }
   case "$MANIFEST_URL" in *@*) say "WARN  CODEFORGE_SDK_REPO ist nicht konfiguriert ($CONF)"; rc=1 ;; esac
