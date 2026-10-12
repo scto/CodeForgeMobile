@@ -8,9 +8,9 @@
 #
 # Aufruf:  codeforge-env [--machine] <befehl> [argumente]
 #   list                         alle bekannten Komponenten mit Installationsstatus
-#   install <id>                 z. B. jdk;21  ndk;30b  cmake;4.3.0  platforms;android-35
+#   install <id>                 z. B. jdk;21  ndk;r29d  cmake;termux  sdk-natives;37.0.0  platforms;android-36
 #   uninstall <id>
-#   setup [--jdk 17|21] [--ndk 27d|30b] [--cmake 4.3.0] [--no-ndk] [--no-cmake]
+#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29d|r30b] [--no-ndk] [--no-cmake]
 #   env                          schreibt/zeigt die Umgebungsdatei (ANDROID_HOME, JAVA_HOME …)
 #   doctor                       prüft die Umgebung
 #
@@ -20,15 +20,15 @@
 #   CFSDK|OK|id
 #   CFSDK|ERR|nachricht
 #
-# Quellen (ohne eigenes Manifest-Repo):
-#   - JDK, adb (android-tools) und aapt2 kommen als Termux-Pakete aus dem CodeForge-APT-Repo.
-#   - cmdline-tools (sdkmanager, reines Java) kommen von Google. URL und SHA-256 sind unten als
-#     Standard eingetragen (Version 15859902), überschreibbar in $PREFIX/etc/codeforge/sdk.conf
-#     (CMDLINE_TOOLS_URL, CMDLINE_TOOLS_SHA256) oder per CODEFORGE_CMDLINE_TOOLS_URL / _SHA256.
-#     Die Prüfsumme ist Pflicht.
-#   - platforms;* und build-tools;* installiert Googles sdkmanager. Die x86-Binaries darin
-#     (aapt2, zipalign …) laufen auf Android nicht; Gradle nutzt das Termux-aapt2 (siehe write_env).
-#   - NDK und CMake: nur über ein eigenes Manifest, siehe unten (Googles Builds sind x86).
+# Quellen (ohne eigenes Manifest-Repo; gleiches Vorgehen wie scto/termux-android-setup):
+#   - JDK, CMake und Ninja kommen als Termux-Pakete aus dem CodeForge-APT-Repo.
+#   - cmdline-tools (sdkmanager, reines Java) kommen von Google (URL + SHA-256 unten als Standard).
+#   - platforms;android-N und die Java-Teile der build-tools holt Googles sdkmanager.
+#   - Native aarch64-Binaries (aapt2, aidl, zipalign, adb …) und das NDK stammen aus den
+#     GitHub-Releases HomuHomu833/android-sdk-custom bzw. android-ndk-custom (Asset *-aarch64-linux-android.*).
+#     Googles eigene Binaries sind x86 und laufen auf Android nicht. Das sind Drittanbieter-Builds.
+#   - CMake: das Termux-Paket, per Symlink als $SDK_ROOT/cmake/<version> für Gradle registriert.
+#   - GitHub-API ohne Token ist auf 60 Anfragen/Stunde begrenzt: bei Fehlern GITHUB_TOKEN setzen.
 # Optional zusätzlich ein Manifest ($CODEFORGE_SDK_REPO/manifest.txt), Zeilenformat:
 #   id|version|kind|source|sha256|dest|extra
 #   kind=archive     source=URL (relativ zum Repo, wenn ohne "://"), dest relativ zu $SDK_ROOT,
@@ -71,14 +71,20 @@ mkdir -p "$TMP" "$SDK_ROOT" 2>/dev/null
 CMDLINE_TOOLS_URL="${CODEFORGE_CMDLINE_TOOLS_URL:-${CMDLINE_TOOLS_URL:-https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip}}"
 CMDLINE_TOOLS_SHA256="${CODEFORGE_CMDLINE_TOOLS_SHA256:-${CMDLINE_TOOLS_SHA256:-4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583}}"
 
+GH_VARIANT="${ASSET_VARIANT:-aarch64-linux-android}"
+SDK_CUSTOM_REPO="${SDK_REPO:-HomuHomu833/android-sdk-custom}"
+NDK_CUSTOM_REPO="${NDK_REPO:-HomuHomu833/android-ndk-custom}"
+
 DEFAULT_MANIFEST='jdk;17|17|pkg|openjdk-17|||
 jdk;21|21|pkg|openjdk-21|||
-platform-tools;latest|latest|pkg|android-tools|||
-aapt2;termux|termux|pkg|aapt2|||'
+cmake;termux|termux|cmake|cmake|||'
+DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"sdk-natives;37.0.0|37.0.0|ghsdk|$SDK_CUSTOM_REPO|||"
+DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"ndk;r29d|r29d|ghndk|$NDK_CUSTOM_REPO|||"
+DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"ndk;r30b|r30b|ghndk|$NDK_CUSTOM_REPO|||"
 if [ -n "$CMDLINE_TOOLS_URL" ]; then
   DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"cmdline-tools;latest|latest|archive|$CMDLINE_TOOLS_URL|$CMDLINE_TOOLS_SHA256|cmdline-tools/latest|strip=1"
   DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''platforms;android-35|35|sdkmanager|platforms;android-35|||'
-  DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''build-tools;35.0.0|35.0.0|sdkmanager|build-tools;35.0.0|||'
+  DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''platforms;android-36|36|sdkmanager|platforms;android-36|||'
 fi
 
 # ---------- Ausgabe ----------
@@ -120,9 +126,15 @@ installed_path() { # id
     pkg)
       case "$id" in
         jdk\;*) [ -x "$(jdk_home "$ver")/bin/java" ] && printf '%s' "$(jdk_home "$ver")" ;;
-        platform-tools\;*) [ -x "$PREFIX/bin/adb" ] && printf '%s' "$PREFIX/bin" ;;
-        aapt2\;*) [ -x "$PREFIX/bin/aapt2" ] && printf '%s' "$PREFIX/bin/aapt2" ;;
       esac ;;
+    cmake)
+      local cm; cm=$(ls -d "$SDK_ROOT"/cmake/*/ 2>/dev/null | head -n1); cm=${cm%/}
+      [ -n "$cm" ] && [ -e "$cm/bin/cmake" ] && printf '%s' "$cm" ;;
+    ghsdk)
+      [ -x "$SDK_ROOT/build-tools/$ver/aapt2" ] && printf '%s' "$SDK_ROOT/build-tools/$ver" ;;
+    ghndk)
+      local mk="$SDK_ROOT/ndk/.cf-$ver" rev
+      if [ -f "$mk" ]; then rev=$(cat "$mk"); [ -d "$SDK_ROOT/ndk/$rev" ] && printf '%s' "$SDK_ROOT/ndk/$rev"; fi ;;
     archive)
       [ -n "$dest" ] && [ -d "$SDK_ROOT/$dest" ] && printf '%s' "$SDK_ROOT/$dest" ;;
     sdkmanager)
@@ -136,6 +148,8 @@ need_tools() {
   local missing=() t
   for t in curl tar unzip sha256sum; do command -v "$t" >/dev/null 2>&1 || missing+=("$t"); done
   command -v xz >/dev/null 2>&1 || missing+=(xz-utils)
+  command -v jq >/dev/null 2>&1 || missing+=(jq)
+  command -v 7z >/dev/null 2>&1 || missing+=(p7zip)
   if [ ${#missing[@]} -gt 0 ]; then
     progress 1 "Installiere Werkzeuge: ${missing[*]}"
     local pkgs=() m
@@ -166,9 +180,66 @@ extract() { # archiv ziel strip
              local d; d=$(find "$dest.tmp" -mindepth 1 -maxdepth 1 | head -n1)
              if [ -n "$d" ] && [ -d "$d" ]; then mv "$d" "$dest.tmp.inner" && rm -rf "$dest.tmp" && mv "$dest.tmp.inner" "$dest.tmp"; fi
            fi ;;
+    *.7z)  7z x -y -o"$dest.tmp" "$file" >/dev/null || return 1 ;;
     *) tar -xf "$file" -C "$dest.tmp" --strip-components="$strip" || return 1 ;;
   esac
   rm -rf "$dest"; mkdir -p "$(dirname "$dest")"; mv "$dest.tmp" "$dest"
+}
+
+# ---------- GitHub-Releases (HomuHomu833/android-*-custom) ----------
+gh_api() {
+  curl -fsSL -m 60 -H 'Accept: application/vnd.github+json' \
+       ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} "$1"
+}
+
+# gh_find_asset <repo> <version> → GH_ASSET, GH_URL, GH_SHA (leer, wenn GitHub keine Prüfsumme liefert)
+gh_find_asset() {
+  local repo=$1 want=$2 json row digest
+  json=$(gh_api "https://api.github.com/repos/$repo/releases?per_page=100") || { err "GitHub-API nicht erreichbar (Rate-Limit? GITHUB_TOKEN setzen)"; return 1; }
+  row=$(printf '%s' "$json" | jq -r --arg v "$GH_VARIANT" --arg w "$want" '
+    [ .[] | . as $r
+      | ($r.assets[] | select(.name | test("-" + $v + "\\.(tar\\.xz|tar\\.gz|zip|7z)$"))) as $a
+      | { n: (if ($r.name // "") != "" then $r.name else $r.tag_name end), t: $r.tag_name,
+          a: $a.name, u: $a.browser_download_url, d: ($a.digest // "") } ]
+    | map(select(.n == $w or .t == $w or (.a | contains("-" + $w + "-")))) | .[0] // empty
+    | [.a, .u, .d] | @tsv') || { err "Antwort der GitHub-API nicht lesbar"; return 1; }
+  [ -n "$row" ] || { err "Kein Release '$want' mit Asset *-$GH_VARIANT in $repo gefunden"; return 1; }
+  IFS=$'\t' read -r GH_ASSET GH_URL digest <<<"$row"
+  GH_SHA=${digest#sha256:}; [ "$GH_SHA" = "$digest" ] && GH_SHA=""
+  return 0
+}
+
+# gh_fetch_extract <zielordner>: lädt GH_URL, prüft ggf. die Prüfsumme, entpackt nach <zielordner>; setzt GH_ROOT
+gh_fetch_extract() {
+  local out=$1 file="$TMP/cfsdk-$GH_ASSET" got d
+  progress 8 "Lade $GH_ASSET …"
+  download "$GH_URL" "$file" 8 62 || { rm -f "$file"; return 1; }
+  if [ -n "$GH_SHA" ]; then
+    progress 72 "Prüfe Prüfsumme …"
+    got=$(sha256sum "$file" | awk '{print $1}')
+    [ "$got" = "$GH_SHA" ] || { rm -f "$file"; err "Prüfsumme stimmt nicht für $GH_ASSET (erwartet $GH_SHA, erhalten $got)"; return 1; }
+  else
+    say "Warnung: GitHub liefert keine Prüfsumme für $GH_ASSET – Download ist nicht verifiziert"
+  fi
+  progress 75 "Entpacke (kann dauern) …"
+  extract "$file" "$out" 0 || { rm -f "$file"; err "Entpacken fehlgeschlagen: $GH_ASSET"; return 1; }
+  rm -f "$file"
+  GH_ROOT=$out
+  d=$(find "$out" -mindepth 1 -maxdepth 1 | head -n 2)
+  [ "$(printf '%s\n' "$d" | grep -c .)" = 1 ] && [ -d "$d" ] && GH_ROOT=$d
+  return 0
+}
+
+# Termux-CMake für AGP registrieren: $SDK_ROOT/cmake/<version>/bin/{cmake,ninja}
+link_cmake() {
+  command -v cmake >/dev/null 2>&1 || return 1
+  local v d
+  v=$(cmake --version | head -n1 | awk '{print $3}'); [ -n "$v" ] || return 1
+  d="$SDK_ROOT/cmake/$v/bin"
+  mkdir -p "$d"
+  ln -sf "$(command -v cmake)" "$d/cmake"
+  command -v ninja >/dev/null 2>&1 && ln -sf "$(command -v ninja)" "$d/ninja"
+  printf 'Pkg.Revision = %s\nPkg.Path = cmake;%s\n' "$v" "$v" > "$SDK_ROOT/cmake/$v/source.properties"
 }
 
 # ---------- install / uninstall ----------
@@ -216,6 +287,63 @@ do_install() { # id
       yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "$src" >/dev/null 2>&1 \
         || die "sdkmanager konnte $src nicht installieren"
       ;;
+    cmake)
+      progress 5 "Installiere cmake und ninja …"
+      pkg install -y cmake ninja >/dev/null 2>&1 || die "pkg install cmake ninja fehlgeschlagen"
+      link_cmake || die "CMake konnte nicht für Gradle registriert werden"
+      ;;
+    ghndk)
+      need_tools
+      progress 3 "Suche NDK $ver bei GitHub …"
+      gh_find_asset "$src" "$ver" || exit 1
+      say "NDK-Download ist groß (mehrere GB) und braucht beim Entpacken zusätzlich Platz."
+      local nx="$TMP/cfsdk-ndk-extract" rev nd
+      gh_fetch_extract "$nx" || { rm -rf "$nx"; exit 1; }
+      [ -f "$GH_ROOT/source.properties" ] || { rm -rf "$nx"; die "source.properties im NDK nicht gefunden"; }
+      rev=$(grep -E '^Pkg.Revision' "$GH_ROOT/source.properties" | cut -d= -f2 | tr -d ' \r')
+      [ -n "$rev" ] || { rm -rf "$nx"; die "Pkg.Revision im NDK nicht lesbar"; }
+      progress 90 "Installiere NDK $rev …"
+      mkdir -p "$SDK_ROOT/ndk"; rm -rf "$SDK_ROOT/ndk/$rev"
+      mv "$GH_ROOT" "$SDK_ROOT/ndk/$rev" || { rm -rf "$nx"; die "NDK konnte nicht verschoben werden"; }
+      rm -rf "$nx"
+      nd="$SDK_ROOT/ndk/$rev"
+      printf '%s' "$rev" > "$SDK_ROOT/ndk/.cf-$ver"
+      ln -sfn "$nd" "$SDK_ROOT/ndk-bundle"
+      find "$nd/toolchains" -path '*/bin/*' -type f -exec chmod +x {} + 2>/dev/null
+      local clang; clang=$(find "$nd/toolchains/llvm/prebuilt" -path '*/bin/clang' 2>/dev/null | head -n1)
+      if [ -n "$clang" ] && "$clang" --version >/dev/null 2>&1; then say "NDK-clang: $("$clang" --version | head -n1)"
+      else say "Warnung: NDK-clang startet nicht – Asset-Variante prüfen (ASSET_VARIANT=$GH_VARIANT)"; fi
+      ;;
+    ghsdk)
+      need_tools
+      local bt="$SDK_ROOT/build-tools/$ver" sm="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" sx="$TMP/cfsdk-sdk-extract" aapt2 adb
+      # a) Java-Teile und Metadaten der offiziellen build-tools (sdkmanager), falls verfügbar
+      if [ ! -x "$sm" ] && entry_exists 'cmdline-tools;latest'; then ( do_install 'cmdline-tools;latest' ) || say "Warnung: cmdline-tools konnten nicht installiert werden"; fi
+      if [ -x "$sm" ]; then
+        progress 4 "sdkmanager installiert build-tools;$ver …"
+        export JAVA_HOME="${JAVA_HOME:-$(first_jdk)}"
+        yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "build-tools;$ver" >/dev/null 2>&1 \
+          || say "Warnung: build-tools;$ver bei Google nicht verfügbar – nur aarch64-Binaries werden genutzt"
+      else
+        say "Warnung: kein sdkmanager – build-tools enthalten nur die aarch64-Binaries"
+      fi
+      # b) native aarch64-Binaries einspielen
+      progress 6 "Suche SDK-Binaries $ver bei GitHub …"
+      gh_find_asset "$src" "$ver" || exit 1
+      gh_fetch_extract "$sx" || { rm -rf "$sx"; exit 1; }
+      aapt2=$(find "$GH_ROOT" -type f -name aapt2 | head -n1)
+      adb=$(find "$GH_ROOT" -type f -name adb | head -n1)
+      [ -n "$aapt2" ] || { rm -rf "$sx"; die "aapt2 im SDK-Archiv nicht gefunden"; }
+      mkdir -p "$bt"; cp -a "$(dirname "$aapt2")"/. "$bt"/
+      find "$bt" -maxdepth 2 -type f ! -name '*.jar' ! -name '*.xml' ! -name '*.properties' -exec chmod +x {} + 2>/dev/null
+      if [ -n "$adb" ]; then
+        mkdir -p "$SDK_ROOT/platform-tools"; cp -a "$(dirname "$adb")"/. "$SDK_ROOT/platform-tools"/
+        find "$SDK_ROOT/platform-tools" -maxdepth 1 -type f ! -name '*.properties' -exec chmod +x {} + 2>/dev/null
+      fi
+      rm -rf "$sx"
+      [ -f "$bt/source.properties" ] || printf 'Pkg.Desc = Android SDK Build-Tools %s (aarch64)\nPkg.Revision = %s\n' "$ver" "$ver" > "$bt/source.properties"
+      "$bt/aapt2" version >/dev/null 2>&1 || say "Warnung: aapt2 startet nicht – Asset-Variante prüfen (ASSET_VARIANT=$GH_VARIANT)"
+      ;;
     *) die "Unbekannter Typ '$kind' im Manifest für $id" ;;
   esac
   progress 100 "Fertig"
@@ -232,6 +360,10 @@ do_uninstall() { # id
     pkg) pkg uninstall -y "$src" >/dev/null 2>&1 || die "Deinstallation von $src fehlgeschlagen" ;;
     archive) rm -rf "$p" ;;
     sdkmanager) rm -rf "$p" ;;
+    cmake) rm -rf "$p" ;;   # Symlinks; die Termux-Pakete cmake/ninja bleiben installiert
+    ghsdk) rm -rf "$p" ;;   # nur build-tools/<version>; platform-tools bleibt
+    ghndk) rm -rf "$p" "$SDK_ROOT/ndk/.cf-$(entry_field "$id" 2)"
+           [ -e "$SDK_ROOT/ndk-bundle" ] || rm -f "$SDK_ROOT/ndk-bundle" ;;
   esac
   ok "$id"
 }
@@ -265,9 +397,12 @@ write_env() { # jdkVer ndkId cmakeId
     if [ -n "$cmake" ]; then p=$(installed_path "$cmake"); [ -n "$p" ] && path_add="$p/bin:$path_add"; fi
     echo "export PATH=\"$path_add:\$PATH\""
   } > "$ENV_FILE"
-  # Gradle braucht ein aapt2, das auf dem Gerät läuft: das Termux-Paket 'aapt2'. Das x86-aapt2
-  # aus den Google-build-tools ist hier nicht lauffähig und wird nicht verwendet.
-  local aapt2="$PREFIX/bin/aapt2"
+  # Gradle braucht ein aapt2, das auf dem Gerät läuft: das aarch64-aapt2 aus den eigenen build-tools
+  # (sdk-natives), sonst ein Termux-Paket 'aapt2'. Das x86-aapt2 von Google/Maven läuft hier nicht.
+  local bt aapt2
+  bt=$(ls -d "$SDK_ROOT"/build-tools/* 2>/dev/null | sort -V | tail -n1)
+  aapt2="$bt/aapt2"
+  [ -n "$bt" ] && [ -x "$aapt2" ] || aapt2="$PREFIX/bin/aapt2"
   if [ -x "$aapt2" ]; then
     mkdir -p "$HOME/.gradle"
     local gp="$HOME/.gradle/gradle.properties"
@@ -277,15 +412,16 @@ write_env() { # jdkVer ndkId cmakeId
 }
 
 do_setup() {
-  local jdk=17 ndk=27d cmake=4.3.0 want_ndk=1 want_cmake=1
+  local jdk=17 ndk=r29d cmake=termux sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1
   while [ $# -gt 0 ]; do
     case "$1" in
       --jdk) jdk=$2; shift 2 ;; --ndk) ndk=$2; shift 2 ;; --cmake) cmake=$2; shift 2 ;;
+      --sdk) sdk=$2; shift 2 ;; --platform) platform=$2; shift 2 ;;
       --no-ndk) want_ndk=0; shift ;; --no-cmake) want_cmake=0; shift ;;
       *) die "Unbekannte Option: $1" ;;
     esac
   done
-  local steps=("jdk;$jdk" 'platform-tools;latest' 'aapt2;termux' 'cmdline-tools;latest' 'platforms;android-35' 'build-tools;35.0.0')
+  local steps=("jdk;$jdk" 'cmdline-tools;latest' "sdk-natives;$sdk" "platforms;android-$platform")
   [ "$want_ndk" = 1 ] && steps+=("ndk;$ndk")
   [ "$want_cmake" = 1 ] && steps+=("cmake;$cmake")
   local total=${#steps[@]} i=0 id
@@ -304,7 +440,7 @@ do_setup() {
 
 do_doctor() {
   local rc=0 t
-  for t in bash curl tar unzip java adb aapt2; do command -v "$t" >/dev/null 2>&1 && say "ok   $t" || { say "FEHLT $t"; rc=1; }; done
+  for t in bash curl tar unzip java jq; do command -v "$t" >/dev/null 2>&1 && say "ok   $t" || { say "FEHLT $t"; rc=1; }; done
   [ -d "$SDK_ROOT" ] && say "ok   SDK_ROOT=$SDK_ROOT" || { say "FEHLT SDK_ROOT"; rc=1; }
   [ -f "$ENV_FILE" ] && say "ok   $ENV_FILE" || { say "FEHLT $ENV_FILE (codeforge-env setup)"; rc=1; }
   case "$MANIFEST_URL" in *@*) say "WARN  CODEFORGE_SDK_REPO ist nicht konfiguriert ($CONF)"; rc=1 ;; esac
