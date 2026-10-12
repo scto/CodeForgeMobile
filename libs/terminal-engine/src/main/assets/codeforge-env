@@ -8,7 +8,7 @@
 #
 # Aufruf:  codeforge-env [--machine] <befehl> [argumente]
 #   list                         alle bekannten Komponenten mit Installationsstatus
-#   install <id>                 z. B. jdk;21  ndk;r29d  cmake;termux  sdk-natives;37.0.0  platforms;android-36
+#   install <id>                 z. B. jdk;21  ndk;r29d  cmake;termux  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36
 #   uninstall <id>
 #   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29d|r30b] [--no-ndk] [--no-cmake]
 #   env                          schreibt/zeigt die Umgebungsdatei (ANDROID_HOME, JAVA_HOME …)
@@ -78,7 +78,8 @@ NDK_CUSTOM_REPO="${NDK_REPO:-HomuHomu833/android-ndk-custom}"
 DEFAULT_MANIFEST='jdk;17|17|pkg|openjdk-17|||
 jdk;21|21|pkg|openjdk-21|||
 cmake;termux|termux|cmake|cmake|||'
-DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"sdk-natives;37.0.0|37.0.0|ghsdk|$SDK_CUSTOM_REPO|||"
+DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"build-tools;37.0.0|37.0.0|ghsdk|$SDK_CUSTOM_REPO|||"
+DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"platform-tools;37.0.0|37.0.0|ghpt|$SDK_CUSTOM_REPO|||"
 DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"ndk;r29d|r29d|ghndk|$NDK_CUSTOM_REPO|||"
 DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"ndk;r30b|r30b|ghndk|$NDK_CUSTOM_REPO|||"
 if [ -n "$CMDLINE_TOOLS_URL" ]; then
@@ -132,6 +133,8 @@ installed_path() { # id
       [ -n "$cm" ] && [ -e "$cm/bin/cmake" ] && printf '%s' "$cm" ;;
     ghsdk)
       [ -x "$SDK_ROOT/build-tools/$ver/aapt2" ] && printf '%s' "$SDK_ROOT/build-tools/$ver" ;;
+    ghpt)
+      [ -x "$SDK_ROOT/platform-tools/adb" ] && printf '%s' "$SDK_ROOT/platform-tools" ;;
     ghndk)
       local mk="$SDK_ROOT/ndk/.cf-$ver" rev
       if [ -f "$mk" ]; then rev=$(cat "$mk"); [ -d "$SDK_ROOT/ndk/$rev" ] && printf '%s' "$SDK_ROOT/ndk/$rev"; fi ;;
@@ -314,6 +317,18 @@ do_install() { # id
       if [ -n "$clang" ] && "$clang" --version >/dev/null 2>&1; then say "NDK-clang: $("$clang" --version | head -n1)"
       else say "Warnung: NDK-clang startet nicht – Asset-Variante prüfen (ASSET_VARIANT=$GH_VARIANT)"; fi
       ;;
+    ghpt)
+      need_tools
+      local px="$TMP/cfsdk-pt-extract" padb
+      progress 6 "Suche platform-tools $ver bei GitHub …"
+      gh_find_asset "$src" "$ver" || exit 1
+      gh_fetch_extract "$px" || { rm -rf "$px"; exit 1; }
+      padb=$(find "$GH_ROOT" -type f -name adb | head -n1)
+      [ -n "$padb" ] || { rm -rf "$px"; die "adb im SDK-Archiv nicht gefunden"; }
+      mkdir -p "$SDK_ROOT/platform-tools"; cp -a "$(dirname "$padb")"/. "$SDK_ROOT/platform-tools"/
+      find "$SDK_ROOT/platform-tools" -maxdepth 1 -type f ! -name '*.properties' -exec chmod +x {} + 2>/dev/null
+      rm -rf "$px"
+      ;;
     ghsdk)
       need_tools
       local bt="$SDK_ROOT/build-tools/$ver" sm="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" sx="$TMP/cfsdk-sdk-extract" aapt2 adb
@@ -361,7 +376,8 @@ do_uninstall() { # id
     archive) rm -rf "$p" ;;
     sdkmanager) rm -rf "$p" ;;
     cmake) rm -rf "$p" ;;   # Symlinks; die Termux-Pakete cmake/ninja bleiben installiert
-    ghsdk) rm -rf "$p" ;;   # nur build-tools/<version>; platform-tools bleibt
+    ghsdk) rm -rf "$p" ;;   # nur build-tools/<version>
+    ghpt) rm -rf "$p" ;;
     ghndk) rm -rf "$p" "$SDK_ROOT/ndk/.cf-$(entry_field "$id" 2)"
            [ -e "$SDK_ROOT/ndk-bundle" ] || rm -f "$SDK_ROOT/ndk-bundle" ;;
   esac
@@ -398,7 +414,7 @@ write_env() { # jdkVer ndkId cmakeId
     echo "export PATH=\"$path_add:\$PATH\""
   } > "$ENV_FILE"
   # Gradle braucht ein aapt2, das auf dem Gerät läuft: das aarch64-aapt2 aus den eigenen build-tools
-  # (sdk-natives), sonst ein Termux-Paket 'aapt2'. Das x86-aapt2 von Google/Maven läuft hier nicht.
+  # (build-tools), sonst ein Termux-Paket 'aapt2'. Das x86-aapt2 von Google/Maven läuft hier nicht.
   local bt aapt2
   bt=$(ls -d "$SDK_ROOT"/build-tools/* 2>/dev/null | sort -V | tail -n1)
   aapt2="$bt/aapt2"
@@ -421,7 +437,11 @@ do_setup() {
       *) die "Unbekannte Option: $1" ;;
     esac
   done
-  local steps=("jdk;$jdk" 'cmdline-tools;latest' "sdk-natives;$sdk" "platforms;android-$platform")
+  # Kompatibilität zur App: Das Onboarding übergibt z. B. '--ndk 27d' und '--cmake 4.3.0'.
+  # NDK-Namen tragen ein 'r' (r29d); CMake kommt immer aus dem Termux-Paket, der Wert wird ignoriert.
+  case "$ndk" in [0-9]*) ndk="r$ndk" ;; esac
+  cmake=termux
+  local steps=("jdk;$jdk" 'cmdline-tools;latest' "build-tools;$sdk" "platform-tools;$sdk" "platforms;android-$platform")
   [ "$want_ndk" = 1 ] && steps+=("ndk;$ndk")
   [ "$want_cmake" = 1 ] && steps+=("cmake;$cmake")
   local total=${#steps[@]} i=0 id

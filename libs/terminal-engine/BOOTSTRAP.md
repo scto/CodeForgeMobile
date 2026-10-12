@@ -7,24 +7,30 @@ entfernt. Es gibt genau eine Umgebung: den Termux-Bootstrap unter
 ## Ablauf
 
 1. **Onboarding → Setup:** `TermuxInstaller.setupBootstrapIfNeeded(activity)` (`:libs:termux-app`)
-   entpackt den eingebetteten Bootstrap. Er enthält die Pflichtpakete (u. a. `openjdk-17`) und
-   das Paket **`codeforge-env`** (Skript, Quelle `assets/codeforge-env`).
+   entpackt den eingebetteten Bootstrap (Prefix `com.codeforge.app`; der Release `bootstrap-2026.10.08` ist defekt und muss neu gebaut werden). Er enthält die
+   Termux-Basispakete (bash, coreutils, curl, tar, unzip, xz-utils, gawk, grep, sed, …), **nicht** `openjdk-17` und nicht
+   `codeforge-env`. Das Skript kommt aus `assets/codeforge-env` (ScriptInstaller). Das neue Build-Skript patcht `apt` auf
+   das eigene APT-Repo (`CODEFORGE_APT_URL`); `openjdk-17` o. Ä. kommen über `EXTRA_PACKAGES` ins Repo/Bootstrap.
 2. **Skript sicherstellen:** `ScriptInstaller` kopiert `assets/codeforge-env` nach
    `$PREFIX/bin`, falls es nicht als Paket im Bootstrap liegt (Platzhalter `@TERMUX_PREFIX@` etc.
    werden ersetzt).
 3. **Terminal öffnet sich** (Route `terminal?initialCommand=…`) und führt
-   `codeforge-env setup --jdk 17|21 --ndk 27d|30b --cmake 4.3.0` sichtbar aus.
+   `codeforge-env setup --jdk 17|21 --ndk r29d|r30b --cmake …` sichtbar aus (der CMake-Wert wird ignoriert: es ist immer das Termux-Paket).
 4. **SDK-Manager** (`:feature:sdkmanager`) ist nur noch die grafische Oberfläche über
    `codeforge-env --machine list|install|uninstall` (`TermuxScriptSdkRepository`).
 
 ## Skript `codeforge-env`
 
 * JDKs: Termux-Pakete `openjdk-17` / `openjdk-21` (`$PREFIX/lib/jvm/java-N-openjdk`).
-* Android-spezifische Teile (cmdline-tools, platform-tools, build-tools mit aapt2, NDK 27d/30b,
-  CMake 4.3.0): **eigene Builds**, beschrieben durch ein Manifest
-  `$CODEFORGE_SDK_REPO/manifest.txt` (`id|version|kind|source|sha256|dest|extra`).
-* Repo-URL: `CODEFORGE_SDK_REPO` in `$PREFIX/etc/codeforge/sdk.conf` (oder beim Paket-Build den
-  Platzhalter `@CODEFORGE_SDK_REPO@` ersetzen). Ohne Konfiguration zeigt `list` nur die JDKs.
+* Quellen der Android-Teile (Vorbild: `scto/termux-android-setup`):
+  * JDK, CMake, Ninja: Termux-Pakete aus dem CodeForge-APT-Repo (`openjdk-17`, `cmake`, `ninja`; dazu `jq`, `p7zip`).
+  * cmdline-tools (`sdkmanager`) und `platforms;android-N`: Google. URL + SHA-256 stehen als Standard im Skript
+    (überschreibbar über `sdk.conf` oder `CODEFORGE_CMDLINE_TOOLS_URL/_SHA256`).
+  * `build-tools;<v>`, `platform-tools;<v>` (aarch64: `aapt2`, `aidl`, `zipalign`, `adb`) und `ndk;<r…>`: GitHub-Releases
+    `HomuHomu833/android-sdk-custom` bzw. `android-ndk-custom`, Asset `*-aarch64-linux-android.*` (Drittanbieter-Builds).
+  * Die Versionen in der Liste sind im Skript fest eingetragen (`DEFAULT_MANIFEST`) und optional durch ein eigenes
+    Manifest `$CODEFORGE_SDK_REPO/manifest.txt` (`id|version|kind|source|sha256|dest|extra`) erweiterbar.
+    Ohne Manifest-Repo bietet `list` nur diese festen Einträge.
 * SDK-Root: `CODEFORGE_SDK_ROOT` → `ANDROID_SDK_ROOT` aus `$PREFIX/etc/codeforge-environment.properties` (optionale Override-Datei) → `$PREFIX/opt/android-sdk` (= `TermuxEnvironment.sdkRoot`).
 * Schreibt `$PREFIX/etc/profile.d/codeforge-android.sh` (ANDROID_HOME, JAVA_HOME,
   ANDROID_NDK_HOME, PATH) und setzt `android.aapt2FromMavenOverride` in `~/.gradle/gradle.properties`.

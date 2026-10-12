@@ -143,7 +143,7 @@ class SdkManagerViewModel @Inject constructor(
     }
 
     /**
-     * Die Paket-ID kommt vom Skript (`ndk;27d` mit Anzeigeversion `27.3.…`) und ist nicht aus der
+     * Die Paket-ID kommt vom Skript (`ndk;r29d` mit Anzeigeversion `r29d`) und ist nicht aus der
      * Anzeigeversion ableitbar — daher aus der geladenen Liste nachschlagen.
      */
     private fun packageIdFor(toolType: ToolType, version: String): String =
