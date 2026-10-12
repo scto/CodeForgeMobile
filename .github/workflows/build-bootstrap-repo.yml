@@ -23,7 +23,7 @@ on:
         default: ""
         type: string
       repo_packages:
-        description: "Pakete NUR im APT-Repo (per pkg install nachladbar), durch Komma getrennt, z. B. openjdk-17,git,protobuf,aapt2,wget"
+        description: "Pakete NUR im APT-Repo (per pkg install nachladbar), durch Komma getrennt, z. B. openjdk-17,jq,p7zip,ninja,git,zip"
         required: false
         default: ""
         type: string
