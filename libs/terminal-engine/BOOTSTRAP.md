@@ -15,7 +15,7 @@ entfernt. Es gibt genau eine Umgebung: den Termux-Bootstrap unter
    `$PREFIX/bin`, falls es nicht als Paket im Bootstrap liegt (Platzhalter `@TERMUX_PREFIX@` etc.
    werden ersetzt).
 3. **Terminal öffnet sich** (Route `terminal?initialCommand=…`) und führt
-   `codeforge-env setup --jdk 17|21 --ndk r29d|r30b --cmake …` sichtbar aus (der CMake-Wert wird ignoriert: es ist immer das Termux-Paket).
+   `codeforge-env setup --jdk 17|21 --ndk r29 --cmake 3.22.1` sichtbar aus (gibt es eine Version nicht, nimmt das Skript das NDK gleicher Hauptversion bzw. das Termux-CMake).
 4. **SDK-Manager** (`:feature:sdkmanager`) ist nur noch die grafische Oberfläche über
    `codeforge-env --machine list|install|uninstall` (`TermuxScriptSdkRepository`).
 
@@ -23,14 +23,18 @@ entfernt. Es gibt genau eine Umgebung: den Termux-Bootstrap unter
 
 * JDKs: Termux-Pakete `openjdk-17` / `openjdk-21` (`$PREFIX/lib/jvm/java-N-openjdk`).
 * Quellen der Android-Teile (Vorbild: `scto/termux-android-setup`):
-  * JDK, CMake, Ninja: Termux-Pakete aus dem CodeForge-APT-Repo (`openjdk-17`, `cmake`, `ninja`; dazu `jq`, `p7zip`).
+  * JDK und Ninja: Termux-Pakete aus dem CodeForge-APT-Repo (`openjdk-17`, `ninja`; dazu `jq`, `p7zip`).
   * cmdline-tools (`sdkmanager`) und `platforms;android-N`: Google. URL + SHA-256 stehen als Standard im Skript
     (überschreibbar über `sdk.conf` oder `CODEFORGE_CMDLINE_TOOLS_URL/_SHA256`).
-  * `build-tools;<v>`, `platform-tools;<v>` (aarch64: `aapt2`, `aidl`, `zipalign`, `adb`) und `ndk;<r…>`: GitHub-Releases
-    `HomuHomu833/android-sdk-custom` bzw. `android-ndk-custom`, Asset `*-aarch64-linux-android.*` (Drittanbieter-Builds).
-  * Die Versionen in der Liste sind im Skript fest eingetragen (`DEFAULT_MANIFEST`) und optional durch ein eigenes
-    Manifest `$CODEFORGE_SDK_REPO/manifest.txt` (`id|version|kind|source|sha256|dest|extra`) erweiterbar.
-    Ohne Manifest-Repo bietet `list` nur diese festen Einträge.
+  * `build-tools;<v>`, `platform-tools;<v>` (aarch64: `aapt2`, `aidl`, `zipalign`, `adb`): GitHub-Releases
+    `HomuHomu833/android-sdk-custom` (Stand der Sichtung: 37.0.0, 36.0.2, 36.0.0, 35.0.2).
+  * `ndk;<name>`: `HomuHomu833/android-ndk-custom` (Release-Titel: r30-beta2, r29, r28c, r27d, r26d).
+  * `cmake;<version>`: `HomuHomu833/cmake-custom` (3.6.0 … 4.1.2, u. a. 3.22.1 als AGP-Standard);
+    `cmake;termux` ist das Termux-Paket als Alternative.
+  * Die Listen bildet `codeforge-env list` bei jedem Aufruf aus den GitHub-Releases (nur Releases mit Asset
+    `*-aarch64-linux-android.*`, 6 Stunden zwischengespeichert, neueste zuerst). Ohne Netz gilt eine feste
+    Rückfallliste. Ein eigenes Manifest `$CODEFORGE_SDK_REPO/manifest.txt` (`id|version|kind|source|sha256|dest|extra`)
+    ergänzt sie optional. Ohne `GITHUB_TOKEN` gilt das API-Limit von 60 Anfragen pro Stunde.
 * SDK-Root: `CODEFORGE_SDK_ROOT` → `ANDROID_SDK_ROOT` aus `$PREFIX/etc/codeforge-environment.properties` (optionale Override-Datei) → `$PREFIX/opt/android-sdk` (= `TermuxEnvironment.sdkRoot`).
 * Schreibt `$PREFIX/etc/profile.d/codeforge-android.sh` (ANDROID_HOME, JAVA_HOME,
   ANDROID_NDK_HOME, PATH) und setzt `android.aapt2FromMavenOverride` in `~/.gradle/gradle.properties`.

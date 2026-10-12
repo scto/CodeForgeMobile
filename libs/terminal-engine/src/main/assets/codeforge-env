@@ -8,9 +8,9 @@
 #
 # Aufruf:  codeforge-env [--machine] <befehl> [argumente]
 #   list                         alle bekannten Komponenten mit Installationsstatus
-#   install <id>                 z. B. jdk;21  ndk;r29d  cmake;termux  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36
+#   install <id>                 z. B. jdk;21  ndk;r29  cmake;3.22.1  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36
 #   uninstall <id>
-#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29d|r30b] [--no-ndk] [--no-cmake]
+#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 3.22.1] [--no-ndk] [--no-cmake]
 #   env                          schreibt/zeigt die Umgebungsdatei (ANDROID_HOME, JAVA_HOME …)
 #   doctor                       prüft die Umgebung
 #
@@ -27,7 +27,11 @@
 #   - Native aarch64-Binaries (aapt2, aidl, zipalign, adb …) und das NDK stammen aus den
 #     GitHub-Releases HomuHomu833/android-sdk-custom bzw. android-ndk-custom (Asset *-aarch64-linux-android.*).
 #     Googles eigene Binaries sind x86 und laufen auf Android nicht. Das sind Drittanbieter-Builds.
-#   - CMake: das Termux-Paket, per Symlink als $SDK_ROOT/cmake/<version> für Gradle registriert.
+#   - CMake: aarch64-Builds aus HomuHomu833/cmake-custom (mehrere Versionen, z. B. 3.22.1 als AGP-Standard);
+#     alternativ das Termux-Paket (cmake;termux), per Symlink als $SDK_ROOT/cmake/<version> registriert.
+#   - Die Versionslisten (build-tools, platform-tools, NDK, CMake) werden bei jedem Aufruf aus den
+#     GitHub-Releases gebildet (nur Releases mit Asset *-aarch64-linux-android.*), 6 Stunden zwischengespeichert.
+#     Ist GitHub nicht erreichbar, gilt eine feste Rückfallliste.
 #   - GitHub-API ohne Token ist auf 60 Anfragen/Stunde begrenzt: bei Fehlern GITHUB_TOKEN setzen.
 # Optional zusätzlich ein Manifest ($CODEFORGE_SDK_REPO/manifest.txt), Zeilenformat:
 #   id|version|kind|source|sha256|dest|extra
@@ -75,18 +79,23 @@ GH_VARIANT="${ASSET_VARIANT:-aarch64-linux-android}"
 SDK_CUSTOM_REPO="${SDK_REPO:-HomuHomu833/android-sdk-custom}"
 NDK_CUSTOM_REPO="${NDK_REPO:-HomuHomu833/android-ndk-custom}"
 
+CMAKE_CUSTOM_REPO="${CMAKE_REPO:-HomuHomu833/cmake-custom}"
+
 DEFAULT_MANIFEST='jdk;17|17|pkg|openjdk-17|||
 jdk;21|21|pkg|openjdk-21|||
 cmake;termux|termux|cmake|cmake|||'
-DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"build-tools;37.0.0|37.0.0|ghsdk|$SDK_CUSTOM_REPO|||"
-DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"platform-tools;37.0.0|37.0.0|ghpt|$SDK_CUSTOM_REPO|||"
-DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"ndk;r29d|r29d|ghndk|$NDK_CUSTOM_REPO|||"
-DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"ndk;r30b|r30b|ghndk|$NDK_CUSTOM_REPO|||"
 if [ -n "$CMDLINE_TOOLS_URL" ]; then
   DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"cmdline-tools;latest|latest|archive|$CMDLINE_TOOLS_URL|$CMDLINE_TOOLS_SHA256|cmdline-tools/latest|strip=1"
   DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''platforms;android-35|35|sdkmanager|platforms;android-35|||'
   DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''platforms;android-36|36|sdkmanager|platforms;android-36|||'
 fi
+
+# Rückfall, wenn die GitHub-API nicht erreichbar ist
+FALLBACK_SDK="build-tools;37.0.0|37.0.0|ghsdk|$SDK_CUSTOM_REPO|||
+platform-tools;37.0.0|37.0.0|ghpt|$SDK_CUSTOM_REPO|||"
+FALLBACK_NDK="ndk;r29|r29|ghndk|$NDK_CUSTOM_REPO|||
+ndk;r27d|r27d|ghndk|$NDK_CUSTOM_REPO|||"
+FALLBACK_CMAKE="cmake;3.22.1|3.22.1|ghcmake|$CMAKE_CUSTOM_REPO|||"
 
 # ---------- Ausgabe ----------
 clean() { printf '%s' "$*" | tr '|\n\r' '   '; }
@@ -99,19 +108,10 @@ err() { if [ "$MACHINE" = 1 ]; then printf 'CFSDK|ERR|%s\n' "$(clean "$*")"; els
 die() { err "$*"; exit 1; }
 
 # ---------- Manifest ----------
+# MANIFEST_CACHE wird einmal pro Aufruf auf oberster Ebene gebildet (build_manifest, siehe unten) –
+# manifest() läuft oft in Subshells, dort ginge ein dort gesetzter Cache verloren.
 MANIFEST_CACHE=""
-manifest() {
-  if [ -z "$MANIFEST_CACHE" ]; then
-    local remote=""
-    case "$MANIFEST_URL" in
-      *@*) remote="" ;; # nicht ersetzter Platzhalter
-      *) remote=$(curl -fsSL --max-time 20 "$MANIFEST_URL" 2>/dev/null | tr -d '\r' | grep -v '^[[:space:]]*#' | grep '|' || true) ;;
-    esac
-    MANIFEST_CACHE="$DEFAULT_MANIFEST"
-    [ -n "$remote" ] && MANIFEST_CACHE="$MANIFEST_CACHE"$'\n'"$remote"
-  fi
-  printf '%s\n' "$MANIFEST_CACHE"
-}
+manifest() { printf '%s\n' "$MANIFEST_CACHE"; }
 
 # entry_field <id> <feldnummer> — das letzte Vorkommen gewinnt (Remote überschreibt Default)
 entry_field() { manifest | awk -F'|' -v id="$1" -v n="$2" '$1==id{v=$n} END{print v}'; }
@@ -129,8 +129,10 @@ installed_path() { # id
         jdk\;*) [ -x "$(jdk_home "$ver")/bin/java" ] && printf '%s' "$(jdk_home "$ver")" ;;
       esac ;;
     cmake)
-      local cm; cm=$(ls -d "$SDK_ROOT"/cmake/*/ 2>/dev/null | head -n1); cm=${cm%/}
-      [ -n "$cm" ] && [ -e "$cm/bin/cmake" ] && printf '%s' "$cm" ;;
+      local cmk="$SDK_ROOT/cmake/.cf-termux" cmv
+      if [ -f "$cmk" ]; then cmv=$(cat "$cmk"); [ -e "$SDK_ROOT/cmake/$cmv/bin/cmake" ] && printf '%s' "$SDK_ROOT/cmake/$cmv"; fi ;;
+    ghcmake)
+      [ -x "$SDK_ROOT/cmake/$ver/bin/cmake" ] && printf '%s' "$SDK_ROOT/cmake/$ver" ;;
     ghsdk)
       [ -x "$SDK_ROOT/build-tools/$ver/aapt2" ] && printf '%s' "$SDK_ROOT/build-tools/$ver" ;;
     ghpt)
@@ -191,7 +193,7 @@ extract() { # archiv ziel strip
 
 # ---------- GitHub-Releases (HomuHomu833/android-*-custom) ----------
 gh_api() {
-  curl -fsSL -m 60 -H 'Accept: application/vnd.github+json' \
+  curl -fsSL -m 25 -H 'Accept: application/vnd.github+json' \
        ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} "$1"
 }
 
@@ -210,6 +212,47 @@ gh_find_asset() {
   IFS=$'\t' read -r GH_ASSET GH_URL digest <<<"$row"
   GH_SHA=${digest#sha256:}; [ "$GH_SHA" = "$digest" ] && GH_SHA=""
   return 0
+}
+
+# Releases eines Repos als JSON, 6 Stunden zwischengespeichert (schont das API-Limit von 60/Stunde)
+gh_releases_json() {
+  local repo=$1 f="$TMP/.cfsdk-gh-${1//\//_}.json" json
+  if [ -s "$f" ] && [ -n "$(find "$f" -mmin -360 2>/dev/null)" ]; then cat "$f"; return 0; fi
+  json=$(gh_api "https://api.github.com/repos/$repo/releases?per_page=100" 2>/dev/null) || { [ -s "$f" ] && cat "$f"; return 0; }
+  printf '%s' "$json" | jq -e 'type == "array"' >/dev/null 2>&1 || { [ -s "$f" ] && cat "$f"; return 0; }
+  printf '%s' "$json" > "$f"; printf '%s' "$json"
+}
+
+# gh_dynamic <repo> <idpräfix> <kind> [<idpräfix2> <kind2> …]: Manifestzeilen für jedes Release mit passendem Asset.
+# Name = Release-Titel (sonst Tag), z. B. ndk;r28c, cmake;3.22.1, build-tools;37.0.0. Neueste zuerst (Reihenfolge der API).
+gh_dynamic() {
+  local repo=$1; shift
+  command -v jq >/dev/null 2>&1 || return 0
+  gh_releases_json "$repo" | jq -r --arg v "$GH_VARIANT" --arg repo "$repo" '
+    .[]?
+    | select(any(.assets[]?; .name | test("-" + $v + "\\.(tar\\.xz|tar\\.gz|zip|7z)$")))
+    | (if (.name // "") != "" then .name else .tag_name end) as $n
+    | select($n | test("^[A-Za-z0-9._-]+$"))
+    | $ARGS.positional as $p
+    | range(0; $p | length; 2) as $i
+    | "\($p[$i]);\($n)|\($n)|\($p[$i + 1])|\($repo)|||"' --args "$@" 2>/dev/null
+}
+
+build_manifest() {
+  local m="$DEFAULT_MANIFEST" remote="" dyn
+  command -v jq >/dev/null 2>&1 || pkg install -y jq >/dev/null 2>&1
+  dyn=$(gh_dynamic "$SDK_CUSTOM_REPO" build-tools ghsdk platform-tools ghpt); [ -n "$dyn" ] || dyn=$FALLBACK_SDK
+  m="$m"$'\n'"$dyn"
+  dyn=$(gh_dynamic "$NDK_CUSTOM_REPO" ndk ghndk); [ -n "$dyn" ] || dyn=$FALLBACK_NDK
+  m="$m"$'\n'"$dyn"
+  dyn=$(gh_dynamic "$CMAKE_CUSTOM_REPO" cmake ghcmake); [ -n "$dyn" ] || dyn=$FALLBACK_CMAKE
+  m="$m"$'\n'"$dyn"
+  case "$MANIFEST_URL" in
+    *@*) ;; # nicht ersetzter Platzhalter
+    *) remote=$(curl -fsSL --max-time 20 "$MANIFEST_URL" 2>/dev/null | tr -d '\r' | grep -v '^[[:space:]]*#' | grep '|' || true) ;;
+  esac
+  [ -n "$remote" ] && m="$m"$'\n'"$remote"
+  printf '%s\n' "$m"
 }
 
 # gh_fetch_extract <zielordner>: lädt GH_URL, prüft ggf. die Prüfsumme, entpackt nach <zielordner>; setzt GH_ROOT
@@ -238,8 +281,10 @@ link_cmake() {
   command -v cmake >/dev/null 2>&1 || return 1
   local v d
   v=$(cmake --version | head -n1 | awk '{print $3}'); [ -n "$v" ] || return 1
+  [ -e "$SDK_ROOT/cmake/$v/bin/cmake" ] && [ ! -L "$SDK_ROOT/cmake/$v/bin/cmake" ] && return 1  # echte Installation gleicher Version
   d="$SDK_ROOT/cmake/$v/bin"
   mkdir -p "$d"
+  printf '%s' "$v" > "$SDK_ROOT/cmake/.cf-termux"
   ln -sf "$(command -v cmake)" "$d/cmake"
   command -v ninja >/dev/null 2>&1 && ln -sf "$(command -v ninja)" "$d/ninja"
   printf 'Pkg.Revision = %s\nPkg.Path = cmake;%s\n' "$v" "$v" > "$SDK_ROOT/cmake/$v/source.properties"
@@ -317,6 +362,29 @@ do_install() { # id
       if [ -n "$clang" ] && "$clang" --version >/dev/null 2>&1; then say "NDK-clang: $("$clang" --version | head -n1)"
       else say "Warnung: NDK-clang startet nicht – Asset-Variante prüfen (ASSET_VARIANT=$GH_VARIANT)"; fi
       ;;
+    ghcmake)
+      need_tools
+      local cx="$TMP/cfsdk-cmake-extract" cmbin croot cdir
+      progress 3 "Suche CMake $ver bei GitHub …"
+      gh_find_asset "$src" "$ver" || exit 1
+      gh_fetch_extract "$cx" || { rm -rf "$cx"; exit 1; }
+      cmbin=$(find "$GH_ROOT" -type f -path '*/bin/cmake' | head -n1)
+      [ -n "$cmbin" ] || { rm -rf "$cx"; die "bin/cmake im CMake-Archiv nicht gefunden"; }
+      croot=$(dirname "$(dirname "$cmbin")")
+      cdir="$SDK_ROOT/cmake/$ver"
+      progress 90 "Installiere CMake $ver …"
+      mkdir -p "$SDK_ROOT/cmake"; rm -rf "$cdir"
+      mv "$croot" "$cdir" || { rm -rf "$cx"; die "CMake konnte nicht verschoben werden"; }
+      rm -rf "$cx"
+      chmod +x "$cdir"/bin/* 2>/dev/null
+      if [ ! -x "$cdir/bin/ninja" ]; then
+        command -v ninja >/dev/null 2>&1 || pkg install -y ninja >/dev/null 2>&1
+        if command -v ninja >/dev/null 2>&1; then ln -sf "$(command -v ninja)" "$cdir/bin/ninja"
+        else say "Warnung: ninja fehlt (pkg install ninja)"; fi
+      fi
+      printf 'Pkg.Revision = %s\nPkg.Path = cmake;%s\n' "$ver" "$ver" > "$cdir/source.properties"
+      "$cdir/bin/cmake" --version >/dev/null 2>&1 || say "Warnung: cmake startet nicht – Asset-Variante prüfen (ASSET_VARIANT=$GH_VARIANT)"
+      ;;
     ghpt)
       need_tools
       local px="$TMP/cfsdk-pt-extract" padb
@@ -375,7 +443,8 @@ do_uninstall() { # id
     pkg) pkg uninstall -y "$src" >/dev/null 2>&1 || die "Deinstallation von $src fehlgeschlagen" ;;
     archive) rm -rf "$p" ;;
     sdkmanager) rm -rf "$p" ;;
-    cmake) rm -rf "$p" ;;   # Symlinks; die Termux-Pakete cmake/ninja bleiben installiert
+    cmake) rm -rf "$p" "$SDK_ROOT/cmake/.cf-termux" ;;   # Symlinks; die Termux-Pakete cmake/ninja bleiben installiert
+    ghcmake) rm -rf "$p" ;;
     ghsdk) rm -rf "$p" ;;   # nur build-tools/<version>
     ghpt) rm -rf "$p" ;;
     ghndk) rm -rf "$p" "$SDK_ROOT/ndk/.cf-$(entry_field "$id" 2)"
@@ -428,7 +497,7 @@ write_env() { # jdkVer ndkId cmakeId
 }
 
 do_setup() {
-  local jdk=17 ndk=r29d cmake=termux sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1
+  local jdk=17 ndk=r29 cmake=3.22.1 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1
   while [ $# -gt 0 ]; do
     case "$1" in
       --jdk) jdk=$2; shift 2 ;; --ndk) ndk=$2; shift 2 ;; --cmake) cmake=$2; shift 2 ;;
@@ -437,10 +506,18 @@ do_setup() {
       *) die "Unbekannte Option: $1" ;;
     esac
   done
-  # Kompatibilität zur App: Das Onboarding übergibt z. B. '--ndk 27d' und '--cmake 4.3.0'.
-  # NDK-Namen tragen ein 'r' (r29d); CMake kommt immer aus dem Termux-Paket, der Wert wird ignoriert.
+  # NDK: '27d' wird zu 'r27d'; gibt es genau diese Version nicht (z. B. 'r29d'), gilt das Release gleicher Hauptversion ('r29').
   case "$ndk" in [0-9]*) ndk="r$ndk" ;; esac
-  cmake=termux
+  if [ "$want_ndk" = 1 ] && ! entry_exists "ndk;$ndk"; then
+    local nbase nalt
+    nbase=$(printf '%s' "$ndk" | sed -E 's/^(r[0-9]+).*/\1/')
+    nalt=$(manifest | awk -F'|' -v b="ndk;$nbase" '$1 ~ ("^" b "[a-z]?$") {print $1; exit}')
+    if [ -n "$nalt" ]; then say "NDK $ndk nicht vorhanden – verwende ${nalt#ndk;}"; ndk=${nalt#ndk;}; fi
+  fi
+  # CMake: gewünschte Version, sonst das Termux-Paket
+  if [ "$want_cmake" = 1 ] && ! entry_exists "cmake;$cmake"; then
+    say "CMake $cmake nicht verfügbar – verwende das Termux-Paket"; cmake=termux
+  fi
   local steps=("jdk;$jdk" 'cmdline-tools;latest' "build-tools;$sdk" "platform-tools;$sdk" "platforms;android-$platform")
   [ "$want_ndk" = 1 ] && steps+=("ndk;$ndk")
   [ "$want_cmake" = 1 ] && steps+=("cmake;$cmake")
@@ -468,6 +545,7 @@ do_doctor() {
 }
 
 cmd=${1:-help}; [ $# -gt 0 ] && shift
+case "$cmd" in list|install|uninstall|setup) MANIFEST_CACHE=$(build_manifest) ;; esac
 case "$cmd" in
   list) do_list ;;
   install) [ $# -ge 1 ] || die "install braucht eine ID"; do_install "$1" ;;

@@ -10,13 +10,14 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * Grafischer Aufsatz auf das Termux-Skript `codeforge-env` (`--machine`-Ausgabe). Das
- * Skript installiert JDK und CMake (Termux-Pakete), cmdline-tools und platforms (Google) sowie
- * aarch64-build-tools, -platform-tools und NDK (GitHub-Releases HomuHomu833); die App führt es
+ * Skript installiert das JDK (Termux-Paket), cmdline-tools und platforms (Google) sowie
+ * aarch64-build-tools, -platform-tools, NDK und CMake (GitHub-Releases HomuHomu833); die App führt es
  * nur aus und zeigt Status/Fortschritt. Die Liste der Versionen stammt allein aus dem Skript.
  * Implementiert in :libs:terminal-engine, konsumiert von :feature:sdkmanager.
  *
  * Paket-IDs (Präfix bestimmt die Kategorie in :feature:sdkmanager): `jdk;21`, `cmdline-tools;latest`,
- * `platform-tools;37.0.0`, `build-tools;37.0.0`, `platforms;android-36`, `ndk;r29d`, `cmake;termux`.
+ * `platform-tools;37.0.0`, `build-tools;37.0.0`, `platforms;android-36`, `ndk;r29`, `cmake;3.22.1`.
+ * Die Versionen entstehen im Skript aus den GitHub-Releases (HomuHomu833), die App kennt keine feste Liste.
  */
 interface SdkRepository {
     suspend fun listAvailablePackages(): Result<List<ToolItem>>
