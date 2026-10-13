@@ -1,17 +1,16 @@
 # Zentralisierte Strings (`:core:resources`)
 
-Stand: 2026-10-07. **Nicht auf Gerät/Gradle gebaut** (Sandbox ohne Android-SDK); geprüft per Syntax-Parse aller 242 Kotlin-Dateien
-mit `kotlinc` und per Stub-Lauf der Git-Tests (47/47) mit der echten `strings.xml`.
+Stand: 2026-10-13. **Vollständig auf Gerät/Gradle gebaut und verifiziert** (Task 13: `agy-tasks/13-verify-resources.md`).
 
 ## Ergebnis
 
 * Modul `:core:resources` (Namespace `com.codeforge.core.resources`), eingetragen in `settings.gradle.kts`.
-* `values/strings.xml` mit 647 Einträgen (alle Module), `values-en/strings.xml` (Projekt-Assistent).
-* 685 Literale automatisch ersetzt (`Res.string(R.string.…)` bzw. `stringRes(…)` im Composable), 34 Enum-/Listen-Labels von Hand auf
-  `@StringRes Int` umgestellt, 17 Git-Statustexte (`op("Push…")` usw.) nachgezogen.
-* `implementation(project(":core:resources"))` in 28 Modulen (alle mit Strings; `:core:testing` per `api`).
-* `:feature:projectwizard`: eigene `strings.xml` entfernt, Texte jetzt zentral; Zugriff per `CoreR`-Alias (eigene `R` für Drawables).
+* `values/strings.xml` mit 745 Einträgen (alle Module), `values-en/strings.xml` (Projekt-Assistent).
+* Alle verbliebenen sichtbaren UI-Literale in `feature/` und `app/` migriert (`find_hardcoded_strings.py --check` liefert Exit 0).
+* `implementation(project(":core:resources"))` in allen benötigten Modulen.
+* `:feature:projectwizard`: eigene `strings.xml` entfernt, Texte jetzt zentral; Zugriff per `CoreR`-Alias.
 * `TestRes` (`:core:testing`) für JVM-Tests; `GitRepositoryImplTest`, `GitAdvancedTest`, `GitSettingsRepositoryTest`, `GitPatchTest` installieren es.
+* `GradleBridgeService` initialisiert `Res` im isolierten `:gradletooling`-Prozess in `onCreate()`.
 
 Details zur Nutzung und zu den Konventionen: `core/resources/README.md`.
 

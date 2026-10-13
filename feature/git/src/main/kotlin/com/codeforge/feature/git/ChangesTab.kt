@@ -102,10 +102,10 @@ private fun CommitBox(state: GitUiState, stagedCount: Int, onEvent: (GitUiEvent)
     val operation = state.status?.state ?: GitRepoState.NORMAL
     val inOperation = operation.completesWithCommit
     val label = when (operation) {
-        GitRepoState.MERGING -> "Merge-Nachricht"
-        GitRepoState.CHERRY_PICKING -> "Cherry-Pick-Nachricht"
-        GitRepoState.REVERTING -> "Revert-Nachricht"
-        else -> if (state.amend) Res.string(R.string.git_neue_nachricht_amend) else "Commit-Nachricht"
+        GitRepoState.MERGING -> stringRes(R.string.git_merge_nachricht)
+        GitRepoState.CHERRY_PICKING -> stringRes(R.string.git_cherry_pick_nachricht)
+        GitRepoState.REVERTING -> stringRes(R.string.git_revert_nachricht)
+        else -> if (state.amend) stringRes(R.string.git_neue_nachricht_amend) else stringRes(R.string.git_commit_nachricht)
     }
     Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         OutlinedTextField(
@@ -217,13 +217,13 @@ private fun FileMenu(entry: GitStatusEntry, state: GitUiState, onEvent: (GitUiEv
                 DropdownMenuItem(text = { Text(text) }, enabled = enabled, onClick = { open = false; onEvent(event) })
             if (conflict) {
                 // Beim Rebase sind die Seiten vertauscht: „ours“ = Ziel-Branch, „theirs“ = der eigene Commit
-                val ours = if (rebase) "Ziel-Branch-Version" else Res.string(R.string.git_aktuelle_version_head)
+                val ours = if (rebase) stringRes(R.string.git_ziel_branch_version) else stringRes(R.string.git_aktuelle_version_head)
                 val theirs = if (rebase) Res.string(R.string.git_eigene_version_commit) else Res.string(R.string.git_eingehende_version)
                 item(ours, event = GitUiEvent.ResolveConflictFile(entry.path, GitConflictSide.OURS))
                 item(theirs, event = GitUiEvent.ResolveConflictFile(entry.path, GitConflictSide.THEIRS))
-                item("Im Editor öffnen", event = GitUiEvent.OpenFile(entry.path))
+                item(stringRes(R.string.common_im_editor_oeffnen), event = GitUiEvent.OpenFile(entry.path))
             } else {
-                item("Im Editor öffnen", enabled = !deleted, event = GitUiEvent.OpenFile(entry.path))
+                item(stringRes(R.string.common_im_editor_oeffnen), enabled = !deleted, event = GitUiEvent.OpenFile(entry.path))
             }
             if (!untracked) {
                 item(Res.string(R.string.git_verlauf), event = GitUiEvent.OpenHistory(entry.path))

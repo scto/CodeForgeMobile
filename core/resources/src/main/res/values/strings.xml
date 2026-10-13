@@ -786,6 +786,33 @@
     <string name="layout_scan_failed">Suche fehlgeschlagen: %1$s</string>
     <string name="drawer_layouts">Layouts</string>
 
+    <!-- Task 13: Verifizierte und migrierte UI-Strings -->
+    <string name="common_im_editor_oeffnen">Im Editor öffnen</string>
+    <string name="common_lade">Lade …</string>
+    <string name="editor_suchen_ersetzen">Suchen/Ersetzen</string>
+    <string name="git_remote_branches_count">Remote-Branches (%1$s)</string>
+    <string name="git_branch_aktionen">Branch-Aktionen</string>
+    <string name="git_tag_aktionen">Tag-Aktionen</string>
+    <string name="git_merge_nachricht">Merge-Nachricht</string>
+    <string name="git_cherry_pick_nachricht">Cherry-Pick-Nachricht</string>
+    <string name="git_revert_nachricht">Revert-Nachricht</string>
+    <string name="git_commit_nachricht">Commit-Nachricht</string>
+    <string name="git_ziel_branch_version">Ziel-Branch-Version</string>
+    <string name="git_merge_praefix">"Merge · "</string>
+    <string name="git_eltern">Eltern: %1$s</string>
+    <string name="git_cherry_pick">Cherry-Pick</string>
+    <string name="git_repository_url">Repository-URL</string>
+    <string name="git_einstellungen">Git-Einstellungen</string>
+    <string name="layout_kein_wurzelelement">Kein Wurzelelement</string>
+    <string name="layout_xml_ungueltig">XML ungültig</string>
+    <string name="modulemaker_gradle_pfad">Gradle-Pfad</string>
+    <string name="plugins_geladen">Geladen</string>
+    <string name="plugins_nicht_geladen">Nicht geladen</string>
+    <string name="plugins_version_status">v%1$s · %2$s</string>
+    <string name="settings_textmate_theme">TextMate-Theme</string>
+    <string name="settings_lsp_server_pfad">LSP-Server-Pfad</string>
+    <string name="themebuilder_beispiel_karte">Beispiel-Karte</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

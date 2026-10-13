@@ -99,7 +99,7 @@ private fun EditorSettingsScreen(
             OutlinedTextField(
                 value = uiState.textmateTheme,
                 onValueChange = { onEvent(EditorSettingsUiEvent.TextmateThemeChanged(it)) },
-                label = { Text("TextMate-Theme") },
+                label = { Text(stringRes(R.string.settings_textmate_theme)) },
                 placeholder = { Text(stringRes(R.string.settings_dark_plus)) },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -109,7 +109,7 @@ private fun EditorSettingsScreen(
             OutlinedTextField(
                 value = uiState.lspServerPath,
                 onValueChange = { onEvent(EditorSettingsUiEvent.LspServerPathChanged(it)) },
-                label = { Text("LSP-Server-Pfad") },
+                label = { Text(stringRes(R.string.settings_lsp_server_pfad)) },
                 placeholder = { Text(stringRes(R.string.settings_lsp_path_hint)) },
                 modifier = Modifier.fillMaxWidth()
             )

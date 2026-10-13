@@ -59,7 +59,7 @@ private fun GitCloneScreen(
         OutlinedTextField(
             value = uiState.repositoryUrl,
             onValueChange = { onEvent(GitCloneUiEvent.UrlChanged(it)) },
-            label = { Text("Repository-URL") },
+            label = { Text(stringRes(R.string.git_repository_url)) },
             enabled = fieldsEnabled,
             modifier = Modifier.fillMaxWidth()
         )

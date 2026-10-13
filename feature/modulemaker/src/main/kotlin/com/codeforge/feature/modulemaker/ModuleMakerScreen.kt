@@ -91,7 +91,7 @@ fun ModuleMakerScreen(
             onValueChange = { onEvent(ModuleMakerUiEvent.InputChanged(it)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            label = { Text("Gradle-Pfad") },
+            label = { Text(stringRes(R.string.modulemaker_gradle_pfad)) },
             placeholder = { Text(":lib:core:libcoredu") },
             isError = state.inputError != null,
             supportingText = { Text(state.inputError ?: stringRes(R.string.modulemaker_notation_wie_in_settings_gradle)) },

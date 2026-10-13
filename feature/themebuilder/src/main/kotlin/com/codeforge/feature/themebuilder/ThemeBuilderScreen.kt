@@ -157,7 +157,7 @@ private fun ThemePreviewCard(previewTheme: ThemeConfig) {
                 Spacer(modifier = Modifier.height(12.dp))
                 ElevatedCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("Beispiel-Karte", style = MaterialTheme.typography.bodyLarge)
+                        Text(stringRes(R.string.themebuilder_beispiel_karte), style = MaterialTheme.typography.bodyLarge)
                         Text(
                             stringRes(R.string.themebuilder_so_sehen_text_und_oberflaechen),
                             style = MaterialTheme.typography.bodySmall

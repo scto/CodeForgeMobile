@@ -35,7 +35,7 @@ object TestRes {
     fun uninstall() = Res.install(null)
 
     private fun locateStringsXml(): File {
-        var dir: File? = File(System.getProperty("user.dir")).absoluteFile
+        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
         while (dir != null) {
             File(dir, STRINGS_PATH).takeIf { it.isFile }?.let { return it }
             dir = dir.parentFile

@@ -104,7 +104,7 @@ internal fun CommitDetailDialog(
                                 Text(detail.info.refs.joinToString("  "), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                             }
                             Text(
-                                (if (detail.isMerge) "Merge · " else "") + "Eltern: " + detail.info.parents.joinToString { it.take(7) }.ifEmpty { "–" },
+                                (if (detail.isMerge) stringRes(R.string.git_merge_praefix) else "") + stringRes(R.string.git_eltern, detail.info.parents.joinToString { it.take(7) }.ifEmpty { "–" }),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -120,7 +120,7 @@ internal fun CommitDetailDialog(
                                 Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                ActionChip("Cherry-Pick", Icons.Filled.ContentCopy, !busy && !detail.isMerge) { onEvent(GitUiEvent.CherryPick(state.hash)) }
+                                ActionChip(stringRes(R.string.git_cherry_pick), Icons.Filled.ContentCopy, !busy && !detail.isMerge) { onEvent(GitUiEvent.CherryPick(state.hash)) }
                                 ActionChip(Res.string(R.string.git_revert), Icons.Filled.Undo, !busy && !detail.isMerge) { onEvent(GitUiEvent.RevertRequested(state.hash, label)) }
                                 ActionChip(Res.string(R.string.git_reset_hierhin), Icons.Filled.RestartAlt, !busy) { onEvent(GitUiEvent.ResetRequested(state.hash, label)) }
                                 ActionChip(Res.string(R.string.git_branch_hier), Icons.Filled.CallSplit, !busy) { onEvent(GitUiEvent.NewBranchRequested(state.hash)) }

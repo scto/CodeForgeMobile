@@ -72,7 +72,7 @@ internal fun DiffViewerDialog(
                         Text(diff.path.substringAfterLast('/'), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(
                             (when {
-                                diff.commit != null -> "Commit ${diff.commit.take(7)}"
+                                diff.commit != null -> stringRes(R.string.git_commit_short, diff.commit.take(7))
                                 diff.staged -> Res.string(R.string.git_vorgemerkt)
                                 else -> Res.string(R.string.git_arbeitsverzeichnis)
                             }) + " · " + diff.path,

@@ -174,7 +174,11 @@ private fun PluginRow(plugin: InstalledPlugin, isLoaded: Boolean, onEvent: (Plug
                 Column(modifier = Modifier.weight(1f)) {
                     Text(plugin.name, style = MaterialTheme.typography.titleSmall)
                     Text(
-                        "v${plugin.version} · ${if (isLoaded) "Geladen" else "Nicht geladen"}",
+                        stringRes(
+                            R.string.plugins_version_status,
+                            plugin.version,
+                            if (isLoaded) stringRes(R.string.plugins_geladen) else stringRes(R.string.plugins_nicht_geladen)
+                        ),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

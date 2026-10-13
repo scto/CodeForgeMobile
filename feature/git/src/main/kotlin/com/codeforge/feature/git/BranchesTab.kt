@@ -65,7 +65,7 @@ internal fun BranchesTab(state: GitUiState, onEvent: (GitUiEvent) -> Unit, modif
         items(local, key = { "l-" + it.name }) { b -> BranchRow(b, enabled, onEvent) }
 
         if (remote.isNotEmpty()) {
-            item(key = "remote-h") { SectionTitle("Remote-Branches (${remote.size})") }
+            item(key = "remote-h") { SectionTitle(stringRes(R.string.git_remote_branches_count, remote.size)) }
             items(remote, key = { "r-" + it.name }) { b -> BranchRow(b, enabled, onEvent) }
         }
 
@@ -158,7 +158,7 @@ private fun BranchRow(branch: GitBranch, enabled: Boolean, onEvent: (GitUiEvent)
         }
         Box {
             IconButton(onClick = { menu = true }, enabled = enabled, modifier = Modifier.size(40.dp)) {
-                Icon(Icons.Filled.MoreVert, "Branch-Aktionen", Modifier.size(20.dp))
+                Icon(Icons.Filled.MoreVert, stringRes(R.string.git_branch_aktionen), Modifier.size(20.dp))
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 @Composable
@@ -200,7 +200,7 @@ private fun TagRow(tag: GitTag, enabled: Boolean, hasRemote: Boolean, onEvent: (
         }
         Box {
             IconButton(onClick = { menu = true }, enabled = enabled, modifier = Modifier.size(40.dp)) {
-                Icon(Icons.Filled.MoreVert, "Tag-Aktionen", Modifier.size(20.dp))
+                Icon(Icons.Filled.MoreVert, stringRes(R.string.git_tag_aktionen), Modifier.size(20.dp))
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 DropdownMenuItem(text = { Text(stringRes(R.string.git_commit_ansehen)) }, onClick = { menu = false; onEvent(GitUiEvent.OpenCommit(tag.commitHash)) })

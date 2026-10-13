@@ -31,6 +31,11 @@ private const val TAG = "GradleBridgeService"
  */
 class GradleBridgeService : Service() {
 
+    override fun onCreate() {
+        super.onCreate()
+        Res.init(this)
+    }
+
     private var connection: ProjectConnection? = null
     private var currentCancellationHandle: org.gradle.tooling.CancellationTokenSource? = null
 

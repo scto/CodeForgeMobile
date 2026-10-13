@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🌐 Lokalisierung & Ressourcen (`:core:resources`) (Task 13)
+
+* **Zentrale Strings verifiziert**: AAPT2-Validierung, R-Codegenerierung und `TestRes`-Reflection erfolgreich auf Gradle/Termux ausgeführt.
+* **Harte UI-Strings migriert**: 25 verbliebene sichtbare UI-Literale in `feature/` (`EditorScreen`, `BranchesTab`, `ChangesTab`, `CommitViews`, `ConflictEditor`, `DiffViewer`, `GitCloneScreen`, `GitPanel`, `LayoutXml`, `ModuleMakerScreen`, `PluginsScreen`, `EditorSettingsScreen`, `ThemeBuilderScreen`) nach `core:resources` ausgelagert. `find_hardcoded_strings.py --check` ist sauber (Exit 0).
+* **Multi-Prozess-Unterstützung**: `Res.init(this)` in `GradleBridgeService.onCreate()` integriert, sodass auch im isolierten `:gradletooling`-Prozess String-Ressourcen korrekt aufgelöst werden.
+* **JVM-Unit-Tests**: Type-Mismatch-Warnung in `TestRes.locateStringsXml()` und `parentFile`-Warnungen in Git-Tests behoben; alle Test-Tasks im Gesamtlauf grün.
+
 ### ➕ Tooling
 
 * `scripts/find_hardcoded_strings.py` (Suche nach harten UI-Texten, `--check`/`--json`/Allowlist) und `agy-tasks/17-externalize-hardcoded-strings.md` (wiederkehrende Auslagerung nach `:core:resources`).

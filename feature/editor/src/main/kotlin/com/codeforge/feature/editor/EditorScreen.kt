@@ -280,7 +280,7 @@ private fun EditorToolbar(
             Icon(Icons.Filled.Numbers, contentDescription = stringRes(R.string.editor_gehe_zu_zeile))
         }
         IconButton(onClick = onToggleSearch) {
-            Icon(Icons.Filled.Search, contentDescription = "Suchen/Ersetzen")
+            Icon(Icons.Filled.Search, contentDescription = stringRes(R.string.editor_suchen_ersetzen))
         }
         IconButton(onClick = onShare) {
             Icon(Icons.Filled.Share, contentDescription = stringRes(R.string.editor_teilen))

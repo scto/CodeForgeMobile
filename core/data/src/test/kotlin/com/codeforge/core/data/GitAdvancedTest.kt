@@ -44,7 +44,7 @@ class GitAdvancedTest {
 
     private fun tmp(): File = File.createTempFile("cfgit2", "").apply { delete(); mkdirs() }
     private fun <T> run(block: suspend () -> T): T = runBlocking { block() }
-    private fun File.write(name: String, text: String) = File(this, name).apply { parentFile.mkdirs(); writeText(text) }
+    private fun File.write(name: String, text: String) = File(this, name).apply { parentFile?.mkdirs(); writeText(text) }
     private fun File.read(name: String) = File(this, name).readText()
 
     private fun initRepo(): File = tmp().also { d -> run { repo.init(d.path, null).getOrThrow() } }

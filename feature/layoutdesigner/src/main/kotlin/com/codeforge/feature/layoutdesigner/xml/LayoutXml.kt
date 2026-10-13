@@ -8,6 +8,8 @@
  */
 package com.codeforge.feature.layoutdesigner.xml
 
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.LayoutNode
 import java.io.StringReader
@@ -36,9 +38,9 @@ object LayoutXml {
                 setErrorHandler(null)
             }.parse(InputSource(StringReader(xml.trimStart('﻿'))))
         } catch (e: Exception) {
-            throw LayoutParseException(e.message?.lineSequence()?.firstOrNull() ?: "XML ungültig", e)
+            throw LayoutParseException(e.message?.lineSequence()?.firstOrNull() ?: Res.string(R.string.layout_xml_ungueltig), e)
         }
-        val rootElement = document.documentElement ?: throw LayoutParseException("Kein Wurzelelement")
+        val rootElement = document.documentElement ?: throw LayoutParseException(Res.string(R.string.layout_kein_wurzelelement))
         var counter = 0
         fun convert(e: Element): LayoutNode {
             val uid = counter++

@@ -201,7 +201,7 @@ private fun GitHeader(state: GitUiState, onEvent: (GitUiEvent) -> Unit, onOpenSe
         IconButton(onClick = { onEvent(GitUiEvent.PullClicked) }, enabled = enabled) { Icon(Icons.Filled.CloudDownload, stringRes(R.string.git_pull)) }
         IconButton(onClick = { onEvent(GitUiEvent.PushClicked) }, enabled = enabled) { Icon(Icons.Filled.CloudUpload, stringRes(R.string.git_push)) }
         IconButton(onClick = { onEvent(GitUiEvent.Refresh) }) { Icon(Icons.Filled.Refresh, stringRes(R.string.common_aktualisieren)) }
-        IconButton(onClick = onOpenSettings) { Icon(Icons.Filled.Settings, "Git-Einstellungen") }
+        IconButton(onClick = onOpenSettings) { Icon(Icons.Filled.Settings, stringRes(R.string.git_einstellungen)) }
     }
 }
 

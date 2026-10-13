@@ -38,7 +38,7 @@ class GitRepositoryImplTest {
 
     private fun tmp(): File = File.createTempFile("cfgit", "").apply { delete(); mkdirs() }
     private fun <T> run(block: suspend () -> T): T = runBlocking { block() }
-    private fun File.write(name: String, text: String) = File(this, name).apply { parentFile.mkdirs(); writeText(text) }
+    private fun File.write(name: String, text: String) = File(this, name).apply { parentFile?.mkdirs(); writeText(text) }
 
     private fun initRepo(): File {
         val d = tmp()

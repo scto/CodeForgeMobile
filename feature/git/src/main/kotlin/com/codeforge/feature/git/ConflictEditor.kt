@@ -65,7 +65,7 @@ internal fun ConflictEditorDialog(
                     Column(Modifier.weight(1f)) {
                         Text(state.path.substringAfterLast('/'), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(
-                            if (state.isLoading) "Lade …" else stringRes(R.string.git_konfliktblock_bloecke_gewaehlt, state.conflictCount, state.conflictCount - state.unresolved),
+                            if (state.isLoading) stringRes(R.string.common_lade) else stringRes(R.string.git_konfliktblock_bloecke_gewaehlt, state.conflictCount, state.conflictCount - state.unresolved),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
