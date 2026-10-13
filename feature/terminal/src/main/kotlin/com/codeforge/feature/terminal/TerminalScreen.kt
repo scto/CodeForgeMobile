@@ -12,7 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -116,7 +116,7 @@ private fun TerminalScreen(
                     onClick = { onEvent(TerminalUiEvent.SendCommand) },
                     enabled = uiState.sessionState == TerminalSessionState.RUNNING
                 ) {
-                    Icon(Icons.Filled.Send, contentDescription = stringRes(R.string.terminal_senden))
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringRes(R.string.terminal_senden))
                 }
             }
         }

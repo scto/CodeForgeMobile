@@ -10,7 +10,7 @@ import org.junit.Test
 class ProjectIndexBuilderTest {
 
     private fun write(root: File, rel: String, text: String = "") {
-        File(root, rel).apply { parentFile.mkdirs(); writeText(text) }
+        File(root, rel).apply { parentFile?.mkdirs(); writeText(text) }
     }
 
     @Test

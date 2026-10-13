@@ -17,7 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
@@ -146,7 +146,7 @@ private fun DiffBody(
                             if (staged) {
                                 HunkButton(Icons.Filled.Remove, Res.string(R.string.git_hunk_zuruecknehmen)) { onHunkAction(hunkIndex, GitHunkAction.UNSTAGE) }
                             } else {
-                                HunkButton(Icons.Filled.Undo, Res.string(R.string.git_hunk_verwerfen)) { onHunkAction(hunkIndex, GitHunkAction.DISCARD) }
+                                HunkButton(Icons.AutoMirrored.Filled.Undo, Res.string(R.string.git_hunk_verwerfen)) { onHunkAction(hunkIndex, GitHunkAction.DISCARD) }
                                 HunkButton(Icons.Filled.Add, Res.string(R.string.git_hunk_vormerken)) { onHunkAction(hunkIndex, GitHunkAction.STAGE) }
                             }
                         }

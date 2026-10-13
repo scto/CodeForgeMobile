@@ -17,12 +17,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CallSplit
+import androidx.compose.material.icons.automirrored.filled.CallSplit
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Sell
-import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
@@ -121,9 +121,9 @@ internal fun CommitDetailDialog(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 ActionChip(stringRes(R.string.git_cherry_pick), Icons.Filled.ContentCopy, !busy && !detail.isMerge) { onEvent(GitUiEvent.CherryPick(state.hash)) }
-                                ActionChip(Res.string(R.string.git_revert), Icons.Filled.Undo, !busy && !detail.isMerge) { onEvent(GitUiEvent.RevertRequested(state.hash, label)) }
+                                ActionChip(Res.string(R.string.git_revert), Icons.AutoMirrored.Filled.Undo, !busy && !detail.isMerge) { onEvent(GitUiEvent.RevertRequested(state.hash, label)) }
                                 ActionChip(Res.string(R.string.git_reset_hierhin), Icons.Filled.RestartAlt, !busy) { onEvent(GitUiEvent.ResetRequested(state.hash, label)) }
-                                ActionChip(Res.string(R.string.git_branch_hier), Icons.Filled.CallSplit, !busy) { onEvent(GitUiEvent.NewBranchRequested(state.hash)) }
+                                ActionChip(Res.string(R.string.git_branch_hier), Icons.AutoMirrored.Filled.CallSplit, !busy) { onEvent(GitUiEvent.NewBranchRequested(state.hash)) }
                                 ActionChip(Res.string(R.string.git_tag_hier), Icons.Filled.Sell, !busy) { onEvent(GitUiEvent.NewTagRequested(state.hash)) }
                                 ActionChip(Res.string(R.string.git_auschecken), Icons.Filled.CheckCircle, !busy) { onEvent(GitUiEvent.CheckoutCommit(state.hash)) }
                             }

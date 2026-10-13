@@ -15,23 +15,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
-import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.ControlPointDuplicate
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.FormatIndentDecrease
-import androidx.compose.material.icons.filled.FormatIndentIncrease
+import androidx.compose.material.icons.automirrored.filled.FormatIndentDecrease
+import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material.icons.filled.FormatAlignLeft
-import androidx.compose.material.icons.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
@@ -222,10 +222,10 @@ private fun EditorToolbar(
         modifier = modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
     ) {
         IconButton(onClick = { controller?.undo() }, enabled = controller?.canUndo() ?: false) {
-            Icon(Icons.Filled.Undo, contentDescription = stringRes(R.string.editor_rueckgaengig))
+            Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringRes(R.string.editor_rueckgaengig))
         }
         IconButton(onClick = { controller?.redo() }, enabled = controller?.canRedo() ?: false) {
-            Icon(Icons.Filled.Redo, contentDescription = stringRes(R.string.editor_wiederholen))
+            Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = stringRes(R.string.editor_wiederholen))
         }
         IconButton(onClick = { controller?.selectAll() }) {
             Icon(Icons.Filled.SelectAll, contentDescription = stringRes(R.string.editor_alles_auswaehlen))
@@ -247,7 +247,7 @@ private fun EditorToolbar(
         }
         if (isLspConnected) {
             IconButton(onClick = onFormatLsp) {
-                Icon(Icons.Filled.FormatAlignLeft, contentDescription = stringRes(R.string.editor_formatieren_lsp))
+                Icon(Icons.AutoMirrored.Filled.FormatAlignLeft, contentDescription = stringRes(R.string.editor_formatieren_lsp))
             }
         }
         val unit = " ".repeat(tabSize.coerceIn(1, 8))
@@ -256,13 +256,13 @@ private fun EditorToolbar(
             onClick = { commentStyle?.let { style -> controller?.runLineCommand { t, a, b -> LineEdits.toggleComment(t, a, b, style) } } },
             enabled = commentStyle != null
         ) {
-            Icon(Icons.Filled.Comment, contentDescription = stringRes(R.string.editor_kommentar_umschalten))
+            Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = stringRes(R.string.editor_kommentar_umschalten))
         }
         IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.indent(t, a, b, unit) } }) {
-            Icon(Icons.Filled.FormatIndentIncrease, contentDescription = stringRes(R.string.editor_einruecken))
+            Icon(Icons.AutoMirrored.Filled.FormatIndentIncrease, contentDescription = stringRes(R.string.editor_einruecken))
         }
         IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.dedent(t, a, b, unit) } }) {
-            Icon(Icons.Filled.FormatIndentDecrease, contentDescription = stringRes(R.string.editor_ausruecken))
+            Icon(Icons.AutoMirrored.Filled.FormatIndentDecrease, contentDescription = stringRes(R.string.editor_ausruecken))
         }
         IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.duplicateLines(t, a, b) } }) {
             Icon(Icons.Filled.ControlPointDuplicate, contentDescription = stringRes(R.string.editor_zeile_duplizieren))

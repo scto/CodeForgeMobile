@@ -17,7 +17,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -89,7 +89,7 @@ internal fun ChangesTab(state: GitUiState, onEvent: (GitUiEvent) -> Unit, modifi
         if (unstaged.isEmpty()) item(key = "e-unstaged") { EmptyHint(if (staged.isEmpty() && conflicts.isEmpty()) Res.string(R.string.git_arbeitsverzeichnis_sauber) else Res.string(R.string.git_keine_weiteren_aenderungen)) }
         items(unstaged, key = { "u-" + it.path }) { entry ->
             ChangeRow(entry, onEvent, actions = {
-                RowAction(Icons.Filled.Undo, Res.string(R.string.git_aenderungen_verwerfen)) { onEvent(GitUiEvent.DiscardRequested(listOf(entry.path))) }
+                RowAction(Icons.AutoMirrored.Filled.Undo, Res.string(R.string.git_aenderungen_verwerfen)) { onEvent(GitUiEvent.DiscardRequested(listOf(entry.path))) }
                 RowAction(Icons.Filled.Add, Res.string(R.string.git_vormerken)) { onEvent(GitUiEvent.Stage(listOf(entry.path))) }
                 FileMenu(entry, state, onEvent)
             })

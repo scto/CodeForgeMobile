@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📱 Adaptive Layouts, Edge-to-Edge & Material 3 (Task 14)
+
+* **Toolchain & Bibliotheken verifiziert**: Compose BOM `2025.09.00` (Material 3 `1.3.2`) und `material3-adaptive:1.1.0` auf Google Maven verifiziert. Veralteten Eintrag `composeCompiler = "1.5.15"` aus `libs.versions.toml` bereinigt.
+* **WelcomeScreen (Adaptive 1.1.0)**: `NavigableListDetailPaneScaffold`, `AnimatedPane` und `rememberListDetailPaneScaffoldNavigator` verifiziert; `navigator.navigateTo` korrekt als Suspend-Funktion in Coroutine-Scope gebunden.
+* **Edge-to-Edge & Insets**: `WindowSizeUtils` Breakpoints (Compact <600dp, Medium <840dp, Expanded >=840dp), permanenter Workspace-Drawer ab 840dp, `consumeWindowInsets(padding)` gegen doppeltes Scaffold-Padding und `imePadding()` für Tastatur im Editor/Terminal verifiziert.
+* **Statusleisten-Synchronisation**: `MainActivity` schaltet Status- und Navigationsleisten dynamisch per `SystemBarStyle.auto(...) { isDark }` passend zum App-Theme (auch bei invertiertem System-Modus lesbar).
+* **AutoMirrored-Icons**: Deprecated Icons in `ProjectImportRoute`, `EditorScreen`, `ChangesTab`, `CommitViews`, `DiffViewer` und `TerminalScreen` auf `Icons.AutoMirrored.Filled.*` (`ArrowBack`, `Undo`, `Redo`, `Send`, `CallSplit`, `FormatAlignLeft`, `Comment`, `FormatIndentIncrease`, `FormatIndentDecrease`) migriert.
+
 ### 🌐 Lokalisierung & Ressourcen (`:core:resources`) (Task 13)
 
 * **Zentrale Strings verifiziert**: AAPT2-Validierung, R-Codegenerierung und `TestRes`-Reflection erfolgreich auf Gradle/Termux ausgeführt.
