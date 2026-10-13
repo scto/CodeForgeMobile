@@ -25,6 +25,9 @@ object BuildConfig {
   /** The target SDK version (28 disables W^X execution restrictions for Termux binaries in data dir). */
   const val targetSdk = 28
 
+  /** The NDK version. */
+  const val ndkVersion = "29.0.14206865"
+
   /** The source and target Java compatibility. */
   val javaVersion = JavaVersion.VERSION_17
 
