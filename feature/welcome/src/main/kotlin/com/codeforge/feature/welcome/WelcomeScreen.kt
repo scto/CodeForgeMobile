@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
@@ -101,6 +102,7 @@ fun WelcomeRoute(
  * (Grid + Recent-Projects) gezeigt; auf Tablet/Foldable erscheint das Detail-Pane
  * (Projekt-Metadaten, Module, letzte Änderung) parallel neben der Liste.
  */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 private fun WelcomeScreen(
     modifier: Modifier = Modifier,

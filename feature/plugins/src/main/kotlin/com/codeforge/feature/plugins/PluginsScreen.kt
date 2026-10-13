@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -92,6 +93,7 @@ private fun copyToCacheFile(context: android.content.Context, uri: Uri): File? =
     targetFile
 }.getOrNull()
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PluginsScreen(
     modifier: Modifier = Modifier,
@@ -102,7 +104,7 @@ private fun PluginsScreen(
 ) {
     Scaffold(
         modifier = modifier,
-        snackBarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringRes(R.string.plugins_plugins)) },

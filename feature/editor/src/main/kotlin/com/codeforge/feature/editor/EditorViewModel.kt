@@ -166,7 +166,7 @@ class EditorViewModel @Inject constructor(
                 }
                 .onFailure {
                     ok = false
-                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_speichern_fehlgeschlagen, it.message)))
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_speichern_fehlgeschlagen, it.message.orEmpty())))
                 }
         }
         return ok
@@ -194,7 +194,7 @@ class EditorViewModel @Inject constructor(
                     else Res.string(R.string.editor_angewendet_fehlgeschlagen, result.applied.size, result.failed.size, result.failed.first().second)
                     _effect.emit(EditorUiEffect.ShowSnackbar(message))
                 }
-                .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_update_fehlgeschlagen, it.message))) }
+                .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_update_fehlgeschlagen, it.message.orEmpty()))) }
             _uiState.update { it.copy(isApplyingUpdate = false, updateDialog = null) }
         }
     }
@@ -300,7 +300,7 @@ class EditorViewModel @Inject constructor(
             }
             .onFailure {
                 _uiState.update { it.copy(isLoading = false) }
-                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_fehler_beim_oeffnen, it.message)))
+                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_fehler_beim_oeffnen, it.message.orEmpty())))
             }
     }
 
@@ -346,7 +346,7 @@ class EditorViewModel @Inject constructor(
         val active = _uiState.value.activeFile ?: return@launch
         lspClient.requestFormat(active.path, active.content)
             .onSuccess { formatted -> updateBuffer(formatted) }
-            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_lsp_formatierung_fehlgeschlagen, it.message))) }
+            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_lsp_formatierung_fehlgeschlagen, it.message.orEmpty()))) }
     }
 
     private fun languageIdFor(path: String): String = when (EditorLanguageType.fromPath(path)) {

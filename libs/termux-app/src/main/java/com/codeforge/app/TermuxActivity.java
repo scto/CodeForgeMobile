@@ -195,13 +195,6 @@ public class TermuxActivity extends AppCompatActivity implements ServiceConnecti
 
     protected static final String LOG_TAG = "TermuxActivity";
 
-    @SuppressLint("InflateParams")
-    @NonNull
-    @Override
-    protected View bindLayout() {
-        return getLayoutInflater().inflate(R.layout.activity_termux, null, false);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Logger.logDebug(LOG_TAG, "onCreate");
@@ -220,6 +213,7 @@ public class TermuxActivity extends AppCompatActivity implements ServiceConnecti
         setActivityTheme();
 
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_termux);
 
         // Load termux shared preferences
         // This will also fail if TermuxConstants.TERMUX_PACKAGE_NAME does not equal applicationId

@@ -124,7 +124,7 @@ class JavaLspPlugin : CodeForgePlugin {
     }
 
     private fun log(message: String, isError: Boolean = false) {
-        if (isError) android.util.Log.e(TAG, message) else android.util.Log.i(TAG, message)
+        if (isError) System.err.println("[$TAG] $message") else println("[$TAG] $message")
     }
 
     private companion object {

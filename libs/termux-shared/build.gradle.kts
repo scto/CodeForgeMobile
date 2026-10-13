@@ -50,4 +50,5 @@ dependencies {
     implementation(libs.markwon.linkify)
     implementation(libs.markwon.recycler)
     implementation(libs.hidden.api.bypass) // BEGRÜNDUNG: von TermuxShellEnvironment für Reflection-Workarounds auf neueren API-Levels benötigt
+    implementation(libs.commons.io)
 }

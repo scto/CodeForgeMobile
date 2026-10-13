@@ -45,6 +45,7 @@ fun ComposePreviewRoute(
     ComposePreviewScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun ComposePreviewScreen(
     modifier: Modifier = Modifier,

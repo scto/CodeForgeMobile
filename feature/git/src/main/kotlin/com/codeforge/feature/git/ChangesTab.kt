@@ -212,6 +212,7 @@ private fun FileMenu(entry: GitStatusEntry, state: GitUiState, onEvent: (GitUiEv
     Box {
         RowAction(Icons.Filled.MoreVert, Res.string(R.string.git_mehr)) { open = true }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            @Composable
             fun item(text: String, enabled: Boolean = true, event: GitUiEvent) =
                 DropdownMenuItem(text = { Text(text) }, enabled = enabled, onClick = { open = false; onEvent(event) })
             if (conflict) {

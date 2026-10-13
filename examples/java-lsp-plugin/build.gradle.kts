@@ -9,6 +9,7 @@ plugins {
 dependencies {
     compileOnly(project(":libs:plugin-api"))
     compileOnly(project(":core:domain"))
+    compileOnly(project(":libs:terminal-engine"))
     compileOnly(libs.kotlinx.coroutines.core)
 
     // implementation (nicht compileOnly): landet im eigenen classes.dex.

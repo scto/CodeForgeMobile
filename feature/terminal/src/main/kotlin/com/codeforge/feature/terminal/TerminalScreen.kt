@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +44,7 @@ fun TerminalRoute(
     TerminalScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TerminalScreen(
     modifier: Modifier = Modifier,

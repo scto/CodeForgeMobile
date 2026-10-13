@@ -5,6 +5,7 @@
 package com.codeforge.feature.editor
 
 import android.content.Context
+import com.codeforge.feature.editor.lsp.LspAwareLanguage
 import com.codeforge.feature.editor.lsp.LspCompletionProvider
 import com.codeforge.feature.editor.treesitter.TreeSitterGrammar
 import com.codeforge.feature.editor.treesitter.TreeSitterLanguageSupport

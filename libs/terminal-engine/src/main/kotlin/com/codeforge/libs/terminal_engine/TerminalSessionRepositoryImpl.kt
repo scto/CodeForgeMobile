@@ -84,7 +84,7 @@ class TerminalSessionRepositoryImpl @Inject constructor(
             _sessionState.value = TerminalSessionState.RUNNING
             initialCommand?.takeIf { it.isNotBlank() }?.let { sendInput(it) }
         }.onFailure { throwable ->
-            _output.tryEmit(Res.string(R.string.terminal_engine_fehler_beim_starten_der_shell, throwable.message))
+            _output.tryEmit(Res.string(R.string.terminal_engine_fehler_beim_starten_der_shell, throwable.message.orEmpty()))
             _sessionState.value = TerminalSessionState.FAILED
         }
     }

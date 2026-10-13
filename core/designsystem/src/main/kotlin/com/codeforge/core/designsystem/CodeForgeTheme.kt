@@ -3,9 +3,7 @@ package com.codeforge.core.designsystem
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialExpressiveTheme
-import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
@@ -22,8 +20,6 @@ fun ThemeConfig.resolveIsDark(systemDark: Boolean): Boolean = when (mode) {
     else -> systemDark
 }
 
-/** Material 3 Expressive: expressive Motion-Physik + Expressive-Komponenten (z.B. LoadingIndicator). */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CodeForgeTheme(
     themeState: ThemeConfig,
@@ -38,9 +34,8 @@ fun CodeForgeTheme(
         else -> resolveCustomScheme(themeState.colorSchemeId, themeState.customPalette, isDark)
     }
 
-    MaterialExpressiveTheme(
+    MaterialTheme(
         colorScheme = colorScheme,
-        motionScheme = MotionScheme.expressive(),
         typography = CodeForgeTypography,
         content = content
     )

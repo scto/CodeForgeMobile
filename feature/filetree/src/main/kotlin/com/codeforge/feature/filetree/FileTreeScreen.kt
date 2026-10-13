@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -120,34 +121,34 @@ private fun FileTreeScreen(
         if (uiState.rootPath.isNotBlank()) {
             // `refreshToken` im Key erzwingt eine neue Tree-/Node-Instanz nach
             // Create/Rename/Delete — siehe KDoc an FileTreeUiState.refreshToken.
-            val tree = remember(uiState.rootPath, uiState.refreshToken) {
-                FileSystemTree(
+            key(uiState.rootPath, uiState.refreshToken) {
+                val tree = FileSystemTree(
                     rootPath = uiState.rootPath.toPath(),
                     fileSystem = FileSystem.SYSTEM,
                     selfInclude = false
                 )
-            }
 
-            Bonsai(
-                tree = tree,
-                modifier = Modifier.fillMaxSize(),
-                style = FileSystemBonsaiStyle(),
-                onClick = { node ->
-                    when (node) {
-                        is LeafNode -> onEvent(FileTreeUiEvent.FileOpened(node.content.toFile().absolutePath))
-                        is BranchNode -> tree.toggleExpansion(node)
-                        else -> Unit
-                    }
-                },
-                onLongClick = { node ->
-                    onEvent(
-                        FileTreeUiEvent.ContextMenuRequested(
-                            path = node.content.toFile().absolutePath,
-                            isDirectory = node is BranchNode
+                Bonsai(
+                    tree = tree,
+                    modifier = Modifier.fillMaxSize(),
+                    style = FileSystemBonsaiStyle(),
+                    onClick = { node ->
+                        when (node) {
+                            is LeafNode -> onEvent(FileTreeUiEvent.FileOpened(node.content.toFile().absolutePath))
+                            is BranchNode -> tree.toggleExpansion(node)
+                            else -> Unit
+                        }
+                    },
+                    onLongClick = { node ->
+                        onEvent(
+                            FileTreeUiEvent.ContextMenuRequested(
+                                path = node.content.toFile().absolutePath,
+                                isDirectory = node is BranchNode
+                            )
                         )
-                    )
-                }
-            )
+                    }
+                )
+            }
         }
 
         SnackbarHost(snackbarHostState)

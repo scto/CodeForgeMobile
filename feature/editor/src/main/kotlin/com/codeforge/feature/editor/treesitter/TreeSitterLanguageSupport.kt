@@ -29,9 +29,10 @@ package com.codeforge.feature.editor.treesitter
 import android.content.Context
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import com.itsaky.androidide.treesitter.TSLanguage
+import io.github.rosemoe.sora.editor.ts.TsLanguage
+import io.github.rosemoe.sora.editor.ts.TsLanguageSpec
 import io.github.rosemoe.sora.lang.Language
-import io.github.rosemoe.sora.langs.treesitter.TsLanguage
-import io.github.rosemoe.sora.langs.treesitter.TsLanguageSpec
 
 enum class TreeSitterGrammar(val libraryName: String, val queryAssetDir: String) {
     KOTLIN("tree-sitter-kotlin", "treesitter/kotlin"),
@@ -117,14 +118,18 @@ object TreeSitterLanguageSupport {
     fun createLanguage(context: Context, grammar: TreeSitterGrammar): Language? {
         if (!isAvailable(grammar)) return null
         return runCatching {
-            val spec = TsLanguageSpec.Builder()
-                .language(grammar.libraryName)
-                .highlightScmSource(context.assets.open("${grammar.queryAssetDir}/highlights.scm"))
-                .codeBlocksScmSource(
-                    runCatching { context.assets.open("${grammar.queryAssetDir}/blocks.scm") }.getOrNull()
-                )
-                .build()
-            TsLanguage(spec)
+            val highlightScm = context.assets.open("${grammar.queryAssetDir}/highlights.scm")
+                .bufferedReader().use { it.readText() }
+            val blocksScm = runCatching {
+                context.assets.open("${grammar.queryAssetDir}/blocks.scm").bufferedReader().use { it.readText() }
+            }.getOrDefault("")
+            val tsLang = TSLanguage.loadLanguage(context, grammar.libraryName)
+            val spec = TsLanguageSpec(
+                language = tsLang,
+                highlightScmSource = highlightScm,
+                codeBlocksScmSource = blocksScm
+            )
+            TsLanguage(spec) { }
         }.onFailure {
             android.util.Log.w(
                 "TreeSitterLanguageSupport",

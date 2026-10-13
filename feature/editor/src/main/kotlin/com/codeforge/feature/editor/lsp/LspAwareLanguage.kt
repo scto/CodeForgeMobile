@@ -10,15 +10,10 @@
 package com.codeforge.feature.editor.lsp
 
 import io.github.rosemoe.sora.lang.Language
-import io.github.rosemoe.sora.lang.analysis.AnalyzeManager
-import io.github.rosemoe.sora.lang.completion.CompletionCancelledException
-import io.github.rosemoe.sora.lang.completion.CompletionItem
 import io.github.rosemoe.sora.lang.completion.CompletionPublisher
-import io.github.rosemoe.sora.lang.format.Formatter
-import io.github.rosemoe.sora.lang.smartEnter.NewlineHandler
+import io.github.rosemoe.sora.lang.completion.SimpleCompletionItem
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.ContentReference
-import io.github.rosemoe.sora.widget.SymbolPairMatch
 import android.os.Bundle
 
 class LspAwareLanguage(
@@ -38,13 +33,14 @@ class LspAwareLanguage(
 
         // 2) LSP-Vorschläge (Member-Access, Imports) ergänzen, sofern der Server erreichbar
         //    ist; Fehler werden stillschweigend ignoriert (Completion ist best-effort).
-        if (publisher.isCancelled) throw CompletionCancelledException()
+        publisher.checkCancelled()
         runCatching {
             completionProvider.fetchCompletions(position.line, position.column).forEach { item ->
                 publisher.addItem(
-                    CompletionItem(
+                    SimpleCompletionItem(
                         item.label,
                         item.detail.orEmpty(),
+                        0,
                         item.insertText
                     )
                 )

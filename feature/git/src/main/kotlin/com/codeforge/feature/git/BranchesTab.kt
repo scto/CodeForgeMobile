@@ -161,6 +161,7 @@ private fun BranchRow(branch: GitBranch, enabled: Boolean, onEvent: (GitUiEvent)
                 Icon(Icons.Filled.MoreVert, "Branch-Aktionen", Modifier.size(20.dp))
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                @Composable
                 fun item(text: String, event: GitUiEvent) = DropdownMenuItem(text = { Text(text) }, onClick = { menu = false; onEvent(event) })
                 if (!branch.isCurrent) {
                     item(Res.string(R.string.git_auschecken), GitUiEvent.Checkout(branch.name))

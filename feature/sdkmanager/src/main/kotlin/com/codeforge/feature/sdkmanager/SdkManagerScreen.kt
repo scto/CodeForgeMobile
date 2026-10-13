@@ -24,6 +24,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -75,6 +76,7 @@ fun SdkManagerRoute(
 
 private data class CategoryEntry(@StringRes val labelRes: Int, val toolType: ToolType, val items: List<ToolItem>)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SdkManagerScreen(
     modifier: Modifier = Modifier,
@@ -136,7 +138,7 @@ private fun SdkManagerScreen(
     uiState.openDialogCategory?.let { openCategory ->
         val dialogItems = categories.find { it.toolType == openCategory }?.items ?: emptyList()
         VersionSelectionDialog(
-            title = categories.find { it.toolType == openCategory }?.label ?: "",
+            title = categories.find { it.toolType == openCategory }?.let { stringRes(it.labelRes) } ?: "",
             items = dialogItems,
             selectedVersions = uiState.pendingSelection,
             onToggle = { version -> onEvent(SdkManagerEvent.ToggleVersionSelection(version)) },

@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.codeforge.shared.R;
 import com.codeforge.shared.data.DataUtils;
-import com.codeforge.shared.databinding.ActivityReportBinding;
 import com.codeforge.shared.errors.Error;
 import com.codeforge.shared.file.FileUtils;
 import com.codeforge.shared.file.filesystem.FileType;
@@ -54,8 +53,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public class ReportActivity extends AppCompatActivity {
 
-  private ActivityReportBinding binding;
-
   private static final String CLASS_NAME = ReportActivity.class.getCanonicalName();
   private static final String ACTION_DELETE_REPORT_INFO_OBJECT_FILE =
       CLASS_NAME + ".ACTION_DELETE_REPORT_INFO_OBJECT_FILE";
@@ -78,17 +75,11 @@ public class ReportActivity extends AppCompatActivity {
 
   private static final String LOG_TAG = "ReportActivity";
 
-  @NonNull
-  @Override
-  protected View bindLayout() {
-    this.binding = ActivityReportBinding.inflate(getLayoutInflater());
-    return binding.getRoot();
-  }
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     Logger.logVerbose(LOG_TAG, "onCreate");
     super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_report);
 
     Toolbar toolbar = findViewById(R.id.toolbar);
     if (toolbar != null) {
@@ -208,7 +199,6 @@ public class ReportActivity extends AppCompatActivity {
   protected void onDestroy() {
     super.onDestroy();
     Logger.logVerbose(LOG_TAG, "onDestroy");
-    binding = null;
     deleteReportInfoFile(this, mReportInfoFilePath);
   }
 

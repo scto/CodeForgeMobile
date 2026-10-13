@@ -118,7 +118,7 @@ class SearchViewModel @Inject constructor(
                 if (onlyFile != null && matchStart != null) {
                     searcher.replaceOne(File(onlyFile), options.search, s.replacement, matchStart).fold(
                         onSuccess = { ok -> if (ok) 1 to Res.string(R.string.search_1_treffer_ersetzt) else 0 to Res.string(R.string.search_treffer_nicht_mehr_aktuell_suche) },
-                        onFailure = { 0 to Res.string(R.string.search_ersetzen_fehlgeschlagen, it.message) },
+                        onFailure = { 0 to Res.string(R.string.search_ersetzen_fehlgeschlagen, it.message.orEmpty()) },
                     ).also { (n, _) -> if (n > 0) fileSyncBridge.notifyExternalChange(listOf(onlyFile)) }
                 } else {
                     searcher.replaceAll(File(s.rootPath), options, s.replacement, onlyFile?.let { setOf(it) }).fold(
@@ -129,7 +129,7 @@ class SearchViewModel @Inject constructor(
                                 if (r.failedFiles.isNotEmpty()) append(Res.string(R.string.search_fehlgeschlagen, r.failedFiles.size))
                             }
                         },
-                        onFailure = { 0 to Res.string(R.string.search_ersetzen_fehlgeschlagen, it.message) },
+                        onFailure = { 0 to Res.string(R.string.search_ersetzen_fehlgeschlagen, it.message.orEmpty()) },
                     )
                 }
             }

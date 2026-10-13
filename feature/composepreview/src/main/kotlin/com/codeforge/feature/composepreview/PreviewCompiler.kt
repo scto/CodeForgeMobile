@@ -67,7 +67,7 @@ internal class PreviewCompiler {
             noJdk = false
         }
 
-        val exitCode = K2JVMCompiler().execImpl(collector, Services.EMPTY, arguments)
+        val exitCode = K2JVMCompiler().exec(collector, Services.EMPTY, arguments)
 
         return CompileResult(
             success = exitCode == ExitCode.OK && errorMessages.isEmpty(),

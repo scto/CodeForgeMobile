@@ -45,7 +45,7 @@ class TemplateEngineRepositoryImpl @Inject constructor(
                 // Git-Fehler dürfen das fertige Projekt nicht verwerfen – sie werden nur gemeldet.
                 git.init(projectDir.path, INITIAL_COMMIT_MESSAGE).fold(
                     onSuccess = { r -> handle.copy(gitInitialized = true, gitNote = r.note) },
-                    onFailure = { e -> handle.copy(gitInitialized = false, gitNote = Res.string(R.string.template_git_init_fehlgeschlagen, e.message)) },
+                    onFailure = { e -> handle.copy(gitInitialized = false, gitNote = Res.string(R.string.template_git_init_fehlgeschlagen, e.message.orEmpty())) },
                 )
             }
         }

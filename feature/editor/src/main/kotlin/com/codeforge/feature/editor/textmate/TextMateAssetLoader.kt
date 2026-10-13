@@ -27,7 +27,6 @@ import io.github.rosemoe.sora.langs.textmate.registry.GrammarRegistry
 import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import io.github.rosemoe.sora.langs.textmate.registry.model.ThemeModel
 import io.github.rosemoe.sora.langs.textmate.registry.provider.AssetsFileResolver
-import io.github.rosemoe.sora.textmate.core.theme.IRawTheme
 import org.eclipse.tm4e.core.registry.IThemeSource
 import java.util.concurrent.atomic.AtomicBoolean
 

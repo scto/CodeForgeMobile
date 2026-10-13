@@ -25,10 +25,19 @@ android {
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            pickFirsts += "kotlin/concurrent/atomics/atomics.kotlin_builtins"
+            pickFirsts += "**/*.kotlin_builtins"
+        }
+    }
 }
 
 dependencies {
     implementation(project(":core:resources"))
+    implementation(project(":core:domain"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
@@ -73,6 +82,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.3")
 
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)

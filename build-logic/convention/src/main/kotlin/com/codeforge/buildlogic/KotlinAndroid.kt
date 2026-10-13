@@ -11,6 +11,7 @@ internal fun configureKotlinAndroid(
 ) {
     commonExtension.apply {
         compileSdk = BuildConfig.compileSdk
+        buildToolsVersion = BuildConfig.buildToolsVersion
 
         defaultConfig {
             minSdk = BuildConfig.minSdk

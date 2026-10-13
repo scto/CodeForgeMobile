@@ -46,3 +46,54 @@ passenden Fork per `codeforgeBootstrapUrlTemplate` einhängen (siehe `docs/sub/T
   Details: `docs/adaptive-edge-to-edge-expressive.md`.
 - Gradle 9 / AGP 9 ist ein eigener Migrationsschritt (Built-in Kotlin, neue DSL).
 - SDK-Platform 36 + Build-Tools müssen installiert sein.
+
+## Verifikation
+
+Erfolgreich verifiziert am **2026-10-13** gemäß `agy-tasks/12-verify-build-logic.md`. Alle Schritte wurden auf dem Host-System (Linux aarch64, Termux) vollständig durchlaufen.
+
+### 1. `./gradlew help` & Convention-Plugins
+- **Kompilierung von `build-logic:convention`:**
+  - `AndroidLibraryConventionPlugin`: Korrektur der `consumerProguardFile`-Verdrahtung (Aufruf von `consumerProguardFile("consumer-rules.pro")` statt ungültiger Zuweisung).
+  - `AndroidApplicationConventionPlugin`: `buildTypes.getByName("release")` defensiv an Vorhandensein von `proguard-rules.pro` gebunden.
+  - `QualityConventionPlugin`: Typisierte Konfiguration der `KtlintExtension` via Reflection/DSL (`ignoreFailures = true`, `android = true`).
+  - `TerminalBootstrapPackagesPlugin`: Unterstützung für Property `-PcodeforgeBootstrapSkip=true` implementiert; Offline-Assembly über `termux-bootstrap-zip.S` integriert.
+  - `KotlinAndroid` & `BuildConfig`: `buildToolsVersion = "37.0.0"` fest verankert, damit auf ARM64 die nativen `aidl`- und `aapt2`-Binaries aus dem SDK genutzt werden (verhindert Exec-Fehler x86_64 vs. aarch64).
+- **Status:** `./gradlew help` war `BUILD SUCCESSFUL`.
+
+### 2. `./gradlew projects` & `./gradlew :app:assembleDebug -PcodeforgeBootstrapSkip=true`
+- **Modul- und Toolchain-Anpassungen:**
+  - **NDK Toolchain:** Version in `gradle/libs.versions.toml` auf `29.0.14206865` aktualisiert (unter `~/android-sdk/ndk/29.0.14206865` nativ für aarch64 verfügbar). ndk-build baut alle 4 ABIs (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`) fehlerfrei.
+  - **Protobuf:** `protobuf` auf `4.35.1` angehoben (synchron zu Termux-System `protoc 35.1`; löst `@com.google.protobuf.Generated`); `api(libs.protobuf.javalite)` in `:core:datastore` exportiert.
+  - **Ressourcen & Dependencies:**
+    - `:libs:termux-view`: Fehlende XML-Ressourcen (`strings.xml`, `text_select_handle_left_material.xml`, `text_select_handle_right_material.xml`) nachgetragen.
+    - `:libs:termux-shared`: `commons-io:2.16.1` ergänzt; fehlende ViewBindings in `ReportActivity` durch `setContentView` ersetzt; Command-Hilfsklassen (`Am`, `BaseCommand`, `IntentCmd`, `ShellCommand`) unter `com.codeforge.am` eingebunden.
+    - `:libs:termux-app`: ViewBinding in `TermuxActivity` bereinigt.
+    - `:core:designsystem`: Dependency auf `:core:datastore` ergänzt; Fallback auf Standard-`MaterialTheme` (Expressive Theme API in Material3 1.3.2 noch experimentell/privat).
+  - **String-Ressourcen-Korrekturen:**
+    - Nullable `throwable.message` via `.orEmpty()` abgesichert in `:libs:template-engine`, `:libs:terminal-engine`, `:feature:editor`, `:feature:search`.
+  - **Compose & UI-Fixes:**
+    - `:feature:filetree`: `@Composable`-Aufruf `FileSystemTree` aus `remember` in `key(...)` verschoben.
+    - `:feature:git`: Hilfsfunktionen in `BranchesTab.kt` und `ChangesTab.kt` mit `@Composable` annotiert.
+    - `@OptIn(ExperimentalMaterial3Api::class)` bzw. `@OptIn(ExperimentalMaterial3AdaptiveApi::class)` ergänzt in: `:feature:composepreview`, `:feature:editor`, `:feature:sdkmanager`, `:feature:themebuilder`, `:feature:welcome`, `:feature:settings`, `:feature:terminal`, `:feature:plugins`, `:app` (`ProjectImportRoute`, `ProjectWorkspaceRoute`).
+    - `:feature:editor`: Sora-Editor API-Anpassungen (Nutzung von `SimpleCompletionItem` statt abstract `CompletionItem`, `publisher.checkCancelled()`, Imports für `io.github.rosemoe.sora.editor.ts.*` und `TSLanguage.loadLanguage`).
+    - `:feature:sdkmanager`: `material-icons-extended:1.7.3` für `Icons.Filled.ChevronRight` ergänzt; `labelRes` Auflösung via `stringRes` korrigiert.
+    - `:feature:plugins`: Typo `snackBarHost` -> `snackbarHost` korrigiert.
+  - **App-Verdrahtung & Packaging:**
+    - `:app`: Abhängigkeiten `project(":core:domain")` und `libs.hilt.navigation.compose` in `app/build.gradle.kts` ergänzt.
+    - `packaging.resources`: `pickFirsts += "**/*.kotlin_builtins"` zur Deduplizierung von `kotlin-compiler-embeddable` und `kotlin-stdlib` konfiguriert.
+- **Status:** Debug-APK `app/build/outputs/apk/debug/app-debug.apk` (316 MB) erfolgreich gebaut (`BUILD SUCCESSFUL` in 1m, 865 Tasks).
+
+### 3. `./gradlew test` (JVM-Tests) & `./gradlew ktlintCheck`
+- **JVM-Tests (`./gradlew test -PcodeforgeBootstrapSkip=true`):**
+  - **Variant-Resolution JVM -> Android:** In `KotlinLibraryConventionPlugin` wurden Gradle-Attribute-Regeln (`AndroidJvmCompatibilityRule`, `BuildTypeDisambiguationRule`, `ArtifactTypeDisambiguationRule`) registriert. Dadurch können reine JVM-Module (`examples:*`) Android-Bibliotheken (`:core:domain`, `:libs:plugin-api`, `:libs:terminal-engine`) zur Compile-Zeit über deren `jar`-Artefakt auflösen.
+  - **Beispiel-Plugins (`examples:*-lsp-plugin`):** Fehlende Compile-Only-Abhängigkeit auf `:libs:terminal-engine` für `ShellLaunchSpec` ergänzt; Android-unabhängiges Logging verwendet.
+  - **Status:** Alle Unit-Tests über alle Module fehlerfrei durchgelaufen (`BUILD SUCCESSFUL` in 6m 41s, 1696 Tasks, 0 Fehler).
+- **Code-Style (`./gradlew ktlintCheck`):**
+  - Wie gefordert rein berichtend ausgeführt (`ignoreFailures = true` in `QualityConventionPlugin`), kein Auto-Formatting.
+  - Befunde (u. a. Naming Conventions in Generatoren, Package-Struktur mit Underscores in Templates, Wildcard-Imports) wurden in den Gradle-Reports protokolliert.
+  - **Status:** `BUILD SUCCESSFUL` in 7m 59s, 217 Tasks.
+
+### 4. Verbleibende Hinweise / Warnungen
+- Veraltete Compose-Icons (`Icons.Filled.Undo`, `Icons.Filled.Send` etc.) sollten perspektivisch auf `Icons.AutoMirrored.Filled.*` migriert werden.
+- Gradle 9.0-Kompatibilitätswarnungen betreffen vor allem AGP 8.13.2-interne Tasks und Konfigurationen (geplante Migration zu AGP 9 / Gradle 9).
+
