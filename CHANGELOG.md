@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🎨 Layout-Designer (`:feature:layoutdesigner`) (Task 15)
+
+* **Unit-Tests vollständig grün**: Alle 14 Tests (`LayoutModelTest`: 11, `LayoutScannerTest`: 3) erfolgreich ausgeführt (Roundtrip-XML, Widget-Palette, Attribut-Filterung nach Eltern-Typ, Duplizieren/Verschieben/Einrücken, XXE-Schutz, Einheiten/Farben, Datei-Scanner).
+* **Compose-UI & Material 3 verifiziert**: `ModalBottomSheet`, `VerticalDivider`, `HorizontalDivider`, `CircularProgressIndicator` und spezifische Icons (`SpaceBar`, `TouchApp`, `HourglassEmpty`, `AutoMirrored.*`) fehlerfrei im Debug-Build kompiliert.
+* **Workflow & Näherungsdarstellung**: Palette-Einfügen mit freier ID-Generierung, 100 Schritte Undo/Redo mit Eingabe-Coalescing, XML-Draft/Apply/Revert mit Fehlerprüfung, atomares Speichern (.tmp) und Benachrichtigung via `FileSyncBridge`. Erkennung von `ConstraintLayout`/`RelativeLayout` mit Hinweistext `layout_approx_note`.
+* **Adaptives Layout**: Split-Panel ab 600 dp (Vorschau links, Eigenschaften/Struktur/XML rechts); Tab-Navigation auf kompakten Bildschirmen.
+
 ### 📱 Adaptive Layouts, Edge-to-Edge & Material 3 (Task 14)
 
 * **Toolchain & Bibliotheken verifiziert**: Compose BOM `2025.09.00` (Material 3 `1.3.2`) und `material3-adaptive:1.1.0` auf Google Maven verifiziert. Veralteten Eintrag `composeCompiler = "1.5.15"` aus `libs.versions.toml` bereinigt.
