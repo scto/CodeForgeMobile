@@ -21,6 +21,8 @@
 #                       "openjdk-17,git,protobuf,aapt2,wget". Installation später per `pkg install`.
 #   PREBUILD_PACKAGES   Pakete, die vor REPO_PACKAGES gebaut werden (Reihenfolge-Workaround). Standard: "libsndfile",
 #                       wenn REPO_PACKAGES openjdk-17/alsa-plugins/pulseaudio enthält; "" schaltet es ab.
+#                       Solange es gesetzt ist, wird zusätzlich der Zyklus libmpg123 <-> pulseaudio aufgelöst
+#                       (BUILD_DEPENDS pulseaudio von libmpg123 entfällt für den Lauf).
 #   CODEFORGE_APT_URL   öffentliche URL des APT-Repos (Standard: GitHub Pages dieses Repos)
 #   CODEFORGE_FORK_URL  Fork mit den Paketquellen (Standard: scto/terminal-packages-codeforge)
 #   CODEFORGE_GPG_PASSPHRASE  Passphrase (sonst Zeile aus ~/.bashrc)
@@ -532,6 +534,19 @@ if [ -n "${REPO_PACKAGES}" ]; then
         REPO_PKG_LIST=("${_merged[@]}")
         echo "  Vorab gebaut (Reihenfolge-Workaround): ${PREBUILD_PACKAGES}"
     fi
+    # Zyklus: libsndfile -> libmp3lame -> libmpg123 (BUILD_DEPENDS pulseaudio) -> pulseaudio -> libsndfile.
+    # Auch mit Vorab-Build von libsndfile baut build-package.sh pulseaudio als Abhängigkeit VOR libsndfile
+    # ('Dependency "sndfile" not found'). Der Zyklus wird bei libmpg123 aufgelöst: Dessen BUILD_DEPENDS auf pulseaudio
+    # dient nur der Pulse-Ausgabe des mpg123-Players und wird für diesen Lauf entfernt (danach wiederhergestellt).
+    MPG123_BUILD="packages/libmpg123/build.sh"
+    MPG123_PATCHED=0
+    if [ "${PREBUILD_PACKAGES:-}" != "" ] && [ -f "${MPG123_BUILD}" ] \
+       && grep -q '^TERMUX_PKG_BUILD_DEPENDS="pulseaudio"$' "${MPG123_BUILD}"; then
+        cp "${MPG123_BUILD}" "${MPG123_BUILD}.orig"
+        sed -i 's/^TERMUX_PKG_BUILD_DEPENDS="pulseaudio"$/TERMUX_PKG_BUILD_DEPENDS=""/' "${MPG123_BUILD}"
+        MPG123_PATCHED=1
+        echo "  Zyklus aufgelöst: libmpg123 ohne BUILD_DEPENDS pulseaudio (Datei wird danach wiederhergestellt)"
+    fi
     for arch in "${ARCHS_LIST[@]}"; do
         for pkg in "${REPO_PKG_LIST[@]}"; do
             [ -n "${pkg}" ] || continue
@@ -561,6 +576,7 @@ if [ -n "${REPO_PACKAGES}" ]; then
             done
         done
     done
+    if [ "${MPG123_PATCHED}" = 1 ]; then mv -f "${MPG123_BUILD}.orig" "${MPG123_BUILD}"; fi
 fi
 
 # ----------------------------------------------------
