@@ -25,8 +25,10 @@ entfernt. Es gibt genau eine Umgebung: den Termux-Bootstrap unter
 * Quellen der Android-Teile (Vorbild: `scto/termux-android-setup`):
   * JDK und Ninja: Termux-Pakete aus dem CodeForge-APT-Repo (`openjdk-17`, `ninja`; dazu `jq`). `p7zip` lädt das Skript
     nur nach, wenn ein `.7z`-Asset auftaucht (die Mirror-Assets sind `.tar.xz`/`.zip`).
-  * cmdline-tools (`sdkmanager`) und `platforms;android-N`: Google. URL + SHA-256 stehen als Standard im Skript
-    (überschreibbar über `sdk.conf` oder `CODEFORGE_CMDLINE_TOOLS_URL/_SHA256`).
+  * cmdline-tools (`sdkmanager`): aus dem Mirror-Release **`cmdline-tools-19.0`** (Asset `cmdline-tools-19.0.tar.xz`, SHA-256 fest im Skript;
+    einmalig mit dem Workflow `publish-cmdline-tools` aus dem SDK-Archiv 37.0.0 erzeugt). Ist das Release nicht erreichbar, entpackt das Skript
+    `cmdline-tools/` aus dem Mirror-Archiv `android-sdk-37.0.0`. Googles cmdline-tools werden nicht mehr geladen. Überschreibbar über
+    `CODEFORGE_CMDLINE_REV`, `CODEFORGE_CMDLINE_TOOLS_URL/_SHA256` (oder `sdk.conf`). `platforms;android-N` kommen weiterhin per `sdkmanager` von Google.
   * Die Android-Binaries (build-tools, platform-tools, NDK, CMake) kommen aus dem eigenen Mirror
     **`scto/codeforge-tools`** (Standard, überschreibbar über `CODEFORGE_TOOLS_REPO` bzw. `TOOLS_REPO` in `sdk.conf`;
     leer = Mirror aus). Der Mirror kopiert Releases von HomuHomu833, AndroidIDEOfficial und Lzhiyong, siehe `docs/CODEFORGE-TOOLS.md`:

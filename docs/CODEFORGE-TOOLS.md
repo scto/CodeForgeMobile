@@ -30,3 +30,21 @@ ohne Android-Variante (35.0.2, 36.0.0: nur musl).
 Das Skript wurde nur mit simulierten Releases (gemockte `curl`/`pkg`) getestet: Liste, Installation je Quelle, Prüfsummenfehler,
 Rückfall bei fehlendem Mirror, `setup`. Ein echter Lauf gegen GitHub, das Layout der echten Archive (NDK, CMake) und der Start der
 Binaries auf dem Gerät sind nicht geprüft.
+
+## Architekturen
+
+`codeforge-env` und `setup-termux-android.sh` wählen die Asset-Variante nach `uname -m`:
+
+| `uname -m` | sdk / ndk / cmake | aide / lzhi |
+|---|---|---|
+| `aarch64` | `*-aarch64-linux-android` | `aarch64` |
+| `armv7l`, `armv8l` (32-bit-Userland) | `*-armv7a-linux-androideabi` | `arm` |
+
+Überschreibbar mit `ASSET_VARIANT` / `AIDE_VARIANT`. Der Mirror spiegelt standardmäßig beide Varianten. `agy` (Antigravity CLI) läuft nur auf aarch64 und wird auf 32-bit-ARM übersprungen.
+
+## cmdline-tools aus dem Mirror
+
+`codeforge-env` installiert `cmdline-tools;latest` aus dem Mirror-Release `cmdline-tools-<Rev>` (Standard `19.0`, Asset `cmdline-tools-19.0.tar.xz`,
+SHA-256 fest im Skript). Das Release erzeugt einmalig der Workflow `publish-cmdline-tools` in `scto/codeforge-tools` aus dem Archiv `android-sdk-37.0.0`.
+Fehlt das Release, entpackt `codeforge-env` `cmdline-tools/` aus `android-sdk-37.0.0` (Mirror). Überschreiben: `CODEFORGE_CMDLINE_REV`,
+`CODEFORGE_CMDLINE_TOOLS_URL`, `CODEFORGE_CMDLINE_TOOLS_SHA256`.

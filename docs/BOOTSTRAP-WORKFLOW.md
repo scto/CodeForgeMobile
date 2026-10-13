@@ -74,7 +74,7 @@ Das Gradle-Plugin bettet die Bootstrap-ZIPs in die APK ein. Alles, was in der ZI
 `codeforge-env` bezieht Android-SDK-Teile so (Vorbild: `scto/termux-android-setup`):
 
 - **Termux-Pakete aus diesem Repo:** JDK, Ninja und das Hilfswerkzeug `jq`; CMake nur als Alternative (`cmake;termux`). `p7zip` lädt das Skript nur bei `.7z`-Assets nach.
-- **Google:** cmdline-tools (`sdkmanager`, reines Java), darüber `platforms;android-N` und die Java-Teile der build-tools.
+- **Mirror (`cmdline-tools-19.0`):** cmdline-tools (`sdkmanager`, reines Java). Darüber lädt Google noch `platforms;android-N` und die Java-Teile der build-tools.
 - **Mirror `scto/codeforge-tools` (GitHub-Releases):** aarch64-Binaries für build-tools und platform-tools (`aapt2`, `aidl`, `zipalign`, `adb`), NDK und CMake. Der Mirror kopiert Drittanbieter-Builds (HomuHomu833, AndroidIDEOfficial, Lzhiyong); er läuft über eigenen Workflow und nicht über dieses Repo, siehe `docs/CODEFORGE-TOOLS.md`. Ist der Mirror leer oder nicht erreichbar, nutzt das Skript die HomuHomu833-Repos direkt.
 
 | Paket | Empfehlung | Begründung |
