@@ -19,6 +19,8 @@
 #                       damit die APK – nur für Kleinkram verwenden (z. B. "zip").
 #   REPO_PACKAGES       Pakete, die NUR gebaut und ins APT-Repo gelegt werden (Komma-getrennt), z. B.
 #                       "openjdk-17,git,protobuf,aapt2,wget". Installation später per `pkg install`.
+#   PREBUILD_PACKAGES   Pakete, die vor REPO_PACKAGES gebaut werden (Reihenfolge-Workaround). Standard: "libsndfile",
+#                       wenn REPO_PACKAGES openjdk-17/alsa-plugins/pulseaudio enthält; "" schaltet es ab.
 #   CODEFORGE_APT_URL   öffentliche URL des APT-Repos (Standard: GitHub Pages dieses Repos)
 #   CODEFORGE_FORK_URL  Fork mit den Paketquellen (Standard: scto/terminal-packages-codeforge)
 #   CODEFORGE_GPG_PASSPHRASE  Passphrase (sonst Zeile aus ~/.bashrc)
@@ -509,6 +511,27 @@ ls "${CLONE_DIR}"/output/*.deb >/dev/null 2>&1 || die "Keine .deb-Dateien in ${C
 if [ -n "${REPO_PACKAGES}" ]; then
     [ -f build-package.sh ] || die "build-package.sh fehlt im Fork."
     IFS=',' read -r -a REPO_PKG_LIST <<< "${REPO_PACKAGES}"
+    # Workaround: scripts/buildorder.py sortiert für openjdk-17 (-> alsa-plugins -> pulseaudio) pulseaudio VOR libsndfile
+    # (Reihenfolge laut Log: ... speexdsp, pulseaudio, libmpg123, ..., libsndfile). pulseaudio bricht dann mit
+    # 'Dependency "sndfile" not found' ab. Baut man libsndfile zuerst, gilt es als gebaut und die Reihenfolge ist egal.
+    # Überschreibbar: PREBUILD_PACKAGES="" schaltet es ab.
+    if [ -z "${PREBUILD_PACKAGES+x}" ]; then
+        PREBUILD_PACKAGES=""
+        case ",${REPO_PACKAGES}," in
+            *,openjdk-17,*|*,alsa-plugins,*|*,pulseaudio,*) PREBUILD_PACKAGES="libsndfile" ;;
+        esac
+    fi
+    if [ -n "${PREBUILD_PACKAGES}" ]; then
+        IFS=',' read -r -a _pre <<< "${PREBUILD_PACKAGES}"
+        _merged=()
+        for p in "${_pre[@]}" "${REPO_PKG_LIST[@]}"; do
+            [ -n "${p}" ] || continue
+            case " ${_merged[*]-} " in *" ${p} "*) continue ;; esac
+            _merged+=("${p}")
+        done
+        REPO_PKG_LIST=("${_merged[@]}")
+        echo "  Vorab gebaut (Reihenfolge-Workaround): ${PREBUILD_PACKAGES}"
+    fi
     for arch in "${ARCHS_LIST[@]}"; do
         for pkg in "${REPO_PKG_LIST[@]}"; do
             [ -n "${pkg}" ] || continue
