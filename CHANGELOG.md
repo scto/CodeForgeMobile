@@ -22,7 +22,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 * `scripts/find_hardcoded_strings.py` (Suche nach harten UI-Texten, `--check`/`--json`/Allowlist) und `agy-tasks/17-externalize-hardcoded-strings.md` (wiederkehrende Auslagerung nach `:core:resources`).
 
-* Bootstrap-Release `bootstrap-2026.10.08` (`scto/terminal-packages-codeforge`) in `gradle.properties` eingetragen (URL-Template + SHA-256 je ABI). Stichprobe: Prüfsummen stimmen, keine `com.termux`-Strings in Text-/ELF-Dateien, Shebangs und `SYMLINKS.txt` auf `com.codeforge.app`. Nicht auf dem Gerät gestartet.
+### 📦 Terminal-Bootstrap (`bootstrap-2026.10.11`) (Task 04)
+
+* **Neuer Bootstrap-Release eingebunden**: Release `bootstrap-2026.10.11` (`scto/terminal-packages-codeforge`) mit Präfix `/data/data/com.codeforge.app/files/usr` für `aarch64` und `arm` verifiziert und in `gradle.properties` konfiguriert.
+* **Architektur-Fokus**: `TerminalBootstrapPackagesPlugin` auf `aarch64` und `arm` angepasst (Standard für Pixel 9 Pro XL / ARM-Zielgeräte), defekten x86_64-Release `2026.10.08` vollständig entfernt.
+* **Native Einbettung verifiziert**: Task `:libs:termux-app:embedTerminalBootstrap` lädt die Zips und generiert `termux-bootstrap-zip.S` mit `.incbin`. `:app:assembleDebug` baut erfolgreich mit `libtermux-bootstrap.so` (128 MB für aarch64, 120 MB für arm).
 
 ### 🐛 Fixes nach dem ersten echten On-Device-Build (`error2.log`)
 

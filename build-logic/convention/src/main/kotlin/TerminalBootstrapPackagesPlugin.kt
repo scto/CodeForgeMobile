@@ -30,9 +30,8 @@ class TerminalBootstrapPackagesPlugin : Plugin<Project> {
     companion object {
         /** ABI → SHA-256 des Bootstrap-ZIPs. */
         private val BOOTSTRAP_PACKAGES = mapOf(
-            "aarch64" to "68da03ed270d59cafcd37981b00583c713b42cb440adf03d1bf980f39a55181d",
-            "arm" to "f3d9f2da7338bd00b02a8df192bdc22ad431a5eef413cecf4cd78d7a54ffffbf",
-            "x86_64" to "6e4e50a206c3384c36f141b2496c1a7c69d30429e4e20268c51a84143530af67",
+            "aarch64" to "05bb4a96a74e955333cc96139f6d05df394bfa8f2b18d29a29bb0f6b4b914279",
+            "arm" to "2ba9e7e5e0d129776a80e70da115fc6bf258105a008be07fc5087eda30111ad0",
         )
 
         /** Tag-Suffix des GitHub-Releases. */
@@ -83,10 +82,8 @@ class TerminalBootstrapPackagesPlugin : Plugin<Project> {
                         .incbin "${escapePathOnWindows(files.getValue("aarch64").absolutePath)}"
                     #elif defined __arm__
                         .incbin "${escapePathOnWindows(files.getValue("arm").absolutePath)}"
-                    #elif defined __x86_64__
-                        .incbin "${escapePathOnWindows(files.getValue("x86_64").absolutePath)}"
                     #else
-                    # error Unsupported arch
+                        .byte 0
                     #endif
                     1:
                     blob_size:
