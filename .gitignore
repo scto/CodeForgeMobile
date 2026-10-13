@@ -30,3 +30,6 @@ output/
 github_repo_ready/
 tmp/
 terminal-packages-codeforge/
+
+# Patches und temporäre Diffs
+*.patch
