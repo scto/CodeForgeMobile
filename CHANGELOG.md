@@ -11,6 +11,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📦 Indexierung, Dependency-Updater & Editor-Overlays (Task 08)
+
+* **Unit-Tests vollständig grün**: Alle 34 Tests in `:libs:indexing-impl` (8 Tests: Gradle-Repositories, Settings, Index-Builder), `:libs:dependency-updater-impl` (21 Tests: Gradle-Build-Parser, Repository-Flow, TOML-Katalog-Parser, Update-Flow, Versionsvergleich) und `:feature:editor` (5 Tests: Hex-/Kotlin-Farbliteral-Scanner) erfolgreich ausgeführt.
+* **Builds & Integration verifiziert**: `:feature:dependencyupdates:assembleDebug`, `:feature:editor:assembleDebug` und `:app:assembleDebug` erfolgreich kompiliert und assembliert.
+* **Editor-Overlays (sora-editor 0.23.4)**: `EditorOverlayGeometry` korrigiert den sora-Versatz (`getCharOffsetY` liefert Unterkante; `rowHeight` wird subtrahiert) für zeilenbündige Platzierung; Farbkästchen mit 2x2-Schachbrett für Alphatransparenz; reaktives Re-Layout über `overlayTick` bei Scroll- und Content-Events.
+* **Update-Flow & FileSyncBridge**: Update-Chips in `libs.versions.toml` mit Dialog (Update / Update All); atomares Speichern und automatischer Tab-Reload via `FileSyncBridge.requestFlush()` und `notifyExternalChange()`.
+* **Projekt-Öffnen & Dialog-Optionen**: `DependencyUpdatesHost` prüft Abhängigkeiten im Hintergrund; persistentes `Dismiss` (überlebt Neustarts via `DismissalStore`), sitzungsweises `Ask later` (`snooze`) und direkte Aktualisierung verifiziert.
+* **Sprachanalyse**: Prüfung der `.toml`-Erkennung dokumentiert (derzeit `PLAIN`; Erweiterung für Task 01/02 empfohlen).
+
 ### 💻 Termux-Umgebung, SDK-Setup & W^X Exec (Task 11)
 
 * **Exec-Entscheidung & W^X-Lösung**: `targetSdk` in `build-logic/convention/.../BuildConfig.kt` und Dokumentation auf `28` festgelegt. Dies weist Android 10+ (API 29+) an, die App im `untrusted_app_28`-SELinux-Domain ohne W^X-Restriktionen auszuführen, sodass `bash`, `java`, `apt`, `aapt2` etc. direkt aus `/data/data/com.codeforge.app/files/usr/bin` gestartet werden können (identisch zur offiziellen Termux-App).
