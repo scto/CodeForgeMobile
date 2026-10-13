@@ -13,6 +13,6 @@ des Projekts. Version Catalog: `../gradle/libs.versions.toml` (auch hier als `li
 | `codeforge.quality` | `QualityConventionPlugin` | ktlint (`.editorconfig`), derzeit `ignoreFailures = true` |
 | `codeforge.terminal.bootstrap` | `TerminalBootstrapPackagesPlugin` | Task `embedTerminalBootstrap`: lädt Bootstrap-Zips, schreibt `termux-bootstrap-zip.S` (nur `:libs:termux-app`) |
 
-Zentrale Konstanten: `com.codeforge.buildlogic.BuildConfig` (compileSdk 36, minSdk 26, targetSdk 35, Java 17).
+Zentrale Konstanten: `com.codeforge.buildlogic.BuildConfig` (compileSdk 36, minSdk 26, targetSdk 28, Java 17).
 Verwendung im Modul: `alias(libs.plugins.codeforge.android.library.compose)` usw. (Aliase in der toml).
 Vendorte Termux-Module nutzen nur `…android.library` (kein ktlint auf GPL-Fremdcode).

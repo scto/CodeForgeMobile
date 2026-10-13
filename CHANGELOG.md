@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 💻 Termux-Umgebung, SDK-Setup & W^X Exec (Task 11)
+
+* **Exec-Entscheidung & W^X-Lösung**: `targetSdk` in `build-logic/convention/.../BuildConfig.kt` und Dokumentation auf `28` festgelegt. Dies weist Android 10+ (API 29+) an, die App im `untrusted_app_28`-SELinux-Domain ohne W^X-Restriktionen auszuführen, sodass `bash`, `java`, `apt`, `aapt2` etc. direkt aus `/data/data/com.codeforge.app/files/usr/bin` gestartet werden können (identisch zur offiziellen Termux-App).
+* **Build & Namespace-Kollisionsprüfung**: `./gradlew assembleDebug` fehlerfrei gebaut (1279 Tasks). Namespace-Koexistenz von `:libs:termux-app` und `:app` (`com.codeforge.app`) ohne Konflikte bestätigt.
+* **Unit-Tests vollständig grün**: Alle 4 Tests in `SdkScriptProtocolTest` (`:libs:terminal-engine`) erfolgreich (Status-Parsing, Fortschrittsextraktion `PROGRESS:`, Fehleranalyse `ERROR:` und Warnungen). Alle 849 Unit-Test-Tasks im Gesamtlauf (`testDebugUnitTest`) fehlerfrei.
+* **codeforge-env & Architektur**: Installationsskript in `libs/terminal-engine/src/main/assets/codeforge-env` verifiziert (Multi-Arch `aarch64`/`arm`, GitHub-Mirror-Fallback `scto/codeforge-tools`, Extraktion und Maschinenprotokoll).
+* **Plugin-API**: `PluginHostServices.buildShellCommand` und `$HOME`-Pfadkonsistenz im Termux-Prefix verifiziert.
+
 ### 🎨 Layout-Designer (`:feature:layoutdesigner`) (Task 15)
 
 * **Unit-Tests vollständig grün**: Alle 14 Tests (`LayoutModelTest`: 11, `LayoutScannerTest`: 3) erfolgreich ausgeführt (Roundtrip-XML, Widget-Palette, Attribut-Filterung nach Eltern-Typ, Duplizieren/Verschieben/Einrücken, XXE-Schutz, Einheiten/Farben, Datei-Scanner).

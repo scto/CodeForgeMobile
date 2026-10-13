@@ -22,8 +22,8 @@ object BuildConfig {
   /** The minimum SDK version. */
   const val minSdk = 26
 
-  /** The target SDK version. */
-  const val targetSdk = 35
+  /** The target SDK version (28 disables W^X execution restrictions for Termux binaries in data dir). */
+  const val targetSdk = 28
 
   /** The source and target Java compatibility. */
   val javaVersion = JavaVersion.VERSION_17
