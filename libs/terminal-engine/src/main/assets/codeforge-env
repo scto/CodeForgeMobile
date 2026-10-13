@@ -22,8 +22,10 @@
 #
 # Quellen:
 #   - JDK, CMake und Ninja kommen als Termux-Pakete aus dem CodeForge-APT-Repo.
-#   - cmdline-tools (sdkmanager, reines Java) kommen von Google (URL + SHA-256 unten als Standard).
-#   - platforms;android-N und die Java-Teile der build-tools holt Googles sdkmanager.
+#   - cmdline-tools (sdkmanager, reines Java) kommen aus dem Mirror: Release cmdline-tools-19.0 von $TOOLS_REPO
+#     (SHA-256 fest hinterlegt). Nicht erreichbar -> Fallback: temporär aus dem Archiv android-sdk-37.0.0 entpackt.
+#     Kein Download von dl.google.com mehr (es sei denn, CODEFORGE_CMDLINE_TOOLS_URL setzt ihn ausdrücklich).
+#   - platforms;android-N und die Java-Teile der build-tools holt der sdkmanager (Repository von Google).
 #   - Native Android-Binaries (aapt2, aidl, zipalign, adb …), NDK und CMake kommen aus dem eigenen
 #     Mirror $TOOLS_REPO (Standard scto/codeforge-tools, siehe dessen README). Googles eigene Binaries sind
 #     x86 und laufen auf Android nicht. Tags im Mirror:
@@ -40,7 +42,8 @@
 #   - GitHub-API ohne Token ist auf 60 Anfragen/Stunde begrenzt: bei Fehlern GITHUB_TOKEN setzen.
 #   - Prüfsumme: GitHubs "digest" des Assets, sonst die <asset>.sha256 aus dem Mirror-Release; fehlt beides, Warnung.
 #   - Überschreibbar über sdk.conf oder Umgebung: TOOLS_REPO (leer = Mirror aus), SDK_REPO, NDK_REPO, CMAKE_REPO,
-#     ASSET_VARIANT (Standard aarch64-linux-android), AIDE_VARIANT (aarch64 oder arm, sonst aus uname -m).
+#     ASSET_VARIANT (Standard nach uname -m: aarch64 -> aarch64-linux-android, 32-bit-ARM -> armv7a-linux-androideabi),
+#     AIDE_VARIANT (aarch64 oder arm, sonst aus uname -m).
 # Optional zusätzlich ein Manifest ($CODEFORGE_SDK_REPO/manifest.txt), Zeilenformat:
 #   id|version|kind|source|sha256|dest|extra
 #   kind=archive     source=URL (relativ zum Repo, wenn ohne "://"), dest relativ zu $SDK_ROOT,
@@ -77,21 +80,36 @@ ENV_FILE="$PREFIX/etc/profile.d/codeforge-android.sh"
 JVM_DIR="$PREFIX/lib/jvm"
 mkdir -p "$TMP" "$SDK_ROOT" 2>/dev/null
 
-# Standard: Googles Command-line Tools (reines Java, läuft mit dem Termux-JDK). Überschreibbar über sdk.conf
-# (CMDLINE_TOOLS_URL / CMDLINE_TOOLS_SHA256) oder CODEFORGE_CMDLINE_TOOLS_URL / _SHA256.
-# Bei einem Versionswechsel URL UND Prüfsumme gemeinsam ändern (Prüfsumme steht auf developer.android.com/studio).
-CMDLINE_TOOLS_URL="${CODEFORGE_CMDLINE_TOOLS_URL:-${CMDLINE_TOOLS_URL:-https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip}}"
-CMDLINE_TOOLS_SHA256="${CODEFORGE_CMDLINE_TOOLS_SHA256:-${CMDLINE_TOOLS_SHA256:-4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583}}"
+# cmdline-tools (reines Java, läuft mit dem Termux-JDK). Standard: Release cmdline-tools-$CMDLINE_REV des Mirrors
+# (https://github.com/scto/codeforge-tools/releases/tag/cmdline-tools-19.0, Asset cmdline-tools-19.0.tar.xz).
+# Überschreibbar über sdk.conf bzw. Umgebung:
+#   CMDLINE_REV (Standard 19.0) · CMDLINE_TOOLS_URL / CMDLINE_TOOLS_SHA256 (eigene Quelle, z. B. Googles ZIP)
+#   Bei anderer Revision als 19.0 ohne CMDLINE_TOOLS_SHA256 wird die <asset>.sha256 des Releases verwendet.
+CMDLINE_REV="${CODEFORGE_CMDLINE_REV:-${CMDLINE_REV:-19.0}}"
+CMDLINE_SDK_VER="${CODEFORGE_CMDLINE_SDK_VER:-${CMDLINE_SDK_VER:-37.0.0}}"   # SDK-Archiv für den Fallback
+CMDLINE_TOOLS_URL="${CODEFORGE_CMDLINE_TOOLS_URL:-${CMDLINE_TOOLS_URL-__mirror__}}"
+CMDLINE_TOOLS_SHA256="${CODEFORGE_CMDLINE_TOOLS_SHA256:-${CMDLINE_TOOLS_SHA256:-}}"
 
-GH_VARIANT="${ASSET_VARIANT:-aarch64-linux-android}"
+# Architektur des Geräts -> Asset-Variante (HomuHomu833/Mirror: *-aarch64-linux-android bzw. *-armv7a-linux-androideabi,
+# androidide-tools/Lzhiyong: aarch64 bzw. arm). 32-bit-Userland (armv7l/armv8l) bekommt die armv7a-Builds.
+case "$(uname -m)" in
+  aarch64|arm64)      GH_VARIANT_DEFAULT=aarch64-linux-android;     AIDE_VARIANT_DEFAULT=aarch64; CF_ARCH=aarch64 ;;
+  armv7l|armv8l|arm*) GH_VARIANT_DEFAULT=armv7a-linux-androideabi;  AIDE_VARIANT_DEFAULT=arm;     CF_ARCH=arm ;;
+  *)                  GH_VARIANT_DEFAULT=aarch64-linux-android;     AIDE_VARIANT_DEFAULT=aarch64; CF_ARCH=aarch64 ;;
+esac
+GH_VARIANT="${ASSET_VARIANT:-$GH_VARIANT_DEFAULT}"
 # Eigener Mirror (Releases android-sdk-*, android-ndk-*, cmake-*, androidide-tools-v*, lzhiyong-sdk-tools-*)
 TOOLS_REPO="${CODEFORGE_TOOLS_REPO:-${TOOLS_REPO-scto/codeforge-tools}}"
-case "$(uname -m)" in
-  aarch64|arm64) AIDE_VARIANT_DEFAULT=aarch64 ;;
-  arm*|armv7l|armv8l) AIDE_VARIANT_DEFAULT=arm ;;
-  *) AIDE_VARIANT_DEFAULT=aarch64 ;;
-esac
 AIDE_VARIANT="${AIDE_VARIANT:-$AIDE_VARIANT_DEFAULT}"
+# cmdline-tools-URL: Mirror-Release (Standard), eigene URL oder leer (= keine cmdline-tools/platforms im Manifest)
+if [ "$CMDLINE_TOOLS_URL" = "__mirror__" ]; then
+  if [ -n "$TOOLS_REPO" ]; then
+    CMDLINE_TOOLS_URL="https://github.com/$TOOLS_REPO/releases/download/cmdline-tools-$CMDLINE_REV/cmdline-tools-$CMDLINE_REV.tar.xz"
+    [ -n "$CMDLINE_TOOLS_SHA256" ] || [ "$CMDLINE_REV" != "19.0" ] || CMDLINE_TOOLS_SHA256=f9ab9233b8ced6f74fd682a8a3c68a52031bc761bc06425e8dc502adb93fca9e
+  else
+    CMDLINE_TOOLS_URL=""
+  fi
+fi
 SDK_CUSTOM_REPO="${SDK_REPO:-HomuHomu833/android-sdk-custom}"
 NDK_CUSTOM_REPO="${NDK_REPO:-HomuHomu833/android-ndk-custom}"
 
@@ -101,7 +119,7 @@ DEFAULT_MANIFEST='jdk;17|17|pkg|openjdk-17|||
 jdk;21|21|pkg|openjdk-21|||
 cmake;termux|termux|cmake|cmake|||'
 if [ -n "$CMDLINE_TOOLS_URL" ]; then
-  DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"cmdline-tools;latest|latest|archive|$CMDLINE_TOOLS_URL|$CMDLINE_TOOLS_SHA256|cmdline-tools/latest|strip=1"
+  DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"cmdline-tools;latest|$CMDLINE_REV|archive|$CMDLINE_TOOLS_URL|$CMDLINE_TOOLS_SHA256|cmdline-tools/latest|strip=1"
   DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''platforms;android-35|35|sdkmanager|platforms;android-35|||'
   DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''platforms;android-36|36|sdkmanager|platforms;android-36|||'
 fi
@@ -377,6 +395,24 @@ link_cmake() {
 }
 
 # ---------- install / uninstall ----------
+# Fallback für cmdline-tools: nur cmdline-tools/ temporär aus dem SDK-Archiv android-sdk-$CMDLINE_SDK_VER (Mirror) entpacken
+cmdline_from_sdk_archive() {
+  [ -n "$TOOLS_REPO" ] || { err "Kein Mirror (TOOLS_REPO leer) – cmdline-tools nicht verfügbar"; return 1; }
+  local cx="$TMP/cfsdk-cmdline-extract" sm root dest="$SDK_ROOT/cmdline-tools/latest"
+  progress 3 "Suche android-sdk-$CMDLINE_SDK_VER im Mirror …"
+  gh_find_asset "$TOOLS_REPO" "$CMDLINE_SDK_VER" android-sdk- || return 1
+  gh_fetch_extract "$cx" || { rm -rf "$cx"; return 1; }
+  sm=$(find "$GH_ROOT" -type f -path '*/cmdline-tools/bin/sdkmanager' | head -n1)
+  [ -n "$sm" ] || { rm -rf "$cx"; err "Kein cmdline-tools/bin/sdkmanager im Archiv $GH_ASSET"; return 1; }
+  root=$(dirname "$(dirname "$sm")")
+  progress 92 "Installiere cmdline-tools …"
+  mkdir -p "$SDK_ROOT/cmdline-tools"; rm -rf "$dest"
+  mv "$root" "$dest" || { rm -rf "$cx"; err "cmdline-tools konnten nicht verschoben werden"; return 1; }
+  rm -rf "$cx"
+  chmod -R u+x "$dest/bin" 2>/dev/null
+  [ -x "$dest/bin/sdkmanager" ]
+}
+
 do_install() { # id
   local id=$1 kind ver src sha dest extra strip=0 url file tp=""
   entry_exists "$id" || die "Unbekannte Komponente: $id"
@@ -396,13 +432,25 @@ do_install() { # id
       case "$src" in *://*) url=$src ;; *) url="$REPO_URL/$src" ;; esac
       file="$TMP/cfsdk-$(printf '%s' "$id" | tr -c 'A-Za-z0-9.' '_')-${src##*/}"
       progress 2 "Starte Download $id"
-      download "$url" "$file" 2 78 || { rm -f "$file"; exit 1; }
+      if ! download "$url" "$file" 2 78; then
+        rm -f "$file"
+        if [ "$id" = 'cmdline-tools;latest' ]; then
+          say "Warnung: $url nicht erreichbar – Fallback: aus android-sdk-$CMDLINE_SDK_VER entpacken"
+          cmdline_from_sdk_archive || exit 1
+          return 0
+        fi
+        exit 1
+      fi
+      if [ -z "$sha" ] && [ "$id" = 'cmdline-tools;latest' ]; then
+        sha=$(curl -fsSL -m 25 "$url.sha256" 2>/dev/null | awk 'NR==1{print $1}')
+        printf '%s' "$sha" | grep -Eq '^[0-9a-f]{64}$' || sha=""
+      fi
       if [ -n "$sha" ]; then
         progress 82 "Prüfe Prüfsumme …"
         local got; got=$(sha256sum "$file" | awk '{print $1}')
         [ "$got" = "$sha" ] || { rm -f "$file"; die "Prüfsumme stimmt nicht für $id (erwartet $sha, erhalten $got)"; }
       elif [ "$id" = 'cmdline-tools;latest' ]; then
-        rm -f "$file"; die "Keine SHA-256 für cmdline-tools gesetzt (CMDLINE_TOOLS_SHA256 in $CONF)"
+        rm -f "$file"; die "Keine SHA-256 für cmdline-tools (weder CMDLINE_TOOLS_SHA256 in $CONF noch $url.sha256)"
       else
         say "Warnung: keine Prüfsumme im Manifest für $id"
       fi
@@ -414,7 +462,7 @@ do_install() { # id
     sdkmanager)
       local sm="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
       if [ ! -x "$sm" ]; then
-        entry_exists 'cmdline-tools;latest' || die "cmdline-tools nicht konfiguriert: CMDLINE_TOOLS_URL und CMDLINE_TOOLS_SHA256 in $CONF setzen"
+        entry_exists 'cmdline-tools;latest' || die "cmdline-tools nicht konfiguriert (TOOLS_REPO leer?): CMDLINE_TOOLS_URL und CMDLINE_TOOLS_SHA256 in $CONF setzen"
         say "cmdline-tools fehlen — installiere sie zuerst"; ( do_install 'cmdline-tools;latest' ) || exit 1
       fi
       progress 10 "sdkmanager installiert $src …"
@@ -502,7 +550,7 @@ do_install() { # id
       mv "$(dirname "$aapt2src")" "$bdir" || { rm -rf "$ax"; die "build-tools konnten nicht verschoben werden"; }
       rm -rf "$ax"
       find "$bdir" -maxdepth 2 -type f ! -name '*.jar' ! -name '*.xml' ! -name '*.properties' ! -name '*.txt' -exec chmod +x {} + 2>/dev/null
-      [ -f "$bdir/source.properties" ] || printf 'Pkg.Desc = Android SDK Build-Tools %s (aarch64)\nPkg.Revision = %s\n' "$ver" "$ver" > "$bdir/source.properties"
+      [ -f "$bdir/source.properties" ] || printf 'Pkg.Desc = Android SDK Build-Tools %s (%s)\nPkg.Revision = %s\n' "$ver" "$CF_ARCH" "$ver" > "$bdir/source.properties"
       "$bdir/aapt2" version >/dev/null 2>&1 || say "Warnung: aapt2 startet nicht – Quelle/Variante prüfen (AIDE_VARIANT=$AIDE_VARIANT)"
       ;;
     ghsdk)
@@ -514,11 +562,11 @@ do_install() { # id
         progress 4 "sdkmanager installiert build-tools;$ver …"
         export JAVA_HOME="${JAVA_HOME:-$(first_jdk)}"
         yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "build-tools;$ver" >/dev/null 2>&1 \
-          || say "Warnung: build-tools;$ver bei Google nicht verfügbar – nur aarch64-Binaries werden genutzt"
+          || say "Warnung: build-tools;$ver bei Google nicht verfügbar – nur die $CF_ARCH-Binaries werden genutzt"
       else
-        say "Warnung: kein sdkmanager – build-tools enthalten nur die aarch64-Binaries"
+        say "Warnung: kein sdkmanager – build-tools enthalten nur die $CF_ARCH-Binaries"
       fi
-      # b) native aarch64-Binaries einspielen
+      # b) native Binaries (aarch64 bzw. arm) einspielen
       progress 6 "Suche SDK-Binaries $ver bei GitHub …"
       gh_find_asset "$src" "$ver" "$tp" "$(asset_re_for "$tp" "$kind" "$ver")" || exit 1
       gh_fetch_extract "$sx" || { rm -rf "$sx"; exit 1; }
@@ -532,7 +580,7 @@ do_install() { # id
         find "$SDK_ROOT/platform-tools" -maxdepth 1 -type f ! -name '*.properties' -exec chmod +x {} + 2>/dev/null
       fi
       rm -rf "$sx"
-      [ -f "$bt/source.properties" ] || printf 'Pkg.Desc = Android SDK Build-Tools %s (aarch64)\nPkg.Revision = %s\n' "$ver" "$ver" > "$bt/source.properties"
+      [ -f "$bt/source.properties" ] || printf 'Pkg.Desc = Android SDK Build-Tools %s (%s)\nPkg.Revision = %s\n' "$ver" "$CF_ARCH" "$ver" > "$bt/source.properties"
       "$bt/aapt2" version >/dev/null 2>&1 || say "Warnung: aapt2 startet nicht – Asset-Variante prüfen (ASSET_VARIANT=$GH_VARIANT)"
       [ -f "$bt/lib/d8.jar" ] || say "Warnung: d8.jar fehlt in build-tools $ver (Google bietet diese Version nicht an?) – Gradle/AGP nutzt eigene Kopien"
       ;;
@@ -591,7 +639,7 @@ write_env() { # jdkVer ndkId cmakeId
     if [ -n "$cmake" ]; then p=$(installed_path "$cmake"); [ -n "$p" ] && path_add="$p/bin:$path_add"; fi
     echo "export PATH=\"$path_add:\$PATH\""
   } > "$ENV_FILE"
-  # Gradle braucht ein aapt2, das auf dem Gerät läuft: das aarch64-aapt2 aus den eigenen build-tools
+  # Gradle braucht ein aapt2, das auf dem Gerät läuft: das aapt2 (aarch64 bzw. arm) aus den eigenen build-tools
   # (build-tools), sonst ein Termux-Paket 'aapt2'. Das x86-aapt2 von Google/Maven läuft hier nicht.
   local bt aapt2
   bt=$(ls -d "$SDK_ROOT"/build-tools/* 2>/dev/null | sort -V | tail -n1)
