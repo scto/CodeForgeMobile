@@ -114,6 +114,9 @@ androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", vers
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppcompat" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "androidxWindow" }
 
+ktfmt = { module = "com.facebook:ktfmt", version = "0.64" }
+google-java-format = { module = "com.google.googlejavaformat:google-java-format", version = "1.20.0" }
+
 # --- Abhängigkeiten von build-logic (Convention-Plugins, siehe build-logic/convention) ---
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
