@@ -42,6 +42,7 @@ Der Agent liest die Task-Datei selbst; so entfällt das Einfügen langer Texte i
 | 15 | `15-verify-layout-designer.md` | — | Build-/Gerätetest: `:feature:layoutdesigner` (Layout-Designer) |
 | 16 | `16-port-local-experiment-features.md` | 12 (Build muss laufen) | Umsetzung: Features des lokalen Experimentzweigs (Minimap, Rainbow Brackets, Extensions-Manager, 15 Presets, Dateibaum-Details) |
 | 17 | `17-externalize-hardcoded-strings.md` | 13 (Konventionen) | **wiederkehrend**: harte UI-Texte finden (`scripts/find_hardcoded_strings.py`), nach `:core:resources` auslagern; vor Commits/PRs ausführen |
+| 18 | `18-translate-strings-en-de.md` | 13; vor dem nächsten Lauf von 17 | **einmalig**: `values/` → Englisch (Standard), bisherige deutsche Texte → `values-de`; Prüfskript `scripts/check_string_locales.py` |
 
 **Stand 2026-10-12 / empfohlene Reihenfolge** (nicht bauen-verifiziert):
 
@@ -53,6 +54,7 @@ Der Agent liest die Task-Datei selbst; so entfällt das Einfügen langer Texte i
 | 3 Module prüfen | **08**, **09**, **10** | Indexierung/Updater, Wizard, Editor/Git/Drawer |
 | 4 Inhalte vervollständigen | **01**, **02**, **07** | TextMate-Grammars/Themes, Tree-sitter-Libs, CMake-Erkennung |
 | 5 Features nachziehen | **16** | Funktionen des lokalen Experimentzweigs |
+| 5b Sprachen | **18** | Standard Englisch, Deutsch in `values-de` (vor weiteren Läufen von 17) |
 | laufend | **17** | harte UI-Texte nach `:core:resources` (vor jedem Commit/PR) |
 | entfällt | 03, 05 | erledigt/überholt |
 | optional | 06 | volle Termux-UI |
