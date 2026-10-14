@@ -23,6 +23,16 @@
 #                       wenn REPO_PACKAGES openjdk-17/alsa-plugins/pulseaudio enthält; "" schaltet es ab.
 #                       Solange es gesetzt ist, wird zusätzlich der Zyklus libmpg123 <-> pulseaudio aufgelöst
 #                       (BUILD_DEPENDS pulseaudio von libmpg123 entfällt für den Lauf).
+#   PHASE               all (Standard): Bootstraps + Pakete + Repo in einem Lauf (ersetzt das Repo komplett).
+#                       build:    nur REPO_PACKAGES für die Architekturen in ARCHS bauen (keine Bootstraps); die .deb liegen
+#                                 danach in terminal-packages-codeforge/output/. Für parallele Läufe pro Architektur.
+#                       assemble: kein Docker; fügt die .deb aus EXTRA_DEBS_DIR dem bestehenden Repo (BASE_REPO_DIR) hinzu,
+#                                 erzeugt Packages/Release neu und signiert. Die Bootstraps bleiben unverändert.
+#   BASE_REPO_DIR       (assemble) Verzeichnis des bestehenden Repos (Checkout von gh-pages)
+#   EXTRA_DEBS_DIR      (assemble) Verzeichnis mit den neu gebauten .deb (rekursiv)
+#   SKIP_DEPS_PACKAGES  Pakete, die ohne Abhängigkeiten gebaut werden (build-package.sh -s), Komma-getrennt. Nur für
+#                       Pakete ohne BUILD_DEPENDS (z. B. gradle, kotlin): spart den erneuten Bau von openjdk-21.
+#   KEEP_GOING          1 = in PHASE=build bei einem fehlgeschlagenen Paket weitermachen und es am Ende melden (Standard 0)
 #   CODEFORGE_APT_URL   öffentliche URL des APT-Repos (Standard: GitHub Pages dieses Repos)
 #   CODEFORGE_FORK_URL  Fork mit den Paketquellen (Standard: scto/terminal-packages-codeforge)
 #   CODEFORGE_GPG_PASSPHRASE  Passphrase (sonst Zeile aus ~/.bashrc)
@@ -54,6 +64,14 @@ KEY_EMAIL="tschmid35@gmail.com"
 
 die() { echo "FEHLER: $*" >&2; exit 1; }
 
+PHASE="${PHASE:-all}"
+case "${PHASE}" in all|build|assemble) ;; *) die "PHASE muss all, build oder assemble sein (ist: ${PHASE})." ;; esac
+BASE_REPO_DIR="${BASE_REPO_DIR:-}"
+EXTRA_DEBS_DIR="${EXTRA_DEBS_DIR:-}"
+SKIP_DEPS_PACKAGES="${SKIP_DEPS_PACKAGES:-}"
+KEEP_GOING="${KEEP_GOING:-0}"
+FAILED_PKGS=()
+
 mkdir -p "${TMP_ROOT}"
 export TMPDIR="${TMP_ROOT}"
 
@@ -62,6 +80,7 @@ echo "CodeForge Build & APT Repository Pipeline"
 echo "Prefix: ${PREFIX_PATH}"
 echo "APT-URL: ${APT_URL}"
 echo "Architekturen: ${ARCHS_LIST[*]}"
+echo "Phase: ${PHASE}"
 echo "===================================================="
 
 # ----------------------------------------------------
@@ -69,16 +88,23 @@ echo "===================================================="
 # ----------------------------------------------------
 echo "[Step 1/9] Voraussetzungen & Klonen..."
 
-[ "$(uname -m)" = "x86_64" ] || die "Dieses Skript braucht einen x86_64-Linux-Rechner mit Docker (gefunden: $(uname -m)). Auf dem Telefon kann der Termux-Builder nicht laufen."
-for tool in docker git gpg curl zip unzip jq python3 readelf dpkg-deb apt-ftparchive sha256sum; do
+[ "$(uname -m)" = "x86_64" ] || die "Dieses Skript braucht einen x86_64-Linux-Rechner (gefunden: $(uname -m)). Auf dem Telefon kann der Termux-Builder nicht laufen."
+if [ "${PHASE}" = assemble ]; then
+    NEED_TOOLS="git gpg curl jq python3 dpkg-deb apt-ftparchive sha256sum"
+    [ -n "${EXTRA_DEBS_DIR}" ] && [ -d "${EXTRA_DEBS_DIR}" ] || die "PHASE=assemble braucht EXTRA_DEBS_DIR (Verzeichnis mit den neuen .deb)."
+else
+    NEED_TOOLS="docker git gpg curl zip unzip jq python3 readelf dpkg-deb apt-ftparchive sha256sum"
+fi
+for tool in ${NEED_TOOLS}; do
     command -v "${tool}" >/dev/null 2>&1 || die "'${tool}' fehlt (Debian/Ubuntu: apt-get install docker.io git gnupg curl zip unzip jq python3 binutils dpkg apt-utils)."
 done
-docker info >/dev/null 2>&1 || die "Docker ist nicht erreichbar (läuft der Daemon, gehört der Benutzer zur Gruppe 'docker'?)."
-
-if [ ! -d "${CLONE_DIR}/.git" ]; then
-    git clone --depth 1 "${FORK_URL}" "${CLONE_DIR}"
-else
-    echo "Fork bereits vorhanden: ${CLONE_DIR} (Patches werden idempotent angewendet)."
+if [ "${PHASE}" != assemble ]; then
+    docker info >/dev/null 2>&1 || die "Docker ist nicht erreichbar (läuft der Daemon, gehört der Benutzer zur Gruppe 'docker'?)."
+    if [ ! -d "${CLONE_DIR}/.git" ]; then
+        git clone --depth 1 "${FORK_URL}" "${CLONE_DIR}"
+    else
+        echo "Fork bereits vorhanden: ${CLONE_DIR} (Patches werden idempotent angewendet)."
+    fi
 fi
 
 touch "${WORKSPACE_DIR}/.gitignore"
@@ -87,8 +113,9 @@ for entry in ".gpg/" ".gpg/private/" "output/" "github_repo_ready/" "tmp/" "term
 done
 
 # ----------------------------------------------------
-# Step 2: Prefix prüfen (kein sed auf properties.sh!)
+# Step 2: Prefix prüfen (kein sed auf properties.sh!)   [nicht in PHASE=assemble]
 # ----------------------------------------------------
+if [ "${PHASE}" != assemble ]; then
 echo "[Step 2/9] Prefix prüfen..."
 PROPS="${CLONE_DIR}/scripts/properties.sh"
 [ -f "${PROPS}" ] || die "scripts/properties.sh nicht gefunden."
@@ -319,6 +346,7 @@ fix_bootstrap_subpackage_names "${CLONE_DIR}"
 fix_bootstrap_zip_destination "${CLONE_DIR}"
 [ -x "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || [ ! -e "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || die "termux-replace-termux-core-src-scripts ist nicht ausführbar."
 [ -d "${CLONE_DIR}/packages/procps/hsearch" ] || die "packages/procps/hsearch ist kein Verzeichnis – Symlink-Reparatur unvollständig."
+fi   # Ende Step 2 (PHASE != assemble)
 
 # ----------------------------------------------------
 # Step 3: GPG-Schlüssel (einmal erzeugen, danach wiederverwenden)
@@ -387,8 +415,9 @@ echo "Public:  ${GPG_DIR}/codeforge.gpg ($(cut -d' ' -f1 "${GPG_DIR}/sha256.txt"
 echo "Private: ${GPG_DIR}/private/codeforge.gpg ($(cut -d' ' -f1 "${GPG_DIR}/private/sha256.txt"))"
 
 # ----------------------------------------------------
-# Step 4: Fork patchen (idempotent)
+# Step 4: Fork patchen (idempotent)   [nicht in PHASE=assemble]
 # ----------------------------------------------------
+if [ "${PHASE}" != assemble ]; then
 echo "[Step 4/9] Fork patchen (Keyring + apt-Quelle)..."
 
 KEYRING_DIR="${CLONE_DIR}/packages/termux-keyring"
@@ -486,13 +515,22 @@ else:
     print("Hinweis: GPG-Block in build-package.sh nicht gefunden (nur für -I relevant).")
 PY
 fi
+fi   # Ende Step 4 (PHASE != assemble)
 
 # ----------------------------------------------------
 # Step 5: Pakete + Bootstraps aus dem Quellcode bauen (Docker)
 # ----------------------------------------------------
-echo "[Step 5/9] Bootstraps bauen (Docker, build-bootstraps.sh) – dauert Stunden..."
+if [ "${PHASE}" != assemble ]; then
+if [ "${PHASE}" = all ]; then
+    echo "[Step 5/9] Bootstraps bauen (Docker, build-bootstraps.sh) – dauert Stunden..."
+else
+    echo "[Step 5/9] Nur Pakete bauen (PHASE=build, keine Bootstraps)..."
+    [ -n "${REPO_PACKAGES}" ] || die "PHASE=build braucht REPO_PACKAGES."
+fi
 cd "${CLONE_DIR}"
 [ -x scripts/run-docker.sh ] || die "scripts/run-docker.sh fehlt/nicht ausführbar."
+mkdir -p "${CLONE_DIR}/output"
+if [ "${PHASE}" = all ]; then
 [ -f scripts/build-bootstraps.sh ] || die "scripts/build-bootstraps.sh fehlt im Fork."
 
 ARCH_CSV="$(IFS=,; echo "${ARCHS_LIST[*]}")"
@@ -507,6 +545,7 @@ for arch in "${ARCHS_LIST[@]}"; do
     [ -s "${CLONE_DIR}/output/bootstrap-${arch}.zip" ] || die "output/bootstrap-${arch}.zip wurde nicht erzeugt."
 done
 ls "${CLONE_DIR}"/output/*.deb >/dev/null 2>&1 || die "Keine .deb-Dateien in ${CLONE_DIR}/output (build-bootstraps.sh hätte sie erzeugen müssen)."
+fi   # Ende Bootstrap-Build (nur PHASE=all)
 
 # Zusätzliche Pakete NUR fürs APT-Repo (nicht ins Bootstrap): einzeln pro Architektur aus dem Quellcode bauen.
 # Abhängigkeiten werden von build-package.sh ebenfalls aus dem Quellcode gebaut (kein -I, keine Pakete vom offiziellen Repo).
@@ -555,15 +594,38 @@ if [ -n "${REPO_PACKAGES}" ]; then
             build_pkg="${pkg}"
             if [ ! -f "packages/${pkg}/build.sh" ]; then
                 sub="$(ls packages/*/"${pkg}".subpackage.sh 2>/dev/null | head -n1 || true)"
-                [ -n "${sub}" ] || die "${pkg}: weder packages/${pkg}/build.sh noch packages/*/${pkg}.subpackage.sh im Fork."
-                build_pkg="$(basename "$(dirname "${sub}")")"
+                if [ -n "${sub}" ]; then
+                    build_pkg="$(basename "$(dirname "${sub}")")"
+                else
+                    # Ersatzpaket: z. B. 'p7zip' wird im Fork von '7zip' bereitgestellt (TERMUX_PKG_PROVIDES).
+                    prov="$(grep -lE "^TERMUX_PKG_PROVIDES=.*([\" ,]|^)${pkg}([\" ,(]|\$)" packages/*/build.sh 2>/dev/null | head -n1 || true)"
+                    [ -n "${prov}" ] || die "${pkg}: weder packages/${pkg}/build.sh noch packages/*/${pkg}.subpackage.sh noch ein Paket mit TERMUX_PKG_PROVIDES=${pkg} im Fork."
+                    build_pkg="$(basename "$(dirname "${prov}")")"
+                    echo "  Hinweis: '${pkg}' gibt es im Fork nicht, es wird von '${build_pkg}' bereitgestellt (PROVIDES) – baue '${build_pkg}'."
+                    pkg="${build_pkg}"
+                fi
             fi
             echo "  -> ${pkg} (${arch})$([ "${build_pkg}" != "${pkg}" ] && echo " via ${build_pkg}")"
-            ./scripts/run-docker.sh ./build-package.sh -a "${arch}" -o output "${build_pkg}"
-            ls output/"${pkg}"_*_"${arch}".deb >/dev/null 2>&1 \
-                || die "${pkg}: keine ${pkg}_*_${arch}.deb in output/ (Paketname im Fork vorhanden? Baut es für ${arch}?)."
+            build_args=(-a "${arch}" -o output)
+            case ",${SKIP_DEPS_PACKAGES}," in *,"${pkg}",*) build_args+=(-s); echo "     (ohne Abhängigkeiten: -s)" ;; esac
+            if ! ./scripts/run-docker.sh ./build-package.sh "${build_args[@]}" "${build_pkg}"; then
+                if [ "${KEEP_GOING}" = 1 ]; then
+                    echo "FEHLGESCHLAGEN: ${pkg} (${arch}) – weiter mit dem nächsten Paket (KEEP_GOING=1)." >&2
+                    FAILED_PKGS+=("${pkg} (${arch})"); continue
+                fi
+                die "${pkg} (${arch}): build-package.sh fehlgeschlagen."
+            fi
+            # Architekturunabhängige Pakete (z. B. gradle, kotlin) heißen *_all.deb.
+            shopt -s nullglob
+            pkg_debs=(output/"${pkg}"_*_"${arch}".deb output/"${pkg}"_*_all.deb)
+            shopt -u nullglob
+            if [ "${#pkg_debs[@]}" -eq 0 ]; then
+                msg="${pkg}: keine ${pkg}_*_${arch}.deb bzw. *_all.deb in output/ (Paketname im Fork vorhanden? Baut es für ${arch}?)."
+                if [ "${KEEP_GOING}" = 1 ]; then echo "FEHLGESCHLAGEN: ${msg}" >&2; FAILED_PKGS+=("${pkg} (${arch})"); continue; fi
+                die "${msg}"
+            fi
             # Das fertige Paket darf keinen alten Prefix enthalten (ELF und Text).
-            for deb in output/"${pkg}"_*_"${arch}".deb; do
+            for deb in "${pkg_debs[@]}"; do
                 chk="$(mktemp -d "${TMP_ROOT}/debcheck.XXXXXX")"
                 dpkg-deb -x "${deb}" "${chk}"
                 bad="$(grep -rla 'com\.termux' "${chk}" || true)"
@@ -579,9 +641,21 @@ if [ -n "${REPO_PACKAGES}" ]; then
     if [ "${MPG123_PATCHED}" = 1 ]; then mv -f "${MPG123_BUILD}.orig" "${MPG123_BUILD}"; fi
 fi
 
+if [ "${PHASE}" = build ]; then
+    cd "${WORKSPACE_DIR}"
+    FAILED_FILE="${WORKSPACE_DIR}/failed-packages-${ARCHS_LIST[*]// /_}.txt"
+    : > "${FAILED_FILE}"
+    [ "${#FAILED_PKGS[@]}" -eq 0 ] || printf '%s\n' "${FAILED_PKGS[@]}" > "${FAILED_FILE}"
+    echo "PHASE=build fertig: $(ls "${CLONE_DIR}"/output/*.deb 2>/dev/null | wc -l) .deb in ${CLONE_DIR}/output, Fehlgeschlagen: ${#FAILED_PKGS[@]}"
+    [ "${#FAILED_PKGS[@]}" -eq 0 ] || { echo "Fehlgeschlagene Pakete:"; printf '  %s\n' "${FAILED_PKGS[@]}"; }
+    exit 0
+fi
+fi   # Ende Step 5 (PHASE != assemble)
+
 # ----------------------------------------------------
-# Step 6: Verifikation der Bootstraps (hart, ohne Ausnahmen)
+# Step 6: Verifikation der Bootstraps (hart, ohne Ausnahmen)   [nur PHASE=all]
 # ----------------------------------------------------
+if [ "${PHASE}" = all ]; then
 echo "[Step 6/9] Bootstraps verifizieren..."
 VERIFY_DIR="${TMP_ROOT}/verify"
 rm -rf "${VERIFY_DIR}"; mkdir -p "${VERIFY_DIR}"
@@ -646,6 +720,7 @@ for arch in "${ARCHS_LIST[@]}"; do
     mv -f "${CLONE_DIR}/output/bootstrap-${arch}.zip" "${BOOTSTRAP_DIR}/"
 done
 (cd "${BOOTSTRAP_DIR}" && for z in bootstrap-*.zip; do sha256sum "${z}" > "${z}.sha256"; echo "  $(cat "${z}.sha256")"; done)
+fi   # Ende Step 6/7 (nur PHASE=all)
 
 # ----------------------------------------------------
 # Step 8: APT-Repository aus den gebauten .deb-Dateien
@@ -654,10 +729,35 @@ echo "[Step 8/9] APT-Repository erzeugen & signieren..."
 rm -rf "${REPO_DIR}"
 mkdir -p "${REPO_DIR}/pool/main"
 
-# Pool-Layout wie bei Termux: pool/main/<erster Buchstabe | lib+Buchstabe>/<paket>/<datei>.deb
 shopt -s nullglob
-deb_count=0
-for deb in "${CLONE_DIR}"/output/*.deb; do
+DEB_FILES=()
+if [ "${PHASE}" = assemble ]; then
+    # Bestehendes Repo übernehmen und die neuen Pakete ergänzen (gleicher Dateiname = überschrieben).
+    if [ -n "${BASE_REPO_DIR}" ] && [ -d "${BASE_REPO_DIR}/pool" ]; then
+        if [ -s "${BASE_REPO_DIR}/codeforge.gpg" ]; then
+            base_fpr="$(gpg --show-keys --with-colons "${BASE_REPO_DIR}/codeforge.gpg" 2>/dev/null | awk -F: '/^fpr:/ {print $10; exit}')"
+            [ -z "${base_fpr}" ] || [ "${base_fpr}" = "${KEY_FINGERPRINT}" ] \
+                || die "Der Signaturschlüssel (${KEY_FINGERPRINT}) passt nicht zum bestehenden Repo (${base_fpr}). Geräte würden das Repo nicht mehr akzeptieren – GPG_PRIVATE_KEY_B64 prüfen."
+        fi
+        cp -a "${BASE_REPO_DIR}/pool/." "${REPO_DIR}/pool/"
+        echo "  Bestehendes Repo übernommen: $(find "${REPO_DIR}/pool" -name '*.deb' | wc -l) Pakete."
+        for d in "${BASE_REPO_DIR}"/dists/stable/main/binary-*; do
+            [ -d "${d}" ] || continue
+            a="${d##*/binary-}"
+            case " ${ARCHS_LIST[*]} " in *" ${a} "*) ;; *) ARCHS_LIST+=("${a}") ;; esac
+        done
+    else
+        echo "Hinweis: BASE_REPO_DIR leer oder ohne pool/ – es entsteht ein neues Repo nur aus den neuen Paketen."
+    fi
+    while IFS= read -r -d '' f; do DEB_FILES+=("${f}"); done < <(find "${EXTRA_DEBS_DIR}" -type f -name '*.deb' -print0)
+    [ "${#DEB_FILES[@]}" -gt 0 ] || die "Keine neuen .deb in ${EXTRA_DEBS_DIR} gefunden."
+    echo "  Neue/aktualisierte Pakete: ${#DEB_FILES[@]} · Architekturen im Repo: ${ARCHS_LIST[*]}"
+else
+    DEB_FILES=("${CLONE_DIR}"/output/*.deb)
+fi
+
+# Pool-Layout wie bei Termux: pool/main/<erster Buchstabe | lib+Buchstabe>/<paket>/<datei>.deb
+for deb in "${DEB_FILES[@]}"; do
     pkg="$(dpkg-deb -f "${deb}" Package)"
     [ -n "${pkg}" ] || die "Kein Package-Feld in ${deb}"
     case "${pkg}" in lib?*) bucket="${pkg:0:4}" ;; *) bucket="${pkg:0:1}" ;; esac
@@ -665,11 +765,14 @@ for deb in "${CLONE_DIR}"/output/*.deb; do
     # Epoche (z. B. "1:2026.09.25") steht nicht im Dateinamen (wie bei Debian): ":" ist in Artefakt-Uploads/Windows ungültig.
     deb_name="$(basename "${deb}" | sed -E 's/_[0-9]+:/_/')"
     cp -f "${deb}" "${REPO_DIR}/pool/main/${bucket}/${pkg}/${deb_name}"
-    deb_count=$((deb_count + 1))
 done
 shopt -u nullglob
+deb_count="$(find "${REPO_DIR}/pool" -type f -name '*.deb' | wc -l)"
 [ "${deb_count}" -gt 0 ] || die "Pool ist leer."
 echo "  ${deb_count} Pakete im Pool."
+pool_mb="$(du -sm "${REPO_DIR}/pool" | cut -f1)"
+echo "  Pool-Größe: ${pool_mb} MB"
+[ "${pool_mb}" -lt 900 ] || echo "WARNUNG: Pool > 900 MB. GitHub Pages ist auf ca. 1 GB je Seite begrenzt – anderes Hosting einplanen." >&2
 
 DIST_DIR="${REPO_DIR}/dists/stable"
 cd "${REPO_DIR}"
@@ -757,8 +860,10 @@ SUMMARY_FILE="${DOCS_DIR}/overview_and_summary.md"
     echo
     echo "## Bootstraps (\`${BOOTSTRAP_DIR}\`)"
     for z in "${BOOTSTRAP_DIR}"/bootstrap-*.zip; do
+        [ -f "${z}" ] || continue
         echo "- \`$(basename "${z}")\` – SHA-256 \`$(cut -d' ' -f1 "${z}.sha256")\`"
     done
+    [ "${PHASE}" != assemble ] || echo "- (PHASE=assemble: Bootstraps unverändert, nur Pakete ergänzt)"
     echo
     echo "## gradle.properties (Release-Tag anpassen)"
     echo '```properties'

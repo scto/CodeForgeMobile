@@ -35,6 +35,13 @@ dependencies {
     // TreeSitter-Sprachunterstützung — benötigt native Parser-Bibliotheken je Sprache.
     // Siehe TREESITTER.md (analog zur proot-Problematik in :libs:terminal-engine).
     implementation("io.github.Rosemoe.sora-editor:language-treesitter:0.23.4")
+    implementation(libs.treesitter.core)
+    implementation(libs.treesitter.kotlin)
+    implementation(libs.treesitter.java)
+    implementation(libs.treesitter.json)
+    implementation(libs.treesitter.xml)
+    implementation(libs.treesitter.cpp)
+    implementation(libs.treesitter.c)
 
     // Für androidx.core.content.FileProvider (content://-URIs zum Teilen/Öffnen von Dateien
     // aus dem Editor heraus, z.B. "Öffnen mit..." / Teilen-Intent).

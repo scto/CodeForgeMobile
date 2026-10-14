@@ -34,17 +34,21 @@ import io.github.rosemoe.sora.editor.ts.TsLanguage
 import io.github.rosemoe.sora.editor.ts.TsLanguageSpec
 import io.github.rosemoe.sora.lang.Language
 
-enum class TreeSitterGrammar(val libraryName: String, val queryAssetDir: String) {
-    KOTLIN("tree-sitter-kotlin", "treesitter/kotlin"),
-    JAVA("tree-sitter-java", "treesitter/java"),
-    JSON("tree-sitter-json", "treesitter/json"),
-    XML("tree-sitter-xml", "treesitter/xml"),
-    CPP("tree-sitter-cpp", "treesitter/cpp"),
-    C("tree-sitter-c", "treesitter/c"),
-    BASH("tree-sitter-bash", "treesitter/bash"),
-    CMAKE("tree-sitter-cmake", "treesitter/cmake"),
-    TOML("tree-sitter-toml", "treesitter/toml"),
-    YAML("tree-sitter-yaml", "treesitter/yaml");
+enum class TreeSitterGrammar(
+    val langName: String,
+    val queryAssetDir: String,
+    val libraryName: String = "tree-sitter-$langName"
+) {
+    KOTLIN("kotlin", "treesitter/kotlin"),
+    JAVA("java", "treesitter/java"),
+    JSON("json", "treesitter/json"),
+    XML("xml", "treesitter/xml"),
+    CPP("cpp", "treesitter/cpp"),
+    C("c", "treesitter/c"),
+    BASH("bash", "treesitter/bash"),
+    CMAKE("cmake", "treesitter/cmake"),
+    TOML("toml", "treesitter/toml"),
+    YAML("yaml", "treesitter/yaml");
 
     companion object {
         fun fromPath(path: String): TreeSitterGrammar? {
@@ -112,6 +116,32 @@ object TreeSitterLanguageSupport {
         runCatching { System.loadLibrary(grammar.libraryName) }.isSuccess
     }
 
+    private fun loadTsLanguage(context: Context, grammar: TreeSitterGrammar): TSLanguage {
+        val precompiled = runCatching {
+            val className = when (grammar) {
+                TreeSitterGrammar.KOTLIN -> "com.itsaky.androidide.treesitter.kotlin.TSLanguageKotlin"
+                TreeSitterGrammar.JAVA -> "com.itsaky.androidide.treesitter.java.TSLanguageJava"
+                TreeSitterGrammar.JSON -> "com.itsaky.androidide.treesitter.json.TSLanguageJson"
+                TreeSitterGrammar.XML -> "com.itsaky.androidide.treesitter.xml.TSLanguageXml"
+                TreeSitterGrammar.CPP -> "com.itsaky.androidide.treesitter.cpp.TSLanguageCpp"
+                TreeSitterGrammar.C -> "com.itsaky.androidide.treesitter.c.TSLanguageC"
+                else -> null
+            }
+            className?.let { name ->
+                val clazz = Class.forName(name)
+                val method = clazz.getMethod("getInstance")
+                method.invoke(null) as? TSLanguage
+            }
+        }.getOrNull()
+
+        if (precompiled != null) {
+            return precompiled
+        }
+
+        return TSLanguage.loadLanguage(context, grammar.langName)
+            ?: throw IllegalStateException("TSLanguage für ${grammar.langName} konnte nicht geladen werden")
+    }
+
     /**
      * Erzeugt eine TreeSitter-[Language]-Instanz für [grammar], oder `null` falls die
      * native Bibliothek fehlt bzw. die Query-Dateien (highlights.scm etc.) unter
@@ -125,7 +155,7 @@ object TreeSitterLanguageSupport {
             val blocksScm = runCatching {
                 context.assets.open("${grammar.queryAssetDir}/blocks.scm").bufferedReader().use { it.readText() }
             }.getOrDefault("")
-            val tsLang = TSLanguage.loadLanguage(context, grammar.libraryName)
+            val tsLang = loadTsLanguage(context, grammar)
             val spec = TsLanguageSpec(
                 language = tsLang,
                 highlightScmSource = highlightScm,
@@ -141,3 +171,4 @@ object TreeSitterLanguageSupport {
         }.getOrNull()
     }
 }
+

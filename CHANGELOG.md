@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🌳 Tree-sitter Core-Library, native Sprachbibliotheken & Query-Assets (Task 02)
+
+* **Core-Library & Maven-Integration**: Tree-sitter Core-Runtime (`com.itsaky.androidide.treesitter:android-tree-sitter:4.3.1`) und native Parser-AARs für Kotlin, Java, JSON, XML, C++ sowie C in `gradle/libs.versions.toml` und `feature/editor/build.gradle.kts` eingebunden.
+* **Query-Assets**: Vollständige `highlights.scm`-Query-Dateien aus den offiziellen Upstream-Repositories für alle 10 Ziel-Sprachen (Kotlin, Java, JSON, XML, C++, C, Bash, CMake, TOML, YAML) unter `feature/editor/src/main/assets/treesitter/<sprache>/highlights.scm` bereitgestellt und im erzeugten Debug-AAR verifiziert.
+* **Resiliente Ladelogik**: `TreeSitterGrammar` um Sprachbezeichner `langName` erweitert; `TreeSitterLanguageSupport` instanziiert vorkompilierte Grammatiken vorrangig über deren typisierte Wrapper-Klasse (`TSLanguage<Lang>.getInstance()`) und fällt bei dynamischen Bibliotheken transparent auf `TSLanguage.loadLanguage(context, langName)` bzw. TextMate/Plaintext zurück.
+* **Verifikation**: Alle 9 Unit-Tests in `:feature:editor` erfolgreich ausgeführt; `:feature:editor:assembleDebug` fehlerfrei gebaut; 0 hartcodierte Strings.
+
 ### 🎨 TextMate-Grammatiken, Konfigurationen & Themes (Task 01)
 
 * **Vollständige Grammatiken & Sprachkonfigurationen**: Offizielle MIT-lizenzierte TextMate-Grammatiken und Sprachkonfigurationen (Bracket-Pairs, Auto-Closing, Kommentare) für Kotlin (`fwcd/vscode-kotlin`), Java, XML und JSON (`microsoft/vscode`) in `feature/editor/src/main/assets/textmate/` hinterlegt.

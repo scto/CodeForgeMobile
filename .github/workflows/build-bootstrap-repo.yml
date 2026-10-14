@@ -1,44 +1,69 @@
 name: Build Bootstraps & APT-Repo
 
-# Baut mit build_codeforge_repo.sh (Termux-Docker-Builder, Prefix com.codeforge.app) die Bootstraps
-# und das signierte APT-Repository. Läuft nur manuell.
+# Baut mit build_codeforge_repo.sh (Termux-Docker-Builder, Prefix com.codeforge.app) die Bootstraps und das signierte
+# APT-Repository. Läuft nur manuell.
+#
+# Zwei Modi (Eingabe "mode"):
+#   full  Bootstraps + Pakete + Repo in EINEM Job; ersetzt Release-Assets und das gesamte Repo auf gh-pages.
+#   add   Bootstraps bleiben unberührt. Die Pakete werden pro Architektur PARALLEL gebaut (jede Architektur ein eigener Job
+#         mit eigenen 6 Stunden) und anschließend dem bestehenden Repo auf gh-pages ERGÄNZT (Pakete anderer Etappen bleiben).
+#   auto  (Standard) = add, wenn auf gh-pages des Ziel-Repos schon ein Repo liegt, sonst full.
+#
+# Große Paketlisten in Etappen bauen: Eingabe "stage" (Namen in apt-stages.conf) und/oder "repo_packages".
+# Jede Etappe ergänzt das Repo; Reihenfolge egal. Ablauf: erst einmal "full" (z. B. mit repo_packages=jq), danach Etappe für Etappe "add".
 #
 # Benötigte Repository-Secrets (Settings -> Secrets and variables -> Actions):
 #   CODEFORGE_GPG_PASSPHRASE   Passphrase des Signaturschlüssels
-#   GPG_PRIVATE_KEY_B64        Privater Schlüssel, armored und base64-kodiert (einzeilig)
-#   PACKAGES_REPO_TOKEN        Nur für "publish": PAT (fine-grained) mit Contents: Read and write
-#                              auf dem Ziel-Repo (scto/terminal-packages-codeforge)
+#   GPG_PRIVATE_KEY_B64        Privater Schlüssel, armored und base64-kodiert (einzeilig). Muss derselbe sein wie beim ersten Lauf,
+#                              sonst vertrauen die Geräte dem ergänzten Repo nicht (das Skript prüft das im Modus add).
+#   PACKAGES_REPO_TOKEN        Für "publish": PAT (fine-grained) mit Contents: Read and write auf dem Ziel-Repo
 
 on:
   workflow_dispatch:
     inputs:
-      archs:
-        description: "Architekturen, durch Komma getrennt (aarch64, arm, i686, x86_64)"
+      mode:
+        description: "auto = ergänzen, wenn das Repo schon existiert, sonst neu bauen · add = nur ergänzen · full = alles neu (ersetzt das Repo!)"
         required: true
-        default: "aarch64,arm"
-        type: string
-      extra_packages:
-        description: "Pakete IM Bootstrap (vergrößert die APK!), durch Komma getrennt, z. B. zip. Normalerweise leer."
+        default: "auto"
+        type: choice
+        options: [auto, add, full]
+      stage:
+        description: "Etappe aus apt-stages.conf, z. B. 02-jdk21 (leer = nur repo_packages)"
         required: false
         default: ""
         type: string
       repo_packages:
-        description: "Pakete NUR im APT-Repo (per pkg install nachladbar), durch Komma getrennt, z. B. openjdk-17,jq,p7zip,ninja,git,zip"
+        description: "Zusätzliche Pakete NUR im APT-Repo, durch Komma getrennt (Elternpakete, z. B. libllvm statt clang)"
         required: false
         default: ""
         type: string
+      archs:
+        description: "Architekturen, durch Komma getrennt (aarch64, arm, i686, x86_64)"
+        required: true
+        default: "aarch64,arm,x86_64"
+        type: string
+      extra_packages:
+        description: "Pakete IM Bootstrap (vergrößert die APK!), nur im Modus full. Normalerweise leer."
+        required: false
+        default: ""
+        type: string
+      keep_going:
+        description: "Modus add: bei einem fehlgeschlagenen Paket weiterbauen und es am Ende melden"
+        required: true
+        default: true
+        type: boolean
       publish:
-        description: "Nach dem Build Release anlegen und APT-Repo auf gh-pages pushen"
+        description: "Nach dem Build veröffentlichen (full: Release + gh-pages, add: gh-pages)"
         required: true
         default: false
         type: boolean
       target_repo:
-        description: "Ziel-Repo für Release und gh-pages (nur bei publish)"
+        description: "Ziel-Repo für Release und gh-pages"
         required: false
         default: "scto/terminal-packages-codeforge"
         type: string
       release_tag:
-        description: "Release-Tag (leer = bootstrap-JJJJ.MM.TT, UTC)"
+        description: "Release-Tag nur im Modus full (leer = bootstrap-JJJJ.MM.TT, UTC)"
         required: false
         default: ""
         type: string
@@ -56,98 +81,58 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 350   # GitHub-Limit pro Job: 360 Minuten
-
+    timeout-minutes: 10
+    outputs:
+      mode: ${{ steps.plan.outputs.mode }}
+      archs: ${{ steps.plan.outputs.archs }}
+      archs_json: ${{ steps.plan.outputs.archs_json }}
+      repo_packages: ${{ steps.plan.outputs.repo_packages }}
+      skip_deps: ${{ steps.plan.outputs.skip_deps }}
+      extra: ${{ steps.plan.outputs.extra }}
+      tag: ${{ steps.plan.outputs.tag }}
     steps:
-      - name: Eingaben prüfen
+      - uses: actions/checkout@v4
+      - name: Eingaben prüfen und Modus bestimmen
+        id: plan
         env:
           IN_ARCHS: ${{ inputs.archs }}
           IN_EXTRA: ${{ inputs.extra_packages }}
           IN_REPO_PKGS: ${{ inputs.repo_packages }}
+          IN_STAGE: ${{ inputs.stage }}
+          IN_MODE: ${{ inputs.mode }}
           IN_TAG: ${{ inputs.release_tag }}
-          IN_REPO: ${{ inputs.target_repo }}
+          IN_TARGET: ${{ inputs.target_repo }}
           IN_APT_URL: ${{ inputs.apt_url }}
-        run: |
-          set -euo pipefail
+        run: bash .github/scripts/plan-apt-build.sh
 
-          # Architekturen: nur bekannte Werte, ohne Duplikate
-          archs=""
-          IFS=',' read -ra parts <<< "${IN_ARCHS// /}"
-          for a in "${parts[@]}"; do
-            case "$a" in
-              aarch64|arm|i686|x86_64) ;;
-              *) echo "::error::Unbekannte Architektur '$a' (erlaubt: aarch64, arm, i686, x86_64)"; exit 1 ;;
-            esac
-            case " $archs " in *" $a "*) ;; *) archs="${archs:+$archs }$a" ;; esac
-          done
-          [ -n "$archs" ] || { echo "::error::Keine Architektur angegeben"; exit 1; }
+  # ---------------------------------------------------------------------------
+  # Modus full: Bootstraps + Pakete + Repo in einem Job (wie bisher)
+  # ---------------------------------------------------------------------------
+  build_full:
+    needs: plan
+    if: needs.plan.outputs.mode == 'full'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350   # GitHub-Limit pro Job: 360 Minuten
+    env:
+      ARCHS: ${{ needs.plan.outputs.archs }}
+      EXTRA_PACKAGES: ${{ needs.plan.outputs.extra }}
+      REPO_PACKAGES: ${{ needs.plan.outputs.repo_packages }}
+      SKIP_DEPS_PACKAGES: ${{ needs.plan.outputs.skip_deps }}
+      RELEASE_TAG: ${{ needs.plan.outputs.tag }}
+      PHASE: all
+    steps:
+      - uses: actions/checkout@v4
 
-          extra="${IN_EXTRA// /}"
-          if [ -n "$extra" ] && ! [[ "$extra" =~ ^[a-z0-9+._-]+(,[a-z0-9+._-]+)*$ ]]; then
-            echo "::error::extra_packages: nur Paketnamen, durch Komma getrennt"; exit 1
-          fi
+      - uses: ./.github/actions/prepare-runner
+        with:
+          gpg_private_key_b64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          gpg_passphrase: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
 
-          repo_pkgs="${IN_REPO_PKGS// /}"
-          if [ -n "$repo_pkgs" ] && ! [[ "$repo_pkgs" =~ ^[a-z0-9+._-]+(,[a-z0-9+._-]+)*$ ]]; then
-            echo "::error::repo_packages: nur Paketnamen, durch Komma getrennt"; exit 1
-          fi
-
-          tag="${IN_TAG:-bootstrap-$(date -u +%Y.%m.%d)}"
-          [[ "$tag" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Ungültiger release_tag"; exit 1; }
-
-          [[ "$IN_REPO" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]] || { echo "::error::Ungültiges target_repo"; exit 1; }
-
-          if [ -n "$IN_APT_URL" ] && ! [[ "$IN_APT_URL" =~ ^https://[A-Za-z0-9._~/:%@+-]+$ ]]; then
-            echo "::error::apt_url muss eine https-URL sein"; exit 1
-          fi
-
-          {
-            echo "ARCHS=$archs"
-            echo "EXTRA_PACKAGES=$extra"
-            echo "REPO_PACKAGES=$repo_pkgs"
-            echo "RELEASE_TAG=$tag"
-          } >> "$GITHUB_ENV"
-          if [ -n "$IN_APT_URL" ]; then echo "CODEFORGE_APT_URL=$IN_APT_URL" >> "$GITHUB_ENV"; fi
-          echo "Architekturen: $archs | Bootstrap-Extras: ${extra:-keine} | Nur Repo: ${repo_pkgs:-keine} | Tag: $tag"
-
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Secrets prüfen
-        env:
-          KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
-          PASS: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
-        run: |
-          [ -n "$KEY_B64" ] || { echo "::error::Secret GPG_PRIVATE_KEY_B64 fehlt (siehe Kommentar am Dateianfang)"; exit 1; }
-          [ -n "$PASS" ]    || { echo "::error::Secret CODEFORGE_GPG_PASSPHRASE fehlt"; exit 1; }
-
-      - name: Speicherplatz freigeben
-        run: |
-          df -h /
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost \
-                      /opt/hostedtoolcache/CodeQL /usr/local/.ghcup /usr/share/swift
-          sudo docker image prune -af >/dev/null
-          df -h /
-
-      - name: Abhängigkeiten installieren
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            git gnupg curl zip unzip jq python3 binutils dpkg apt-utils rsync
-
-      - name: Privaten Schlüssel bereitstellen
-        env:
-          KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
-        run: |
-          set -euo pipefail
-          umask 077
-          mkdir -p .gpg/private
-          printf '%s' "$KEY_B64" | base64 -d > .gpg/private/codeforge.gpg
-          chmod 600 .gpg/private/codeforge.gpg
-          grep -q 'BEGIN PGP PRIVATE KEY BLOCK' .gpg/private/codeforge.gpg \
-            || { echo "::error::GPG_PRIVATE_KEY_B64 enthält keinen armored privaten Schlüssel"; exit 1; }
+      - name: Optionale APT-URL setzen
+        if: inputs.apt_url != ''
+        run: echo "CODEFORGE_APT_URL=${{ inputs.apt_url }}" >> "$GITHUB_ENV"
 
       - name: Bootstraps und APT-Repo bauen
         env:
@@ -161,7 +146,7 @@ jobs:
         if: success()
         run: |
           {
-            echo "## Ergebnis"
+            echo "## Ergebnis (full)"
             echo
             echo "Architekturen: \`$ARCHS\` · Bootstrap-Extras: \`${EXTRA_PACKAGES:-keine}\` · Nur Repo: \`${REPO_PACKAGES:-keine}\` · Tag: \`$RELEASE_TAG\`"
             echo
@@ -206,52 +191,183 @@ jobs:
           [ -n "$GH_TOKEN" ] || { echo "::error::Secret PACKAGES_REPO_TOKEN fehlt"; exit 1; }
           notes="Bootstraps (Prefix com.codeforge.app) für: $ARCHS. SHA-256 in den .sha256-Dateien."
           if gh release view "$RELEASE_TAG" --repo "$TARGET_REPO" >/dev/null 2>&1; then
-            # Release existiert bereits (z. B. erneuter Lauf mit gleichem Tag):
-            # Assets ersetzen statt abbrechen, Notes aktualisieren.
             echo "Release $RELEASE_TAG existiert – Assets werden ersetzt."
-            gh release upload "$RELEASE_TAG" output/bootstraps/* \
-              --repo "$TARGET_REPO" --clobber
+            gh release upload "$RELEASE_TAG" output/bootstraps/* --repo "$TARGET_REPO" --clobber
             gh release edit "$RELEASE_TAG" --repo "$TARGET_REPO" --notes "$notes"
           else
-            gh release create "$RELEASE_TAG" output/bootstraps/* \
-              --repo "$TARGET_REPO" \
-              --title "$RELEASE_TAG" \
-              --notes "$notes"
+            gh release create "$RELEASE_TAG" output/bootstraps/* --repo "$TARGET_REPO" --title "$RELEASE_TAG" --notes "$notes"
           fi
 
       - name: APT-Repo auf gh-pages veröffentlichen
         if: success() && inputs.publish
-        env:
-          GH_TOKEN: ${{ secrets.PACKAGES_REPO_TOKEN }}
-          TARGET_REPO: ${{ inputs.target_repo }}
-        run: |
-          set -euo pipefail
-          gh auth setup-git
-          work="$(mktemp -d)"
-          if git ls-remote --exit-code --heads "https://github.com/${TARGET_REPO}.git" gh-pages >/dev/null 2>&1; then
-            git clone --depth 1 --branch gh-pages "https://github.com/${TARGET_REPO}.git" "$work/pages"
-          else
-            git init -b gh-pages "$work/pages"
-            git -C "$work/pages" remote add origin "https://github.com/${TARGET_REPO}.git"
-          fi
-          cd "$work/pages"
-          # Snapshot ersetzen: dists/ und pool/ müssen zueinander passen.
-          # Hinweis: Nicht gebaute Architekturen/Pakete verschwinden dadurch aus dem Repo.
-          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-          rsync -a "$GITHUB_WORKSPACE/github_repo_ready/" ./
-          touch .nojekyll
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "Keine Änderungen am APT-Repo."
-          else
-            git commit -m "APT-Repo $RELEASE_TAG ($ARCHS)"
-            git push origin gh-pages
-          fi
+        uses: ./.github/actions/publish-pages
+        with:
+          target_repo: ${{ inputs.target_repo }}
+          token: ${{ secrets.PACKAGES_REPO_TOKEN }}
+          message: "APT-Repo ${{ needs.plan.outputs.tag }} (${{ needs.plan.outputs.archs }}) – full"
 
       - name: Aufräumen
         if: always()
         run: |
           rm -rf .gpg/private tmp
           docker system prune -af >/dev/null 2>&1 || true
+
+  # ---------------------------------------------------------------------------
+  # Modus add, Teil 1: Pakete pro Architektur parallel bauen
+  # ---------------------------------------------------------------------------
+  build_add:
+    needs: plan
+    if: needs.plan.outputs.mode == 'add'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ${{ fromJSON(needs.plan.outputs.archs_json) }}
+    env:
+      ARCHS: ${{ matrix.arch }}
+      REPO_PACKAGES: ${{ needs.plan.outputs.repo_packages }}
+      SKIP_DEPS_PACKAGES: ${{ needs.plan.outputs.skip_deps }}
+      KEEP_GOING: ${{ inputs.keep_going && '1' || '0' }}
+      PHASE: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/prepare-runner
+        with:
+          gpg_private_key_b64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          gpg_passphrase: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+
+      - name: Optionale APT-URL setzen
+        if: inputs.apt_url != ''
+        run: echo "CODEFORGE_APT_URL=${{ inputs.apt_url }}" >> "$GITHUB_ENV"
+
+      - name: Pakete bauen (${{ matrix.arch }})
+        env:
+          CODEFORGE_GPG_PASSPHRASE: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          chmod +x build_codeforge_repo.sh
+          ./build_codeforge_repo.sh
+
+      - name: Zusammenfassung
+        if: always()
+        run: |
+          {
+            echo "## Pakete bauen – ${{ matrix.arch }}"
+            echo "Pakete: \`$REPO_PACKAGES\` · ohne Abhängigkeiten: \`${SKIP_DEPS_PACKAGES:-keine}\`"
+            echo "Gebaute .deb: $(ls terminal-packages-codeforge/output/*.deb 2>/dev/null | wc -l)"
+            if [ -s failed-packages-${{ matrix.arch }}.txt ]; then
+              echo
+              echo "**Fehlgeschlagen:**"
+              sed 's/^/- /' failed-packages-${{ matrix.arch }}.txt
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: .deb hochladen
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debs-${{ matrix.arch }}
+          path: |
+            terminal-packages-codeforge/output/*.deb
+            failed-packages-*.txt
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 3
+
+      - name: Aufräumen
+        if: always()
+        run: |
+          rm -rf .gpg/private tmp
+          docker system prune -af >/dev/null 2>&1 || true
+
+  # ---------------------------------------------------------------------------
+  # Modus add, Teil 2: neue Pakete in das bestehende Repo einfügen, signieren, veröffentlichen
+  # ---------------------------------------------------------------------------
+  assemble:
+    needs: [plan, build_add]
+    if: needs.plan.outputs.mode == 'add'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PHASE: assemble
+      ARCHS: ${{ needs.plan.outputs.archs }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/prepare-runner
+        with:
+          gpg_private_key_b64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          gpg_passphrase: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+          free_disk: "false"
+
+      - name: Neue .deb laden
+        uses: actions/download-artifact@v4
+        with:
+          pattern: debs-*
+          path: extra-debs
+
+      - name: Bestehendes Repo laden (gh-pages)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.target_repo }}
+          ref: gh-pages
+          path: base-repo
+          token: ${{ secrets.PACKAGES_REPO_TOKEN || github.token }}
+          persist-credentials: false
+
+      - name: Optionale APT-URL setzen
+        if: inputs.apt_url != ''
+        run: echo "CODEFORGE_APT_URL=${{ inputs.apt_url }}" >> "$GITHUB_ENV"
+
+      - name: Repo ergänzen, signieren, prüfen
+        env:
+          CODEFORGE_GPG_PASSPHRASE: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          export BASE_REPO_DIR="$PWD/base-repo" EXTRA_DEBS_DIR="$PWD/extra-debs"
+          chmod +x build_codeforge_repo.sh
+          ./build_codeforge_repo.sh
+
+      - name: Zusammenfassung
+        if: always()
+        run: |
+          {
+            echo "## Repo ergänzt (add)"
+            echo "Pakete: \`${{ needs.plan.outputs.repo_packages }}\` · Architekturen dieses Laufs: \`${{ needs.plan.outputs.archs }}\`"
+            if [ -d github_repo_ready ]; then
+              echo "Pakete im Repo gesamt: $(find github_repo_ready/pool -name '*.deb' | wc -l) · Pool: $(du -sh github_repo_ready/pool | cut -f1)"
+            fi
+            fails="$(cat extra-debs/*/failed-packages-*.txt extra-debs/failed-packages-*.txt 2>/dev/null || true)"
+            if [ -n "$fails" ]; then
+              echo
+              echo "**Nicht gebaut (bitte Log der Architektur-Jobs ansehen):**"
+              printf '%s\n' "$fails" | sed 's/^/- /'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Repo als Artefakt ablegen
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeforge-apt-repo-${{ github.run_number }}
+          path: |
+            github_repo_ready/dists/
+            github_repo_ready/codeforge.gpg
+            github_repo_ready/codeforge.asc
+            docs/overview_and_summary.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: APT-Repo auf gh-pages veröffentlichen
+        if: success() && inputs.publish
+        uses: ./.github/actions/publish-pages
+        with:
+          target_repo: ${{ inputs.target_repo }}
+          token: ${{ secrets.PACKAGES_REPO_TOKEN }}
+          message: "APT-Repo ergänzt: ${{ needs.plan.outputs.repo_packages }} (${{ needs.plan.outputs.archs }})"
+
+      - name: Aufräumen
+        if: always()
+        run: rm -rf .gpg/private tmp base-repo extra-debs

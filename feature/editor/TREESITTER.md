@@ -75,40 +75,36 @@ entsprechend korrigieren, falls er nicht zu `android-tree-sitter` passt.
 `TreeSitterGrammar` (`TreeSitterLanguageSupport.kt`) deckt jetzt zehn Sprachen ab:
 Kotlin, Java, JSON, XML, C++, C, Bash, CMake, TOML, YAML.
 
-| Sprache | Grammar-Repo (falls manueller Build nötig) | Vorkompiliertes Artefakt? |
-|---|---|---|
-| Kotlin | `fwcd/tree-sitter-kotlin` | `tree-sitter-kotlin` ✅ |
-| Java | `tree-sitter/tree-sitter-java` | `tree-sitter-java` ✅ |
-| JSON | `tree-sitter/tree-sitter-json` | `tree-sitter-json` ✅ |
-| XML | `tree-sitter-grammars/tree-sitter-xml` | `tree-sitter-xml` ✅ |
-| C++ | `tree-sitter/tree-sitter-cpp` | `tree-sitter-cpp` ✅ |
-| C | `tree-sitter/tree-sitter-c` | ❓ ungeprüft, vermutlich manueller Build |
-| Bash | `tree-sitter/tree-sitter-bash` | ❓ ungeprüft, vermutlich manueller Build |
-| CMake | `uyha/tree-sitter-cmake` bzw. `tree-sitter-grammars/tree-sitter-cmake` | ❓ ungeprüft, vermutlich manueller Build |
-| TOML | `tree-sitter-grammars/tree-sitter-toml` | ❓ ungeprüft, vermutlich manueller Build |
-| YAML | `tree-sitter-grammars/tree-sitter-yaml` | ❓ ungeprüft, vermutlich manueller Build |
+| Sprache | Grammar-Repo (falls manueller Build nötig) | Vorkompiliertes Artefakt? | Status in CodeForgeMobile |
+|---|---|---|---|
+| Kotlin | `fwcd/tree-sitter-kotlin` | `tree-sitter-kotlin` ✅ | Eingebunden via Maven (4.3.1) ✅ |
+| Java | `tree-sitter/tree-sitter-java` | `tree-sitter-java` ✅ | Eingebunden via Maven (4.3.1) ✅ |
+| JSON | `tree-sitter/tree-sitter-json` | `tree-sitter-json` ✅ | Eingebunden via Maven (4.3.1) ✅ |
+| XML | `tree-sitter-grammars/tree-sitter-xml` | `tree-sitter-xml` ✅ | Eingebunden via Maven (4.3.1) ✅ |
+| C++ | `tree-sitter/tree-sitter-cpp` | `tree-sitter-cpp` ✅ | Eingebunden via Maven (4.3.1) ✅ |
+| C | `tree-sitter/tree-sitter-c` | `tree-sitter-c` ✅ | Eingebunden via Maven (4.3.1) ✅ |
+| Bash | `tree-sitter/tree-sitter-bash` | ❌ nicht auf Maven Central | NDK-Host-Build erforderlich; highlights.scm vorhanden |
+| CMake | `uyha/tree-sitter-cmake` | ❌ nicht auf Maven Central | NDK-Host-Build erforderlich; highlights.scm vorhanden |
+| TOML | `tree-sitter-grammars/tree-sitter-toml` | ❌ nicht auf Maven Central | NDK-Host-Build erforderlich; highlights.scm vorhanden |
+| YAML | `tree-sitter-grammars/tree-sitter-yaml` | ❌ nicht auf Maven Central | NDK-Host-Build erforderlich; highlights.scm vorhanden |
 
-Empfohlener Build-Weg für die ❓-Sprachen, falls kein vorkompiliertes Artefakt existiert:
+Empfohlener Build-Weg für Bash, CMake, TOML, YAML:
 `tree-sitter-cli generate` generiert aus `grammar.js` die `parser.c`; diese wird zusammen
 mit der Tree-sitter-Runtime über ein minimales `Android.mk`/`CMakeLists.txt` je Sprache zu
-`libtree-sitter-<sprache>.so` kompiliert — als Vorlage eignet sich das Build-Setup von
-`AndroidIDEOfficial/android-tree-sitter` selbst besser als ein komplett eigenes
-`Android.mk` (das Projekt generiert laut eigener Doku Gradle-Module aus einer
-`grammars.json`-Konfiguration und hat damit die Android/NDK-Spezifika bereits gelöst),
-alternativ strukturell analog zum bereits vorhandenen `src/main/jni/Android.mk` in
-`libs/termux-emulator` (dort für `termux.c`/PTY, hier für den Parser).
+`libtree-sitter-<sprache>.so` kompiliert. Auf Termux ist der NDK-Clang-Backend-Code-Generator
+bei Direktaufrufen ohne komplettes Sysroot/Toolchain-Setup limitiert, weshalb der Bau dieser
+vier Bibliotheken auf einen Host mit Standard-Android-NDK ausgelagert werden kann.
+Solange die `.so`-Dateien fehlen, greift der transparente Fallback über `TreeSitterLanguageSupport.isAvailable()`.
 
 ## Aktueller Stand in diesem Repository
 
 - Kotlin-Integrationscode (`TreeSitterLanguageSupport`, `EditorLanguageFactory`): **fertig**,
-  erweitert um die Core-Library-Ladelogik und die sieben neuen Sprach-Einträge (XML, C++, C,
-  Bash, CMake, TOML, YAML).
-- Core-Library-Dependency (`com.itsaky.androidide.treesitter:android-tree-sitter`) in
-  `feature/editor/build.gradle.kts`: **noch nicht ergänzt** — siehe `agy-tasks/02-treesitter-native-libs.md`.
-- Native `.so`-Dateien (weder Core noch Pro-Sprache) und `.scm`-Query-Assets: **nicht
-  enthalten** — dieses Sandbox-Environment hat weder NDK-Toolchain noch zuverlässigen
-  Netzwerkzugriff, um Maven-Artefakte aufzulösen oder Grammar-Repos zu klonen. Bis diese
-  Artefakte ergänzt werden, läuft der Editor automatisch mit TextMate-Highlighting
-  (funktional vollständig, nur weniger präzise als AST-basiertes Highlighting) — für die
-  sieben neuen Sprachen ohne eigene TextMate-Grammar-Datei (siehe `ASSETS.md`) fällt das
-  Highlighting für diese Dateitypen bis dahin auf Plain-Text zurück, nicht auf TextMate.
+  erweitert um Core-Library-Ladelogik, Reflektions-Lookup für AAR-Klassen und Fallback via `TSLanguage.loadLanguage`.
+- Core-Library-Dependency (`com.itsaky.androidide.treesitter:android-tree-sitter:4.3.1`) in
+  `gradle/libs.versions.toml` und `feature/editor/build.gradle.kts` **eingebunden** ✅.
+- Native Sprach-Dependencies für Kotlin, Java, JSON, XML, C++ und C (`com.itsaky.androidide.treesitter:tree-sitter-*:4.3.1`)
+  in `feature/editor/build.gradle.kts` **eingebunden** ✅.
+- Query-Dateien (`highlights.scm`) für **alle zehn Sprachen** unter
+  `feature/editor/src/main/assets/treesitter/<sprache>/highlights.scm` **vorhanden und verifiziert** ✅.
+- Erkennung von `CMakeLists.txt` in `TreeSitterGrammar.fromPath(path)` **implementiert und unit-getestet** ✅.
+

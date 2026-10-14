@@ -39,4 +39,14 @@ class TreeSitterGrammarTest {
         assertNull(TreeSitterGrammar.fromPath("README.md"))
         assertNull(TreeSitterGrammar.fromPath("unknown_file"))
     }
+
+    @Test
+    fun grammarPropertiesMatchConvention() {
+        assertEquals(10, TreeSitterGrammar.entries.size)
+        for (grammar in TreeSitterGrammar.entries) {
+            assertEquals("tree-sitter-${grammar.langName}", grammar.libraryName)
+            assertEquals("treesitter/${grammar.langName}", grammar.queryAssetDir)
+        }
+    }
 }
+
