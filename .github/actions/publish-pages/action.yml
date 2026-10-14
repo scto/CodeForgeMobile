@@ -1,0 +1,45 @@
+name: APT-Repo auf gh-pages veröffentlichen
+description: >
+  Schreibt den Inhalt von github_repo_ready/ als einzigen Commit auf den Branch gh-pages des Ziel-Repos (Force-Push).
+  Das fertige Repo enthält immer den vollständigen Stand (dists/ und pool/), die alte Historie wird verworfen –
+  sonst wächst das Repo mit jedem .deb-Update um die volle Größe.
+inputs:
+  target_repo:
+    description: owner/repo
+    required: true
+  token:
+    description: Token mit Contents Read/Write auf dem Ziel-Repo
+    required: true
+  message:
+    description: Commit-Nachricht
+    required: true
+  source_dir:
+    description: Verzeichnis mit dem fertigen Repo
+    required: false
+    default: github_repo_ready
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        TARGET_REPO: ${{ inputs.target_repo }}
+        MESSAGE: ${{ inputs.message }}
+        SRC: ${{ inputs.source_dir }}
+      run: |
+        set -euo pipefail
+        [ -n "$GH_TOKEN" ] || { echo "::error::Secret PACKAGES_REPO_TOKEN fehlt"; exit 1; }
+        [ -f "$SRC/dists/stable/InRelease" ] || { echo "::error::$SRC enthält kein fertiges Repo"; exit 1; }
+        gh auth setup-git
+        work="$(mktemp -d)"
+        git init -q -b gh-pages "$work/pages"
+        git -C "$work/pages" remote add origin "https://github.com/${TARGET_REPO}.git"
+        rsync -a "$SRC"/ "$work/pages"/
+        touch "$work/pages/.nojekyll"
+        cd "$work/pages"
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -q -m "$MESSAGE"
+        git push --force origin gh-pages
+        echo "Veröffentlicht: https://github.com/${TARGET_REPO} (gh-pages)"

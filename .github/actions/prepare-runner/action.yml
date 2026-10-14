@@ -1,0 +1,54 @@
+name: Runner vorbereiten
+description: Speicherplatz freigeben (optional), Werkzeuge installieren, Signaturschlüssel bereitstellen
+inputs:
+  gpg_private_key_b64:
+    description: Privater Schlüssel, armored und base64-kodiert
+    required: true
+  gpg_passphrase:
+    description: Passphrase des Schlüssels (wird nur auf Vorhandensein geprüft)
+    required: true
+  free_disk:
+    description: "true = große vorinstallierte Pakete löschen (für Docker-Builds)"
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Secrets prüfen
+      shell: bash
+      env:
+        KEY_B64: ${{ inputs.gpg_private_key_b64 }}
+        PASS: ${{ inputs.gpg_passphrase }}
+      run: |
+        [ -n "$KEY_B64" ] || { echo "::error::Secret GPG_PRIVATE_KEY_B64 fehlt (siehe Kommentar am Anfang von build-bootstrap-repo.yml)"; exit 1; }
+        [ -n "$PASS" ]    || { echo "::error::Secret CODEFORGE_GPG_PASSPHRASE fehlt"; exit 1; }
+
+    - name: Speicherplatz freigeben
+      if: inputs.free_disk == 'true'
+      shell: bash
+      run: |
+        df -h /
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost \
+                    /opt/hostedtoolcache/CodeQL /usr/local/.ghcup /usr/share/swift
+        sudo docker image prune -af >/dev/null
+        df -h /
+
+    - name: Abhängigkeiten installieren
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          git gnupg curl zip unzip jq python3 binutils dpkg apt-utils rsync
+
+    - name: Privaten Schlüssel bereitstellen
+      shell: bash
+      env:
+        KEY_B64: ${{ inputs.gpg_private_key_b64 }}
+      run: |
+        set -euo pipefail
+        umask 077
+        mkdir -p .gpg/private
+        printf '%s' "$KEY_B64" | base64 -d > .gpg/private/codeforge.gpg
+        chmod 600 .gpg/private/codeforge.gpg
+        grep -q 'BEGIN PGP PRIVATE KEY BLOCK' .gpg/private/codeforge.gpg \
+          || { echo "::error::GPG_PRIVATE_KEY_B64 enthält keinen armored privaten Schlüssel"; exit 1; }

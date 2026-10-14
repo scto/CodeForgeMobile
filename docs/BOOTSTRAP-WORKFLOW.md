@@ -99,3 +99,34 @@ Vorschlag: `extra_packages` leer, `repo_packages` = `openjdk-17,ninja,jq,git,zip
 Zum Einstieg reicht `openjdk-17,ninja,jq`. Ein späterer Lauf mit `publish` ersetzt `gh-pages` komplett: Wenn du `git` oder `zip` nachträglich willst, gib im neuen Lauf wieder **alle** gewünschten Pakete an, sonst verschwinden die früheren aus dem Repo.
 
 **Nicht geprüft:** ob alle Paketnamen im Fork für alle Architekturen bauen (insbesondere `openjdk-17` und `cmake` auf `arm`) und ob die Binaries aus dem Mirror (HomuHomu833, AndroidIDEOfficial, Lzhiyong) unter dem Prefix `com.codeforge.app` laufen. Der bisher erfolgreiche Lauf hatte `repo_packages` leer.
+
+## Repo in Etappen aufbauen (Modus add)
+
+Ein einzelner Lauf schafft große Paketlisten nicht: GitHub bricht Jobs nach 6 Stunden ab, und OpenJDK, LLVM, Python oder Node.js
+brauchen je Architektur Stunden. Der Workflow `build-bootstrap-repo.yml` hat deshalb zwei Modi:
+
+| Modus | Was passiert |
+|---|---|
+| `full` | Bootstraps + Pakete + Repo in einem Job. Ersetzt Release-Assets **und** das gesamte Repo auf gh-pages. |
+| `add` | Bootstraps bleiben unberührt. Die Pakete werden **pro Architektur parallel** gebaut (je Architektur ein eigener Job mit eigenen 6 Stunden). Danach werden die neuen `.deb` in das bestehende Repo auf gh-pages **ergänzt**, `Packages`/`Release` neu erzeugt und signiert. |
+| `auto` (Standard) | `add`, wenn auf gh-pages des Ziel-Repos schon ein Repo liegt, sonst `full`. |
+
+Ablauf:
+
+1. Einmal `full` (oder `auto` bei leerem Repo) mit `publish` – erzeugt Bootstraps und das erste Repo. `repo_packages` kann dabei leer bleiben oder eine kleine Liste enthalten.
+2. Danach pro Lauf eine **Etappe** (Eingabe `stage`, Namen stehen in `apt-stages.conf`) und `publish` – jede ergänzt das Repo. Reihenfolge egal.
+3. Zusätzliche Einzelpakete über `repo_packages` (Elternpakete: `libllvm` statt `clang`, `libcurl` statt `curl`, `liblzma` statt `xz-utils`, `libprotobuf` statt `protobuf`, `aapt` statt `aapt2`/`aidl`).
+
+Wichtige Regeln:
+
+- **Gleicher Schlüssel:** `GPG_PRIVATE_KEY_B64` muss derselbe sein wie beim ersten Lauf. Im Modus `add` bricht der Lauf ab, wenn der Fingerprint nicht zum bestehenden `codeforge.gpg` passt.
+- **Abhängigkeiten:** Sie werden in jedem Lauf neu aus dem Quellcode gebaut (im Container ist nichts vom vorigen Lauf vorhanden). Pakete ohne BUILD_DEPENDS (gradle, kotlin, …) stehen deshalb mit `nodeps` in der Etappe und werden mit `build-package.sh -s` gebaut. Sonst würde z. B. jeder Lauf OpenJDK 21 mitbauen, nur weil `kotlin` davon abhängt.
+- **Architekturunabhängige Pakete** (`*_all.deb`) werden einmal gebaut (`single-arch`) und gelten für alle Architekturen im Repo.
+- **`keep_going`:** Ein fehlgeschlagenes Paket stoppt den Job nicht; es steht in der Zusammenfassung. Sind in einer Architektur alle Pakete fehlgeschlagen, bricht der Lauf ab.
+- **Eine Leg schlägt fehl** (Timeout, Docker-Fehler): der Schritt „assemble“ wird übersprungen, das Repo bleibt unverändert. Etappe erneut starten oder kleiner schneiden.
+- **gh-pages-Historie:** Beim Veröffentlichen wird der Branch als einzelner Commit per Force-Push ersetzt (der Stand ist immer vollständig). Das hält das Repo klein.
+- **Größe:** GitHub Pages ist auf etwa 1 GB je Seite begrenzt. Das Skript warnt ab 900 MB Pool. Für ein sehr großes Repo ist anderes Hosting nötig.
+- **Paketnamen:** `p7zip` gibt es im Fork nicht, nur `7zip` (stellt `p7zip` bereit). Das Skript ersetzt `p7zip` automatisch durch `7zip`.
+
+Lokal (ohne GitHub): `PHASE=build ARCHS=aarch64 REPO_PACKAGES=... ./build_codeforge_repo.sh` baut nur Pakete nach `terminal-packages-codeforge/output/`.
+`PHASE=assemble BASE_REPO_DIR=<gh-pages-Checkout> EXTRA_DEBS_DIR=<Ordner mit .deb> ./build_codeforge_repo.sh` ergänzt das Repo.
