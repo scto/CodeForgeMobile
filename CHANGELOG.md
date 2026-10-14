@@ -11,6 +11,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📂 Dateibaum-Verbesserungen & Eigenschaften-Dialog (Task 16 Item 2)
+
+* **Theme-adaptive durchgehende Einrückungslinien**: Kontinuierliche vertikale Führungslinien (`drawBehind`) für jede Hierarchiestufe, dynamisch adaptiert an das aktive Theme (`MaterialTheme.colorScheme.outlineVariant`).
+* **2-zeilige Dateiinfo**: Zeile 1 für den Datei- bzw. Verzeichnisnamen; Zeile 2 für Dateigröße (B / KB / MB / GB) bzw. Eintragsanzahl und das Datum der letzten Änderung (`FileTreeFormatters.formatSubtitle`).
+* **Voll-Zeilen-Tap-Target**: Vollflächiger Klick- und Long-Click-Bereich über die gesamte Zeilenbreite (`fillMaxWidth()`, `combinedClickable`) zur komfortablen Bedienung auf Mobilgeräten; separater Chevron-Button zur Ordner-Expansion.
+* **Eigenschaften-Dialog (`FileTreePropertiesDialog`)**: Detaillierte Dateiinformationen im Kontextmenü (Name, Pfad, Typ, Byte-/Formatgröße, Änderungszeitstempel, Lese-/Schreib-/Ausführungsrechte).
+* **Lösch-Bestätigungsdialog (`FileTreeDeleteConfirmDialog`)**: Sicherheitsabfrage mit Bestätigung (`Löschen` / `Abbrechen`) vor der Dateisystem-Löschung.
+* **Lokalisierung & Tests**: Vollständig lokalisierte String-Ressourcen (de / en); 0 hartcodierte Strings; 7 Unit-Tests in `FileTreeFormattersTest` erfolgreich ausgeführt.
+
 ### 📝 Editor Ultimate Setup, Bildvorschau & Desktop-Navigation (Task 16 Item 1)
 
 * **Erweiterte Editor-Funktionen**:

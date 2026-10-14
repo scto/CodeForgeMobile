@@ -189,6 +189,18 @@
     <string name="filetree_loeschen_fehlgeschlagen">Löschen fehlgeschlagen.</string>
     <string name="filetree_neue_datei">Neue Datei</string>
     <string name="filetree_neuer_ordner">Neuer Ordner</string>
+    <string name="filetree_eigenschaften">Eigenschaften</string>
+    <string name="filetree_loeschen_titel">Löschen bestätigen</string>
+    <string name="filetree_loeschen_nachricht">Möchten Sie „%1$s“ wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="filetree_name">Name</string>
+    <string name="filetree_pfad">Pfad</string>
+    <string name="filetree_typ">Typ</string>
+    <string name="filetree_groesse">Größe</string>
+    <string name="filetree_geaendert">Geändert</string>
+    <string name="filetree_berechtigungen">Berechtigungen</string>
+    <string name="filetree_eintraege">%1$d Einträge</string>
+    <string name="filetree_ein_eintrag">1 Eintrag</string>
+    <string name="filetree_keine_eintraege">Keine Einträge</string>
 
     <!-- git -->
     <string name="git_abbrechen_zuruecksetzen">Abbrechen &amp; zurücksetzen</string>

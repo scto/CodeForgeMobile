@@ -51,7 +51,11 @@ class FileTreeViewModel @Inject constructor(
             FileTreeUiEvent.CreateFileClicked -> startAction(FileTreeActionType.CREATE_FILE)
             FileTreeUiEvent.CreateDirectoryClicked -> startAction(FileTreeActionType.CREATE_DIRECTORY)
             FileTreeUiEvent.RenameClicked -> startActionOnContextTarget(FileTreeActionType.RENAME)
-            FileTreeUiEvent.DeleteClicked -> deleteContextTarget()
+            FileTreeUiEvent.PropertiesClicked -> showProperties()
+            FileTreeUiEvent.DismissProperties -> _uiState.update { it.copy(propertiesTarget = null) }
+            FileTreeUiEvent.DeleteClicked -> requestDelete()
+            FileTreeUiEvent.ConfirmDelete -> confirmDelete()
+            FileTreeUiEvent.CancelDelete -> _uiState.update { it.copy(deleteConfirmTarget = null) }
             is FileTreeUiEvent.ActionConfirmed -> confirmAction(event.inputName)
             FileTreeUiEvent.ActionCancelled -> _uiState.update { it.copy(pendingAction = null) }
             FileTreeUiEvent.Refresh -> bumpRefreshToken()
@@ -76,9 +80,20 @@ class FileTreeViewModel @Inject constructor(
         _uiState.update { it.copy(pendingAction = FileTreeAction(type, target.path), contextTarget = null) }
     }
 
-    private fun deleteContextTarget() {
+    private fun showProperties() {
         val target = _uiState.value.contextTarget ?: return
-        _uiState.update { it.copy(contextTarget = null) }
+        val props = FileTreeFormatters.extractFileProperties(java.io.File(target.path), target.isDirectory)
+        _uiState.update { it.copy(contextTarget = null, propertiesTarget = props) }
+    }
+
+    private fun requestDelete() {
+        val target = _uiState.value.contextTarget ?: return
+        _uiState.update { it.copy(contextTarget = null, deleteConfirmTarget = target) }
+    }
+
+    private fun confirmDelete() {
+        val target = _uiState.value.deleteConfirmTarget ?: return
+        _uiState.update { it.copy(deleteConfirmTarget = null) }
         viewModelScope.launch {
             fileSystemRepository.delete(target.path)
                 .onSuccess { bumpRefreshToken() }

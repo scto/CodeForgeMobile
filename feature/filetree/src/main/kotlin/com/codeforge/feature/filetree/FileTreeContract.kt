@@ -24,6 +24,8 @@ data class FileTreeUiState(
     val rootPath: String = "",
     val pendingAction: FileTreeAction? = null,
     val contextTarget: FileTreeContextTarget? = null,
+    val deleteConfirmTarget: FileTreeContextTarget? = null,
+    val propertiesTarget: FilePropertiesData? = null,
     /**
      * Wird bei jeder erfolgreichen Dateisystem-Mutation erhöht und von [FileTreeScreen] als
      * Teil des `remember`-Keys für die Bonsai-[cafe.adriel.bonsai.core.tree.Tree]-Instanz
@@ -40,7 +42,11 @@ sealed interface FileTreeUiEvent {
     data object CreateFileClicked : FileTreeUiEvent
     data object CreateDirectoryClicked : FileTreeUiEvent
     data object RenameClicked : FileTreeUiEvent
+    data object PropertiesClicked : FileTreeUiEvent
+    data object DismissProperties : FileTreeUiEvent
     data object DeleteClicked : FileTreeUiEvent
+    data object ConfirmDelete : FileTreeUiEvent
+    data object CancelDelete : FileTreeUiEvent
     data class ActionConfirmed(val inputName: String) : FileTreeUiEvent
     data object ActionCancelled : FileTreeUiEvent
     data object Refresh : FileTreeUiEvent

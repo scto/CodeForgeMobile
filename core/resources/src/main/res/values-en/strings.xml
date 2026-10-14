@@ -53,5 +53,18 @@
     <string name="editor_image_preview_xml_resource">XML Resource</string>
     <string name="editor_image_preview_resource">Resource</string>
     <string name="editor_image_preview_structure">XML Resource Structure</string>
+    <string name="common_schliessen">Close</string>
+    <string name="filetree_eigenschaften">Properties</string>
+    <string name="filetree_loeschen_titel">Confirm Deletion</string>
+    <string name="filetree_loeschen_nachricht">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
+    <string name="filetree_name">Name</string>
+    <string name="filetree_pfad">Path</string>
+    <string name="filetree_typ">Type</string>
+    <string name="filetree_groesse">Size</string>
+    <string name="filetree_geaendert">Modified</string>
+    <string name="filetree_berechtigungen">Permissions</string>
+    <string name="filetree_eintraege">%1$d items</string>
+    <string name="filetree_ein_eintrag">1 item</string>
+    <string name="filetree_keine_eintraege">No items</string>
 </resources>
 

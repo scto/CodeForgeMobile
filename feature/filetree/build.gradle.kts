@@ -31,5 +31,6 @@ dependencies {
     implementation(libs.bonsai.core)
     implementation(libs.bonsai.file.system)
 
+    testImplementation(libs.junit)
     testImplementation(project(":core:testing"))
 }
