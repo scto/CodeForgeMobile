@@ -813,6 +813,20 @@
     <string name="settings_lsp_server_pfad">LSP-Server-Pfad</string>
     <string name="themebuilder_beispiel_karte">Beispiel-Karte</string>
 
+    <!-- Editor Ultimate Setup & Erweiterungen (Task 16) -->
+    <string name="settings_minimap">Minimap anzeigen</string>
+    <string name="settings_minimap_desc">Miniatur-Codeübersicht am rechten Bildschirmrand einblenden.</string>
+    <string name="settings_rainbow_brackets">Regenbogen-Klammern (Rainbow Brackets)</string>
+    <string name="settings_rainbow_brackets_desc">Zusammengehörende Klammerpaare farblich hervorheben.</string>
+    <string name="settings_pinch_to_zoom">Pinch-to-Zoom</string>
+    <string name="settings_pinch_to_zoom_desc">Schriftgröße stufenlos mit Zwei-Finger-Geste anpassen.</string>
+    <string name="settings_desktop_shortcuts">Desktop-Tastaturkürzel &amp; PC-Navigation</string>
+    <string name="settings_desktop_shortcuts_desc">Erweiterte Navigation und Tastatur-Shortcuts (Strg+S, Strg+Z, Strg+F, Strg+D etc.).</string>
+    <string name="editor_image_preview_xml_resource">XML-Ressource</string>
+    <string name="editor_image_preview_resource">Ressource</string>
+    <string name="editor_image_preview_structure">XML-Ressourcenstruktur</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>
+

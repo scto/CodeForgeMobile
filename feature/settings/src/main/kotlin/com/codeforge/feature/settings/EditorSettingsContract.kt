@@ -19,6 +19,10 @@ data class EditorSettingsUiState(
     val stickyScrollEnabled: Boolean = true,
     val magnifierEnabled: Boolean = true,
     val symbolPairAutocompleteEnabled: Boolean = true,
+    val minimapEnabled: Boolean = true,
+    val rainbowBracketsEnabled: Boolean = true,
+    val pinchToZoomEnabled: Boolean = true,
+    val desktopShortcutsEnabled: Boolean = true,
     val isLoading: Boolean = true
 )
 
@@ -34,4 +38,9 @@ sealed interface EditorSettingsUiEvent {
     data object StickyScrollToggled : EditorSettingsUiEvent
     data object MagnifierToggled : EditorSettingsUiEvent
     data object SymbolPairAutocompleteToggled : EditorSettingsUiEvent
+    data object MinimapToggled : EditorSettingsUiEvent
+    data object RainbowBracketsToggled : EditorSettingsUiEvent
+    data object PinchToZoomToggled : EditorSettingsUiEvent
+    data object DesktopShortcutsToggled : EditorSettingsUiEvent
 }
+

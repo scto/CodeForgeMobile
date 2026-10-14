@@ -46,6 +46,8 @@ dependencies {
     // Für androidx.core.content.FileProvider (content://-URIs zum Teilen/Öffnen von Dateien
     // aus dem Editor heraus, z.B. "Öffnen mit..." / Teilen-Intent).
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.vectordrawable:vectordrawable:1.1.0")
+
 
     implementation(project(":libs:lsp-client"))
     // Update-Chips/Dialog im Editor (nur das -api; Implementierung wird in :app per Hilt gebunden)

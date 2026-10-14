@@ -175,9 +175,34 @@ private fun EditorSettingsScreen(
                 checked = uiState.symbolPairAutocompleteEnabled,
                 onToggle = { onEvent(EditorSettingsUiEvent.SymbolPairAutocompleteToggled) }
             )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_minimap),
+                description = Res.string(R.string.settings_minimap_desc),
+                checked = uiState.minimapEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.MinimapToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_rainbow_brackets),
+                description = Res.string(R.string.settings_rainbow_brackets_desc),
+                checked = uiState.rainbowBracketsEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.RainbowBracketsToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_pinch_to_zoom),
+                description = Res.string(R.string.settings_pinch_to_zoom_desc),
+                checked = uiState.pinchToZoomEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.PinchToZoomToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_desktop_shortcuts),
+                description = Res.string(R.string.settings_desktop_shortcuts_desc),
+                checked = uiState.desktopShortcutsEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.DesktopShortcutsToggled) }
+            )
         }
     }
 }
+
 
 @Composable
 private fun EditorToggleRow(

@@ -11,6 +11,26 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📝 Editor Ultimate Setup, Bildvorschau & Desktop-Navigation (Task 16 Item 1)
+
+* **Erweiterte Editor-Funktionen**:
+  * **Minimap**: Optionale Miniatur-Codeübersicht am rechten Bildschirmrand via sichere Reflection (`EditorMinimap`).
+  * **Rainbow Brackets**: Farbliches Hervorheben und Fetten zusammengehöriger Klammerpaare (`isHighlightBracketPair`, `boldMatchingDelimiters`, `BracketPairs`).
+  * **Pinch-to-Zoom**: Stufenloses Skalieren der Schriftgröße per Zwei-Finger-Geste (`setScaleTextSizes(8f * density, 40f * density)`).
+  * **Desktop-Shortcuts & PC-Navigation**: Aktivierung des PC-Navigationsmodus (`navigationMode = 1`) für Tastatur-Navigation und Shortcuts.
+  * **Diagnose-UI**: Aktivierung von `EditorDiagnosticTooltipWindow` für Tooltip-Anzeige bei LSP-Diagnosen.
+* **Bild- und Vektor-Vorschau (`ImageFilePreview`)**:
+  * Unterstützung für Raster- und Vektor-Formate: PNG, JPG, JPEG, WEBP, GIF, SVG, BMP sowie Android XML `<vector>` und `<adaptive-icon>`.
+  * Zoom & Pan via `pointerInput(detectTransformGestures)`, Detail-Header mit Dateigröße und Pixel-Dimensionen, Vektor-Strukturanzeige bei XML-Dateien.
+  * Umschaltung im `EditorScreen` bei Bilddateien unter Deaktivierung nicht anwendbarer Aktionen (Undo, Redo, Cut, Copy, Formatting).
+* **Einstellungen & Proto-Schema**:
+  * `core/datastore/src/main/proto/settings.proto` um 4 Felder erweitert (`minimap_enabled = 12`, `rainbow_brackets_enabled = 13`, `pinch_to_zoom_enabled = 14`, `desktop_shortcuts_enabled = 15`), standardmäßig aktiv in `AppSettingsSerializer`.
+  * Toggles in `EditorSettingsContract`, `EditorSettingsViewModel` und `EditorSettingsScreen` integriert.
+* **Lokalisierung & Tests**:
+  * Vollständige englische und deutsche Ressourcen in `values/` und `values-en/`; 0 hartcodierte Strings (`python3 scripts/find_hardcoded_strings.py --check`).
+  * 4 Unit-Tests in `ImageFilePreviewTest` erfolgreich; `:feature:editor:testDebugUnitTest`, `:feature:settings:testDebugUnitTest` und `:app:assembleDebug` erfolgreich ausgeführt.
+
+
 ### 🌳 Tree-sitter Core-Library, native Sprachbibliotheken & Query-Assets (Task 02)
 
 * **Core-Library & Maven-Integration**: Tree-sitter Core-Runtime (`com.itsaky.androidide.treesitter:android-tree-sitter:4.3.1`) und native Parser-AARs für Kotlin, Java, JSON, XML, C++ sowie C in `gradle/libs.versions.toml` und `feature/editor/build.gradle.kts` eingebunden.

@@ -34,6 +34,10 @@ class EditorSettingsViewModel @Inject constructor(
                 stickyScrollEnabled = settings.editor.stickyScrollEnabled,
                 magnifierEnabled = settings.editor.magnifierEnabled,
                 symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled,
+                minimapEnabled = settings.editor.minimapEnabled,
+                rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,
+                pinchToZoomEnabled = settings.editor.pinchToZoomEnabled,
+                desktopShortcutsEnabled = settings.editor.desktopShortcutsEnabled,
                 isLoading = false
             )
         }
@@ -82,7 +86,26 @@ class EditorSettingsViewModel @Inject constructor(
                             .setSymbolPairAutocompleteEnabled(!it.symbolPairAutocompleteEnabled)
                             .build()
                     }
+
+                EditorSettingsUiEvent.MinimapToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setMinimapEnabled(!it.minimapEnabled).build() }
+
+                EditorSettingsUiEvent.RainbowBracketsToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setRainbowBracketsEnabled(!it.rainbowBracketsEnabled).build()
+                    }
+
+                EditorSettingsUiEvent.PinchToZoomToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setPinchToZoomEnabled(!it.pinchToZoomEnabled).build()
+                    }
+
+                EditorSettingsUiEvent.DesktopShortcutsToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setDesktopShortcutsEnabled(!it.desktopShortcutsEnabled).build()
+                    }
             }
         }
     }
+
 }

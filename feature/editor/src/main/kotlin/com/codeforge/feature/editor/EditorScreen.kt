@@ -61,6 +61,8 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import com.codeforge.feature.editor.fileprovider.EditorFileProvider
 import com.codeforge.feature.editor.overlay.UpdateChipDialog
+import com.codeforge.feature.editor.ui.ImageFilePreview
+import com.codeforge.feature.editor.ui.isImageFilePath
 import com.codeforge.libs.code_tools.edit.LineEdits
 import com.codeforge.libs.code_tools.format.CodeFormatter
 import com.codeforge.libs.code_tools.format.FormatOptions
@@ -167,22 +169,30 @@ fun EditorRoute(
             }
 
             uiState.activeFile?.let { active ->
-                SoraCodeEditor(
-                    modifier = Modifier.fillMaxSize(),
-                    path = active.path,
-                    content = active.content,
-                    language = EditorLanguageType.fromPath(active.path),
-                    settings = uiState.displaySettings,
-                    diagnostics = uiState.activeDiagnostics,
-                    completionProvider = viewModel.completionProvider,
-                    updateAnnotations = uiState.activeUpdateAnnotations,
-                    onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
-                    onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
-                    onControllerReady = { controller = it }
-                )
+                if (isImageFilePath(active.path)) {
+                    ImageFilePreview(
+                        filePath = active.path,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    SoraCodeEditor(
+                        modifier = Modifier.fillMaxSize(),
+                        path = active.path,
+                        content = active.content,
+                        language = EditorLanguageType.fromPath(active.path),
+                        settings = uiState.displaySettings,
+                        diagnostics = uiState.activeDiagnostics,
+                        completionProvider = viewModel.completionProvider,
+                        updateAnnotations = uiState.activeUpdateAnnotations,
+                        onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
+                        onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
+                        onControllerReady = { controller = it }
+                    )
+                }
             }
         }
     }
+
 
     if (showGoToLine) {
         GoToLineDialog(
@@ -218,43 +228,45 @@ private fun EditorToolbar(
     onToggleSearch: () -> Unit,
     onShare: () -> Unit
 ) {
+    val isImage = activePath?.let { isImageFilePath(it) } == true
     Row(
         modifier = modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
     ) {
-        IconButton(onClick = { controller?.undo() }, enabled = controller?.canUndo() ?: false) {
+        IconButton(onClick = { controller?.undo() }, enabled = !isImage && (controller?.canUndo() ?: false)) {
             Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringRes(R.string.editor_rueckgaengig))
         }
-        IconButton(onClick = { controller?.redo() }, enabled = controller?.canRedo() ?: false) {
+        IconButton(onClick = { controller?.redo() }, enabled = !isImage && (controller?.canRedo() ?: false)) {
             Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = stringRes(R.string.editor_wiederholen))
         }
-        IconButton(onClick = { controller?.selectAll() }) {
+        IconButton(onClick = { controller?.selectAll() }, enabled = !isImage) {
             Icon(Icons.Filled.SelectAll, contentDescription = stringRes(R.string.editor_alles_auswaehlen))
         }
-        IconButton(onClick = { controller?.cut() }) {
+        IconButton(onClick = { controller?.cut() }, enabled = !isImage) {
             Icon(Icons.Filled.ContentCut, contentDescription = stringRes(R.string.editor_ausschneiden))
         }
-        IconButton(onClick = { controller?.copy() }) {
+        IconButton(onClick = { controller?.copy() }, enabled = !isImage) {
             Icon(Icons.Filled.ContentCopy, contentDescription = stringRes(R.string.editor_kopieren))
         }
-        IconButton(onClick = { controller?.paste() }) {
+        IconButton(onClick = { controller?.paste() }, enabled = !isImage) {
             Icon(Icons.Filled.ContentPaste, contentDescription = stringRes(R.string.editor_einfuegen))
         }
-        IconButton(onClick = onSave) {
+        IconButton(onClick = onSave, enabled = !isImage) {
             Icon(Icons.Filled.Save, contentDescription = stringRes(R.string.common_speichern))
         }
-        IconButton(onClick = onFormat) {
+        IconButton(onClick = onFormat, enabled = !isImage) {
             Icon(Icons.Filled.AutoFixHigh, contentDescription = stringRes(R.string.editor_formatieren))
         }
-        if (isLspConnected) {
+        if (isLspConnected && !isImage) {
             IconButton(onClick = onFormatLsp) {
                 Icon(Icons.AutoMirrored.Filled.FormatAlignLeft, contentDescription = stringRes(R.string.editor_formatieren_lsp))
             }
         }
         val unit = " ".repeat(tabSize.coerceIn(1, 8))
-        val commentStyle = activePath?.let(LineEdits::commentStyleFor)
+        val commentStyle = if (isImage) null else activePath?.let(LineEdits::commentStyleFor)
         IconButton(
             onClick = { commentStyle?.let { style -> controller?.runLineCommand { t, a, b -> LineEdits.toggleComment(t, a, b, style) } } },
             enabled = commentStyle != null
+
         ) {
             Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = stringRes(R.string.editor_kommentar_umschalten))
         }

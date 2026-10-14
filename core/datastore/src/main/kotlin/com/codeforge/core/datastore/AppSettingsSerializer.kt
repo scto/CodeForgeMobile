@@ -32,9 +32,14 @@ object AppSettingsSerializer : Serializer<AppSettings> {
                 .setStickyScrollEnabled(true)
                 .setMagnifierEnabled(true)
                 .setSymbolPairAutocompleteEnabled(true)
+                .setMinimapEnabled(true)
+                .setRainbowBracketsEnabled(true)
+                .setPinchToZoomEnabled(true)
+                .setDesktopShortcutsEnabled(true)
                 .build()
         )
         .build()
+
 
     override suspend fun readFrom(input: InputStream): AppSettings {
         try {

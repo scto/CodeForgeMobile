@@ -42,4 +42,16 @@
     <string name="pw_tpl_no_androidx_desc">Classic activity without AndroidX</string>
     <string name="pw_tpl_compose">Jetpack Compose</string>
     <string name="pw_tpl_compose_desc">Empty Compose activity with Material 3</string>
+    <string name="settings_minimap">Show Minimap</string>
+    <string name="settings_minimap_desc">Display miniature code overview on the right edge.</string>
+    <string name="settings_rainbow_brackets">Rainbow Brackets</string>
+    <string name="settings_rainbow_brackets_desc">Colorize matching bracket pairs.</string>
+    <string name="settings_pinch_to_zoom">Pinch to Zoom</string>
+    <string name="settings_pinch_to_zoom_desc">Smoothly adjust font size using two-finger pinch gesture.</string>
+    <string name="settings_desktop_shortcuts">Desktop Shortcuts &amp; PC Navigation</string>
+    <string name="settings_desktop_shortcuts_desc">Advanced navigation and keyboard shortcuts (Ctrl+S, Ctrl+Z, Ctrl+F, Ctrl+D etc.).</string>
+    <string name="editor_image_preview_xml_resource">XML Resource</string>
+    <string name="editor_image_preview_resource">Resource</string>
+    <string name="editor_image_preview_structure">XML Resource Structure</string>
 </resources>
+

@@ -69,7 +69,11 @@ data class EditorDisplaySettings(
     val showNonPrintableChars: Boolean = false,
     val stickyScrollEnabled: Boolean = true,
     val magnifierEnabled: Boolean = true,
-    val symbolPairAutocompleteEnabled: Boolean = true
+    val symbolPairAutocompleteEnabled: Boolean = true,
+    val minimapEnabled: Boolean = true,
+    val rainbowBracketsEnabled: Boolean = true,
+    val pinchToZoomEnabled: Boolean = true,
+    val desktopShortcutsEnabled: Boolean = true
 )
 
 @Composable
@@ -124,8 +128,38 @@ fun SoraCodeEditor(
                 // --- Code Block Indicators ---
                 isBlockLineEnabled = true
 
-                // --- Punctuation Pair Matching and Highlighting ---
-                isHighlightBracketPair = true
+                // --- Punctuation Pair Matching and Highlighting (Rainbow Brackets) ---
+                isHighlightBracketPair = settings.rainbowBracketsEnabled
+                props.boldMatchingDelimiters = settings.rainbowBracketsEnabled
+                runCatching {
+                    val bracketClass = Class.forName("io.github.rosemoe.sora.widget.component.BracketPairs")
+                    val component = getComponent(bracketClass.asSubclass(
+                        io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
+                    ))
+                    component.isEnabled = settings.rainbowBracketsEnabled
+                }
+
+                // --- Pinch-to-Zoom (Text-Skalierung per Geste) ---
+                val density = ctx.resources.displayMetrics.scaledDensity
+                if (settings.pinchToZoomEnabled) {
+                    setScaleTextSizes(8f * density, 40f * density)
+                    runCatching {
+                        val method = javaClass.getMethod("setScaleTextEnabled", Boolean::class.javaPrimitiveType)
+                        method.invoke(this, true)
+                    }
+                } else {
+                    val currentPx = settings.fontSizeSp * density
+                    setScaleTextSizes(currentPx, currentPx)
+                }
+
+                // --- PC-Navigation & Desktop-Tastaturkürzel ---
+                if (settings.desktopShortcutsEnabled) {
+                    runCatching {
+                        val field = props.javaClass.getDeclaredField("navigationMode")
+                        field.isAccessible = true
+                        field.setInt(props, 1) // NAVIGATION_MODE_PC
+                    }
+                }
 
                 // --- Word Wrap Display Mode ---
                 isWordwrap = settings.wordWrap
@@ -148,9 +182,6 @@ fun SoraCodeEditor(
                 getComponent(EditorAutoCompletion::class.java).isEnabled = true
 
                 // --- Sticky Scroll: zeigt den umschließenden Code-Block fixiert oben an.
-                // Komponente ist in sora-editor 0.23.x als EditorStickyScroll verfügbar;
-                // Zugriff defensiv per reflection-freiem getComponent, da ältere Artefakte
-                // diese Komponente u.U. nicht registrieren.
                 runCatching {
                     val stickyScrollClass = Class.forName(
                         "io.github.rosemoe.sora.widget.component.EditorStickyScroll"
@@ -159,6 +190,21 @@ fun SoraCodeEditor(
                         io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
                     ))
                     component.isEnabled = settings.stickyScrollEnabled
+                }
+
+                // --- Minimap (Miniatur-Codeübersicht am rechten Rand) ---
+                runCatching {
+                    val minimapClass = Class.forName("io.github.rosemoe.sora.widget.component.EditorMinimap")
+                    val comp = getComponent(minimapClass.asSubclass(
+                        io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
+                    ))
+                    comp?.isEnabled = settings.minimapEnabled
+                }
+
+                // --- Diagnose-UI & Tooltips ---
+                runCatching {
+                    val tooltipWindow = getComponent(io.github.rosemoe.sora.widget.component.EditorDiagnosticTooltipWindow::class.java)
+                    tooltipWindow.isEnabled = true
                 }
 
                 // --- Tab-Größe ---
@@ -197,10 +243,38 @@ fun SoraCodeEditor(
             editor.tabWidth = settings.tabSize.coerceAtLeast(1)
             editor.setTextSize(settings.fontSizeSp.coerceIn(6f, 48f))
             editor.getComponent(Magnifier::class.java).isEnabled = settings.magnifierEnabled
+
+            editor.isHighlightBracketPair = settings.rainbowBracketsEnabled
+            editor.props.boldMatchingDelimiters = settings.rainbowBracketsEnabled
+            runCatching {
+                val bracketClass = Class.forName("io.github.rosemoe.sora.widget.component.BracketPairs")
+                val component = editor.getComponent(bracketClass.asSubclass(
+                    io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
+                ))
+                component.isEnabled = settings.rainbowBracketsEnabled
+            }
+
+            val density = editor.context.resources.displayMetrics.scaledDensity
+            if (settings.pinchToZoomEnabled) {
+                editor.setScaleTextSizes(8f * density, 40f * density)
+            } else {
+                val currentPx = settings.fontSizeSp * density
+                editor.setScaleTextSizes(currentPx, currentPx)
+            }
+
+            runCatching {
+                val minimapClass = Class.forName("io.github.rosemoe.sora.widget.component.EditorMinimap")
+                val comp = editor.getComponent(minimapClass.asSubclass(
+                    io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
+                ))
+                comp?.isEnabled = settings.minimapEnabled
+            }
+
             TextMateAssetLoader.setActiveTheme(settings.textmateTheme)
             LspDiagnosticsBridge.apply(diagnosticsContainer, editor.text, diagnostics)
         }
     )
+
     EditorOverlayLayer(
         modifier = Modifier.fillMaxSize(),
         editor = overlayEditor,

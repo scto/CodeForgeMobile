@@ -231,10 +231,15 @@ class EditorViewModel @Inject constructor(
                         showNonPrintableChars = settings.editor.showNonPrintableChars,
                         stickyScrollEnabled = settings.editor.stickyScrollEnabled,
                         magnifierEnabled = settings.editor.magnifierEnabled,
-                        symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled
+                        symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled,
+                        minimapEnabled = settings.editor.minimapEnabled,
+                        rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,
+                        pinchToZoomEnabled = settings.editor.pinchToZoomEnabled,
+                        desktopShortcutsEnabled = settings.editor.desktopShortcutsEnabled
                     )
                 )
             }
+
         }
     }
 
@@ -346,8 +351,22 @@ class EditorViewModel @Inject constructor(
         val active = _uiState.value.activeFile ?: return@launch
         lspClient.requestFormat(active.path, active.content)
             .onSuccess { formatted -> updateBuffer(formatted) }
-            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_lsp_formatierung_fehlgeschlagen, it.message.orEmpty()))) }
+            .onFailure {
+                val tab = _uiState.value.displaySettings.tabSize
+                val result = com.codeforge.libs.code_tools.format.CodeFormatter.format(
+                    active.content,
+                    com.codeforge.libs.code_tools.format.CodeFormatter.languageFor(active.path),
+                    com.codeforge.libs.code_tools.format.FormatOptions(indentSize = tab)
+                )
+                if (result.text != active.content) {
+                    updateBuffer(result.text)
+                    _effect.emit(EditorUiEffect.ShowSnackbar(result.warning ?: Res.string(R.string.editor_formatiert)))
+                } else {
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_bereits_formatiert)))
+                }
+            }
     }
+
 
     private fun languageIdFor(path: String): String = when (EditorLanguageType.fromPath(path)) {
         EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
