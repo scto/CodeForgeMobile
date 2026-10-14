@@ -24,6 +24,7 @@ import com.codeforge.feature.settings.EditorSettingsRoute
 import com.codeforge.feature.settings.GitSettingsRoute
 import com.codeforge.feature.settings.SettingsHubRoute
 import com.codeforge.feature.settings.TerminalSettingsRoute
+import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.terminal.TerminalRoute
 import com.codeforge.feature.themebuilder.ThemeBuilderRoute
 import com.codeforge.feature.welcome.WelcomeRoute
@@ -41,6 +42,7 @@ internal object Routes {
     const val SETTINGS_SDK_MANAGER = "settings_sdk_manager"
     const val SETTINGS_PLUGINS = "settings_plugins"
     const val SETTINGS_GIT = "settings_git"
+    const val EXTENSIONS = "extensions"
     const val TERMINAL = "terminal"
     const val TERMINAL_PATTERN = "terminal?initialCommand={initialCommand}"
     const val PROJECT_WORKSPACE_PATTERN = "workspace/{rootPath}"
@@ -112,7 +114,8 @@ fun CodeForgeNavHost(startOnboarding: Boolean) {
                 onNavigateToTerminal = { navController.navigate(Routes.SETTINGS_TERMINAL) },
                 onNavigateToSdkManager = { navController.navigate(Routes.SETTINGS_SDK_MANAGER) },
                 onNavigateToPlugins = { navController.navigate(Routes.SETTINGS_PLUGINS) },
-                onNavigateToGit = { navController.navigate(Routes.SETTINGS_GIT) }
+                onNavigateToGit = { navController.navigate(Routes.SETTINGS_GIT) },
+                onNavigateToExtensions = { navController.navigate(Routes.EXTENSIONS) }
             )
         }
         composable(Routes.SETTINGS_THEME) {
@@ -132,6 +135,11 @@ fun CodeForgeNavHost(startOnboarding: Boolean) {
         }
         composable(Routes.SETTINGS_PLUGINS) {
             PluginsRoute()
+        }
+        composable(Routes.EXTENSIONS) {
+            ExtensionsRoute(
+                onBack = { navController.popBackStack() }
+            )
         }
         composable(
             route = Routes.TERMINAL_PATTERN,

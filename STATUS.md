@@ -47,7 +47,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilw
 | Bereich | Status | Details / Doku |
 |---|---|---|
 | Projekt-Wizard (2 Schritte) + Template-Engine, 9 Vorlagen | ✅ | `docs/project-wizard-and-template-engine.md` |
-| Welcome (Adaptive List-Detail), Settings-Hub, Theme-Builder (15 Presets, RGB-Colorpicker, Horizontal Preview), Git-/Editor-/Terminal-Einstellungen | ✅ 🧪 | |
+| Welcome (Adaptive List-Detail), Settings-Hub (inkl. Extensions-Manager für LSP-Server), Theme-Builder (15 Presets, RGB-Colorpicker, Horizontal Preview), Git-/Editor-/Terminal-Einstellungen | ✅ 🧪 | |
 | Plugin-API/-Runtime (Termux-Prefix) | 🟡 | `libs/plugin-api`, `feature/plugins` |
 
 ## ⬜ Noch offene Features / Aufgaben
@@ -64,7 +64,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilw
    - ✅ Item 1: Editor & Image Preview (Minimap, Rainbow Brackets, Pinch-Zoom, Desktop-Shortcuts, Diagnose-UI, `ImageFilePreview`)
    - ✅ Item 2: Dateibaum (theme-adaptive Einrückungslinien, 2-zeilige Dateiinfo, Vollzeilen-Tap, Kontextmenü „Eigenschaften“, Löschdialog)
    - ✅ Item 3: Theme Studio (15 Presets, horizontale Live-Vorschau, RGB-Colorpicker mit 10 Swatches)
-   - ⬜ Item 4: Extensions-Manager (`:feature:settings`): LSP-Server-Pakete, SHA-256-Prüfung, Entpacken (Zip/Jar), Route `Routes.EXTENSIONS`
+   - ✅ Item 4: Extensions-Manager (`:feature:settings`): LSP-Server-Pakete, SHA-256-Prüfung, Entpacken (Zip/Jar), Route `Routes.EXTENSIONS`
    - ⬜ Item 5: Hintergrundbefehle (`RunCommandWorker`, Foreground-Service; prüfen ob durch Termux abgedeckt)
    - ⬜ Item 6: Fluent 2 Token-Entscheidung
 10. Fluent-2-Designrichtung (`FLUENT2_JETPACK_COMPOSE_GUIDE.md`): bisher nur als Leitfaden, im Code gilt Material 3 (Expressive).

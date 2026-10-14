@@ -89,5 +89,37 @@
     <string name="themebuilder_schnellauswahl">Quick Presets</string>
     <string name="themebuilder_farbe_anwenden">Apply</string>
     <string name="themebuilder_palette_anpassen">Adjust color</string>
+    <string name="common_zurueck">Back</string>
+    <string name="common_fehler">Error</string>
+
+    <!-- Extensions Manager (Task 16 Item 4) -->
+    <string name="settings_hub_extensions">Extensions (LSP)</string>
+    <string name="extensions_title">Extensions &amp; Language Servers</string>
+    <string name="extensions_installed">Installed</string>
+    <string name="extensions_not_installed">Not installed</string>
+    <string name="extensions_install">Install</string>
+    <string name="extensions_uninstall">Uninstall</string>
+    <string name="extensions_downloading">Downloading (%1$d%%)...</string>
+    <string name="extensions_verifying">Verifying SHA-256 checksum...</string>
+    <string name="extensions_extracting">Extracting archive...</string>
+    <string name="extensions_sha256_mismatch">SHA-256 checksum mismatch.</string>
+    <string name="extensions_error">Error: %1$s</string>
+    <string name="extensions_install_success">%1$s successfully installed.</string>
+    <string name="extensions_uninstall_success">%1$s was uninstalled.</string>
+    <string name="extensions_path_label">Path: %1$s</string>
+    <string name="extensions_version_label">Version: %1$s</string>
+    <string name="extensions_language_label">Language: %1$s</string>
+    <string name="extension_kotlin_lsp_name">Kotlin Language Server</string>
+    <string name="extension_kotlin_lsp_desc">LSP server for Kotlin providing code completion, diagnostics, and refactoring.</string>
+    <string name="extension_jdtls_name">Eclipse JDT Language Server</string>
+    <string name="extension_jdtls_desc">Java language server based on Eclipse JDT for completion and navigation.</string>
+    <string name="extension_clangd_name">Clangd (C/C++)</string>
+    <string name="extension_clangd_desc">Fast C/C++ language server with Clang backend.</string>
+    <string name="extension_pyright_name">Pyright (Python)</string>
+    <string name="extension_pyright_desc">Static type checker and language server for Python.</string>
+    <string name="extension_rust_analyzer_name">Rust Analyzer</string>
+    <string name="extension_rust_analyzer_desc">Modular language server implementation for the Rust programming language.</string>
+    <string name="extension_html_css_json_name">HTML / CSS / JSON Server</string>
+    <string name="extension_html_css_json_desc">Language server for web technologies and structured data formats.</string>
 </resources>
 

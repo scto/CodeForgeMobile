@@ -35,6 +35,8 @@
     <string name="common_update">Update</string>
     <string name="common_vorschau">Vorschau</string>
     <string name="common_wort">Wort</string>
+    <string name="common_zurueck">Zurück</string>
+    <string name="common_fehler">Fehler</string>
 
     <!-- app -->
     <string name="app_import_fehlgeschlagen">Import fehlgeschlagen</string>
@@ -855,6 +857,36 @@
     <string name="editor_image_preview_xml_resource">XML-Ressource</string>
     <string name="editor_image_preview_resource">Ressource</string>
     <string name="editor_image_preview_structure">XML-Ressourcenstruktur</string>
+
+    <!-- Extensions Manager (Task 16 Item 4) -->
+    <string name="settings_hub_extensions">Erweiterungen (LSP)</string>
+    <string name="extensions_title">Erweiterungen &amp; Sprachserver</string>
+    <string name="extensions_installed">Installiert</string>
+    <string name="extensions_not_installed">Nicht installiert</string>
+    <string name="extensions_install">Installieren</string>
+    <string name="extensions_uninstall">Deinstallieren</string>
+    <string name="extensions_downloading">Wird heruntergeladen (%1$d%%)...</string>
+    <string name="extensions_verifying">Prüfe SHA-256-Prüfsumme...</string>
+    <string name="extensions_extracting">Wird entpackt...</string>
+    <string name="extensions_sha256_mismatch">SHA-256-Prüfsumme stimmt nicht überein.</string>
+    <string name="extensions_error">Fehler: %1$s</string>
+    <string name="extensions_install_success">%1$s erfolgreich installiert.</string>
+    <string name="extensions_uninstall_success">%1$s wurde deinstalliert.</string>
+    <string name="extensions_path_label">Pfad: %1$s</string>
+    <string name="extensions_version_label">Version: %1$s</string>
+    <string name="extensions_language_label">Sprache: %1$s</string>
+    <string name="extension_kotlin_lsp_name">Kotlin Language Server</string>
+    <string name="extension_kotlin_lsp_desc">LSP-Server für Kotlin mit Code-Vervollständigung, Diagnostik und Refactoring.</string>
+    <string name="extension_jdtls_name">Eclipse JDT Language Server</string>
+    <string name="extension_jdtls_desc">Java-Sprachserver auf Basis von Eclipse JDT für Vervollständigung und Navigation.</string>
+    <string name="extension_clangd_name">Clangd (C/C++)</string>
+    <string name="extension_clangd_desc">Schneller C/C++ Sprachserver mit Clang-Backend.</string>
+    <string name="extension_pyright_name">Pyright (Python)</string>
+    <string name="extension_pyright_desc">Statischer Typ- und Sprachserver für Python.</string>
+    <string name="extension_rust_analyzer_name">Rust Analyzer</string>
+    <string name="extension_rust_analyzer_desc">Modulare Sprachserver-Implementierung für die Programmiersprache Rust.</string>
+    <string name="extension_html_css_json_name">HTML / CSS / JSON Server</string>
+    <string name="extension_html_css_json_desc">Sprachserver für Web-Technologien und strukturierte Datenformate.</string>
 
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>

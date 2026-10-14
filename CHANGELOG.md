@@ -11,6 +11,19 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🧩 Extensions-Manager: LSP-Server-Pakete, SHA-256-Prüfung & Navigation (Task 16 Item 4)
+
+* **Extensions-Manager (`:feature:settings`)**:
+  * `ExtensionsManager` zur Verwaltung von Language-Server-Paketen unter dem Termux-Prefix (`/data/data/com.codeforge.app/files/usr/opt/extensions`) bzw. Anwendungs-`filesDir`.
+  * Unterstützung für Download, SHA-256-Prüfsummen-Verifizierung und sicheres Entpacken (Zip mit Schutz vor Zip-Slip, Jar, Binaries mit automatischer `chmod +x` Ausführbarkeit).
+  * Katalog mit 6 vorkonfigurierten LSP-Servern: Kotlin Language Server, Eclipse JDT LS (Java), Clangd (C/C++), Pyright (Python), Rust Analyzer, HTML/CSS/JSON Language Server.
+* **UI & Navigation (`ExtensionsScreen`)**:
+  * `ExtensionsScreen` mit Sprachserver-Karten, Statusanzeige (Installiert, Nicht installiert, Fehler), Live-Download-Fortschrittsbalken und Aktionen (Installieren, Deinstallieren).
+  * Route `Routes.EXTENSIONS` in `CodeForgeNavHost` und Verknüpfung im `SettingsHubScreen`.
+* **Lokalisierung & Tests**:
+  * Vollständig lokalisierte String-Ressourcen (de / en); 0 hartcodierte Strings.
+  * 10 Unit-Tests in `Sha256UtilsTest`, `ArchiveUtilsTest` und `ExtensionsManagerTest` für Hash-Prüfung, Zip-Slip-Schutz und Installations-Lebenszyklus.
+
 ### 🎨 Theme Studio: 15 Presets, horizontale Live-Vorschau & RGB-Colorpicker (Task 16 Item 3)
 
 * **15 Theme-Presets**: Erweiterung von 5 auf 15 vordefinierte Farbschemata in `ThemePresets` (Monokai, Darcula, Quiet Light, Ayu Dark, Solarized Dark, GitHub Light, VS Code Dark+, Notepad++, Eclipse, Cyberpunk Neon, Forest, Ocean, Sunset, Monochrome, Violet) mit Labels als `@StringRes`.

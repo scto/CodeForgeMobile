@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Palette
@@ -42,7 +43,8 @@ fun SettingsHubRoute(
     onNavigateToTerminal: () -> Unit,
     onNavigateToSdkManager: () -> Unit,
     onNavigateToPlugins: () -> Unit,
-    onNavigateToGit: () -> Unit
+    onNavigateToGit: () -> Unit,
+    onNavigateToExtensions: () -> Unit
 ) {
     val entries = listOf(
         SettingsEntry(R.string.settings_hub_theme, Icons.Filled.Palette, onNavigateToTheme),
@@ -50,7 +52,8 @@ fun SettingsHubRoute(
         SettingsEntry(R.string.settings_hub_terminal, Icons.Filled.Terminal, onNavigateToTerminal),
         SettingsEntry(R.string.settings_hub_git, Icons.Filled.Source, onNavigateToGit),
         SettingsEntry(R.string.sdkmanager_title, Icons.Filled.SdCard, onNavigateToSdkManager),
-        SettingsEntry(R.string.settings_hub_plugins, Icons.Filled.Extension, onNavigateToPlugins)
+        SettingsEntry(R.string.settings_hub_plugins, Icons.Filled.Extension, onNavigateToPlugins),
+        SettingsEntry(R.string.settings_hub_extensions, Icons.Filled.Build, onNavigateToExtensions)
     )
 
     Scaffold(
