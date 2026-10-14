@@ -11,6 +11,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🔍 TreeSitter & CMakeLists.txt-Erkennung (Task 07)
+
+* **Dateinamen-Erkennung**: `TreeSitterGrammar.fromPath` erkennt `CMakeLists.txt` (auch in Unterverzeichnissen, Windows-Pfaden und unabhängig von Groß-/Kleinschreibung) als `CMAKE`-Grammatik, obwohl die Datei keine klassische Dateiendung besitzt.
+* **Unit-Tests erweitert**: `TreeSitterGrammarTest` in `:feature:editor` hinzugefügt (3 Tests für `CMakeLists.txt`, Standard-Endungen und nicht unterstützte Dateien). Alle 8 Tests in `:feature:editor` grün.
+* **Build & Doku**: `:feature:editor:assembleDebug` erfolgreich gebaut; TODO in `TreeSitterLanguageSupport.kt` auf gelöst aktualisiert und Verifikationsbericht hinterlegt.
+
 ### 🛠️ Editor-Werkzeuge, Git-Panel & Drawer (Task 10)
 
 * **Unit-Tests vollständig grün**: Alle 118 Tests in `:libs:code-tools` (53 Tests: Formatierung für Kotlin/Java/C/Gradle/JSON/XML, Zeilenbefehle, Regex-Suche/Ersetzen), `:core:domain` (24 Tests: Git-Modelle, Hunk-Patching, Eingabevalidierung) und `:core:data` (41 Tests gegen JGit: Stash inkl. untracked, Tags, Rebase, Cherry-Pick, Revert, Reset, Amend, Hunk-Staging mit `DirCacheEditor`, Blame, Verlauf, 3-Wege-Konflikt-Editor) erfolgreich ausgeführt.

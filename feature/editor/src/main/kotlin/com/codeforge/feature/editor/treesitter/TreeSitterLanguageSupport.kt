@@ -47,24 +47,26 @@ enum class TreeSitterGrammar(val libraryName: String, val queryAssetDir: String)
     YAML("tree-sitter-yaml", "treesitter/yaml");
 
     companion object {
-        fun fromPath(path: String): TreeSitterGrammar? = when (path.substringAfterLast('.', "")) {
-            "kt", "kts" -> KOTLIN
-            "java" -> JAVA
-            "json" -> JSON
-            "xml" -> XML
-            "cpp", "cc", "cxx", "hpp", "hh", "hxx" -> CPP
-            "c", "h" -> C
-            "sh", "bash" -> BASH
-            // TODO(Thomas)-OFFEN: "CMakeLists.txt" hat keine klassische Dateiendung und wird von
-            // dieser Zeile NICHT erfasst — nur ".cmake"-Dateien (z. B. Helper-Module). Eine
-            // Sonderbehandlung für den exakten Dateinamen "CMakeLists.txt" existiert bislang
-            // NICHT in EditorLanguageFactory.kt (dort gibt es noch keinen entsprechenden
-            // Code/TODO) — siehe agy-tasks/02-treesitter-native-libs.md, Abschnitt 4, für den
-            // noch offenen Umsetzungsvorschlag.
-            "cmake" -> CMAKE
-            "toml" -> TOML
-            "yml", "yaml" -> YAML
-            else -> null
+        fun fromPath(path: String): TreeSitterGrammar? {
+            val fileName = path.substringAfterLast('/').substringAfterLast('\\')
+            if (fileName.equals("CMakeLists.txt", ignoreCase = true)) {
+                return CMAKE
+            }
+            return when (path.substringAfterLast('.', "")) {
+                "kt", "kts" -> KOTLIN
+                "java" -> JAVA
+                "json" -> JSON
+                "xml" -> XML
+                "cpp", "cc", "cxx", "hpp", "hh", "hxx" -> CPP
+                "c", "h" -> C
+                "sh", "bash" -> BASH
+                // ✅ gelöst: "CMakeLists.txt" wird oben direkt anhand des Dateinamens erkannt,
+                // ".cmake"-Dateien (z. B. Helper-Module) über die Dateiendung.
+                "cmake" -> CMAKE
+                "toml" -> TOML
+                "yml", "yaml" -> YAML
+                else -> null
+            }
         }
     }
 }
