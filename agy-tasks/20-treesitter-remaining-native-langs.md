@@ -1,3 +1,5 @@
+> **ERLEDIGT (Stand 2026-10-14):** Umgesetzt mit reproduzierbarem Build-Skript `scripts/build-treesitter-lib.sh`, NDK 29 Clang für alle 4 ABIs (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86`). Bericht: `docs/treesitter-native-libs-verification.md`. Nur erneut ausführen, wenn sich der Gegenstand ändert (Regression).
+
 # Task 20 – Tree-sitter: native Bibliotheken für Bash, CMake, TOML, YAML
 
 **Ausgangslage (Task 02, Commit `2d66ecc`):** Kotlin, Java, JSON, XML, C++ und C sind über Maven-AARs (`com.itsaky.androidide.treesitter`) nativ eingebunden; für **Bash, CMake, TOML, YAML** liegen nur die `highlights.scm`-Queries unter

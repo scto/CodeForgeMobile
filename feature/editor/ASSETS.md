@@ -42,3 +42,22 @@ ohne die vollständigen Grammar-Dateien.
       `README-VENDORED.md` in `:libs:terminal-engine`).
 3. `TextMateAssetLoader` erfordert keine Codeänderung — Registrierung erfolgt deklarativ über
    `languages.json`.
+
+---
+
+# Tree-sitter Assets & native Bibliotheken — Bezugsquellen & Lizenzen
+
+Tree-sitter-Highlighting nutzt `.scm`-Query-Dateien in `src/main/assets/treesitter/<sprache>/` sowie native Shared Libraries (`libtree-sitter-<sprache>.so`) in `src/main/jniLibs/<abi>/` bzw. transitive Maven-AARs (`com.itsaky.androidide.treesitter:*`).
+
+## Tree-sitter Grammatiken & Lizenzen (alle MIT)
+
+| Komponente / Sprache | Upstream-Repository | Version / Tag | Lizenz |
+|---|---|---|---|
+| **Tree-sitter Core & Maven AARs** (Kotlin, Java, JSON, XML, C++, C) | `AndroidIDEOfficial/android-tree-sitter` | `4.3.1` | MIT License |
+| **tree-sitter-bash** (`.so` + `highlights.scm`) | [`tree-sitter/tree-sitter-bash`](https://github.com/tree-sitter/tree-sitter-bash) | `v0.23.3` (ABI 14) | MIT License |
+| **tree-sitter-cmake** (`.so` + `highlights.scm`) | [`uyha/tree-sitter-cmake`](https://github.com/uyha/tree-sitter-cmake) | `v0.7.5` (ABI 14) | MIT License |
+| **tree-sitter-toml** (`.so` + `highlights.scm`) | [`tree-sitter-grammars/tree-sitter-toml`](https://github.com/tree-sitter-grammars/tree-sitter-toml) | `v0.7.0` (ABI 14) | MIT License |
+| **tree-sitter-yaml** (`.so` + `highlights.scm`) | [`tree-sitter-grammars/tree-sitter-yaml`](https://github.com/tree-sitter-grammars/tree-sitter-yaml) | `v0.7.2` (ABI 14) | MIT License |
+
+Alle Upstream-Grammatiken und Query-Dateien unterliegen der MIT-Lizenz und sind uneingeschränkt kompatibel mit CodeForgeMobile. Details zum Build-Vorgang und SHA-256 Prüfsummen siehe [`TREESITTER.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/feature/editor/TREESITTER.md).
+

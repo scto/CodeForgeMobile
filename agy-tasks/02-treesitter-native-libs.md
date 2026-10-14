@@ -1,4 +1,4 @@
-> **ERLEDIGT (teilweise: 6 von 10 Sprachen nativ) (Stand 2026-10-14):** umgesetzt in Commit `2d66ecc`; Bericht: `docs/treesitter-native-libs-verification.md; Rest: Task 20`. Nur erneut ausführen, wenn sich der Gegenstand ändert (Regression).
+> **ERLEDIGT (vollständig: 10 von 10 Sprachen nativ) (Stand 2026-10-14):** 6 Sprachen via Maven-AARs (`2d66ecc`), 4 Sprachen (Bash, CMake, TOML, YAML) via NDK 29 Shared Libraries in `jniLibs/<abi>/` (Task 20); Bericht: `docs/treesitter-native-libs-verification.md`. Nur erneut ausführen, wenn sich der Gegenstand ändert (Regression).
 
 # Auftrag: Tree-sitter Core-Library + native Parser-Bibliotheken + Query-Assets
 

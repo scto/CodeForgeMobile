@@ -48,5 +48,49 @@ class TreeSitterGrammarTest {
             assertEquals("treesitter/${grammar.langName}", grammar.queryAssetDir)
         }
     }
+
+    @Test
+    fun queryAssetsExistForEveryGrammar() {
+        for (grammar in TreeSitterGrammar.entries) {
+            val assetFile = resolveModuleFile("src/main/assets/${grammar.queryAssetDir}/highlights.scm")
+            org.junit.Assert.assertTrue(
+                "Highlight-Query fehlt für ${grammar.langName}: ${assetFile.path}",
+                assetFile.isFile && assetFile.length() > 0
+            )
+        }
+    }
+
+    @Test
+    fun nativeLibsExistForManuallyBuiltGrammars() {
+        val manualLangs = listOf("bash", "cmake", "toml", "yaml")
+        val abis = listOf("arm64-v8a", "armeabi-v7a")
+        for (lang in manualLangs) {
+            for (abi in abis) {
+                val libFile = resolveModuleFile("src/main/jniLibs/$abi/libtree-sitter-$lang.so")
+                org.junit.Assert.assertTrue(
+                    "Native Bibliothek fehlt für $lang ($abi): ${libFile.path}",
+                    libFile.isFile && libFile.length() > 0
+                )
+            }
+        }
+    }
+
+    private fun resolveModuleFile(relativePath: String): java.io.File {
+        val candidates = listOf(
+            java.io.File(relativePath),
+            java.io.File("feature/editor", relativePath)
+        )
+        return candidates.firstOrNull { it.exists() } ?: java.io.File(relativePath)
+    }
+
+    @Test
+    fun isAvailableHandlesMissingRuntimeGracefully() {
+        for (grammar in TreeSitterGrammar.entries) {
+            // In reinem JVM-Unit-Test ist die Core-Library nicht im java.library.path gebunden.
+            // isAvailable() muss sicher false liefern, ohne zu werfen.
+            val available = TreeSitterLanguageSupport.isAvailable(grammar)
+            org.junit.Assert.assertFalse(available)
+        }
+    }
 }
 

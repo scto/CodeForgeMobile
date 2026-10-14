@@ -95,10 +95,12 @@ object TreeSitterLanguageSupport {
     private fun ensureCoreLibraryLoaded(): Boolean = coreLibraryLoaded ?: run {
         val loaded = runCatching { System.loadLibrary(CORE_LIBRARY_NAME) }.isSuccess
         if (!loaded) {
-            android.util.Log.w(
-                "TreeSitterLanguageSupport",
-                Res.string(R.string.editor_core_bibliothek_nicht_gefunden_treesit, CORE_LIBRARY_NAME)
-            )
+            runCatching {
+                android.util.Log.w(
+                    "TreeSitterLanguageSupport",
+                    Res.string(R.string.editor_core_bibliothek_nicht_gefunden_treesit, CORE_LIBRARY_NAME)
+                )
+            }
         }
         coreLibraryLoaded = loaded
         loaded
