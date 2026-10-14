@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🎨 TextMate-Grammatiken, Konfigurationen & Themes (Task 01)
+
+* **Vollständige Grammatiken & Sprachkonfigurationen**: Offizielle MIT-lizenzierte TextMate-Grammatiken und Sprachkonfigurationen (Bracket-Pairs, Auto-Closing, Kommentare) für Kotlin (`fwcd/vscode-kotlin`), Java, XML und JSON (`microsoft/vscode`) in `feature/editor/src/main/assets/textmate/` hinterlegt.
+* **Autarke Themes**: Vollständige `dark_plus.json` und `light_plus.json` durch Zusammenführung der VS-Code-Basisfarben (`dark_vs`/`light_vs`) und Plus-Tokens generiert; sora-editor und tm4e laden die Themes ohne unaufgelöste `include`-Referenzen autark.
+* **JSON-Validierung**: Alle 10 Dateien als valides Standard-JSON ohne JSONC-Kommentare oder trailing commas verifiziert.
+* **Lizenz & Dokumentation**: `feature/editor/src/main/assets/textmate/docs/sub/NOTICE.md` angelegt und `feature/editor/ASSETS.md` aktualisiert.
+
 ### 🔍 TreeSitter & CMakeLists.txt-Erkennung (Task 07)
 
 * **Dateinamen-Erkennung**: `TreeSitterGrammar.fromPath` erkennt `CMakeLists.txt` (auch in Unterverzeichnissen, Windows-Pfaden und unabhängig von Groß-/Kleinschreibung) als `CMAKE`-Grammatik, obwohl die Datei keine klassische Dateiendung besitzt.

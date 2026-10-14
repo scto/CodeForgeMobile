@@ -10,12 +10,12 @@ dieselbe Vendoring-Strategie wie bei `com.termux.terminal.*` in `:libs:terminal-
 | Datei | Status |
 |---|---|
 | `languages.json` | Vollständig — Registry-Manifest (scopeName → Grammar-/Config-Pfad) |
-| `themes/dark_plus.json`, `themes/light_plus.json` | **Platzhalter** — minimales, kompilierbares Theme mit den wichtigsten Scopes |
-| `grammars/kotlin.tmLanguage.json` | **Fehlt** — siehe Bezugsquelle unten |
-| `grammars/java.tmLanguage.json` | **Fehlt** |
-| `grammars/xml.tmLanguage.json` | **Fehlt** |
-| `grammars/json.tmLanguage.json` | **Fehlt** |
-| `languages/*-language-configuration.json` | **Fehlt** (Bracket-Pairs, Kommentar-Syntax, Auto-Closing-Pairs pro Sprache) |
+| `themes/dark_plus.json`, `themes/light_plus.json` | **Vollständig** — Autarke, vollständige Dark+/Light+ Themes |
+| `grammars/kotlin.tmLanguage.json` | **Vollständig** — aus `fwcd/vscode-kotlin` |
+| `grammars/java.tmLanguage.json` | **Vollständig** — aus `microsoft/vscode` |
+| `grammars/xml.tmLanguage.json` | **Vollständig** — aus `microsoft/vscode` |
+| `grammars/json.tmLanguage.json` | **Vollständig** — aus `microsoft/vscode` |
+| `languages/*-language-configuration.json` | **Vollständig** — Bracket-Pairs, Kommentar-Syntax, Auto-Closing-Pairs pro Sprache |
 
 `TextMateAssetLoader.ensureInitialized()` fängt ein Fehlen dieser Dateien ab (`Result.failure`
 + Log-Warnung) und fällt auf Plain-Text-Highlighting zurück — die App bleibt lauffähig, auch
