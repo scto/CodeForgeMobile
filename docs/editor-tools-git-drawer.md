@@ -101,3 +101,10 @@ existierende nicht-leere Ordner. Danach ist ein Gradle-Sync nötig.
    Keystore auf Gerät.
 4. Drawer-UX bei sehr schmalen Displays; Git-Graph bei großen Historien (aktuell begrenztes Log).
 5. Regex läuft mit `java.util.regex` (Java-Syntax), nicht RE2.
+
+### Status nach Task-10-Verifikation (2026-10-14)
+* **Gradle-Build**: Alle Module (`:libs:code-tools`, `:feature:search`, `:feature:modulemaker`, `:feature:git`, `:feature:settings`, `:feature:editor`, `:app`, `:core:data`) kompilieren und assemblieren fehlerfrei (`assembleDebug`).
+* **sora-editor 0.23.4 API**: In `EditorController` vollständig geprüft und verifiziert (`replace`, `getCharPosition`, `beginBatchEdit/endBatchEdit`, `cursor.left/right`, `setSelectionRegion`). Batch-Edits stellen sicher, dass Undo nach Ersetzen oder Formatieren genau einen Schritt zurücknimmt.
+* **JGit 6.10**: Vollständig verifiziert. Alle 41 Tests in `:core:data` (`GitAdvancedTest`: 23, `GitRepositoryImplTest`: 12, `GitSettingsRepositoryTest`: 6) laufen grün.
+* **Code-Tools**: Alle 53 Tests in `:libs:code-tools` (`CodeFormatterTest`: 20, `LineEditsAndModuleMakerTest`: 13, `TextSearchTest`: 20) laufen grün.
+

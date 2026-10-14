@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🛠️ Editor-Werkzeuge, Git-Panel & Drawer (Task 10)
+
+* **Unit-Tests vollständig grün**: Alle 118 Tests in `:libs:code-tools` (53 Tests: Formatierung für Kotlin/Java/C/Gradle/JSON/XML, Zeilenbefehle, Regex-Suche/Ersetzen), `:core:domain` (24 Tests: Git-Modelle, Hunk-Patching, Eingabevalidierung) und `:core:data` (41 Tests gegen JGit: Stash inkl. untracked, Tags, Rebase, Cherry-Pick, Revert, Reset, Amend, Hunk-Staging mit `DirCacheEditor`, Blame, Verlauf, 3-Wege-Konflikt-Editor) erfolgreich ausgeführt.
+* **sora-editor 0.23.4 API**: `EditorController` vollständig verifiziert (`Content.replace`, `indexer.getCharPosition`, `cursor.left/right`, `setSelectionRegion`). Batch-Edits fassen Ersetzen und Formatieren atomar in `beginBatchEdit()`/`endBatchEdit()` zusammen, sodass Undo exakt einen Schritt zurücknimmt.
+* **Workspace-Drawer & Navigation**: `WorkspaceDrawer` mit adaptiver Breite `min(92%, 420 dp)` und horizontal wischbarer `LazyRow` für Tabs (Files, Suche, Git, Module, Terminal, Settings).
+* **Editor- und Dateisynchronisation**: `FileSyncBridge` speichert ungespeicherte Puffer vor Git-Aktionen (Checkout, Pull, Stash) und Projektersetzungen atomar ab und lädt betroffene Tabs nach externen Dateiänderungen neu.
+* **Dokumentation**: Risikosektion in `docs/editor-tools-git-drawer.md` aktualisiert und Verifikationsbericht erstellt.
+
 ### 🧙 Project Wizard & Template Engine (Task 09)
 
 * **Wrapper-Harmonisierung & Sofort-Build**: Template-Wrapper von `gradle-9.0.0` auf `gradle-8.14.3-bin.zip` vereinheitlicht; `RootBuildGradle.kt` verwendet nun `rootProject.layout.buildDirectory` (Groovy & KTS). Ein erzeugtes Android-Projekt (`SampleApp`, EmptyActivity, Kotlin, KTS) wurde im realen Dateisystem mit `./gradlew assembleDebug` in 3m 48s erfolgreich und fehlerfrei gebaut.
