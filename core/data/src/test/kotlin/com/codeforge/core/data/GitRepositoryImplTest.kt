@@ -64,7 +64,7 @@ class GitRepositoryImplTest {
         val d = tmp(); d.write("a.txt", "hi\n")
         val r = run { repo.init(d.path, "Initial commit").getOrThrow() }
         assertFalse(r.initialCommitCreated)
-        assertTrue(r.note!!.contains("Git-Einstellungen"))
+        assertTrue(r.note!!.contains("Git settings"))
         assertFalse(run { repo.status(d.path).getOrThrow() }.hasCommits)
     }
 
@@ -102,11 +102,11 @@ class GitRepositoryImplTest {
         run { repo.stageAll(d.path) }
         assertTrue(run { repo.commit(d.path, "  ").isFailure })
         settings.id = GitIdentity()
-        assertTrue(run { repo.commit(d.path, "m") }.exceptionOrNull()!!.message!!.contains("Git-Einstellungen"))
+        assertTrue(run { repo.commit(d.path, "m") }.exceptionOrNull()!!.message!!.contains("Git settings"))
         settings.id = GitIdentity("T", "t@x")
         assertTrue(run { repo.commit(d.path, "m").isSuccess })
         val again = run { repo.commit(d.path, "again") }
-        assertTrue(again.exceptionOrNull()!!.message!!.contains("Nichts zu committen"))
+        assertTrue(again.exceptionOrNull()!!.message!!.contains("Nothing to commit"))
     }
 
     @Test fun discardRestoresAndDeletesUntracked() {
@@ -205,7 +205,7 @@ class GitRepositoryImplTest {
         org.eclipse.jgit.api.Git.init().setBare(true).setDirectory(bare).setInitialBranch("main").call().close()
         val a = initRepo(); a.write("a.txt", "1\n")
         run { repo.stageAll(a.path); repo.commit(a.path, "c1") }
-        assertTrue(run { repo.push(a.path) }.exceptionOrNull()!!.message!!.contains("Kein Remote"))
+        assertTrue(run { repo.push(a.path) }.exceptionOrNull()!!.message!!.contains("No remote"))
         run { repo.setRemote(a.path, "origin", bare.toURI().toString()).getOrThrow() }
         assertEquals("origin", run { repo.remotes(a.path).getOrThrow() }.single().name)
         run { repo.push(a.path).getOrThrow() }

@@ -27,7 +27,7 @@ Text(stringRes(section.labelRes))
 | `stringRes(id, vararg args)` | `@Composable` | reagiert auf Sprach-/Konfigurationswechsel |
 | `pluralRes` / `Res.plural` | | für `<plurals>` (bisher keine Einträge) |
 | `UiText` / `asString()` | State | Text im UI-State halten, erst im Composable auflösen |
-| `TestRes.install()` | JVM-Unit-Tests | `:core:testing`, liest die echte `strings.xml` |
+| `TestRes.install()` | JVM-Unit-Tests | `:core:testing`, liest die echte englische `strings.xml` (optional `TestRes.install("de")` für Deutsch) |
 
 Initialisierung: `ResInitializer` (androidx.startup) – läuft in jedem App-Prozess (auch im Gradle-Bridge-Service).
 
@@ -38,9 +38,9 @@ Initialisierung: `ResInitializer` (androidx.startup) – läuft in jedem App-Pro
 * Android-Escapes: `\'`, `\"`, `\n`, `\@`; führende/endende Leerzeichen → Wert in Anführungszeichen.
 * `R` ist **nicht transitiv** (`android.nonTransitiveRClass=true`): jedes Modul importiert `com.codeforge.core.resources.R`.
   Module mit eigener `R` (z. B. `:feature:projectwizard` mit Drawables) importieren `… R as CoreR`.
-* Sprachen: Standard ist Deutsch (`values/`). Englisch: `values-en/strings.xml` (bisher nur Projekt-Assistent `pw_*`).
+* Sprachen: Standardsprache ist Englisch (`values/strings.xml`). Die deutsche Übersetzung liegt vollständig synchronisiert in `values-de/strings.xml`. Neue Strings müssen immer in beiden Dateien mit identischen Schlüsseln und Platzhaltern angelegt werden. Prüfskript: `python3 scripts/check_string_locales.py`.
 * Neue Texte **nie** als Literal im Code; Enum-/Listen-Labels als `@StringRes Int`.
-* Regelmäßige Kontrolle/Migration: `python3 scripts/find_hardcoded_strings.py --check` und `agy-tasks/17-externalize-hardcoded-strings.md`.
+* Regelmäßige Kontrolle/Migration: `python3 scripts/find_hardcoded_strings.py --check`, `python3 scripts/check_string_locales.py` und `agy-tasks/17-externalize-hardcoded-strings.md`.
 
 ## Bewusst nicht migriert
 

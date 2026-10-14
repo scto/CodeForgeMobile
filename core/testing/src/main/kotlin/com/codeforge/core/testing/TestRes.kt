@@ -18,13 +18,14 @@ object TestRes {
     private const val STRINGS_PATH = "core/resources/src/main/res/values/strings.xml"
     private const val R_STRING_CLASS = "com.codeforge.core.resources.R\$string"
 
-    fun install(stringsXml: File = locateStringsXml()) {
+    fun install(locale: String = "en", stringsXml: File = locateStringsXml(locale)) {
         val texts = parse(stringsXml)
         val names = idToName()
+        val formatLocale = if (locale.equals("de", ignoreCase = true)) Locale.GERMANY else Locale.ROOT
         Res.install(object : Res.Resolver {
             override fun string(id: Int, args: Array<out Any>): String {
                 val text = names[id]?.let(texts::get) ?: return "@string/$id"
-                return if (args.isEmpty()) text else String.format(Locale.GERMANY, text, *args)
+                return if (args.isEmpty()) text else String.format(formatLocale, text, *args)
             }
 
             override fun plural(id: Int, quantity: Int, args: Array<out Any>): String = string(id, args)
@@ -34,13 +35,14 @@ object TestRes {
     /** Setzt den Resolver zurück (z. B. in `@After`). */
     fun uninstall() = Res.install(null)
 
-    private fun locateStringsXml(): File {
+    private fun locateStringsXml(locale: String = "en"): File {
+        val subPath = if (locale.equals("de", ignoreCase = true)) "core/resources/src/main/res/values-de/strings.xml" else STRINGS_PATH
         var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
         while (dir != null) {
-            File(dir, STRINGS_PATH).takeIf { it.isFile }?.let { return it }
+            File(dir, subPath).takeIf { it.isFile }?.let { return it }
             dir = dir.parentFile
         }
-        error("strings.xml nicht gefunden (ausgehend von ${System.getProperty("user.dir")})")
+        error("strings.xml nicht gefunden ($subPath, ausgehend von ${System.getProperty("user.dir")})")
     }
 
     private fun idToName(): Map<Int, String> = Class.forName(R_STRING_CLASS).fields
