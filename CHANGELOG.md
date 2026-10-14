@@ -11,6 +11,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### ⚡ Hintergrundbefehle & Microsoft Fluent 2 Tokens (Task 16 Items 5 & 6)
+
+* **Hintergrundbefehle & Service-Architektur (Item 5)**:
+  * Analyse und Verifikation der Hintergrundausführung: `TermuxService` (`:libs:termux-app`) deckt als vollwertiger Foreground-Service mit Notification, Wakelock und Wifilock alle langen Terminal- und Compiler-Sessions ab.
+  * WorkManager-basierter `RunCommandWorker` als redundantes Altredundanz-Konstrukt identifiziert und entfallen. Dokumentiert in `docs/fluent2-and-background-services-decision.md`.
+* **Fluent 2 Design-Tokens (`:core:designsystem`, Item 6)**:
+  * Eigenständiges, leichtgewichtiges Token-Set `FluentTokens` nach Microsoft Fluent 2 Spezifikation (Brand-Palette, Neutrals, CornerRadii, Elevation Levels 0–4, Strokes, `FluentColorScheme`) ohne fehleranfällige Alpha-Bibliotheken.
+  * Vollständig typisiert und verifiziert durch 4 Unit-Tests in `FluentTokensTest`.
+
 ### 🧩 Extensions-Manager: LSP-Server-Pakete, SHA-256-Prüfung & Navigation (Task 16 Item 4)
 
 * **Extensions-Manager (`:feature:settings`)**:

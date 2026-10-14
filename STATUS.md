@@ -65,9 +65,9 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilw
    - ✅ Item 2: Dateibaum (theme-adaptive Einrückungslinien, 2-zeilige Dateiinfo, Vollzeilen-Tap, Kontextmenü „Eigenschaften“, Löschdialog)
    - ✅ Item 3: Theme Studio (15 Presets, horizontale Live-Vorschau, RGB-Colorpicker mit 10 Swatches)
    - ✅ Item 4: Extensions-Manager (`:feature:settings`): LSP-Server-Pakete, SHA-256-Prüfung, Entpacken (Zip/Jar), Route `Routes.EXTENSIONS`
-   - ⬜ Item 5: Hintergrundbefehle (`RunCommandWorker`, Foreground-Service; prüfen ob durch Termux abgedeckt)
-   - ⬜ Item 6: Fluent 2 Token-Entscheidung
-10. Fluent-2-Designrichtung (`FLUENT2_JETPACK_COMPOSE_GUIDE.md`): bisher nur als Leitfaden, im Code gilt Material 3 (Expressive).
+   - ✅ Item 5: Hintergrundbefehle: vollständig durch `TermuxService` abgedeckt (`ForegroundService` mit Wakelock/Wifilock); `RunCommandWorker` entfällt als redundant (siehe `docs/fluent2-and-background-services-decision.md`)
+   - ✅ Item 6: Fluent 2: leichtgewichtiges Token-Set in `:core:designsystem` (`FluentTokens.kt`) eingeführt; 4 Unit-Tests in `FluentTokensTest`
+10. Fluent-2-Designrichtung (`FLUENT2_JETPACK_COMPOSE_GUIDE.md`): `FluentTokens` in `:core:designsystem` bereitgestellt, primäres App-Theme bleibt Material 3 (Expressive).
 11. Lizenzklärung: Das Projekt ist wegen der Termux-Module **GPLv3** (`LICENSE`); die frühere Angabe „Apache 2.0“ in den READMEs war falsch.
 
 ## ⚠️ Risiken
