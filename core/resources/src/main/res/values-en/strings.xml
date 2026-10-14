@@ -66,5 +66,28 @@
     <string name="filetree_eintraege">%1$d items</string>
     <string name="filetree_ein_eintrag">1 item</string>
     <string name="filetree_keine_eintraege">No items</string>
+    <string name="theme_preset_forest">Forest</string>
+    <string name="theme_preset_ocean">Ocean</string>
+    <string name="theme_preset_sunset">Sunset</string>
+    <string name="theme_preset_monochrome">Monochrome</string>
+    <string name="theme_preset_violet">Violet</string>
+    <string name="theme_preset_monokai">Monokai</string>
+    <string name="theme_preset_darcula">Darcula</string>
+    <string name="theme_preset_quiet_light">Quiet Light</string>
+    <string name="theme_preset_ayu_dark">Ayu Dark</string>
+    <string name="theme_preset_solarized_dark">Solarized Dark</string>
+    <string name="theme_preset_github_light">GitHub Light</string>
+    <string name="theme_preset_vscode_dark_plus">VS Code Dark+</string>
+    <string name="theme_preset_notepad_plus_plus">Notepad++</string>
+    <string name="theme_preset_eclipse">Eclipse</string>
+    <string name="theme_preset_cyberpunk_neon">Cyberpunk Neon</string>
+    <string name="themebuilder_farbauswahl">Pick Color</string>
+    <string name="themebuilder_rot">Red</string>
+    <string name="themebuilder_gruen">Green</string>
+    <string name="themebuilder_blau">Blue</string>
+    <string name="themebuilder_farbwert">Hex Code</string>
+    <string name="themebuilder_schnellauswahl">Quick Presets</string>
+    <string name="themebuilder_farbe_anwenden">Apply</string>
+    <string name="themebuilder_palette_anpassen">Adjust color</string>
 </resources>
 

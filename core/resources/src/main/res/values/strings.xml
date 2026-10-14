@@ -654,6 +654,24 @@
     <string name="theme_preset_sunset">Sonnenuntergang</string>
     <string name="theme_preset_monochrome">Monochrom</string>
     <string name="theme_preset_violet">Violett</string>
+    <string name="theme_preset_monokai">Monokai</string>
+    <string name="theme_preset_darcula">Darcula</string>
+    <string name="theme_preset_quiet_light">Quiet Light</string>
+    <string name="theme_preset_ayu_dark">Ayu Dark</string>
+    <string name="theme_preset_solarized_dark">Solarized Dark</string>
+    <string name="theme_preset_github_light">GitHub Light</string>
+    <string name="theme_preset_vscode_dark_plus">VS Code Dark+</string>
+    <string name="theme_preset_notepad_plus_plus">Notepad++</string>
+    <string name="theme_preset_eclipse">Eclipse</string>
+    <string name="theme_preset_cyberpunk_neon">Cyberpunk Neon</string>
+    <string name="themebuilder_farbauswahl">Farbe auswählen</string>
+    <string name="themebuilder_rot">Rot</string>
+    <string name="themebuilder_gruen">Grün</string>
+    <string name="themebuilder_blau">Blau</string>
+    <string name="themebuilder_farbwert">Hex-Wert</string>
+    <string name="themebuilder_schnellauswahl">Schnellauswahl</string>
+    <string name="themebuilder_farbe_anwenden">Übernehmen</string>
+    <string name="themebuilder_palette_anpassen">Farbe anpassen</string>
     <string name="domain_ungueltige_versionsangabe">Ungültige Versionsangabe</string>
 
     <!-- projectwizard (aus :feature:projectwizard übernommen) -->

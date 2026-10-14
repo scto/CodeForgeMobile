@@ -1,12 +1,16 @@
 // Modul: :feature:themebuilder
 package com.codeforge.feature.themebuilder
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,34 +18,50 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.datastore.proto.ThemeConfig
@@ -69,6 +89,8 @@ private fun ThemeBuilderScreen(
     uiState: ThemeBuilderUiState,
     onEvent: (ThemeBuilderUiEvent) -> Unit
 ) {
+    var activePickerSlot by remember { mutableStateOf<PaletteSlot?>(null) }
+
     Scaffold(
         modifier = modifier,
         topBar = { TopAppBar(title = { Text(stringRes(R.string.themebuilder_theme)) }) }
@@ -101,7 +123,7 @@ private fun ThemeBuilderScreen(
             }
 
             item {
-                PresetGrid(
+                PresetRow(
                     selectedId = uiState.colorSchemeId,
                     dynamicColorActive = uiState.useDynamicColor,
                     onPresetSelected = { id -> onEvent(ThemeBuilderUiEvent.PresetSelected(id)) }
@@ -117,6 +139,7 @@ private fun ThemeBuilderScreen(
                 CustomColorField(
                     label = Res.string(R.string.themebuilder_primaer),
                     value = uiState.customPrimary,
+                    onEditColor = { activePickerSlot = PaletteSlot.PRIMARY },
                     onChange = { onEvent(ThemeBuilderUiEvent.CustomColorChanged(PaletteSlot.PRIMARY, it)) }
                 )
             }
@@ -124,6 +147,7 @@ private fun ThemeBuilderScreen(
                 CustomColorField(
                     label = Res.string(R.string.themebuilder_sekundaer),
                     value = uiState.customSecondary,
+                    onEditColor = { activePickerSlot = PaletteSlot.SECONDARY },
                     onChange = { onEvent(ThemeBuilderUiEvent.CustomColorChanged(PaletteSlot.SECONDARY, it)) }
                 )
             }
@@ -131,12 +155,30 @@ private fun ThemeBuilderScreen(
                 CustomColorField(
                     label = Res.string(R.string.themebuilder_tertiaer),
                     value = uiState.customTertiary,
+                    onEditColor = { activePickerSlot = PaletteSlot.TERTIARY },
                     onChange = { onEvent(ThemeBuilderUiEvent.CustomColorChanged(PaletteSlot.TERTIARY, it)) }
                 )
             }
 
             item { Spacer(modifier = Modifier.height(8.dp)) }
         }
+    }
+
+    activePickerSlot?.let { slot ->
+        val currentHex = when (slot) {
+            PaletteSlot.PRIMARY -> uiState.customPrimary
+            PaletteSlot.SECONDARY -> uiState.customSecondary
+            PaletteSlot.TERTIARY -> uiState.customTertiary
+        }
+        RgbColorPickerDialog(
+            slot = slot,
+            initialHex = currentHex,
+            onConfirm = { s, hex ->
+                onEvent(ThemeBuilderUiEvent.CustomColorChanged(s, hex))
+                activePickerSlot = null
+            },
+            onDismiss = { activePickerSlot = null }
+        )
     }
 }
 
@@ -215,16 +257,15 @@ private fun DynamicColorRow(enabled: Boolean, checked: Boolean, onToggle: () -> 
 }
 
 @Composable
-private fun PresetGrid(
+private fun PresetRow(
     selectedId: String,
     dynamicColorActive: Boolean,
     onPresetSelected: (String) -> Unit
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.height(180.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
     ) {
         items(ThemePresets.all) { preset ->
             PresetCard(
@@ -238,52 +279,98 @@ private fun PresetGrid(
 
 @Composable
 private fun PresetCard(preset: ThemePreset, isSelected: Boolean, onClick: () -> Unit) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+    val primary = runCatching { Color(android.graphics.Color.parseColor(preset.primaryHex)) }.getOrDefault(Color.Gray)
+    val secondary = runCatching { Color(android.graphics.Color.parseColor(preset.secondaryHex)) }.getOrDefault(Color.Gray)
+    val tertiary = runCatching { Color(android.graphics.Color.parseColor(preset.tertiaryHex)) }.getOrDefault(Color.Gray)
+
+    OutlinedCard(
+        modifier = Modifier
+            .width(140.dp)
+            .height(115.dp),
         onClick = onClick,
         colors = if (isSelected) {
-            CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+            CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
         } else {
-            CardDefaults.elevatedCardColors()
+            CardDefaults.outlinedCardColors()
+        },
+        border = if (isSelected) {
+            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        } else {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         }
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Row {
-                ColorDot(preset.primaryHex)
-                ColorDot(preset.secondaryHex)
-                ColorDot(preset.tertiaryHex)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(primary)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .background(secondary)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clip(CircleShape)
+                        .background(tertiary)
+                )
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringRes(preset.labelRes), style = MaterialTheme.typography.bodyMedium)
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+            ) {
+                Box(modifier = Modifier.weight(1f).fillMaxHeight().background(primary))
+                Box(modifier = Modifier.weight(1f).fillMaxHeight().background(secondary))
+                Box(modifier = Modifier.weight(1f).fillMaxHeight().background(tertiary))
+            }
+
+            Text(
+                text = stringRes(preset.labelRes),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
 
 @Composable
-private fun ColorDot(hex: String) {
-    val color = runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray)
-    Box(
-        modifier = Modifier
-            .size(20.dp)
-            .padding(2.dp)
-            .clip(CircleShape)
-            .background(color)
-    )
-}
-
-@Composable
-private fun CustomColorField(label: String, value: String, onChange: (String) -> Unit) {
+private fun CustomColorField(
+    label: String,
+    value: String,
+    onEditColor: () -> Unit,
+    onChange: (String) -> Unit
+) {
     val color = runCatching { Color(android.graphics.Color.parseColor(value)) }.getOrNull()
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Box(
             modifier = Modifier
-                .size(32.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(color ?: Color.LightGray)
+                .clickable(onClick = onEditColor)
         )
         Spacer(modifier = Modifier.width(12.dp))
         OutlinedTextField(
@@ -293,7 +380,181 @@ private fun CustomColorField(label: String, value: String, onChange: (String) ->
             placeholder = { Text(stringRes(R.string.themebuilder_hex_hint)) },
             singleLine = true,
             isError = value.isNotBlank() && color == null,
-            modifier = Modifier.fillMaxWidth()
+            trailingIcon = {
+                IconButton(onClick = onEditColor) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = stringRes(R.string.themebuilder_palette_anpassen)
+                    )
+                }
+            },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun RgbColorPickerDialog(
+    slot: PaletteSlot,
+    initialHex: String,
+    onConfirm: (PaletteSlot, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val initialRgb = remember(initialHex) {
+        RgbColorUtils.hexToRgb(initialHex) ?: Triple(33, 150, 243)
+    }
+    var red by remember { mutableFloatStateOf(initialRgb.first.toFloat()) }
+    var green by remember { mutableFloatStateOf(initialRgb.second.toFloat()) }
+    var blue by remember { mutableFloatStateOf(initialRgb.third.toFloat()) }
+    var hexText by remember { mutableStateOf(RgbColorUtils.rgbToHex(initialRgb.first, initialRgb.second, initialRgb.third)) }
+
+    fun updateFromRgb(r: Int, g: Int, b: Int) {
+        red = r.toFloat()
+        green = g.toFloat()
+        blue = b.toFloat()
+        hexText = RgbColorUtils.rgbToHex(r, g, b)
+    }
+
+    val currentColor = Color(red.toInt(), green.toInt(), blue.toInt())
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringRes(R.string.themebuilder_farbauswahl)) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(currentColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = hexText,
+                        color = if (red * 0.299 + green * 0.587 + blue * 0.114 > 186) Color.Black else Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                ColorSliderRow(
+                    label = stringRes(R.string.themebuilder_rot),
+                    value = red,
+                    color = Color.Red,
+                    onValueChange = {
+                        red = it
+                        hexText = RgbColorUtils.rgbToHex(red.toInt(), green.toInt(), blue.toInt())
+                    }
+                )
+
+                ColorSliderRow(
+                    label = stringRes(R.string.themebuilder_gruen),
+                    value = green,
+                    color = Color.Green,
+                    onValueChange = {
+                        green = it
+                        hexText = RgbColorUtils.rgbToHex(red.toInt(), green.toInt(), blue.toInt())
+                    }
+                )
+
+                ColorSliderRow(
+                    label = stringRes(R.string.themebuilder_blau),
+                    value = blue,
+                    color = Color.Blue,
+                    onValueChange = {
+                        blue = it
+                        hexText = RgbColorUtils.rgbToHex(red.toInt(), green.toInt(), blue.toInt())
+                    }
+                )
+
+                OutlinedTextField(
+                    value = hexText,
+                    onValueChange = { text ->
+                        hexText = text
+                        RgbColorUtils.hexToRgb(text)?.let { (r, g, b) ->
+                            red = r.toFloat()
+                            green = g.toFloat()
+                            blue = b.toFloat()
+                        }
+                    },
+                    label = { Text(stringRes(R.string.themebuilder_farbwert)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text(
+                    text = stringRes(R.string.themebuilder_schnellauswahl),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(RgbColorUtils.QUICK_PRESETS) { presetHex ->
+                        val presetColor = runCatching { Color(android.graphics.Color.parseColor(presetHex)) }.getOrDefault(Color.Gray)
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(presetColor)
+                                .clickable {
+                                    RgbColorUtils.hexToRgb(presetHex)?.let { (r, g, b) ->
+                                        updateFromRgb(r, g, b)
+                                    }
+                                }
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(slot, hexText)
+                }
+            ) {
+                Text(stringRes(R.string.themebuilder_farbe_anwenden))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringRes(R.string.common_abbrechen))
+            }
+        }
+    )
+}
+
+@Composable
+private fun ColorSliderRow(
+    label: String,
+    value: Float,
+    color: Color,
+    onValueChange: (Float) -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(label, style = MaterialTheme.typography.bodySmall)
+            Text(value.toInt().toString(), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+        }
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = 0f..255f,
+            colors = SliderDefaults.colors(
+                thumbColor = color,
+                activeTrackColor = color.copy(alpha = 0.7f)
+            )
         )
     }
 }

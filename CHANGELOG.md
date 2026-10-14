@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🎨 Theme Studio: 15 Presets, horizontale Live-Vorschau & RGB-Colorpicker (Task 16 Item 3)
+
+* **15 Theme-Presets**: Erweiterung von 5 auf 15 vordefinierte Farbschemata in `ThemePresets` (Monokai, Darcula, Quiet Light, Ayu Dark, Solarized Dark, GitHub Light, VS Code Dark+, Notepad++, Eclipse, Cyberpunk Neon, Forest, Ocean, Sunset, Monochrome, Violet) mit Labels als `@StringRes`.
+* **Horizontale Live-Vorschau (`LazyRow`)**: Wischbare Preset-Karten mit Farbpalette (Primär, Sekundär, Tertiär), Kontraststreifen und interaktiver Auswahlmarkierung; dynamische Vorschau im `ThemePreviewCard`.
+* **RGB-Colorpicker-Dialog**: Modal mit Live-Farbfläche, RGB-Schiebereglern (0–255), Hex-Eingabefeld und 10 Schnell-Auswahlfarben (Material Swatches) zur feinen Justierung von Primär-, Sekundär- und Tertiärfarben.
+* **Lokalisierung & Tests**: Vollständig lokalisierte String-Ressourcen (de / en); 0 hartcodierte Strings; 6 Unit-Tests in `RgbColorUtilsTest` erfolgreich ausgeführt.
+
 ### 📂 Dateibaum-Verbesserungen & Eigenschaften-Dialog (Task 16 Item 2)
 
 * **Theme-adaptive durchgehende Einrückungslinien**: Kontinuierliche vertikale Führungslinien (`drawBehind`) für jede Hierarchiestufe, dynamisch adaptiert an das aktive Theme (`MaterialTheme.colorScheme.outlineVariant`).
