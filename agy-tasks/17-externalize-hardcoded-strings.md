@@ -1,9 +1,9 @@
-> **Stand 2026-10-14 – wiederkehrend, aber Reihenfolge beachten:** Solange Task 18 nicht ausgeführt ist, ist `values/` deutsch und `values-en/` die englische Ergänzung. **Nach Task 18** gilt: Standardsprache Englisch in `values/`, Deutsch in `values-de/`; neue Schlüssel immer in beiden Dateien anlegen, `python3 scripts/check_string_locales.py` ausführen (Task 18 passt die Schritte 3, 5, 6 dieser Datei an). Letzter Lauf: Task 13/16 (0 Funde).
+> **Zweisprachig (ab Task 18):** Standardsprache Englisch in `values/strings.xml`, deutsche Übersetzung zwingend in `values-de/strings.xml`. Neue Schlüssel immer in beiden Dateien anlegen und `python3 scripts/check_string_locales.py` ausführen. Letzter Lauf: Task 18 (0 Funde, 816 Strings synchron).
 
 # Task 17 – Wiederkehrend: harte UI-Texte nach `:core:resources` auslagern
 
-**Zweck:** Bei lokaler Entwicklung entstehen immer wieder neue Literale wie `Text("Abbrechen")`. Dieser Task findet sie, legt Schlüssel in
-`core/resources/src/main/res/values/strings.xml` an und ersetzt die Literale im Code. Er ist **idempotent** und für den regelmäßigen Lauf gedacht
+**Zweck:** Bei lokaler Entwicklung entstehen immer wieder neue Literale wie `Text("Cancel")` oder `Text("Abbrechen")`. Dieser Task findet sie, legt Schlüssel in
+`core/resources/src/main/res/values/strings.xml` (Englisch) sowie `core/resources/src/main/res/values-de/strings.xml` (Deutsch) an und ersetzt die Literale im Code. Er ist **idempotent** und für den regelmäßigen Lauf gedacht
 (z. B. vor jedem Commit/PR oder wöchentlich). Arbeitsverzeichnis = Projekt-Root `CodeForgeMobile/`.
 
 Pflichtlektüre: `core/resources/README.md` (Konventionen), `docs/resources-and-strings.md` (Entscheidungen, Ausnahmen).
@@ -16,23 +16,24 @@ Pflichtlektüre: `core/resources/README.md` (Konventionen), `docs/resources-and-
 2. **Jeden Fund prüfen** – nur *sichtbare* Texte migrieren. **Nicht migrieren** (stattdessen mit Begründung in die Allowlist, Schritt 7):
    Log-Tags, Dateinamen/Pfade, Regex, JSON-Schlüssel, Shell-Kommandos, Git-Patch-Header, Commit-Nachrichten, Fehler-Erkennungsmuster,
    Annotations-/Klassennamen, Test-Quellen, `libs/code-tools`, `libs/template-engine`, `libs/termux-*` (eigene XML-Ressourcen).
-3. **Schlüssel anlegen** in `core/resources/src/main/res/values/strings.xml`:
+3. **Schlüssel anlegen** in `core/resources/src/main/res/values/strings.xml` (Englisch) und `values-de/strings.xml` (Deutsch):
    * Name `<modul>_<kurzform>` in snake_case (`git_`, `editor_`, `settings_`, `modulemaker_` …); in ≥ 2 Modulen verwendet → `common_…`.
    * **Vor dem Anlegen suchen**, ob der Text schon existiert (`grep -n '>Text<' core/resources/src/main/res/values/strings.xml`) – vorhandenen Schlüssel wiederverwenden, nie Duplikate.
    * Argumente positional: `$name` / `${expr}` im Literal → `%1$s`, `%2$s`; literales `%` bei Argumenten als `%%`.
-   * Android-Escapes: `\'`, `\"`, `\n`, `\@`; führende/endende Leerzeichen → Wert in Anführungszeichen. Kein XML-Markup im Wert.
+   * Identische Platzhalter und Escapes in beiden Dateien: `%1$s`, `\n`, `\'`, `\"`, `\@`; führende/endende Leerzeichen → Wert in Anführungszeichen. Kein XML-Markup im Wert.
    * Zahlen mit Singular/Plural → `<plurals>` und `pluralRes`/`Res.plural` statt „Datei(en)".
-   * Neue Schlüssel an die passende Modul-Gruppe der Datei anhängen (nicht sortieren/umbauen, damit Diffs klein bleiben).
+   * Neue Schlüssel an die passende Modul-Gruppe der Dateien anhängen (nicht sortieren/umbauen, damit Diffs klein bleiben).
 4. **Literal ersetzen** (Regeln aus dem README):
    * `@Composable`, direktes Argument von `Text/Icon/Image/...`: `stringRes(R.string.x, args)`.
    * ViewModel/Repository/UseCase/Notification: `Res.string(R.string.x, args)`; UI-State, der den Text erst später anzeigt: `UiText.of(R.string.x, args)`.
    * Enum-/Listen-Labels: `@StringRes val labelRes: Int` und im Composable `stringRes(item.labelRes)`.
    * Import `com.codeforge.core.resources.R` (+ `Res`/`stringRes`) ergänzen; Modul mit eigener `R` → `import com.codeforge.core.resources.R as CoreR`.
    * Hat das Modul keine Abhängigkeit: `implementation(project(":core:resources"))` in dessen `build.gradle.kts` (nur dort, kein `api`).
-5. **Englisch (optional, wenn der Text in `values-en` bereits für das Modul gepflegt wird):** Eintrag in `values-en/strings.xml` ergänzen. Fehlende Übersetzungen sind kein Fehler (Fallback Deutsch).
+5. **Deutsche Übersetzung (zwingend):** Eintrag in `core/resources/src/main/res/values-de/strings.xml` mit identischem Schlüssel und Platzhaltern pflegen.
 6. **Verifizieren:**
    * `python3 scripts/find_hardcoded_strings.py --check` → Exit 0.
-   * XML wohlgeformt: `python3 -c "import xml.dom.minidom as m;m.parse('core/resources/src/main/res/values/strings.xml')"`; keine doppelten `name="…"`:
+   * Zweisprachigkeit und Platzhalter prüfen: `python3 scripts/check_string_locales.py` → Exit 0.
+   * XML wohlgeformt und keine doppelten `name="…"`:
      `grep -o 'name="[^"]*"' core/resources/src/main/res/values/strings.xml | sort | uniq -d` → leer.
    * Platzhalter: je Eintrag stimmen Anzahl/Index der `%n$s` mit den Aufrufargumenten überein.
    * `./gradlew :core:resources:assembleDebug` und `./gradlew assembleDebug` (bzw. die betroffenen Module) kompilieren; `./gradlew testDebugUnitTest` für betroffene Module (Tests mit `TestRes.install()`).
@@ -54,8 +55,9 @@ Pflichtlektüre: `core/resources/README.md` (Konventionen), `docs/resources-and-
 ## Akzeptanz
 
 * `python3 scripts/find_hardcoded_strings.py --check` liefert Exit 0.
+* `python3 scripts/check_string_locales.py` liefert Exit 0.
 * Build und Unit-Tests der betroffenen Module grün; App zeigt keine `@string/…`-Platzhalter.
-* Diff enthält nur: `strings.xml`(+`values-en`), die ersetzten Stellen, nötige Imports/`build.gradle.kts`-Zeilen, Allowlist, CHANGELOG.
+* Diff enthält nur: `strings.xml` in `values/` und `values-de/`, die ersetzten Stellen, nötige Imports/`build.gradle.kts`-Zeilen, Allowlist, CHANGELOG.
 
 ## Optional: Pre-commit-Hook (lokal)
 

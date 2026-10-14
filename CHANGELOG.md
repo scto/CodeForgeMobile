@@ -11,7 +11,20 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-### ⚡ Hintergrundbefehle & Microsoft Fluent 2 Tokens (Task 16 Items 5 & 6)
+### 🌐 Internationalisierung: Englisch als Standard, vollständige deutsche Übersetzung (Task 18)
+
+* **Standardsprache Englisch (`values/strings.xml`)**:
+  * Vollständige Übersetzung aller 816 Strings der App in natürliches, professionelles technisches Englisch.
+  * Sentence case für UI-Titel/Labels, Imperativ für Aktionen/Buttons.
+  * Exakte Beibehaltung aller Format-Platzhalter (`%1$s`, `%2$d`, `%%`), Escapes (`\n`, `\'`, `\"`) und Gruppierungskommentare.
+* **Deutsche Übersetzung (`values-de/strings.xml`)**:
+  * 100 % Parität mit dem deutschen Original-Stand (Baseline `321c81707d363995f29360d4a88d13143744c637`).
+  * Redundantes Teil-Verzeichnis `values-en/` entfernt.
+* **Locale-Validierung & Tests**:
+  * Validierungsskript `scripts/check_string_locales.py` verifiziert XML-Wohlgeformtheit, Duplikatfreiheit, Parität der Schlüsselmengen und Identität aller Platzhalter/Escapes (Exit 0).
+  * `find_hardcoded_strings.py --check` meldet 0 hartcodierte Strings (Exit 0).
+  * `TestRes.kt` in `:core:testing` auf englische Standardauflösung umgestellt mit optionalem `TestRes.install("de")`.
+  * Alle Unit-Tests und Android-Builds (`testDebugUnitTest`, `:core:resources:assembleDebug`, `assembleDebug`) erfolgreich.
 
 * **Hintergrundbefehle & Service-Architektur (Item 5)**:
   * Analyse und Verifikation der Hintergrundausführung: `TermuxService` (`:libs:termux-app`) deckt als vollwertiger Foreground-Service mit Notification, Wakelock und Wifilock alle langen Terminal- und Compiler-Sessions ab.
