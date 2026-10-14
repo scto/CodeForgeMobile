@@ -109,4 +109,18 @@ class ProjectGeneratorTest {
         assertTrue(xml.contains("A&amp;B &lt;x&gt;"))
         assertTrue(xml.startsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>"))
     }
+
+    @Test fun exportSampleProject() {
+        val out = File.createTempFile("pwgen_sample", "").apply { delete(); mkdirs() }
+        val target = File(out, "SampleApp").apply { mkdirs() }
+        val req = ProjectRequest(
+            ProjectTemplateDescriptor("empty_activity", ProjectTemplateKind.EMPTY_ACTIVITY, true),
+            "SampleApp", "com.example.sampleapp", out.path, language = ProjectLanguage.KOTLIN, useKotlinDsl = true
+        )
+        generator.generate(req, target)
+        assertTrue(File(target, "build.gradle.kts").exists())
+        assertTrue(File(target, "app/build.gradle.kts").exists())
+        out.deleteRecursively()
+    }
 }
+

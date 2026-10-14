@@ -24,6 +24,6 @@ fun AppGradleGroovy(): String = """
     }
 
     tasks.register('clean', Delete) {
-        delete rootProject.buildDir
+        delete rootProject.layout.buildDirectory
     }
 """.trimIndent()

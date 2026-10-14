@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🧙 Project Wizard & Template Engine (Task 09)
+
+* **Wrapper-Harmonisierung & Sofort-Build**: Template-Wrapper von `gradle-9.0.0` auf `gradle-8.14.3-bin.zip` vereinheitlicht; `RootBuildGradle.kt` verwendet nun `rootProject.layout.buildDirectory` (Groovy & KTS). Ein erzeugtes Android-Projekt (`SampleApp`, EmptyActivity, Kotlin, KTS) wurde im realen Dateisystem mit `./gradlew assembleDebug` in 3m 48s erfolgreich und fehlerfrei gebaut.
+* **Schlanker Versionskatalog**: `libs/template-engine/src/main/assets/gradle/libs.versions.toml` von 228 auf 35 relevante Zeilen bereinigt (AGP 8.13.0, Kotlin 2.1.0, Vorlagen-Bibliotheken). Verhindert irrelevante Warnungen im Dependency-Updater.
+* **Unit-Tests vollständig grün**: Alle 7 Tests in `ProjectGeneratorTest` (alle 9 Vorlagen × Kotlin/Java × KTS/Groovy, Quelltext-Endungen, Layout- und ViewBinding-Auflösung, XML-Escaping, String-Referenzen) und alle 6 Tests in `ProjectInputValidatorTest` erfolgreich.
+* **Formular & Persistenz**: Vorlagenwahl mit 9er-Raster; automatische Package-Vorschläge; Compose erzwingt Kotlin; Benutzereinstellungen (Speicherort, Sprache, minSdk, DSL) werden in `WizardConfig` (`settings.proto`) gespeichert; automatischer Eintrag in `RecentProjectsRepository` und Navigation in den Editor.
+* **Audit-Notizen**: SAF-Ordnerauswahl für den Speicherort und Flutter-Wizard (aus ZIP nicht portiert) planmäßig als offen dokumentiert.
+
 ### 📦 Indexierung, Dependency-Updater & Editor-Overlays (Task 08)
 
 * **Unit-Tests vollständig grün**: Alle 34 Tests in `:libs:indexing-impl` (8 Tests: Gradle-Repositories, Settings, Index-Builder), `:libs:dependency-updater-impl` (21 Tests: Gradle-Build-Parser, Repository-Flow, TOML-Katalog-Parser, Update-Flow, Versionsvergleich) und `:feature:editor` (5 Tests: Hex-/Kotlin-Farbliteral-Scanner) erfolgreich ausgeführt.
