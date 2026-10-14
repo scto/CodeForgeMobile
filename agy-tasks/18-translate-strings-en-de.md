@@ -1,3 +1,5 @@
+> **ERLEDIGT (Stand 2026-10-14):** Umgesetzt in Commit `6bcf72f` (PR #1 gemergt in `50ce68c`). Alle 816 Strings der App auf Englisch in `values/strings.xml` und Deutsch in `values-de/strings.xml` synchronisiert. `scripts/check_string_locales.py` und `find_hardcoded_strings.py --check` liefern Exit 0. Nur erneut ausführen, wenn sich der Gegenstand ändert (Regression).
+
 # Task 18 – Strings: Standard auf Englisch umstellen, Deutsch nach `values-de`
 
 **Ziel:** `:core:resources` wird zweisprachig mit **Englisch als Standard** (`values/`) und **Deutsch** als Übersetzung (`values-de/`).
