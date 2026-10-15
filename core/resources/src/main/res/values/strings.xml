@@ -185,6 +185,8 @@
     <string name="editor_zeile_loeschen">Delete line</string>
     <string name="editor_zeile_nach_oben">Move line up</string>
     <string name="editor_zeile_nach_unten">Move line down</string>
+    <string name="editor_symbol_bar">Symbol bar</string>
+    <string name="editor_symbol_tab">Tab</string>
 
     <!-- filetree -->
     <string name="filetree_aktion_fehlgeschlagen">Action failed.</string>

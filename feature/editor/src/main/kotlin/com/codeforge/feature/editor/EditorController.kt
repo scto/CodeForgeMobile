@@ -43,6 +43,21 @@ class EditorController {
     fun copy() = withEditor { it.copyText() }
     fun paste() = withEditor { it.pasteText() }
 
+    /** Fügt [text] an der aktuellen Cursor-Position ein (bzw. ersetzt die aktive Auswahl). */
+    fun insertText(text: String) = withEditor { editor ->
+        val cursor = editor.cursor
+        val s = cursor.left
+        val e = cursor.right
+        editor.text.beginBatchEdit()
+        try {
+            replaceRange(editor, s, e, text)
+        } finally {
+            editor.text.endBatchEdit()
+        }
+        val newPos = s + text.length
+        selectRange(newPos, newPos)
+    }
+
     // --- Navigation ---
     fun jumpToLine(line: Int) = withEditor { editor ->
         val target = line.coerceIn(0, (editor.text.lineCount - 1).coerceAtLeast(0))

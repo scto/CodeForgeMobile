@@ -11,6 +11,18 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### ⌨️ Editor: Wiederherstellung verlorener Editor-Funktionen (Task 19)
+
+* **Symbolleiste (`EditorSymbolBar`)**:
+  * Vollwertiges Compose-Composable in `:feature:editor/ui` mit Presets für Kotlin, Java, Python, HTML/XML, Bash und allgemeine Programmiersymbole.
+  * Dynamische Einblendung in `EditorScreen` über der Bildschirmtastatur (`WindowInsets.isImeVisible`) bei geöffneter Textdatei.
+  * Undo-fähiger Text-Einschub über `EditorController.insertText` und MVI-Event `EditorUiEvent.InsertText`.
+  * Zweisprachig mit `editor_symbol_bar` und `editor_symbol_tab` in `values/strings.xml` und `values-de/strings.xml`.
+* **Sora-Aktionsleiste & Suchen/Ersetzen**:
+  * `SoraEditorTextActionWindow` durch natives Sora 0.23.x `EditorTextActionWindow` und Compose `EditorToolbar` abgedeckt.
+  * `EditorSearchPanel` durch vollwertige `EditorSearchBar` (Regex, Groups, Case/Word) abgedeckt.
+  * Dokumentation in `docs/restore-lost-editor-features.md`.
+
 ### 🌐 Internationalisierung: Englisch als Standard, vollständige deutsche Übersetzung (Task 18)
 
 * **Standardsprache Englisch (`values/strings.xml`)**:

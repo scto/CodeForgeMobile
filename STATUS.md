@@ -33,7 +33,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilw
 ### Editor & Werkzeuge
 | Bereich | Status | Details / Doku |
 |---|---|---|
-| Sora-Editor-Wrapper (Magnifier, Sticky Scroll, Zeilenumbruch, Inlay-Hints-Anbindung), TextMate/Tree-Sitter-Gerüst | 🟡 | `docs/bonsai-sora-app-integration.md`; Grammars/Native-Libs fehlen (`agy-tasks/01`, `02`) |
+| Sora-Editor-Wrapper (Magnifier, Sticky Scroll, Zeilenumbruch, Inlay-Hints-Anbindung), TextMate/Tree-Sitter, Symbolleiste (Task 19) | ✅ | `docs/bonsai-sora-app-integration.md`, `docs/restore-lost-editor-features.md` |
 | Dateibaum (Bonsai) im Drawer | ✅ | dito |
 | Suche & Ersetzen (Datei/Projekt, Regex, Case, Wort) | ✅ 🧪 | `docs/editor-tools-git-drawer.md` |
 | Highlighter/Formatter-Logik, Submodule Maker | ✅ 🧪 | `:libs:code-tools` (53 Tests) |

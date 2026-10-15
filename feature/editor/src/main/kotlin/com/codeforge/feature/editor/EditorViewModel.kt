@@ -273,6 +273,7 @@ class EditorViewModel @Inject constructor(
             EditorUiEvent.ToggleRegexSearch -> _uiState.update { it.copy(isRegexSearch = !it.isRegexSearch) }
             EditorUiEvent.ToggleWholeWordSearch -> _uiState.update { it.copy(isWholeWordSearch = !it.isWholeWordSearch) }
             EditorUiEvent.JumpHandled -> _uiState.update { it.copy(pendingJump = null) }
+            is EditorUiEvent.InsertText -> { /* Direkte View-Ausführung über EditorController; Puffer wird via TextChanged aktualisiert */ }
         }
     }
 

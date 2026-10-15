@@ -1,3 +1,5 @@
+> **ERLEDIGT (Stand 2026-10-15):** Umgesetzt in `:feature:editor` mit `EditorSymbolBar`, Anbindung an `EditorScreen` und `EditorController.insertText`. Bericht: `docs/restore-lost-editor-features.md`. Nur erneut ausführen, wenn sich der Gegenstand ändert (Regression).
+
 # Task 19 – Verlorene Editor-Funktionen aus dem alten Stand wiederherstellen
 
 **Hintergrund:** Das Repo wurde neu initialisiert (Commit `de2caf0` „reinit", 2026-10-01 = alter Stand; Commit `4bdb999`, 2026-10-08, löschte viele Dateien).

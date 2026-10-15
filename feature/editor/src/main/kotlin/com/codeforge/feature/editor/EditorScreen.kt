@@ -5,9 +5,12 @@
 package com.codeforge.feature.editor
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.horizontalScroll
@@ -61,6 +64,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import com.codeforge.feature.editor.fileprovider.EditorFileProvider
 import com.codeforge.feature.editor.overlay.UpdateChipDialog
+import com.codeforge.feature.editor.ui.EditorSymbolBar
 import com.codeforge.feature.editor.ui.ImageFilePreview
 import com.codeforge.feature.editor.ui.isImageFilePath
 import com.codeforge.libs.code_tools.edit.LineEdits
@@ -70,6 +74,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun EditorRoute(
     modifier: Modifier = Modifier,
@@ -175,19 +180,31 @@ fun EditorRoute(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    SoraCodeEditor(
-                        modifier = Modifier.fillMaxSize(),
-                        path = active.path,
-                        content = active.content,
-                        language = EditorLanguageType.fromPath(active.path),
-                        settings = uiState.displaySettings,
-                        diagnostics = uiState.activeDiagnostics,
-                        completionProvider = viewModel.completionProvider,
-                        updateAnnotations = uiState.activeUpdateAnnotations,
-                        onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
-                        onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
-                        onControllerReady = { controller = it }
-                    )
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        SoraCodeEditor(
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            path = active.path,
+                            content = active.content,
+                            language = EditorLanguageType.fromPath(active.path),
+                            settings = uiState.displaySettings,
+                            diagnostics = uiState.activeDiagnostics,
+                            completionProvider = viewModel.completionProvider,
+                            updateAnnotations = uiState.activeUpdateAnnotations,
+                            onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
+                            onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
+                            onControllerReady = { controller = it }
+                        )
+
+                        if (WindowInsets.isImeVisible) {
+                            EditorSymbolBar(
+                                filePath = active.path,
+                                onInsertText = { text ->
+                                    controller?.insertText(text)
+                                    viewModel.onEvent(EditorUiEvent.InsertText(text))
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

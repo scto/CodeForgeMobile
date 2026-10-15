@@ -69,6 +69,7 @@ sealed interface EditorUiEvent {
     data object ToggleRegexSearch : EditorUiEvent
     data object ToggleWholeWordSearch : EditorUiEvent
     data object JumpHandled : EditorUiEvent
+    data class InsertText(val text: String) : EditorUiEvent
 }
 
 sealed interface EditorUiEffect {
