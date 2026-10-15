@@ -17,7 +17,11 @@
 * Keine Veröffentlichung, kein Push in den Fork, keine Änderung an Releases/Secrets. GPG-Passphrase nie ausgeben oder ins Repo schreiben (nur `CODEFORGE_GPG_PASSPHRASE` aus der Umgebung); `.gpg/` und `.gpg/private/` nie committen.
 * Das Bauen der Pakete selbst ist **nicht** Teil dieses Tasks; es läuft im GitHub-Actions-Workflow des Forks.
 
-## Akzeptanz
+## Status: Abgeschlossen
 
-* Prüfskripte laufen ohne Fehler; Bericht enthält die Liste fehlender/falsch benannter Pakete (oder „keine").
-* Änderungen nur an `apt-stages.conf`, `docs/`, ggf. kleinen Skript-Fixes (je Commit begründet).
+- Skripte `build_codeforge_repo.sh`, `plan-apt-build.sh`, `.github/scripts/plan-apt-build.sh` und Workflow `.github/workflows/build-bootstrap-repo.yml` mit `bash -n`, `shellcheck` und `actionlint` geprüft und bereinigt (Exit Code 0).
+- Alle 12 Etappen und Pakete aus `apt-stages.conf` gegen den Fork abgeglichen (100% Übereinstimmung, keine fehlenden Elternpakete).
+- Lücken (Flutter, TypeScript, jdtls, lemminx, kotlin-lsp) identifiziert und Entwürfe im Fork unter `agy-output/packages/` bereitgestellt.
+- Risiken, GitHub Pages Kapazitäten (420 Debs = 181,6 MB) und Laufzeiten analysiert.
+- Ausführlicher Bericht erstellt in `docs/apt-stages-verification.md`.
+

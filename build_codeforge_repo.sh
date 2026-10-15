@@ -276,7 +276,7 @@ fix_bootstrap_subpackage_names() {
         if [ -d "${d}/packages/${name}" ] || [ -d "${d}/root-packages/${name}" ] || [ -d "${d}/x11-packages/${name}" ]; then
             continue
         fi
-        sub="$(ls "${d}"/packages/*/"${name}".subpackage.sh "${d}"/root-packages/*/"${name}".subpackage.sh "${d}"/x11-packages/*/"${name}".subpackage.sh 2>/dev/null | head -n1 || true)"
+        sub="$(find "${d}/packages" "${d}/root-packages" "${d}/x11-packages" -maxdepth 2 -name "${name}.subpackage.sh" 2>/dev/null | head -n1 || true)"
         [ -n "${sub}" ] || die "Paket '${name}' aus build-bootstraps.sh existiert weder als Paket noch als Subpackage."
         parent="$(basename "$(dirname "${sub}")")"
         sed -i "s#PACKAGES+=(\"${name}\")#PACKAGES+=(\"${parent}\") \# ${name} ist Subpackage von ${parent}#" "${f}"
@@ -290,6 +290,7 @@ fix_bootstrap_subpackage_names() {
 # ("deny /home/builder/termux-packages/[^o]** wlk"); erlaubt ist nur output/. build-bootstraps.sh verschiebt die fertige ZIP
 # aber ins Repo-Root -> "mv: cannot create regular file ... Permission denied" nach Stunden Bauzeit. Ziel nach output/ umbiegen
 # und bei Fehlschlag sofort abbrechen. Idempotent; bricht ab, wenn die Zeile nicht gefunden wird.
+# shellcheck disable=SC2016 # Literal dollar variables intended for grep -F pattern matching
 fix_bootstrap_zip_destination() {
     local f="$1/scripts/build-bootstraps.sh" before after
     [ -f "${f}" ] || die "scripts/build-bootstraps.sh fehlt im Fork."
@@ -376,7 +377,8 @@ KEY_PASS="$(load_gpg_passphrase)"
 mkdir -p "${GPG_DIR}/private"
 chmod 700 "${GPG_DIR}" "${GPG_DIR}/private"
 
-export GNUPGHOME="$(mktemp -d "${TMP_ROOT}/codeforge_gnupg.XXXXXX")"
+GNUPGHOME="$(mktemp -d "${TMP_ROOT}/codeforge_gnupg.XXXXXX")"
+export GNUPGHOME
 chmod 700 "${GNUPGHOME}"
 trap 'rm -rf "${GNUPGHOME}"' EXIT
 
@@ -593,7 +595,7 @@ if [ -n "${REPO_PACKAGES}" ]; then
             # dann das Elternpaket bauen; die .deb des Unterpakets entsteht dabei mit.
             build_pkg="${pkg}"
             if [ ! -f "packages/${pkg}/build.sh" ]; then
-                sub="$(ls packages/*/"${pkg}".subpackage.sh 2>/dev/null | head -n1 || true)"
+                sub="$(find packages -maxdepth 2 -name "${pkg}.subpackage.sh" 2>/dev/null | head -n1 || true)"
                 if [ -n "${sub}" ]; then
                     build_pkg="$(basename "$(dirname "${sub}")")"
                 else
@@ -646,7 +648,7 @@ if [ "${PHASE}" = build ]; then
     FAILED_FILE="${WORKSPACE_DIR}/failed-packages-${ARCHS_LIST[*]// /_}.txt"
     : > "${FAILED_FILE}"
     [ "${#FAILED_PKGS[@]}" -eq 0 ] || printf '%s\n' "${FAILED_PKGS[@]}" > "${FAILED_FILE}"
-    echo "PHASE=build fertig: $(ls "${CLONE_DIR}"/output/*.deb 2>/dev/null | wc -l) .deb in ${CLONE_DIR}/output, Fehlgeschlagen: ${#FAILED_PKGS[@]}"
+    echo "PHASE=build fertig: $(find "${CLONE_DIR}/output" -maxdepth 1 -name '*.deb' 2>/dev/null | wc -l) .deb in ${CLONE_DIR}/output, Fehlgeschlagen: ${#FAILED_PKGS[@]}"
     [ "${#FAILED_PKGS[@]}" -eq 0 ] || { echo "Fehlgeschlagene Pakete:"; printf '  %s\n' "${FAILED_PKGS[@]}"; }
     exit 0
 fi

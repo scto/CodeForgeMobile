@@ -19,7 +19,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilw
 | `:app`-Ressourcen (Theme, Farben, Icons, Backup-/Extraktionsregeln, Manifest) | ✅ | dito |
 | Zentrale Strings `:core:resources` (~720 Texte, `Res`/`stringRes`, `TestRes`) | ✅ 🧪 | `docs/resources-and-strings.md` |
 | Edge-to-Edge, Adaptive Layouts (Compact/Medium/Expanded), Material 3 Expressive | ✅ | `docs/adaptive-edge-to-edge-expressive.md` |
-| Repo-Pipeline für Bootstrap + APT-Repository (`build_codeforge_repo.sh`) | ✅ | Passphrase nur noch per Umgebungsvariable |
+| Repo-Pipeline für Bootstrap + APT-Repository (`build_codeforge_repo.sh`, `apt-stages.conf`) | ✅ | Verifiziert (Task 21, `docs/apt-stages-verification.md`) |
 
 ### Terminal & Umgebung
 | Bereich | Status | Details / Doku |

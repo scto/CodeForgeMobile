@@ -11,6 +11,21 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📦 APT-Repo-Pipeline: Verifikation der Etappen & Paketliste (Task 21)
+
+* **Skript-Bereinigung & Linter-Härtung**:
+  * `build_codeforge_repo.sh`, `plan-apt-build.sh`, `.github/scripts/plan-apt-build.sh` und Workflow `.github/workflows/build-bootstrap-repo.yml` mit `shellcheck` und `actionlint` gehärtet und fehlerfrei gestellt (Exit Code 0).
+  * Trennung von `GNUPGHOME` Deklaration und Assignment (SC2155), Ersetzung von `ls` durch `find` für Subpackage- und Deb-Prüfungen (SC2012).
+* **Vollständiger Paketabgleich**:
+  * Abgleich aller 12 Etappen in `apt-stages.conf` gegen den Fork `terminal-packages-codeforge` (100% Deckung der Elternpakete).
+  * Traceability für Subpackages (`clang`, `aapt2`, `aidl`, `protobuf`/`protoc`, `xz`, `curl`) und Provides (`7zip` -> `p7zip`) validiert.
+* **Lückenanalyse & Standalone-Entwürfe**:
+  * 5 fehlende Termux-Rezepte (`flutter`, `typescript`, `jdtls`, `lemminx`, `kotlin-lsp`) im Stil von `packages/kotlin` (`TERMUX_PKG_PLATFORM_INDEPENDENT=true`) entworfen und im Fork unter `agy-output/packages/` abgelegt.
+* **Speicher- & Laufzeitanalyse**:
+  * Bestandsaufnahme von `gh-pages`: 420 Pakete mit 181,6 MB (17,7% des 1 GB Pages-Limits).
+  * Risikobetrachtung für Langläufer (`libllvm`, `openjdk`, `dart`) und Ausführungsempfehlung dokumentiert in `docs/apt-stages-verification.md`.
+
+
 ### ⌨️ Editor: Wiederherstellung verlorener Editor-Funktionen (Task 19)
 
 * **Symbolleiste (`EditorSymbolBar`)**:

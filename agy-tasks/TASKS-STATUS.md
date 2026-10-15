@@ -29,27 +29,19 @@
 | **18** | `18-translate-strings-en-de.md` | ✅ **Erledigt** | Englisch als Standard (`values/`), Deutsch in `values-de/` (`6bcf72f`) |
 | **19** | `19-restore-lost-editor-features.md` | ✅ **Erledigt** | Verlorene Editor-Funktionen (`EditorSymbolBar`, TextActionWindow, etc.) |
 | **20** | `20-treesitter-remaining-native-langs.md` | ✅ **Erledigt** | Native Tree-sitter Parser für Bash, CMake, TOML, YAML (`a689aed`) |
-| **21** | `21-verify-apt-stages-pipeline.md` | ⬜ **Offen** | APT-Repo-Etappen-Pipeline & Paketliste abgleichen |
+| **21** | `21-verify-apt-stages-pipeline.md` | ✅ **Erledigt** | APT-Repo-Etappen-Pipeline & Paketliste verifiziert (`docs/apt-stages-verification.md`) |
 | **22** | `22-verification-followups.md` | ⬜ **Offen** | Folgepunkte aus den Verifikationsberichten (SAF, Warnings, Checklist) |
 
 ---
 
 ## 🔍 Detaillierte Arbeitsliste für offene Tasks
 
-### Task 19 – Verlorene Editor-Funktionen wiederherstellen
-1. **`EditorSymbolBar`**: Composable in `:feature:editor/ui` fertigstellen, Tastatur-Erkennung / Textdatei-Bedingung in `EditorScreen` anbinden, `EditorIntent.InsertText(String)` auslösen, Strings zweisprachig anlegen.
-2. **`SoraEditorTextActionWindow`**: Aktionsleiste (Kopieren, Ausschneiden, Einfügen, Alles auswählen) gegen Sora 0.23.x API prüfen/anbinden.
-3. **`EditorSearchPanel` vs. `EditorSearchBar`**: Funktionsabgleich durchführen und Lücken analysieren.
-4. **Alte Klassen prüfen**: `EditorSession`, `EditorAssetRegistry`, `SoraEditorHost` bewerten und dokumentieren.
-5. **Terminal-Extras prüfen**: Nyamux-UI Extra-Keys gegen Termux abgleichen.
-6. **Abschluss**: `docs/restore-lost-editor-features.md`, `CHANGELOG.md` und `STATUS.md` aktualisieren.
-
-### Task 21 – APT-Repo-Etappen-Pipeline prüfen
-1. **Skriptprüfung**: `bash -n` und `shellcheck` für `build_codeforge_repo.sh` und `.github/scripts/plan-apt-build.sh`.
-2. **Paketabgleich**: `apt-stages.conf` gegen `packages/<name>/build.sh` des Forks abgleichen.
-3. **Lücken analysieren**: Fehlende Pakete für IDE-Werkzeuge (Flutter, TypeScript, jdtls, lemminx, kotlin-lsp).
-4. **Risikoanalyse**: Laufzeit (> 5h auf GitHub-Runnern) und GitHub Pages Speicherlimit (~1 GB) evaluieren.
-5. **Abschluss**: Verifikationsbericht `docs/apt-stages-verification.md` erstellen.
+### Task 21 – APT-Repo-Etappen-Pipeline prüfen (Erledigt)
+1. **Skriptprüfung**: `bash -n`, `shellcheck` und `actionlint` für alle Build- und Planungs-Skripte bereinigt (Exit 0).
+2. **Paketabgleich**: Alle 12 Etappen und Elternpakete aus `apt-stages.conf` gegen `packages/<name>/build.sh` des Forks abgeglichen (100% Deckung).
+3. **Lücken analysieren**: 5 fehlende Rezepte (Flutter, TypeScript, jdtls, lemminx, kotlin-lsp) im Fork unter `agy-output/packages/` entworfen.
+4. **Risikoanalyse**: Laufzeit (> 5h auf GHA-Runnern) und GitHub Pages Speicherlimit (~1 GB vs. 181,6 MB Ist-Bestand) evaluiert.
+5. **Abschluss**: Ausführlicher Verifikationsbericht `docs/apt-stages-verification.md` erstellt.
 
 ### Task 22 – Folgepunkte aus Verifikationsberichten
 1. **SAF im Projekt-Wizard**: Evaluation der Speicherort-Auswahl per SAF vs. Termux-Pfadkompatibilität.

@@ -256,7 +256,7 @@ jobs:
           {
             echo "## Pakete bauen – ${{ matrix.arch }}"
             echo "Pakete: \`$REPO_PACKAGES\` · ohne Abhängigkeiten: \`${SKIP_DEPS_PACKAGES:-keine}\`"
-            echo "Gebaute .deb: $(ls terminal-packages-codeforge/output/*.deb 2>/dev/null | wc -l)"
+            echo "Gebaute .deb: $(find terminal-packages-codeforge/output -maxdepth 1 -name '*.deb' 2>/dev/null | wc -l)"
             if [ -s failed-packages-${{ matrix.arch }}.txt ]; then
               echo
               echo "**Fehlgeschlagen:**"

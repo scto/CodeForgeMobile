@@ -101,6 +101,7 @@ if [ "$mode" = add ]; then
   [ -z "$extra" ] || err "extra_packages gehören in den Bootstrap und gehen nur im Modus full (der Bootstrap wird dabei neu gebaut)."
 fi
 
+# shellcheck disable=SC2086 # Word splitting is intentional to split space-separated architectures into lines
 archs_json="$(printf '%s\n' $archs | jq -R . | jq -sc .)"
 {
   echo "mode=$mode"
