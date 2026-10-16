@@ -1,0 +1,76 @@
+# agy-tasks/ — KI-Agent-Aufträge für agy (antigravity-cli)
+
+Jede Datei in diesem Ordner ist ein **eigenständiger, vollständiger Prompt** für
+einen KI-Coding-Agenten (hier: `agy`/antigravity-cli, laufend in Termux auf deinem
+Smartphone). Jede Datei enthält genug Kontext, um ohne Rückfragen gestartet zu
+werden — Repo-Struktur, betroffene Dateien, exakte Akzeptanzkriterien.
+
+**Aufruf (geprüft gegen `agy --help`, Version agy.va39):** Es gibt keine Option, eine Datei als Prompt
+zu übergeben (kein `-f`). Starte `agy` im Projekt-Root (`CodeForgeMobile/`) und gib den Auftrag als Prompt mit:
+
+```bash
+cd ~/CodeForgeMobile
+agy --mode plan -i "Lies agy-tasks/23-fix-extensions-manager.md und führe den Auftrag aus."
+```
+
+- `-i` / `--prompt-interactive`: startet mit dem Prompt und bleibt interaktiv (Rückfragen und Freigaben möglich).
+- `--mode plan`: Der Agent plant erst, ohne Dateien zu ändern. Danach (oder direkt) `--mode accept-edits`, damit Änderungen ohne Einzelfreigabe geschrieben werden.
+- `-p` / `--print`: einmaliger Lauf ohne Dialog, nur für kleine Aufgaben.
+- `-c` / `--continue`: letzte Sitzung fortsetzen.
+- `--dangerously-skip-permissions` nur verwenden, wenn du den Task gelesen hast und dem Ablauf vertraust.
+
+Der Agent liest die Task-Datei selbst; so entfällt das Einfügen langer Texte in die Shell.
+
+## Übersicht (Stand 2026-10-16)
+
+Repo-Stand: `adb101f`. ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen. Berichte zu den Verifikations-Tasks: `docs/*-verification.md`, `docs/apt-stages-verification.md`, `docs/restore-lost-editor-features.md`, `docs/verification-followups-report.md`. Der Build läuft laut Inhaber ohne Fehler; Gerätetests stehen aus (`docs/device-test-checklist.md`).
+
+| # | Datei | Status | Hinweis |
+|---|---|---|---|
+| 01 | `01-textmate-grammars-themes.md` | ✅ `52e4c9b` | TextMate-Grammatiken, Themes |
+| 02 | `02-treesitter-native-libs.md` | ✅ `2d66ecc` (+ Task 20) | Tree-sitter Core, 6 Sprachen per Maven |
+| 03 | `03-termux-bootstrap-ui-wiring.md` | ✅ überholt | Onboarding startet Bootstrap |
+| 04 | `04-termux-bootstrap-package-build.md` | ✅ `a2edcaf` | Release `bootstrap-2026.10.11` (aarch64, arm) |
+| 05 | `05-termux-sdk-path-visibility.md` | ✅ überholt | PRoot entfällt, SDK unter `$PREFIX/opt/android-sdk` |
+| 06 | `06-optional-full-termux-ui.md` | ⚪ optional | volle Termux-Multi-Session-UI |
+| 07 | `07-bonsai-sora-app-followups.md` | ✅ `0dbce28` | `CMakeLists.txt`-Erkennung |
+| 08 | `08-verify-indexing-updater-overlays.md` | ✅ `3051341` | Indexierung, Updater, Overlays |
+| 09 | `09-verify-project-wizard-template-engine.md` | ✅ `f1dd5ce` | Wizard, Template-Engine |
+| 10 | `10-verify-editor-git-drawer.md` | ✅ `0ea8b78` | Editor-Werkzeuge, Git-Panel, Drawer |
+| 11 | `11-verify-termux-sdk-script.md` | ✅ `26bc869` | `codeforge-env`, `targetSdk = 28` |
+| 12 | `12-verify-build-logic.md` | ✅ `4826199` | build-logic, AGP 8.13.2 |
+| 13 | `13-verify-resources.md` | ✅ `a8771ba` | `:core:resources` |
+| 14 | `14-verify-adaptive-expressive.md` | ✅ `0c0715a` | Adaptive/Edge-to-Edge, stabiles `MaterialTheme` |
+| 15 | `15-verify-layout-designer.md` | ✅ `42924e2` | Layout-Designer |
+| 16 | `16-port-local-experiment-features.md` | 🟡 Punkte 1–3, 5, 6 ✅; **4 nachbessern (Task 23)** | Editor, Dateibaum, Theme Studio, Hintergrundbefehle (Entscheidung), Fluent 2; Extensions-Manager fehlerhaft |
+| 17 | `17-externalize-hardcoded-strings.md` | 🔁 wiederkehrend | harte UI-Texte nach `:core:resources` (zweisprachig); letzter Lauf 0 Funde |
+| 18 | `18-translate-strings-en-de.md` | ✅ `6bcf72f` | Englisch Standard, Deutsch in `values-de` (825 Strings) |
+| 19 | `19-restore-lost-editor-features.md` | ✅ `8383ade` | `EditorSymbolBar`; Rest ersetzt/geprüft |
+| 20 | `20-treesitter-remaining-native-langs.md` | ✅ `a689aed` | Bash, CMake, TOML, YAML (16 `.so`, SHA-256 geprüft) |
+| 21 | `21-verify-apt-stages-pipeline.md` | ✅ `73bb2af` | Skripte geprüft, 12 Etappen gegen den Fork abgeglichen; Rezepte nur im Fork |
+| 22 | `22-verification-followups.md` | ✅ `adb101f` | Ordnerwahl im Wizard, Expressive-Entscheidung, Gradle-/ktlint-Bericht, Gerätetest-Checkliste |
+| 23 | `23-fix-extensions-manager.md` | ⬜ **offen** | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen |
+
+## Nächste Schritte
+
+| Schritt | Aufgabe | Anmerkung |
+|---|---|---|
+| 1 | **Task 23** ausführen | Extensions-Manager reparieren, LSP anbinden, Repo-Reste aufräumen |
+| 2 | Gerätetests | `docs/device-test-checklist.md` (28 Fälle, Bootstrap, W^X, Layouts, Editor, Wizard) |
+| 3 | Fork `scto/terminal-packages-codeforge` | Rezepte aus `agy-output/packages/` (Flutter, TypeScript, jdtls, lemminx, kotlin-lsp) committen, ersten Etappen-Lauf starten (Workflow `build-bootstrap-repo.yml`, Modus `add`) |
+| laufend | **17** | vor jedem Commit/PR; neue Texte in `values/` **und** `values-de/` |
+| optional | **06** | volle Termux-UI |
+
+Nicht Teil der Tasks: das Bauen von Bootstrap und APT-Paketen (GitHub-Actions im Fork). Weitere Backlog-Punkte: `STATUS.md` (Abschnitt „Noch offene Features"): `:libs:gradle-tooling-bridge`, Layout-Designer-Erweiterungen, Expressive ab stabiler material3 ≥ 1.4, ktlint-Umbenennung `template_engine`.
+
+Wichtig: `targetSdk = 28` (Voraussetzung für Termux-Binaries) schließt den Play Store aus; Verteilung über F-Droid/GitHub/Sideload.
+
+Quellen für den jeweiligen Kontext stehen in den referenzierten `.md`-Dateien im
+Projekt selbst (`ASSETS.md`, `TREESITTER.md`, `docs/sub/TERMUX-PORTING.md`,
+`libs/terminal-engine/BOOTSTRAP.md`, `docs/BOOTSTRAP-WORKFLOW.md`).
+
+## Sicherheitshinweis
+
+Diese Prompts weisen den Agenten an, Code zu ändern, Dateien herunterzuladen und
+Build-Artefakte zu erzeugen. Lies jede Datei einmal selbst durch, bevor du sie
+startest — insbesondere 06 und 23 (Netzwerk-Downloads, Archiv-Entpacken, Prozessstart für Language Server).
