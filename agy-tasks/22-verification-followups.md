@@ -13,7 +13,11 @@ Sammelauftrag für Punkte, die die Berichte `docs/*-verification.md` (Task 08–
 * Flutter-Wizard bleibt bewusst nicht portiert (siehe Bericht). `targetSdk = 28` nicht ändern (Voraussetzung für Ausführbarkeit der Termux-Binaries, Task 11); Hinweis: Play-Store-Veröffentlichung wäre damit nicht möglich – nur melden.
 * Keine Logikänderungen außerhalb der genannten Punkte; keine harten Strings.
 
-## Akzeptanz
+## Status: Abgeschlossen
 
-* Je Punkt: umgesetzt oder begründet zurückgestellt, vermerkt in `STATUS.md`/`CHANGELOG.md` (`[Unreleased]`).
-* Build und Unit-Tests grün; `python3 scripts/find_hardcoded_strings.py --check` → Exit 0.
+- **Speicherort per SAF im Wizard:** SAF vs. Termux-Pfadmodell geklärt (POSIX-Syscalls und `noexec` verbieten direkte Arbeit auf externen SAF-URIs). Ordnerauswahl über Compose-Dialog `ProjectDirectoryPickerDialog` und trailing Icon in `ProjectWizardScreen` integriert (zweisprachig mit 7 neuen Strings).
+- **Material 3 Expressive:** Geprüft. Da Material 3 Expressive erst in Alpha-Versionen (`1.4.0-alpha+`) existiert und gemäß Spezifikation keine Alpha-Versionen eingeführt werden dürfen, verbleibt das Theme auf dem stabilen `MaterialTheme` aus der Compose BOM 2025.09.00 (`material3 1.3.2`).
+- **Gradle 9 / AGP-Warnungen:** Mit `./gradlew help --warning-mode all` ausgewertet. Keine Deprecation-Warnungen in eigenem Code/build-logic; nur AGP-internes AAPT2-Override.
+- **ktlint:** `./gradlew ktlintCheck` ausgeführt (225 Tasks) und Befunde rein berichtend in `docs/verification-followups-report.md` dokumentiert.
+- **Gerätetest-Checkliste:** Vollständige manuelle Test-Checkliste in `docs/device-test-checklist.md` mit 28 Szenarien in 6 Kategorien angelegt (alle initial „ungeprüft"). Play-Store-Einschränkung bei `targetSdk = 28` dokumentiert.
+

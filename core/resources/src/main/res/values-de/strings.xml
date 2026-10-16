@@ -687,6 +687,13 @@
     <string name="pw_field_name">Projektname</string>
     <string name="pw_field_package">Package-Name</string>
     <string name="pw_field_location">Speicherort</string>
+    <string name="pw_choose_directory">Ordner wählen</string>
+    <string name="pw_select_directory_title">Speicherort wählen</string>
+    <string name="pw_select_this_directory">Diesen Ordner wählen</string>
+    <string name="pw_new_folder">Neuer Ordner</string>
+    <string name="pw_new_folder_title">Neuen Ordner erstellen</string>
+    <string name="pw_new_folder_hint">Ordnername</string>
+    <string name="pw_folder_up">Übergeordneter Ordner</string>
     <string name="pw_field_language">Sprache</string>
     <string name="pw_field_min_sdk">Minimale SDK-Version</string>
     <string name="pw_field_kts">Gradle Kotlin DSL (.kts)</string>

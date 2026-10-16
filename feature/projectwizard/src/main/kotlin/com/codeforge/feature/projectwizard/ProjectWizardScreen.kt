@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -167,6 +169,8 @@ private fun ConfigForm(
             enabled = enabled,
             keyboardType = KeyboardType.Uri,
         )
+        var showDirPicker by remember { mutableStateOf(false) }
+
         FormField(
             value = state.targetDir,
             onChange = { onEvent(ProjectWizardUiEvent.TargetDirChanged(it)) },
@@ -174,7 +178,26 @@ private fun ConfigForm(
             error = if (state.showErrors) error(Field.TARGET_DIR) else null,
             enabled = enabled,
             keyboardType = KeyboardType.Uri,
+            trailingIcon = {
+                IconButton(onClick = { showDirPicker = true }, enabled = enabled) {
+                    Icon(
+                        imageVector = Icons.Default.Folder,
+                        contentDescription = stringResource(CoreR.string.pw_choose_directory),
+                    )
+                }
+            },
         )
+
+        if (showDirPicker) {
+            ProjectDirectoryPickerDialog(
+                initialDir = state.targetDir,
+                onDismiss = { showDirPicker = false },
+                onSelectDir = { selectedPath ->
+                    onEvent(ProjectWizardUiEvent.TargetDirChanged(selectedPath))
+                    showDirPicker = false
+                },
+            )
+        }
 
         Dropdown(
             label = CoreR.string.pw_field_language,
@@ -242,6 +265,7 @@ private fun FormField(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     OutlinedTextField(
         value = value,
@@ -252,6 +276,7 @@ private fun FormField(
         singleLine = true,
         enabled = enabled,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        trailingIcon = trailingIcon,
         modifier = modifier.fillMaxWidth(),
     )
 }

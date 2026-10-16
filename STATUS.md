@@ -46,7 +46,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilw
 ### Projekt & Einstellungen
 | Bereich | Status | Details / Doku |
 |---|---|---|
-| Projekt-Wizard (2 Schritte) + Template-Engine, 9 Vorlagen | ✅ | `docs/project-wizard-and-template-engine.md` |
+| Projekt-Wizard (2 Schritte) + Template-Engine, 9 Vorlagen, Ordnerauswahl | ✅ | `docs/project-wizard-and-template-engine.md`, Task 22 (`docs/verification-followups-report.md`) |
 | Welcome (Adaptive List-Detail), Settings-Hub (inkl. Extensions-Manager für LSP-Server), Theme-Builder (15 Presets, RGB-Colorpicker, Horizontal Preview), Git-/Editor-/Terminal-Einstellungen | ✅ 🧪 | |
 | Plugin-API/-Runtime (Termux-Prefix) | 🟡 | `libs/plugin-api`, `feature/plugins` |
 

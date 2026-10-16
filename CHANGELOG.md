@@ -11,6 +11,23 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🔍 Folgepunkte aus den Verifikationsberichten (Task 22)
+
+* **Projekt-Wizard Speicherort-Auswahl (`ProjectDirectoryPickerDialog`)**:
+  * Technische Klärung des SAF- vs. Termux-Dateisystemmodells: Native Linux-Syscalls (`open()`, `execve()`) und Android `noexec`-Mounts auf externem Speicher verbieten das direkte Arbeiten auf externen SAF-URIs.
+  * Ergänzung eines Ordner-Auswahl-Buttons (`trailingIcon`) in `ProjectWizardScreen.kt` und Implementierung von `ProjectDirectoryPickerDialog.kt` zum Navigieren und Anlegen von Verzeichnissen im app-privaten Bereich (`<filesDir>/projects`).
+  * 7 neue Strings zweisprachig in `core/resources` ergänzt (`pw_choose_directory`, `pw_select_directory_title`, `pw_select_this_directory`, `pw_new_folder`, etc.).
+* **Material 3 Expressive Stabilität**:
+  * Analyse der Verfügbarkeit: Expressive APIs (`MaterialExpressiveTheme`, `MotionScheme.expressive()`) existieren erst in experimentellen Alpha-Versionen (`1.4.0-alpha+`).
+  * Beibehaltung des stabilen `MaterialTheme` aus Compose BOM 2025.09.00 (`material3 1.3.2`) gemäß Projekt-Stabilitätsrichtlinien.
+* **Gradle 9 & AGP-Vorbereitung**:
+  * Analyse von `./gradlew help --warning-mode all`: 0 Gradle-Deprecation-Warnungen in eigenem Code/build-logic.
+* **ktlint Code-Style Check**:
+  * `./gradlew ktlintCheck` ausgeführt (225 Tasks) und Befunde (Package-Namen-Unterstriche in `template_engine`, Template-Funktionsnamen) rein berichtend in `docs/verification-followups-report.md` erfasst.
+* **Manuelle Gerätetest-Checkliste**:
+  * [`docs/device-test-checklist.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/docs/device-test-checklist.md) mit 28 detaillierten Testfällen in 6 Kategorien (Bootstrap/W^X, Adaptive Layouts, IME/Input, Themes, Sora Editor, Filetree & Wizard) erstellt; Play-Store-Einschränkung bei `targetSdk = 28` dokumentiert.
+
+
 ### 📦 APT-Repo-Pipeline: Verifikation der Etappen & Paketliste (Task 21)
 
 * **Skript-Bereinigung & Linter-Härtung**:

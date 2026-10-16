@@ -30,7 +30,7 @@
 | **19** | `19-restore-lost-editor-features.md` | ✅ **Erledigt** | Verlorene Editor-Funktionen (`EditorSymbolBar`, TextActionWindow, etc.) |
 | **20** | `20-treesitter-remaining-native-langs.md` | ✅ **Erledigt** | Native Tree-sitter Parser für Bash, CMake, TOML, YAML (`a689aed`) |
 | **21** | `21-verify-apt-stages-pipeline.md` | ✅ **Erledigt** | APT-Repo-Etappen-Pipeline & Paketliste verifiziert (`docs/apt-stages-verification.md`) |
-| **22** | `22-verification-followups.md` | ⬜ **Offen** | Folgepunkte aus den Verifikationsberichten (SAF, Warnings, Checklist) |
+| **22** | `22-verification-followups.md` | ✅ **Erledigt** | Folgepunkte verifiziert & umgesetzt (`docs/verification-followups-report.md`) |
 
 ---
 
@@ -43,9 +43,10 @@
 4. **Risikoanalyse**: Laufzeit (> 5h auf GHA-Runnern) und GitHub Pages Speicherlimit (~1 GB vs. 181,6 MB Ist-Bestand) evaluiert.
 5. **Abschluss**: Ausführlicher Verifikationsbericht `docs/apt-stages-verification.md` erstellt.
 
-### Task 22 – Folgepunkte aus Verifikationsberichten
-1. **SAF im Projekt-Wizard**: Evaluation der Speicherort-Auswahl per SAF vs. Termux-Pfadkompatibilität.
-2. **Material 3 Expressive**: Verfügbarkeit und Kompatibilität von Compose M3 Expressive prüfen.
-3. **Gradle 9 / AGP**: Warnungen mit `--warning-mode all` analysieren und beheben.
-4. **ktlint**: `ktlintCheck` ausführen und Befunde dokumentieren.
-5. **Gerätetest-Checkliste**: `docs/device-test-checklist.md` erstellen.
+### Task 22 – Folgepunkte aus Verifikationsberichten (Erledigt)
+1. **SAF im Projekt-Wizard**: SAF vs. Termux-Pfadmodell geklärt; `ProjectDirectoryPickerDialog` und trailing Icon in `ProjectWizardScreen` integriert (zweisprachig mit 7 Strings).
+2. **Material 3 Expressive**: Stabilität evaluiert; stabiles `MaterialTheme` (BOM 2025.09.00 / material3 1.3.2) beibehalten (keine Alpha-Versionen).
+3. **Gradle 9 / AGP**: `--warning-mode all` analysiert (0 eigene Warnungen).
+4. **ktlint**: `ktlintCheck` ausgeführt und Befunde dokumentiert.
+5. **Gerätetest-Checkliste**: `docs/device-test-checklist.md` mit 28 Testfällen in 6 Kategorien erstellt.
+
