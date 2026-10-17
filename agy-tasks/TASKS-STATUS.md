@@ -19,7 +19,7 @@
 | **13** | `13-verify-resources.md` | ✅ `a8771ba` | `:core:resources` |
 | **14** | `14-verify-adaptive-expressive.md` | ✅ `0c0715a` | Adaptive/Edge-to-Edge, stabiles `MaterialTheme` |
 | **15** | `15-verify-layout-designer.md` | ✅ `42924e2` | Layout-Designer |
-| **16** | `16-port-local-experiment-features.md` | 🟡 Punkte 1–3, 5, 6 ✅; **4 nachbessern (Task 23)** | Editor, Dateibaum, Theme Studio, Hintergrundbefehle (Entscheidung), Fluent 2; Extensions-Manager fehlerhaft |
+| **16** | `16-port-local-experiment-features.md` | ✅ Alle Punkte 1–6 (`f498c47`) | Editor, Dateibaum, Theme Studio, Hintergrundbefehle, Fluent 2; Extensions-Manager repariert (Task 23) |
 | **17** | `17-externalize-hardcoded-strings.md` | 🔁 wiederkehrend | harte UI-Texte nach `:core:resources` (zweisprachig); letzter Lauf 0 Funde |
 | **18** | `18-translate-strings-en-de.md` | ✅ `6bcf72f` | Englisch Standard, Deutsch in `values-de` (825 Strings) |
 | **19** | `19-restore-lost-editor-features.md` | ✅ `8383ade` | `EditorSymbolBar`; Rest ersetzt/geprüft |
