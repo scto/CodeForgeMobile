@@ -896,6 +896,15 @@
     <string name="extension_rust_analyzer_desc">Modular language server implementation for the Rust programming language.</string>
     <string name="extension_html_css_json_name">HTML / CSS / JSON Server</string>
     <string name="extension_html_css_json_desc">Language server for web technologies and structured data formats.</string>
+    <string name="extensions_missing_prerequisite">Prerequisite missing: %1$s</string>
+    <string name="extensions_termux_install_hint">Run in terminal: pkg install %1$s</string>
+    <string name="extensions_termux_package">Termux Package</string>
+    <string name="editor_lsp_status_running">LSP: Running</string>
+    <string name="editor_lsp_status_stopped">LSP: Stopped</string>
+    <string name="editor_lsp_status_starting">LSP: Starting…</string>
+    <string name="editor_lsp_status_failed">LSP: Error</string>
+    <string name="editor_lsp_open_settings">Settings → Extensions</string>
+    <string name="editor_lsp_start_failed">LSP server could not be started. Check Settings → Extensions.</string>
 
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>

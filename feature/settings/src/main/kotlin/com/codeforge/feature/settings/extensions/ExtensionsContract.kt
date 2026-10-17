@@ -8,7 +8,8 @@ data class ExtensionUiItem(
     val isInstalled: Boolean,
     val installedPath: String?,
     val status: ExtensionStatus,
-    val progress: Float
+    val progress: Float,
+    val missingRequirements: List<String> = emptyList()
 )
 
 data class ExtensionsUiState(
@@ -20,6 +21,6 @@ data class ExtensionsUiState(
 sealed interface ExtensionsUiEvent {
     data class InstallClicked(val pkg: LspExtensionPackage) : ExtensionsUiEvent
     data class UninstallClicked(val pkg: LspExtensionPackage) : ExtensionsUiEvent
-    object Refresh : ExtensionsUiEvent
-    object DismissSnackbar : ExtensionsUiEvent
+    data object Refresh : ExtensionsUiEvent
+    data object DismissSnackbar : ExtensionsUiEvent
 }

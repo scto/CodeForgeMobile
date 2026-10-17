@@ -43,7 +43,7 @@ Jeweils wählbar: Gradle Kotlin DSL (`.kts`) oder Groovy, minSdk (21/24/26/28/29
 `settings.proto`: `AppSettings.wizard = 5` mit `WizardConfig { last_save_location, language, min_sdk, use_groovy_dsl }`; `SettingsRepository.updateWizard { }`.
 
 ### `:feature:projectwizard`
-Zwei Schritte: Vorlagenraster (Vorschaubilder, de/en-Texte) → Formular (Projektname, Package mit Auto-Vorschlag solange nicht manuell bearbeitet, Speicherort, Sprache, minSdk, KTS-Schalter, Inline-Validierung). Nach Erfolg: Präferenzen speichern, Eintrag in `RecentProjectsRepository`, Navigation in den Editor. Route-Signatur unverändert: `ProjectWizardRoute(onNavigateToEditor, onCancel)`. Back im Formular führt zurück zur Vorlagenwahl. Drawables `pw_*` (mit Night-Varianten, wo im ZIP vorhanden), Strings `values/` (de) und `values-en/`.
+Zwei Schritte: Vorlagenraster (Vorschaubilder, de/en-Texte) → Formular (Projektname, Package mit Auto-Vorschlag solange nicht manuell bearbeitet, Speicherort, Sprache, minSdk, KTS-Schalter, Inline-Validierung). Nach Erfolg: Präferenzen speichern, Eintrag in `RecentProjectsRepository`, Navigation in den Editor. Route-Signatur unverändert: `ProjectWizardRoute(onNavigateToEditor, onCancel)`. Back im Formular führt zurück zur Vorlagenwahl. Drawables `pw_*` (mit Night-Varianten, wo im ZIP vorhanden), Strings `values/` (en) und `values-de/` (de).
 
 ## Korrekturen am ZIP-Code (beim Portieren gefunden)
 - Vertauschte Strings-XMLs und falsche Activity bei Bottom-Navigation → korrigiert.

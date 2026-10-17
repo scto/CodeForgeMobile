@@ -31,10 +31,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * TODO: [serverCommand] muss auf ein Binary innerhalb der PRoot-Rootfs zeigen
- * (z.B. ["proot", ..., "kotlin-language-server"] oder analog für andere Sprachen),
- * sobald :libs:terminal-engine die Termux-Umgebung (TermuxEnvironment) bereitstellt. Aktuell wird
- * das übergebene Kommando direkt per ProcessBuilder gestartet.
+ * JSON-RPC-Bridge zum Language Server (LSP).
+ *
+ * Server werden direkt im Android/Termux-Dateisystem ausgeführt (ohne PRoot).
+ * Prozessumgebungsvariablen (PREFIX, PATH, LD_LIBRARY_PATH, JAVA_HOME usw.) werden über
+ * [extraProcessEnv] bereitgestellt (siehe [TermuxEnvironment] in :libs:terminal-engine
+ * und [LspServerResolver] in :core:domain).
  */
 @Singleton
 class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {

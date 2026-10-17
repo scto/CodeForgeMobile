@@ -1,4 +1,4 @@
-> **Zweisprachig (ab Task 18):** Standardsprache Englisch in `values/strings.xml`, deutsche Übersetzung zwingend in `values-de/strings.xml`. Neue Schlüssel immer in beiden Dateien anlegen und `python3 scripts/check_string_locales.py` ausführen. Letzter Lauf: Task 18 (0 Funde, 816 Strings synchron).
+> **Zweisprachig (ab Task 18):** Standardsprache Englisch in `values/strings.xml`, deutsche Übersetzung zwingend in `values-de/strings.xml`. Neue Schlüssel immer in beiden Dateien anlegen und `python3 scripts/check_string_locales.py` ausführen. Letzter Lauf: Task 23 (0 Funde, 834 Strings synchron).
 
 # Task 17 – Wiederkehrend: harte UI-Texte nach `:core:resources` auslagern
 

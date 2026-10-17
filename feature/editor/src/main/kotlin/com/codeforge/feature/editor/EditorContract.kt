@@ -10,6 +10,8 @@ import com.codeforge.core.navigation.JumpTarget
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import com.codeforge.libs.dependency_updater_api.FileUpdateAnnotation
 
+import com.codeforge.core.domain.model.LspServerState
+
 data class OpenFile(
     val path: String,
     val content: String,
@@ -20,7 +22,7 @@ data class OpenFile(
 data class EditorUiState(
     val openFiles: List<OpenFile> = emptyList(),
     val activeFileIndex: Int = 0,
-    val isLspConnected: Boolean = false,
+    val lspServerState: LspServerState = LspServerState.STOPPED,
     val isLoading: Boolean = false,
     val displaySettings: EditorDisplaySettings = EditorDisplaySettings(),
     val diagnosticsByPath: Map<String, List<LspDiagnostic>> = emptyMap(),
@@ -40,6 +42,8 @@ data class EditorUiState(
     val updateDialog: DependencyUpdate? = null,
     val isApplyingUpdate: Boolean = false
 ) {
+    val isLspConnected: Boolean get() = lspServerState == LspServerState.RUNNING
+
     val activeUpdateAnnotations: List<FileUpdateAnnotation>
         get() = if (updateAnnotationsPath != null && updateAnnotationsPath == activeFile?.path) updateAnnotations else emptyList()
 

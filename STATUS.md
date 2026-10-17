@@ -1,6 +1,6 @@
 # 📊 Aktueller Status
 
-**Version:** 3.0.0 (`versionCode 30000`) · **Stand:** 2026-10-16 · **Module:** 43 · **Kotlin-Dateien:** ~330 · **Strings:** 825 (Englisch Standard, Deutsch `values-de`)
+**Version:** 3.0.0 (`versionCode 30000`) · **Stand:** 2026-10-16 · **Module:** 43 · **Kotlin-Dateien:** ~330 · **Strings:** 834 (Englisch Standard, Deutsch `values-de`)
 
 > ✅ **Build:** `./gradlew assembleDebug` läuft laut Inhaber (Stand 2026-10-16, on-device in Termux aarch64) ohne Fehler; die Verifikationsberichte zu Task 08–15 liegen in `docs/*-verification.md`.
 > ⚠️ **Noch nicht geprüft:** Verhalten auf dem Gerät (Bootstrap-Installation, W^X unter `targetSdk 28`, Layouts, Tastatur, LSP). Checkliste: `docs/device-test-checklist.md` (28 Testfälle, alle „ungeprüft“). Aufträge: `agy-tasks/README.md`.
@@ -16,7 +16,7 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 | build-logic mit Convention-Plugins (App, Library, Compose, Hilt, Quality, Bootstrap) | ✅ | `build-logic/` |
 | Pflichtdateien je Modul (`.gitignore`, `consumer-rules.pro`, `proguard-rules.pro`, Manifest) | ✅ | `docs/module-files-and-app-resources.md` |
 | `:app`-Ressourcen (Theme, Farben, Icons, Backup-/Extraktionsregeln, Manifest) | ✅ | dito |
-| Zentrale Strings `:core:resources` (825 Texte, zweisprachig: `values/` Englisch, `values-de/` Deutsch; `Res`/`stringRes`, `TestRes`, Prüfskript `scripts/check_string_locales.py`) | ✅ 🧪 | `docs/resources-and-strings.md` |
+| Zentrale Strings `:core:resources` (834 Texte, zweisprachig: `values/` Englisch, `values-de/` Deutsch; `Res`/`stringRes`, `TestRes`, Prüfskript `scripts/check_string_locales.py`) | ✅ 🧪 | `docs/resources-and-strings.md` |
 | Edge-to-Edge, Adaptive Layouts (Compact/Medium/Expanded), Material 3 Expressive | ✅ | `docs/adaptive-edge-to-edge-expressive.md` |
 | Repo-Pipeline für Bootstrap + APT-Repository (`build_codeforge_repo.sh`, `apt-stages.conf`) | ✅ | Verifiziert (Task 21, `docs/apt-stages-verification.md`) |
 
@@ -38,7 +38,7 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 | Highlighter/Formatter-Logik, Submodule Maker | ✅ 🧪 | `:libs:code-tools` (53 Tests) |
 | Git-Panel (Diff, Merge, Commit, Push/Pull, Graph, Stash, Tags, Rebase, Cherry-Pick, Revert, Reset, Amend, Blame, Hunks, Konflikt-Editor) | ✅ 🧪 | JGit, 47 Tests laufen gegen echte Repos |
 | Indexierung, Dependency-Updater, Editor-Overlays (Versions-Hinweis, Farb-Kästchen) | ✅ | `docs/indexing-and-dependency-updater.md` |
-| LSP-Client (`LspClientRepositoryImpl`, JSON-RPC) | 🟡 | implementiert, nicht gegen echten Server geprüft; wird im Editor noch nirgends gestartet (Task 23) |
+| LSP-Client (`LspClientRepositoryImpl`, JSON-RPC) | ✅ 🧪 | voll angebunden über `LspServerResolver` und `LspSessionController` im Editor, verifiziert (Task 23) |
 | Compose-Preview | 🟡 | Renderer + Brücke vorhanden, ungebaut |
 | **Layout-Designer** (Palette, Vorschau, Baum, Eigenschaften, XML, Undo/Redo, Speichern) | ✅ 🧪 (Logik) | `docs/layout-designer.md` |
 
@@ -46,14 +46,14 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 | Bereich | Status | Details / Doku |
 |---|---|---|
 | Projekt-Wizard (2 Schritte) + Template-Engine, 9 Vorlagen, Ordnerauswahl | ✅ | `docs/project-wizard-and-template-engine.md`, Task 22 (`docs/verification-followups-report.md`) |
-| Welcome (Adaptive List-Detail), Settings-Hub (inkl. Extensions-Manager für LSP-Server, 🟡 Katalog fehlerhaft, Task 23), Theme-Builder (15 Presets, RGB-Colorpicker, Horizontal Preview), Git-/Editor-/Terminal-Einstellungen | ✅ 🧪 | |
+| Welcome (Adaptive List-Detail), Settings-Hub (inkl. Extensions-Manager für LSP-Server, ✅ repariert, echte SHA-256, tar.gz/gz, Task 23), Theme-Builder (15 Presets, RGB-Colorpicker, Horizontal Preview), Git-/Editor-/Terminal-Einstellungen | ✅ 🧪 | |
 | Plugin-API/-Runtime (Termux-Prefix) | 🟡 | `libs/plugin-api`, `feature/plugins` |
 
 ## ⬜ Noch offene Features / Aufgaben
 
 1. **Gerätetests** (Bootstrap aarch64/arm, W^X mit `targetSdk 28`, Layouts, Tastatur, Editor-Features, Wizard): `docs/device-test-checklist.md`, 28 Testfälle ungeprüft.
 2. **Erster echter Lauf der APT-Etappen-Pipeline** im Fork `scto/terminal-packages-codeforge` (Skripte verifiziert, `docs/apt-stages-verification.md`); Rezepte für Flutter, TypeScript, jdtls, lemminx, kotlin-lsp liegen noch ungepusht unter `agy-output/packages/` im Fork. Pages-Limit (~1 GB) beachten.
-3. **Extensions-Manager reparieren und an den LSP-Client anbinden** (Katalog-Prüfsummen, tar.gz/gz-Entpacken, Plattform-Binaries, Start des Servers aus dem Editor). → `agy-tasks/23-fix-extensions-manager.md`.
+3. ~~**Extensions-Manager reparieren und an den LSP-Client anbinden**~~ → ✅ Erledigt (Task 23, `docs/extensions-manager-fix-report.md`).
 4. `:libs:gradle-tooling-bridge` (Socket/AIDL) und Build-Ausführung aus der IDE.
 5. Layout-Designer: Drag-and-Drop, echte Constraint-Darstellung, Ressourcen-Auflösung (`@string`, `@color`), `include`/`merge`, ViewModel-Tests.
 6. Material-3-Expressive-Komponenten erst, wenn eine stabile material3 ≥ 1.4 in der BOM liegt (Entscheidung Task 22).
@@ -63,7 +63,7 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
    - ✅ Item 1: Editor & Image Preview (Minimap, Rainbow Brackets, Pinch-Zoom, Desktop-Shortcuts, Diagnose-UI, `ImageFilePreview`)
    - ✅ Item 2: Dateibaum (theme-adaptive Einrückungslinien, 2-zeilige Dateiinfo, Vollzeilen-Tap, Kontextmenü „Eigenschaften“, Löschdialog)
    - ✅ Item 3: Theme Studio (15 Presets, horizontale Live-Vorschau, RGB-Colorpicker mit 10 Swatches)
-   - 🟡 Item 4: Extensions-Manager (`:feature:settings`): Oberfläche, Route `Routes.EXTENSIONS` und SHA-256-/Zip-Logik vorhanden; Katalog-Prüfsummen/Archivtypen falsch, Server wird nicht genutzt → Task 23
+   - ✅ Item 4: Extensions-Manager (`:feature:settings`): Katalog mit echten SHA-256 Prüfsummen und Archivtypen korrigiert, Termux-Pakete eingebunden, tar.gz/gz-Extraktion implementiert, an LSP-Client im Editor über LspServerResolver und LspSessionController angebunden (Task 23, `docs/extensions-manager-fix-report.md`)
    - ✅ Item 5: Hintergrundbefehle: vollständig durch `TermuxService` abgedeckt (`ForegroundService` mit Wakelock/Wifilock); `RunCommandWorker` entfällt als redundant (siehe `docs/fluent2-and-background-services-decision.md`)
    - ✅ Item 6: Fluent 2: leichtgewichtiges Token-Set in `:core:designsystem` (`FluentTokens.kt`) eingeführt; 4 Unit-Tests in `FluentTokensTest`
 10. Fluent-2-Designrichtung (`FLUENT2_JETPACK_COMPOSE_GUIDE.md`): `FluentTokens` in `:core:designsystem` bereitgestellt, primäres App-Theme bleibt Material 3 (Expressive).
@@ -72,7 +72,7 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 ## ⚠️ Risiken
 
 * `targetSdk = 28` ist Voraussetzung für die Ausführbarkeit der Termux-Binaries (Task 11), schließt aber den Play Store aus.
-* Der LSP-Pfad ist ungeprüft: Extension-Prüfsummen im Katalog stimmen nicht (Task 23), und es gibt keinen Aufrufer für `LspClientRepository.start`.
+* Der LSP-Pfad ist im Code angebunden und per Unit-Tests verifiziert (Task 23); On-Device-Verhalten mit echten Servern bleibt im Rahmen der Checkliste (`docs/device-test-checklist.md`) zu testen.
 * `build_codeforge_repo.sh` erzeugt einen privaten GPG-Schlüssel unter `.gpg/` – nicht einchecken (steht in `.gitignore`). Die früher im Klartext eingecheckte Passphrase gilt als kompromittiert, falls das Repository öffentlich war; Passphrase nur per `CODEFORGE_GPG_PASSPHRASE`.
 * Umgebung und W^X: `libs/terminal-engine/BOOTSTRAP.md`.
 

@@ -32,4 +32,4 @@
 
 ### 2. Verifikation & Lokalisierung
 * `scripts/find_hardcoded_strings.py --check` liefert Exit 0.
-* `scripts/check_string_locales.py` bestätigt vollständige Synchronität (818 Strings je Sprache).
+* `scripts/check_string_locales.py` bestätigt vollständige Synchronität (834 Strings je Sprache).

@@ -7,14 +7,21 @@ package com.codeforge.feature.editor
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.Surface
+import com.codeforge.core.domain.model.LspServerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
@@ -41,6 +48,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHost
@@ -156,6 +164,7 @@ fun EditorRoute(
                 controller = controller,
                 activePath = uiState.activeFile?.path,
                 isLspConnected = uiState.isLspConnected,
+                lspServerState = uiState.lspServerState,
                 tabSize = uiState.displaySettings.tabSize,
                 onFormat = ::formatDocument,
                 onFormatLsp = { viewModel.onEvent(EditorUiEvent.RunLspFormat) },
@@ -237,6 +246,7 @@ private fun EditorToolbar(
     controller: EditorController?,
     activePath: String?,
     isLspConnected: Boolean,
+    lspServerState: LspServerState,
     tabSize: Int,
     onFormat: () -> Unit,
     onFormatLsp: () -> Unit,
@@ -247,8 +257,13 @@ private fun EditorToolbar(
 ) {
     val isImage = activePath?.let { isImageFilePath(it) } == true
     Row(
-        modifier = modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+        modifier = modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        LspStatusBadge(
+            state = lspServerState,
+            modifier = Modifier.padding(start = 8.dp, end = 4.dp)
+        )
         IconButton(onClick = { controller?.undo() }, enabled = !isImage && (controller?.canUndo() ?: false)) {
             Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringRes(R.string.editor_rueckgaengig))
         }
@@ -337,3 +352,49 @@ private fun GoToLineDialog(lineCount: Int, onDismiss: () -> Unit, onGo: (line: I
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringRes(R.string.common_abbrechen)) } }
     )
 }
+
+@Composable
+private fun LspStatusBadge(
+    state: LspServerState,
+    modifier: Modifier = Modifier
+) {
+    if (state == LspServerState.STOPPED) return
+
+    val (bgColor, textColor, textRes) = when (state) {
+        LspServerState.RUNNING -> Triple(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.onPrimaryContainer,
+            R.string.editor_lsp_status_running
+        )
+        LspServerState.STARTING -> Triple(
+            MaterialTheme.colorScheme.tertiaryContainer,
+            MaterialTheme.colorScheme.onTertiaryContainer,
+            R.string.editor_lsp_status_starting
+        )
+        LspServerState.FAILED, LspServerState.ERROR -> Triple(
+            MaterialTheme.colorScheme.errorContainer,
+            MaterialTheme.colorScheme.onErrorContainer,
+            R.string.editor_lsp_status_failed
+        )
+        LspServerState.STOPPED -> Triple(
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.onSurfaceVariant,
+            R.string.editor_lsp_status_stopped
+        )
+    }
+
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = bgColor,
+        modifier = modifier
+    ) {
+        Text(
+            text = stringRes(textRes),
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
+}
+

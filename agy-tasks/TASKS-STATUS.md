@@ -26,18 +26,18 @@
 | **20** | `20-treesitter-remaining-native-langs.md` | ✅ `a689aed` | Bash, CMake, TOML, YAML (16 `.so`, SHA-256 geprüft) |
 | **21** | `21-verify-apt-stages-pipeline.md` | ✅ `73bb2af` | Skripte geprüft, 12 Etappen gegen den Fork abgeglichen; Rezepte nur im Fork |
 | **22** | `22-verification-followups.md` | ✅ `adb101f` | Ordnerwahl im Wizard, Expressive-Entscheidung, Gradle-/ktlint-Bericht, Gerätetest-Checkliste |
-| **23** | `23-fix-extensions-manager.md` | ⬜ **offen** | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen |
+| **23** | `23-fix-extensions-manager.md` | ✅ (dieser Commit) | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen (`docs/extensions-manager-fix-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
 
-### Task 23 – Extensions-Manager (offen)
-1. **Katalog**: SHA-256 für kotlin-language-server, clangd, rust-analyzer stimmen nicht mit den Original-Downloads überein; jdtls/pyright/vscode-langservers unbestätigt. Alle Werte aus echten Downloads neu berechnen.
-2. **Archivtypen**: `.tar.gz`/`.tgz` sind als ZIP eingetragen, `rust-analyzer` (`.gz`) wird nicht entpackt → `TAR_GZ`/`GZ` ergänzen.
-3. **Plattform**: `clangd-linux` (x86_64) und `rust-analyzer-…-gnu` (glibc) laufen unter Android nicht → Termux-Pakete (`clang`, ggf. `rust-analyzer`) verwenden oder entfernen.
-4. **Anbindung**: `LspClientRepository.start` hat keinen Aufrufer; `LspServerResolver` + `LspSessionController` anlegen.
-5. **Aufräumen**: Duplikat `plan-apt-build.sh` im Root, eingechecktes `mirror-integration.patch`, Stringzahlen (816/818 → 825), `values-en`-Reste in Doku.
+### Task 23 – Extensions-Manager (✅ erledigt)
+1. **Katalog**: Reale SHA-256 Prüfsummen für alle Pakete ermittelt; Termux-Pakete für clangd & rust-analyzer integriert.
+2. **Archivtypen**: `TAR_GZ` und `GZ` implementiert und mit Sicherheitsprüfungen (Zip/Tar-Slip, Symlinks, Executable-Bits) versehen.
+3. **Plattform**: Android/Termux-Kompatibilität sichergestellt (Termux-Pakete statt inkompatibler glibc-Binaries).
+4. **Anbindung**: `LspServerResolver` in `:core:domain`, `LspServerResolverImpl` in `:feature:settings`, `LspSessionController` in `:feature:editor` angebunden.
+5. **Aufräumen**: `plan-apt-build.sh` Duplikat gelöscht, `mirror-integration.patch` enttracked, Stringzahlen synchronisiert (834). Vollständiger Bericht in `docs/extensions-manager-fix-report.md`.
 
 ### Außerhalb der Tasks
 * Fork `scto/terminal-packages-codeforge`: Rezepte aus `agy-output/packages/` committen; erster echter Etappen-Lauf (Laufzeit-Risiko `openjdk-*`, `libllvm`, `dart`; Pages ~1 GB, Ist 181,6 MB).

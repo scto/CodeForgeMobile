@@ -5,7 +5,7 @@
 Kontext: `docs/resources-and-strings.md`, `core/resources/README.md`. Arbeitsverzeichnis = Projekt-Root `CodeForgeMobile/`.
 Nichts davon wurde mit Gradle gebaut.
 
-1. `./gradlew :core:resources:assembleDebug` – `strings.xml`/`values-en` müssen durch aapt2 gehen (Escapes, `%`, Anführungszeichen). Fehler dort beheben, nicht Texte entfernen.
+1. `./gradlew :core:resources:assembleDebug` – `strings.xml`/`values-de` müssen durch aapt2 gehen (Escapes, `%`, Anführungszeichen). Fehler dort beheben, nicht Texte entfernen.
 2. `./gradlew assembleDebug` – Kompilierfehler aus der Migration beheben (z. B. `stringRes` außerhalb eines Composables → `Res.string`; fehlende `import com.codeforge.core.resources.R`; Module mit eigener `R` → `R as CoreR`).
 3. `./gradlew testDebugUnitTest` – insbesondere `:core:data` (`Git*Test`) und `:core:domain` (`GitPatchTest`); `TestRes` nutzt Reflection auf `com.codeforge.core.resources.R$string` – falls AGP die Felder nicht als `public static int` liefert, `TestRes.idToName()` anpassen.
 4. `grep -rn '"[A-ZÄÖÜ][a-zäöüß]' --include=*.kt feature app` – verbliebene sichtbare Literale in Compose-Code migrieren.

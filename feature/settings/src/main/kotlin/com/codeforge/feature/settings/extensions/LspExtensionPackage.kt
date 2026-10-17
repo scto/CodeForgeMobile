@@ -6,6 +6,8 @@ import com.codeforge.core.resources.R
 
 enum class ExtensionArchiveType(val extension: String) {
     ZIP("zip"),
+    TAR_GZ("tar.gz"),
+    GZ("gz"),
     JAR("jar"),
     BINARY("bin")
 }
@@ -19,88 +21,190 @@ enum class ExtensionStatus {
     ERROR
 }
 
+sealed interface ExtensionSource {
+    data class Download(
+        val url: String,
+        val sha256: String,
+        val archiveType: ExtensionArchiveType
+    ) : ExtensionSource
+
+    data class TermuxPackage(
+        val packageName: String,
+        val binaryName: String
+    ) : ExtensionSource
+}
+
 data class LspExtensionPackage(
     val id: String,
     @StringRes val nameRes: Int,
     @StringRes val descriptionRes: Int,
     val version: String,
     val language: String,
-    val downloadUrl: String,
-    val expectedSha256: String,
-    val archiveType: ExtensionArchiveType,
+    val source: ExtensionSource,
+    val requires: List<String> = emptyList(),
+    val launchCommand: List<String>,
     val executableRelativePath: String
-)
+) {
+    // Secondary constructor for backwards compatibility with tests and callers
+    constructor(
+        id: String,
+        @StringRes nameRes: Int,
+        @StringRes descriptionRes: Int,
+        version: String,
+        language: String,
+        downloadUrl: String,
+        expectedSha256: String,
+        archiveType: ExtensionArchiveType,
+        executableRelativePath: String,
+        requires: List<String> = emptyList(),
+        launchCommand: List<String> = listOf(executableRelativePath)
+    ) : this(
+        id = id,
+        nameRes = nameRes,
+        descriptionRes = descriptionRes,
+        version = version,
+        language = language,
+        source = ExtensionSource.Download(downloadUrl, expectedSha256, archiveType),
+        requires = requires,
+        launchCommand = launchCommand,
+        executableRelativePath = executableRelativePath
+    )
+
+    val downloadUrl: String? get() = (source as? ExtensionSource.Download)?.url
+    val expectedSha256: String? get() = (source as? ExtensionSource.Download)?.sha256
+    val archiveType: ExtensionArchiveType? get() = (source as? ExtensionSource.Download)?.archiveType
+    val isTermuxPackage: Boolean get() = source is ExtensionSource.TermuxPackage
+    val isDownloadable: Boolean get() = source is ExtensionSource.Download
+}
 
 object LspExtensionCatalog {
+    /**
+     * Kotlin Language Server (fwcd/kotlin-language-server)
+     * Download: GitHub Releases asset server.zip
+     * SHA-256 verifiziert 2026-10-16: c65efea1c09d88ddb1fe227d8e2c5dbb3d8dd568453bccbbf2e20dfa2f004dcd
+     * Benötigt: openjdk-17 (Java Runtime)
+     */
     val kotlinLanguageServer = LspExtensionPackage(
         id = "kotlin-language-server",
         nameRes = R.string.extension_kotlin_lsp_name,
         descriptionRes = R.string.extension_kotlin_lsp_desc,
         version = "1.3.11",
         language = "Kotlin",
-        downloadUrl = "https://github.com/fwcd/kotlin-language-server/releases/download/1.3.11/server.zip",
-        expectedSha256 = "c08e8df5e8c1591f8615b1c5a932d0ce7ce6a17b876f185ef3db1c1c7aeceebf",
-        archiveType = ExtensionArchiveType.ZIP,
-        executableRelativePath = "bin/kotlin-language-server"
+        source = ExtensionSource.Download(
+            url = "https://github.com/fwcd/kotlin-language-server/releases/download/1.3.11/server.zip",
+            sha256 = "c65efea1c09d88ddb1fe227d8e2c5dbb3d8dd568453bccbbf2e20dfa2f004dcd",
+            archiveType = ExtensionArchiveType.ZIP
+        ),
+        requires = listOf("openjdk-17"),
+        launchCommand = listOf("server/bin/kotlin-language-server"),
+        executableRelativePath = "server/bin/kotlin-language-server"
     )
 
+    /**
+     * Eclipse JDT Language Server (Eclipse Foundation)
+     * Download: Eclipse Milestones (1.45.0)
+     * SHA-256 verifiziert 2026-10-16: c09e79e958beb5ce41fb3b5097aec0455298bc88a14c8e41462b57edb2812797
+     * Benötigt: openjdk-17, python
+     */
     val jdtls = LspExtensionPackage(
         id = "jdtls",
         nameRes = R.string.extension_jdtls_name,
         descriptionRes = R.string.extension_jdtls_desc,
-        version = "1.38.0",
+        version = "1.45.0",
         language = "Java",
-        downloadUrl = "https://download.eclipse.org/jdtls/milestones/1.38.0/jdt-language-server-1.38.0.tar.gz",
-        expectedSha256 = "09462fc74805ef952f44227f2f111f1ae59902506eef14115e51084d50f8ad91",
-        archiveType = ExtensionArchiveType.ZIP,
+        source = ExtensionSource.Download(
+            url = "https://download.eclipse.org/jdtls/milestones/1.45.0/jdt-language-server-1.45.0-202502271238.tar.gz",
+            sha256 = "c09e79e958beb5ce41fb3b5097aec0455298bc88a14c8e41462b57edb2812797",
+            archiveType = ExtensionArchiveType.TAR_GZ
+        ),
+        requires = listOf("openjdk-17", "python"),
+        launchCommand = listOf("bin/jdtls"),
         executableRelativePath = "bin/jdtls"
     )
 
+    /**
+     * Clangd C/C++ Language Server
+     * Bereitstellung über das Termux-Paket 'clang' im CodeForge APT-Repository (apt-stages.conf Stage 10)
+     * Binary: $PREFIX/bin/clangd
+     */
     val clangd = LspExtensionPackage(
         id = "clangd",
         nameRes = R.string.extension_clangd_name,
         descriptionRes = R.string.extension_clangd_desc,
         version = "18.1.3",
         language = "C/C++",
-        downloadUrl = "https://github.com/clangd/clangd/releases/download/18.1.3/clangd-linux-18.1.3.zip",
-        expectedSha256 = "1d6c818fa8f8aa48c8b41ca85786ba113501a1d1ca22ee3a2c5ce82e6ff93414",
-        archiveType = ExtensionArchiveType.ZIP,
-        executableRelativePath = "bin/clangd"
+        source = ExtensionSource.TermuxPackage(
+            packageName = "clang",
+            binaryName = "clangd"
+        ),
+        requires = listOf("clang"),
+        launchCommand = listOf("clangd"),
+        executableRelativePath = "clangd"
     )
 
+    /**
+     * Pyright (Microsoft)
+     * Download: npm registry tarball pyright-1.1.377.tgz
+     * SHA-256 verifiziert 2026-10-16: b11dc22e92560b38ebad99a892544d9ce81e2ce995db430b3683e86db57d7710
+     * dist.integrity (sha512): y6ENYuyZXTczPnPWZnqx78pE+ZgyIotEas2M/LFRTq3EfbgVk84EcvuSKLIy2DJeDKjKDxVP/LVmDNHabljD3g==
+     * Benötigt: nodejs
+     */
     val pyright = LspExtensionPackage(
         id = "pyright",
         nameRes = R.string.extension_pyright_name,
         descriptionRes = R.string.extension_pyright_desc,
         version = "1.1.377",
         language = "Python",
-        downloadUrl = "https://registry.npmjs.org/pyright/-/pyright-1.1.377.tgz",
-        expectedSha256 = "91a826bcddbeff64eec2489cbe3600f688e1467406a6b83f33cf2b66cbcf22ca",
-        archiveType = ExtensionArchiveType.ZIP,
-        executableRelativePath = "package/index.js"
+        source = ExtensionSource.Download(
+            url = "https://registry.npmjs.org/pyright/-/pyright-1.1.377.tgz",
+            sha256 = "b11dc22e92560b38ebad99a892544d9ce81e2ce995db430b3683e86db57d7710",
+            archiveType = ExtensionArchiveType.TAR_GZ
+        ),
+        requires = listOf("nodejs"),
+        launchCommand = listOf("node", "package/langserver.index.js", "--stdio"),
+        executableRelativePath = "package/langserver.index.js"
     )
 
+    /**
+     * Rust Analyzer
+     * Bereitstellung über das Termux-Paket 'rust-analyzer' im CodeForge APT-Repository (apt-stages.conf Stage 15)
+     * Binary: $PREFIX/bin/rust-analyzer
+     */
     val rustAnalyzer = LspExtensionPackage(
         id = "rust-analyzer",
         nameRes = R.string.extension_rust_analyzer_name,
         descriptionRes = R.string.extension_rust_analyzer_desc,
-        version = "2024-08-19",
+        version = "1.79.0",
         language = "Rust",
-        downloadUrl = "https://github.com/rust-lang/rust-analyzer/releases/download/2024-08-19/rust-analyzer-aarch64-unknown-linux-gnu.gz",
-        expectedSha256 = "8f307ebc31bcfbbdcb06bc455a04fb68d6f9a0d8e202521c7e2c949755ca7b6c",
-        archiveType = ExtensionArchiveType.BINARY,
+        source = ExtensionSource.TermuxPackage(
+            packageName = "rust-analyzer",
+            binaryName = "rust-analyzer"
+        ),
+        requires = listOf("rust-analyzer"),
+        launchCommand = listOf("rust-analyzer"),
         executableRelativePath = "rust-analyzer"
     )
 
+    /**
+     * VS Code Language Servers Extracted (HTML / CSS / JSON / ESLint)
+     * Download: npm registry tarball vscode-langservers-extracted-4.8.0.tgz
+     * SHA-256 verifiziert 2026-10-16: 8c7102927a32fa145077f0406b66bb3a7d85f5b0a208d4efeb40702b5a6cd2e1
+     * dist.integrity (sha512): kWqVdmdcf9Ez1P3hZpvCHomxVqrdK2awwZkezSW3SuXLX0kXS4x8WoA0GkF54SA0CiXtJWszaFpQghUNVlepuQ==
+     * Benötigt: nodejs
+     */
     val htmlCssJson = LspExtensionPackage(
         id = "vscode-langservers-extracted",
         nameRes = R.string.extension_html_css_json_name,
         descriptionRes = R.string.extension_html_css_json_desc,
         version = "4.8.0",
         language = "HTML / CSS / JSON",
-        downloadUrl = "https://registry.npmjs.org/vscode-langservers-extracted/-/vscode-langservers-extracted-4.8.0.tgz",
-        expectedSha256 = "2f6c096abeccecae2b1b369ba0f0f5b9d29ba029f626155ee2dfebc469b76e27",
-        archiveType = ExtensionArchiveType.ZIP,
+        source = ExtensionSource.Download(
+            url = "https://registry.npmjs.org/vscode-langservers-extracted/-/vscode-langservers-extracted-4.8.0.tgz",
+            sha256 = "8c7102927a32fa145077f0406b66bb3a7d85f5b0a208d4efeb40702b5a6cd2e1",
+            archiveType = ExtensionArchiveType.TAR_GZ
+        ),
+        requires = listOf("nodejs"),
+        launchCommand = listOf("node", "package/bin/vscode-html-language-server", "--stdio"),
         executableRelativePath = "package/bin/vscode-html-language-server"
     )
 

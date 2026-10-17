@@ -2,7 +2,7 @@
 
 > **Datum:** 15. Oktober 2026  
 > **Status:** Erfolgreich verifiziert  
-> **Referenzierte Commits/Workflows:** `build_codeforge_repo.sh`, `plan-apt-build.sh`, `.github/workflows/build-bootstrap-repo.yml`, `apt-stages.conf`  
+> **Referenzierte Commits/Workflows:** `build_codeforge_repo.sh`, `.github/scripts/plan-apt-build.sh`, `.github/workflows/build-bootstrap-repo.yml`, `apt-stages.conf`  
 > **Ziel-Fork:** `scto/terminal-packages-codeforge` (Präfix `com.codeforge.app`)
 
 ---
@@ -13,13 +13,12 @@ Im Rahmen von Task 21 wurden sämtliche Build- und Planungs-Skripte sowie die CI
 
 - **Syntaxprüfung (`bash -n`):**
   - `build_codeforge_repo.sh`: OK (Exit Code 0).
-  - `plan-apt-build.sh`: OK (Exit Code 0).
   - `.github/scripts/plan-apt-build.sh`: OK (Exit Code 0).
 - **Linter & ShellCheck (`shellcheck`):**
   - `build_codeforge_repo.sh:379`: Trennung von `GNUPGHOME` Deklaration und Assignment behoben (SC2155).
   - `build_codeforge_repo.sh:279, 596, 649`: Ersetzung von `ls` durch robustes `find` für Subpackage-Suche und Deb-Zählung behoben (SC2012).
   - `build_codeforge_repo.sh:290`: SC2016 für beabsichtigtes Match von Literal-Dollarvariablen via `grep -F` markiert.
-  - `plan-apt-build.sh:104` und `.github/scripts/plan-apt-build.sh:104`: Beabsichtigtes Whitespace-Splitting für Architekturen dokumentiert (`# shellcheck disable=SC2086`).
+  - `.github/scripts/plan-apt-build.sh:104`: Beabsichtigtes Whitespace-Splitting für Architekturen dokumentiert (`# shellcheck disable=SC2086`).
   - Alle Skripte schließen nun mit **Exit Code 0** ohne Warnungen ab.
 - **Workflow-Linter (`actionlint`):**
   - `.github/workflows/build-bootstrap-repo.yml:255`: `ls terminal-packages-codeforge/output/*.deb` durch `find terminal-packages-codeforge/output -maxdepth 1 -name '*.deb'` ersetzt (SC2012 behoben).

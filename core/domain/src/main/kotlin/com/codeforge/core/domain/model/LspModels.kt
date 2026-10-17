@@ -22,4 +22,4 @@ data class LspCompletionItem(
 
 data class LspHoverInfo(val contents: String, val range: LspRange? = null)
 
-enum class LspServerState { STOPPED, STARTING, RUNNING, FAILED }
+enum class LspServerState { STOPPED, STARTING, RUNNING, FAILED, ERROR }

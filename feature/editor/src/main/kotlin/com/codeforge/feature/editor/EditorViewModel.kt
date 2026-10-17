@@ -18,6 +18,7 @@ import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.feature.editor.lsp.LspCompletionProvider
+import com.codeforge.feature.editor.lsp.LspSessionController
 import com.codeforge.feature.editor.textmate.TextMateAssetLoader
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import com.codeforge.libs.dependency_updater_api.DependencyUpdateRepository
@@ -47,6 +48,7 @@ import javax.inject.Inject
 class EditorViewModel @Inject constructor(
     private val openFileUseCase: OpenFileUseCase,
     private val lspClient: LspClientRepository,
+    private val lspSessionController: LspSessionController,
     private val composeSourceAnalyzer: ComposeSourceAnalyzer,
     private val previewBridge: ActiveComposablePreviewBridge,
     private val settingsRepository: SettingsRepository,
@@ -71,6 +73,7 @@ class EditorViewModel @Inject constructor(
     init {
         observeSettings()
         observeDiagnostics()
+        observeLspSession()
         observeOpenFileRequests()
         observeJumpRequests()
         observeFlushRequests()
@@ -251,6 +254,19 @@ class EditorViewModel @Inject constructor(
         }
     }
 
+    private fun observeLspSession() {
+        viewModelScope.launch {
+            lspSessionController.serverState.collect { state ->
+                _uiState.update { it.copy(lspServerState = state) }
+            }
+        }
+        viewModelScope.launch {
+            lspSessionController.errors.collect {
+                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_lsp_start_failed)))
+            }
+        }
+    }
+
     fun onEvent(event: EditorUiEvent) {
         when (event) {
             is EditorUiEvent.OpenFile -> openFile(event.path)
@@ -259,7 +275,16 @@ class EditorViewModel @Inject constructor(
             is EditorUiEvent.TextChanged -> updateBuffer(event.text)
             EditorUiEvent.RunLspFormat -> formatViaLsp()
             EditorUiEvent.Save -> saveActive()
-            is EditorUiEvent.SetProjectRoot -> projectRoot.value = event.rootPath
+            is EditorUiEvent.SetProjectRoot -> {
+                projectRoot.value = event.rootPath
+                val active = _uiState.value.activeFile
+                if (active != null && event.rootPath != null) {
+                    val langId = languageIdFor(active.path)
+                    viewModelScope.launch {
+                        lspSessionController.onFileOpened(langId, event.rootPath)
+                    }
+                }
+            }
             is EditorUiEvent.UpdateChipClicked -> _uiState.update { it.copy(updateDialog = event.update) }
             EditorUiEvent.UpdateDialogCancel -> _uiState.update { it.copy(updateDialog = null) }
             is EditorUiEvent.ApplyUpdate -> applyUpdates(listOf(event.update))
@@ -281,6 +306,14 @@ class EditorViewModel @Inject constructor(
         if (index !in _uiState.value.openFiles.indices) return
         _uiState.update { it.copy(activeFileIndex = index) }
         publishActiveFileToBridge()
+        val file = _uiState.value.openFiles.getOrNull(index)
+        if (file != null) {
+            val langId = languageIdFor(file.path)
+            val workspaceRoot = projectRoot.value ?: File(file.path).parentFile?.absolutePath
+            viewModelScope.launch {
+                lspSessionController.onFileOpened(langId, workspaceRoot)
+            }
+        }
     }
 
     private fun openFile(path: String) = viewModelScope.launch {
@@ -301,7 +334,10 @@ class EditorViewModel @Inject constructor(
                     )
                 }
                 documentVersions[file.path] = 1
-                lspClient.didOpen(file.path, languageIdFor(file.path), file.content)
+                val langId = languageIdFor(file.path)
+                val workspaceRoot = projectRoot.value ?: File(file.path).parentFile?.absolutePath
+                lspSessionController.onFileOpened(langId, workspaceRoot)
+                lspClient.didOpen(file.path, langId, file.content)
                 publishActiveFileToBridge()
             }
             .onFailure {
@@ -312,18 +348,29 @@ class EditorViewModel @Inject constructor(
 
     private fun closeTab(index: Int) {
         val closedPath = _uiState.value.openFiles.getOrNull(index)?.path
+        var remainingCount = 0
+        var newActivePath: String? = null
         _uiState.update { s ->
             val updated = s.openFiles.toMutableList().apply { removeAt(index) }
+            remainingCount = updated.size
             val newActive = when {
                 updated.isEmpty() -> 0
                 s.activeFileIndex >= updated.size -> updated.size - 1
                 else -> s.activeFileIndex
             }
+            newActivePath = updated.getOrNull(newActive)?.path
             s.copy(openFiles = updated, activeFileIndex = newActive)
         }
         if (closedPath != null) {
             documentVersions.remove(closedPath)
             viewModelScope.launch { lspClient.didClose(closedPath) }
+        }
+        if (remainingCount == 0) {
+            viewModelScope.launch { lspSessionController.stop() }
+        } else if (newActivePath != null) {
+            val langId = languageIdFor(newActivePath!!)
+            val workspaceRoot = projectRoot.value ?: File(newActivePath!!).parentFile?.absolutePath
+            viewModelScope.launch { lspSessionController.onFileOpened(langId, workspaceRoot) }
         }
         publishActiveFileToBridge()
     }
@@ -369,12 +416,24 @@ class EditorViewModel @Inject constructor(
     }
 
 
-    private fun languageIdFor(path: String): String = when (EditorLanguageType.fromPath(path)) {
-        EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
-        EditorLanguageType.JAVA -> "java"
-        EditorLanguageType.XML -> "xml"
-        EditorLanguageType.JSON -> "json"
-        EditorLanguageType.PLAIN -> "plaintext"
+    private fun languageIdFor(path: String): String = when (path.substringAfterLast('.', "").lowercase()) {
+        "kt", "kts" -> "kotlin"
+        "java" -> "java"
+        "xml" -> "xml"
+        "json" -> "json"
+        "py" -> "python"
+        "c", "h" -> "c"
+        "cpp", "cc", "cxx", "hpp", "hh" -> "cpp"
+        "rs" -> "rust"
+        "html", "htm" -> "html"
+        "css" -> "css"
+        else -> when (EditorLanguageType.fromPath(path)) {
+            EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
+            EditorLanguageType.JAVA -> "java"
+            EditorLanguageType.XML -> "xml"
+            EditorLanguageType.JSON -> "json"
+            EditorLanguageType.PLAIN -> "plaintext"
+        }
     }
 
     /**

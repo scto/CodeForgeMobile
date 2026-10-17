@@ -5,7 +5,7 @@ Stand: 2026-10-14. **Vollständig zweisprachig (EN Standard / DE Übersetzung) a
 ## Ergebnis
 
 * Modul `:core:resources` (Namespace `com.codeforge.core.resources`), eingetragen in `settings.gradle.kts`.
-* `values/strings.xml` mit 816 Einträgen (Standardsprache Englisch), `values-de/strings.xml` mit 816 Einträgen (vollständige deutsche Übersetzung). Redundantes `values-en/strings.xml` entfernt.
+* `values/strings.xml` mit 834 Einträgen (Standardsprache Englisch), `values-de/strings.xml` mit 834 Einträgen (vollständige deutsche Übersetzung). Redundantes `values-en/strings.xml` entfernt.
 * Alle sichtbaren UI-Literale in `feature/` und `app/` migriert (`find_hardcoded_strings.py --check` liefert Exit 0; `check_string_locales.py` liefert Exit 0).
 * `implementation(project(":core:resources"))` in allen benötigten Modulen.
 * `:feature:projectwizard`: eigene `strings.xml` entfernt, Texte jetzt zentral; Zugriff per `CoreR`-Alias.

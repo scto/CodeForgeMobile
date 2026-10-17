@@ -11,6 +11,37 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🧩 Extensions-Manager Reparatur & LSP-Client-Anbindung (Task 23)
+
+* **Katalog-Korrektur & Verifikation (`LspExtensionPackage.kt`)**:
+  * Alle SHA-256-Prüfsummen anhand realer Original-Downloads neu berechnet und validiert (`kotlin-language-server`, `jdtls`, `pyright`, `vscode-langservers-extracted`).
+  * npm-Pakete zusätzlich gegen Registry-`dist.integrity` (SHA-512) gegengeprüft.
+  * Korrektur von Eclipse JDT.LS auf den funktionierenden Milestone 1.45.0.
+  * Umstellung von `clangd` und `rust-analyzer` auf native Termux-Pakete (`ExtensionSource.TermuxPackage`), da Upstream-Binaries (x86_64/glibc) auf Android/Bionic inkompatibel sind.
+  * Ergänzung von Laufzeitvoraussetzungen (`requires`) mit automatischer Erkennung und zweisprachigen Hinweisen in der UI.
+* **Sicheres Archiv-Entpacken (`ArchiveUtils.kt`)**:
+  * Unterstützung für `TAR_GZ` (`.tar.gz`/`.tgz`) mittels `GZIPInputStream` und integriertem ustar/GNU-Tar-Reader ohne externe Abhängigkeiten.
+  * Unterstützung für `GZ`-Einzeldateien.
+  * Durchgängiger Schutz vor Zip-Slip, Pfad-Traversal und Symlink-Ausbrüchen.
+  * Erhalt der Ausführungsrechte (Tar-Modusbits und Heuristik für `.sh`/`bin`).
+  * Atomares Aufräumen bei Download- oder Extraktionsfehlern; automatisches Löschen des Quellarchivs nach erfolgreicher Installation.
+  * `HttpFileDownloader` mit Unterstützung für Redirects (bis zu 5 Hops über Protokollgrenzen) und Prüfung der `Content-Length`.
+* **Architektur-konforme Anbindung an den Editor**:
+  * Saubere Schichtentrennung ohne Feature-zu-Feature-Abhängigkeiten: `LspServerResolver` in `:core:domain`, implementiert in `:feature:settings` (`LspServerResolverImpl`), gebunden in `:app` (`LspModule`).
+  * Lebenszyklus-Steuerung im Editor über `LspSessionController`: genau ein Server pro Workspace und Sprache, automatischer Wechsel und Beenden.
+  * Visuelle Anzeige des Serverzustands (`LspStatusBadge`) in der Editor-Toolbar.
+  * Veraltete PRoot-TODOs in der KDoc von `LspClientRepositoryImpl` auf die native Termux-Umgebung aktualisiert.
+* **Testabdeckung & Skripte**:
+  * Neue Testsuite `LspExtensionCatalogTest` zur Offline-Integritätsprüfung aller Katalogeinträge.
+  * Erweiterte Tests in `ArchiveUtilsTest` und `ExtensionsManagerTest` für alle Archivtypen und Schutzmechanismen.
+  * `LspSessionControllerTest` in `:feature:editor`.
+  * Verifikationsskript `scripts/verify-extension-catalog.sh` (ShellCheck-geprüft).
+* **Repository-Bereinigung**:
+  * Duplikat `plan-apt-build.sh` im Root entfernt, Verweise auf `.github/scripts/` aktualisiert.
+  * `mirror-integration.patch` aus Git entfernt.
+  * Veraltete `values-en`-Doku-Referenzen bereinigt.
+  * Stringanzahl in allen Dokumenten auf den aktuellen Stand von 834 Strings je Sprache synchronisiert.
+
 ### 🔍 Folgepunkte aus den Verifikationsberichten (Task 22)
 
 * **Projekt-Wizard Speicherort-Auswahl (`ProjectDirectoryPickerDialog`)**:
