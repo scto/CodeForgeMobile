@@ -29,9 +29,9 @@
 | **23** | `23-fix-extensions-manager.md` | ✅ `baa1e07` | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen (`docs/extensions-manager-fix-report.md`) |
 | **24** | `24-onboarding-permissions-icon-termux-ui.md` | ✅ `2aa0cc6` | Onboarding-Surface/Previews, Rechte (`MANAGE_EXTERNAL_STORAGE`, Pakete installieren/löschen), Original-Launcher-Icon (`de2caf0`), volle Termux-UI (`TermuxActivity`), sichtbare Fehler in `codeforge-env`, Second-Stage-Fix (`docs/task-24-report.md`) |
 | **25** | `25-large-packages-release-assets.md` | ✅ `ae1824f` | Große Pakete (> 95 MiB) über Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`install_repo_pkg` / `pkg_install`), Mock-Tests (`docs/task-25-report.md`) |
-| **26** | `26-compose-preview-compiler-runtime.md` | ✅ (dieser Commit) | Compose-Preview: Gradle-Task `packCompilerRuntime` (31 JARs, 22.10 MiB unpacked / 20.52 MiB ZIP), CI-Workflow `build-compiler-runtime.yml`, `CompilerRuntimeProviderImpl` mit SHA-256/Zip-Slip/Versions-Check, Classpath-Trennung & Android-SDK-Einbindung, JVM-Unit-Tests (`docs/compose-preview-runtime-report.md`) |
-| **27a** | Folgetask aus 26 | ⏳ offen | Verifikation der On-Device-Kompilierung von `K2JVMCompiler` und `classes.dex`-Erzeugung via `d8` auf ART / echtem Android-Gerät |
-| **27b** | Folgetask aus 26 | ⏳ offen | Verifikation und Härtung des Offscreen-`ComposeView`-Renderers (`ComposeViewBitmapRenderer`) auf echten Geräten (Themes, Density, State) |
+| **26** | `26-compose-preview-compiler-runtime.md` | ✅ `9e09f84` | Compose-Preview: Gradle-Task `packCompilerRuntime` (30 JARs ohne Plugin, 21.80 MiB unpacked / 20.22 MiB ZIP), CI-Workflow `build-compiler-runtime.yml`, `CompilerRuntimeProviderImpl` mit SHA-256/Zip-Slip/Versions-Check, Classpath-Trennung & Android-SDK-Einbindung, JVM-Unit-Tests (`docs/compose-preview-runtime-report.md`) |
+| **27a** | `27a-compose-preview-kotlinc-in-termux.md` | ✅ (dieser Commit) | Compose-Preview: Kotlin-Compiler als Termux-Prozess (`$PREFIX/opt/kotlin/bin/kotlinc`), Spike auf Gerät (4–6 s, `javap` verifiziert), Entfernung embeddable (-4,67 MB APK), `KotlincProcessCompiler` & `KotlincOutputParser`, JVM-Tests (`docs/compose-preview-kotlinc-report.md`) |
+| **27b** | Folgetask aus 26/27a | ⏳ offen | Verifikation und Härtung des Offscreen-`ComposeView`-Renderers (`ComposeViewBitmapRenderer`) auf echten Geräten (Themes, Density, State) |
 
 ---
 
@@ -45,7 +45,14 @@
 5. **Strings (26.5)**: `composepreview_compose_compiler_plugin_jar_fehlt` korrigiert (de/en), `composepreview_android_plattform_fehlt` und `composepreview_laufzeit_wird_vorbereitet` zweisprachig ergänzt.
 6. **Tests & Report (26.6 / 26.7)**: JVM-Unit-Tests für Manifest-Parser, SHA-Mismatch, Zip-Slip, Versions-Mismatch, erzeugtes `manifest.json` gegen Build-JARs und Classpath-Exklusion. Doku-Bericht in `docs/compose-preview-runtime-report.md`.
 
+### Task 27a – Compose-Preview: Kotlin-Compiler als Prozess in Termux (✅ erledigt)
+1. **Spike auf Gerät (27a.0)**: `scripts/compose-preview-spike.sh` in `plain` (4 s) und `compose` (5–6 s) erfolgreich; synthetische `@Composable`-Signatur mit `Composer`-Parameter via `javap` bestätigt; Kompatibilität von Termux `kotlinc` 2.4.21 mit Compose BOM `2025.09.00` nachgewiesen.
+2. **Compiler-Prozess (27a.1)**: `PreviewCompiling` Interface, `KotlincProcessCompiler` ruft `$PREFIX/opt/kotlin/bin/kotlinc` mit `TermuxEnvironment.environment()`, `JAVA_OPTS=-Xmx768m`, 120 s Timeout und `destroyForcibly()`.
+3. **Ausgabefilterung & Entkoppelung (27a.1)**: `KotlincOutputParser` parst Fehlerausgaben und filtert `libc.so.6`-Jansi-Warnungen aus. `kotlin-compiler-embeddable` und Plugin entfernt (-4,67 MB APK-Größe). Task 26 Bundle auf 30 JARs ohne Plugin angepasst.
+4. **UI & Strings (27a.2)**: `composepreview_kompilierung_laeuft` (*„Kompiliere Compose-Vorschau …“*) mit `CircularProgressIndicator` im `Rendering`-Status.
+5. **Tests & Report (27a.3)**: JVM-Unit-Tests in `KotlincProcessCompilerTest`. Ausführlicher Bericht in `docs/compose-preview-kotlinc-report.md`.
+
 ### Außerhalb der Tasks
 * Fork `scto/terminal-packages-codeforge`: Etappe `H1-jdk17` (`openjdk-17` fehlt aktuell noch im APT-Repo, siehe `docs/task-24-report.md` 24.7) und Gruppe A (`publish = true`, legt Release `large-packages` + `large-packages.txt` an) über `build-all-stages.yml` bauen; Rezepte aus `agy-output/packages/` committen.
 * Release `compiler-runtime-2025.09.00-k2.1.21` in `scto/codeforge-tools` über den Workflow `.github/workflows/build-compiler-runtime.yml` veröffentlichen.
-* Gerätetests: `docs/device-test-checklist.md` + Folge-Tasks 27a und 27b auf einem physischen Android-Gerät.
+* Gerätetests: `docs/device-test-checklist.md` + Folge-Task 27b auf einem physischen Android-Gerät.

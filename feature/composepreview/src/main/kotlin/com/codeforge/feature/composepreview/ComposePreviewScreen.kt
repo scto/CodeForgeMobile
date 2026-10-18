@@ -130,8 +130,18 @@ private fun RenderStateContent(state: PreviewRenderState, onRetry: () -> Unit) {
             }
         }
 
-        PreviewRenderState.Rendering ->
-            CircularProgressIndicator()
+        PreviewRenderState.Rendering -> {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CircularProgressIndicator()
+                Text(
+                    stringRes(R.string.composepreview_kompilierung_laeuft),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
 
         is PreviewRenderState.Rendered -> {
             if (state.imageBytes != null) {

@@ -22,4 +22,8 @@ abstract class ComposePreviewModule {
     @Binds
     @Singleton
     abstract fun bindCompilerRuntimeProvider(impl: CompilerRuntimeProviderImpl): CompilerRuntimeProvider
+
+    @Binds
+    @Singleton
+    internal abstract fun bindPreviewCompiling(impl: KotlincProcessCompiler): PreviewCompiling
 }

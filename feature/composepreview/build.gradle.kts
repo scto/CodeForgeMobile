@@ -50,12 +50,6 @@ val compilerRuntimeConfig: Configuration by configurations.creating {
     }
 }
 
-val compilerPluginConfig: Configuration by configurations.creating {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-    isTransitive = false
-}
-
 val withExtendedIcons = providers.gradleProperty("withExtendedIcons")
     .map { it.equals("true", ignoreCase = true) || it == "1" }
     .orElse(false)
@@ -66,6 +60,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
+    implementation(project(":libs:terminal-engine"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -82,12 +77,7 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
-    // ACHTUNG: sehr große Dependency (~80 MB), erhöht die APK-Größe spürbar.
-    // Siehe KDoc in ComposePreviewRendererImpl zu den ungelösten Classpath-Fragen.
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable:$kotlinVersion")
-
-    // --- Compiler-Runtime-Konfiguration für packCompilerRuntime (Task 26.1) ---
+    // --- Compiler-Runtime-Konfiguration für packCompilerRuntime (Task 26.1 / 27a) ---
     compilerRuntimeConfig(platform(libs.androidx.compose.bom))
     compilerRuntimeConfig("androidx.compose.runtime:runtime")
     compilerRuntimeConfig("androidx.compose.runtime:runtime-saveable")
@@ -110,8 +100,6 @@ dependencies {
         compilerRuntimeConfig("androidx.compose.material:material-icons-extended")
     }
 
-    compilerPluginConfig("org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable:$kotlinVersion")
-
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.core)
 }
@@ -130,7 +118,6 @@ val packCompilerRuntime = tasks.register("packCompilerRuntime") {
     inputs.property("kotlinVersion", ktVer)
     inputs.property("withExtendedIcons", withExtendedIcons.get())
     inputs.files(compilerRuntimeConfig)
-    inputs.files(compilerPluginConfig)
     outputs.dir(outDirProvider)
 
     doLast {
@@ -194,16 +181,10 @@ val packCompilerRuntime = tasks.register("packCompilerRuntime") {
             }
         }
 
-        // Compiler-Plugin-Jar exakt als kotlin-compose-compiler-plugin-embeddable.jar ablegen
-        val pluginFile = compilerPluginConfig.singleFile
-        val pluginDest = File(outDir, "kotlin-compose-compiler-plugin-embeddable.jar")
-        pluginFile.copyTo(pluginDest, overwrite = true)
-
         val jarFiles = outDir.listFiles { f -> f.isFile && f.extension == "jar" }
             ?.sortedBy { it.name }
             .orEmpty()
         check(jarFiles.isNotEmpty()) { "packCompilerRuntime produced no JAR files" }
-        check(pluginDest.isFile) { "kotlin-compose-compiler-plugin-embeddable.jar is missing" }
 
         fun sha256Hex(file: File): String {
             val digest = MessageDigest.getInstance("SHA-256")

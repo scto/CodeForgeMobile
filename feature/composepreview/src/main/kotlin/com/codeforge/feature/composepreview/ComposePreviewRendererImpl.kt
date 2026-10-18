@@ -47,13 +47,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Singleton
-class ComposePreviewRendererImpl @Inject constructor(
+class ComposePreviewRendererImpl @Inject internal constructor(
     @ApplicationContext private val context: Context,
     private val sdkRepository: SdkRepository,
-    private val compilerRuntimeProvider: CompilerRuntimeProvider
+    private val compilerRuntimeProvider: CompilerRuntimeProvider,
+    private val compiler: PreviewCompiling
 ) : ComposePreviewRenderer {
 
-    private val compiler = PreviewCompiler()
     private val dexer = PreviewDexer()
 
     override suspend fun render(
@@ -70,10 +70,6 @@ class ComposePreviewRendererImpl @Inject constructor(
 
             try {
                 val runtimeJars = resolveRuntimeJars(runtimeDir)
-                val composePluginJar = resolveComposeCompilerPluginJar(runtimeDir)
-                    ?: error(
-                        Res.string(R.string.composepreview_compose_compiler_plugin_jar_fehlt)
-                    )
                 val androidPlatformJar = resolveAndroidPlatformJar()
                     ?: error(
                         Res.string(R.string.composepreview_android_plattform_fehlt)
@@ -89,8 +85,8 @@ class ComposePreviewRendererImpl @Inject constructor(
                 val compileResult = compiler.compile(
                     sourceFile = sourceFile,
                     outputDir = classesDir,
-                    composeCompilerPluginJar = composePluginJar,
-                    runtimeClasspathJars = runtimeJars + androidPlatformJar
+                    runtimeClasspathJars = runtimeJars,
+                    androidPlatformJar = androidPlatformJar
                 )
                 if (!compileResult.success) {
                     error(
@@ -143,9 +139,6 @@ class ComposePreviewRendererImpl @Inject constructor(
 
     internal fun resolveRuntimeJars(runtimeDir: File): List<File> = Companion.resolveRuntimeJars(runtimeDir)
 
-    private fun resolveComposeCompilerPluginJar(runtimeDir: File): File? =
-        File(runtimeDir, COMPOSE_COMPILER_PLUGIN_JAR_NAME).takeIf { it.isFile }
-
     private suspend fun resolveAndroidPlatformJar(): File? {
         val packages = sdkRepository.listAvailablePackages().getOrNull() ?: return null
 
@@ -191,10 +184,8 @@ class ComposePreviewRendererImpl @Inject constructor(
     }
 
     companion object {
-        internal const val COMPOSE_COMPILER_PLUGIN_JAR_NAME = "kotlin-compose-compiler-plugin-embeddable.jar"
-
         internal fun resolveRuntimeJars(runtimeDir: File): List<File> = runtimeDir
-            .listFiles { f -> f.isFile && f.extension == "jar" && f.name != COMPOSE_COMPILER_PLUGIN_JAR_NAME }
+            .listFiles { f -> f.isFile && f.extension == "jar" }
             ?.sortedBy { it.name }
             ?.toList()
             .orEmpty()

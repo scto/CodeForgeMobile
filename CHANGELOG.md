@@ -11,6 +11,26 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🎨 Compose-Preview: Kotlin-Compiler als Prozess in Termux (Task 27a)
+
+* **Spike auf dem Gerät & Bytecode-Verifikation (`27a.0`)**:
+  * Skript `scripts/compose-preview-spike.sh` in der Termux-Umgebung auf dem Gerät ausgeführt: `plain` in 4 s, `compose` in 5–6 s mit Exit-Code 0.
+  * `javap`-Inspektion verifiziert die synthetische Signatur `public static final void SpikePreview(androidx.compose.runtime.Composer, int);`.
+  * Verifikation der Versionskompatibilität: Termux `kotlinc` 2.4.21 erzeugt vollständig kompatiblen Bytecode für Compose BOM `2025.09.00` (kein Downgrade auf 2.1.21 nötig).
+* **Compiler-Prozessarchitektur & Entkoppelung (`27a.1`)**:
+  * Interface `PreviewCompiling` mit `CompileResult.Success` und `CompileResult.Failure` definiert.
+  * `KotlincProcessCompiler` implementiert: Startet `$PREFIX/opt/kotlin/bin/kotlinc` mit `TermuxEnvironment.environment()`, `JAVA_OPTS=-Xmx768m`, 120 s Timeout und `destroyForcibly()`.
+  * `KotlincOutputParser` parst Fehlermeldungen (`file:line:col error: ...`) und filtert plattformspezifisches JLine/Jansi-Rauschen (`dlopen failed: library "libc.so.6" not found`) heraus.
+  * Vorabprüfung auf `kotlinc`, `java` und `compose-compiler-plugin.jar` mit klarer Fehlermeldung (`composepreview_kotlin_compiler_fehlt`).
+  * `kotlin-compiler-embeddable` und `kotlin-compose-compiler-plugin-embeddable` vollständig aus `:feature:composepreview` entfernt (Netto-APK-Ersparnis: ~4,67 MiB komprimiert / ~80 MiB unkomprimiert).
+  * Task 26 Bundle auf 30 Runtime-JARs ohne Plugin angepasst (Plugin kommt aus Termux-Distribution).
+* **UI-Fortschrittsanzeige & Lokalisierung (`27a.2`)**:
+  * `composepreview_kompilierung_laeuft` (*„Kompiliere Compose-Vorschau …“*) mit `CircularProgressIndicator` während des Kompiliervorgangs.
+  * Zweisprachige Strings (DE/EN) in `:core:resources` ergänzt.
+* **Unit-Tests & Dokumentation (`27a.3`)**:
+  * JVM-Unit-Tests in `KotlincProcessCompilerTest` für Fehlerparsing, Jansi-Filterung, Befehlsaufbau, fehlenden Compiler und Prozess-Timeout.
+  * Technischer Bericht in [`docs/compose-preview-kotlinc-report.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/docs/compose-preview-kotlinc-report.md).
+
 ### 🎨 Compose-Preview: Jar-Bundle für den On-Device-Compiler bereitstellen (Task 26)
 
 * **Gradle-Task `packCompilerRuntime` (`26.1`)**:

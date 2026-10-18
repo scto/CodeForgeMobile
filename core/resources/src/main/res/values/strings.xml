@@ -58,7 +58,9 @@
     <string name="composepreview_die_grafische_rendering_pipeline_ist">The graphical rendering pipeline is architecturally prepared, but not yet connected (dynamic compilation + class loading at runtime). See KDoc in ComposePreviewRendererImpl.</string>
     <string name="composepreview_funktion_nicht_in_kompiliertem_code">Function \'%1$s\' not found in compiled code.</string>
     <string name="composepreview_kompilierung_fehlgeschlagen">Compilation failed:\n%1$s</string>
+    <string name="composepreview_kompilierung_laeuft">Compiling preview…</string>
     <string name="composepreview_kompilierung_lieferte_keine_class_date">Compilation produced no .class files.</string>
+    <string name="composepreview_kotlin_compiler_fehlt">Kotlin compiler missing – run \'pkg install kotlin\' in the terminal (large packages are automatically downloaded from the release).</string>
     <string name="composepreview_laufzeit_wird_vorbereitet">Preparing compiler runtime (%1$d%%)…</string>
     <string name="composepreview_neu_rendern">Re-render</string>
     <string name="composepreview_oeffne_eine_datei_mit_composable">Open a file containing @Composable functions in the editor.</string>

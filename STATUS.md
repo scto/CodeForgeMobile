@@ -1,6 +1,6 @@
 # 📊 Aktueller Status
 
-**Version:** 3.0.0 (`versionCode 30000`) · **Stand:** 2026-10-18 · **Module:** 43 · **Kotlin-Dateien:** ~330 · **Strings:** 844 (Englisch Standard, Deutsch `values-de`)
+**Version:** 3.0.0 (`versionCode 30000`) · **Stand:** 2026-10-18 · **Module:** 43 · **Kotlin-Dateien:** ~330 · **Strings:** 848 (Englisch Standard, Deutsch `values-de`)
 
 > ✅ **Build:** `./gradlew assembleDebug` läuft laut Inhaber (Stand 2026-10-16, on-device in Termux aarch64) ohne Fehler; die Verifikationsberichte zu Task 08–15 liegen in `docs/*-verification.md`.
 > ⚠️ **Noch nicht geprüft:** Verhalten auf dem Gerät (Bootstrap-Installation, W^X unter `targetSdk 28`, Layouts, Tastatur, LSP). Checkliste: `docs/device-test-checklist.md` (28 Testfälle, alle „ungeprüft“). Aufträge: `agy-tasks/README.md`.
@@ -39,7 +39,7 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 | Git-Panel (Diff, Merge, Commit, Push/Pull, Graph, Stash, Tags, Rebase, Cherry-Pick, Revert, Reset, Amend, Blame, Hunks, Konflikt-Editor) | ✅ 🧪 | JGit, 47 Tests laufen gegen echte Repos |
 | Indexierung, Dependency-Updater, Editor-Overlays (Versions-Hinweis, Farb-Kästchen) | ✅ | `docs/indexing-and-dependency-updater.md` |
 | LSP-Client (`LspClientRepositoryImpl`, JSON-RPC) | ✅ 🧪 | voll angebunden über `LspServerResolver` und `LspSessionController` im Editor, verifiziert (Task 23) |
-| Compose-Preview (On-Device-Compiler, `packCompilerRuntime` 31 JARs, `CompilerRuntimeProviderImpl`, Android-Platform `android.jar`, Workflow) | ✅ 🧪 | `docs/compose-preview.md`, `docs/compose-preview-runtime-report.md` |
+| Compose-Preview (Termux-`kotlinc`-Prozesscompiler, `packCompilerRuntime` 30 JARs, `CompilerRuntimeProviderImpl`, Android-Platform `android.jar`, Workflow) | ✅ 🧪 | `docs/compose-preview.md`, `docs/compose-preview-runtime-report.md`, `docs/compose-preview-kotlinc-report.md` |
 | **Layout-Designer** (Palette, Vorschau, Baum, Eigenschaften, XML, Undo/Redo, Speichern) | ✅ 🧪 (Logik) | `docs/layout-designer.md` |
 
 ### Projekt & Einstellungen

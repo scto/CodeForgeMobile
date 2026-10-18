@@ -20,7 +20,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-internal const val COMPOSE_COMPILER_PLUGIN_JAR_NAME = "kotlin-compose-compiler-plugin-embeddable.jar"
 internal const val COMPILER_RUNTIME_MANIFEST_NAME = "manifest.json"
 internal const val COMPILER_RUNTIME_DIR_NAME = "compiler-runtime"
 
@@ -299,12 +298,6 @@ class CompilerRuntimeProviderImpl internal constructor(
             throw IllegalStateException(
                 "Compiler runtime version mismatch: manifest has bom=${manifest.bom}, kotlin=${manifest.kotlin}, " +
                     "expected bom=$expectedBomVersion, kotlin=$expectedKotlinVersion"
-            )
-        }
-        val hasPluginJar = manifest.files.any { it.name == COMPOSE_COMPILER_PLUGIN_JAR_NAME }
-        if (!hasPluginJar) {
-            throw IllegalStateException(
-                "Compiler runtime manifest does not include $COMPOSE_COMPILER_PLUGIN_JAR_NAME"
             )
         }
         for (entry in manifest.files) {

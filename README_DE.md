@@ -47,7 +47,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 * 🚀 Onboarding: Intro → Berechtigungen → Bootstrap → Setup-Skript im Terminal.
 
 ### 🎨 3. Compose-Preview & Layout-Designer (`:feature:composepreview`, `:feature:layoutdesigner`)
-* 👁️ Compose-Live-Preview für `@Composable`-Funktionen 🟡 (On-Device-Compiler-Laufzeitpaket über `packCompilerRuntime` bereitgestellt und on-demand als GitHub-Release-Asset geladen, siehe [docs/compose-preview-runtime-report.md](docs/compose-preview-runtime-report.md)).
+* 👁️ Compose-Live-Preview für `@Composable`-Funktionen 🟡 (Kompilierung über Termux-`kotlinc`-Prozess, Runtime-Paket via `packCompilerRuntime` als GitHub-Release-Asset, siehe [docs/compose-preview-runtime-report.md](docs/compose-preview-runtime-report.md) und [docs/compose-preview-kotlinc-report.md](docs/compose-preview-kotlinc-report.md)).
 * ✏️ **Layout-Designer** ✅🧪: visueller Editor für Android-Layout-XML mit Palette, Vorschau (4 Gerätegrößen), Struktur-Baum, Eigenschaften, XML-Tab, Undo/Redo und Drawer-Bereich „Layouts“. Näherungsvorschau, kein Drag-and-Drop – siehe [docs/layout-designer.md](docs/layout-designer.md).
 
 ### 🚀 4. Projekt-Wizard & Template-Engine (`:feature:projectwizard`, `:libs:template-engine`) ✅

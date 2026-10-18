@@ -9,6 +9,7 @@
 # Aufruf im Repo-Verzeichnis:   bash scripts/setup-gpg-secrets.sh [owner/repo]
 # Ohne Argument wird das Repo des aktuellen Verzeichnisses verwendet.
 # NO_SECRETS=1 bash scripts/setup-gpg-secrets.sh   -> nur lokal prüfen, nichts bei GitHub setzen.
+# BACKUP_DIR=~/gpg-backup bash scripts/setup-gpg-secrets.sh   -> legt zusätzlich private.asc (mit Passphrase geschützt) und public.asc dort ab.
 set -euo pipefail
 umask 077
 
@@ -69,6 +70,14 @@ GNUPGHOME="${TEST_HOME}" gpg --verify "${WORK}/t.sig" "${WORK}/t.txt" 2>&1 | gre
 echo "      OK"
 
 base64 -w0 "${WORK}/private.asc" > "${WORK}/private.b64"
+
+if [ -n "${BACKUP_DIR:-}" ]; then
+    mkdir -p -m 700 "${BACKUP_DIR}"
+    cp "${WORK}/private.asc" "${BACKUP_DIR}/codeforge-private.asc"
+    gpg --armor --export "${FPR}" > "${BACKUP_DIR}/codeforge-public.asc"
+    chmod 600 "${BACKUP_DIR}/codeforge-private.asc"
+    echo "      Sicherung: ${BACKUP_DIR}/codeforge-private.asc (nur mit Passphrase nutzbar) und codeforge-public.asc"
+fi
 
 if [ "${NO_SECRETS:-0}" = "1" ]; then
     echo "[4/4] NO_SECRETS=1 – es wurde nichts bei GitHub gesetzt."

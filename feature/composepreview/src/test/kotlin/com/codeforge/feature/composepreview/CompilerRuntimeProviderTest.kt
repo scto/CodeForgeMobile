@@ -11,7 +11,6 @@ import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +31,7 @@ class CompilerRuntimeProviderTest {
               "kotlin": "2.1.21",
               "files": [
                 { "name": "kotlin-stdlib-2.1.21.jar", "sha256": "$sha1", "size": 1024 },
-                { "name": "kotlin-compose-compiler-plugin-embeddable.jar", "sha256": "$sha2", "size": 2048 }
+                { "name": "androidx-compose-runtime.jar", "sha256": "$sha2", "size": 2048 }
               ]
             }
         """.trimIndent()
@@ -44,7 +43,7 @@ class CompilerRuntimeProviderTest {
         assertEquals("kotlin-stdlib-2.1.21.jar", manifest.files[0].name)
         assertEquals(sha1, manifest.files[0].sha256)
         assertEquals(1024L, manifest.files[0].size)
-        assertEquals("kotlin-compose-compiler-plugin-embeddable.jar", manifest.files[1].name)
+        assertEquals("androidx-compose-runtime.jar", manifest.files[1].name)
         assertEquals(sha2, manifest.files[1].sha256)
         assertEquals(2048L, manifest.files[1].size)
     }
@@ -226,8 +225,8 @@ class CompilerRuntimeProviderTest {
         val installedDir = firstResult.getOrThrow()
         assertFalse("Old JAR should be removed after atomic swap", File(installedDir, "old.jar").exists())
         assertTrue(
-            "Plugin JAR should exist",
-            File(installedDir, "kotlin-compose-compiler-plugin-embeddable.jar").isFile
+            "Runtime JAR should exist",
+            File(installedDir, "kotlin-stdlib-2.1.21.jar").isFile
         )
 
         // Zweiter Aufruf bei identischer Version darf keinen erneuten Download auslösen
@@ -237,11 +236,10 @@ class CompilerRuntimeProviderTest {
     }
 
     @Test
-    fun `resolveRuntimeJars excludes kotlin-compose-compiler-plugin-embeddable jar`() {
+    fun `resolveRuntimeJars returns sorted list of all jar files in directory`() {
         val dir = tempFolder.newFolder("runtime-jars")
         File(dir, "kotlin-stdlib-2.1.21.jar").writeText("stdlib")
         File(dir, "androidx_compose_runtime-runtime-android-1.9.1.jar").writeText("runtime")
-        File(dir, "kotlin-compose-compiler-plugin-embeddable.jar").writeText("plugin")
         File(dir, "manifest.json").writeText("{}")
 
         val userClasspath = ComposePreviewRendererImpl.resolveRuntimeJars(dir)
@@ -253,7 +251,6 @@ class CompilerRuntimeProviderTest {
             ),
             names
         )
-        assertFalse(names.contains("kotlin-compose-compiler-plugin-embeddable.jar"))
     }
 
     @Test
@@ -295,9 +292,6 @@ class CompilerRuntimeProviderTest {
             manifest.files.size
         )
 
-        val pluginEntry = manifest.files.find { it.name == "kotlin-compose-compiler-plugin-embeddable.jar" }
-        assertNotNull("manifest.json must contain kotlin-compose-compiler-plugin-embeddable.jar", pluginEntry)
-
         for (entry in manifest.files) {
             val jarFile = File(runtimeBuildDir, entry.name)
             assertTrue("Missing JAR listed in manifest: ${entry.name}", jarFile.isFile)
@@ -324,9 +318,9 @@ class CompilerRuntimeProviderTest {
 
     private fun createValidRuntimeZip(targetZip: File, bom: String, kotlin: String): File {
         val dummyStdlibBytes = "dummy-stdlib-jar-content".toByteArray(Charsets.UTF_8)
-        val dummyPluginBytes = "dummy-plugin-jar-content".toByteArray(Charsets.UTF_8)
+        val dummyRuntimeBytes = "dummy-runtime-jar-content".toByteArray(Charsets.UTF_8)
         val stdlibSha = sha256Bytes(dummyStdlibBytes)
-        val pluginSha = sha256Bytes(dummyPluginBytes)
+        val runtimeSha = sha256Bytes(dummyRuntimeBytes)
 
         val manifestJson = """
             {
@@ -334,7 +328,7 @@ class CompilerRuntimeProviderTest {
               "kotlin": "$kotlin",
               "files": [
                 { "name": "kotlin-stdlib-$kotlin.jar", "sha256": "$stdlibSha", "size": ${dummyStdlibBytes.size} },
-                { "name": "kotlin-compose-compiler-plugin-embeddable.jar", "sha256": "$pluginSha", "size": ${dummyPluginBytes.size} }
+                { "name": "androidx-compose-runtime.jar", "sha256": "$runtimeSha", "size": ${dummyRuntimeBytes.size} }
               ]
             }
         """.trimIndent().toByteArray(Charsets.UTF_8)
@@ -344,8 +338,8 @@ class CompilerRuntimeProviderTest {
             zos.write(dummyStdlibBytes)
             zos.closeEntry()
 
-            zos.putNextEntry(ZipEntry("kotlin-compose-compiler-plugin-embeddable.jar"))
-            zos.write(dummyPluginBytes)
+            zos.putNextEntry(ZipEntry("androidx-compose-runtime.jar"))
+            zos.write(dummyRuntimeBytes)
             zos.closeEntry()
 
             zos.putNextEntry(ZipEntry("manifest.json"))
