@@ -50,14 +50,15 @@ Repo-Stand: `adb101f`. ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen
 | 21 | `21-verify-apt-stages-pipeline.md` | ✅ `73bb2af` | Skripte geprüft, 12 Etappen gegen den Fork abgeglichen; Rezepte nur im Fork |
 | 22 | `22-verification-followups.md` | ✅ `adb101f` | Ordnerwahl im Wizard, Expressive-Entscheidung, Gradle-/ktlint-Bericht, Gerätetest-Checkliste |
 | 23 | `23-fix-extensions-manager.md` | ✅ `baa1e07` | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen |
-| 24 | `24-onboarding-permissions-icon-termux-ui.md` | ✅ (dieser Commit) | Onboarding-Surface/Previews, Rechte, Launcher-Icon (`de2caf0`), volle Termux-UI, `codeforge-env`-Fehlerausgabe, Second-Stage-Fix |
+| 24 | `24-onboarding-permissions-icon-termux-ui.md` | ✅ `2aa0cc6` | Onboarding-Surface/Previews, Rechte, Launcher-Icon (`de2caf0`), volle Termux-UI, `codeforge-env`-Fehlerausgabe, Second-Stage-Fix |
+| 25 | `25-large-packages-release-assets.md` | ✅ (dieser Commit) | Große Pakete (> 95 MiB) per Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`docs/task-25-report.md`) |
 
 ## Nächste Schritte
 
 | Schritt | Aufgabe | Anmerkung |
 |---|---|---|
-| 1 | Fork `scto/terminal-packages-codeforge` | Etappe `H1-jdk17` (`only=H1-jdk17` in `build-all-stages.yml`) starten, damit `openjdk-17` im APT-Repo liegt; Rezepte aus `agy-output/packages/` committen |
-| 2 | Gerätetests | `docs/device-test-checklist.md` + Punkte aus `docs/task-24-report.md` (Onboarding, Rechte, TermuxActivity, Setup-Lauf) |
+| 1 | Fork `scto/terminal-packages-codeforge` | Etappe `H1-jdk17` sowie Gruppe A (`publish = true`, erzeugt Release `large-packages` + `large-packages.txt`) in `build-all-stages.yml` starten; Rezepte aus `agy-output/packages/` committen |
+| 2 | Gerätetests | `docs/device-test-checklist.md` + Punkte aus `docs/task-24-report.md` & `docs/task-25-report.md` (`codeforge-env setup --gradle`) |
 | laufend | **17** | vor jedem Commit/PR; neue Texte in `values/` **und** `values-de/` |
 
 Nicht Teil der Tasks: das Bauen von Bootstrap und APT-Paketen (GitHub-Actions im Fork). Weitere Backlog-Punkte: `STATUS.md` (Abschnitt „Noch offene Features"): `:libs:gradle-tooling-bridge`, Layout-Designer-Erweiterungen, Expressive ab stabiler material3 ≥ 1.4, ktlint-Umbenennung `template_engine`.

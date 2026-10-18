@@ -8,9 +8,10 @@
 #
 # Aufruf:  codeforge-env [--machine] <befehl> [argumente]
 #   list                         alle bekannten Komponenten mit Installationsstatus
-#   install <id>                 z. B. jdk;21  ndk;r29  cmake;3.22.1  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36
+#   install <id|paket>           z. B. jdk;21  ndk;r29  cmake;3.22.1  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36  gradle
 #   uninstall <id>
-#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 3.22.1] [--no-ndk] [--no-cmake]
+#   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 95 MiB über large-packages.txt, sonst per pkg)
+#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 3.22.1] [--no-ndk] [--no-cmake] [--gradle]
 #   env                          schreibt/zeigt die Umgebungsdatei (ANDROID_HOME, JAVA_HOME …)
 #   doctor                       prüft die Umgebung
 #
@@ -165,78 +166,6 @@ format_component_id() {
   esac
 }
 
-apt_repo_url() {
-  local sl="$PREFIX/etc/apt/sources.list" url=""
-  if [ -f "$sl" ]; then
-    url=$(awk '!/^[[:space:]]*#/ && $1=="deb" {for(i=2;i<=NF;i++) if ($i ~ /^https?:\/\//) {print $i; exit}}' "$sl")
-  fi
-  if [ -z "$url" ] && [ -d "$PREFIX/etc/apt/sources.list.d" ]; then
-    url=$(awk '!/^[[:space:]]*#/ && $1=="deb" {for(i=2;i<=NF;i++) if ($i ~ /^https?:\/\//) {print $i; exit}}' "$PREFIX/etc/apt/sources.list.d"/*.list 2>/dev/null | head -n1)
-  fi
-  printf '%s' "${url:-unbekannt ($sl)}"
-}
-
-pkg_update_once() {
-  [ "$PKG_UPDATED" = 1 ] && return 0
-  PKG_UPDATED=1
-  mkdir -p "$LOG_DIR" 2>/dev/null
-  local up_out="$TMP/.cfsdk-apt-update.out" rc=0
-  {
-    printf '\n=== [%s] apt-get update ===\n' "$(date '+%Y-%m-%d %H:%M:%S')"
-  } >> "$LOG_FILE" 2>/dev/null
-  if command -v apt-get >/dev/null 2>&1; then
-    DEBIAN_FRONTEND=noninteractive apt-get update -y >"$up_out" 2>&1 || rc=$?
-  else
-    pkg update -y >"$up_out" 2>&1 || rc=$?
-  fi
-  cat "$up_out" >> "$LOG_FILE" 2>/dev/null
-  if [ "$rc" -ne 0 ] || grep -Eq '^(Err:|E:|W: Failed to fetch|.*NO_PUBKEY|.*404  Not Found|.*Could not resolve)' "$up_out" 2>/dev/null; then
-    err "Paketlisten-Update (apt-get update) meldet Probleme (URL: $(apt_repo_url)):"
-    if [ "$MACHINE" != 1 ]; then
-      grep -E '(Err:|E:|Failed to fetch|NO_PUBKEY|404|Could not resolve|Clearsigned|signature)' "$up_out" >&2 || tail -n 15 "$up_out" >&2
-    fi
-  fi
-  rm -f "$up_out"
-  return 0
-}
-
-pkg_install() {
-  [ $# -gt 0 ] || return 0
-  pkg_update_once
-  mkdir -p "$LOG_DIR" 2>/dev/null
-  local out_file="$TMP/.cfsdk-pkg-install.out" rc=0 repo_url
-  {
-    printf '\n=== [%s] pkg install -y %s ===\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
-  } >> "$LOG_FILE" 2>/dev/null
-  DEBIAN_FRONTEND=noninteractive pkg install -y "$@" >"$out_file" 2>&1 || rc=$?
-  cat "$out_file" >> "$LOG_FILE" 2>/dev/null
-  if [ "$rc" -ne 0 ]; then
-    repo_url=$(apt_repo_url)
-    if grep -q "Unable to locate package" "$out_file" 2>/dev/null; then
-      err "Paket fehlt im APT-Repo (Etappe bauen) – URL: $repo_url (Pakete: $*)"
-    else
-      err "pkg install $* fehlgeschlagen (Exit-Code $rc, Log: $LOG_FILE)"
-    fi
-    if [ "$MACHINE" != 1 ]; then
-      printf -- '--- Letzte 20 Zeilen aus %s ---\n' "$LOG_FILE" >&2
-      tail -n 20 "$out_file" >&2
-      if command -v apt-cache >/dev/null 2>&1; then
-        printf -- '--- apt-cache policy %s ---\n' "$*" >&2
-        apt-cache policy "$@" 2>&1 | tee -a "$LOG_FILE" >&2
-      fi
-      printf -- '-------------------------------\n' >&2
-    else
-      if command -v apt-cache >/dev/null 2>&1; then
-        apt-cache policy "$@" >> "$LOG_FILE" 2>&1 || true
-      fi
-    fi
-    rm -f "$out_file"
-    return "$rc"
-  fi
-  rm -f "$out_file"
-  return 0
-}
-
 # ---------- Manifest ----------
 # MANIFEST_CACHE wird einmal pro Aufruf auf oberster Ebene gebildet (build_manifest, siehe unten) –
 # manifest() läuft oft in Subshells, dort ginge ein dort gesetzter Cache verloren.
@@ -257,6 +186,7 @@ installed_path() { # id
     pkg)
       case "$id" in
         jdk\;*) [ -x "$(jdk_home "$ver")/bin/java" ] && printf '%s' "$(jdk_home "$ver")" ;;
+        *) [ -n "$src" ] && command -v "$src" >/dev/null 2>&1 && command -v "$src" ;;
       esac ;;
     cmake)
       local cmk="$SDK_ROOT/cmake/.cf-termux" cmv
@@ -305,6 +235,169 @@ download() { # url ziel basis-prozent spanne
     sleep 1
   done
   wait "$pid" || { err "Download fehlgeschlagen: $url ($(head -c 200 "$TMP/.cfsdk-curl-err" 2>/dev/null))"; return 1; }
+}
+
+# Große Pakete (> 95 MiB, z. B. gradle, openjdk-*, libllvm) liegen wegen des
+# 100-MB-Limits von GitHub Pages nicht im APT-Pool, sondern als Asset am Release
+# 'large-packages'. Das Verzeichnis '<apt-url>/large-packages.txt' enthält Zeilen:
+#   name|version|arch|datei|sha256|bytes|url
+# Benötigt: say, err, download, $TMP, $PREFIX.
+
+apt_base_url() {
+  local sl="$PREFIX/etc/apt/sources.list" url=""
+  if [ -f "$sl" ]; then
+    url=$(awk '!/^[[:space:]]*#/ && $1=="deb" {for(i=2;i<=NF;i++) if ($i ~ /^https?:\/\//) {print $i; exit}}' "$sl")
+  fi
+  if [ -z "$url" ] && [ -d "$PREFIX/etc/apt/sources.list.d" ]; then
+    url=$(awk '!/^[[:space:]]*#/ && $1=="deb" {for(i=2;i<=NF;i++) if ($i ~ /^https?:\/\//) {print $i; exit}}' "$PREFIX/etc/apt/sources.list.d"/*.list 2>/dev/null | head -n1)
+  fi
+  printf '%s' "${url%/}"
+}
+
+install_repo_pkg() {
+  local want="${1:-}" base arch man="$TMP/.cfsdk-large-packages.txt" row ver rarch asset sha bytes url deb got keyring
+  [ -n "$want" ] || return 1
+  base=$(apt_base_url)
+  arch=$(dpkg --print-architecture 2>/dev/null || echo "${CF_ARCH:-aarch64}")
+  row=""
+  if [ -n "$base" ]; then
+    if [ ! -s "$man" ]; then
+      curl -fsSL --max-time 15 "$base/large-packages.txt" >"$man" 2>/dev/null || rm -f "$man"
+      keyring="$PREFIX/share/termux-keyring/codeforge.gpg"
+      if [ -s "$man" ] && [ -s "$keyring" ] && command -v gpgv >/dev/null 2>&1; then
+        if curl -fsSL --max-time 15 "$base/large-packages.txt.asc" >"$man.asc" 2>/dev/null && [ -s "$man.asc" ]; then
+          if ! gpgv --keyring "$keyring" "$man.asc" "$man" >/dev/null 2>&1; then
+            err "GPG-Signatur von large-packages.txt ungültig!"
+            rm -f "$man" "$man.asc"
+            return 1
+          fi
+        fi
+        rm -f "$man.asc"
+      fi
+    fi
+    if [ -s "$man" ]; then
+      row=$(awk -F'|' -v p="$want" -v a="$arch" '$1==p && ($3==a || $3=="all") {v=$0} END{print v}' "$man")
+    fi
+  fi
+
+  if [ -z "$row" ]; then
+    if [ -n "${PKG_INSTALL_OUT:-}" ]; then
+      DEBIAN_FRONTEND=noninteractive pkg install -y "$want" >"$PKG_INSTALL_OUT" 2>&1
+    else
+      DEBIAN_FRONTEND=noninteractive pkg install -y "$want"
+    fi
+    return $?
+  fi
+
+  IFS='|' read -r _ ver rarch asset sha bytes url <<<"$row"
+  case "$url" in
+    https://github.com/*) ;;
+    *)
+      err "Ungültige Download-URL für großes Paket $want (nur https://github.com/ erlaubt): $url"
+      return 1
+      ;;
+  esac
+  printf '%s' "$sha" | grep -Eq '^[0-9a-f]{64}$' || {
+    err "Ungültige SHA-256 im Manifest für $want: $sha"
+    return 1
+  }
+
+  deb="$TMP/${asset##*/}"
+  say "Lade großes Paket $want $ver ($rarch) von GitHub Release …"
+  download "$url" "$deb" 10 75 || { rm -f "$deb"; return 1; }
+
+  got=$(sha256sum "$deb" | cut -d' ' -f1)
+  if [ "$got" != "$sha" ]; then
+    err "Prüfsumme für $asset stimmt nicht (erwartet $sha, erhalten $got)"
+    rm -f "$deb"
+    return 1
+  fi
+
+  say "Installiere $asset …"
+  if [ -n "${PKG_INSTALL_OUT:-}" ]; then
+    if ! DEBIAN_FRONTEND=noninteractive apt install -y "$deb" >"$PKG_INSTALL_OUT" 2>&1; then
+      rm -f "$deb"
+      return 1
+    fi
+  elif ! DEBIAN_FRONTEND=noninteractive apt install -y "$deb"; then
+    rm -f "$deb"
+    return 1
+  fi
+  rm -f "$deb"
+  return 0
+}
+
+apt_repo_url() {
+  local url
+  url=$(apt_base_url)
+  printf '%s' "${url:-unbekannt ($PREFIX/etc/apt/sources.list)}"
+}
+
+pkg_update_once() {
+  [ "$PKG_UPDATED" = 1 ] && return 0
+  PKG_UPDATED=1
+  mkdir -p "$LOG_DIR" 2>/dev/null
+  local up_out="$TMP/.cfsdk-apt-update.out" rc=0
+  {
+    printf '\n=== [%s] apt-get update ===\n' "$(date '+%Y-%m-%d %H:%M:%S')"
+  } >> "$LOG_FILE" 2>/dev/null
+  if command -v apt-get >/dev/null 2>&1; then
+    DEBIAN_FRONTEND=noninteractive apt-get update -y >"$up_out" 2>&1 || rc=$?
+  else
+    pkg update -y >"$up_out" 2>&1 || rc=$?
+  fi
+  cat "$up_out" >> "$LOG_FILE" 2>/dev/null
+  if [ "$rc" -ne 0 ] || grep -Eq '^(Err:|E:|W: Failed to fetch|.*NO_PUBKEY|.*404  Not Found|.*Could not resolve)' "$up_out" 2>/dev/null; then
+    err "Paketlisten-Update (apt-get update) meldet Probleme (URL: $(apt_repo_url)):"
+    if [ "$MACHINE" != 1 ]; then
+      grep -E '(Err:|E:|Failed to fetch|NO_PUBKEY|404|Could not resolve|Clearsigned|signature)' "$up_out" >&2 || tail -n 15 "$up_out" >&2
+    fi
+  fi
+  rm -f "$up_out"
+  return 0
+}
+
+pkg_install() {
+  [ $# -gt 0 ] || return 0
+  pkg_update_once
+  mkdir -p "$LOG_DIR" 2>/dev/null
+  local out_file="$TMP/.cfsdk-pkg-install.out" rc=0 repo_url _pkg
+  for _pkg in "$@"; do
+    {
+      printf '\n=== [%s] install_repo_pkg %s ===\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$_pkg"
+    } >> "$LOG_FILE" 2>/dev/null
+    : > "$out_file" 2>/dev/null || true
+    rc=0
+    PKG_INSTALL_OUT="$out_file" install_repo_pkg "$_pkg" || rc=$?
+    [ -s "$out_file" ] && cat "$out_file" >> "$LOG_FILE" 2>/dev/null
+    if [ "$rc" -ne 0 ]; then
+      repo_url=$(apt_repo_url)
+      if grep -q "Unable to locate package" "$out_file" 2>/dev/null; then
+        err "Paket fehlt im APT-Repo (Etappe bauen) – URL: $repo_url (Paket: $_pkg)"
+      else
+        err "pkg install $_pkg fehlgeschlagen (Exit-Code $rc, Log: $LOG_FILE)"
+      fi
+      if [ "$MACHINE" != 1 ]; then
+        if [ -s "$out_file" ]; then
+          printf -- '--- Letzte 20 Zeilen aus %s ---\n' "$LOG_FILE" >&2
+          tail -n 20 "$out_file" >&2
+        fi
+        if command -v apt-cache >/dev/null 2>&1; then
+          printf -- '--- apt-cache policy %s ---\n' "$_pkg" >&2
+          apt-cache policy "$_pkg" 2>&1 | tee -a "$LOG_FILE" >&2
+        fi
+        printf -- '-------------------------------\n' >&2
+      else
+        if command -v apt-cache >/dev/null 2>&1; then
+          apt-cache policy "$_pkg" >> "$LOG_FILE" 2>&1 || true
+        fi
+      fi
+      rm -f "$out_file"
+      return "$rc"
+    fi
+    rm -f "$out_file"
+  done
+  return 0
 }
 
 extract() { # archiv ziel strip
@@ -510,7 +603,18 @@ cmdline_from_sdk_archive() {
 
 do_install() { # id
   local id=$1 kind ver src sha dest extra strip=0 url file tp=""
-  entry_exists "$id" || die "Unbekannte Komponente: $id"
+  if ! entry_exists "$id"; then
+    case "$id" in
+      *\;*) die "Unbekannte Komponente: $id" ;;
+      *)
+        progress 5 "Installiere Paket $id …"
+        pkg_install "$id" || die "pkg install $id fehlgeschlagen"
+        progress 100 "Fertig"
+        ok "$id"
+        return 0
+        ;;
+    esac
+  fi
   kind=$(entry_field "$id" 3); ver=$(entry_field "$id" 2); src=$(entry_field "$id" 4)
   sha=$(entry_field "$id" 5); dest=$(entry_field "$id" 6); extra=$(entry_field "$id" 7)
   case "$extra" in *strip=*) strip=${extra##*strip=}; strip=${strip%%[!0-9]*} ;; esac
@@ -752,12 +856,13 @@ do_setup() {
   local setup_args="$*"
   local retry_cmd="codeforge-env setup${setup_args:+ $setup_args}"
   CURRENT_SETUP_RETRY_CMD="$retry_cmd"
-  local jdk=17 ndk=r29 cmake=3.22.1 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1
+  local jdk=17 ndk=r29 cmake=3.22.1 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=0
   while [ $# -gt 0 ]; do
     case "$1" in
       --jdk) jdk=$2; shift 2 ;; --ndk) ndk=$2; shift 2 ;; --cmake) cmake=$2; shift 2 ;;
       --sdk) sdk=$2; shift 2 ;; --platform) platform=$2; shift 2 ;;
       --no-ndk) want_ndk=0; shift ;; --no-cmake) want_cmake=0; shift ;;
+      --gradle) want_gradle=1; shift ;;
       *) die "Unbekannte Option: $1" ;;
     esac
   done
@@ -791,6 +896,19 @@ do_setup() {
       exit 1
     fi
   done
+  if [ "$want_gradle" = 1 ]; then
+    if command -v gradle >/dev/null 2>&1; then
+      say "Gradle bereits installiert"
+    else
+      say "== Gradle =="
+      if ! ( CURRENT_SETUP_RETRY_CMD="" do_install gradle ); then
+        err "Einrichtung abgebrochen bei Gradle"
+        say "Logdatei: $LOG_FILE"
+        say "Erneut versuchen: $retry_cmd"
+        exit 1
+      fi
+    fi
+  fi
   write_env "$jdk" "$( [ "$want_ndk" = 1 ] && echo "ndk;$ndk")" "$( [ "$want_cmake" = 1 ] && echo "cmake;$cmake")"
   progress 100 "Umgebung eingerichtet"
   say "Neue Shell öffnen oder 'source $ENV_FILE' ausführen."
@@ -817,6 +935,7 @@ case "$cmd" in
   list) do_list ;;
   install) [ $# -ge 1 ] || die "install braucht eine ID"; do_install "$1" ;;
   uninstall) [ $# -ge 1 ] || die "uninstall braucht eine ID"; do_uninstall "$1" ;;
+  pkg) [ $# -ge 1 ] || die "pkg braucht mindestens einen Paketnamen"; pkg_install "$@" || exit 1; ok "$*" ;;
   setup) do_setup "$@" ;;
   env) [ -f "$ENV_FILE" ] && cat "$ENV_FILE" || die "Noch nicht eingerichtet (codeforge-env setup)" ;;
   doctor) do_doctor ;;

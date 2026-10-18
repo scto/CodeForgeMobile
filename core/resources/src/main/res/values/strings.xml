@@ -907,7 +907,7 @@
     <string name="extension_html_css_json_name">HTML / CSS / JSON Server</string>
     <string name="extension_html_css_json_desc">Language server for web technologies and structured data formats.</string>
     <string name="extensions_missing_prerequisite">Prerequisite missing: %1$s</string>
-    <string name="extensions_termux_install_hint">Run in terminal: pkg install %1$s</string>
+    <string name="extensions_termux_install_hint">Run in terminal: codeforge-env pkg %1$s</string>
     <string name="extensions_termux_package">Termux Package</string>
     <string name="editor_lsp_status_running">LSP: Running</string>
     <string name="editor_lsp_status_stopped">LSP: Stopped</string>

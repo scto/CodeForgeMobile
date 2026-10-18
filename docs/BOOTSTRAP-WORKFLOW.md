@@ -130,3 +130,29 @@ Wichtige Regeln:
 
 Lokal (ohne GitHub): `PHASE=build ARCHS=aarch64 REPO_PACKAGES=... ./build_codeforge_repo.sh` baut nur Pakete nach `terminal-packages-codeforge/output/`.
 `PHASE=assemble BASE_REPO_DIR=<gh-pages-Checkout> EXTRA_DEBS_DIR=<Ordner mit .deb> ./build_codeforge_repo.sh` ergänzt das Repo.
+
+## Große Pakete (> 100 MB)
+
+GitHub lehnt beim Push auf `gh-pages` Einzeldateien über 100 MB ab (`GH001`, z. B. `gradle_9.8.0_all.deb` mit ~142 MB; potenziell auch `openjdk-*` oder `libllvm`).
+
+### Lösung im Workflow (`build-bootstrap-repo.yml`, Modus `add`)
+1. **Abtrennen ab 95 MiB:** Vor dem Zusammenbau des APT-Pools verschiebt der `assemble`-Job alle `.deb`-Dateien über 95 MiB nach `big-debs/` (Doppelpunkte aus Epochen werden im Dateinamen durch `_` ersetzt).
+2. **Release-Asset:** Bei `publish = true` werden diese Dateien an das GitHub-Release `large-packages` des Ziel-Repos (`scto/terminal-packages-codeforge`) hochgeladen (`gh release upload large-packages big-debs/* --clobber`).
+3. **Manifest `large-packages.txt` (+ `large-packages.txt.asc`):** Im Root des APT-Repos (`<apt-url>/large-packages.txt`) wird ein Verzeichnis aller ausgelagerten Pakete gepflegt (je Paket + Architektur gewinnt der neueste Eintrag) und zusätzlich mit dem Repo-Schlüssel als detachte Signatur `large-packages.txt.asc` signiert:
+   ```text
+   name|version|arch|datei|sha256|bytes|url
+   ```
+
+### Installation auf dem Gerät (`codeforge-env`)
+Da ausgelagerte Pakete nicht im `pool/` und damit nicht in `dists/stable/main/binary-*/Packages` stehen, kennt `apt`/`pkg` sie nicht direkt.
+- `codeforge-env` prüft in `install_repo_pkg()` (aufgerufen von `pkg_install()`) vor jedem Paket-Installationsschritt `<apt-url>/large-packages.txt` (inkl. optionaler `gpgv`-Signaturprüfung gegen `$PREFIX/share/termux-keyring/codeforge.gpg` falls `large-packages.txt.asc` vorliegt).
+- Steht das Paket für die Geräte-Architektur (oder `all`) in `large-packages.txt`, prüft `install_repo_pkg`, dass die URL mit `https://github.com/` beginnt, lädt die `.deb`-Datei mit Fortschrittsanzeige herunter, verifiziert die SHA-256-Prüfsumme und installiert sie per `apt install -y /pfad/zur/datei.deb` (wodurch reguläre Abhängigkeiten weiterhin aus dem APT-Pool aufgelöst werden).
+- Steht das Paket nicht in `large-packages.txt`, fällt `install_repo_pkg` auf `pkg install -y <name>` zurück.
+- Manuelle Installation im Terminal (auch für große Pakete):
+  ```bash
+  codeforge-env pkg gradle
+  # oder:
+  codeforge-env install gradle
+  codeforge-env setup --gradle
+  ```
+

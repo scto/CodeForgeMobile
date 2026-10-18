@@ -135,8 +135,10 @@ cd CodeForgeMobile
 ./gradlew ktlintCheck
 ```
 
-### Termux-Bootstrap
+### Termux-Bootstrap & Große Pakete (`> 100 MB`)
 Die App braucht einen Bootstrap für `com.codeforge.app`. Bauen und veröffentlichen mit `build_codeforge_repo.sh` ([Anleitung](build_codeforge_repo.md)); die GPG-Passphrase kommt aus der Umgebungsvariable `CODEFORGE_GPG_PASSPHRASE`.
+
+Pakete über dem 100-MB-Dateilimit von GitHub Pages (`> 95 MiB`, z. B. `gradle` sowie ggf. `openjdk-*` oder `libllvm`) werden im Workflow `.github/workflows/build-bootstrap-repo.yml` automatisch in das GitHub-Release `large-packages` ausgelagert und in `<apt-url>/large-packages.txt` (samt detachter Signatur `large-packages.txt.asc`) verzeichnet. Auf dem Gerät lädt `codeforge-env` (`install_repo_pkg` / `pkg_install`, z. B. `codeforge-env pkg gradle` oder `codeforge-env setup --gradle`) diese `.deb`-Assets von `https://github.com/`, prüft die SHA-256-Prüfsumme und installiert sie per `apt install -y`. Details siehe [docs/BOOTSTRAP-WORKFLOW.md](docs/BOOTSTRAP-WORKFLOW.md#große-pakete--100-mb).
 
 ---
 

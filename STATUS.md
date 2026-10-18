@@ -25,7 +25,7 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 |---|---|---|
 | Termux-Vendoring (`termux-emulator/-view/-shared/-app`), GPLv3 + volle `TermuxActivity`-Multi-Session-UI (Standard) & kompakter Compose-Fallback | ✅ | `docs/sub/TERMUX-PORTING.md`, `docs/task-24-report.md` |
 | Terminal-Feature auf Termux-Shell (`TerminalSessionRepositoryImpl`) | ✅ | `libs/terminal-engine/BOOTSTRAP.md` |
-| `codeforge-env` (JDK, SDK, CMake, NDK; `--machine`-Protokoll, sichtbare APT-/Setup-Fehlerausgabe & Logdatei) | ✅ | `agy-tasks/11-…`, `docs/task-24-report.md` |
+| `codeforge-env` (JDK, SDK, CMake, NDK; `--machine`-Protokoll, sichtbare APT-/Setup-Fehlerausgabe, Logdatei & Installation großer Pakete > 95 MiB über `large-packages.txt`) | ✅ 🧪 | `agy-tasks/11-…`, `docs/task-24-report.md`, `docs/task-25-report.md` |
 | Onboarding: Intro (mit `icon.xml`-Logo & Previews) → Berechtigungen (`MANAGE_EXTERNAL_STORAGE`, Pakete installieren/löschen, `ON_RESUME`-Refresh) → Setup (inkl. Second-Stage-Fix) → `TermuxActivity` mit Autostart | ✅ | `feature/onboarding`, `docs/task-24-report.md` |
 | SDK-Manager (GUI über `codeforge-env`) | ✅ | `feature/sdkmanager` |
 

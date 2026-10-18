@@ -11,6 +11,18 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📦 Große Pakete (> 100 MB) per Release-Asset installieren (Task 25)
+
+* **`codeforge-env` & `large-pkg-snippet.sh` (`25.1` / `25.2`)**:
+  * `apt_base_url()` und `install_repo_pkg()` in `libs/terminal-engine/snippets/large-pkg-snippet.sh` und direkt nach `download()` in `libs/terminal-engine/src/main/assets/codeforge-env` integriert.
+  * `pkg_install()` (aus Task 24.5) ruft in einer Schleife `install_repo_pkg` für jedes Paket auf: Pakete aus `<apt-url>/large-packages.txt` werden vom GitHub-Release `large-packages` geladen, per SHA-256 verifiziert und mit `apt install -y` installiert; normale Pakete fallen auf `pkg install -y` zurück (inkl. Logdatei und Fehlerdiagnose).
+  * Neue CLI-Befehle `codeforge-env pkg <paket…>` und `codeforge-env setup --gradle` sowie direkte Paketnamen in `codeforge-env install <paket>`.
+* **Extensions-Manager & Sicherheit (`25.3` / `25.4`)**:
+  * Terminal-Installationshinweis für Termux-LSP-Pakete (`clang`, `rust-analyzer`) in `ExtensionsManager.kt` und `strings.xml` (DE/EN) auf `codeforge-env pkg <paket>` umgestellt.
+  * URL-Prüfung auf `https://github.com/`, 64-stellige SHA-256-Prüfung sowie detachte GPG-Signatur `large-packages.txt.asc` in `.github/workflows/build-bootstrap-repo.yml` samt `gpgv`-Prüfung gegen `$PREFIX/share/termux-keyring/codeforge.gpg` in `install_repo_pkg()`.
+* **Dokumentation & Bericht (`25.5` / `25.6`)**:
+  * Abschnitt „Große Pakete (> 100 MB)“ in `docs/BOOTSTRAP-WORKFLOW.md`, `README.md` und `README_DE.md` ergänzt; Bericht in [`docs/task-25-report.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/docs/task-25-report.md).
+
 ### 🛠️ Onboarding-Farben, Rechte, Launcher-Icon, volle Termux-UI & sichtbare Setup-Fehler (Task 24)
 
 * **Onboarding-Farben, Surfaces & Previews (`24.1`)**:

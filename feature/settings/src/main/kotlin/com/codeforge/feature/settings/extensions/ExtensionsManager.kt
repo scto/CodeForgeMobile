@@ -90,7 +90,7 @@ class ExtensionsManager internal constructor(
                 is ExtensionSource.Download -> source
                 is ExtensionSource.TermuxPackage -> {
                     throw UnsupportedOperationException(
-                        "Termux package '${source.packageName}' must be installed via 'pkg install ${source.packageName}' in the terminal."
+                        "Termux package '${source.packageName}' must be installed via 'codeforge-env pkg ${source.packageName}' in the terminal."
                     )
                 }
             }

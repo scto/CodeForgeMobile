@@ -27,20 +27,19 @@
 | **21** | `21-verify-apt-stages-pipeline.md` | ✅ `73bb2af` | Skripte geprüft, 12 Etappen gegen den Fork abgeglichen; Rezepte nur im Fork |
 | **22** | `22-verification-followups.md` | ✅ `adb101f` | Ordnerwahl im Wizard, Expressive-Entscheidung, Gradle-/ktlint-Bericht, Gerätetest-Checkliste |
 | **23** | `23-fix-extensions-manager.md` | ✅ `baa1e07` | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen (`docs/extensions-manager-fix-report.md`) |
-| **24** | `24-onboarding-permissions-icon-termux-ui.md` | ✅ (dieser Commit) | Onboarding-Surface/Previews, Rechte (`MANAGE_EXTERNAL_STORAGE`, Pakete installieren/löschen), Original-Launcher-Icon (`de2caf0`), volle Termux-UI (`TermuxActivity`), sichtbare Fehler in `codeforge-env`, Second-Stage-Fix (`docs/task-24-report.md`) |
+| **24** | `24-onboarding-permissions-icon-termux-ui.md` | ✅ `2aa0cc6` | Onboarding-Surface/Previews, Rechte (`MANAGE_EXTERNAL_STORAGE`, Pakete installieren/löschen), Original-Launcher-Icon (`de2caf0`), volle Termux-UI (`TermuxActivity`), sichtbare Fehler in `codeforge-env`, Second-Stage-Fix (`docs/task-24-report.md`) |
+| **25** | `25-large-packages-release-assets.md` | ✅ (dieser Commit) | Große Pakete (> 95 MiB) über Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`install_repo_pkg` / `pkg_install`), Mock-Tests (`docs/task-25-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
 
-### Task 24 – Onboarding, Rechte, Icon, Termux-UI & Setup-Fehler (✅ erledigt)
-1. **Onboarding-Farben & Previews (24.1)**: `OnboardingRoute` und `GitCloneScreen` in `Surface` eingebettet; Light/Dark-`@Preview` für alle drei Onboarding-Schritte ergänzt.
-2. **Berechtigungen (24.2)**: `MANAGE_EXTERNAL_STORAGE` (API 30+), `REQUEST_INSTALL_PACKAGES` und `REQUEST_DELETE_PACKAGES` integriert; `ON_RESUME`-Refresh und klickbare Berechtigungskarten.
-3. **Launcher-Icon & Logo (24.3)**: Original-Drawables (`ic_launcher_background.xml`, `ic_launcher_foreground.xml`, `icon.xml`) aus `de2caf0` wiederhergestellt und in Onboarding/Welcome eingebunden.
-4. **Volle Termux-UI (24.4 / Task 06)**: `:libs:termux-app` in `:app` eingebunden, `TermuxActivity` als Standard-Terminal mit `EXTRA_INITIAL_COMMAND` für das Setup-Skript, Umschalter Termux-UI/Kompakt in den Einstellungen.
-5. **Sichtbare Fehler in `codeforge-env` (24.5)**: `pkg_update_once()` + `pkg_install()` mit Logdatei, Konsolenausgabe der letzten 20 Zeilen, `apt-cache policy` und klarer Meldung bei fehlendem APT-Paket.
-6. **Bootstrap Second-Stage (24.6)**: Zeile 290 quotiert, `TERMUX_PACKAGE_MANAGER=apt` und `TERMUX_PACKAGE_ARCH` in `build_codeforge_repo.sh`/`scripts/fix-fork.sh` sowie In-Place-Reparatur und regulärer Aufruf in `TermuxInstaller.java`.
+### Task 25 – Große Pakete (> 100 MB) per Release-Asset installieren (✅ erledigt)
+1. **Snippet & `codeforge-env` (25.1 / 25.2)**: `apt_base_url()` und `install_repo_pkg()` in `libs/terminal-engine/snippets/large-pkg-snippet.sh` und direkt nach `download()` in `codeforge-env` integriert; `pkg_install()` iteriert über alle Pakete via `install_repo_pkg` (inkl. Logdatei und Fehlerausgabe); `codeforge-env pkg <name...>` und `setup --gradle` ergänzt.
+2. **Code-weite Prüfung (25.3)**: Alle `pkg install`/`apt install`-Stellen geprüft; Hinweis im Extensions-Manager (`ExtensionsManager.kt`, `strings.xml`) auf `codeforge-env pkg <pkg>` umgestellt.
+3. **Sicherheit & Signatur (25.4)**: Nur `https://github.com/`-URLs erlaubt, SHA-256 geprüft, detachte GPG-Signatur `large-packages.txt.asc` im Workflow `.github/workflows/build-bootstrap-repo.yml` erzeugt und in `install_repo_pkg()` per `gpgv` gegen `codeforge.gpg` geprüft.
+4. **Doku & Bericht (25.5 / 25.6)**: Mock-Tests (`large-pkg-snippet.test.sh`) ausgeführt, Abschnitt „Große Pakete (> 100 MB)“ in `docs/BOOTSTRAP-WORKFLOW.md` und `README.md`/`README_DE.md` ergänzt, Bericht in `docs/task-25-report.md`.
 
 ### Außerhalb der Tasks
-* Fork `scto/terminal-packages-codeforge`: Etappe `H1-jdk17` (`openjdk-17` fehlt aktuell noch im APT-Repo, siehe `docs/task-24-report.md` 24.7) über `build-all-stages.yml` bauen; Rezepte aus `agy-output/packages/` committen.
-* Gerätetests: `docs/device-test-checklist.md`.
+* Fork `scto/terminal-packages-codeforge`: Etappe `H1-jdk17` (`openjdk-17` fehlt aktuell noch im APT-Repo, siehe `docs/task-24-report.md` 24.7) und Gruppe A (`publish = true`, legt Release `large-packages` + `large-packages.txt` an) über `build-all-stages.yml` bauen; Rezepte aus `agy-output/packages/` committen.
+* Gerätetests: `docs/device-test-checklist.md` + `codeforge-env setup --gradle` nach Veröffentlichung des `large-packages`-Releases.

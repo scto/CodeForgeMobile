@@ -443,6 +443,8 @@ jobs:
           ./build_codeforge_repo.sh
 
       - name: Manifest großer Pakete schreiben
+        env:
+          CODEFORGE_GPG_PASSPHRASE: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
         run: |
           set -euo pipefail
           man=github_repo_ready/large-packages.txt
@@ -454,6 +456,15 @@ jobs:
           awk -F'|' 'NF>=7 {k=$1"|"$3; if(!(k in l)) K[++n]=k; l[k]=$0} END{for(i=1;i<=n;i++) print l[K[i]]}' "$man.tmp" | sort > "$man"
           rm -f "$man.tmp"
           echo "Einträge in large-packages.txt: $(wc -l < "$man")"
+          if [ -s .gpg/private/codeforge.gpg ] && [ -n "${CODEFORGE_GPG_PASSPHRASE:-}" ]; then
+            gpghome="$(mktemp -d)"
+            chmod 700 "$gpghome"
+            printf '%s\n' "$CODEFORGE_GPG_PASSPHRASE" | gpg --homedir "$gpghome" --batch --yes --pinentry-mode loopback --passphrase-fd 0 --import .gpg/private/codeforge.gpg
+            printf '%s\n' "$CODEFORGE_GPG_PASSPHRASE" | gpg --homedir "$gpghome" --batch --yes --pinentry-mode loopback --passphrase-fd 0 --armor --detach-sign -o "$man.asc" "$man"
+            gpg --homedir "$gpghome" --verify "$man.asc" "$man"
+            rm -rf "$gpghome"
+            echo "Signatur erzeugt: $man.asc"
+          fi
 
       - name: Index-Seite erzeugen (index.html)
         env:
@@ -488,6 +499,7 @@ jobs:
           name: codeforge-apt-repo-${{ needs.plan.outputs.label }}
           path: |
             github_repo_ready/dists/
+            github_repo_ready/large-packages.txt*
             github_repo_ready/codeforge.gpg
             github_repo_ready/codeforge.asc
             docs/overview_and_summary.md
