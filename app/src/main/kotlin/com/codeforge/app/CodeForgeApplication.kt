@@ -9,5 +9,6 @@ class CodeForgeApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         TermuxApplication.initTermuxApplication(this)
+        com.codeforge.feature.composepreview.PreviewActivityHolder.register(this)
     }
 }

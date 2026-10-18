@@ -56,6 +56,7 @@
     <string name="composepreview_d8_nicht_gefunden_build_tools">d8 not found. Install build tools via SDK Manager (Settings → SDK Manager → Build Tools).</string>
     <string name="composepreview_dexing_fehlgeschlagen">Dexing failed: %1$s</string>
     <string name="composepreview_die_grafische_rendering_pipeline_ist">The graphical rendering pipeline is architecturally prepared, but not yet connected (dynamic compilation + class loading at runtime). See KDoc in ComposePreviewRendererImpl.</string>
+    <string name="composepreview_funktion_hat_parameter">Function \'%1$s\' requires parameters. Previews only support parameterless @Composable functions.</string>
     <string name="composepreview_funktion_nicht_in_kompiliertem_code">Function \'%1$s\' not found in compiled code.</string>
     <string name="composepreview_kompilierung_fehlgeschlagen">Compilation failed:\n%1$s</string>
     <string name="composepreview_kompilierung_laeuft">Compiling preview…</string>
@@ -66,6 +67,7 @@
     <string name="composepreview_oeffne_eine_datei_mit_composable">Open a file containing @Composable functions in the editor.</string>
     <string name="composepreview_rendering_fehlgeschlagen">Rendering failed.</string>
     <string name="composepreview_waehle_eine_funktion_fuer_die">Select a function for preview.</string>
+    <string name="composepreview_zeitlimit_ueberschritten">Rendering timed out (limit: 5 seconds).</string>
 
     <!-- data -->
     <string name="data_aktion_im_aktuellen_zustand_nicht">Action not possible in current state: %1$s</string>

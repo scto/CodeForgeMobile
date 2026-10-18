@@ -118,11 +118,11 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                 val targetMethod = hostClass.methods.firstOrNull { it.name == functionName }
                     ?: error(Res.string(R.string.composepreview_funktion_nicht_in_kompiliertem_code, functionName))
 
-                val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap(
-                    widthPx = 1080,
-                    heightPx = 1920
-                ) {
-                    ReflectiveComposableHost(targetMethod)
+                // Parameterlose Signatur prüfen (Composer, Int); Funktionen mit Parametern ablehnen
+                ReflectiveComposableValidator.validateParameterless(targetMethod)
+
+                val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap { onError ->
+                    ReflectiveComposableHost(targetMethod, onError = onError)
                 }
 
                 PreviewRenderResult(functionName = functionName, imageBytes = bitmap.toPngBytes())

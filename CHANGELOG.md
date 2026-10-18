@@ -11,6 +11,28 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🎨 Compose-Preview: Offscreen-Rendering mit GraphicsLayer (Task 27b)
+
+* **Reproduktion des leeren Bitmaps (`27b.0`)**:
+  * Ursache analysiert: Unmittelbares synchrones `measure/layout/draw` auf einer unangehängten `ComposeView` traf auf einen noch unvollständigen Recomposer-Zyklus (0 % nicht-transparente Pixel).
+  * Instrumentierter Test in `feature/composepreview/src/androidTest` (`ComposePreviewRenderTest.kt`) belegt das Problem unabhängig vom Compiler.
+* **Umbau auf GraphicsLayer & Frame-Synchronisation (`27b.1`)**:
+  * Aufnahme innerhalb der Komposition via `rememberGraphicsLayer()` und `drawWithContent { graphicsLayer.record { drawContent() } }`.
+  * Warten auf den Frame via `withFrameNanos` und Auslesen über `graphicsLayer.toImageBitmap().asAndroidBitmap()`.
+  * Absicherung gegen Einfrieren durch 5-Sekunden-Timeout mit lokalisierter Meldung `composepreview_zeitlimit_ueberschritten`.
+* **Fehlerisolation & Schutz der Host-UI (`27b.1`)**:
+  * Vorschau läuft in einer eigenen `ComposeView` mit separatem Lebenszyklus, um Composer-Slot-Table-Korruption der Host-App zu verhindern.
+  * `ReflectiveComposableHost` fängt `InvocationTargetException` ab und meldet Fehler sauber an `PreviewRenderState.Failed(message)`.
+* **Signatur-Validierung (`27b.1`)**:
+  * `ReflectiveComposableValidator.validateParameterless` prüft auf `(androidx.compose.runtime.Composer, Int)`.
+  * Funktionen mit Parametern werden ausdrücklich mit `composepreview_funktion_hat_parameter` abgewiesen, statt mit fehlerhafter Argumentanzahl abzustürzen.
+* **Dynamische Größe (`27b.1`)**:
+  * `ComposePreviewSizeResolver` berechnet Dimensionen dynamisch anhand von `displayMetrics`, Seitenverhältnis und `MeasureSpec.AT_MOST`-Wrapping statt starrer 1080×1920 Pixel.
+* **Tests & Dokumentation (`27b.2`)**:
+  * Instrumentierte Tests (`ComposePreviewRenderTest.kt`, `Sample.kt`) mit Vorab-Kompilierung von `RedSquareSample`, `ThrowingSample` und `ParameterizedSample`.
+  * Tests kompilieren erfolgreich (`assembleDebugAndroidTest`).
+  * Ausführlicher technischer Bericht in [`docs/compose-preview-render-report.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/docs/compose-preview-render-report.md).
+
 ### 🎨 Compose-Preview: Kotlin-Compiler als Prozess in Termux (Task 27a)
 
 * **Spike auf dem Gerät & Bytecode-Verifikation (`27a.0`)**:

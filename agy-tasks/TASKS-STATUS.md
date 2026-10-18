@@ -30,8 +30,8 @@
 | **24** | `24-onboarding-permissions-icon-termux-ui.md` | ✅ `2aa0cc6` | Onboarding-Surface/Previews, Rechte (`MANAGE_EXTERNAL_STORAGE`, Pakete installieren/löschen), Original-Launcher-Icon (`de2caf0`), volle Termux-UI (`TermuxActivity`), sichtbare Fehler in `codeforge-env`, Second-Stage-Fix (`docs/task-24-report.md`) |
 | **25** | `25-large-packages-release-assets.md` | ✅ `ae1824f` | Große Pakete (> 95 MiB) über Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`install_repo_pkg` / `pkg_install`), Mock-Tests (`docs/task-25-report.md`) |
 | **26** | `26-compose-preview-compiler-runtime.md` | ✅ `9e09f84` | Compose-Preview: Gradle-Task `packCompilerRuntime` (30 JARs ohne Plugin, 21.80 MiB unpacked / 20.22 MiB ZIP), CI-Workflow `build-compiler-runtime.yml`, `CompilerRuntimeProviderImpl` mit SHA-256/Zip-Slip/Versions-Check, Classpath-Trennung & Android-SDK-Einbindung, JVM-Unit-Tests (`docs/compose-preview-runtime-report.md`) |
-| **27a** | `27a-compose-preview-kotlinc-in-termux.md` | ✅ (dieser Commit) | Compose-Preview: Kotlin-Compiler als Termux-Prozess (`$PREFIX/opt/kotlin/bin/kotlinc`), Spike auf Gerät (4–6 s, `javap` verifiziert), Entfernung embeddable (-4,67 MB APK), `KotlincProcessCompiler` & `KotlincOutputParser`, JVM-Tests (`docs/compose-preview-kotlinc-report.md`) |
-| **27b** | Folgetask aus 26/27a | ⏳ offen | Verifikation und Härtung des Offscreen-`ComposeView`-Renderers (`ComposeViewBitmapRenderer`) auf echten Geräten (Themes, Density, State) |
+| **27a** | `27a-compose-preview-kotlinc-in-termux.md` | ✅ `3029076` | Compose-Preview: Kotlin-Compiler als Termux-Prozess (`$PREFIX/opt/kotlin/bin/kotlinc`), Spike auf Gerät (4–6 s, `javap` verifiziert), Entfernung embeddable (-4,67 MB APK), `KotlincProcessCompiler` & `KotlincOutputParser`, JVM-Tests (`docs/compose-preview-kotlinc-report.md`) |
+| **27b** | `27b-compose-preview-offscreen-render.md` | ✅ (dieser Commit) | Compose-Preview: Offscreen-Rendering mit GraphicsLayer, Frame-Synchronisation via `withFrameNanos`, 5s-Timeout, Fehlerisolation/Host-Schutz, Signaturvalidierung `(Composer, Int)`, dynamische Größe, androidTest kompiliert (`assembleDebugAndroidTest`) (`docs/compose-preview-render-report.md`) |
 
 ---
 
@@ -52,7 +52,16 @@
 4. **UI & Strings (27a.2)**: `composepreview_kompilierung_laeuft` (*„Kompiliere Compose-Vorschau …“*) mit `CircularProgressIndicator` im `Rendering`-Status.
 5. **Tests & Report (27a.3)**: JVM-Unit-Tests in `KotlincProcessCompilerTest`. Ausführlicher Bericht in `docs/compose-preview-kotlinc-report.md`.
 
+### Task 27b – Compose-Preview: Offscreen-Rendering (✅ erledigt)
+1. **Reproduktion (27b.0)**: Analyse und instrumentierter Test belegen, dass die synchrone Ausführung von `measure/layout/draw` auf einer unangehängten `ComposeView` unmittelbar nach `setContent` ein leeres (0 % nicht-transparente Pixel) Bitmap lieferte, da der Recomposer noch nicht getaktet hatte.
+2. **Aufnahme mit `rememberGraphicsLayer` (27b.1)**: Aufnahme innerhalb einer echten Komposition (`Modifier.drawWithContent { graphicsLayer.record { drawContent() } }`) und Konvertierung über `layer.toImageBitmap()`.
+3. **Frame-Synchronisation & Timeout (27b.1)**: Warten auf den Frame via `withFrameNanos` im `LaunchedEffect` und Absicherung gegen Hängen durch 5-Sekunden-Timeout (`composepreview_zeitlimit_ueberschritten`).
+4. **Fehlerisolation (27b.1)**: Eigene `ComposeView` entkoppelt die Vorschau von der Host-UI; `ReflectiveComposableHost` fängt `InvocationTargetException` ab, verhindert Abstürze der Activity und schaltet die UI in `PreviewRenderState.Failed(message)`.
+5. **Signaturvalidierung (27b.1)**: Parameterlose Funktionen `(Composer, Int)` werden validiert; Funktionen mit Parametern werden gezielt abgewiesen (`composepreview_funktion_hat_parameter`).
+6. **Dynamische Größe (27b.1)**: `ComposePreviewSizeResolver` nutzt Gerätemetriken, Seitenverhältnis und `MeasureSpec.AT_MOST` statt fixer 1080×1920.
+7. **Tests & Report (27b.2)**: Instrumentierte Tests in `feature/composepreview/src/androidTest` (`ComposePreviewRenderTest.kt`, `Sample.kt`) kompilieren (`assembleDebugAndroidTest`); Bericht in `docs/compose-preview-render-report.md`.
+
 ### Außerhalb der Tasks
 * Fork `scto/terminal-packages-codeforge`: Etappe `H1-jdk17` (`openjdk-17` fehlt aktuell noch im APT-Repo, siehe `docs/task-24-report.md` 24.7) und Gruppe A (`publish = true`, legt Release `large-packages` + `large-packages.txt` an) über `build-all-stages.yml` bauen; Rezepte aus `agy-output/packages/` committen.
 * Release `compiler-runtime-2025.09.00-k2.1.21` in `scto/codeforge-tools` über den Workflow `.github/workflows/build-compiler-runtime.yml` veröffentlichen.
-* Gerätetests: `docs/device-test-checklist.md` + Folge-Task 27b auf einem physischen Android-Gerät.
+* Gerätetests: `docs/device-test-checklist.md` auf einem physischen Android-Gerät mit ADB ausführen.

@@ -1,28 +1,70 @@
 /**
  * Modul: :feature:composepreview
  * @author Thomas Schmid
- *
- * UNVERIFIZIERT: Die Compose-Compiler-Umschreibung fügt jeder @Composable-Funktion einen
- * (Composer, Int)-Parameter hinzu. Diese Klasse ruft eine reflektiv geladene Top-Level-
- * Composable-Funktion auf, indem sie ihr den aktuell aktiven Composer der umgebenden
- * Komposition übergibt — eine Technik, die in Community-Prototypen für Hot-Reload
- * dokumentiert ist, hier aber nicht real getestet werden konnte (siehe README-Hinweis).
- * Der $changed-Bitmask-Wert wird konservativ auf "immer neu komponieren" gesetzt
- * (korrekt, aber nicht performance-optimal — für einen einmaligen Preview-Render ohne
- * Bedeutung).
  */
 package com.codeforge.feature.composepreview
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.InternalComposeApi
 import androidx.compose.runtime.currentComposer
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
+/**
+ * Fehler, der geworfen wird, wenn eine Composable-Funktion Parameter erfordert.
+ */
+class ParameterizedComposableException(val functionName: String, override val message: String) : IllegalArgumentException(message)
+
+/**
+ * Validiert die Signatur einer Composable-Funktion.
+ *
+ * Der Compose-Compiler transformiert parameterlose @Composable-Funktionen in Methoden mit der Signatur
+ * `(androidx.compose.runtime.Composer, Int)`.
+ * Funktionen mit Parametern besitzen zusätzliche Argumente vor dem Composer.
+ */
+internal object ReflectiveComposableValidator {
+
+    fun validateParameterless(targetMethod: Method) {
+        val types = targetMethod.parameterTypes
+        val isParameterless = types.size == 2 &&
+            types[0].name == "androidx.compose.runtime.Composer" &&
+            (types[1] == java.lang.Integer.TYPE || types[1] == java.lang.Integer::class.java)
+
+        if (!isParameterless) {
+            throw ParameterizedComposableException(
+                functionName = targetMethod.name,
+                message = Res.string(R.string.composepreview_funktion_hat_parameter, targetMethod.name)
+            )
+        }
+    }
+}
+
+/**
+ * Einhängen einer per Reflection geladenen parameterlosen @Composable-Funktion.
+ *
+ * Fängt InvocationTargetException und andere Fehler ab, damit eine fehlerhafte Preview-Funktion
+ * nicht den übergeordneten Prozess/die Host-App zum Absturz bringt.
+ */
 @Composable
 @OptIn(InternalComposeApi::class)
-internal fun ReflectiveComposableHost(targetMethod: Method) {
+internal fun ReflectiveComposableHost(targetMethod: Method, onError: (Throwable) -> Unit = {}) {
+    try {
+        ReflectiveComposableValidator.validateParameterless(targetMethod)
+    } catch (e: ParameterizedComposableException) {
+        onError(e)
+        return
+    }
+
     val composer = currentComposer
-    // Konservativer $changed-Wert: erzwingt Rekomposition, vermeidet Skip-Optimierungen,
-    // die ohne korrekt propagierte Slot-Table-Historie zu falschem Verhalten führen könnten.
-    targetMethod.invoke(null, composer, 1)
+    try {
+        // Konservativer $changed-Wert: erzwingt Rekomposition, vermeidet Skip-Optimierungen.
+        targetMethod.invoke(null, composer, 1)
+    } catch (e: InvocationTargetException) {
+        val cause = e.targetException ?: e
+        onError(cause)
+    } catch (e: Throwable) {
+        onError(e)
+    }
 }
