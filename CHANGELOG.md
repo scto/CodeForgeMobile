@@ -11,6 +11,28 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🎨 Compose-Preview: Jar-Bundle für den On-Device-Compiler bereitstellen (Task 26)
+
+* **Gradle-Task `packCompilerRuntime` (`26.1`)**:
+  * In `:feature:composepreview`: Compose-BOM- (`2025.09.00`) und Kotlin- (`2.1.21`) Artefakte aufgelöst, `classes.jar` aus allen AARs extrahiert und kollisionsfrei als `.jar` benannt.
+  * Standard-Bundle umfasst **31 JARs** mit 23,18 MB (22,10 MiB) unkomprimiert bzw. 20,52 MiB (21,52 MB) als ZIP (`compiler-runtime-2025.09.00-k2.1.21.zip`).
+  * `material-icons-extended` (allein 35,69 MiB `classes.jar`) bleibt aus Performance- und Speichergründen ausgeschlossen (optional über `-PwithExtendedIcons=true`).
+  * Erzeugt `manifest.json` und `.sha256`-Prüfsumme nach vollständiger Verifikation aller JARs.
+* **Release-Workflow & BuildConfig (`26.2`)**:
+  * GitHub Actions Workflow `.github/workflows/build-compiler-runtime.yml` zum Erstellen und Veröffentlichen des Runtime-Pakets im Repository `scto/codeforge-tools` (Release-Tag `compiler-runtime-<bom>-k<kotlin>`); mit `actionlint` geprüft.
+  * `BuildConfig`-Felder (`COMPOSE_BOM_VERSION`, `KOTLIN_VERSION`, `COMPILER_RUNTIME_TAG`, `COMPILER_RUNTIME_ZIP_NAME`, `COMPILER_RUNTIME_BASE_URL`) als Single Source of Truth.
+* **`CompilerRuntimeProvider` & UI (`26.3`)**:
+  * Interface `CompilerRuntimeProvider` in `:core:domain`, Implementierung `CompilerRuntimeProviderImpl` in `:feature:composepreview`.
+  * Lokale Integritätsprüfung gegen `manifest.json`; bei Mismatch oder Erststart sicherer Download mit SHA-256-Validierung, Zip-Slip-Schutz und atomarem Austausch des Installationsverzeichnisses (`filesDir/compiler-runtime`).
+  * `PreviewRenderState.PreparingRuntime(progress)` mit `LinearProgressIndicator` und "Erneut versuchen"-Button bei `Failed`.
+* **Classpath & SDK-Plattform (`26.4`)**:
+  * `kotlin-compose-compiler-plugin-embeddable.jar` wird strikt aus dem User-Classpath (`runtimeClasspathJars`) gefiltert und nur als Compiler-Plugin übergeben.
+  * Dynamische Einbindung von `android.jar` der höchsten installierten Android-SDK-Plattform (`platforms;android-N`) über `SdkRepository`; klare Fehlermeldung (`composepreview_android_plattform_fehlt`), wenn keine Plattform installiert ist.
+* **Lokalisierung, Tests & Dokumentation (`26.5` / `26.6` / `26.7`)**:
+  * Fehlermeldung `composepreview_compose_compiler_plugin_jar_fehlt` korrigiert und neue Strings zweisprachig (DE/EN) hinzugefügt.
+  * Umfassende JVM-Unit-Tests (`CompilerRuntimeProviderTest`) für Manifest-Parser, SHA-256-Prüfung, Zip-Slip-Schutz, Versions-Mismatch, Build-Manifest-Verifikation und Versions-Sortierung.
+  * Ausführlicher technischer Bericht in [`docs/compose-preview-runtime-report.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/docs/compose-preview-runtime-report.md).
+
 ### 📦 Große Pakete (> 100 MB) per Release-Asset installieren (Task 25)
 
 * **`codeforge-env` & `large-pkg-snippet.sh` (`25.1` / `25.2`)**:

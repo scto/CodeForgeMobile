@@ -9,6 +9,7 @@ import com.codeforge.core.domain.model.ComposableCandidate
 
 sealed interface PreviewRenderState {
     data object Idle : PreviewRenderState
+    data class PreparingRuntime(val progress: Int) : PreviewRenderState
     data object Rendering : PreviewRenderState
     data class Rendered(val functionName: String, val imageBytes: ByteArray?) : PreviewRenderState
     data class Failed(val message: String) : PreviewRenderState

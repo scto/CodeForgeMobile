@@ -33,106 +33,130 @@ package com.codeforge.feature.composepreview
 import android.content.Context
 import android.graphics.Bitmap
 import com.codeforge.core.domain.model.PreviewRenderResult
+import com.codeforge.core.domain.repository.CompilerRuntimeProvider
 import com.codeforge.core.domain.repository.ComposePreviewRenderer
 import com.codeforge.core.domain.repository.SdkRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Singleton
 class ComposePreviewRendererImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val sdkRepository: SdkRepository
+    private val sdkRepository: SdkRepository,
+    private val compilerRuntimeProvider: CompilerRuntimeProvider
 ) : ComposePreviewRenderer {
 
     private val compiler = PreviewCompiler()
     private val dexer = PreviewDexer()
 
-    override suspend fun render(filePath: String, sourceCode: String, functionName: String): Result<PreviewRenderResult> =
-        withContext(Dispatchers.Default) {
-            runCatching {
-                val workDir = File(context.cacheDir, "compose_preview/${System.currentTimeMillis()}")
-                workDir.mkdirs()
+    override suspend fun render(
+        filePath: String,
+        sourceCode: String,
+        functionName: String,
+        onPreparingRuntime: (Int) -> Unit
+    ): Result<PreviewRenderResult> = withContext(Dispatchers.Default) {
+        runCatching {
+            val runtimeDir = compilerRuntimeProvider.ensureInstalled(onPreparingRuntime).getOrThrow()
 
-                try {
-                    val runtimeJars = resolveRuntimeJars()
-                    val composePluginJar = resolveComposeCompilerPluginJar()
-                        ?: error(
-                            Res.string(R.string.composepreview_compose_compiler_plugin_jar_fehlt)
-                        )
-                    val d8Path = resolveD8BinaryPath()
-                        ?: error(
-                            Res.string(R.string.composepreview_d8_nicht_gefunden_build_tools)
-                        )
+            val workDir = File(context.cacheDir, "compose_preview/${System.currentTimeMillis()}")
+            workDir.mkdirs()
 
-                    val sourceFile = File(workDir, "PreviewTarget.kt").apply { writeText(sourceCode) }
-                    val classesDir = File(workDir, "classes")
-
-                    val compileResult = compiler.compile(
-                        sourceFile = sourceFile,
-                        outputDir = classesDir,
-                        composeCompilerPluginJar = composePluginJar,
-                        runtimeClasspathJars = runtimeJars
+            try {
+                val runtimeJars = resolveRuntimeJars(runtimeDir)
+                val composePluginJar = resolveComposeCompilerPluginJar(runtimeDir)
+                    ?: error(
+                        Res.string(R.string.composepreview_compose_compiler_plugin_jar_fehlt)
                     )
-                    if (!compileResult.success) {
-                        error(Res.string(R.string.composepreview_kompilierung_fehlgeschlagen, compileResult.errorMessages.joinToString("\n")))
-                    }
-
-                    val classFiles = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
-                    if (classFiles.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
-
-                    val dexOutputDir = File(workDir, "dex")
-                    val dexResult = dexer.dex(classFiles, dexOutputDir, d8Path)
-                    val dexFile = dexResult.dexFile
-                    if (!dexResult.success || dexFile == null) {
-                        error(Res.string(R.string.composepreview_dexing_fehlgeschlagen, dexResult.errorOutput))
-                    }
-
-                    val optimizedDir = File(context.codeCacheDir, "compose_preview_dex").apply { mkdirs() }
-                    val classLoader = dalvik.system.DexClassLoader(
-                        dexFile.absolutePath,
-                        optimizedDir.absolutePath,
-                        null,
-                        context.classLoader
+                val androidPlatformJar = resolveAndroidPlatformJar()
+                    ?: error(
+                        Res.string(R.string.composepreview_android_plattform_fehlt)
+                    )
+                val d8Path = resolveD8BinaryPath()
+                    ?: error(
+                        Res.string(R.string.composepreview_d8_nicht_gefunden_build_tools)
                     )
 
-                    // Top-Level-Funktionen landen im Kotlin-Bytecode in einer synthetischen
-                    // Klasse "<DateinameKt>" — hier "PreviewTargetKt".
-                    val hostClass = classLoader.loadClass("PreviewTargetKt")
-                    val targetMethod = hostClass.methods.firstOrNull { it.name == functionName }
-                        ?: error(Res.string(R.string.composepreview_funktion_nicht_in_kompiliertem_code, functionName))
+                val sourceFile = File(workDir, "PreviewTarget.kt").apply { writeText(sourceCode) }
+                val classesDir = File(workDir, "classes")
 
-                    val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap(
-                        widthPx = 1080,
-                        heightPx = 1920
-                    ) {
-                        ReflectiveComposableHost(targetMethod)
-                    }
-
-                    PreviewRenderResult(functionName = functionName, imageBytes = bitmap.toPngBytes())
-                } finally {
-                    workDir.deleteRecursively()
+                val compileResult = compiler.compile(
+                    sourceFile = sourceFile,
+                    outputDir = classesDir,
+                    composeCompilerPluginJar = composePluginJar,
+                    runtimeClasspathJars = runtimeJars + androidPlatformJar
+                )
+                if (!compileResult.success) {
+                    error(
+                        Res.string(R.string.composepreview_kompilierung_fehlgeschlagen, compileResult.errorMessages.joinToString("\n"))
+                    )
                 }
+
+                val classFiles = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
+                if (classFiles.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
+
+                val dexOutputDir = File(workDir, "dex")
+                val dexResult = dexer.dex(classFiles, dexOutputDir, d8Path)
+                val dexFile = dexResult.dexFile
+                if (!dexResult.success || dexFile == null) {
+                    error(Res.string(R.string.composepreview_dexing_fehlgeschlagen, dexResult.errorOutput))
+                }
+
+                val optimizedDir = File(context.codeCacheDir, "compose_preview_dex").apply { mkdirs() }
+                val classLoader = dalvik.system.DexClassLoader(
+                    dexFile.absolutePath,
+                    optimizedDir.absolutePath,
+                    null,
+                    context.classLoader
+                )
+
+                // Top-Level-Funktionen landen im Kotlin-Bytecode in einer synthetischen
+                // Klasse "<DateinameKt>" — hier "PreviewTargetKt".
+                val hostClass = classLoader.loadClass("PreviewTargetKt")
+                val targetMethod = hostClass.methods.firstOrNull { it.name == functionName }
+                    ?: error(Res.string(R.string.composepreview_funktion_nicht_in_kompiliertem_code, functionName))
+
+                val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap(
+                    widthPx = 1080,
+                    heightPx = 1920
+                ) {
+                    ReflectiveComposableHost(targetMethod)
+                }
+
+                PreviewRenderResult(functionName = functionName, imageBytes = bitmap.toPngBytes())
+            } finally {
+                workDir.deleteRecursively()
             }
         }
+    }
 
-    private fun Bitmap.toPngBytes(): ByteArray =
-        ByteArrayOutputStream().use { stream ->
-            compress(Bitmap.CompressFormat.PNG, 100, stream)
-            stream.toByteArray()
-        }
+    private fun Bitmap.toPngBytes(): ByteArray = ByteArrayOutputStream().use { stream ->
+        compress(Bitmap.CompressFormat.PNG, 100, stream)
+        stream.toByteArray()
+    }
 
-    private fun resolveRuntimeJars(): List<File> =
-        File(context.filesDir, "compiler-runtime").listFiles { f -> f.extension == "jar" }?.toList().orEmpty()
+    internal fun resolveRuntimeJars(runtimeDir: File): List<File> = Companion.resolveRuntimeJars(runtimeDir)
 
-    private fun resolveComposeCompilerPluginJar(): File? =
-        File(context.filesDir, "compiler-runtime/kotlin-compose-compiler-plugin-embeddable.jar").takeIf { it.isFile }
+    private fun resolveComposeCompilerPluginJar(runtimeDir: File): File? =
+        File(runtimeDir, COMPOSE_COMPILER_PLUGIN_JAR_NAME).takeIf { it.isFile }
+
+    private suspend fun resolveAndroidPlatformJar(): File? {
+        val packages = sdkRepository.listAvailablePackages().getOrNull() ?: return null
+
+        val latestPlatform = packages
+            .filter { it.isInstalled && it.id.startsWith("platforms;android-") && it.path != null }
+            .maxWithOrNull(compareBy(VersionComparator) { it.version })
+            ?: return null
+
+        val androidJar = File(latestPlatform.path!!, "android.jar")
+        return androidJar.takeIf { it.isFile }
+    }
 
     /**
      * Nutzt jetzt echte, verifizierte Installationspfade aus SdkRepository (ToolItem.path
@@ -152,7 +176,7 @@ class ComposePreviewRendererImpl @Inject constructor(
     }
 
     /** Vergleicht Versionsstrings wie "34.0.0" numerisch je Segment statt lexikografisch. */
-    private object VersionComparator : Comparator<String> {
+    internal object VersionComparator : Comparator<String> {
         override fun compare(a: String, b: String): Int {
             val partsA = a.split('.', '-')
             val partsB = b.split('.', '-')
@@ -164,5 +188,15 @@ class ComposePreviewRendererImpl @Inject constructor(
             }
             return 0
         }
+    }
+
+    companion object {
+        internal const val COMPOSE_COMPILER_PLUGIN_JAR_NAME = "kotlin-compose-compiler-plugin-embeddable.jar"
+
+        internal fun resolveRuntimeJars(runtimeDir: File): List<File> = runtimeDir
+            .listFiles { f -> f.isFile && f.extension == "jar" && f.name != COMPOSE_COMPILER_PLUGIN_JAR_NAME }
+            ?.sortedBy { it.name }
+            ?.toList()
+            .orEmpty()
     }
 }

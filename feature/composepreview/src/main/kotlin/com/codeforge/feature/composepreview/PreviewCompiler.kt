@@ -11,14 +11,14 @@
  */
 package com.codeforge.feature.composepreview
 
+import java.io.File
 import org.jetbrains.kotlin.cli.common.ExitCode
+import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
-import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.config.Services
-import java.io.File
 
 internal data class CompileResult(val success: Boolean, val outputDir: File, val errorMessages: List<String>)
 
@@ -36,23 +36,14 @@ internal data class CompileResult(val success: Boolean, val outputDir: File, val
  */
 internal class PreviewCompiler {
 
-    fun compile(
-        sourceFile: File,
-        outputDir: File,
-        composeCompilerPluginJar: File,
-        runtimeClasspathJars: List<File>
-    ): CompileResult {
+    fun compile(sourceFile: File, outputDir: File, composeCompilerPluginJar: File, runtimeClasspathJars: List<File>): CompileResult {
         outputDir.mkdirs()
         val errorMessages = mutableListOf<String>()
 
         val collector = object : MessageCollector {
             override fun clear() = Unit
             override fun hasErrors(): Boolean = errorMessages.isNotEmpty()
-            override fun report(
-                severity: CompilerMessageSeverity,
-                message: String,
-                location: CompilerMessageSourceLocation?
-            ) {
+            override fun report(severity: CompilerMessageSeverity, message: String, location: CompilerMessageSourceLocation?) {
                 if (severity.isError) errorMessages.add("${location?.line}:${location?.column} $message")
             }
         }

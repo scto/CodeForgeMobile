@@ -15,10 +15,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,21 +39,14 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
 @Composable
-fun ComposePreviewRoute(
-    modifier: Modifier = Modifier,
-    viewModel: ComposePreviewViewModel = hiltViewModel()
-) {
+fun ComposePreviewRoute(modifier: Modifier = Modifier, viewModel: ComposePreviewViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     ComposePreviewScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
 }
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-private fun ComposePreviewScreen(
-    modifier: Modifier = Modifier,
-    uiState: ComposePreviewUiState,
-    onEvent: (ComposePreviewUiEvent) -> Unit
-) {
+private fun ComposePreviewScreen(modifier: Modifier = Modifier, uiState: ComposePreviewUiState, onEvent: (ComposePreviewUiEvent) -> Unit) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -83,18 +78,17 @@ private fun ComposePreviewScreen(
             )
 
             Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-                RenderStateContent(uiState.renderState)
+                RenderStateContent(
+                    state = uiState.renderState,
+                    onRetry = { onEvent(ComposePreviewUiEvent.Rerender) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ComposableChipRow(
-    candidates: List<ComposableCandidate>,
-    selected: String?,
-    onSelected: (String) -> Unit
-) {
+private fun ComposableChipRow(candidates: List<ComposableCandidate>, selected: String?, onSelected: (String) -> Unit) {
     LazyRow(
         modifier = Modifier.fillMaxWidth().padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -115,10 +109,26 @@ private fun ComposableChipRow(
 }
 
 @Composable
-private fun RenderStateContent(state: PreviewRenderState) {
+private fun RenderStateContent(state: PreviewRenderState, onRetry: () -> Unit) {
     when (state) {
         PreviewRenderState.Idle ->
             Text(stringRes(R.string.composepreview_waehle_eine_funktion_fuer_die), style = MaterialTheme.typography.bodyMedium)
+
+        is PreviewRenderState.PreparingRuntime -> {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                LinearProgressIndicator(
+                    progress = { (state.progress.coerceIn(0, 100)) / 100f },
+                    modifier = Modifier.fillMaxWidth(0.7f)
+                )
+                Text(
+                    stringRes(R.string.composepreview_laufzeit_wird_vorbereitet, state.progress.coerceIn(0, 100)),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
 
         PreviewRenderState.Rendering ->
             CircularProgressIndicator()
@@ -152,7 +162,16 @@ private fun RenderStateContent(state: PreviewRenderState) {
             }
         }
 
-        is PreviewRenderState.Failed ->
-            Text(state.message, color = MaterialTheme.colorScheme.error)
+        is PreviewRenderState.Failed -> {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(state.message, color = MaterialTheme.colorScheme.error)
+                Button(onClick = onRetry) {
+                    Text(stringRes(R.string.common_erneut_versuchen))
+                }
+            }
+        }
     }
 }

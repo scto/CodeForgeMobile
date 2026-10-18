@@ -4,6 +4,7 @@
  */
 package com.codeforge.feature.composepreview
 
+import com.codeforge.core.domain.repository.CompilerRuntimeProvider
 import com.codeforge.core.domain.repository.ComposePreviewRenderer
 import dagger.Binds
 import dagger.Module
@@ -16,7 +17,9 @@ import javax.inject.Singleton
 abstract class ComposePreviewModule {
     @Binds
     @Singleton
-    abstract fun bindComposePreviewRenderer(
-        impl: ComposePreviewRendererImpl
-    ): ComposePreviewRenderer
+    abstract fun bindComposePreviewRenderer(impl: ComposePreviewRendererImpl): ComposePreviewRenderer
+
+    @Binds
+    @Singleton
+    abstract fun bindCompilerRuntimeProvider(impl: CompilerRuntimeProviderImpl): CompilerRuntimeProvider
 }

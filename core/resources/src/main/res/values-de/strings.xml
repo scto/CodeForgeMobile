@@ -49,8 +49,9 @@
     <string name="app_verzeichnisauswahl_wird_geoeffnet">Verzeichnisauswahl wird geöffnet…</string>
 
     <!-- composepreview -->
+    <string name="composepreview_android_plattform_fehlt">Android-Plattform über den SDK-Manager installieren (Einstellungen → SDK-Manager → Plattformen).</string>
     <string name="composepreview_bild_konnte_nicht_dekodiert_werden">Bild konnte nicht dekodiert werden.</string>
-    <string name="composepreview_compose_compiler_plugin_jar_fehlt">Compose-Compiler-Plugin-Jar fehlt (assets/compiler-runtime/kotlin-compose-compiler-plugin-embeddable.jar). Ohne dieses Plugin können @Composable-Funktionen nicht korrekt kompiliert werden.</string>
+    <string name="composepreview_compose_compiler_plugin_jar_fehlt">Compiler-Laufzeitpaket fehlt oder ist unvollständig – wird beim ersten Start geladen.</string>
     <string name="composepreview_d8_konnte_nicht_gestartet_werden">d8 konnte nicht gestartet werden.</string>
     <string name="composepreview_d8_nicht_gefunden_build_tools">d8 nicht gefunden. Build-Tools über den SDK Manager installieren (Einstellungen → SDK Manager → Build-Tools).</string>
     <string name="composepreview_dexing_fehlgeschlagen">Dexing fehlgeschlagen: %1$s</string>
@@ -58,6 +59,7 @@
     <string name="composepreview_funktion_nicht_in_kompiliertem_code">Funktion \'%1$s\' nicht in kompiliertem Code gefunden.</string>
     <string name="composepreview_kompilierung_fehlgeschlagen">Kompilierung fehlgeschlagen:\n%1$s</string>
     <string name="composepreview_kompilierung_lieferte_keine_class_date">Kompilierung lieferte keine .class-Dateien.</string>
+    <string name="composepreview_laufzeit_wird_vorbereitet">Compiler-Laufzeit wird vorbereitet (%1$d%%)…</string>
     <string name="composepreview_neu_rendern">Neu rendern</string>
     <string name="composepreview_oeffne_eine_datei_mit_composable">Öffne eine Datei mit @Composable-Funktionen im Editor.</string>
     <string name="composepreview_rendering_fehlgeschlagen">Rendering fehlgeschlagen.</string>

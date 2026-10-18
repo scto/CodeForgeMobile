@@ -1,0 +1,127 @@
+name: Build Compose Preview Compiler Runtime
+
+# Erzeugt das Compiler-Runtime-Bundle (compiler-runtime-<bom>-k<kotlin>.zip, manifest.json, .sha256)
+# über ./gradlew :feature:composepreview:packCompilerRuntime und lädt es optional als Release-Asset
+# in das Repository scto/codeforge-tools hoch (Task 26.2).
+#
+# Benötigtes Repository-Secret (nur bei publish = true):
+#   PACKAGES_REPO_TOKEN   Fine-grained PAT mit Contents: Read and write auf dem Ziel-Repo (scto/codeforge-tools)
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Nach dem Build als Release in target_repo veröffentlichen"
+        required: true
+        default: true
+        type: boolean
+      with_extended_icons:
+        description: "material-icons-extended einschließen (-PwithExtendedIcons=true, +35.7 MiB)"
+        required: true
+        default: false
+        type: boolean
+      target_repo:
+        description: "Ziel-Repository für das Release"
+        required: true
+        default: "scto/codeforge-tools"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-compiler-runtime
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ziel-Repository prüfen
+        env:
+          IN_TARGET: ${{ inputs.target_repo }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$IN_TARGET" | grep -Eq '^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$' \
+            || { echo "::error::Ungültiges target_repo: $IN_TARGET"; exit 1; }
+
+      - name: JDK 17 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Compiler-Runtime-Bundle bauen (packCompilerRuntime)
+        env:
+          EXT_ICONS: ${{ inputs.with_extended_icons && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew :feature:composepreview:packCompilerRuntime -PwithExtendedIcons="$EXT_ICONS" --no-daemon
+
+      - name: Metadaten und Zusammenfassung bestimmen
+        id: meta
+        run: |
+          set -euo pipefail
+          dir="feature/composepreview/build/compiler-runtime"
+          man="$dir/manifest.json"
+          [ -s "$man" ] || { echo "::error::manifest.json fehlt in $dir"; exit 1; }
+          bom="$(jq -r '.bom' "$man")"
+          kotlin="$(jq -r '.kotlin' "$man")"
+          tag="compiler-runtime-${bom}-k${kotlin}"
+          zip="$dir/${tag}.zip"
+          sha="$dir/${tag}.zip.sha256"
+          [ -s "$zip" ] || { echo "::error::ZIP-Datei fehlt: $zip"; exit 1; }
+          [ -s "$sha" ] || { echo "::error::SHA-256-Datei fehlt: $sha"; exit 1; }
+          unzip -t "$zip" >/dev/null
+          {
+            echo "tag=$tag"
+            echo "zip=$zip"
+            echo "sha=$sha"
+            echo "man=$man"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "## Compose Preview Compiler-Runtime"
+            echo
+            echo "- **Release-Tag:** \`$tag\`"
+            echo "- **Compose-BOM:** \`$bom\` · **Kotlin:** \`$kotlin\`"
+            echo "- **Anzahl JARs:** \`$(jq '.files | length' "$man")\`"
+            echo "- **ZIP-Größe:** \`$(du -h "$zip" | cut -f1)\`"
+            echo "- **SHA-256:** \`$(awk '{print $1}' "$sha")\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.tag }}
+          path: |
+            ${{ steps.meta.outputs.zip }}
+            ${{ steps.meta.outputs.sha }}
+            ${{ steps.meta.outputs.man }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Release in target_repo veröffentlichen
+        if: success() && inputs.publish
+        env:
+          GH_TOKEN: ${{ secrets.PACKAGES_REPO_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          ZIP_FILE: ${{ steps.meta.outputs.zip }}
+          SHA_FILE: ${{ steps.meta.outputs.sha }}
+          MAN_FILE: ${{ steps.meta.outputs.man }}
+        run: |
+          set -euo pipefail
+          [ -n "$GH_TOKEN" ] || { echo "::error::Secret PACKAGES_REPO_TOKEN fehlt"; exit 1; }
+          notes="Compose-Preview Compiler-Runtime (${TAG}). Enthält classes.jar aus der Compose-BOM, kotlin-stdlib, kotlinx-coroutines-core-jvm, kotlin-compose-compiler-plugin-embeddable.jar und manifest.json."
+          if gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ZIP_FILE" "$SHA_FILE" "$MAN_FILE" --repo "$TARGET_REPO" --clobber
+            gh release edit "$TAG" --repo "$TARGET_REPO" --notes "$notes"
+          else
+            gh release create "$TAG" "$ZIP_FILE" "$SHA_FILE" "$MAN_FILE" --repo "$TARGET_REPO" --title "$TAG" --notes "$notes"
+          fi

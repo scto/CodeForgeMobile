@@ -29,7 +29,10 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
-private class PreviewHostOwner : LifecycleOwner, SavedStateRegistryOwner, ViewModelStoreOwner {
+private class PreviewHostOwner :
+    LifecycleOwner,
+    SavedStateRegistryOwner,
+    ViewModelStoreOwner {
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
     override val viewModelStore = ViewModelStore()

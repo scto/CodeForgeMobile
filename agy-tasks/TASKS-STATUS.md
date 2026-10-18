@@ -28,18 +28,24 @@
 | **22** | `22-verification-followups.md` | ✅ `adb101f` | Ordnerwahl im Wizard, Expressive-Entscheidung, Gradle-/ktlint-Bericht, Gerätetest-Checkliste |
 | **23** | `23-fix-extensions-manager.md` | ✅ `baa1e07` | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen (`docs/extensions-manager-fix-report.md`) |
 | **24** | `24-onboarding-permissions-icon-termux-ui.md` | ✅ `2aa0cc6` | Onboarding-Surface/Previews, Rechte (`MANAGE_EXTERNAL_STORAGE`, Pakete installieren/löschen), Original-Launcher-Icon (`de2caf0`), volle Termux-UI (`TermuxActivity`), sichtbare Fehler in `codeforge-env`, Second-Stage-Fix (`docs/task-24-report.md`) |
-| **25** | `25-large-packages-release-assets.md` | ✅ (dieser Commit) | Große Pakete (> 95 MiB) über Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`install_repo_pkg` / `pkg_install`), Mock-Tests (`docs/task-25-report.md`) |
+| **25** | `25-large-packages-release-assets.md` | ✅ `ae1824f` | Große Pakete (> 95 MiB) über Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`install_repo_pkg` / `pkg_install`), Mock-Tests (`docs/task-25-report.md`) |
+| **26** | `26-compose-preview-compiler-runtime.md` | ✅ (dieser Commit) | Compose-Preview: Gradle-Task `packCompilerRuntime` (31 JARs, 22.10 MiB unpacked / 20.52 MiB ZIP), CI-Workflow `build-compiler-runtime.yml`, `CompilerRuntimeProviderImpl` mit SHA-256/Zip-Slip/Versions-Check, Classpath-Trennung & Android-SDK-Einbindung, JVM-Unit-Tests (`docs/compose-preview-runtime-report.md`) |
+| **27a** | Folgetask aus 26 | ⏳ offen | Verifikation der On-Device-Kompilierung von `K2JVMCompiler` und `classes.dex`-Erzeugung via `d8` auf ART / echtem Android-Gerät |
+| **27b** | Folgetask aus 26 | ⏳ offen | Verifikation und Härtung des Offscreen-`ComposeView`-Renderers (`ComposeViewBitmapRenderer`) auf echten Geräten (Themes, Density, State) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
 
-### Task 25 – Große Pakete (> 100 MB) per Release-Asset installieren (✅ erledigt)
-1. **Snippet & `codeforge-env` (25.1 / 25.2)**: `apt_base_url()` und `install_repo_pkg()` in `libs/terminal-engine/snippets/large-pkg-snippet.sh` und direkt nach `download()` in `codeforge-env` integriert; `pkg_install()` iteriert über alle Pakete via `install_repo_pkg` (inkl. Logdatei und Fehlerausgabe); `codeforge-env pkg <name...>` und `setup --gradle` ergänzt.
-2. **Code-weite Prüfung (25.3)**: Alle `pkg install`/`apt install`-Stellen geprüft; Hinweis im Extensions-Manager (`ExtensionsManager.kt`, `strings.xml`) auf `codeforge-env pkg <pkg>` umgestellt.
-3. **Sicherheit & Signatur (25.4)**: Nur `https://github.com/`-URLs erlaubt, SHA-256 geprüft, detachte GPG-Signatur `large-packages.txt.asc` im Workflow `.github/workflows/build-bootstrap-repo.yml` erzeugt und in `install_repo_pkg()` per `gpgv` gegen `codeforge.gpg` geprüft.
-4. **Doku & Bericht (25.5 / 25.6)**: Mock-Tests (`large-pkg-snippet.test.sh`) ausgeführt, Abschnitt „Große Pakete (> 100 MB)“ in `docs/BOOTSTRAP-WORKFLOW.md` und `README.md`/`README_DE.md` ergänzt, Bericht in `docs/task-25-report.md`.
+### Task 26 – Compose-Preview: Jar-Bundle für den On-Device-Compiler bereitstellen (✅ erledigt)
+1. **Gradle-Task `packCompilerRuntime` (26.1)**: Compose BOM 2025.09.00 + Kotlin 2.1.21 Artefakte aufgelöst, AARs entpackt (`classes.jar`), alle 31 JARs geprüft (`unzip -t`), `manifest.json`, ZIP (`compiler-runtime-2025.09.00-k2.1.21.zip`) und `.sha256` erzeugt. Optional `-PwithExtendedIcons`.
+2. **Release-Workflow (26.2)**: `.github/workflows/build-compiler-runtime.yml` erstellt, via `workflow_dispatch` triggerbar, Upload zu Release `compiler-runtime-<bom>-k<kotlin>` in `scto/codeforge-tools`. `actionlint` fehlerfrei.
+3. **`CompilerRuntimeProvider` (26.3)**: Interface in `:core:domain`, Implementierung in `:feature:composepreview`. Integritätsprüfung gegen `manifest.json`, Download von GitHub-Release-Asset, SHA-256-Validierung, Zip-Slip-Schutz, atomarer Austausch des Verzeichnisses. UI-Zustand `PreparingRuntime(progress)` und Wiederholen-Button bei `Failed`.
+4. **Classpath & Platform (26.4)**: `kotlin-compose-compiler-plugin-embeddable.jar` aus User-Classpath exkludiert (nur in `pluginClasspaths`), höchstes `platforms;android-N` via `SdkRepository` ermittelt und `android.jar` angehängt. Lokalisierte Fehlermeldung bei fehlender Plattform.
+5. **Strings (26.5)**: `composepreview_compose_compiler_plugin_jar_fehlt` korrigiert (de/en), `composepreview_android_plattform_fehlt` und `composepreview_laufzeit_wird_vorbereitet` zweisprachig ergänzt.
+6. **Tests & Report (26.6 / 26.7)**: JVM-Unit-Tests für Manifest-Parser, SHA-Mismatch, Zip-Slip, Versions-Mismatch, erzeugtes `manifest.json` gegen Build-JARs und Classpath-Exklusion. Doku-Bericht in `docs/compose-preview-runtime-report.md`.
 
 ### Außerhalb der Tasks
 * Fork `scto/terminal-packages-codeforge`: Etappe `H1-jdk17` (`openjdk-17` fehlt aktuell noch im APT-Repo, siehe `docs/task-24-report.md` 24.7) und Gruppe A (`publish = true`, legt Release `large-packages` + `large-packages.txt` an) über `build-all-stages.yml` bauen; Rezepte aus `agy-output/packages/` committen.
-* Gerätetests: `docs/device-test-checklist.md` + `codeforge-env setup --gradle` nach Veröffentlichung des `large-packages`-Releases.
+* Release `compiler-runtime-2025.09.00-k2.1.21` in `scto/codeforge-tools` über den Workflow `.github/workflows/build-compiler-runtime.yml` veröffentlichen.
+* Gerätetests: `docs/device-test-checklist.md` + Folge-Tasks 27a und 27b auf einem physischen Android-Gerät.

@@ -51,14 +51,18 @@ Repo-Stand: `adb101f`. ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen
 | 22 | `22-verification-followups.md` | ✅ `adb101f` | Ordnerwahl im Wizard, Expressive-Entscheidung, Gradle-/ktlint-Bericht, Gerätetest-Checkliste |
 | 23 | `23-fix-extensions-manager.md` | ✅ `baa1e07` | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen |
 | 24 | `24-onboarding-permissions-icon-termux-ui.md` | ✅ `2aa0cc6` | Onboarding-Surface/Previews, Rechte, Launcher-Icon (`de2caf0`), volle Termux-UI, `codeforge-env`-Fehlerausgabe, Second-Stage-Fix |
-| 25 | `25-large-packages-release-assets.md` | ✅ (dieser Commit) | Große Pakete (> 95 MiB) per Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`docs/task-25-report.md`) |
+| 25 | `25-large-packages-release-assets.md` | ✅ `ae1824f` | Große Pakete (> 95 MiB) per Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`docs/task-25-report.md`) |
+| 26 | `26-compose-preview-compiler-runtime.md` | ✅ (dieser Commit) | Compose-Preview: Gradle-Task `packCompilerRuntime` (31 JARs, 22.10 MiB unpacked / 20.52 MiB ZIP), CI-Workflow `build-compiler-runtime.yml`, `CompilerRuntimeProviderImpl` mit SHA-256/Zip-Slip/Versions-Check, Classpath-Trennung & Android-SDK-Einbindung, JVM-Unit-Tests (`docs/compose-preview-runtime-report.md`) |
+| 27a | Folgetask aus 26 | ⏳ offen | Verifikation der On-Device-Kompilierung von `K2JVMCompiler` und `classes.dex`-Erzeugung via `d8` auf ART / echtem Android-Gerät |
+| 27b | Folgetask aus 26 | ⏳ offen | Verifikation und Härtung des Offscreen-`ComposeView`-Renderers (`ComposeViewBitmapRenderer`) auf echten Geräten (Themes, Density, State) |
 
 ## Nächste Schritte
 
 | Schritt | Aufgabe | Anmerkung |
 |---|---|---|
 | 1 | Fork `scto/terminal-packages-codeforge` | Etappe `H1-jdk17` sowie Gruppe A (`publish = true`, erzeugt Release `large-packages` + `large-packages.txt`) in `build-all-stages.yml` starten; Rezepte aus `agy-output/packages/` committen |
-| 2 | Gerätetests | `docs/device-test-checklist.md` + Punkte aus `docs/task-24-report.md` & `docs/task-25-report.md` (`codeforge-env setup --gradle`) |
+| 2 | Release `compiler-runtime-2025.09.00-k2.1.21` | In `scto/codeforge-tools` über Workflow `.github/workflows/build-compiler-runtime.yml` ausrollen |
+| 3 | Gerätetests | `docs/device-test-checklist.md` + Punkte aus `docs/task-24-report.md` & `docs/task-25-report.md` (`codeforge-env setup --gradle`) + Folge-Tasks 27a und 27b |
 | laufend | **17** | vor jedem Commit/PR; neue Texte in `values/` **und** `values-de/` |
 
 Nicht Teil der Tasks: das Bauen von Bootstrap und APT-Paketen (GitHub-Actions im Fork). Weitere Backlog-Punkte: `STATUS.md` (Abschnitt „Noch offene Features"): `:libs:gradle-tooling-bridge`, Layout-Designer-Erweiterungen, Expressive ab stabiler material3 ≥ 1.4, ktlint-Umbenennung `template_engine`.

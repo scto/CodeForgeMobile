@@ -39,7 +39,7 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 | Git-Panel (Diff, Merge, Commit, Push/Pull, Graph, Stash, Tags, Rebase, Cherry-Pick, Revert, Reset, Amend, Blame, Hunks, Konflikt-Editor) | ✅ 🧪 | JGit, 47 Tests laufen gegen echte Repos |
 | Indexierung, Dependency-Updater, Editor-Overlays (Versions-Hinweis, Farb-Kästchen) | ✅ | `docs/indexing-and-dependency-updater.md` |
 | LSP-Client (`LspClientRepositoryImpl`, JSON-RPC) | ✅ 🧪 | voll angebunden über `LspServerResolver` und `LspSessionController` im Editor, verifiziert (Task 23) |
-| Compose-Preview | 🟡 | Renderer + Brücke vorhanden, ungebaut |
+| Compose-Preview (On-Device-Compiler, `packCompilerRuntime` 31 JARs, `CompilerRuntimeProviderImpl`, Android-Platform `android.jar`, Workflow) | ✅ 🧪 | `docs/compose-preview.md`, `docs/compose-preview-runtime-report.md` |
 | **Layout-Designer** (Palette, Vorschau, Baum, Eigenschaften, XML, Undo/Redo, Speichern) | ✅ 🧪 (Logik) | `docs/layout-designer.md` |
 
 ### Projekt & Einstellungen

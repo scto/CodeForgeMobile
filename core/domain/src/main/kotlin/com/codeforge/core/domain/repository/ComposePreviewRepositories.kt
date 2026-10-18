@@ -6,6 +6,7 @@ package com.codeforge.core.domain.repository
 
 import com.codeforge.core.domain.model.ComposableCandidate
 import com.codeforge.core.domain.model.PreviewRenderResult
+import java.io.File
 
 /**
  * Reine, plattformunabhängige Kotlin-Quelltext-Analyse (kein I/O). Liegt bewusst in
@@ -19,10 +20,22 @@ interface ComposeSourceAnalyzer {
 }
 
 /**
+ * Stellt sicher, dass das zur App-Version (Compose-BOM + Kotlin) passende
+ * Compiler-Runtime-Bundle unter `filesDir/compiler-runtime` installiert und verifiziert ist.
+ */
+interface CompilerRuntimeProvider {
+    suspend fun ensureInstalled(onProgress: (Int) -> Unit = {}): Result<File>
+}
+
+/**
  * Rendert eine einzelne @Composable-Funktion aus Quelltext in ein Bild. Implementiert
- * in :feature:composepreview (siehe KDoc dort zur aktuell noch fehlenden dynamischen
- * Kompilierungs-Pipeline).
+ * in :feature:composepreview.
  */
 interface ComposePreviewRenderer {
-    suspend fun render(filePath: String, sourceCode: String, functionName: String): Result<PreviewRenderResult>
+    suspend fun render(
+        filePath: String,
+        sourceCode: String,
+        functionName: String,
+        onPreparingRuntime: (Int) -> Unit = {}
+    ): Result<PreviewRenderResult>
 }

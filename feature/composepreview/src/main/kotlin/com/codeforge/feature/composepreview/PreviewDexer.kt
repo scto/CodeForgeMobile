@@ -28,7 +28,8 @@ internal class PreviewDexer {
         return try {
             val command = buildList {
                 add(d8BinaryPath)
-                add("--output"); add(outputDir.absolutePath)
+                add("--output")
+                add(outputDir.absolutePath)
                 addAll(classFiles.map { it.absolutePath })
             }
 
@@ -42,7 +43,8 @@ internal class PreviewDexer {
             val dexFile = File(outputDir, "classes.dex").takeIf { it.isFile }
             DexResult(success = exitCode == 0 && dexFile != null, dexFile = dexFile, errorOutput = output)
         } catch (e: Exception) {
-            DexResult(success = false, dexFile = null, errorOutput = e.message ?: Res.string(R.string.composepreview_d8_konnte_nicht_gestartet_werden))
+            val defaultMessage = Res.string(R.string.composepreview_d8_konnte_nicht_gestartet_werden)
+            DexResult(success = false, dexFile = null, errorOutput = e.message ?: defaultMessage)
         }
     }
 }

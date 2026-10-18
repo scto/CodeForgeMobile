@@ -13,6 +13,7 @@ import com.codeforge.core.navigation.ActiveComposablePreviewBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class ComposePreviewViewModel @Inject constructor(
@@ -80,10 +80,24 @@ class ComposePreviewViewModel @Inject constructor(
 
     private fun renderSelected(functionName: String) {
         val file = lastActiveFile ?: return
-        _uiState.update { it.copy(renderState = PreviewRenderState.Rendering) }
+        _uiState.update { it.copy(renderState = PreviewRenderState.PreparingRuntime(0)) }
 
         viewModelScope.launch {
-            composePreviewRenderer.render(file.path, file.content, functionName)
+            composePreviewRenderer.render(
+                filePath = file.path,
+                sourceCode = file.content,
+                functionName = functionName,
+                onPreparingRuntime = { pct ->
+                    _uiState.update { state ->
+                        val nextState = if (pct >= 100) {
+                            PreviewRenderState.Rendering
+                        } else {
+                            PreviewRenderState.PreparingRuntime(pct)
+                        }
+                        state.copy(renderState = nextState)
+                    }
+                }
+            )
                 .onSuccess { result ->
                     _uiState.update {
                         it.copy(renderState = PreviewRenderState.Rendered(result.functionName, result.imageBytes))
@@ -91,7 +105,11 @@ class ComposePreviewViewModel @Inject constructor(
                 }
                 .onFailure { throwable ->
                     _uiState.update {
-                        it.copy(renderState = PreviewRenderState.Failed(throwable.message ?: Res.string(R.string.composepreview_rendering_fehlgeschlagen)))
+                        it.copy(
+                            renderState = PreviewRenderState.Failed(
+                                throwable.message ?: Res.string(R.string.composepreview_rendering_fehlgeschlagen)
+                            )
+                        )
                     }
                 }
         }
