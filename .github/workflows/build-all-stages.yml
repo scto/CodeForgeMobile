@@ -1,0 +1,112 @@
+name: Build All Stages (Kette)
+
+# Startet build-bootstrap-repo.yml nacheinander für mehrere Gruppen aus apt-groups.json
+# (ein Klick statt vieler Einzelläufe). Die Läufe sind absichtlich sequentiell:
+# build-bootstrap-repo hält eine Concurrency-Gruppe und gh-pages darf nicht parallel beschrieben werden.
+#
+# Voraussetzungen: dieselben Secrets wie build-bootstrap-repo.yml (secrets: inherit).
+
+on:
+  workflow_dispatch:
+    inputs:
+      preset:
+        description: "light = Gruppen A–E · heavy = JDKs, LLVM, Dart, rust-analyzer · all = beides"
+        required: true
+        default: "light"
+        type: choice
+        options: [light, heavy, all]
+      only:
+        description: "Optional: nur diese Gruppen (Komma, z. B. A-leicht-jvm,D-leicht-lsp); überschreibt preset"
+        required: false
+        default: ""
+        type: string
+      mode:
+        description: "Modus für jeden Lauf (add = ergänzen, empfohlen)"
+        required: true
+        default: "add"
+        type: choice
+        options: [add, auto]
+      archs:
+        description: "Architekturen, Komma getrennt (Gruppen mit eigenem archs-Feld nutzen dieses)"
+        required: true
+        default: "aarch64,arm"
+        type: string
+      publish:
+        description: "Nach jedem Lauf nach gh-pages veröffentlichen"
+        required: true
+        default: false
+        type: boolean
+      stop_on_error:
+        description: "Kette abbrechen, sobald eine Gruppe fehlschlägt"
+        required: true
+        default: false
+        type: boolean
+      keep_going:
+        description: "Innerhalb einer Gruppe bei fehlgeschlagenem Paket weiterbauen"
+        required: true
+        default: true
+        type: boolean
+      target_repo:
+        description: "Ziel-Repo für gh-pages"
+        required: false
+        default: "scto/terminal-packages-codeforge"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-all-stages
+  cancel-in-progress: false
+
+jobs:
+  groups:
+    name: Gruppen planen
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Matrix aus apt-groups.json
+        id: plan
+        env:
+          IN_PRESET: ${{ inputs.preset }}
+          IN_ONLY: ${{ inputs.only }}
+        run: bash .github/scripts/plan-apt-groups.sh
+
+  build:
+    name: ${{ matrix.name }}
+    needs: groups
+    strategy:
+      max-parallel: 1
+      fail-fast: ${{ inputs.stop_on_error }}
+      matrix: ${{ fromJSON(needs.groups.outputs.matrix) }}
+    uses: ./.github/workflows/build-bootstrap-repo.yml
+    with:
+      mode: ${{ inputs.mode }}
+      stage: ${{ matrix.stage }}
+      repo_packages: ${{ matrix.repo_packages }}
+      archs: ${{ matrix.archs || inputs.archs }}
+      keep_going: ${{ inputs.keep_going }}
+      publish: ${{ inputs.publish }}
+      target_repo: ${{ inputs.target_repo }}
+      run_label: ${{ matrix.name }}
+    secrets: inherit
+
+  summary:
+    name: Zusammenfassung
+    needs: [groups, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ergebnis
+        env:
+          RESULT: ${{ needs.build.result }}
+          MATRIX: ${{ needs.groups.outputs.matrix }}
+        run: |
+          {
+            echo "### Kette: $RESULT"
+            echo "Gruppen: $(jq -r '[.include[].name]|join(" → ")' <<<"$MATRIX")"
+            echo "Einzelergebnisse stehen in den Jobs 'build / …' (Matrix-Einträge)."
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$RESULT" = success ] || { echo "Kette nicht erfolgreich: $RESULT"; exit 1; }
