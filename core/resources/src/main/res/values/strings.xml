@@ -459,12 +459,16 @@
     <string name="modulemaker_typ">Type</string>
 
     <!-- onboarding -->
+    <string name="onboarding_apps_installieren">Install unknown apps</string>
+    <string name="onboarding_apps_installieren_beschreibung">To install and test APKs built in CodeForge directly on your device (REQUEST_INSTALL_PACKAGES).</string>
+    <string name="onboarding_apps_loeschen">Uninstall apps</string>
+    <string name="onboarding_apps_loeschen_beschreibung">Granted at installation — allows starting app uninstallation via system dialog (REQUEST_DELETE_PACKAGES).</string>
     <string name="onboarding_ausstehend">Pending</string>
     <string name="onboarding_benachrichtigungen">Notifications</string>
     <string name="onboarding_berechtigungen">Permissions</string>
     <string name="onboarding_bereite_setup_skript_vor">Preparing setup script…</string>
     <string name="onboarding_cmake_installieren">Install CMake %1$s</string>
-    <string name="onboarding_codeforge_mobile_benoetigt_zugriff_auf">CodeForge Mobile requires access to your project storage and permission to notify you about build status.</string>
+    <string name="onboarding_codeforge_mobile_benoetigt_zugriff_auf">CodeForge Mobile requires access to all files for your projects, as well as optional permissions to install built APKs and show build notifications.</string>
     <string name="onboarding_codeforge_nutzt_termux_als_umgebung">CodeForge uses Termux as its environment. First it is extracted, then the terminal opens and the codeforge-env script installs Android SDK, tools, JDK, NDK, and CMake. You can manage everything later in the SDK Manager.</string>
     <string name="onboarding_einrichtung_fehlgeschlagen">Setup failed.</string>
     <string name="onboarding_einrichtung_starten">Start setup</string>
@@ -476,11 +480,11 @@
     <string name="onboarding_loslegen">Get started</string>
     <string name="onboarding_ndk_installieren">Install NDK</string>
     <string name="onboarding_setup_skript_konnte_nicht_bereitgestel">Setup script could not be provided.</string>
-    <string name="onboarding_speicherzugriff">Storage access</string>
+    <string name="onboarding_speicherzugriff">All files access</string>
     <string name="onboarding_termux_bootstrap_konnte_nicht_eingeric">Termux bootstrap could not be set up.</string>
     <string name="onboarding_umgebung_bereit_das_terminal_oeffnet">Environment ready — terminal is opening ✓</string>
     <string name="onboarding_weiter">Next</string>
-    <string name="onboarding_zum_oeffnen_erstellen_und_bearbeiten">For opening, creating, and editing projects (MANAGE_EXTERNAL_STORAGE).</string>
+    <string name="onboarding_zum_oeffnen_erstellen_und_bearbeiten">Required for opening, creating, and editing projects across device storage (MANAGE_EXTERNAL_STORAGE).</string>
 
     <!-- plugin -->
     <string name="plugin_implementiert_nicht_codeforgeplugin">%1$s does not implement CodeForgePlugin.</string>
@@ -555,6 +559,11 @@
     <string name="settings_sticky_scroll">Sticky Scroll</string>
     <string name="settings_tab_groesse">Tab size</string>
     <string name="settings_terminal">Terminal</string>
+    <string name="settings_terminal_ansicht">Terminal view</string>
+    <string name="settings_terminal_kompakt">Compact</string>
+    <string name="settings_terminal_kompakt_beschreibung">Embedded minimal shell view inside the app</string>
+    <string name="settings_termux_ui">Termux UI</string>
+    <string name="settings_termux_ui_beschreibung">Full multi-session terminal with extra keys and drawer (default)</string>
     <string name="settings_text_lupe_magnifier">Text magnifier</string>
     <string name="settings_token_anzeigen">Show token</string>
     <string name="settings_token_gespeichert">%1$s · Token saved ••••••••</string>
@@ -589,6 +598,7 @@
     <string name="terminal_shell_wurde_beendet">Shell terminated.</string>
     <string name="terminal_sitzung_beenden">End session</string>
     <string name="terminal_terminal_termux">Terminal (Termux)</string>
+    <string name="terminal_termux_ui_oeffnen">Open Termux UI</string>
 
     <!-- terminal_engine -->
     <string name="terminal_engine_codeforge_env_endete_mit_code">codeforge-env exited with code %1$s</string>

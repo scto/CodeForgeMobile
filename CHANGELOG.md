@@ -11,6 +11,28 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🛠️ Onboarding-Farben, Rechte, Launcher-Icon, volle Termux-UI & sichtbare Setup-Fehler (Task 24)
+
+* **Onboarding-Farben, Surfaces & Previews (`24.1`)**:
+  * `OnboardingRoute` und `GitCloneScreen` in `Surface(color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground)` eingebettet, sodass Texte und Icons im Dark-Mode nicht mehr auf Schwarz zurückfallen.
+  * Intro-Seiten-Icon auf `64.dp` und `tint = MaterialTheme.colorScheme.primary` gesetzt; Light- und Dark-`@Preview`-Funktionen für `IntroPagerScreen`, `PermissionScreen` und `SetupScreen` ergänzt.
+* **Berechtigungen im Onboarding (`24.2`)**:
+  * `MANAGE_EXTERNAL_STORAGE` (API 30+ via `ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION`, API 26–29 `READ/WRITE_EXTERNAL_STORAGE` mit `maxSdkVersion="29"`), `REQUEST_INSTALL_PACKAGES` (`ACTION_MANAGE_UNKNOWN_APP_SOURCES`) und `REQUEST_DELETE_PACKAGES` (Info-Zeile) ergänzt.
+  * Automatische Neuauswertung aller Berechtigungen bei `Lifecycle.Event.ON_RESUME` nach Rückkehr aus den Systemeinstellungen; ganze Karten klickbar (sofern noch nicht erteilt).
+* **Original-Launcher-Icon & Vektor-Logo (`24.3`)**:
+  * `ic_launcher_background.xml`, `ic_launcher_foreground.xml` und `icon.xml` aus Commit `de2caf0` wiederhergestellt (`@author Thomas Schmid`) und in `IntroPagerScreen` sowie `WelcomeScreen` eingebunden.
+* **Volle Termux-UI als Standard (`24.4` / Task 06)**:
+  * `:libs:termux-app` (`TermuxActivity`, `TermuxService`, `HelpActivity`) in `:app` integriert und `TermuxApplication.initTermuxApplication(this)` in `CodeForgeApplication.onCreate()` aufgerufen.
+  * `TermuxActivity.EXTRA_INITIAL_COMMAND` für die Übergabe des `codeforge-env setup ...`-Befehls nach dem Start der ersten Session implementiert.
+  * Einstellung „Terminal-Ansicht: Termux-UI (Standard) / Kompakt“ (`use_compact_terminal` in `settings.proto`) in `TerminalSettingsScreen` ergänzt.
+* **Sichtbare Fehler in `codeforge-env` (`24.5`)**:
+  * `pkg_update_once()` und `pkg_install()` protokollieren in `$HOME/.codeforge/logs/setup-<datum>.log`, geben bei Fehlern die letzten 20 Zeilen sowie `apt-cache policy` auf der Konsole aus und melden fehlende APT-Pakete („Unable to locate package“) mit Repository-URL aus `sources.list`.
+  * Lesbare Komponenten-Namen (`JDK 17` statt `jdk;17`) und Wiederholungshinweis bei Fehler-Exit.
+* **Bootstrap Second-Stage Zeile 290 & regulärer Aufruf (`24.6`)**:
+  * `fix_bootstrap_second_stage()` in `build_codeforge_repo.sh` und `scripts/fix-fork.sh` ergänzt (Quoting von `"${TERMUX_PACKAGE_MANAGER}"` in Zeile 290, Vorbelegung `TERMUX_PACKAGE_MANAGER=apt` und Übergabe von `$TERMUX_ARCH` in `build-bootstraps.sh`).
+  * `TermuxInstaller.java` repariert bestehende Second-Stage-Skripte beim Entpacken in-place und führt `termux-bootstrap-second-stage.sh` direkt nach dem Entpacken aus, sodass der `profile.d`-Fallback beim ersten Shell-Start entfällt.
+  * Bericht in [`docs/task-24-report.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/docs/task-24-report.md).
+
 ### 🧩 Extensions-Manager Reparatur & LSP-Client-Anbindung (Task 23)
 
 * **Katalog-Korrektur & Verifikation (`LspExtensionPackage.kt`)**:

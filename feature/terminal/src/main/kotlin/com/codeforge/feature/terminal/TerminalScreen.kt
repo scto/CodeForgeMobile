@@ -10,9 +10,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,10 +39,16 @@ import com.codeforge.core.resources.stringRes
 @Composable
 fun TerminalRoute(
     modifier: Modifier = Modifier,
+    onOpenFullTermuxUi: (() -> Unit)? = null,
     viewModel: TerminalViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    TerminalScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
+    TerminalScreen(
+        modifier = modifier,
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        onOpenFullTermuxUi = onOpenFullTermuxUi
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +56,8 @@ fun TerminalRoute(
 private fun TerminalScreen(
     modifier: Modifier = Modifier,
     uiState: TerminalUiState,
-    onEvent: (TerminalUiEvent) -> Unit
+    onEvent: (TerminalUiEvent) -> Unit,
+    onOpenFullTermuxUi: (() -> Unit)? = null
 ) {
     val scrollState = rememberScrollState()
 
@@ -63,6 +71,14 @@ private fun TerminalScreen(
             TopAppBar(
                 title = { Text(stringRes(R.string.terminal_terminal_termux)) },
                 actions = {
+                    if (onOpenFullTermuxUi != null) {
+                        IconButton(onClick = onOpenFullTermuxUi) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.OpenInNew,
+                                contentDescription = stringRes(R.string.terminal_termux_ui_oeffnen)
+                            )
+                        }
+                    }
                     when (uiState.sessionState) {
                         TerminalSessionState.RUNNING, TerminalSessionState.STARTING -> {
                             IconButton(onClick = { onEvent(TerminalUiEvent.StopSession) }) {

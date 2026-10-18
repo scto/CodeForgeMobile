@@ -49,20 +49,21 @@ proot-/Rootfs-Downloader ist damit überflüssig.
 führt das Setup aus. Plugin-API: `buildShellCommand(...)` statt `buildRootfsCommand(distro, …)`.
 Details: `libs/terminal-engine/BOOTSTRAP.md`.
 
-## ADR-4: Zwei parallele Integrationstiefen — schlanker Pfad aktiv, volle UI optional
+## ADR-4: Zwei parallele Integrationstiefen — volle Termux-UI als Standard, schlanker Pfad als Kompakt-Fallback (aktualisiert in Task 24.4)
 
-**Entscheidung:** Aktiv im Dependency-Graph von `:app` ist nur der
-schlanke Pfad (`TerminalSessionRepositoryImpl` instanziiert
-`com.codeforge.terminal.TerminalSession` direkt, ohne `TermuxService`/
-`TermuxActivity`). Die vollständige Termux-App-Schicht
-(`:libs:termux-app`, `:libs:termux-view` — Multi-Session-UI, Extra-Keys-
-Toolbar, Sessions-Drawer) ist vendort und kompiliert eigenständig, ist aber
-aktuell nicht in `:app` verdrahtet.
+**Entscheidung:** `:libs:termux-app` (`TermuxActivity`, `TermuxService`, `FileReceiverActivity`,
+`HelpActivity`, `ReportActivity`) ist fest im Dependency-Graph von `:app` eingebunden, und
+`CodeForgeApplication.onCreate()` führt `TermuxApplication.initTermuxApplication(this)` aus.
+Standardmäßig öffnen `Routes.TERMINAL` und der Onboarding-Abschluss (`TermuxActivity.EXTRA_INITIAL_COMMAND`)
+die vollständige `TermuxActivity`-UI (Multi-Session-Drawer, Extra-Keys-Toolbar, Kontextmenü).
+Der schlanke Compose-Pfad (`:feature:terminal` über `TerminalSessionRepositoryImpl`) bleibt als
+umschaltbarer Fallback erhalten (Einstellung „Terminal-Ansicht: Termux-UI / Kompakt" in
+`TerminalSettingsScreen`, `TerminalConfig.use_compact_terminal = false` als Standard).
 
-**Begründung:** Thomas' Anfrage war "die ganze Struktur haben, nur
-einzelne Punkte anpassen müssen" — nicht zwingend sofortige Aktivierung der
-vollen Termux-UI. Diese Entscheidung hält beide Optionen offen, ohne
-ungenutzten Code auszuschließen.
+**Begründung:** Für den produktiven Einsatz auf dem Gerät und das interaktive Ausführen von
+`codeforge-env setup …` nach dem Onboarding werden mehrere Sessions, Extra-Keys und Scrollback/Kopieren
+der vollen Termux-UI benötigt, während die eingebettete Kompakt-Ansicht weiterhin optional zur
+Verfügung steht.
 
 ## ADR-5: Applikations-ID-Korrektur (`com.codeforge.app`, nicht `com.codeforge`)
 

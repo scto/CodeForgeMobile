@@ -9,7 +9,7 @@
 | **03** | `03-termux-bootstrap-ui-wiring.md` | ✅ überholt | Onboarding startet Bootstrap |
 | **04** | `04-termux-bootstrap-package-build.md` | ✅ `a2edcaf` | Release `bootstrap-2026.10.11` (aarch64, arm) |
 | **05** | `05-termux-sdk-path-visibility.md` | ✅ überholt | PRoot entfällt, SDK unter `$PREFIX/opt/android-sdk` |
-| **06** | `06-optional-full-termux-ui.md` | ⚪ optional | volle Termux-Multi-Session-UI |
+| **06** | `06-optional-full-termux-ui.md` | ⚠️ ersetzt durch 24.4 | volle Termux-Multi-Session-UI (in Task 24.4 als Standard umgesetzt) |
 | **07** | `07-bonsai-sora-app-followups.md` | ✅ `0dbce28` | `CMakeLists.txt`-Erkennung |
 | **08** | `08-verify-indexing-updater-overlays.md` | ✅ `3051341` | Indexierung, Updater, Overlays |
 | **09** | `09-verify-project-wizard-template-engine.md` | ✅ `f1dd5ce` | Wizard, Template-Engine |
@@ -26,19 +26,21 @@
 | **20** | `20-treesitter-remaining-native-langs.md` | ✅ `a689aed` | Bash, CMake, TOML, YAML (16 `.so`, SHA-256 geprüft) |
 | **21** | `21-verify-apt-stages-pipeline.md` | ✅ `73bb2af` | Skripte geprüft, 12 Etappen gegen den Fork abgeglichen; Rezepte nur im Fork |
 | **22** | `22-verification-followups.md` | ✅ `adb101f` | Ordnerwahl im Wizard, Expressive-Entscheidung, Gradle-/ktlint-Bericht, Gerätetest-Checkliste |
-| **23** | `23-fix-extensions-manager.md` | ✅ (dieser Commit) | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen (`docs/extensions-manager-fix-report.md`) |
+| **23** | `23-fix-extensions-manager.md` | ✅ `baa1e07` | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen (`docs/extensions-manager-fix-report.md`) |
+| **24** | `24-onboarding-permissions-icon-termux-ui.md` | ✅ (dieser Commit) | Onboarding-Surface/Previews, Rechte (`MANAGE_EXTERNAL_STORAGE`, Pakete installieren/löschen), Original-Launcher-Icon (`de2caf0`), volle Termux-UI (`TermuxActivity`), sichtbare Fehler in `codeforge-env`, Second-Stage-Fix (`docs/task-24-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
 
-### Task 23 – Extensions-Manager (✅ erledigt)
-1. **Katalog**: Reale SHA-256 Prüfsummen für alle Pakete ermittelt; Termux-Pakete für clangd & rust-analyzer integriert.
-2. **Archivtypen**: `TAR_GZ` und `GZ` implementiert und mit Sicherheitsprüfungen (Zip/Tar-Slip, Symlinks, Executable-Bits) versehen.
-3. **Plattform**: Android/Termux-Kompatibilität sichergestellt (Termux-Pakete statt inkompatibler glibc-Binaries).
-4. **Anbindung**: `LspServerResolver` in `:core:domain`, `LspServerResolverImpl` in `:feature:settings`, `LspSessionController` in `:feature:editor` angebunden.
-5. **Aufräumen**: `plan-apt-build.sh` Duplikat gelöscht, `mirror-integration.patch` enttracked, Stringzahlen synchronisiert (834). Vollständiger Bericht in `docs/extensions-manager-fix-report.md`.
+### Task 24 – Onboarding, Rechte, Icon, Termux-UI & Setup-Fehler (✅ erledigt)
+1. **Onboarding-Farben & Previews (24.1)**: `OnboardingRoute` und `GitCloneScreen` in `Surface` eingebettet; Light/Dark-`@Preview` für alle drei Onboarding-Schritte ergänzt.
+2. **Berechtigungen (24.2)**: `MANAGE_EXTERNAL_STORAGE` (API 30+), `REQUEST_INSTALL_PACKAGES` und `REQUEST_DELETE_PACKAGES` integriert; `ON_RESUME`-Refresh und klickbare Berechtigungskarten.
+3. **Launcher-Icon & Logo (24.3)**: Original-Drawables (`ic_launcher_background.xml`, `ic_launcher_foreground.xml`, `icon.xml`) aus `de2caf0` wiederhergestellt und in Onboarding/Welcome eingebunden.
+4. **Volle Termux-UI (24.4 / Task 06)**: `:libs:termux-app` in `:app` eingebunden, `TermuxActivity` als Standard-Terminal mit `EXTRA_INITIAL_COMMAND` für das Setup-Skript, Umschalter Termux-UI/Kompakt in den Einstellungen.
+5. **Sichtbare Fehler in `codeforge-env` (24.5)**: `pkg_update_once()` + `pkg_install()` mit Logdatei, Konsolenausgabe der letzten 20 Zeilen, `apt-cache policy` und klarer Meldung bei fehlendem APT-Paket.
+6. **Bootstrap Second-Stage (24.6)**: Zeile 290 quotiert, `TERMUX_PACKAGE_MANAGER=apt` und `TERMUX_PACKAGE_ARCH` in `build_codeforge_repo.sh`/`scripts/fix-fork.sh` sowie In-Place-Reparatur und regulärer Aufruf in `TermuxInstaller.java`.
 
 ### Außerhalb der Tasks
-* Fork `scto/terminal-packages-codeforge`: Rezepte aus `agy-output/packages/` committen; erster echter Etappen-Lauf (Laufzeit-Risiko `openjdk-*`, `libllvm`, `dart`; Pages ~1 GB, Ist 181,6 MB).
+* Fork `scto/terminal-packages-codeforge`: Etappe `H1-jdk17` (`openjdk-17` fehlt aktuell noch im APT-Repo, siehe `docs/task-24-report.md` 24.7) über `build-all-stages.yml` bauen; Rezepte aus `agy-output/packages/` committen.
 * Gerätetests: `docs/device-test-checklist.md`.

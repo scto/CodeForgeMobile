@@ -1,6 +1,7 @@
 // Modul: :feature:onboarding
 package com.codeforge.feature.onboarding
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,15 +16,19 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.codeforge.core.datastore.proto.ThemeConfig
+import com.codeforge.core.datastore.proto.ThemeMode
+import com.codeforge.core.designsystem.CodeForgeTheme
 import com.codeforge.core.domain.repository.SdkSetupOptions
 import com.codeforge.core.resources.R
-import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 
 @Composable
@@ -49,10 +54,10 @@ fun SetupScreen(
 
         ChoiceRow("JDK", SdkSetupOptions.JDK_CHOICES, options.jdk, !inProgress, onJdkSelected)
         Spacer(Modifier.height(12.dp))
-        ToggleRow(Res.string(R.string.onboarding_ndk_installieren), options.installNdk, !inProgress, onInstallNdkChanged)
+        ToggleRow(stringRes(R.string.onboarding_ndk_installieren), options.installNdk, !inProgress, onInstallNdkChanged)
         if (options.installNdk) ChoiceRow("NDK", SdkSetupOptions.NDK_CHOICES, options.ndk, !inProgress, onNdkSelected)
         Spacer(Modifier.height(12.dp))
-        ToggleRow(Res.string(R.string.onboarding_cmake_installieren, SdkSetupOptions.DEFAULT_CMAKE), options.installCmake, !inProgress, onInstallCmakeChanged)
+        ToggleRow(stringRes(R.string.onboarding_cmake_installieren, SdkSetupOptions.DEFAULT_CMAKE), options.installCmake, !inProgress, onInstallCmakeChanged)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -105,5 +110,45 @@ private fun ToggleRow(label: String, checked: Boolean, enabled: Boolean, onChang
     ) {
         Text(label)
         Switch(checked = checked, enabled = enabled, onCheckedChange = onChange)
+    }
+}
+
+@Preview(name = "Setup - Light", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Composable
+private fun SetupScreenLightPreview() {
+    CodeForgeTheme(themeState = ThemeConfig.newBuilder().setMode(ThemeMode.LIGHT).build()) {
+        Surface(color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
+            SetupScreen(
+                options = SdkSetupOptions(),
+                setupPhase = SetupPhase.IDLE,
+                setupErrorMessage = null,
+                onJdkSelected = {},
+                onNdkSelected = {},
+                onInstallNdkChanged = {},
+                onInstallCmakeChanged = {},
+                onStartSetup = {},
+                onRetry = {}
+            )
+        }
+    }
+}
+
+@Preview(name = "Setup - Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun SetupScreenDarkPreview() {
+    CodeForgeTheme(themeState = ThemeConfig.newBuilder().setMode(ThemeMode.DARK).build()) {
+        Surface(color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
+            SetupScreen(
+                options = SdkSetupOptions(),
+                setupPhase = SetupPhase.IDLE,
+                setupErrorMessage = null,
+                onJdkSelected = {},
+                onNdkSelected = {},
+                onInstallNdkChanged = {},
+                onInstallCmakeChanged = {},
+                onStartSetup = {},
+                onRetry = {}
+            )
+        }
     }
 }

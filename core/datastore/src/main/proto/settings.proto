@@ -35,6 +35,7 @@ message TerminalConfig {
   reserved 1;
   reserved "default_distro";
   int32 font_size = 2;
+  bool use_compact_terminal = 3;
 }
 
 message EditorConfig {

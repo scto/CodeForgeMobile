@@ -4,8 +4,11 @@
  */
 package com.codeforge.app
 
+import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -56,9 +59,22 @@ internal object Routes {
 }
 
 @Composable
-fun CodeForgeNavHost(startOnboarding: Boolean) {
+fun CodeForgeNavHost(
+    startOnboarding: Boolean,
+    useCompactTerminal: Boolean = false
+) {
     val navController = rememberNavController()
+    val context = LocalContext.current
     val startDestination = if (startOnboarding) Routes.ONBOARDING else Routes.WELCOME
+
+    fun launchTermuxActivity(initialCommand: String? = null) {
+        val intent = Intent(context, TermuxActivity::class.java).apply {
+            if (!initialCommand.isNullOrBlank()) {
+                putExtra(TermuxActivity.EXTRA_INITIAL_COMMAND, initialCommand)
+            }
+        }
+        context.startActivity(intent)
+    }
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.ONBOARDING) {
@@ -68,7 +84,11 @@ fun CodeForgeNavHost(startOnboarding: Boolean) {
                     navController.navigate(Routes.WELCOME) {
                         popUpTo(Routes.ONBOARDING) { inclusive = true }
                     }
-                    navController.navigate(Routes.terminalWith(setupCommand))
+                    if (useCompactTerminal) {
+                        navController.navigate(Routes.terminalWith(setupCommand))
+                    } else {
+                        launchTermuxActivity(setupCommand)
+                    }
                 }
             )
         }
@@ -77,7 +97,13 @@ fun CodeForgeNavHost(startOnboarding: Boolean) {
                 onNavigateToProjectWizard = { navController.navigate(Routes.PROJECT_WIZARD) },
                 onNavigateToImportPicker = { navController.navigate(Routes.IMPORT_PROJECT) },
                 onNavigateToCloneDialog = { navController.navigate(Routes.CLONE_PROJECT) },
-                onNavigateToTerminal = { navController.navigate(Routes.TERMINAL) },
+                onNavigateToTerminal = {
+                    if (useCompactTerminal) {
+                        navController.navigate(Routes.TERMINAL)
+                    } else {
+                        launchTermuxActivity()
+                    }
+                },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenProject = { projectPath -> navController.navigate(Routes.projectWorkspace(projectPath)) }
             )
@@ -150,8 +176,18 @@ fun CodeForgeNavHost(startOnboarding: Boolean) {
                     defaultValue = null
                 }
             )
-        ) {
-            TerminalRoute()
+        ) { backStackEntry ->
+            val initialCommand = backStackEntry.arguments?.getString("initialCommand")
+            if (useCompactTerminal) {
+                TerminalRoute(
+                    onOpenFullTermuxUi = { launchTermuxActivity(initialCommand) }
+                )
+            } else {
+                LaunchedEffect(initialCommand) {
+                    launchTermuxActivity(initialCommand)
+                    navController.popBackStack()
+                }
+            }
         }
         composable(
             route = Routes.GIT_PATTERN,

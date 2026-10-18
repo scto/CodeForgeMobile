@@ -1,6 +1,6 @@
 # 📊 Aktueller Status
 
-**Version:** 3.0.0 (`versionCode 30000`) · **Stand:** 2026-10-16 · **Module:** 43 · **Kotlin-Dateien:** ~330 · **Strings:** 834 (Englisch Standard, Deutsch `values-de`)
+**Version:** 3.0.0 (`versionCode 30000`) · **Stand:** 2026-10-18 · **Module:** 43 · **Kotlin-Dateien:** ~330 · **Strings:** 844 (Englisch Standard, Deutsch `values-de`)
 
 > ✅ **Build:** `./gradlew assembleDebug` läuft laut Inhaber (Stand 2026-10-16, on-device in Termux aarch64) ohne Fehler; die Verifikationsberichte zu Task 08–15 liegen in `docs/*-verification.md`.
 > ⚠️ **Noch nicht geprüft:** Verhalten auf dem Gerät (Bootstrap-Installation, W^X unter `targetSdk 28`, Layouts, Tastatur, LSP). Checkliste: `docs/device-test-checklist.md` (28 Testfälle, alle „ungeprüft“). Aufträge: `agy-tasks/README.md`.
@@ -16,17 +16,17 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 | build-logic mit Convention-Plugins (App, Library, Compose, Hilt, Quality, Bootstrap) | ✅ | `build-logic/` |
 | Pflichtdateien je Modul (`.gitignore`, `consumer-rules.pro`, `proguard-rules.pro`, Manifest) | ✅ | `docs/module-files-and-app-resources.md` |
 | `:app`-Ressourcen (Theme, Farben, Icons, Backup-/Extraktionsregeln, Manifest) | ✅ | dito |
-| Zentrale Strings `:core:resources` (834 Texte, zweisprachig: `values/` Englisch, `values-de/` Deutsch; `Res`/`stringRes`, `TestRes`, Prüfskript `scripts/check_string_locales.py`) | ✅ 🧪 | `docs/resources-and-strings.md` |
+| Zentrale Strings `:core:resources` (844 Texte, zweisprachig: `values/` Englisch, `values-de/` Deutsch; `Res`/`stringRes`, `TestRes`, Prüfskript `scripts/check_string_locales.py`) | ✅ 🧪 | `docs/resources-and-strings.md` |
 | Edge-to-Edge, Adaptive Layouts (Compact/Medium/Expanded), Material 3 Expressive | ✅ | `docs/adaptive-edge-to-edge-expressive.md` |
 | Repo-Pipeline für Bootstrap + APT-Repository (`build_codeforge_repo.sh`, `apt-stages.conf`) | ✅ | Verifiziert (Task 21, `docs/apt-stages-verification.md`) |
 
 ### Terminal & Umgebung
 | Bereich | Status | Details / Doku |
 |---|---|---|
-| Termux-Vendoring (`termux-emulator/-view/-shared/-app`), GPLv3 | ✅ | `docs/sub/TERMUX-PORTING.md`, `docs/sub/NOTICE.md` |
+| Termux-Vendoring (`termux-emulator/-view/-shared/-app`), GPLv3 + volle `TermuxActivity`-Multi-Session-UI (Standard) & kompakter Compose-Fallback | ✅ | `docs/sub/TERMUX-PORTING.md`, `docs/task-24-report.md` |
 | Terminal-Feature auf Termux-Shell (`TerminalSessionRepositoryImpl`) | ✅ | `libs/terminal-engine/BOOTSTRAP.md` |
-| `codeforge-env` (JDK, SDK, CMake, NDK; `--machine`-Protokoll) | ✅ | `agy-tasks/11-…` |
-| Onboarding: Intro → Berechtigungen → Setup → Terminal mit Autostart | ✅ | `feature/onboarding` |
+| `codeforge-env` (JDK, SDK, CMake, NDK; `--machine`-Protokoll, sichtbare APT-/Setup-Fehlerausgabe & Logdatei) | ✅ | `agy-tasks/11-…`, `docs/task-24-report.md` |
+| Onboarding: Intro (mit `icon.xml`-Logo & Previews) → Berechtigungen (`MANAGE_EXTERNAL_STORAGE`, Pakete installieren/löschen, `ON_RESUME`-Refresh) → Setup (inkl. Second-Stage-Fix) → `TermuxActivity` mit Autostart | ✅ | `feature/onboarding`, `docs/task-24-report.md` |
 | SDK-Manager (GUI über `codeforge-env`) | ✅ | `feature/sdkmanager` |
 
 ### Editor & Werkzeuge

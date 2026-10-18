@@ -341,10 +341,53 @@ for entry in out.split("\0"):
 print(f"Symlinks wiederhergestellt: {len(restored)}")
 PY
 }
+# termux-bootstrap-second-stage.sh (Zeile 290) und build-bootstraps.sh reparieren:
+# 1) In scripts/bootstrap/termux-bootstrap-second-stage.sh steht Zeile 290 unquotiert:
+#      elif [ ${TERMUX_PACKAGE_MANAGER} = "pacman" ]; then
+#    Wenn TERMUX_PACKAGE_MANAGER leer ist, bricht `[` mit "[: =: unary operator expected" ab.
+# 2) In scripts/build-bootstraps.sh ist TERMUX_PACKAGE_MANAGER nicht vorbelegt (anders als in build-package.sh)
+#    und add_termux_bootstrap_second_stage_files wird mit "$package_arch" (lokal in extract_debs -> leer) statt
+#    "$TERMUX_ARCH" aufgerufen. Dadurch landen TERMUX_PACKAGE_MANAGER="" und TERMUX_PACKAGE_ARCH="" im Bootstrap.
+# 3) dpkg-perl.subpackage.sh führt in postinst `cpan -Ti Locale::gettext` mit `set -e` aus; im Offline-Bootstrap
+#    ohne Compiler darf das den Second-Stage-Lauf nicht abbrechen.
+# shellcheck disable=SC2016
+fix_bootstrap_second_stage() {
+    local d="$1"
+    local ss="${d}/scripts/bootstrap/termux-bootstrap-second-stage.sh"
+    local bb="${d}/scripts/build-bootstraps.sh"
+    local dp="${d}/packages/dpkg/dpkg-perl.subpackage.sh"
+    [ -f "${ss}" ] || die "scripts/bootstrap/termux-bootstrap-second-stage.sh fehlt im Fork."
+    [ -f "${bb}" ] || die "scripts/build-bootstraps.sh fehlt im Fork."
+
+    if grep -qF 'elif [ ${TERMUX_PACKAGE_MANAGER} = "pacman" ]; then' "${ss}"; then
+        sed -i 's/elif \[ \${TERMUX_PACKAGE_MANAGER} = "pacman" \]; then/elif [ "${TERMUX_PACKAGE_MANAGER}" = "pacman" ]; then/' "${ss}"
+        echo "termux-bootstrap-second-stage.sh: Zeile 290 Variable quotiert."
+    fi
+    if grep -qF 'export TERMUX_PACKAGE_MANAGER="@TERMUX_PACKAGE_MANAGER@"' "${ss}"; then
+        sed -i 's/export TERMUX_PACKAGE_MANAGER="@TERMUX_PACKAGE_MANAGER@"/export TERMUX_PACKAGE_MANAGER="${TERMUX_PACKAGE_MANAGER:-@TERMUX_PACKAGE_MANAGER@}"\n: "${TERMUX_PACKAGE_MANAGER:=apt}"/' "${ss}"
+        echo "termux-bootstrap-second-stage.sh: Fallback TERMUX_PACKAGE_MANAGER=apt ergänzt."
+    fi
+
+    if grep -qF 's|@TERMUX_PACKAGE_MANAGER@|${TERMUX_PACKAGE_MANAGER}|g' "${bb}"; then
+        sed -i 's/s|@TERMUX_PACKAGE_MANAGER@|\${TERMUX_PACKAGE_MANAGER}|g/s|@TERMUX_PACKAGE_MANAGER@|${TERMUX_PACKAGE_MANAGER:-apt}|g/' "${bb}"
+        echo "build-bootstraps.sh: @TERMUX_PACKAGE_MANAGER@ -> \${TERMUX_PACKAGE_MANAGER:-apt}."
+    fi
+    if grep -qF 'add_termux_bootstrap_second_stage_files "$package_arch"' "${bb}"; then
+        sed -i 's/add_termux_bootstrap_second_stage_files "\$package_arch"/add_termux_bootstrap_second_stage_files "$TERMUX_ARCH"/' "${bb}"
+        echo "build-bootstraps.sh: add_termux_bootstrap_second_stage_files mit \$TERMUX_ARCH statt leerem \$package_arch."
+    fi
+
+    if [ -f "${dp}" ] && grep -qF 'cpan -Ti Locale::gettext' "${dp}" && ! grep -qF 'cpan -Ti Locale::gettext || true' "${dp}"; then
+        sed -i 's/cpan -Ti Locale::gettext/command -v make >\/dev\/null 2>\&1 \&\& cpan -Ti Locale::gettext || true/' "${dp}"
+        echo "dpkg-perl.subpackage.sh: cpan-Aufruf in postinst abgesichert."
+    fi
+}
+
 restore_symlinks "${CLONE_DIR}"
 restore_exec_bits "${CLONE_DIR}"
 fix_bootstrap_subpackage_names "${CLONE_DIR}"
 fix_bootstrap_zip_destination "${CLONE_DIR}"
+fix_bootstrap_second_stage "${CLONE_DIR}"
 [ -x "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || [ ! -e "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || die "termux-replace-termux-core-src-scripts ist nicht ausführbar."
 [ -d "${CLONE_DIR}/packages/procps/hsearch" ] || die "packages/procps/hsearch ist kein Verzeichnis – Symlink-Reparatur unvollständig."
 fi   # Ende Step 2 (PHASE != assemble)
@@ -720,6 +763,16 @@ for arch in "${ARCHS_LIST[@]}"; do
     grep -qF '/share/termux-keyring/codeforge.gpg←./etc/apt/trusted.gpg.d/codeforge.gpg' "${dest}/SYMLINKS.txt" \
         || { echo "[${arch}] SYMLINKS.txt ohne Link etc/apt/trusted.gpg.d/codeforge.gpg" >&2; verify_failed=1; }
     grep -q "${PREFIX_PATH}" "${dest}/SYMLINKS.txt" || { echo "[${arch}] SYMLINKS.txt ohne ${PREFIX_PATH}" >&2; verify_failed=1; }
+    # d) termux-bootstrap-second-stage.sh (keine unquotierte Variable in Zeile 290, TERMUX_PACKAGE_MANAGER/ARCH gesetzt)
+    ss_file="${dest}/etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh"
+    if [ -f "${ss_file}" ]; then
+        if grep -qF 'elif [ ${TERMUX_PACKAGE_MANAGER} = "pacman" ]; then' "${ss_file}"; then
+            echo "[${arch}] second-stage enthält unquotierte TERMUX_PACKAGE_MANAGER in Zeile 290" >&2; verify_failed=1
+        fi
+        if grep -qF 'export TERMUX_PACKAGE_MANAGER=""' "${ss_file}"; then
+            echo "[${arch}] second-stage hat leeres TERMUX_PACKAGE_MANAGER" >&2; verify_failed=1
+        fi
+    fi
     echo "[${arch}] geprüft: $(find "${dest}" -type f | wc -l) Dateien"
 done
 rm -rf "${VERIFY_DIR}"

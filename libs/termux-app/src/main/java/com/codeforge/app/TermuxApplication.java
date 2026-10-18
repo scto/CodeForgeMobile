@@ -25,10 +25,14 @@ public class TermuxApplication extends Application {
 
     private static final String LOG_TAG = "TermuxApplication";
 
+    @Override
     public void onCreate() {
         super.onCreate();
+        initTermuxApplication(this);
+    }
 
-        Context context = getApplicationContext();
+    public static void initTermuxApplication(Context appContext) {
+        Context context = appContext.getApplicationContext();
 
         // Set log config for the app
         setLogConfig(context);
@@ -39,14 +43,14 @@ public class TermuxApplication extends Application {
         TermuxAppSharedProperties properties = TermuxAppSharedProperties.init(context);
 
         // Init app wide shell manager
-        TermuxShellManager shellManager = TermuxShellManager.init(context);
+        TermuxShellManager.init(context);
 
         // Set NightMode.APP_NIGHT_MODE
         TermuxThemeUtils.setAppNightMode(properties.getNightMode());
 
         // Check and create termux files directory. If failed to access it like in case of secondary
         // user or external sd card installation, then don't run files directory related code
-        Error error = TermuxFileUtils.isTermuxFilesDirectoryAccessible(this, true, true);
+        Error error = TermuxFileUtils.isTermuxFilesDirectoryAccessible(appContext, true, true);
         boolean isTermuxFilesDirectoryAccessible = error == null;
         if (isTermuxFilesDirectoryAccessible) {
             Logger.logInfo(LOG_TAG, "Termux files directory is accessible");
@@ -64,10 +68,10 @@ public class TermuxApplication extends Application {
         }
 
         // Init TermuxShellEnvironment constants and caches after everything has been setup including termux-am-socket server
-        TermuxShellEnvironment.init(this);
+        TermuxShellEnvironment.init(appContext);
 
         if (isTermuxFilesDirectoryAccessible) {
-            TermuxShellEnvironment.writeEnvironmentToFile(this);
+            TermuxShellEnvironment.writeEnvironmentToFile(appContext);
         }
     }
 

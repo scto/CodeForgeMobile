@@ -24,6 +24,7 @@ class TerminalSettingsViewModel @Inject constructor(
         .map { settings ->
             TerminalSettingsUiState(
                 fontSize = settings.terminal.fontSize.takeIf { it > 0 } ?: 14,
+                useCompactTerminal = settings.terminal.useCompactTerminal,
                 isLoading = false
             )
         }
@@ -34,6 +35,8 @@ class TerminalSettingsViewModel @Inject constructor(
             when (event) {
                 is TerminalSettingsUiEvent.FontSizeChanged ->
                     settingsRepository.updateTerminal { it.toBuilder().setFontSize(event.size).build() }
+                is TerminalSettingsUiEvent.UseCompactTerminalChanged ->
+                    settingsRepository.updateTerminal { it.toBuilder().setUseCompactTerminal(event.compact).build() }
             }
         }
     }

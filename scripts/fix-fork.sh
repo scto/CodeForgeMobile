@@ -194,5 +194,40 @@ EXEC_LIST
 
 restore_exec_bits "${ROOT}"
 
+# 6. termux-bootstrap-second-stage.sh (Zeile 290) und build-bootstraps.sh
+# shellcheck disable=SC2016
+fix_bootstrap_second_stage() {
+    local d="$1"
+    local ss="${d}/scripts/bootstrap/termux-bootstrap-second-stage.sh"
+    local bb="${d}/scripts/build-bootstraps.sh"
+    local dp="${d}/packages/dpkg/dpkg-perl.subpackage.sh"
+    [ -f "${ss}" ] || die "scripts/bootstrap/termux-bootstrap-second-stage.sh fehlt im Fork."
+    [ -f "${bb}" ] || die "scripts/build-bootstraps.sh fehlt im Fork."
+
+    if grep -qF 'elif [ ${TERMUX_PACKAGE_MANAGER} = "pacman" ]; then' "${ss}"; then
+        sed -i 's/elif \[ \${TERMUX_PACKAGE_MANAGER} = "pacman" \]; then/elif [ "${TERMUX_PACKAGE_MANAGER}" = "pacman" ]; then/' "${ss}"
+        echo "termux-bootstrap-second-stage.sh: Zeile 290 Variable quotiert."
+    fi
+    if grep -qF 'export TERMUX_PACKAGE_MANAGER="@TERMUX_PACKAGE_MANAGER@"' "${ss}"; then
+        sed -i 's/export TERMUX_PACKAGE_MANAGER="@TERMUX_PACKAGE_MANAGER@"/export TERMUX_PACKAGE_MANAGER="${TERMUX_PACKAGE_MANAGER:-@TERMUX_PACKAGE_MANAGER@}"\n: "${TERMUX_PACKAGE_MANAGER:=apt}"/' "${ss}"
+        echo "termux-bootstrap-second-stage.sh: Fallback TERMUX_PACKAGE_MANAGER=apt ergänzt."
+    fi
+
+    if grep -qF 's|@TERMUX_PACKAGE_MANAGER@|${TERMUX_PACKAGE_MANAGER}|g' "${bb}"; then
+        sed -i 's/s|@TERMUX_PACKAGE_MANAGER@|\${TERMUX_PACKAGE_MANAGER}|g/s|@TERMUX_PACKAGE_MANAGER@|${TERMUX_PACKAGE_MANAGER:-apt}|g/' "${bb}"
+        echo "build-bootstraps.sh: @TERMUX_PACKAGE_MANAGER@ -> \${TERMUX_PACKAGE_MANAGER:-apt}."
+    fi
+    if grep -qF 'add_termux_bootstrap_second_stage_files "$package_arch"' "${bb}"; then
+        sed -i 's/add_termux_bootstrap_second_stage_files "\$package_arch"/add_termux_bootstrap_second_stage_files "$TERMUX_ARCH"/' "${bb}"
+        echo "build-bootstraps.sh: add_termux_bootstrap_second_stage_files mit \$TERMUX_ARCH statt leerem \$package_arch."
+    fi
+
+    if [ -f "${dp}" ] && grep -qF 'cpan -Ti Locale::gettext' "${dp}" && ! grep -qF 'cpan -Ti Locale::gettext || true' "${dp}"; then
+        sed -i 's/cpan -Ti Locale::gettext/command -v make >\/dev\/null 2>\&1 \&\& cpan -Ti Locale::gettext || true/' "${dp}"
+        echo "dpkg-perl.subpackage.sh: cpan-Aufruf in postinst abgesichert."
+    fi
+}
+fix_bootstrap_second_stage "${ROOT}"
+
 [ -d "${ROOT}/packages/procps/hsearch" ] || die "packages/procps/hsearch ist kein Verzeichnis – Symlink-Reparatur unvollständig."
 echo "Fertig. Prüfen: git status --short | head; dann git add -A && git commit."

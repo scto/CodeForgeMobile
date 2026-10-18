@@ -144,34 +144,25 @@ am Ende — das ist der echte `applicationId` von `:app`) und die Properties `co
 ### ✅ 3. SDK-Sichtbarkeit — entschieden
 PRoot gibt es nicht mehr. Das SDK liegt in `$PREFIX/opt/android-sdk`; `profile.d/codeforge-android.sh` setzt ANDROID_HOME/JAVA_HOME/PATH. **Offen:** Ausführbarkeit von Binaries aus `files/usr` bei `targetSdk 35` (W^X) — siehe BOOTSTRAP.md.
 
-### 🔧 4. Optional: volle `TermuxActivity`-UI statt `:feature:terminal`
-Aktuell aktiv ist ausschließlich der schlanke Pfad über
-`TerminalSessionRepositoryImpl` (direkte `TerminalSession`-Instanziierung,
-kein `TermuxService`, kein `TermuxActivity`). `:libs:termux-app` und
-`:libs:termux-view` sind vollständig mitgebaut (stehen im Dependency-Graph
-von `:app` aktuell **nicht**, siehe unten), falls du stattdessen/zusätzlich
-die komplette Termux-Multi-Session-UI (Extra-Keys-Toolbar, Sessions-Drawer,
-`TermuxActivity`) verwenden willst. Dazu müsstest du `:libs:termux-app`
-als Dependency in `:app` (oder ein neues `:feature:termux-ui`) aufnehmen
-und `TermuxActivity` im App-Manifest registrieren (Komponenten-Namen in
-`libs/termux-app/.../AndroidManifest.xml` sind bereits korrekt).
+### ✅ 4. Volle `TermuxActivity`-UI aktiv (`:feature:terminal` als Kompakt-Fallback) — erledigt (Task 24.4 / 06)
+`:libs:termux-app` ist als Dependency in `:app` (`app/build.gradle.kts`) eingebunden; `TermuxActivity`,
+`HelpActivity`, `FileReceiverActivity`, `ReportActivity` und `TermuxService` werden per Manifest-Merger
+in das App-Manifest übernommen. Standardmäßig startet `Routes.TERMINAL` (sowie der Onboarding-Abschluss
+mit `TermuxActivity.EXTRA_INITIAL_COMMAND`) die volle `TermuxActivity` (Extra-Keys-Toolbar, Sessions-Drawer,
+Multi-Session-Support). In den Terminal-Einstellungen (`TerminalSettingsScreen`) kann zwischen
+**Termux-UI (Standard)** und **Kompakt** (`:feature:terminal`, `TerminalSessionRepositoryImpl`) umgeschaltet
+werden (`TerminalConfig.use_compact_terminal` in `settings.proto`).
 
-### 🔧 5. `TermuxApplication.onCreate()`-Logik
-Falls du die volle Termux-UI (Punkt 4) aktivierst: `TermuxApplication`
-wird nicht mehr automatisch instanziiert (kein `<application>`-Tag mehr in
-`:libs:termux-app`, nur `:app`s `CodeForgeApplication` läuft). Falls
-`TermuxApplication.onCreate()` App-weite Initialisierung enthält (Shell-
-Manager, Notification-Channels, `TermuxAmSocketServer`), müsste sie manuell
-aus `CodeForgeApplication.onCreate()` aufgerufen werden.
+### ✅ 5. `TermuxApplication.onCreate()`-Logik — erledigt (Task 24.4 / 06)
+`TermuxApplication.initTermuxApplication(this)` wird beim App-Start aus `CodeForgeApplication.onCreate()`
+(`:app`) aufgerufen und initialisiert `TermuxAppSharedProperties`, `TermuxShellManager`, `NightMode`,
+`TermuxAmSocketServer` sowie `TermuxShellEnvironment`.
 
-## Was NICHT im Dependency-Graph von `:app` hängt (Stand jetzt)
-`:app` → `:feature:terminal` → `:libs:terminal-engine` → `:libs:termux-emulator`
-+ `:libs:termux-shared`. **`:libs:termux-app` und `:libs:termux-view` werden
-aktuell von niemandem als Projekt-Dependency konsumiert** — sie sind Teil
-des Gradle-Modulbaums (`settings.gradle.kts`) und kompilieren eigenständig,
-liefern aber erst dann echten Wert, wenn du Punkt 4 oben umsetzt. Das ist
-beabsichtigt: dein Wunsch war "die ganze Struktur haben", nicht zwingend
-"die volle Termux-UI sofort aktiv".
+## Dependency-Graph von `:app` (Stand 2026-10-17)
+`:app` → `:libs:termux-app` → `:libs:termux-view` + `:libs:termux-shared` + `:libs:termux-emulator`,
+sowie `:app` → `:feature:terminal` → `:libs:terminal-engine` → `:libs:termux-emulator` + `:libs:termux-shared`.
+Beide Pfade (volle `TermuxActivity`-UI als Standard und schlanker `:feature:terminal`-Compose-Screen als
+Kompakt-Fallback) sind aktiv in `:app` verdrahtet.
 
 ## Lizenzfolge
 `NOTICE.md` im Projekt-Root dokumentiert die GPLv3-Pflicht des

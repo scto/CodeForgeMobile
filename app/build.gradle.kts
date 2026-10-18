@@ -13,6 +13,9 @@ android {
         versionCode = 30000
         versionName = "3.0.0"
 
+        manifestPlaceholders["TERMUX_PACKAGE_NAME"] = "com.codeforge.app"
+        manifestPlaceholders["TERMUX_APP_NAME"] = "CodeForge"
+
         // Wird von :libs:termux-shared per Reflection aus `com.codeforge.app.BuildConfig` gelesen
         // (TermuxConstants.BUILD_CONFIG_CLASS_NAME / TermuxBootstrap) — muss zum Bootstrap-Paketformat passen.
         buildConfigField("String", "TERMUX_PACKAGE_VARIANT", "\"apt-android-7\"")
@@ -61,6 +64,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:dependencyupdates"))
 
+    implementation(project(":libs:termux-app"))
     implementation(project(":libs:terminal-engine"))
     implementation(project(":libs:template-engine"))
     implementation(project(":libs:gradle-tooling-bridge"))

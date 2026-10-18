@@ -32,7 +32,7 @@ Repo-Stand: `adb101f`. ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen
 | 03 | `03-termux-bootstrap-ui-wiring.md` | ✅ überholt | Onboarding startet Bootstrap |
 | 04 | `04-termux-bootstrap-package-build.md` | ✅ `a2edcaf` | Release `bootstrap-2026.10.11` (aarch64, arm) |
 | 05 | `05-termux-sdk-path-visibility.md` | ✅ überholt | PRoot entfällt, SDK unter `$PREFIX/opt/android-sdk` |
-| 06 | `06-optional-full-termux-ui.md` | ⚪ optional | volle Termux-Multi-Session-UI |
+| 06 | `06-optional-full-termux-ui.md` | ⚠️ ersetzt durch 24.4 | volle Termux-Multi-Session-UI (in Task 24.4 umgesetzt) |
 | 07 | `07-bonsai-sora-app-followups.md` | ✅ `0dbce28` | `CMakeLists.txt`-Erkennung |
 | 08 | `08-verify-indexing-updater-overlays.md` | ✅ `3051341` | Indexierung, Updater, Overlays |
 | 09 | `09-verify-project-wizard-template-engine.md` | ✅ `f1dd5ce` | Wizard, Template-Engine |
@@ -42,24 +42,23 @@ Repo-Stand: `adb101f`. ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen
 | 13 | `13-verify-resources.md` | ✅ `a8771ba` | `:core:resources` |
 | 14 | `14-verify-adaptive-expressive.md` | ✅ `0c0715a` | Adaptive/Edge-to-Edge, stabiles `MaterialTheme` |
 | 15 | `15-verify-layout-designer.md` | ✅ `42924e2` | Layout-Designer |
-| 16 | `16-port-local-experiment-features.md` | 🟡 Punkte 1–3, 5, 6 ✅; **4 nachbessern (Task 23)** | Editor, Dateibaum, Theme Studio, Hintergrundbefehle (Entscheidung), Fluent 2; Extensions-Manager fehlerhaft |
+| 16 | `16-port-local-experiment-features.md` | ✅ `f498c47` (+ Task 23) | Editor, Dateibaum, Theme Studio, Hintergrundbefehle, Fluent 2, Extensions-Manager |
 | 17 | `17-externalize-hardcoded-strings.md` | 🔁 wiederkehrend | harte UI-Texte nach `:core:resources` (zweisprachig); letzter Lauf 0 Funde |
 | 18 | `18-translate-strings-en-de.md` | ✅ `6bcf72f` | Englisch Standard, Deutsch in `values-de` (825 Strings) |
 | 19 | `19-restore-lost-editor-features.md` | ✅ `8383ade` | `EditorSymbolBar`; Rest ersetzt/geprüft |
 | 20 | `20-treesitter-remaining-native-langs.md` | ✅ `a689aed` | Bash, CMake, TOML, YAML (16 `.so`, SHA-256 geprüft) |
 | 21 | `21-verify-apt-stages-pipeline.md` | ✅ `73bb2af` | Skripte geprüft, 12 Etappen gegen den Fork abgeglichen; Rezepte nur im Fork |
 | 22 | `22-verification-followups.md` | ✅ `adb101f` | Ordnerwahl im Wizard, Expressive-Entscheidung, Gradle-/ktlint-Bericht, Gerätetest-Checkliste |
-| 23 | `23-fix-extensions-manager.md` | ⬜ **offen** | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen |
+| 23 | `23-fix-extensions-manager.md` | ✅ `baa1e07` | Katalog-Prüfsummen/Archivtypen/Plattform korrigieren, LSP-Anbindung, Repo aufräumen |
+| 24 | `24-onboarding-permissions-icon-termux-ui.md` | ✅ (dieser Commit) | Onboarding-Surface/Previews, Rechte, Launcher-Icon (`de2caf0`), volle Termux-UI, `codeforge-env`-Fehlerausgabe, Second-Stage-Fix |
 
 ## Nächste Schritte
 
 | Schritt | Aufgabe | Anmerkung |
 |---|---|---|
-| 1 | **Task 23** ausführen | Extensions-Manager reparieren, LSP anbinden, Repo-Reste aufräumen |
-| 2 | Gerätetests | `docs/device-test-checklist.md` (28 Fälle, Bootstrap, W^X, Layouts, Editor, Wizard) |
-| 3 | Fork `scto/terminal-packages-codeforge` | Rezepte aus `agy-output/packages/` (Flutter, TypeScript, jdtls, lemminx, kotlin-lsp) committen, ersten Etappen-Lauf starten (Workflow `build-bootstrap-repo.yml`, Modus `add`) |
+| 1 | Fork `scto/terminal-packages-codeforge` | Etappe `H1-jdk17` (`only=H1-jdk17` in `build-all-stages.yml`) starten, damit `openjdk-17` im APT-Repo liegt; Rezepte aus `agy-output/packages/` committen |
+| 2 | Gerätetests | `docs/device-test-checklist.md` + Punkte aus `docs/task-24-report.md` (Onboarding, Rechte, TermuxActivity, Setup-Lauf) |
 | laufend | **17** | vor jedem Commit/PR; neue Texte in `values/` **und** `values-de/` |
-| optional | **06** | volle Termux-UI |
 
 Nicht Teil der Tasks: das Bauen von Bootstrap und APT-Paketen (GitHub-Actions im Fork). Weitere Backlog-Punkte: `STATUS.md` (Abschnitt „Noch offene Features"): `:libs:gradle-tooling-bridge`, Layout-Designer-Erweiterungen, Expressive ab stabiler material3 ≥ 1.4, ktlint-Umbenennung `template_engine`.
 

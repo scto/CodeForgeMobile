@@ -44,7 +44,8 @@ class MainActivity : ComponentActivity() {
 
             CodeForgeTheme(themeState = settings.theme) {
                 CodeForgeNavHost(
-                    startOnboarding = !settings.onboardingCompleted
+                    startOnboarding = !settings.onboardingCompleted,
+                    useCompactTerminal = settings.terminal.useCompactTerminal
                 )
             }
         }

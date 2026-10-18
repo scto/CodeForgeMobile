@@ -44,14 +44,28 @@ class OnboardingViewModel @Inject constructor(
 
             OnboardingUiEvent.IntroFinished -> {
                 _uiState.update { it.copy(step = OnboardingStep.PERMISSIONS) }
-                send(OnboardingUiEffect.RequestStoragePermission)
+                if (!_uiState.value.storagePermissionGranted) {
+                    send(OnboardingUiEffect.RequestStoragePermission)
+                }
             }
 
             is OnboardingUiEvent.StoragePermissionResult ->
                 _uiState.update { it.copy(storagePermissionGranted = event.granted) }
 
+            is OnboardingUiEvent.InstallPackagesPermissionResult ->
+                _uiState.update { it.copy(installPackagesGranted = event.granted) }
+
             is OnboardingUiEvent.NotificationPermissionResult ->
                 _uiState.update { it.copy(notificationPermissionGranted = event.granted) }
+
+            is OnboardingUiEvent.PermissionsRefreshed ->
+                _uiState.update {
+                    it.copy(
+                        storagePermissionGranted = event.storageGranted,
+                        installPackagesGranted = event.installPackagesGranted,
+                        notificationPermissionGranted = event.notificationGranted
+                    )
+                }
 
             OnboardingUiEvent.PermissionsContinueClicked ->
                 _uiState.update { it.copy(step = OnboardingStep.SETUP) }

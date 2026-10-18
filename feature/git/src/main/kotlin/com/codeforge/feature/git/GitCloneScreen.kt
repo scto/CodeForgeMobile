@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,60 +51,66 @@ private fun GitCloneScreen(
     uiState: GitCloneUiState,
     onEvent: (GitCloneUiEvent) -> Unit
 ) {
-    Column(modifier = modifier.fillMaxSize().safeDrawingPadding().padding(24.dp)) {
-        Text(stringRes(R.string.git_repository_klonen), style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(16.dp))
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground
+    ) {
+        Column(modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp)) {
+            Text(stringRes(R.string.git_repository_klonen), style = MaterialTheme.typography.headlineSmall)
+            Spacer(modifier = Modifier.height(16.dp))
 
-        val fieldsEnabled = uiState.phase != GitClonePhase.CLONING
+            val fieldsEnabled = uiState.phase != GitClonePhase.CLONING
 
-        OutlinedTextField(
-            value = uiState.repositoryUrl,
-            onValueChange = { onEvent(GitCloneUiEvent.UrlChanged(it)) },
-            label = { Text(stringRes(R.string.git_repository_url)) },
-            enabled = fieldsEnabled,
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = uiState.repositoryUrl,
+                onValueChange = { onEvent(GitCloneUiEvent.UrlChanged(it)) },
+                label = { Text(stringRes(R.string.git_repository_url)) },
+                enabled = fieldsEnabled,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
-            value = uiState.targetDirectory,
-            onValueChange = { onEvent(GitCloneUiEvent.TargetDirChanged(it)) },
-            label = { Text(stringRes(R.string.git_zielverzeichnis)) },
-            enabled = fieldsEnabled,
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = uiState.targetDirectory,
+                onValueChange = { onEvent(GitCloneUiEvent.TargetDirChanged(it)) },
+                label = { Text(stringRes(R.string.git_zielverzeichnis)) },
+                enabled = fieldsEnabled,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        when (uiState.phase) {
-            GitClonePhase.IDLE -> {
-                Button(onClick = { onEvent(GitCloneUiEvent.CloneClicked) }, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringRes(R.string.git_klonen))
+            when (uiState.phase) {
+                GitClonePhase.IDLE -> {
+                    Button(onClick = { onEvent(GitCloneUiEvent.CloneClicked) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringRes(R.string.git_klonen))
+                    }
                 }
-            }
 
-            GitClonePhase.CLONING -> {
-                Text(uiState.currentTask.ifBlank { Res.string(R.string.git_klonen_laeuft) }, style = MaterialTheme.typography.bodyMedium)
-                Spacer(modifier = Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = { uiState.progressPercent / 100f },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+                GitClonePhase.CLONING -> {
+                    Text(uiState.currentTask.ifBlank { Res.string(R.string.git_klonen_laeuft) }, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { uiState.progressPercent / 100f },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
-            GitClonePhase.DONE -> {
-                Text(stringRes(R.string.git_repository_geklont), style = MaterialTheme.typography.bodyMedium)
-            }
+                GitClonePhase.DONE -> {
+                    Text(stringRes(R.string.git_repository_geklont), style = MaterialTheme.typography.bodyMedium)
+                }
 
-            GitClonePhase.FAILED -> {
-                Text(
-                    uiState.errorMessage ?: stringRes(R.string.common_klonen_fehlgeschlagen),
-                    color = MaterialTheme.colorScheme.error
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(onClick = { onEvent(GitCloneUiEvent.RetryClicked) }, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringRes(R.string.common_erneut_versuchen))
+                GitClonePhase.FAILED -> {
+                    Text(
+                        uiState.errorMessage ?: stringRes(R.string.common_klonen_fehlgeschlagen),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(onClick = { onEvent(GitCloneUiEvent.RetryClicked) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringRes(R.string.common_erneut_versuchen))
+                    }
                 }
             }
         }

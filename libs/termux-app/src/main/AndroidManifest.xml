@@ -7,8 +7,12 @@
     android:required="false" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission
+    android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="29" />
+  <uses-permission
+    android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    android:maxSdkVersion="29" />
   <uses-permission
     android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
     tools:ignore="ScopedStorage" />
@@ -37,6 +41,11 @@
       android:exported="true"
       android:launchMode="singleTask"
       android:name="com.codeforge.app.TermuxActivity"
+      android:resizeableActivity="true" />
+
+    <activity
+      android:exported="false"
+      android:name="com.codeforge.app.activities.HelpActivity"
       android:resizeableActivity="true" />
 
     <!-- TODO(Thomas)-ANGEPASST: war ursprünglich relativer Name ".shared.activities.ReportActivity",

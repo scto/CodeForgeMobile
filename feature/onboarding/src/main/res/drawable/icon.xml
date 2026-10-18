@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Modul: :app
+    Kombiniertes Android Vector Drawable (AVD) mit moderner, professioneller Farbpalette (Deep Indigo / Neon Cyan)
+    @author Thomas Schmid
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:height="500dp"
+    android:width="500dp"
+    android:viewportHeight="100"
+    android:viewportWidth="100">
+
+    <!-- 1. Tiefes, professionelles Dark-Theme Hintergrund-Panel (#111318) -->
+    <path
+        android:fillColor="#111318"
+        android:pathData="M50,5 A45,45 0 1,1 49.99,5 Z" />
+
+    <!-- 2. Subtles, minimalistisches Grid-Overlay mit reduzierter Opazität -->
+    <path
+        android:strokeColor="#1E2330"
+        android:strokeWidth="0.6"
+        android:strokeAlpha="0.6"
+        android:pathData="
+            M16,5 v90 M32,5 v90 M50,5 v90 M68,5 v90 M84,5 v90
+            M5,16 h90 M5,32 h90 M5,50 h90 M5,68 h90 M5,84 h90" />
+
+    <!-- 3. Realistischer Soft-Drop-Shadow für die Code-Symbole (Klammern & Konsole) -->
+    <path
+        android:strokeWidth="6.5"
+        android:strokeAlpha="0.25"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M27,34 L19,49 L27,64 M53,34 L61,49 L53,64 M36,64 L45,34">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="19"
+                android:startY="34"
+                android:endX="61"
+                android:endY="64"
+                android:startColor="#000000"
+                android:endColor="#000000" />
+        </aapt:attr>
+    </path>
+
+    <!-- 3b. Soft-Drop-Shadow für das Puzzleteil -->
+    <group
+        android:pivotX="45"
+        android:pivotY="15"
+        android:rotation="42"
+        android:scaleX="0.800"
+        android:scaleY="0.800"
+        android:translateX="42"
+        android:translateY="15">
+        <path
+            android:strokeWidth="2.5"
+            android:strokeAlpha="0.25"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M21,6a2,2 0,0 1,2 2
+                v2h9v7a4,4 0,0 0,0 8
+                v7H25a4,4 0,0 0,-8 0
+                H10V23H8a2,2 0,0 1,0 -4
+                h2V10h9V8a2,2 0,0 1,2 -2
+                m0,-2a4,4 0,0 0,-4 4
+                H10a2,2 0,0 0,-2 2
+                v7a4,4 0,0 0,0 8
+                v7a2,2 0,0 0,2 2
+                h9V32a2,2 0,0 1,4 0
+                v2h9a2,2 0,0 0,2 -2
+                V23H32a2,2 0,0 1,0 -4
+                h2V10a2,2 0,0 0,-2 -2
+                H25a4,4 0,0 0,-4 -4Z">
+            <aapt:attr name="android:strokeColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="8"
+                    android:startY="4"
+                    android:endX="34"
+                    android:endY="34"
+                    android:startColor="#000000"
+                    android:endColor="#000000" />
+            </aapt:attr>
+        </path>
+    </group>
+
+    <!-- 4. Haupt-Symbole mit modernem High-End Farbverlauf (Electric Violet zu Vibrant Cyan) -->
+    <!-- Linke Code-Klammer { -->
+    <path
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M26,32 C21,32 19,36 19,41 C19,45 22,47 24,48 C22,49 19,51 19,55 C19,60 21,64 26,64">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="19"
+                android:startY="32"
+                android:endX="26"
+                android:endY="64"
+                android:startColor="#6366F1"
+                android:endColor="#06B6D4" />
+        </aapt:attr>
+    </path>
+
+    <!-- Rechte Code-Klammer } -->
+    <path
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M54,32 C59,32 61,36 61,41 C61,45 58,47 56,48 C58,49 61,51 61,55 C61,60 59,64 54,64">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="32"
+                android:endX="61"
+                android:endY="64"
+                android:startColor="#6366F1"
+                android:endColor="#06B6D4" />
+        </aapt:attr>
+    </path>
+
+    <!-- Konsolen-Prompt / Slash (>/) im Zentrum -->
+    <path
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M35,62 L44,34">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="35"
+                android:startY="62"
+                android:endX="44"
+                android:endY="34"
+                android:startColor="#6366F1"
+                android:endColor="#06B6D4" />
+        </aapt:attr>
+    </path>
+
+    <!-- 5. Puzzleteil oben rechts mit harmonierendem Akzent-Farbverlauf -->
+    <group
+        android:pivotX="45"
+        android:pivotY="15"
+        android:rotation="42"
+        android:scaleX="0.800"
+        android:scaleY="0.800"
+        android:translateX="42"
+        android:translateY="14">
+        <path
+            android:pathData="M21,6a2,2 0,0 1,2 2
+                v2h9v7a4,4 0,0 0,0 8
+                v7H25a4,4 0,0 0,-8 0
+                H10V23H8a2,2 0,0 1,0 -4
+                h2V10h9V8a2,2 0,0 1,2 -2
+                m0,-2a4,4 0,0 0,-4 4
+                H10a2,2 0,0 0,-2 2
+                v7a4,4 0,0 0,0 8
+                v7a2,2 0,0 0,2 2
+                h9V32a2,2 0,0 1,4 0
+                v2h9a2,2 0,0 0,2 -2
+                V23H32a2,2 0,0 1,0 -4
+                h2V10a2,2 0,0 0,-2 -2
+                H25a4,4 0,0 0,-4 -4Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="8"
+                    android:startY="4"
+                    android:endX="34"
+                    android:endY="34"
+                    android:startColor="#38BDF8"
+                    android:endColor="#818CF8" />
+            </aapt:attr>
+        </path>
+    </group>
+
+</vector>

@@ -202,7 +202,8 @@ public final class TermuxInstaller {
                                             outStream.write(buffer, 0, readBytes);
                                     }
                                     if (zipEntryName.startsWith("bin/") || zipEntryName.startsWith("libexec") ||
-                                        zipEntryName.startsWith("lib/apt/apt-helper") || zipEntryName.startsWith("lib/apt/methods")) {
+                                        zipEntryName.startsWith("lib/apt/apt-helper") || zipEntryName.startsWith("lib/apt/methods") ||
+                                        zipEntryName.equals("etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh")) {
                                         //noinspection OctalInteger
                                         Os.chmod(targetFile.getAbsolutePath(), 0700);
                                     }
@@ -228,6 +229,10 @@ public final class TermuxInstaller {
                     // Recreate env file since termux prefix was wiped earlier
                     TermuxShellEnvironment.writeEnvironmentToFile(activity);
 
+                    // Run bootstrap second stage (postinst maintainer scripts) right after extraction
+                    // so that the first interactive login shell does not trigger the profile.d fallback.
+                    runBootstrapSecondStageIfPresent();
+
                     activity.runOnUiThread(whenDone);
 
                 } catch (final Exception e) {
@@ -244,6 +249,111 @@ public final class TermuxInstaller {
                 }
             }
         }.start();
+    }
+
+    /**
+     * Repairs and executes {@code etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh}
+     * after bootstrap extraction.
+     *
+     * <p>Older bootstrap archives built by {@code build-bootstraps.sh} had an empty
+     * {@code TERMUX_PACKAGE_MANAGER=""} and {@code TERMUX_PACKAGE_ARCH=""} as well as an unquoted
+     * {@code elif [ ${TERMUX_PACKAGE_MANAGER} = "pacman" ]; then} on line 290. This method repairs
+     * the script in-place before running it so that {@code *.postinst} scripts run cleanly and the
+     * {@code .lock} symlink is created prior to the first shell session.
+     */
+    private static void runBootstrapSecondStageIfPresent() {
+        File secondStageFile = new File(TERMUX_PREFIX_DIR_PATH,
+            "etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh");
+        if (!secondStageFile.isFile()) {
+            return;
+        }
+        try {
+            String arch = determineTermuxArchName();
+            String content = new String(java.nio.file.Files.readAllBytes(secondStageFile.toPath()),
+                java.nio.charset.StandardCharsets.UTF_8);
+            String patched = content
+                .replace("export TERMUX_PACKAGE_MANAGER=\"\"", "export TERMUX_PACKAGE_MANAGER=\"apt\"")
+                .replace("export TERMUX_PACKAGE_ARCH=\"\"", "export TERMUX_PACKAGE_ARCH=\"" + arch + "\"")
+                .replace("elif [ ${TERMUX_PACKAGE_MANAGER} = \"pacman\" ]; then",
+                    "elif [ \"${TERMUX_PACKAGE_MANAGER}\" = \"pacman\" ]; then");
+            if (!patched.equals(content)) {
+                java.nio.file.Files.write(secondStageFile.toPath(),
+                    patched.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                Logger.logInfo(LOG_TAG, "Repaired termux-bootstrap-second-stage.sh (TERMUX_PACKAGE_MANAGER=apt, arch=" + arch + ").");
+            }
+            //noinspection OctalInteger
+            Os.chmod(secondStageFile.getAbsolutePath(), 0700);
+
+            File dpkgPerlPostinst = new File(TERMUX_PREFIX_DIR_PATH, "var/lib/dpkg/info/dpkg-perl.postinst");
+            if (dpkgPerlPostinst.isFile()) {
+                String dpContent = new String(java.nio.file.Files.readAllBytes(dpkgPerlPostinst.toPath()),
+                    java.nio.charset.StandardCharsets.UTF_8);
+                if (dpContent.contains("cpan -Ti Locale::gettext") && !dpContent.contains("|| true")) {
+                    String dpPatched = dpContent.replace("cpan -Ti Locale::gettext",
+                        "command -v make >/dev/null 2>&1 && cpan -Ti Locale::gettext || true");
+                    java.nio.file.Files.write(dpkgPerlPostinst.toPath(),
+                        dpPatched.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                }
+            }
+
+            File bashFile = new File(TERMUX_PREFIX_DIR_PATH, "bin/bash");
+            if (!bashFile.canExecute()) {
+                Logger.logWarn(LOG_TAG, "Cannot run bootstrap second stage: " + bashFile.getAbsolutePath() + " is not executable.");
+                return;
+            }
+
+            Logger.logInfo(LOG_TAG, "Running termux-bootstrap-second-stage.sh...");
+            ProcessBuilder pb = new ProcessBuilder(bashFile.getAbsolutePath(), secondStageFile.getAbsolutePath());
+            pb.directory(TermuxConstants.TERMUX_HOME_DIR.isDirectory() ? TermuxConstants.TERMUX_HOME_DIR : TERMUX_PREFIX_DIR);
+            pb.redirectErrorStream(true);
+            java.util.Map<String, String> env = pb.environment();
+            env.put("PATH", TERMUX_PREFIX_DIR_PATH + "/bin:/system/bin");
+            env.put("PREFIX", TERMUX_PREFIX_DIR_PATH);
+            env.put("TERMUX_PREFIX", TERMUX_PREFIX_DIR_PATH);
+            env.put("HOME", TermuxConstants.TERMUX_HOME_DIR_PATH);
+            env.put("TMPDIR", TERMUX_PREFIX_DIR_PATH + "/tmp");
+            env.put("TERMUX_PACKAGE_MANAGER", "apt");
+            env.put("TERMUX_PACKAGE_ARCH", arch);
+            env.put("ANDROID__BUILD_VERSION_SDK", String.valueOf(android.os.Build.VERSION.SDK_INT));
+
+            Process process = pb.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    Logger.logInfo(LOG_TAG, "second-stage: " + line);
+                }
+            }
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                Logger.logInfo(LOG_TAG, "Bootstrap second stage completed successfully.");
+                File fallbackScript = new File(TERMUX_PREFIX_DIR_PATH,
+                    "etc/profile.d/01-termux-bootstrap-second-stage-fallback.sh");
+                if (fallbackScript.isFile()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    fallbackScript.delete();
+                }
+            } else {
+                Logger.logWarn(LOG_TAG, "Bootstrap second stage exited with code " + exitCode);
+            }
+        } catch (Exception e) {
+            Logger.logStackTraceWithMessage(LOG_TAG, "Failed to run bootstrap second stage", e);
+        }
+    }
+
+    private static String determineTermuxArchName() {
+        for (String androidArch : android.os.Build.SUPPORTED_ABIS) {
+            switch (androidArch) {
+                case "arm64-v8a":
+                    return "aarch64";
+                case "armeabi-v7a":
+                    return "arm";
+                case "x86_64":
+                    return "x86_64";
+                case "x86":
+                    return "i686";
+            }
+        }
+        return "aarch64";
     }
 
     public static void showBootstrapErrorDialog(Activity activity, Runnable whenDone, String message) {

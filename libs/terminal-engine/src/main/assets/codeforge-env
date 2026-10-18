@@ -78,7 +78,11 @@ MANIFEST_URL="${CODEFORGE_SDK_MANIFEST:-$REPO_URL/manifest.txt}"
 TMP="${TMPDIR:-$PREFIX/tmp}"
 ENV_FILE="$PREFIX/etc/profile.d/codeforge-android.sh"
 JVM_DIR="$PREFIX/lib/jvm"
-mkdir -p "$TMP" "$SDK_ROOT" 2>/dev/null
+LOG_DIR="$HOME/.codeforge/logs"
+LOG_FILE="$LOG_DIR/setup-$(date +%Y-%m-%d).log"
+CURRENT_SETUP_RETRY_CMD=""
+PKG_UPDATED=0
+mkdir -p "$TMP" "$SDK_ROOT" "$LOG_DIR" 2>/dev/null
 
 # cmdline-tools (reines Java, läuft mit dem Termux-JDK). Standard: Release cmdline-tools-$CMDLINE_REV des Mirrors
 # (https://github.com/scto/codeforge-tools/releases/tag/cmdline-tools-19.0, Asset cmdline-tools-19.0.tar.xz).
@@ -139,7 +143,99 @@ progress() { # prozent nachricht
 }
 ok()  { if [ "$MACHINE" = 1 ]; then printf 'CFSDK|OK|%s\n' "$1"; else printf 'OK: %s\n' "$1"; fi; }
 err() { if [ "$MACHINE" = 1 ]; then printf 'CFSDK|ERR|%s\n' "$(clean "$*")"; else printf 'FEHLER: %s\n' "$*" >&2; fi; }
-die() { err "$*"; exit 1; }
+die() {
+  err "$*"
+  if [ -n "${CURRENT_SETUP_RETRY_CMD:-}" ]; then
+    say "Logdatei: $LOG_FILE"
+    say "Erneut versuchen: $CURRENT_SETUP_RETRY_CMD"
+  fi
+  exit 1
+}
+
+format_component_id() {
+  case "$1" in
+    jdk\;*)            printf 'JDK %s' "${1#jdk;}" ;;
+    cmdline-tools\;*)  printf 'cmdline-tools (%s)' "${1#cmdline-tools;}" ;;
+    build-tools\;*)    printf 'build-tools %s' "${1#build-tools;}" ;;
+    platform-tools\;*) printf 'platform-tools %s' "${1#platform-tools;}" ;;
+    platforms\;*)      printf 'Platform %s' "${1#platforms;}" ;;
+    ndk\;*)            printf 'NDK %s' "${1#ndk;}" ;;
+    cmake\;*)          printf 'CMake %s' "${1#cmake;}" ;;
+    *)                 printf '%s' "${1//;/ }" ;;
+  esac
+}
+
+apt_repo_url() {
+  local sl="$PREFIX/etc/apt/sources.list" url=""
+  if [ -f "$sl" ]; then
+    url=$(awk '!/^[[:space:]]*#/ && $1=="deb" {for(i=2;i<=NF;i++) if ($i ~ /^https?:\/\//) {print $i; exit}}' "$sl")
+  fi
+  if [ -z "$url" ] && [ -d "$PREFIX/etc/apt/sources.list.d" ]; then
+    url=$(awk '!/^[[:space:]]*#/ && $1=="deb" {for(i=2;i<=NF;i++) if ($i ~ /^https?:\/\//) {print $i; exit}}' "$PREFIX/etc/apt/sources.list.d"/*.list 2>/dev/null | head -n1)
+  fi
+  printf '%s' "${url:-unbekannt ($sl)}"
+}
+
+pkg_update_once() {
+  [ "$PKG_UPDATED" = 1 ] && return 0
+  PKG_UPDATED=1
+  mkdir -p "$LOG_DIR" 2>/dev/null
+  local up_out="$TMP/.cfsdk-apt-update.out" rc=0
+  {
+    printf '\n=== [%s] apt-get update ===\n' "$(date '+%Y-%m-%d %H:%M:%S')"
+  } >> "$LOG_FILE" 2>/dev/null
+  if command -v apt-get >/dev/null 2>&1; then
+    DEBIAN_FRONTEND=noninteractive apt-get update -y >"$up_out" 2>&1 || rc=$?
+  else
+    pkg update -y >"$up_out" 2>&1 || rc=$?
+  fi
+  cat "$up_out" >> "$LOG_FILE" 2>/dev/null
+  if [ "$rc" -ne 0 ] || grep -Eq '^(Err:|E:|W: Failed to fetch|.*NO_PUBKEY|.*404  Not Found|.*Could not resolve)' "$up_out" 2>/dev/null; then
+    err "Paketlisten-Update (apt-get update) meldet Probleme (URL: $(apt_repo_url)):"
+    if [ "$MACHINE" != 1 ]; then
+      grep -E '(Err:|E:|Failed to fetch|NO_PUBKEY|404|Could not resolve|Clearsigned|signature)' "$up_out" >&2 || tail -n 15 "$up_out" >&2
+    fi
+  fi
+  rm -f "$up_out"
+  return 0
+}
+
+pkg_install() {
+  [ $# -gt 0 ] || return 0
+  pkg_update_once
+  mkdir -p "$LOG_DIR" 2>/dev/null
+  local out_file="$TMP/.cfsdk-pkg-install.out" rc=0 repo_url
+  {
+    printf '\n=== [%s] pkg install -y %s ===\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
+  } >> "$LOG_FILE" 2>/dev/null
+  DEBIAN_FRONTEND=noninteractive pkg install -y "$@" >"$out_file" 2>&1 || rc=$?
+  cat "$out_file" >> "$LOG_FILE" 2>/dev/null
+  if [ "$rc" -ne 0 ]; then
+    repo_url=$(apt_repo_url)
+    if grep -q "Unable to locate package" "$out_file" 2>/dev/null; then
+      err "Paket fehlt im APT-Repo (Etappe bauen) – URL: $repo_url (Pakete: $*)"
+    else
+      err "pkg install $* fehlgeschlagen (Exit-Code $rc, Log: $LOG_FILE)"
+    fi
+    if [ "$MACHINE" != 1 ]; then
+      printf -- '--- Letzte 20 Zeilen aus %s ---\n' "$LOG_FILE" >&2
+      tail -n 20 "$out_file" >&2
+      if command -v apt-cache >/dev/null 2>&1; then
+        printf -- '--- apt-cache policy %s ---\n' "$*" >&2
+        apt-cache policy "$@" 2>&1 | tee -a "$LOG_FILE" >&2
+      fi
+      printf -- '-------------------------------\n' >&2
+    else
+      if command -v apt-cache >/dev/null 2>&1; then
+        apt-cache policy "$@" >> "$LOG_FILE" 2>&1 || true
+      fi
+    fi
+    rm -f "$out_file"
+    return "$rc"
+  fi
+  rm -f "$out_file"
+  return 0
+}
 
 # ---------- Manifest ----------
 # MANIFEST_CACHE wird einmal pro Aufruf auf oberster Ebene gebildet (build_manifest, siehe unten) –
@@ -194,7 +290,7 @@ need_tools() {
     progress 1 "Installiere Werkzeuge: ${missing[*]}"
     local pkgs=() m
     for m in "${missing[@]}"; do case "$m" in sha256sum) pkgs+=(coreutils) ;; *) pkgs+=("$m") ;; esac; done
-    pkg install -y "${pkgs[@]}" >/dev/null 2>&1 || die "Werkzeuge konnten nicht installiert werden: ${pkgs[*]}"
+    pkg_install "${pkgs[@]}" || die "Werkzeuge konnten nicht installiert werden: ${pkgs[*]}"
   fi
 }
 
@@ -220,7 +316,7 @@ extract() { # archiv ziel strip
              local d; d=$(find "$dest.tmp" -mindepth 1 -maxdepth 1 | head -n1)
              if [ -n "$d" ] && [ -d "$d" ]; then mv "$d" "$dest.tmp.inner" && rm -rf "$dest.tmp" && mv "$dest.tmp.inner" "$dest.tmp"; fi
            fi ;;
-    *.7z)  command -v 7z >/dev/null 2>&1 || pkg install -y p7zip >/dev/null 2>&1
+    *.7z)  command -v 7z >/dev/null 2>&1 || pkg_install p7zip
            7z x -y -o"$dest.tmp" "$file" >/dev/null || return 1 ;;
     *) tar -xf "$file" -C "$dest.tmp" --strip-components="$strip" || return 1 ;;
   esac
@@ -330,7 +426,6 @@ mirror_dynamic() {
 # Pro Komponente: Mirror, sonst Upstream, sonst feste Rückfallliste
 build_manifest() {
   local m="$DEFAULT_MANIFEST" remote="" dyn d
-  command -v jq >/dev/null 2>&1 || pkg install -y jq >/dev/null 2>&1
   # build-tools / platform-tools: HomuHomu833-SDK (ab 36.0.2), danach androidide-tools (33.x/34.x), danach Lzhiyong (35.x).
   # Doppelte IDs: die erste Quelle gewinnt (androidide-tools ist vollständiger als Lzhiyong).
   dyn=$(mirror_dynamic android-sdk- build-tools ghsdk platform-tools ghpt)
@@ -425,13 +520,13 @@ do_install() { # id
   case "$kind" in
     pkg)
       progress 5 "Installiere Paket $src …"
-      pkg install -y "$src" >/dev/null 2>&1 || die "pkg install $src fehlgeschlagen"
+      pkg_install "$src" || die "pkg install $src fehlgeschlagen"
       ;;
     archive)
       need_tools
       case "$src" in *://*) url=$src ;; *) url="$REPO_URL/$src" ;; esac
       file="$TMP/cfsdk-$(printf '%s' "$id" | tr -c 'A-Za-z0-9.' '_')-${src##*/}"
-      progress 2 "Starte Download $id"
+      progress 2 "Starte Download $(format_component_id "$id")"
       if ! download "$url" "$file" 2 78; then
         rm -f "$file"
         if [ "$id" = 'cmdline-tools;latest' ]; then
@@ -465,14 +560,14 @@ do_install() { # id
         entry_exists 'cmdline-tools;latest' || die "cmdline-tools nicht konfiguriert (TOOLS_REPO leer?): CMDLINE_TOOLS_URL und CMDLINE_TOOLS_SHA256 in $CONF setzen"
         say "cmdline-tools fehlen — installiere sie zuerst"; ( do_install 'cmdline-tools;latest' ) || exit 1
       fi
-      progress 10 "sdkmanager installiert $src …"
+      progress 10 "sdkmanager installiert $(format_component_id "$src") …"
       export JAVA_HOME="${JAVA_HOME:-$(first_jdk)}"
       yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "$src" >/dev/null 2>&1 \
         || die "sdkmanager konnte $src nicht installieren"
       ;;
     cmake)
       progress 5 "Installiere cmake und ninja …"
-      pkg install -y cmake ninja >/dev/null 2>&1 || die "pkg install cmake ninja fehlgeschlagen"
+      pkg_install cmake ninja || die "pkg install cmake ninja fehlgeschlagen"
       link_cmake || die "CMake konnte nicht für Gradle registriert werden"
       ;;
     ghndk)
@@ -513,7 +608,7 @@ do_install() { # id
       rm -rf "$cx"
       chmod +x "$cdir"/bin/* 2>/dev/null
       if [ ! -x "$cdir/bin/ninja" ]; then
-        command -v ninja >/dev/null 2>&1 || pkg install -y ninja >/dev/null 2>&1
+        command -v ninja >/dev/null 2>&1 || pkg_install ninja
         if command -v ninja >/dev/null 2>&1; then ln -sf "$(command -v ninja)" "$cdir/bin/ninja"
         else say "Warnung: ninja fehlt (pkg install ninja)"; fi
       fi
@@ -559,10 +654,10 @@ do_install() { # id
       # a) Java-Teile und Metadaten der offiziellen build-tools (sdkmanager), falls verfügbar
       if [ ! -x "$sm" ] && entry_exists 'cmdline-tools;latest'; then ( do_install 'cmdline-tools;latest' ) || say "Warnung: cmdline-tools konnten nicht installiert werden"; fi
       if [ -x "$sm" ]; then
-        progress 4 "sdkmanager installiert build-tools;$ver …"
+        progress 4 "sdkmanager installiert build-tools $ver …"
         export JAVA_HOME="${JAVA_HOME:-$(first_jdk)}"
         yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "build-tools;$ver" >/dev/null 2>&1 \
-          || say "Warnung: build-tools;$ver bei Google nicht verfügbar – nur die $CF_ARCH-Binaries werden genutzt"
+          || say "Warnung: build-tools $ver bei Google nicht verfügbar – nur die $CF_ARCH-Binaries werden genutzt"
       else
         say "Warnung: kein sdkmanager – build-tools enthalten nur die $CF_ARCH-Binaries"
       fi
@@ -654,6 +749,9 @@ write_env() { # jdkVer ndkId cmakeId
 }
 
 do_setup() {
+  local setup_args="$*"
+  local retry_cmd="codeforge-env setup${setup_args:+ $setup_args}"
+  CURRENT_SETUP_RETRY_CMD="$retry_cmd"
   local jdk=17 ndk=r29 cmake=3.22.1 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -663,6 +761,7 @@ do_setup() {
       *) die "Unbekannte Option: $1" ;;
     esac
   done
+  pkg_update_once
   # NDK: '27d' wird zu 'r27d'; gibt es genau diese Version nicht (z. B. 'r29d'), gilt das Release gleicher Hauptversion ('r29').
   case "$ndk" in [0-9]*) ndk="r$ndk" ;; esac
   if [ "$want_ndk" = 1 ] && ! entry_exists "ndk;$ndk"; then
@@ -678,13 +777,19 @@ do_setup() {
   local steps=("jdk;$jdk" 'cmdline-tools;latest' "build-tools;$sdk" "platform-tools;$sdk" "platforms;android-$platform")
   [ "$want_ndk" = 1 ] && steps+=("ndk;$ndk")
   [ "$want_cmake" = 1 ] && steps+=("cmake;$cmake")
-  local total=${#steps[@]} i=0 id
+  local total=${#steps[@]} i=0 id label
   for id in "${steps[@]}"; do
     i=$((i+1))
-    if ! entry_exists "$id"; then say "Überspringe $id (nicht im Manifest)"; continue; fi
-    if [ -n "$(installed_path "$id")" ]; then say "$id bereits installiert"; continue; fi
-    say "== ($i/$total) $id =="
-    ( do_install "$id" ) || die "Einrichtung abgebrochen bei $id"
+    label=$(format_component_id "$id")
+    if ! entry_exists "$id"; then say "Überspringe $label (nicht im Manifest)"; continue; fi
+    if [ -n "$(installed_path "$id")" ]; then say "$label bereits installiert"; continue; fi
+    say "== ($i/$total) $label =="
+    if ! ( CURRENT_SETUP_RETRY_CMD="" do_install "$id" ); then
+      err "Einrichtung abgebrochen bei $label ($id)"
+      say "Logdatei: $LOG_FILE"
+      say "Erneut versuchen: $retry_cmd"
+      exit 1
+    fi
   done
   write_env "$jdk" "$( [ "$want_ndk" = 1 ] && echo "ndk;$ndk")" "$( [ "$want_cmake" = 1 ] && echo "cmake;$cmake")"
   progress 100 "Umgebung eingerichtet"
@@ -702,7 +807,12 @@ do_doctor() {
 }
 
 cmd=${1:-help}; [ $# -gt 0 ] && shift
-case "$cmd" in list|install|uninstall|setup) MANIFEST_CACHE=$(build_manifest) ;; esac
+case "$cmd" in
+  list|install|uninstall|setup)
+    command -v jq >/dev/null 2>&1 || pkg_install jq || true
+    MANIFEST_CACHE=$(build_manifest)
+    ;;
+esac
 case "$cmd" in
   list) do_list ;;
   install) [ $# -ge 1 ] || die "install braucht eine ID"; do_install "$1" ;;

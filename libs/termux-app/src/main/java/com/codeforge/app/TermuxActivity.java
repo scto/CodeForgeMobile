@@ -193,6 +193,14 @@ public class TermuxActivity extends AppCompatActivity implements ServiceConnecti
     protected static final String ARG_TERMINAL_TOOLBAR_TEXT_INPUT = "terminal_toolbar_text_input";
     protected static final String ARG_ACTIVITY_RECREATED = "activity_recreated";
 
+    /**
+     * Optional initial shell command to execute once the active terminal session has started
+     * (e.g. `codeforge-env setup ...` launched after Onboarding).
+     */
+    public static final String EXTRA_INITIAL_COMMAND = "com.codeforge.app.termux.INITIAL_COMMAND";
+
+    private String mPendingInitialCommand;
+
     protected static final String LOG_TAG = "TermuxActivity";
 
     @Override
@@ -379,6 +387,37 @@ public class TermuxActivity extends AppCompatActivity implements ServiceConnecti
 
 
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        extractInitialCommand(intent);
+        dispatchPendingInitialCommandIfNeeded();
+    }
+
+    private void extractInitialCommand(@Nullable Intent intent) {
+        if (intent == null || intent.getExtras() == null) return;
+        String cmd = intent.getExtras().getString(EXTRA_INITIAL_COMMAND, null);
+        intent.removeExtra(EXTRA_INITIAL_COMMAND);
+        if (cmd != null && !cmd.trim().isEmpty()) {
+            mPendingInitialCommand = cmd;
+        }
+    }
+
+    public void dispatchPendingInitialCommandIfNeeded() {
+        final String cmd = mPendingInitialCommand;
+        if (cmd == null || cmd.trim().isEmpty()) return;
+        final TerminalSession session = getCurrentSession();
+        if (session == null) return;
+        if (session.getPid() > 0) {
+            mPendingInitialCommand = null;
+            byte[] bytes = (cmd + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            session.write(bytes, 0, bytes.length);
+        } else if (mTerminalView != null) {
+            mTerminalView.post(this::dispatchPendingInitialCommandIfNeeded);
+        }
+    }
+
     /**
      * Part of the {@link ServiceConnection} interface. The service is bound with
      * {@link #bindService(Intent, ServiceConnection, int)} in {@link #onCreate(Bundle)} which will cause a call to this
@@ -394,6 +433,7 @@ public class TermuxActivity extends AppCompatActivity implements ServiceConnecti
 
         final Intent intent = getIntent();
         setIntent(null);
+        extractInitialCommand(intent);
 
         final String workingDir;
         final String sessionName;
@@ -457,6 +497,7 @@ public class TermuxActivity extends AppCompatActivity implements ServiceConnecti
     ) {
         if (mTermuxService.isTermuxSessionsEmpty()) {
             onCreateNewSession(launchFailsafe, sessionName, workingDir);
+            dispatchPendingInitialCommandIfNeeded();
             return;
         }
 
@@ -482,6 +523,7 @@ public class TermuxActivity extends AppCompatActivity implements ServiceConnecti
             mTermuxTerminalSessionActivityClient.setCurrentSession(
                 mTermuxTerminalSessionActivityClient.getCurrentStoredSessionOrLast());
         }
+        dispatchPendingInitialCommandIfNeeded();
     }
 
     @Override

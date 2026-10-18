@@ -59,6 +59,70 @@ private fun TerminalSettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(
+                        stringRes(R.string.settings_terminal_ansicht),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = !uiState.useCompactTerminal,
+                                onClick = { onEvent(TerminalSettingsUiEvent.UseCompactTerminalChanged(false)) }
+                            )
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = !uiState.useCompactTerminal,
+                            onClick = { onEvent(TerminalSettingsUiEvent.UseCompactTerminalChanged(false)) }
+                        )
+                        Column(modifier = Modifier.padding(start = 8.dp)) {
+                            Text(
+                                stringRes(R.string.settings_termux_ui),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                stringRes(R.string.settings_termux_ui_beschreibung),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = uiState.useCompactTerminal,
+                                onClick = { onEvent(TerminalSettingsUiEvent.UseCompactTerminalChanged(true)) }
+                            )
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = uiState.useCompactTerminal,
+                            onClick = { onEvent(TerminalSettingsUiEvent.UseCompactTerminalChanged(true)) }
+                        )
+                        Column(modifier = Modifier.padding(start = 8.dp)) {
+                            Text(
+                                stringRes(R.string.settings_terminal_kompakt),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                stringRes(R.string.settings_terminal_kompakt_beschreibung),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,

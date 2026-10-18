@@ -15,6 +15,8 @@ data class OnboardingUiState(
     val introPageCount: Int = 4,
     val currentIntroPage: Int = 0,
     val storagePermissionGranted: Boolean = false,
+    val installPackagesGranted: Boolean = false,
+    val deletePackagesInfo: Boolean = true,
     val notificationPermissionGranted: Boolean = false,
     val sdkOptions: SdkSetupOptions = SdkSetupOptions(),
     val setupPhase: SetupPhase = SetupPhase.IDLE,
@@ -25,7 +27,13 @@ sealed interface OnboardingUiEvent {
     data class IntroPageChanged(val page: Int) : OnboardingUiEvent
     data object IntroFinished : OnboardingUiEvent
     data class StoragePermissionResult(val granted: Boolean) : OnboardingUiEvent
+    data class InstallPackagesPermissionResult(val granted: Boolean) : OnboardingUiEvent
     data class NotificationPermissionResult(val granted: Boolean) : OnboardingUiEvent
+    data class PermissionsRefreshed(
+        val storageGranted: Boolean,
+        val installPackagesGranted: Boolean,
+        val notificationGranted: Boolean
+    ) : OnboardingUiEvent
     data object PermissionsContinueClicked : OnboardingUiEvent
     data class JdkSelected(val version: String) : OnboardingUiEvent
     data class NdkSelected(val version: String) : OnboardingUiEvent
@@ -40,6 +48,7 @@ sealed interface OnboardingUiEvent {
 
 sealed interface OnboardingUiEffect {
     data object RequestStoragePermission : OnboardingUiEffect
+    data object RequestInstallPackagesPermission : OnboardingUiEffect
     data object RequestNotificationPermission : OnboardingUiEffect
 
     /** Activity-abhängig: UI ruft `TermuxInstaller.setupBootstrapIfNeeded(activity, …)` auf. */
