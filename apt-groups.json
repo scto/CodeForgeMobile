@@ -1,0 +1,70 @@
+{
+  "groups": [
+    {
+      "name": "A-leicht-jvm",
+      "heavy": false,
+      "stage": "04-jvm-tools",
+      "repo_packages": "codeforge-env,yarn,autoconf,automake"
+    },
+    {
+      "name": "B-leicht-dev",
+      "heavy": false,
+      "stage": "06-dev-core",
+      "repo_packages": "pkg-config,libtool,flex,bison,ccache,patchelf,strace"
+    },
+    {
+      "name": "C-leicht-android",
+      "heavy": false,
+      "stage": "05-android-tools",
+      "repo_packages": "gdb,android-tools,gh,rsync,xmlstarlet"
+    },
+    {
+      "name": "D-leicht-lsp",
+      "heavy": false,
+      "stage": "12-lsp-misc",
+      "repo_packages": "neocmakelsp,esbuild,pnpm,shellcheck"
+    },
+    {
+      "name": "E-leicht-py-node",
+      "heavy": false,
+      "stage": "08-python",
+      "repo_packages": "nodejs,npm"
+    },
+    {
+      "name": "H1-jdk17",
+      "heavy": true,
+      "stage": "01-jdk17",
+      "repo_packages": ""
+    },
+    {
+      "name": "H2-jdk21",
+      "heavy": true,
+      "stage": "02-jdk21",
+      "repo_packages": ""
+    },
+    {
+      "name": "H3-jdk25",
+      "heavy": true,
+      "stage": "03-jdk25",
+      "repo_packages": ""
+    },
+    {
+      "name": "H4-llvm-clang",
+      "heavy": true,
+      "stage": "10-llvm-clang",
+      "repo_packages": ""
+    },
+    {
+      "name": "H5-dart",
+      "heavy": true,
+      "stage": "11-dart",
+      "repo_packages": ""
+    },
+    {
+      "name": "H6-rust-analyzer",
+      "heavy": true,
+      "stage": "15-rust-analyzer",
+      "repo_packages": ""
+    }
+  ]
+}
