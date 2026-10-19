@@ -36,10 +36,19 @@
 | **29** | `29-install-and-run-apk.md` | ✅ `a35aee7` | APK installieren und starten: `ApkMetadataParser`, `PackageInstaller`-Session, Statuscode-Mapping, Selbstaktualisierungs-Schutz, „Bauen & Starten“-Ablauf (`docs/install-and-run-apk-report.md`) |
 | **30** | `30-logcat-viewer.md` | ✅ `293fdc6` | Logcat-Ansicht: Filter nach Level, Paket & Tag, Erkennung von Abstürzen mit Klick-Navigation zum Stacktrace im Sora Editor, 3 Quellen (`OWN_PROCESS`, `READ_LOGS_PERMISSION`, `ADB_LOOPBACK`), 50k Ringpuffer (`docs/logcat-viewer-report.md`) |
 | **31** | `31-lsp-code-actions-rename.md` | ✅ `25af384` | LSP Code-Aktionen, Umbenennen (atomar, Multi-File), Struktur-Ansicht (Outline mit Fallback), Definition & Referenzen, Beantwortung von `workspace/applyEdit` (`docs/lsp-code-actions-rename-report.md`) |
+| **32** | `32-unified-formatter.md` | ✅ `ff4ff41` | Einheitlicher „Formatieren“-Befehl mit 3-Stufen-Fallback (LSP → CLI-Prozess `ktlint`/`google-java-format` → Built-in `CodeFormatter`), `.editorconfig`, Format-on-Save, Cursor-/Scroll-Erhalt (`docs/unified-formatter-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
+
+### Task 32 – Einheitlicher Formatter (✅ erledigt)
+1. **Zentraler Vertrag & Kette (32.1)**: `CodeFormatterRepository` in `:core:domain`, implementiert in `:core:data` (`CodeFormatterRepositoryImpl`). 3-Stufen-Strategie: LSP (`textDocument/formatting` bzw. `textDocument/rangeFormatting`), Termux-CLI-Prozesse (`ktlint`, `google-java-format`), syntaxtoleranter Built-in-Fallback (`CodeFormatter` aus `:libs:code-tools`).
+2. **Prozessausführung & Sicherheit (32.1)**: `ProcessExecutor` mit 10s-Timeout und Suchpfad-Erkennung; Syntaxprüfung vor Ersetzung; Quellcode bleibt bei Fehlern garantiert unverändert.
+3. **Cursor- & Scrollposition (32.2)**: `EditorController.applyTextChange` mit Präfix/Suffix-Differenz und `mapCursorOffset`; Cursor bleibt exakt erhalten; einzelner Undo-Schritt pro Formatierung.
+4. **EditorConfig & Format-on-Save (32.3)**: `EditorConfigResolver` für Einrückung und Zeilenlänge; Proto-Felder `format_on_save_kotlin`, `_java`, `_xml`, `_json` in Settings und automatische Formatierung bei `SaveActiveFile`.
+5. **UI & Bereinigung (32.4)**: Redundante Buttons entfernt; ein einziger einheitlicher `AutoFixHigh`-Aktionsbutton für Dokument und Auswahl; Hinweis „Vereinfachte Formatierung (integriert)“.
+6. **Tests & Doku (32.5)**: 56 Tests in `:libs:code-tools`, 7 in `EditorConfigResolverTest`, 9 in `CodeFormatterRepositoryImplTest`, 5 in `EditorControllerCursorTest`, 4 in `EditorViewModelFormatTest`; 981 zweisprachige Strings; Bericht in `docs/unified-formatter-report.md`.
 
 ### Task 31 – Code-Aktionen, Umbenennen und Struktur über LSP (✅ erledigt)
 1. **Protokoll & Modelle (31.1)**: `LspCodeAction`, `LspWorkspaceEdit`, `LspTextEdit`, `LspDocumentSymbol`, `LspLocation`, `LspServerCapabilities`; Methoden `requestCodeActions`, `requestPrepareRename`, `requestRename`, `requestDocumentSymbols`, `requestDefinition`, `requestReferences`, `executeCommand` in `core:domain` & `libs:lsp-client`.
