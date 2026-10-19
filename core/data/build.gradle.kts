@@ -21,6 +21,7 @@ dependencies {
 
     implementation(libs.jgit)
     implementation(libs.androidx.documentfile)
+    implementation(libs.androidx.core.ktx)
 
     testImplementation(project(":core:testing"))
     testImplementation(libs.junit)

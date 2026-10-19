@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -27,6 +28,7 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +61,18 @@ fun BuildBottomSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val state by viewModel.uiState.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    androidx.compose.runtime.LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is BuildUiEffect.LaunchIntent -> {
+                    context.startActivity(effect.intent)
+                }
+                else -> {}
+            }
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -93,6 +107,12 @@ fun BuildPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+
+        // APK-Installationsbereich (Task 29)
+        ApkInstallSection(
+            state = state,
+            onIntent = onIntent
         )
 
         // Reiter: Ausgabe & Probleme
@@ -272,6 +292,20 @@ private fun BuildStatusBar(
                     )
                 }
             } else {
+                FilledTonalButton(
+                    onClick = { onIntent(BuildUiIntent.StartBuildAndRun(state.selectedTask)) }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Launch,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = stringRes(R.string.build_bauen_und_starten),
+                        modifier = Modifier.padding(start = 4.dp),
+                        fontSize = 12.sp
+                    )
+                }
                 Button(
                     onClick = { onIntent(BuildUiIntent.StartBuild(state.selectedTask)) }
                 ) {

@@ -11,6 +11,36 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📲 APK installieren und starten (Task 29)
+
+* **APK-Erkennung & Pure-Kotlin-Parser (`ApkMetadataParser`)**:
+  * Parser für AGP `output-metadata.json` mit Erkennung von Varianten, Versionen und ABI-Splits.
+  * Automatische ABI-Split-Auswahl passend zu `Build.SUPPORTED_ABIS`.
+  * Fallback-Scanner für die neueste `*.apk` unter `build/outputs/apk/`.
+  * Erkennung unssignierter Release-APKs (`*-unsigned.apk`) mit Verweis auf Signatur-Task 34.
+  * 3 JSON-Fixtures und Unit-Tests in `ApkMetadataParserTest`.
+* **PackageInstaller-Repository (`:core:data`, `:core:domain`)**:
+  * `ApkInstallerRepository` Schnittstelle in `:core:domain` und `ApkInstallerRepositoryImpl` in `:core:data`.
+  * Installation via Android `PackageInstaller.Session` (`MODE_FULL_INSTALL`) mit Bytes-Streaming, `fsync()` und Status-BroadcastReceiver.
+  * Weiterleitung des Systemdialogs bei `STATUS_PENDING_USER_ACTION` via `Intent`.
+  * `ApkInstallStatusMapper`: Vollständige Übersetzung aller Statuscodes auf lokalisierte Meldungen (Signaturkonflikt `INSTALL_FAILED_UPDATE_INCOMPATIBLE`, Downgrade, unzureichender Speicherplatz).
+  * Berechtigungsprüfung für `canRequestPackageInstalls()` mit direkter Navigation zu `ACTION_MANAGE_UNKNOWN_APP_SOURCES`.
+* **App-Start & Schutzmaßnahmen**:
+  * Start der installierten App über `PackageManager.getLaunchIntentForPackage`.
+  * Warnung und Bestätigungsdialog bei Selbstaktualisierung (`packageName == context.packageName`).
+  * Option „Nach Installation automatisch starten“ (Standard: aus).
+  * Angebot zur Deinstallation & Neuinstallation bei inkompatibler Signatur.
+* **UI & Workflow-Integration (`:feature:build`)**:
+  * Neue Direktaktion „Bauen & Starten“ (`StartBuildAndRun`) in der Statusleiste.
+  * `ApkInstallSection`: Übersichtskarte mit Paket-Info (`com.beispiel.app 1.2 (14)`), Statusanzeige, Auto-Start-Checkbox, Schnellinstallations- und Start-Buttons.
+  * Abfangen von Fehlschlägen: Kein Installationsversuch bei fehlerhaftem Build.
+* **Wireless-ADB Spike (29.5)**:
+  * Prüfung von `android-tools 37.0.0p1-1` in Termux; `adb`-Serverstart und Koppelungsworkflow dokumentiert.
+* **Lokalisierung & Tests**:
+  * 28 neue zweisprachige Strings (`install_*`, `build_bauen_und_starten`) in `values/` und `values-de/`.
+  * 10 Unit-Tests in `BuildViewModelTest` für alle Zustandsübergänge, 9 Tests in `ApkInstallStatusMapperTest`, 3 Tests in `ApkMetadataParserTest`.
+  * Dokumentation in [`docs/install-and-run-apk-report.md`](docs/install-and-run-apk-report.md).
+
 ### 🔨 Gradle-Build-Ausgabe und Problemfenster (Task 28)
 
 * **Entscheidung 28.0 (Option A Termux-Prozess)**:

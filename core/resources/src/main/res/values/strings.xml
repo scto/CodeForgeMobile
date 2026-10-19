@@ -952,6 +952,39 @@
     <string name="editor_lsp_open_settings">Settings → Extensions</string>
     <string name="editor_lsp_start_failed">LSP server could not be started. Check Settings → Extensions.</string>
 
+    <!-- install (Task 29) -->
+    <string name="build_bauen_und_starten">Build &amp; Run</string>
+    <string name="install_titel">Install APK</string>
+    <string name="install_schaltflaeche">Install</string>
+    <string name="install_starten_schaltflaeche">Launch</string>
+    <string name="install_deinstallieren_schaltflaeche">Uninstall</string>
+    <string name="install_deinstallieren_und_neu_installieren">Uninstall &amp; Reinstall</string>
+    <string name="install_abbrechen">Cancel</string>
+    <string name="install_status_bereit">APK ready for installation</string>
+    <string name="install_status_wird_installiert">Installing %1$s…</string>
+    <string name="install_status_erfolgreich">%1$s successfully installed.</string>
+    <string name="install_status_bestaetigung_erforderlich">Please confirm installation in system dialog.</string>
+    <string name="install_status_fehlgeschlagen">Installation failed: %1$s</string>
+    <string name="install_auto_start_einstellung">Auto-launch after installation</string>
+    <string name="install_nicht_signiert_fehler">Release APK is unsigned. Please sign the APK before installing (Task 34).</string>
+    <string name="install_keine_apk_gefunden">No APK found under build/outputs/apk/.</string>
+    <string name="install_berechtigung_fehlt">Permission to install unknown apps is required.</string>
+    <string name="install_berechtigung_oeffnen">Open Settings</string>
+    <string name="install_selbstaktualisierung_warnung_titel">Self-Update Warning</string>
+    <string name="install_selbstaktualisierung_warnung_nachricht">The APK has the same package name as CodeForge Mobile (%1$s). Installing this APK will replace or update CodeForge. Do you want to proceed?</string>
+    <string name="install_inkompatible_signatur_titel">Incompatible Signing Key</string>
+    <string name="install_inkompatible_signatur_nachricht">The installed application has a different signature. To install this build, the existing app must be uninstalled first. All app data will be lost.</string>
+    <string name="install_fehler_downgrade">Cannot install an older version over a newer version (version downgrade).</string>
+    <string name="install_fehler_speicherplatz">Insufficient storage space to install this application.</string>
+    <string name="install_fehler_beschaedigt">The package file appears to be corrupted or invalid.</string>
+    <string name="install_fehler_blockiert">Installation was blocked by device security policy or user action.</string>
+    <string name="install_fehler_konflikt">Installation conflicts with an existing package on the device.</string>
+    <string name="install_fehler_abgebrochen">Installation was cancelled or aborted.</string>
+    <string name="install_fehler_unbekannt">Installation failed (status %1$d): %2$s</string>
+    <string name="install_paket_info">%1$s %2$s (%3$d)</string>
+    <string name="install_groesse">Size: %1$s</string>
+    <string name="install_abi">ABI: %1$s</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

@@ -33,10 +33,19 @@
 | **27a** | `27a-compose-preview-kotlinc-in-termux.md` | ✅ `3029076` | Compose-Preview: Kotlin-Compiler als Termux-Prozess (`$PREFIX/opt/kotlin/bin/kotlinc`), Spike auf Gerät (4–6 s, `javap` verifiziert), Entfernung embeddable (-4,67 MB APK), `KotlincProcessCompiler` & `KotlincOutputParser`, JVM-Tests (`docs/compose-preview-kotlinc-report.md`) |
 | **27b** | `27b-compose-preview-offscreen-render.md` | ✅ `43c55b7` | Compose-Preview: Offscreen-Rendering mit GraphicsLayer, Frame-Synchronisation via `withFrameNanos`, 5s-Timeout, Fehlerisolation/Host-Schutz, Signaturvalidierung `(Composer, Int)`, dynamische Größe, androidTest kompiliert (`assembleDebugAndroidTest`) (`docs/compose-preview-render-report.md`) |
 | **28** | `28-gradle-build-output-problems.md` | ✅ `3399403` | Gradle-Build-Ausgabe und Problemfenster: Entscheidung 28.0 (Option A Termux-Prozess), Domain-Modelle `BuildProblem` & `BuildSession`, reiner Kotlin-Parser `GradleOutputParser` mit 5 Fixtures, `CircularLineBuffer` (20.000 Zeilen), `ProcessGradleBuildRepository`, `BuildForegroundService`, UI-Modul `:feature:build` mit MVI/Hilt, `OutputTab`, `ProblemsTab` mit Klick-Navigation via `OpenFileRequestBridge`, Integration in `ProjectWorkspaceRoute` (`docs/gradle-build-output-problems-report.md`) |
+| **29** | `29-install-and-run-apk.md` | ✅ `a35aee7` | APK installieren und starten: `ApkMetadataParser`, `PackageInstaller`-Session, Statuscode-Mapping, Selbstaktualisierungs-Schutz, „Bauen & Starten“-Ablauf (`docs/install-and-run-apk-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
+
+### Task 29 – APK installieren und starten (✅ erledigt)
+1. **APK-Erkennung & Parser (29.1)**: `ApkMetadataParser` für `output-metadata.json` (ABI-Splits gegen `Build.SUPPORTED_ABIS`, `versionCode`, `versionName`, `outputFile`); Fallback-Scan nach `*.apk` unter `build/outputs/apk/`; Erkennung nicht signierter Release-APKs (`*-unsigned.apk`).
+2. **Installation über PackageInstaller (29.2)**: `ApkInstallerRepository` & `ApkInstallerRepositoryImpl` mit `PackageInstaller`-Session (`MODE_FULL_INSTALL`), Streamen und `fsync()`; Weiterleitung des Systemdialogs bei `STATUS_PENDING_USER_ACTION`; `ApkInstallStatusMapper` mit vollständiger Statuscode- und Fehlerabbildung (Signaturkonflikt, Downgrade, Speicherplatz); `PackageManager.getPackageArchiveInfo` und Rechteprüfung (`ACTION_MANAGE_UNKNOWN_APP_SOURCES`).
+3. **Starten & Selbstaktualisierungs-Schutz (29.3)**: Starten via `getLaunchIntentForPackage`; Einstellung für automatisches Starten nach Installation; Bestätigungsdialog bei Selbstaktualisierung (`packageName == context.packageName`).
+4. **Ablauf-Integration in `:feature:build` (29.4)**: Neuer Button „Bauen & Starten“ (`StartBuildAndRun`); `@Immutable`-Zustände (`Idle`, `Building`, `ReadyToInstall`, `Installing`, `NeedsUserAction`, `NeedsPermission`, `Installed`, `Failed`); kein Installationsversuch bei Build-Fehlern; Dialog für Signaturkonflikte mit Option „Deinstallieren & neu installieren“.
+5. **Wireless ADB Spike (29.5)**: Erreichbarkeit von `adb` in Termux (`android-tools 37.0.0p1-1`) und Serverstart verifiziert; Koppelungs- und Verbindungsablauf für Task 30 in `docs/install-and-run-apk-report.md` dokumentiert.
+6. **Tests & Doku (29.6)**: JVM-Tests in `ApkMetadataParserTest`, `ApkInstallStatusMapperTest`, `BuildViewModelTest`; String-Check grün; Bericht in `docs/install-and-run-apk-report.md`.
 
 ### Task 28 – Gradle-Build-Ausgabe und Problemfenster (✅ erledigt)
 1. **Entscheidung 28.0**: Option A (Termux-Prozess `./gradlew <task> --console=plain`) gewählt; bisherige Tooling-API-Bridge als `@Deprecated` markiert.

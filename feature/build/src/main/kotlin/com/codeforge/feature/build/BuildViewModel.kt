@@ -4,17 +4,23 @@
  */
 package com.codeforge.feature.build
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codeforge.core.domain.model.ApkInstallStatus
 import com.codeforge.core.domain.model.BuildProblem
 import com.codeforge.core.domain.model.BuildStatus
+import com.codeforge.core.domain.repository.ApkInstallerRepository
 import com.codeforge.core.domain.repository.BuildEvent
 import com.codeforge.core.domain.repository.GradleBuildRepository
 import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -26,20 +32,28 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-import kotlinx.coroutines.CoroutineScope
-
 @HiltViewModel
 class BuildViewModel internal constructor(
     private val gradleBuildRepository: GradleBuildRepository,
     private val openFileRequestBridge: OpenFileRequestBridge,
-    externalScope: CoroutineScope?
+    private val apkInstallerRepository: ApkInstallerRepository,
+    private val ownPackageName: String = "",
+    externalScope: CoroutineScope? = null
 ) : ViewModel() {
 
     @Inject
     constructor(
         gradleBuildRepository: GradleBuildRepository,
-        openFileRequestBridge: OpenFileRequestBridge
-    ) : this(gradleBuildRepository, openFileRequestBridge, null)
+        openFileRequestBridge: OpenFileRequestBridge,
+        apkInstallerRepository: ApkInstallerRepository,
+        @ApplicationContext context: Context
+    ) : this(
+        gradleBuildRepository,
+        openFileRequestBridge,
+        apkInstallerRepository,
+        context.packageName,
+        null
+    )
 
     private val scope: CoroutineScope = externalScope ?: viewModelScope
 
@@ -50,8 +64,10 @@ class BuildViewModel internal constructor(
     val effects = _effects.receiveAsFlow()
 
     private var activeBuildJob: Job? = null
+    private var activeInstallJob: Job? = null
     private val pendingLines = ArrayList<String>()
     private val lineBufferLock = Any()
+    private var currentProjectRoot: File? = null
 
     init {
         scope.launch {
@@ -68,6 +84,7 @@ class BuildViewModel internal constructor(
     }
 
     fun connectProject(rootPath: String) {
+        currentProjectRoot = File(rootPath)
         scope.launch {
             gradleBuildRepository.connect(rootPath)
         }
@@ -79,7 +96,10 @@ class BuildViewModel internal constructor(
                 _uiState.update { it.copy(activeTab = intent.tab) }
             }
             is BuildUiIntent.StartBuild -> {
-                startBuild(intent.taskName)
+                startBuild(intent.taskName, autoRunOnSuccess = false)
+            }
+            is BuildUiIntent.StartBuildAndRun -> {
+                startBuild(intent.taskName, autoRunOnSuccess = true)
             }
             is BuildUiIntent.CancelBuild -> {
                 cancelBuild()
@@ -118,10 +138,40 @@ class BuildViewModel internal constructor(
             is BuildUiIntent.SetCustomTaskInput -> {
                 _uiState.update { it.copy(customTaskInput = intent.input) }
             }
+            is BuildUiIntent.InstallApk -> {
+                initiateInstall()
+            }
+            is BuildUiIntent.LaunchInstalledApp -> {
+                launchInstalledApp()
+            }
+            is BuildUiIntent.UninstallApp -> {
+                uninstallCurrentApp()
+            }
+            is BuildUiIntent.UninstallAndReinstall -> {
+                uninstallCurrentApp()
+                _uiState.update { it.copy(isIncompatibleSignatureDialogVisible = false) }
+            }
+            is BuildUiIntent.SetAutoLaunchOnInstall -> {
+                _uiState.update { it.copy(autoLaunchOnInstall = intent.enabled) }
+            }
+            is BuildUiIntent.ConfirmSelfReplace -> {
+                confirmSelfReplace(intent.confirmed)
+            }
+            is BuildUiIntent.DismissIncompatibleSignatureDialog -> {
+                _uiState.update { it.copy(isIncompatibleSignatureDialogVisible = false) }
+            }
+            is BuildUiIntent.RequestInstallPermission -> {
+                val s = _uiState.value.installStatus
+                if (s is ApkInstallStatus.NeedsPermission) {
+                    scope.launch {
+                        _effects.send(BuildUiEffect.LaunchIntent(s.settingsIntent))
+                    }
+                }
+            }
         }
     }
 
-    fun startBuild(taskName: String) {
+    fun startBuild(taskName: String, autoRunOnSuccess: Boolean = false) {
         if (_uiState.value.isBuilding) {
             scope.launch {
                 _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_bereits_aktiv)))
@@ -139,11 +189,11 @@ class BuildViewModel internal constructor(
                 isBuilding = true,
                 selectedTask = taskName,
                 problems = emptyList(),
-                outputLines = emptyList()
+                outputLines = emptyList(),
+                installStatus = if (autoRunOnSuccess) ApkInstallStatus.Building else ApkInstallStatus.Idle
             )
         }
 
-        // Starte Batching-Job für flüssige UI-Updates (100 ms)
         val flushJob = scope.launch {
             while (isActive) {
                 delay(100L)
@@ -170,17 +220,24 @@ class BuildViewModel internal constructor(
                             _uiState.update { it.copy(isBuilding = false) }
                             if (event.success) {
                                 _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_erfolgreich)))
+                                onBuildSucceeded(taskName, autoRun = autoRunOnSuccess)
                             } else {
                                 _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_fehlgeschlagen)))
+                                _uiState.update { it.copy(installStatus = ApkInstallStatus.Idle) }
                             }
                         }
                         is BuildEvent.BuildFailed -> {
                             flushPendingLines()
-                            _uiState.update { it.copy(isBuilding = false) }
+                            _uiState.update {
+                                it.copy(
+                                    isBuilding = false,
+                                    installStatus = ApkInstallStatus.Idle
+                                )
+                            }
                             _effects.send(BuildUiEffect.ShowSnackbar(event.message))
                         }
                         else -> {
-                            // Andere Events (Progress, TaskStarted, etc.)
+                            // Andere Events
                         }
                     }
                 }
@@ -190,6 +247,134 @@ class BuildViewModel internal constructor(
                 _uiState.update { it.copy(isBuilding = false) }
             }
         }
+    }
+
+    private fun onBuildSucceeded(taskName: String, autoRun: Boolean) {
+        // Bei erfolgreichem Build nach APK suchen
+        val projectRoot = currentProjectRoot ?: return
+        val preferredVariant = when {
+            taskName.contains("Release", ignoreCase = true) -> "release"
+            else -> "debug"
+        }
+
+        val metaResult = apkInstallerRepository.findApk(projectRoot, preferredVariant)
+        val metadata = metaResult.getOrNull()
+
+        if (metadata == null) {
+            val errorMsg = metaResult.exceptionOrNull()?.localizedMessage
+                ?: Res.string(R.string.install_keine_apk_gefunden)
+            _uiState.update { it.copy(installStatus = ApkInstallStatus.Failed(errorMsg)) }
+            return
+        }
+
+        if (!metadata.isSigned) {
+            _uiState.update {
+                it.copy(
+                    installStatus = ApkInstallStatus.Failed(
+                        reason = Res.string(R.string.install_nicht_signiert_fehler),
+                        isUnsigned = true
+                    )
+                )
+            }
+            return
+        }
+
+        val pkgResult = apkInstallerRepository.getApkPackageInfo(metadata.file)
+        val apkInfo = pkgResult.getOrNull()
+
+        if (apkInfo == null) {
+            val errorMsg = pkgResult.exceptionOrNull()?.localizedMessage
+                ?: Res.string(R.string.install_keine_apk_gefunden)
+            _uiState.update { it.copy(installStatus = ApkInstallStatus.Failed(errorMsg)) }
+            return
+        }
+
+        _uiState.update { it.copy(installStatus = ApkInstallStatus.ReadyToInstall(apkInfo)) }
+
+        if (autoRun) {
+            initiateInstall()
+        }
+    }
+
+    private fun initiateInstall() {
+        val currentStatus = _uiState.value.installStatus
+        val apkInfo = (currentStatus as? ApkInstallStatus.ReadyToInstall)?.apkInfo ?: return
+
+        // Prüfe auf Selbstersetzung
+        if (ownPackageName.isNotBlank() && apkInfo.packageName == ownPackageName) {
+            _uiState.update { it.copy(isSelfReplaceDialogVisible = true) }
+            return
+        }
+
+        executeInstall(apkInfo.file)
+    }
+
+    private fun confirmSelfReplace(confirmed: Boolean) {
+        _uiState.update { it.copy(isSelfReplaceDialogVisible = false) }
+        if (confirmed) {
+            val apkInfo = (_uiState.value.installStatus as? ApkInstallStatus.ReadyToInstall)?.apkInfo
+            if (apkInfo != null) {
+                executeInstall(apkInfo.file)
+            }
+        }
+    }
+
+    private fun executeInstall(apkFile: File) {
+        activeInstallJob?.cancel()
+        activeInstallJob = scope.launch {
+            apkInstallerRepository.installApk(apkFile).collect { status ->
+                _uiState.update { it.copy(installStatus = status) }
+                when (status) {
+                    is ApkInstallStatus.NeedsUserAction -> {
+                        _effects.send(BuildUiEffect.LaunchIntent(status.confirmationIntent))
+                    }
+                    is ApkInstallStatus.NeedsPermission -> {
+                        _effects.send(BuildUiEffect.LaunchIntent(status.settingsIntent))
+                    }
+                    is ApkInstallStatus.Installed -> {
+                        val label = status.appLabel ?: status.packageName
+                        _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.install_status_erfolgreich, label)))
+                        if (_uiState.value.autoLaunchOnInstall) {
+                            apkInstallerRepository.launchApp(status.packageName)
+                        }
+                    }
+                    is ApkInstallStatus.Failed -> {
+                        _effects.send(BuildUiEffect.ShowSnackbar(status.reason))
+                        if (status.isSignatureIncompatible) {
+                            _uiState.update { it.copy(isIncompatibleSignatureDialogVisible = true) }
+                        }
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun launchInstalledApp() {
+        val packageName = when (val s = _uiState.value.installStatus) {
+            is ApkInstallStatus.Installed -> s.packageName
+            is ApkInstallStatus.ReadyToInstall -> s.apkInfo.packageName
+            else -> null
+        } ?: return
+
+        val result = apkInstallerRepository.launchApp(packageName)
+        if (result.isFailure) {
+            scope.launch {
+                val msg = result.exceptionOrNull()?.localizedMessage ?: "Failed to launch $packageName"
+                _effects.send(BuildUiEffect.ShowSnackbar(msg))
+            }
+        }
+    }
+
+    private fun uninstallCurrentApp() {
+        val packageName = when (val s = _uiState.value.installStatus) {
+            is ApkInstallStatus.Failed -> s.packageName
+            is ApkInstallStatus.ReadyToInstall -> s.apkInfo.packageName
+            is ApkInstallStatus.Installed -> s.packageName
+            else -> null
+        } ?: return
+
+        apkInstallerRepository.uninstallApp(packageName)
     }
 
     fun cancelBuild() {

@@ -36,6 +36,10 @@ data class BuildUiState(
     val customTaskInput: String = "",
     val isTaskSelectorVisible: Boolean = false,
     val lastFinishedStatus: BuildStatus? = null,
+    val installStatus: com.codeforge.core.domain.model.ApkInstallStatus = com.codeforge.core.domain.model.ApkInstallStatus.Idle,
+    val autoLaunchOnInstall: Boolean = false,
+    val isSelfReplaceDialogVisible: Boolean = false,
+    val isIncompatibleSignatureDialogVisible: Boolean = false,
 ) {
     val filteredProblems: List<BuildProblem> get() = when (problemFilter) {
         ProblemFilter.ALL -> problems
@@ -55,6 +59,7 @@ data class BuildUiState(
 sealed interface BuildUiIntent {
     data class SelectTab(val tab: BuildTab) : BuildUiIntent
     data class StartBuild(val taskName: String) : BuildUiIntent
+    data class StartBuildAndRun(val taskName: String = "assembleDebug") : BuildUiIntent
     data object CancelBuild : BuildUiIntent
     data object ClearOutput : BuildUiIntent
     data object CopyOutput : BuildUiIntent
@@ -65,10 +70,19 @@ sealed interface BuildUiIntent {
     data class ShowTaskSelector(val show: Boolean) : BuildUiIntent
     data class SetSelectedTask(val task: String) : BuildUiIntent
     data class SetCustomTaskInput(val input: String) : BuildUiIntent
+    data object InstallApk : BuildUiIntent
+    data object LaunchInstalledApp : BuildUiIntent
+    data object UninstallApp : BuildUiIntent
+    data object UninstallAndReinstall : BuildUiIntent
+    data class SetAutoLaunchOnInstall(val enabled: Boolean) : BuildUiIntent
+    data class ConfirmSelfReplace(val confirmed: Boolean) : BuildUiIntent
+    data object DismissIncompatibleSignatureDialog : BuildUiIntent
+    data object RequestInstallPermission : BuildUiIntent
 }
 
 sealed interface BuildUiEffect {
     data class ShowSnackbar(val message: String) : BuildUiEffect
     data class CopyToClipboard(val text: String) : BuildUiEffect
     data class OpenEditorAt(val path: String, val line: Int, val column: Int) : BuildUiEffect
+    data class LaunchIntent(val intent: android.content.Intent) : BuildUiEffect
 }

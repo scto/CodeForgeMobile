@@ -68,10 +68,11 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 ### 🌍 9. Centralized Strings (`:core:resources`) ✅🧪
 * 📝 All visible texts in one `strings.xml` (~880 entries), accessed via `Res`/`stringRes`; `TestRes` for JVM tests.
 
-### 🔨 10. Gradle Build & Problems (`:feature:build`, `:libs:gradle-tooling-bridge`) ✅🧪
+### 🔨 10. Gradle Build, Problems & APK Install (`:feature:build`, `:core:data`, `:core:domain`) ✅🧪
 * 📦 On-device Gradle build execution via Termux process (`./gradlew <task> --console=plain`) and Android Foreground Service.
 * 📜 Live streaming console output with 20,000-line ring buffer (`CircularLineBuffer`), auto-scroll, search, copy, clear, and colored syntax.
 * 🚨 Clickable "Problems" tab (`BuildProblem`) parsing Kotlin, Java javac multi-line, AAPT2, and Gradle execution errors; direct jump to `line:column` in the editor via `OpenFileRequestBridge`.
+* 📲 One-tap APK installation via Android `PackageInstaller` session and direct app launching; "Build & Run" (`StartBuildAndRun`), auto-launch option, ABI-split matching, self-update protection, and signing conflict resolution (see [docs/install-and-run-apk-report.md](docs/install-and-run-apk-report.md)).
 
 ---
 

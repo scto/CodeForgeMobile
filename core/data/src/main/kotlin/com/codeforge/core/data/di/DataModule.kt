@@ -74,4 +74,10 @@ abstract class DataModule {
     abstract fun bindProjectImportRepository(
         impl: ProjectImportRepositoryImpl
     ): ProjectImportRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindApkInstallerRepository(
+        impl: com.codeforge.core.data.repository.ApkInstallerRepositoryImpl
+    ): com.codeforge.core.domain.repository.ApkInstallerRepository
 }

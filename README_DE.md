@@ -68,10 +68,11 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 ### 🌍 9. Zentrale Strings (`:core:resources`) ✅🧪
 * 📝 Alle sichtbaren Texte in einer `strings.xml` (~880 Einträge), Zugriff über `Res`/`stringRes`; `TestRes` für JVM-Tests.
 
-### 🔨 10. Gradle-Build & Probleme (`:feature:build`, `:libs:gradle-tooling-bridge`) ✅🧪
+### 🔨 10. Gradle-Build, Probleme & APK-Installation (`:feature:build`, `:core:data`, `:core:domain`) ✅🧪
 * 📦 Gradle-Builds auf dem Gerät via Termux-Prozess (`./gradlew <task> --console=plain`) und Android Foreground Service.
 * 📜 Live gestreamte Konsolenausgabe mit 20.000-Zeilen-Ringpuffer (`CircularLineBuffer`), Auto-Scroll, Suche, Kopieren, Löschen und Syntax-Einfärbung.
 * 🚨 Klickbarer Reiter „Probleme“ (`BuildProblem`) für Kotlin-, Java-javac-Mehrzeiler-, AAPT2- und Gradle-Fehler; direkter Sprung zu `line:column` im Sora-Editor via `OpenFileRequestBridge`.
+* 📲 1-Tipp-APK-Installation via Android `PackageInstaller`-Session und direkter App-Start; „Bauen & Starten“-Ablauf (`StartBuildAndRun`), Auto-Start-Option, ABI-Split-Auswahl, Selbstaktualisierungs-Schutz und Signaturkonflikt-Behandlung (siehe [docs/install-and-run-apk-report.md](docs/install-and-run-apk-report.md)).
 
 ---
 

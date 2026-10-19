@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
@@ -81,6 +82,7 @@ fun ProjectWorkspaceRoute(
     val buildState by buildViewModel.uiState.collectAsState()
     var showBuildSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(rootPath) {
         buildViewModel.connectProject(rootPath)
@@ -103,6 +105,9 @@ fun ProjectWorkspaceRoute(
                 }
                 is BuildUiEffect.OpenEditorAt -> {
                     showBuildSheet = false
+                }
+                is BuildUiEffect.LaunchIntent -> {
+                    context.startActivity(effect.intent)
                 }
                 else -> {}
             }
