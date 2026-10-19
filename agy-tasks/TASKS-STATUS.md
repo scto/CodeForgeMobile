@@ -34,10 +34,19 @@
 | **27b** | `27b-compose-preview-offscreen-render.md` | ✅ `43c55b7` | Compose-Preview: Offscreen-Rendering mit GraphicsLayer, Frame-Synchronisation via `withFrameNanos`, 5s-Timeout, Fehlerisolation/Host-Schutz, Signaturvalidierung `(Composer, Int)`, dynamische Größe, androidTest kompiliert (`assembleDebugAndroidTest`) (`docs/compose-preview-render-report.md`) |
 | **28** | `28-gradle-build-output-problems.md` | ✅ `3399403` | Gradle-Build-Ausgabe und Problemfenster: Entscheidung 28.0 (Option A Termux-Prozess), Domain-Modelle `BuildProblem` & `BuildSession`, reiner Kotlin-Parser `GradleOutputParser` mit 5 Fixtures, `CircularLineBuffer` (20.000 Zeilen), `ProcessGradleBuildRepository`, `BuildForegroundService`, UI-Modul `:feature:build` mit MVI/Hilt, `OutputTab`, `ProblemsTab` mit Klick-Navigation via `OpenFileRequestBridge`, Integration in `ProjectWorkspaceRoute` (`docs/gradle-build-output-problems-report.md`) |
 | **29** | `29-install-and-run-apk.md` | ✅ `a35aee7` | APK installieren und starten: `ApkMetadataParser`, `PackageInstaller`-Session, Statuscode-Mapping, Selbstaktualisierungs-Schutz, „Bauen & Starten“-Ablauf (`docs/install-and-run-apk-report.md`) |
+| **30** | `30-logcat-viewer.md` | ✅ erledigt | Logcat-Ansicht: Filter nach Level, Paket & Tag, Erkennung von Abstürzen mit Klick-Navigation zum Stacktrace im Sora Editor, 3 Quellen (`OWN_PROCESS`, `READ_LOGS_PERMISSION`, `ADB_LOOPBACK`), 50k Ringpuffer (`docs/logcat-viewer-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
+
+### Task 30 – Logcat-Ansicht (✅ erledigt)
+1. **Spike & Quellen (30.0)**: Dokumentation der Vor-/Nachteile von `OWN_PROCESS`, `READ_LOGS_PERMISSION` und `ADB_LOOPBACK`. Permission `android.permission.READ_LOGS` im Manifest ergänzt. Transparenter Quell-Auswahldialog `LogcatSourceDialog` mit Terminal-Befehlen.
+2. **Domain-Modelle & Parser (30.1)**: `LogLevel`, `LogEntry`, `StackFrame`, `LogcatFilter`, `LogcatSource`. Reiner Kotlin-Parser `LogcatParser` für `-v threadtime`, Fortsetzungszeilen, Crash-Gruppierung und Stacktrace-Regex. 4 Fixtures und Tests in `LogcatParserTest`.
+3. **Ringpuffer & Repository (30.2)**: `LogcatRingBuffer` (50.000 Einträge), `LogcatRepository` & `LogcatRepositoryImpl` mit Prozess-Streaming auf `Dispatchers.IO`, Prozess-Zerstörung bei Flow-Abbruch, Fake-Tests in `LogcatRepositoryImplTest`.
+4. **UI-Modul `:feature:build` (30.3)**: Neuer Tab `BuildTab.LOGCAT` neben Ausgabe & Probleme, roter Crash-Badge im Tab-Header; `LogcatFilterBar` (Paket, Level, Tag, Volltext, Nur-Abstürze), `LogcatActionBar` (Pause/Fortsetzen, Leeren, Quelle, Zähler, Kopieren, Teilen).
+5. **Stacktrace-Navigation (30.4)**: Klickbare Stacktrace-Zeilen mit Sprung-Icon; automatische Dateiauflösung im Projektverzeichnis (`resolveStackFrameFile`); Sprung via `OpenFileRequestBridge.requestOpenAt(path, line, 1)` direkt in den Sora Editor.
+6. **Verifikation & Tests (30.5)**: JVM-Unit-Tests in `:core:domain`, `:core:data`, `:feature:build`; 941 Strings zweisprachig verifiziert; Bericht in `docs/logcat-viewer-report.md`.
 
 ### Task 29 – APK installieren und starten (✅ erledigt)
 1. **APK-Erkennung & Parser (29.1)**: `ApkMetadataParser` für `output-metadata.json` (ABI-Splits gegen `Build.SUPPORTED_ABIS`, `versionCode`, `versionName`, `outputFile`); Fallback-Scan nach `*.apk` unter `build/outputs/apk/`; Erkennung nicht signierter Release-APKs (`*-unsigned.apk`).

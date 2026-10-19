@@ -27,6 +27,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.codeforge.core.domain.model.LogEntry
+import com.codeforge.core.domain.model.LogcatFilter
+import com.codeforge.core.domain.model.LogcatSource
+import com.codeforge.core.domain.model.StackFrame
+import com.codeforge.core.domain.repository.LogcatRepository
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -37,6 +42,7 @@ class BuildViewModel internal constructor(
     private val gradleBuildRepository: GradleBuildRepository,
     private val openFileRequestBridge: OpenFileRequestBridge,
     private val apkInstallerRepository: ApkInstallerRepository,
+    private val logcatRepository: LogcatRepository,
     private val ownPackageName: String = "",
     externalScope: CoroutineScope? = null
 ) : ViewModel() {
@@ -46,11 +52,13 @@ class BuildViewModel internal constructor(
         gradleBuildRepository: GradleBuildRepository,
         openFileRequestBridge: OpenFileRequestBridge,
         apkInstallerRepository: ApkInstallerRepository,
+        logcatRepository: LogcatRepository,
         @ApplicationContext context: Context
     ) : this(
         gradleBuildRepository,
         openFileRequestBridge,
         apkInstallerRepository,
+        logcatRepository,
         context.packageName,
         null
     )
@@ -65,8 +73,12 @@ class BuildViewModel internal constructor(
 
     private var activeBuildJob: Job? = null
     private var activeInstallJob: Job? = null
+    private var activeLogcatJob: Job? = null
+    private var logcatFlushJob: Job? = null
     private val pendingLines = ArrayList<String>()
     private val lineBufferLock = Any()
+    private val pendingLogEntries = ArrayList<LogEntry>()
+    private val logcatBufferLock = Any()
     private var currentProjectRoot: File? = null
 
     init {
@@ -81,6 +93,19 @@ class BuildViewModel internal constructor(
                 }
             }
         }
+
+        val sources = logcatRepository.detectAvailableSources()
+        val preferredSource = sources.firstOrNull { it.isAvailable && it.source != LogcatSource.OWN_PROCESS }?.source
+            ?: LogcatSource.OWN_PROCESS
+        val initialPackages = if (ownPackageName.isNotBlank()) listOf(ownPackageName) else emptyList()
+        _uiState.update {
+            it.copy(
+                availableLogcatSources = sources,
+                logcatSource = preferredSource,
+                recentPackages = initialPackages
+            )
+        }
+        startLogcatStream(preferredSource)
     }
 
     fun connectProject(rootPath: String) {
@@ -167,6 +192,57 @@ class BuildViewModel internal constructor(
                         _effects.send(BuildUiEffect.LaunchIntent(s.settingsIntent))
                     }
                 }
+            }
+            is BuildUiIntent.UpdateLogcatFilter -> {
+                _uiState.update { it.copy(logcatFilter = intent.filter) }
+                if (intent.filter.packageName.isNotBlank() && intent.filter.targetPid == null) {
+                    scope.launch {
+                        val pid = logcatRepository.resolvePidForPackage(intent.filter.packageName)
+                        if (pid != null) {
+                            _uiState.update { it.copy(logcatFilter = it.logcatFilter.copy(targetPid = pid)) }
+                        }
+                    }
+                }
+            }
+            is BuildUiIntent.ToggleLogcatPause -> {
+                _uiState.update { it.copy(isLogcatPaused = !it.isLogcatPaused) }
+            }
+            is BuildUiIntent.ClearLogcat -> {
+                logcatRepository.clearLogs()
+                synchronized(logcatBufferLock) {
+                    pendingLogEntries.clear()
+                }
+                _uiState.update { it.copy(logcatEntries = emptyList()) }
+            }
+            is BuildUiIntent.SelectLogcatSource -> {
+                _uiState.update { it.copy(logcatSource = intent.source) }
+                startLogcatStream(intent.source)
+            }
+            is BuildUiIntent.ShowLogcatSourceDialog -> {
+                _uiState.update { it.copy(isLogcatSourceDialogVisible = intent.show) }
+            }
+            is BuildUiIntent.CopyLogcatEntry -> {
+                val text = intent.entry.fullFormattedText
+                scope.launch {
+                    _effects.send(BuildUiEffect.CopyToClipboard(text))
+                    _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.logcat_kopiert)))
+                }
+            }
+            is BuildUiIntent.CopyAllLogcat -> {
+                val fullText = _uiState.value.filteredLogcatEntries.joinToString("\n") { it.fullFormattedText }
+                scope.launch {
+                    _effects.send(BuildUiEffect.CopyToClipboard(fullText))
+                    _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.logcat_kopiert)))
+                }
+            }
+            is BuildUiIntent.ShareLogcat -> {
+                val fullText = _uiState.value.filteredLogcatEntries.joinToString("\n") { it.fullFormattedText }
+                scope.launch {
+                    _effects.send(BuildUiEffect.ShareText(fullText, Res.string(R.string.logcat_teilen_titel)))
+                }
+            }
+            is BuildUiIntent.ClickStackFrame -> {
+                onStackFrameClicked(intent.frame)
             }
         }
     }
@@ -333,6 +409,7 @@ class BuildViewModel internal constructor(
                     }
                     is ApkInstallStatus.Installed -> {
                         val label = status.appLabel ?: status.packageName
+                        updateRecentPackage(status.packageName)
                         _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.install_status_erfolgreich, label)))
                         if (_uiState.value.autoLaunchOnInstall) {
                             apkInstallerRepository.launchApp(status.packageName)
@@ -357,6 +434,7 @@ class BuildViewModel internal constructor(
             else -> null
         } ?: return
 
+        updateRecentPackage(packageName)
         val result = apkInstallerRepository.launchApp(packageName)
         if (result.isFailure) {
             scope.launch {
@@ -415,5 +493,98 @@ class BuildViewModel internal constructor(
                 _effects.send(BuildUiEffect.OpenEditorAt(path, line, col))
             }
         }
+    }
+
+    private fun startLogcatStream(source: LogcatSource = _uiState.value.logcatSource) {
+        activeLogcatJob?.cancel()
+        logcatFlushJob?.cancel()
+
+        logcatFlushJob = scope.launch {
+            while (isActive) {
+                delay(100)
+                flushPendingLogEntries()
+            }
+        }
+
+        activeLogcatJob = scope.launch {
+            logcatRepository.startStream(source, _uiState.value.logcatFilter).collect { entry ->
+                if (!_uiState.value.isLogcatPaused) {
+                    synchronized(logcatBufferLock) {
+                        pendingLogEntries.add(entry)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun flushPendingLogEntries() {
+        val toAppend = synchronized(logcatBufferLock) {
+            if (pendingLogEntries.isEmpty()) return
+            val copy = ArrayList(pendingLogEntries)
+            pendingLogEntries.clear()
+            copy
+        }
+
+        _uiState.update { current ->
+            val combined = current.logcatEntries + toAppend
+            val capped = if (combined.size > 10_000) {
+                combined.subList(combined.size - 10_000, combined.size)
+            } else {
+                combined
+            }
+            current.copy(logcatEntries = capped)
+        }
+    }
+
+    private fun updateRecentPackage(packageName: String) {
+        if (packageName.isBlank()) return
+        _uiState.update { current ->
+            val pkgs = (listOf(packageName) + current.recentPackages).distinct()
+            val newFilter = if (current.logcatFilter.packageName.isBlank() || current.logcatFilter.packageName == ownPackageName) {
+                current.logcatFilter.copy(packageName = packageName)
+            } else {
+                current.logcatFilter
+            }
+            current.copy(recentPackages = pkgs, logcatFilter = newFilter)
+        }
+    }
+
+    private fun onStackFrameClicked(frame: StackFrame) {
+        val root = currentProjectRoot
+        val targetFile = if (root != null) {
+            resolveStackFrameFile(root, frame)
+        } else null
+
+        if (targetFile != null) {
+            scope.launch {
+                openFileRequestBridge.requestOpenAt(targetFile.absolutePath, frame.lineNumber, 1)
+                _effects.send(BuildUiEffect.OpenEditorAt(targetFile.absolutePath, frame.lineNumber, 1))
+            }
+        } else {
+            scope.launch {
+                _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.logcat_datei_nicht_gefunden, frame.fileName)))
+            }
+        }
+    }
+
+    internal fun resolveStackFrameFile(root: File, frame: StackFrame): File? {
+        if (!root.exists() || !root.isDirectory) return null
+
+        val pkgPath = frame.className.substringBefore('$').substringBeforeLast('.', "").replace('.', '/')
+        if (pkgPath.isNotEmpty()) {
+            val candidates = listOf(
+                File(root, "app/src/main/java/$pkgPath/${frame.fileName}"),
+                File(root, "app/src/main/kotlin/$pkgPath/${frame.fileName}"),
+                File(root, "src/main/java/$pkgPath/${frame.fileName}"),
+                File(root, "src/main/kotlin/$pkgPath/${frame.fileName}")
+            )
+            for (c in candidates) {
+                if (c.isFile) return c
+            }
+        }
+
+        return root.walkTopDown()
+            .filter { it.isFile && it.name == frame.fileName }
+            .firstOrNull()
     }
 }

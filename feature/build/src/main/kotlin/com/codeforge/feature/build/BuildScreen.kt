@@ -69,6 +69,15 @@ fun BuildBottomSheet(
                 is BuildUiEffect.LaunchIntent -> {
                     context.startActivity(effect.intent)
                 }
+                is BuildUiEffect.ShareText -> {
+                    val sendIntent = android.content.Intent().apply {
+                        action = android.content.Intent.ACTION_SEND
+                        putExtra(android.content.Intent.EXTRA_TEXT, effect.text)
+                        type = "text/plain"
+                    }
+                    val shareIntent = android.content.Intent.createChooser(sendIntent, effect.title)
+                    context.startActivity(shareIntent)
+                }
                 else -> {}
             }
         }
@@ -115,9 +124,15 @@ fun BuildPanel(
             onIntent = onIntent
         )
 
-        // Reiter: Ausgabe & Probleme
+        // Reiter: Ausgabe, Probleme & Logcat
+        val selectedIndex = when (state.activeTab) {
+            BuildTab.OUTPUT -> 0
+            BuildTab.PROBLEMS -> 1
+            BuildTab.LOGCAT -> 2
+        }
+
         TabRow(
-            selectedTabIndex = if (state.activeTab == BuildTab.OUTPUT) 0 else 1,
+            selectedTabIndex = selectedIndex,
             containerColor = MaterialTheme.colorScheme.surface,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -159,6 +174,33 @@ fun BuildPanel(
                     }
                 }
             )
+            Tab(
+                selected = state.activeTab == BuildTab.LOGCAT,
+                onClick = { onIntent(BuildUiIntent.SelectTab(BuildTab.LOGCAT)) },
+                text = {
+                    if (state.crashCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                ) {
+                                    Text("${state.crashCount}")
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = stringRes(R.string.logcat_titel),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = stringRes(R.string.logcat_titel),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                }
+            )
         }
 
         // Tab Content
@@ -170,6 +212,7 @@ fun BuildPanel(
             when (state.activeTab) {
                 BuildTab.OUTPUT -> OutputTab(state = state, onIntent = onIntent)
                 BuildTab.PROBLEMS -> ProblemsTab(state = state, onIntent = onIntent)
+                BuildTab.LOGCAT -> LogcatTab(state = state, onIntent = onIntent)
             }
         }
     }

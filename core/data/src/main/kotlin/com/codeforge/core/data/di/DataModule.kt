@@ -80,4 +80,10 @@ abstract class DataModule {
     abstract fun bindApkInstallerRepository(
         impl: com.codeforge.core.data.repository.ApkInstallerRepositoryImpl
     ): com.codeforge.core.domain.repository.ApkInstallerRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLogcatRepository(
+        impl: com.codeforge.core.data.repository.LogcatRepositoryImpl
+    ): com.codeforge.core.domain.repository.LogcatRepository
 }

@@ -8,11 +8,17 @@ import androidx.compose.runtime.Immutable
 import com.codeforge.core.domain.model.BuildProblem
 import com.codeforge.core.domain.model.BuildSession
 import com.codeforge.core.domain.model.BuildStatus
+import com.codeforge.core.domain.model.LogEntry
+import com.codeforge.core.domain.model.LogcatFilter
+import com.codeforge.core.domain.model.LogcatSource
+import com.codeforge.core.domain.model.LogcatSourceAvailability
 import com.codeforge.core.domain.model.ProblemSeverity
+import com.codeforge.core.domain.model.StackFrame
 
 enum class BuildTab {
     OUTPUT,
     PROBLEMS,
+    LOGCAT,
 }
 
 enum class ProblemFilter {
@@ -40,6 +46,13 @@ data class BuildUiState(
     val autoLaunchOnInstall: Boolean = false,
     val isSelfReplaceDialogVisible: Boolean = false,
     val isIncompatibleSignatureDialogVisible: Boolean = false,
+    val logcatEntries: List<LogEntry> = emptyList(),
+    val logcatFilter: LogcatFilter = LogcatFilter(),
+    val logcatSource: LogcatSource = LogcatSource.OWN_PROCESS,
+    val availableLogcatSources: List<LogcatSourceAvailability> = emptyList(),
+    val isLogcatPaused: Boolean = false,
+    val isLogcatSourceDialogVisible: Boolean = false,
+    val recentPackages: List<String> = emptyList(),
 ) {
     val filteredProblems: List<BuildProblem> get() = when (problemFilter) {
         ProblemFilter.ALL -> problems
@@ -49,11 +62,14 @@ data class BuildUiState(
 
     val errorCount: Int get() = problems.count { it.severity == ProblemSeverity.ERROR }
     val warningCount: Int get() = problems.count { it.severity == ProblemSeverity.WARNING }
+    val crashCount: Int get() = logcatEntries.count { it.isCrash }
 
     val filteredLines: List<String> get() {
         if (searchQuery.isBlank()) return outputLines
         return outputLines.filter { it.contains(searchQuery, ignoreCase = true) }
     }
+
+    val filteredLogcatEntries: List<LogEntry> get() = logcatEntries.filter { logcatFilter.matches(it) }
 }
 
 sealed interface BuildUiIntent {
@@ -78,6 +94,17 @@ sealed interface BuildUiIntent {
     data class ConfirmSelfReplace(val confirmed: Boolean) : BuildUiIntent
     data object DismissIncompatibleSignatureDialog : BuildUiIntent
     data object RequestInstallPermission : BuildUiIntent
+
+    // Logcat
+    data class UpdateLogcatFilter(val filter: LogcatFilter) : BuildUiIntent
+    data object ToggleLogcatPause : BuildUiIntent
+    data object ClearLogcat : BuildUiIntent
+    data class SelectLogcatSource(val source: LogcatSource) : BuildUiIntent
+    data class ShowLogcatSourceDialog(val show: Boolean) : BuildUiIntent
+    data class CopyLogcatEntry(val entry: LogEntry) : BuildUiIntent
+    data object CopyAllLogcat : BuildUiIntent
+    data object ShareLogcat : BuildUiIntent
+    data class ClickStackFrame(val frame: StackFrame) : BuildUiIntent
 }
 
 sealed interface BuildUiEffect {
@@ -85,4 +112,5 @@ sealed interface BuildUiEffect {
     data class CopyToClipboard(val text: String) : BuildUiEffect
     data class OpenEditorAt(val path: String, val line: Int, val column: Int) : BuildUiEffect
     data class LaunchIntent(val intent: android.content.Intent) : BuildUiEffect
+    data class ShareText(val text: String, val title: String) : BuildUiEffect
 }

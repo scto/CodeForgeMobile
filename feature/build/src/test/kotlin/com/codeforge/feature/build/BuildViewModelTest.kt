@@ -32,6 +32,14 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import com.codeforge.core.domain.model.LogEntry
+import com.codeforge.core.domain.model.LogLevel
+import com.codeforge.core.domain.model.LogcatFilter
+import com.codeforge.core.domain.model.LogcatSource
+import com.codeforge.core.domain.model.LogcatSourceAvailability
+import com.codeforge.core.domain.model.StackFrame
+import com.codeforge.core.domain.repository.LogcatRepository
+import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Before
 import org.junit.Test
 
@@ -40,6 +48,7 @@ class BuildViewModelTest {
     private lateinit var fakeRepository: FakeGradleBuildRepository
     private lateinit var fakeBridge: FakeOpenFileRequestBridge
     private lateinit var fakeInstaller: FakeApkInstallerRepository
+    private lateinit var fakeLogcatRepository: FakeLogcatRepository
     private lateinit var viewModel: BuildViewModel
 
     @Before
@@ -47,10 +56,12 @@ class BuildViewModelTest {
         fakeRepository = FakeGradleBuildRepository()
         fakeBridge = FakeOpenFileRequestBridge()
         fakeInstaller = FakeApkInstallerRepository()
+        fakeLogcatRepository = FakeLogcatRepository()
         viewModel = BuildViewModel(
             gradleBuildRepository = fakeRepository,
             openFileRequestBridge = fakeBridge,
             apkInstallerRepository = fakeInstaller,
+            logcatRepository = fakeLogcatRepository,
             ownPackageName = "com.codeforge.app",
             externalScope = CoroutineScope(Dispatchers.Default)
         )
@@ -411,5 +422,157 @@ class BuildViewModelTest {
         }
 
         override fun canRequestPackageInstalls(): Boolean = canRequestInstalls
+    }
+
+    @Test
+    fun logcatReceivesStreamAndBuffersEntries() = runBlocking {
+        val entry1 = LogEntry(1, "10-19 12:00:00.000", 100, 100, LogLevel.DEBUG, "Tag1", "Msg 1")
+        val entry2 = LogEntry(2, "10-19 12:00:01.000", 100, 100, LogLevel.INFO, "Tag2", "Msg 2")
+
+        fakeLogcatRepository.streamFlow.emit(entry1)
+        fakeLogcatRepository.streamFlow.emit(entry2)
+        delay(250)
+
+        val state = viewModel.uiState.value
+        assertEquals(2, state.logcatEntries.size)
+        assertEquals("Msg 1", state.logcatEntries[0].message)
+        assertEquals("Msg 2", state.logcatEntries[1].message)
+    }
+
+    @Test
+    fun logcatFilterMinLevelAndCrashes() = runBlocking {
+        val debugEntry = LogEntry(1, "10-19 12:00:00.000", 100, 100, LogLevel.DEBUG, "Tag1", "Debug Msg")
+        val warnEntry = LogEntry(2, "10-19 12:00:01.000", 100, 100, LogLevel.WARN, "Tag2", "Warn Msg")
+        val crashEntry = LogEntry(
+            id = 3,
+            timestamp = "10-19 12:00:02.000",
+            pid = 100,
+            tid = 100,
+            level = LogLevel.ERROR,
+            tag = "AndroidRuntime",
+            message = "FATAL EXCEPTION: main\njava.lang.NullPointerException",
+            isCrash = true
+        )
+
+        fakeLogcatRepository.streamFlow.emit(debugEntry)
+        fakeLogcatRepository.streamFlow.emit(warnEntry)
+        fakeLogcatRepository.streamFlow.emit(crashEntry)
+        delay(250)
+
+        // All 3 entries buffered
+        assertEquals(3, viewModel.uiState.value.logcatEntries.size)
+        assertEquals(1, viewModel.uiState.value.crashCount)
+
+        // Filter: WARN and above
+        viewModel.handleIntent(BuildUiIntent.UpdateLogcatFilter(LogcatFilter(minLevel = LogLevel.WARN)))
+        assertEquals(2, viewModel.uiState.value.filteredLogcatEntries.size)
+
+        // Filter: Only crashes
+        viewModel.handleIntent(BuildUiIntent.UpdateLogcatFilter(LogcatFilter(crashesOnly = true)))
+        assertEquals(1, viewModel.uiState.value.filteredLogcatEntries.size)
+        assertEquals("AndroidRuntime", viewModel.uiState.value.filteredLogcatEntries[0].tag)
+    }
+
+    @Test
+    fun logcatPauseStopsReceivingNewEntries() = runBlocking {
+        viewModel.handleIntent(BuildUiIntent.ToggleLogcatPause)
+        assertTrue(viewModel.uiState.value.isLogcatPaused)
+
+        fakeLogcatRepository.streamFlow.emit(
+            LogEntry(1, "10-19 12:00:00.000", 100, 100, LogLevel.INFO, "Tag", "Paused Msg")
+        )
+        delay(250)
+
+        assertEquals(0, viewModel.uiState.value.logcatEntries.size)
+
+        viewModel.handleIntent(BuildUiIntent.ToggleLogcatPause)
+        assertFalse(viewModel.uiState.value.isLogcatPaused)
+
+        fakeLogcatRepository.streamFlow.emit(
+            LogEntry(2, "10-19 12:00:01.000", 100, 100, LogLevel.INFO, "Tag", "Unpaused Msg")
+        )
+        delay(250)
+
+        assertEquals(1, viewModel.uiState.value.logcatEntries.size)
+    }
+
+    @Test
+    fun logcatClearLogsResetsState() = runBlocking {
+        fakeLogcatRepository.streamFlow.emit(
+            LogEntry(1, "10-19 12:00:00.000", 100, 100, LogLevel.INFO, "Tag", "Some Msg")
+        )
+        delay(250)
+        assertEquals(1, viewModel.uiState.value.logcatEntries.size)
+
+        viewModel.handleIntent(BuildUiIntent.ClearLogcat)
+        assertTrue(fakeLogcatRepository.cleared.get())
+        assertEquals(0, viewModel.uiState.value.logcatEntries.size)
+    }
+
+    @Test
+    fun logcatStackFrameNavigationResolvesFile(): Unit = runBlocking {
+        val tempDir = File.createTempFile("codeforge_test_proj", "").apply {
+            delete()
+            mkdirs()
+        }
+        val srcDir = File(tempDir, "app/src/main/kotlin/com/example").apply { mkdirs() }
+        val sourceFile = File(srcDir, "MainActivity.kt").apply { writeText("package com.example\nclass MainActivity") }
+
+        viewModel.connectProject(tempDir.absolutePath)
+
+        val frame = StackFrame(
+            className = "com.example.MainActivity",
+            methodName = "onCreate",
+            fileName = "MainActivity.kt",
+            lineNumber = 42,
+            rawLine = "at com.example.MainActivity.onCreate(MainActivity.kt:42)"
+        )
+
+        viewModel.handleIntent(BuildUiIntent.ClickStackFrame(frame))
+        delay(100)
+
+        assertEquals(1, fakeBridge.jumpTargets.size)
+        assertEquals(sourceFile.absolutePath, fakeBridge.jumpTargets[0].path)
+        assertEquals(42, fakeBridge.jumpTargets[0].line)
+
+        tempDir.deleteRecursively()
+        Unit
+    }
+
+    @Test
+    fun logcatSourceSelectionUpdatesState() {
+        viewModel.handleIntent(BuildUiIntent.ShowLogcatSourceDialog(true))
+        assertTrue(viewModel.uiState.value.isLogcatSourceDialogVisible)
+
+        viewModel.handleIntent(BuildUiIntent.SelectLogcatSource(LogcatSource.READ_LOGS_PERMISSION))
+        assertEquals(LogcatSource.READ_LOGS_PERMISSION, viewModel.uiState.value.logcatSource)
+
+        viewModel.handleIntent(BuildUiIntent.ShowLogcatSourceDialog(false))
+        assertFalse(viewModel.uiState.value.isLogcatSourceDialogVisible)
+    }
+
+    private class FakeLogcatRepository : LogcatRepository {
+        val streamFlow = MutableSharedFlow<LogEntry>(replay = 50)
+        val cleared = AtomicBoolean(false)
+        var availableSources = listOf(
+            LogcatSourceAvailability(LogcatSource.OWN_PROCESS, true, 0),
+            LogcatSourceAvailability(LogcatSource.READ_LOGS_PERMISSION, false, 0),
+            LogcatSourceAvailability(LogcatSource.ADB_LOOPBACK, false, 0)
+        )
+        var pidResolution: (String) -> Int? = { null }
+
+        override fun startStream(source: LogcatSource, filter: LogcatFilter?): Flow<LogEntry> = streamFlow
+
+        override fun clearLogs() {
+            cleared.set(true)
+        }
+
+        override fun getBufferedLogs(): List<LogEntry> = emptyList()
+
+        override fun getFilteredLogs(filter: LogcatFilter): List<LogEntry> = emptyList()
+
+        override suspend fun resolvePidForPackage(packageName: String): Int? = pidResolution(packageName)
+
+        override fun detectAvailableSources(): List<LogcatSourceAvailability> = availableSources
     }
 }

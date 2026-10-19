@@ -1,0 +1,6 @@
+10-19 12:40:00.100  1001  1001 D JsonOutput: Response JSON:
+{
+  "status": "ok",
+  "data": [1, 2, 3]
+}
+10-19 12:40:01.200  1001  1001 I SimpleLog: Single line after multiline

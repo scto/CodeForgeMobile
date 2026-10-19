@@ -11,6 +11,33 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📋 Logcat-Ansicht (Task 30)
+
+* **Spike & Quellen-Transparenz**:
+  * Vor- und Nachteile der Log-Quellen `OWN_PROCESS` (Standard-Fallback), `READ_LOGS_PERMISSION` (per ADB gewährt) und `ADB_LOOPBACK` (Wireless ADB via Termux) analysiert.
+  * `android.permission.READ_LOGS` im Manifest deklariert.
+  * Interaktiver Quell-Auswahldialog `LogcatSourceDialog` mit Status-Icons und exakten Befehlen zur Rechtevergabe (`pm grant com.codeforge.app android.permission.READ_LOGS`).
+* **Domain & Parser (`:core:domain`)**:
+  * Modelle `LogLevel`, `LogEntry`, `StackFrame`, `LogcatFilter`, `LogcatSource`, `LogcatSourceAvailability`.
+  * Pure Kotlin `LogcatParser` für `-v threadtime` Format mit Multi-Line Fortsetzungszeilen, `AndroidRuntime`-Crash-Gruppierung und Stacktrace-Regex.
+  * Thread-sicherer Ringpuffer `LogcatRingBuffer` mit 50.000 Einträgen Kapazität und O(1) Überlauf-Handling.
+  * Repository-Schnittstelle `LogcatRepository`.
+* **Repository-Implementierung (`:core:data`)**:
+  * `LogcatRepositoryImpl` mit Prozess-Streaming auf `Dispatchers.IO`, automatischer Subprozess-Zerstörung bei Flow-Abbruch und PID-Auflösung für Pakete.
+* **UI & Workflow-Integration (`:feature:build`)**:
+  * Neuer dritter Tab `BuildTab.LOGCAT` neben *Ausgabe* und *Probleme* mit dynamischem roten Crash-Badge im Tab-Header.
+  * `LogcatFilterBar` mit Paket-Dropdown (inkl. automatischer Übernahme des Zielpakets aus Task 29), Level-Dropdown, Tag-Filter, Volltextsuche und „Nur Abstürze“-Chip.
+  * `LogcatActionBar` mit Pause/Resume, Puffer leeren, Auto-Scroll-Toggle, Quell-Badge, Log-Zähler, „Alle kopieren“ und Systemweitem „Teilen“.
+  * Farbkodierte Level-Badges (V/D/I/W/E/F), PID/TID und formatierter Nachrichtentext in Monospace-Schrift.
+* **Stacktrace-Navigation in den Sora Editor**:
+  * Erkennung von Crash-Stacktrace-Zeilen (`at pkg.Class.method(File.kt:123)`).
+  * Automatische Dateiauflösung im Projektverzeichnis (`resolveStackFrameFile`).
+  * Klickbare Zeilen mit Sprung-Icon navigieren über `OpenFileRequestBridge` direkt zur entsprechenden Quellcodedatei und Zeile im Sora Editor.
+* **Lokalisierung & Tests**:
+  * 32 neue zweisprachige Strings (`logcat_*`) in `values/` und `values-de/`.
+  * Umfassende JVM-Unit-Tests in `LogcatParserTest`, `LogcatRingBufferTest`, `LogcatRepositoryImplTest` und `BuildViewModelTest`.
+  * Dokumentation in [`docs/logcat-viewer-report.md`](docs/logcat-viewer-report.md).
+
 ### 📲 APK installieren und starten (Task 29)
 
 * **APK-Erkennung & Pure-Kotlin-Parser (`ApkMetadataParser`)**:

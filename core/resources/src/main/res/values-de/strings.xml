@@ -985,6 +985,40 @@
     <string name="install_groesse">Größe: %1$s</string>
     <string name="install_abi">ABI: %1$s</string>
 
+    <!-- logcat (Task 30) -->
+    <string name="logcat_titel">Logcat</string>
+    <string name="logcat_filter_level">Level</string>
+    <string name="logcat_filter_tag">Tag…</string>
+    <string name="logcat_filter_search">Log durchsuchen…</string>
+    <string name="logcat_filter_package">Paket</string>
+    <string name="logcat_filter_crashes_only">Nur Abstürze</string>
+    <string name="logcat_filter_all_packages">Alle Pakete</string>
+    <string name="logcat_aktion_pause">Pausieren</string>
+    <string name="logcat_aktion_resume">Fortsetzen</string>
+    <string name="logcat_aktion_clear">Leeren</string>
+    <string name="logcat_aktion_copy_all">Alles kopieren</string>
+    <string name="logcat_aktion_copy_entry">Eintrag kopieren</string>
+    <string name="logcat_aktion_share">Teilen</string>
+    <string name="logcat_kopiert">Log in Zwischenablage kopiert.</string>
+    <string name="logcat_quelle_titel">Logcat-Quelle</string>
+    <string name="logcat_quelle_own_process">Nur CodeForge-Prozess</string>
+    <string name="logcat_quelle_own_process_info">Zeigt derzeit nur CodeForge-Logs an. Um Logs installierter Apps anzuzeigen, gewähre READ_LOGS per ADB oder nutze Drahtloses Debugging.</string>
+    <string name="logcat_quelle_read_logs">READ_LOGS-Berechtigung (per ADB freigegeben)</string>
+    <string name="logcat_quelle_read_logs_info">Liest Geräte-Logs über die freigegebene READ_LOGS-Berechtigung.</string>
+    <string name="logcat_quelle_adb">Drahtlose ADB (localhost)</string>
+    <string name="logcat_quelle_adb_info">Liest vollständigen Logcat-Strom über drahtlose ADB-Verbindung.</string>
+    <string name="logcat_quelle_nicht_verfuegbar">Quelle nicht verfügbar.</string>
+    <string name="logcat_quelle_adb_hilfe">Drahtloses Debugging in Entwickleroptionen aktivieren, dann in Termux \'adb pair\' und \'adb connect\' ausführen.</string>
+    <string name="logcat_quelle_read_logs_hilfe">Per ADB ausführen: pm grant com.codeforge.app android.permission.READ_LOGS</string>
+    <string name="logcat_keine_eintraege">Keine passenden Logeinträge gefunden.</string>
+    <string name="logcat_absturz_erkannt">Absturz erkannt: %1$s</string>
+    <string name="logcat_stacktrace_zeile">in %1$s (%2$s:%3$d)</string>
+    <string name="logcat_eintraege_anzahl">%1$d Logs</string>
+    <string name="logcat_auto_scroll">Automatischer Bildlauf</string>
+    <string name="logcat_schliessen">Schließen</string>
+    <string name="logcat_datei_nicht_gefunden">Datei nicht im Projekt gefunden: %1$s</string>
+    <string name="logcat_teilen_titel">Logcat teilen</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

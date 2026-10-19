@@ -1,0 +1,4 @@
+--------- beginning of main
+10-19 12:42:00.001   100   100 I : untagged system log line
+10-19 12:42:01.002   100   100 D AppTag: tagged message
+--------- beginning of system

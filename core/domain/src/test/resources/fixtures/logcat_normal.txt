@@ -1,0 +1,5 @@
+10-19 12:39:14.604 32448 32448 W libadbmdns_linu: type=1400 audit(0.0:2165668): avc: denied { bind }
+10-19 12:39:16.608 32448 32448 I MainActivity: App started successfully
+10-19 12:39:18.608 32448 32448 D NetworkService: Request completed with HTTP 200
+10-19 12:39:20.608 32448 32448 V CacheManager: Cache hit for key user_profile
+10-19 12:39:22.608 32448 32448 E DatabaseHelper: Query failed to return results

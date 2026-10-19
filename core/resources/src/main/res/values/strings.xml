@@ -985,6 +985,40 @@
     <string name="install_groesse">Size: %1$s</string>
     <string name="install_abi">ABI: %1$s</string>
 
+    <!-- logcat (Task 30) -->
+    <string name="logcat_titel">Logcat</string>
+    <string name="logcat_filter_level">Level</string>
+    <string name="logcat_filter_tag">Tag…</string>
+    <string name="logcat_filter_search">Search log…</string>
+    <string name="logcat_filter_package">Package</string>
+    <string name="logcat_filter_crashes_only">Crashes only</string>
+    <string name="logcat_filter_all_packages">All packages</string>
+    <string name="logcat_aktion_pause">Pause</string>
+    <string name="logcat_aktion_resume">Resume</string>
+    <string name="logcat_aktion_clear">Clear</string>
+    <string name="logcat_aktion_copy_all">Copy all</string>
+    <string name="logcat_aktion_copy_entry">Copy log</string>
+    <string name="logcat_aktion_share">Share</string>
+    <string name="logcat_kopiert">Log copied to clipboard.</string>
+    <string name="logcat_quelle_titel">Logcat Source</string>
+    <string name="logcat_quelle_own_process">CodeForge process only</string>
+    <string name="logcat_quelle_own_process_info">Currently only showing CodeForge logs. To view logs from your installed app, grant READ_LOGS via ADB or use Wireless Debugging.</string>
+    <string name="logcat_quelle_read_logs">READ_LOGS permission (ADB granted)</string>
+    <string name="logcat_quelle_read_logs_info">Reading device logs via granted READ_LOGS permission.</string>
+    <string name="logcat_quelle_adb">Wireless ADB (localhost)</string>
+    <string name="logcat_quelle_adb_info">Reading full logcat stream via wireless ADB loopback.</string>
+    <string name="logcat_quelle_nicht_verfuegbar">Source not available.</string>
+    <string name="logcat_quelle_adb_hilfe">Enable Wireless Debugging in Developer Options, then run \'adb pair\' and \'adb connect\' in Termux.</string>
+    <string name="logcat_quelle_read_logs_hilfe">Run via ADB: pm grant com.codeforge.app android.permission.READ_LOGS</string>
+    <string name="logcat_keine_eintraege">No log entries matching filter.</string>
+    <string name="logcat_absturz_erkannt">Crash detected: %1$s</string>
+    <string name="logcat_stacktrace_zeile">at %1$s (%2$s:%3$d)</string>
+    <string name="logcat_eintraege_anzahl">%1$d logs</string>
+    <string name="logcat_auto_scroll">Auto-scroll</string>
+    <string name="logcat_schliessen">Close</string>
+    <string name="logcat_datei_nicht_gefunden">File not found in project: %1$s</string>
+    <string name="logcat_teilen_titel">Share Logcat</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>
