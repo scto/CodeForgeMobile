@@ -125,4 +125,34 @@ class CodeFormatterTest {
         assertEquals(FormatLanguage.XML, CodeFormatter.languageFor("a/AndroidManifest.xml"))
         assertEquals(FormatLanguage.PLAIN, CodeFormatter.languageFor("README"))
     }
+
+    @Test fun rawStringWithMultipleBlankLinesAndQuotes() {
+        val rawContent = "    first line\n\n\n    third line with \"quotes\" and { braces }"
+        val input = "fun test() {\n    val raw = \"\"\"\n$rawContent\n\"\"\"\n    val after = 42\n}\n"
+        val out = kt(input)
+        assertTrue("Raw string internal blank lines should be preserved", out.contains(rawContent))
+        assertTrue("Variables after raw string should be indented correctly", out.contains("    val after = 42"))
+    }
+
+    @Test fun blockCommentWithCodeLikeTokensAndQuotes() {
+        val input = """
+            fun calc() {
+                /*
+                 * Comment with "quoted string" and { open brace
+                 * and } close brace
+                 */
+                val x = 10
+            }
+        """.trimIndent() + "\n"
+        val out = kt(input)
+        assertTrue("Block comment formatting preserves internal text", out.contains("* Comment with \"quoted string\" and { open brace"))
+        assertTrue("Statement after block comment remains indented at body level", out.contains("    val x = 10"))
+    }
+
+    @Test fun singleLineCommentOnContinuationLine() {
+        val input = "val x = a\n// comment\n.plus(b)\n"
+        val out = kt(input)
+        assertTrue("Continuation with comment", out.contains(".plus(b)"))
+    }
 }
+

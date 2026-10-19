@@ -10,6 +10,8 @@
  */
 package com.codeforge.feature.editor
 
+import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspRange
 import com.codeforge.libs.code_tools.edit.TextEdit
 import io.github.rosemoe.sora.widget.CodeEditor
 import java.lang.ref.WeakReference
@@ -111,6 +113,22 @@ class EditorController {
     /** `(start, end)` der Auswahl als Offsets; bei reinem Cursor `start == end`. */
     fun selection(): Pair<Int, Int>? = editorRef?.get()?.cursor?.let { it.left to it.right }
 
+    fun hasSelection(): Boolean = editorRef?.get()?.cursor?.let { it.left != it.right } ?: false
+
+    /** Liefert die aktive Auswahl als [LspRange] (0-basiert) oder null, wenn keine Auswahl vorliegt. */
+    fun getSelectionLspRange(): LspRange? = editorRef?.get()?.let { editor ->
+        val cursor = editor.cursor
+        if (cursor.left == cursor.right) return null
+        val startOffset = minOf(cursor.left, cursor.right)
+        val endOffset = maxOf(cursor.left, cursor.right)
+        val startPos = editor.text.indexer.getCharPosition(startOffset)
+        val endPos = editor.text.indexer.getCharPosition(endOffset)
+        LspRange(
+            start = LspPosition(startPos.line, startPos.column),
+            end = LspPosition(endPos.line, endPos.column)
+        )
+    }
+
     fun selectRange(start: Int, end: Int) = withEditor { editor ->
         val len = editor.text.length
         val s = start.coerceIn(0, len)
@@ -141,7 +159,7 @@ class EditorController {
 
     /**
      * Ersetzt den gesamten Text durch [newText], tastet aber nur den geänderten Mittelteil an
-     * (gemeinsames Präfix/Suffix bleibt) — Cursor, Scrollposition und Undo-Stack bleiben sinnvoll.
+     * (gemeinsames Präfix/Suffix bleibt) — Cursor, Scrollposition und Undo-Stack bleiben sinnvoll erhalten.
      */
     fun applyTextChange(newText: String) = withEditor { editor ->
         val old = editor.text.toString()
@@ -159,7 +177,9 @@ class EditorController {
         } finally {
             editor.text.endBatchEdit()
         }
-        selectRange(cursorStart.coerceAtMost(newText.length), cursorEnd.coerceAtMost(newText.length))
+        val newCursorStart = mapCursorOffset(cursorStart, old.length, prefix, suffix, newText.length)
+        val newCursorEnd = mapCursorOffset(cursorEnd, old.length, prefix, suffix, newText.length)
+        selectRange(newCursorStart, newCursorEnd)
     }
 
     /** Führt einen reinen Zeilenbefehl (Kommentar, Einrücken, Duplizieren …) auf der aktuellen Auswahl aus. */
@@ -179,4 +199,31 @@ class EditorController {
         px / (editorRef?.get()?.resources?.displayMetrics?.scaledDensity ?: 1f)
     } ?: 14f
 
+}
+
+/**
+ * Berechnet die neue Cursorposition nach einer Differenz-Anwendung ([prefix], [suffix]).
+ * - Cursor vor der Änderung: Position bleibt identisch.
+ * - Cursor nach der Änderung: Position verschiebt sich um die Textlängen-Differenz.
+ * - Cursor innerhalb der Änderung: Lineare Interpolation im geänderten Mittelbereich.
+ */
+internal fun mapCursorOffset(
+    oldCursor: Int,
+    oldLen: Int,
+    prefix: Int,
+    suffix: Int,
+    newLen: Int
+): Int {
+    if (oldCursor <= prefix) return oldCursor
+    val oldMiddleEnd = oldLen - suffix
+    if (oldCursor >= oldMiddleEnd) {
+        val delta = newLen - oldLen
+        return (oldCursor + delta).coerceIn(0, newLen)
+    }
+    val oldMiddleLen = oldMiddleEnd - prefix
+    val newMiddleLen = (newLen - suffix) - prefix
+    if (oldMiddleLen <= 0) return (prefix + newMiddleLen).coerceIn(0, newLen)
+    val ratio = (oldCursor - prefix).toDouble() / oldMiddleLen
+    val mapped = prefix + (ratio * newMiddleLen).toInt()
+    return mapped.coerceIn(0, newLen)
 }

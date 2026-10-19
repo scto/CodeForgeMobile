@@ -127,6 +127,36 @@ class EditorViewModelLspTest {
         }
 
         val lspSessionController = LspSessionController(fakeLspClient, fakeResolver)
+        val fakeCodeFormatter = object : com.codeforge.core.domain.repository.CodeFormatterRepository {
+            override suspend fun formatFile(
+                path: String,
+                content: String,
+                projectRoot: String?,
+                fallbackOptions: com.codeforge.core.domain.model.UnifiedFormatOptions
+            ): Result<com.codeforge.core.domain.model.FormattedCode> = Result.success(
+                com.codeforge.core.domain.model.FormattedCode(
+                    text = content,
+                    source = com.codeforge.core.domain.model.UnifiedFormatSource.BUILTIN_SIMPLIFIED,
+                    sourceName = "integriert",
+                    isUnchanged = true
+                )
+            )
+
+            override suspend fun formatRange(
+                path: String,
+                content: String,
+                range: LspRange,
+                projectRoot: String?,
+                fallbackOptions: com.codeforge.core.domain.model.UnifiedFormatOptions
+            ): Result<com.codeforge.core.domain.model.FormattedCode> = Result.success(
+                com.codeforge.core.domain.model.FormattedCode(
+                    text = content,
+                    source = com.codeforge.core.domain.model.UnifiedFormatSource.BUILTIN_SIMPLIFIED,
+                    sourceName = "integriert",
+                    isUnchanged = true
+                )
+            )
+        }
 
         viewModel = EditorViewModel(
             openFileUseCase = openFileUseCase,
@@ -138,7 +168,8 @@ class EditorViewModelLspTest {
             openFileRequestBridge = fakeOpenFileBridge,
             fileSystemRepository = fakeFileSystemRepo,
             updateRepository = fakeUpdateRepo,
-            fileSyncBridge = fakeFileSyncBridge
+            fileSyncBridge = fakeFileSyncBridge,
+            codeFormatterRepository = fakeCodeFormatter
         )
 
         viewModel.onEvent(EditorUiEvent.OpenFile("/project/Main.kt"))
@@ -317,6 +348,7 @@ class EditorViewModelLspTest {
         override suspend fun requestCompletion(path: String, position: LspPosition) = Result.success(emptyList<LspCompletionItem>())
         override suspend fun requestHover(path: String, position: LspPosition) = Result.success(null)
         override suspend fun requestFormat(path: String, content: String) = Result.success(content)
+        override suspend fun requestRangeFormat(path: String, content: String, range: LspRange) = Result.success(content)
 
         override suspend fun requestCodeActions(path: String, range: LspRange, diagnostics: List<LspDiagnostic>) = Result.success(codeActionsResult)
         override suspend fun requestPrepareRename(path: String, position: LspPosition) = Result.success(prepareRenameResult)

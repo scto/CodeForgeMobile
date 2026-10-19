@@ -23,6 +23,10 @@ data class EditorSettingsUiState(
     val rainbowBracketsEnabled: Boolean = true,
     val pinchToZoomEnabled: Boolean = true,
     val desktopShortcutsEnabled: Boolean = true,
+    val formatOnSaveKotlin: Boolean = false,
+    val formatOnSaveJava: Boolean = false,
+    val formatOnSaveXml: Boolean = false,
+    val formatOnSaveJson: Boolean = false,
     val isLoading: Boolean = true
 )
 
@@ -42,5 +46,9 @@ sealed interface EditorSettingsUiEvent {
     data object RainbowBracketsToggled : EditorSettingsUiEvent
     data object PinchToZoomToggled : EditorSettingsUiEvent
     data object DesktopShortcutsToggled : EditorSettingsUiEvent
+    data object FormatOnSaveKotlinToggled : EditorSettingsUiEvent
+    data object FormatOnSaveJavaToggled : EditorSettingsUiEvent
+    data object FormatOnSaveXmlToggled : EditorSettingsUiEvent
+    data object FormatOnSaveJsonToggled : EditorSettingsUiEvent
 }
 

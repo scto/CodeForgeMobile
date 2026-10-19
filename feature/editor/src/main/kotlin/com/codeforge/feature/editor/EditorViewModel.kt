@@ -47,6 +47,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.codeforge.core.datastore.proto.AppSettings
+import com.codeforge.core.domain.model.UnifiedFormatOptions
+import com.codeforge.core.domain.repository.CodeFormatterRepository
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -64,7 +67,8 @@ class EditorViewModel @Inject constructor(
     private val openFileRequestBridge: OpenFileRequestBridge,
     private val fileSystemRepository: FileSystemRepository,
     private val updateRepository: DependencyUpdateRepository,
-    private val fileSyncBridge: FileSyncBridge
+    private val fileSyncBridge: FileSyncBridge,
+    private val codeFormatterRepository: CodeFormatterRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -78,6 +82,9 @@ class EditorViewModel @Inject constructor(
 
     /** Zuletzt angewendete Rückgängig-Aktion (z. B. für Rename). */
     private var lastUndoAction: (suspend () -> Unit)? = null
+
+    /** Gecachte AppSettings für Format on Save etc. */
+    private var currentAppSettings: AppSettings? = null
 
     /** Vom Composable konsumiert, um LSP-Completion-Vorschläge in [LspAwareLanguage] einzuspeisen. */
     val completionProvider = LspCompletionProvider(lspClient) { _uiState.value.activeFile?.path }
@@ -259,7 +266,22 @@ class EditorViewModel @Inject constructor(
 
     private fun saveActive() = viewModelScope.launch {
         val active = _uiState.value.activeFile ?: return@launch
-        if (persistDirty(setOf(normalize(active.path)))) _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_gespeichert)))
+        val ext = active.path.substringAfterLast('.', "").lowercase()
+        val editorSettings = currentAppSettings?.editor
+        val shouldFormat = when (ext) {
+            "kt", "kts" -> editorSettings?.formatOnSaveKotlin == true
+            "java" -> editorSettings?.formatOnSaveJava == true
+            "xml" -> editorSettings?.formatOnSaveXml == true
+            "json" -> editorSettings?.formatOnSaveJson == true
+            else -> false
+        }
+        if (shouldFormat) {
+            formatCodeInternal(range = null, silentIfUnchanged = true)
+        }
+        val currentActive = _uiState.value.activeFile ?: return@launch
+        if (persistDirty(setOf(normalize(currentActive.path)))) {
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_gespeichert)))
+        }
     }
 
     private fun applyUpdates(updates: List<DependencyUpdate>) {
@@ -298,6 +320,7 @@ class EditorViewModel @Inject constructor(
 
     private fun observeSettings() = viewModelScope.launch {
         settingsRepository.appSettings.collect { settings ->
+            currentAppSettings = settings
             _uiState.update {
                 it.copy(
                     displaySettings = EditorDisplaySettings(
@@ -348,7 +371,8 @@ class EditorViewModel @Inject constructor(
             is EditorUiEvent.CloseTab -> closeTab(event.index)
             is EditorUiEvent.SelectTab -> selectTab(event.index)
             is EditorUiEvent.TextChanged -> updateBuffer(event.text)
-            EditorUiEvent.RunLspFormat -> formatViaLsp()
+            is EditorUiEvent.FormatCode -> formatCode(event.range)
+            EditorUiEvent.RunLspFormat -> formatCode(null)
             EditorUiEvent.Save -> saveActive()
             is EditorUiEvent.SetProjectRoot -> {
                 projectRoot.value = event.rootPath
@@ -682,24 +706,49 @@ class EditorViewModel @Inject constructor(
         publishActiveFileToBridge()
     }
 
-    private fun formatViaLsp() = viewModelScope.launch {
-        val active = _uiState.value.activeFile ?: return@launch
-        lspClient.requestFormat(active.path, active.content)
-            .onSuccess { formatted -> updateBuffer(formatted) }
-            .onFailure {
-                val tab = _uiState.value.displaySettings.tabSize
-                val result = com.codeforge.libs.code_tools.format.CodeFormatter.format(
-                    active.content,
-                    com.codeforge.libs.code_tools.format.CodeFormatter.languageFor(active.path),
-                    com.codeforge.libs.code_tools.format.FormatOptions(indentSize = tab)
-                )
-                if (result.text != active.content) {
-                    updateBuffer(result.text)
-                    _effect.emit(EditorUiEffect.ShowSnackbar(result.warning ?: Res.string(R.string.editor_formatiert)))
-                } else {
-                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_bereits_formatiert)))
-                }
+    private fun formatCode(range: LspRange? = null) = viewModelScope.launch {
+        formatCodeInternal(range = range, silentIfUnchanged = false)
+    }
+
+    private suspend fun formatCodeInternal(range: LspRange?, silentIfUnchanged: Boolean) {
+        val active = _uiState.value.activeFile ?: return
+        val tab = _uiState.value.displaySettings.tabSize
+        val fallback = UnifiedFormatOptions(indentSize = tab)
+        val projectRootPath = projectRoot.value ?: File(active.path).parentFile?.absolutePath
+
+        val result = if (range != null) {
+            codeFormatterRepository.formatRange(active.path, active.content, range, projectRootPath, fallback)
+        } else {
+            codeFormatterRepository.formatFile(active.path, active.content, projectRootPath, fallback)
+        }
+
+        result.onSuccess { formatted ->
+            if (!formatted.isUnchanged) {
+                updateBuffer(formatted.text)
             }
+            _effect.emit(
+                EditorUiEffect.ApplyFormattedText(
+                    formattedText = formatted.text,
+                    sourceName = formatted.sourceName,
+                    isUnchanged = formatted.isUnchanged,
+                    warning = formatted.warning
+                )
+            )
+            if (!silentIfUnchanged) {
+                val message = if (formatted.isUnchanged) {
+                    Res.string(R.string.editor_bereits_formatiert)
+                } else {
+                    Res.string(R.string.editor_format_success_with_source, formatted.sourceName)
+                }
+                _effect.emit(EditorUiEffect.ShowSnackbar(message))
+            }
+        }.onFailure { error ->
+            _effect.emit(
+                EditorUiEffect.ShowSnackbar(
+                    error.message ?: Res.string(R.string.editor_lsp_formatierung_fehlgeschlagen, "Error")
+                )
+            )
+        }
     }
 
     private fun languageIdFor(path: String): String = when (path.substringAfterLast('.', "").lowercase()) {

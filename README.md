@@ -40,6 +40,7 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 * 🌈 TextMate and Tree-Sitter scaffolding; **grammars and native libs still need to be sourced** (`agy-tasks/01`, `02`).
 * 🧩 Overlays: version hints (`4.0.1 → 4.0.3`) in TOML catalogs with Update/Update All, color swatches next to color values.
 * 🔎 Find & replace (file and project, regex/case/word) 🧪, formatter/highlighter logic 🧪 (`:libs:code-tools`).
+* 🧹 **Unified Code Formatter** 🧪: Single action for document & range formatting across Kotlin, Java, XML, and JSON with 3-tier strategy (LSP → CLI `ktlint`/`google-java-format` with 10s timeout & syntax guard → built-in `CodeFormatter` fallback), `.editorconfig` resolution, format-on-save per language, and cursor/scroll position preservation (see [docs/unified-formatter-report.md](docs/unified-formatter-report.md)).
 
 ### 💻 2. Terminal & Environment (`:feature:terminal`, `:libs:terminal-engine`, `:libs:termux-*`) ✅
 * 🐚 A real Termux shell (vendored from `scto/AndroidIDE`, package `com.codeforge`).

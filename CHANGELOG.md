@@ -11,6 +11,25 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🧹 Einheitlicher Code-Formatter (Task 32)
+
+* **Zentraler Formatierungs-Befehl & 3-Stufen-Strategie (`:core:domain`, `:core:data`)**:
+  * Zusammenführung aller Formatier-Pfade zu einem einheitlichen Befehl „Datei formatieren“ und „Auswahl formatieren“ für Kotlin, Java, XML und JSON.
+  * Stufe 1: LSP-Formatierung (`textDocument/formatting` bzw. `textDocument/rangeFormatting`), wenn Server läuft und fähig.
+  * Stufe 2: Termux-CLI-Prozesse (`ktlint --format` für Kotlin, `google-java-format` für Java) mit 10s Timeout und Syntax-Sicherheitsabfrage (Datei bleibt bei Fehlern unverändert).
+  * Stufe 3: Eingebauter `CodeFormatter` (`:libs:code-tools`) als robuster, syntaxtoleranter Offline-Fallback mit sichtbarem UI-Hinweis „Vereinfachte Formatierung (integriert)“.
+* **Cursor- und Scroll-Erhalt (`:feature:editor`)**:
+  * Differenz-Anwendung (`applyTextChange`) via `mapCursorOffset` – unberührte Teile (gemeinsames Präfix/Suffix) bleiben unverändert.
+  * Cursor und Scrollposition bleiben exakt relativ zum Code erhalten.
+  * Ein einziger atomarer Undo-Schritt pro Formatierung.
+* **Einstellungen & Format-on-Save (`:core:datastore`, `:feature:settings`)**:
+  * Einstellungs-Optionen für automatisches Formatieren beim Speichern je Sprache (`format_on_save_kotlin`, `_java`, `_xml`, `_json`).
+  * `.editorconfig`-Parser (`EditorConfigResolver`) berücksichtigt Einrückung (`indent_size`, `indent_style`), Zeilenlänge und Whitespace-Optionen aus dem Projekt.
+* **UI & Lokalisierung**:
+  * Bereinigung: Veraltete redundante LSP-Format-Buttons entfernt, ein einziger kontextsensitiver Aktions-Button (`AutoFixHigh`) für Dokument- und Auswahlformatierung.
+  * 16 zweisprachige Strings (`editor_format_*`, `settings_format_on_save_*`) in Deutsch und Englisch.
+  * Dokumentation in [`docs/unified-formatter-report.md`](docs/unified-formatter-report.md).
+
 ### 💡 LSP Code-Aktionen, Umbenennen & Struktur (Task 31)
 
 * **LSP-Protokoll & Modelle (`:core:domain`)**:

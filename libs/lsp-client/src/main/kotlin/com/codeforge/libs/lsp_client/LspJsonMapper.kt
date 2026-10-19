@@ -363,6 +363,7 @@ internal fun parseServerCapabilities(result: JsonElement?): LspServerCapabilitie
         referencesProvider = isEnabled("referencesProvider"),
         executeCommandProvider = capabilities["executeCommandProvider"] is JsonObject,
         formattingProvider = isEnabled("documentFormattingProvider"),
+        rangeFormattingProvider = isEnabled("documentRangeFormattingProvider"),
         hoverProvider = isEnabled("hoverProvider"),
         completionProvider = capabilities["completionProvider"] is JsonObject
     )

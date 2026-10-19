@@ -53,6 +53,7 @@ interface LspClientRepository {
     suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>>
     suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?>
     suspend fun requestFormat(path: String, content: String): Result<String>
+    suspend fun requestRangeFormat(path: String, content: String, range: LspRange): Result<String>
 
     suspend fun requestCodeActions(
         path: String,

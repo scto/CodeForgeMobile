@@ -54,6 +54,10 @@ message EditorConfig {
   bool rainbow_brackets_enabled = 13;
   bool pinch_to_zoom_enabled = 14;
   bool desktop_shortcuts_enabled = 15;
+  bool format_on_save_kotlin = 16;
+  bool format_on_save_java = 17;
+  bool format_on_save_xml = 18;
+  bool format_on_save_json = 19;
 }
 
 

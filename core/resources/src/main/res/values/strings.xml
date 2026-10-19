@@ -1045,6 +1045,24 @@
     <string name="lsp_overlapping_edits_rejected">Rejected overlapping edits in file %1$s</string>
     <string name="lsp_unsupported_operation">Unsupported file operation: %1$s</string>
 
+    <!-- Formatter Strings (Task 32) -->
+    <string name="editor_format_document">Format Document</string>
+    <string name="editor_format_selection">Format Selection</string>
+    <string name="editor_format_success_with_source">Formatted with %1$s</string>
+    <string name="editor_format_builtin_notice">Simplified formatting (internal)</string>
+    <string name="editor_format_process_timeout">Formatting process timed out after %1$ds</string>
+    <string name="editor_format_syntax_error">Formatting skipped due to syntax errors: %1$s</string>
+    <string name="settings_format_on_save">Format on Save</string>
+    <string name="settings_format_on_save_desc">Automatically format files when saving</string>
+    <string name="settings_format_on_save_kotlin">Format Kotlin on save</string>
+    <string name="settings_format_on_save_java">Format Java on save</string>
+    <string name="settings_format_on_save_xml">Format XML on save</string>
+    <string name="settings_format_on_save_json">Format JSON on save</string>
+    <string name="settings_format_on_save_kotlin_desc">Format .kt and .kts files upon saving</string>
+    <string name="settings_format_on_save_java_desc">Format .java files upon saving</string>
+    <string name="settings_format_on_save_xml_desc">Format .xml files upon saving</string>
+    <string name="settings_format_on_save_json_desc">Format .json files upon saving</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

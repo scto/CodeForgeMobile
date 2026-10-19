@@ -1045,6 +1045,24 @@
     <string name="lsp_overlapping_edits_rejected">Überlappende Änderungen in Datei %1$s abgelehnt</string>
     <string name="lsp_unsupported_operation">Nicht unterstützte Dateioperation: %1$s</string>
 
+    <!-- Formatter Strings (Task 32) -->
+    <string name="editor_format_document">Datei formatieren</string>
+    <string name="editor_format_selection">Auswahl formatieren</string>
+    <string name="editor_format_success_with_source">Formatiert mit %1$s</string>
+    <string name="editor_format_builtin_notice">Vereinfachte Formatierung (integriert)</string>
+    <string name="editor_format_process_timeout">Formatierungs-Prozess nach %1$ds abgebrochen (Zeitüberschreitung)</string>
+    <string name="editor_format_syntax_error">Formatierung wegen Syntaxfehlern übersprungen: %1$s</string>
+    <string name="settings_format_on_save">Beim Speichern formatieren</string>
+    <string name="settings_format_on_save_desc">Dateien beim Speichern automatisch formatieren</string>
+    <string name="settings_format_on_save_kotlin">Kotlin beim Speichern formatieren</string>
+    <string name="settings_format_on_save_java">Java beim Speichern formatieren</string>
+    <string name="settings_format_on_save_xml">XML beim Speichern formatieren</string>
+    <string name="settings_format_on_save_json">JSON beim Speichern formatieren</string>
+    <string name="settings_format_on_save_kotlin_desc">.kt- und .kts-Dateien beim Speichern formatieren</string>
+    <string name="settings_format_on_save_java_desc">.java-Dateien beim Speichern formatieren</string>
+    <string name="settings_format_on_save_xml_desc">.xml-Dateien beim Speichern formatieren</string>
+    <string name="settings_format_on_save_json_desc">.json-Dateien beim Speichern formatieren</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

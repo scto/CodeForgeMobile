@@ -153,6 +153,7 @@ data class LspServerCapabilities(
     val referencesProvider: Boolean = false,
     val executeCommandProvider: Boolean = false,
     val formattingProvider: Boolean = false,
+    val rangeFormattingProvider: Boolean = false,
     val hoverProvider: Boolean = false,
     val completionProvider: Boolean = false
 )

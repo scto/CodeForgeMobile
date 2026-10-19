@@ -86,4 +86,16 @@ abstract class DataModule {
     abstract fun bindLogcatRepository(
         impl: com.codeforge.core.data.repository.LogcatRepositoryImpl
     ): com.codeforge.core.domain.repository.LogcatRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProcessExecutor(
+        impl: com.codeforge.core.data.repository.DefaultProcessExecutor
+    ): com.codeforge.core.data.repository.ProcessExecutor
+
+    @Binds
+    @Singleton
+    abstract fun bindCodeFormatterRepository(
+        impl: com.codeforge.core.data.repository.CodeFormatterRepositoryImpl
+    ): com.codeforge.core.domain.repository.CodeFormatterRepository
 }

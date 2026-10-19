@@ -73,6 +73,8 @@ class LspSessionControllerTest {
             Result.success(null)
         override suspend fun requestFormat(path: String, content: String): Result<String> =
             Result.success(content)
+        override suspend fun requestRangeFormat(path: String, content: String, range: com.codeforge.core.domain.model.LspRange): Result<String> =
+            Result.success(content)
         override suspend fun requestCodeActions(
             path: String,
             range: com.codeforge.core.domain.model.LspRange,

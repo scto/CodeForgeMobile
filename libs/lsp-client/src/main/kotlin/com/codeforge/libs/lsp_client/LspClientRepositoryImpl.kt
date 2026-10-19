@@ -275,6 +275,26 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
             applyTextEdits(content, response["result"])
         }
 
+    override suspend fun requestRangeFormat(path: String, content: String, range: LspRange): Result<String> =
+        runCatching {
+            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+            val response = activeConnection.sendRequest(
+                "textDocument/rangeFormatting",
+                buildJsonObject {
+                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
+                    put("range", rangeToJson(range))
+                    put(
+                        "options",
+                        buildJsonObject {
+                            put("tabSize", 4)
+                            put("insertSpaces", true)
+                        }
+                    )
+                }
+            )
+            applyTextEdits(content, response["result"])
+        }
+
     override suspend fun requestCodeActions(
         path: String,
         range: LspRange,

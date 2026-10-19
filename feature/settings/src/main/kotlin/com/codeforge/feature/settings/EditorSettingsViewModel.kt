@@ -38,6 +38,10 @@ class EditorSettingsViewModel @Inject constructor(
                 rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,
                 pinchToZoomEnabled = settings.editor.pinchToZoomEnabled,
                 desktopShortcutsEnabled = settings.editor.desktopShortcutsEnabled,
+                formatOnSaveKotlin = settings.editor.formatOnSaveKotlin,
+                formatOnSaveJava = settings.editor.formatOnSaveJava,
+                formatOnSaveXml = settings.editor.formatOnSaveXml,
+                formatOnSaveJson = settings.editor.formatOnSaveJson,
                 isLoading = false
             )
         }
@@ -103,6 +107,26 @@ class EditorSettingsViewModel @Inject constructor(
                 EditorSettingsUiEvent.DesktopShortcutsToggled ->
                     settingsRepository.updateEditor {
                         it.toBuilder().setDesktopShortcutsEnabled(!it.desktopShortcutsEnabled).build()
+                    }
+
+                EditorSettingsUiEvent.FormatOnSaveKotlinToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setFormatOnSaveKotlin(!it.formatOnSaveKotlin).build()
+                    }
+
+                EditorSettingsUiEvent.FormatOnSaveJavaToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setFormatOnSaveJava(!it.formatOnSaveJava).build()
+                    }
+
+                EditorSettingsUiEvent.FormatOnSaveXmlToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setFormatOnSaveXml(!it.formatOnSaveXml).build()
+                    }
+
+                EditorSettingsUiEvent.FormatOnSaveJsonToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setFormatOnSaveJson(!it.formatOnSaveJson).build()
                     }
             }
         }

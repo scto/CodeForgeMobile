@@ -199,6 +199,30 @@ private fun EditorSettingsScreen(
                 checked = uiState.desktopShortcutsEnabled,
                 onToggle = { onEvent(EditorSettingsUiEvent.DesktopShortcutsToggled) }
             )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_format_on_save_kotlin),
+                description = Res.string(R.string.settings_format_on_save_kotlin_desc),
+                checked = uiState.formatOnSaveKotlin,
+                onToggle = { onEvent(EditorSettingsUiEvent.FormatOnSaveKotlinToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_format_on_save_java),
+                description = Res.string(R.string.settings_format_on_save_java_desc),
+                checked = uiState.formatOnSaveJava,
+                onToggle = { onEvent(EditorSettingsUiEvent.FormatOnSaveJavaToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_format_on_save_xml),
+                description = Res.string(R.string.settings_format_on_save_xml_desc),
+                checked = uiState.formatOnSaveXml,
+                onToggle = { onEvent(EditorSettingsUiEvent.FormatOnSaveXmlToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_format_on_save_json),
+                description = Res.string(R.string.settings_format_on_save_json_desc),
+                checked = uiState.formatOnSaveJson,
+                onToggle = { onEvent(EditorSettingsUiEvent.FormatOnSaveJsonToggled) }
+            )
         }
     }
 }

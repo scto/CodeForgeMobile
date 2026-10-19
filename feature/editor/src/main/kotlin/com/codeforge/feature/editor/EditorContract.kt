@@ -10,6 +10,7 @@ import com.codeforge.core.domain.model.LspDiagnostic
 import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspServerCapabilities
 import com.codeforge.core.domain.model.LspServerState
 import com.codeforge.core.domain.model.LspWorkspaceEdit
@@ -102,6 +103,7 @@ sealed interface EditorUiEvent {
     data class SelectTab(val index: Int) : EditorUiEvent
     data class TextChanged(val text: String) : EditorUiEvent
     data object RunLspFormat : EditorUiEvent
+    data class FormatCode(val range: LspRange? = null) : EditorUiEvent
     data object Save : EditorUiEvent
 
     /** Projektwurzel des Workspaces (für Dependency-Update-Chips); `null` = kein Projektkontext. */
@@ -147,6 +149,12 @@ sealed interface EditorUiEffect {
         val message: String,
         val actionLabel: String? = null,
         val onAction: (() -> Unit)? = null
+    ) : EditorUiEffect
+    data class ApplyFormattedText(
+        val formattedText: String,
+        val sourceName: String,
+        val isUnchanged: Boolean,
+        val warning: String? = null
     ) : EditorUiEffect
     data class NavigateTo(val route: String) : EditorUiEffect
 }

@@ -130,18 +130,9 @@ fun EditorRoute(
         viewModel.onEvent(EditorUiEvent.JumpHandled)
     }
 
-    fun formatDocument() {
-        val c = controller ?: return
-        val path = uiState.activeFile?.path ?: return
-        val text = c.currentText() ?: return
-        val tab = uiState.displaySettings.tabSize
-        val result = CodeFormatter.format(text, CodeFormatter.languageFor(path), FormatOptions(indentSize = tab))
-        c.applyTextChange(result.text)
-        scope.launch {
-            snackbarHostState.showSnackbar(
-                result.warning ?: if (result.text == text) Res.string(R.string.editor_bereits_formatiert) else Res.string(R.string.editor_formatiert)
-            )
-        }
+    fun formatCode() {
+        val range = controller?.getSelectionLspRange()
+        viewModel.onEvent(EditorUiEvent.FormatCode(range))
     }
 
     fun triggerQuickFix() {
@@ -177,6 +168,9 @@ fun EditorRoute(
                     if (result == SnackbarResult.ActionPerformed) {
                         effect.onAction?.invoke()
                     }
+                }
+                is EditorUiEffect.ApplyFormattedText -> {
+                    controller?.applyTextChange(effect.formattedText)
                 }
                 is EditorUiEffect.NavigateTo -> onNavigate(effect.route)
             }
@@ -222,8 +216,7 @@ fun EditorRoute(
                 capabilities = uiState.serverCapabilities,
                 hasDiagnostics = uiState.activeDiagnostics.isNotEmpty(),
                 tabSize = uiState.displaySettings.tabSize,
-                onFormat = ::formatDocument,
-                onFormatLsp = { viewModel.onEvent(EditorUiEvent.RunLspFormat) },
+                onFormat = ::formatCode,
                 onGoToLine = { showGoToLine = true },
                 onSave = { viewModel.onEvent(EditorUiEvent.Save) },
                 onToggleSearch = { viewModel.onEvent(EditorUiEvent.ToggleSearchBar) },
@@ -350,7 +343,6 @@ private fun EditorToolbar(
     hasDiagnostics: Boolean,
     tabSize: Int,
     onFormat: () -> Unit,
-    onFormatLsp: () -> Unit,
     onGoToLine: () -> Unit,
     onSave: () -> Unit,
     onToggleSearch: () -> Unit,
@@ -435,13 +427,10 @@ private fun EditorToolbar(
         IconButton(onClick = onSave, enabled = !isImage) {
             Icon(Icons.Filled.Save, contentDescription = stringRes(R.string.common_speichern))
         }
+        val hasSelection = controller?.hasSelection() == true
+        val formatDesc = if (hasSelection) stringRes(R.string.editor_format_selection) else stringRes(R.string.editor_format_document)
         IconButton(onClick = onFormat, enabled = !isImage) {
-            Icon(Icons.Filled.AutoFixHigh, contentDescription = stringRes(R.string.editor_formatieren))
-        }
-        if (isLspConnected && !isImage) {
-            IconButton(onClick = onFormatLsp) {
-                Icon(Icons.AutoMirrored.Filled.FormatAlignLeft, contentDescription = stringRes(R.string.editor_formatieren_lsp))
-            }
+            Icon(Icons.Filled.AutoFixHigh, contentDescription = formatDesc)
         }
         val unit = " ".repeat(tabSize.coerceIn(1, 8))
         val commentStyle = if (isImage) null else activePath?.let(LineEdits::commentStyleFor)
