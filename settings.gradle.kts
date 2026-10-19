@@ -48,6 +48,7 @@ include(
     ":feature:dependencyupdates",
     ":feature:search",
     ":feature:modulemaker",
+    ":feature:build",
 
     ":libs:terminal-engine",
     ":libs:gradle-tooling-bridge",

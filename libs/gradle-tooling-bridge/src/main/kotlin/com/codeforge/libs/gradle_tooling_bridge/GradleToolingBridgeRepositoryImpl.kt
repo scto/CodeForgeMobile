@@ -20,10 +20,17 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+import com.codeforge.core.domain.model.BuildSession
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+@Deprecated("Unused AIDL Gradle Tooling API implementation. ProcessGradleBuildRepository is used instead.")
 @Singleton
 class GradleToolingBridgeRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : GradleBuildRepository {
+
+    override val currentSession: StateFlow<BuildSession?> = MutableStateFlow(null)
 
     private var service: IGradleBridgeService? = null
     private var projectRootPath: String? = null

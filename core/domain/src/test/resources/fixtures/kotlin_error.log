@@ -1,0 +1,5 @@
+> Task :app:compileDebugKotlin
+e: /workspace/app/src/main/kotlin/com/example/MainActivity.kt:14:23 Unresolved reference: calculateTotal
+w: /workspace/app/src/main/kotlin/com/example/MainActivity.kt:28:9 Parameter 'flag' is never used
+e: file:///workspace/core/domain/src/main/kotlin/com/example/DomainModel.kt: (42, 10): Type mismatch: inferred type is String but Int was expected
+> Task :app:compileDebugKotlin FAILED

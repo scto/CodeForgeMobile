@@ -66,13 +66,18 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 * 🎨 Material 3 Expressive, Dynamic Color, 5 Presets, eigene Paletten; adaptive Layouts und Edge-to-Edge. Der Fluent-2-Leitfaden ([FLUENT2_JETPACK_COMPOSE_GUIDE.md](FLUENT2_JETPACK_COMPOSE_GUIDE.md)) ist bisher nur Designrichtung, nicht umgesetzt.
 
 ### 🌍 9. Zentrale Strings (`:core:resources`) ✅🧪
-* 📝 Alle sichtbaren Texte in einer `strings.xml` (~720 Einträge), Zugriff über `Res`/`stringRes`; `TestRes` für JVM-Tests.
+* 📝 Alle sichtbaren Texte in einer `strings.xml` (~880 Einträge), Zugriff über `Res`/`stringRes`; `TestRes` für JVM-Tests.
+
+### 🔨 10. Gradle-Build & Probleme (`:feature:build`, `:libs:gradle-tooling-bridge`) ✅🧪
+* 📦 Gradle-Builds auf dem Gerät via Termux-Prozess (`./gradlew <task> --console=plain`) und Android Foreground Service.
+* 📜 Live gestreamte Konsolenausgabe mit 20.000-Zeilen-Ringpuffer (`CircularLineBuffer`), Auto-Scroll, Suche, Kopieren, Löschen und Syntax-Einfärbung.
+* 🚨 Klickbarer Reiter „Probleme“ (`BuildProblem`) für Kotlin-, Java-javac-Mehrzeiler-, AAPT2- und Gradle-Fehler; direkter Sprung zu `line:column` im Sora-Editor via `OpenFileRequestBridge`.
 
 ---
 
 ## 🏗️ Systemarchitektur
 
-43 Gradle-Module mit klarer Abhängigkeitsrichtung (`:feature:*` → nur `:core:*`/`:libs:*-api`; Feature-Module kennen einander nicht, Kommunikation über Bridges in `:core:navigation`):
+44 Gradle-Module mit klarer Abhängigkeitsrichtung (`:feature:*` → nur `:core:*`/`:libs:*-api`; Feature-Module kennen einander nicht, Kommunikation über Bridges in `:core:navigation`):
 
 ```text
 CodeForgeMobile/
@@ -84,7 +89,7 @@ CodeForgeMobile/
 │   ├── domain/ navigation/       # UseCases/Modelle · Bridges
 │   ├── resources/ testing/       # Zentrale Strings · Test-Helfer
 ├── feature/
-│   ├── composepreview/ dependencyupdates/ editor/ filetree/ git/
+│   ├── build/ composepreview/ dependencyupdates/ editor/ filetree/ git/
 │   ├── layoutdesigner/ modulemaker/ onboarding/ plugins/ projectwizard/
 │   └── sdkmanager/ search/ settings/ terminal/ themebuilder/ welcome/
 ├── libs/

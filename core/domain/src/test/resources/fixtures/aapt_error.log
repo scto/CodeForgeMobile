@@ -1,0 +1,4 @@
+> Task :app:processDebugResources
+ERROR: /workspace/app/src/main/res/layout/activity_main.xml:12: AAPT: error: resource color/missing_accent (aka com.example:color/missing_accent) not found.
+/workspace/app/src/main/res/values/strings.xml:24: error: string 'app_title' has already been defined.
+> Task :app:processDebugResources FAILED

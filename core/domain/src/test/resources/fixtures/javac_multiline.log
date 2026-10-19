@@ -1,0 +1,10 @@
+> Task :app:compileDebugJavaWithJavac
+/workspace/app/src/main/java/com/example/LegacyUtil.java:18: error: cannot find symbol
+  symbol:   class MissingClass
+  location: package com.example.model
+        MissingClass instance = new MissingClass();
+        ^
+/workspace/app/src/main/java/com/example/LegacyUtil.java:35: warning: [deprecation] oldMethod() in OldClass has been deprecated
+        OldClass.oldMethod();
+                ^
+> Task :app:compileDebugJavaWithJavac FAILED

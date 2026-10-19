@@ -29,6 +29,7 @@ private const val TAG = "GradleBridgeService"
  * JDK/Gradle-Distribution innerhalb der PRoot-Rootfs zeigen lassen (JAVA_HOME aus
  * :libs:terminal-engine beziehen), sobald die Termux-Umgebung (TermuxEnvironment) produktiv ist.
  */
+@Deprecated("Unused AIDL Gradle Tooling API service. ProcessGradleBuildRepository via Termux is used instead.")
 class GradleBridgeService : Service() {
 
     override fun onCreate() {

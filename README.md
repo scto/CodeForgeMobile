@@ -66,13 +66,18 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 * 🎨 Material 3 Expressive, dynamic color, 5 presets, custom palettes; adaptive layouts and edge-to-edge. The Fluent 2 guide ([FLUENT2_JETPACK_COMPOSE_GUIDE.md](FLUENT2_JETPACK_COMPOSE_GUIDE.md)) is a design direction only and not yet implemented.
 
 ### 🌍 9. Centralized Strings (`:core:resources`) ✅🧪
-* 📝 All visible texts in one `strings.xml` (~720 entries), accessed via `Res`/`stringRes`; `TestRes` for JVM tests.
+* 📝 All visible texts in one `strings.xml` (~880 entries), accessed via `Res`/`stringRes`; `TestRes` for JVM tests.
+
+### 🔨 10. Gradle Build & Problems (`:feature:build`, `:libs:gradle-tooling-bridge`) ✅🧪
+* 📦 On-device Gradle build execution via Termux process (`./gradlew <task> --console=plain`) and Android Foreground Service.
+* 📜 Live streaming console output with 20,000-line ring buffer (`CircularLineBuffer`), auto-scroll, search, copy, clear, and colored syntax.
+* 🚨 Clickable "Problems" tab (`BuildProblem`) parsing Kotlin, Java javac multi-line, AAPT2, and Gradle execution errors; direct jump to `line:column` in the editor via `OpenFileRequestBridge`.
 
 ---
 
 ## 🏗️ System Architecture
 
-43 Gradle modules with a strict dependency direction (`:feature:*` → only `:core:*`/`:libs:*-api`; feature modules do not know each other, communication goes through bridges in `:core:navigation`):
+44 Gradle modules with a strict dependency direction (`:feature:*` → only `:core:*`/`:libs:*-api`; feature modules do not know each other, communication goes through bridges in `:core:navigation`):
 
 ```text
 CodeForgeMobile/
@@ -84,7 +89,7 @@ CodeForgeMobile/
 │   ├── domain/ navigation/       # UseCases/models · bridges
 │   ├── resources/ testing/       # Central strings · test helpers
 ├── feature/
-│   ├── composepreview/ dependencyupdates/ editor/ filetree/ git/
+│   ├── build/ composepreview/ dependencyupdates/ editor/ filetree/ git/
 │   ├── layoutdesigner/ modulemaker/ onboarding/ plugins/ projectwizard/
 │   └── sdkmanager/ search/ settings/ terminal/ themebuilder/ welcome/
 ├── libs/

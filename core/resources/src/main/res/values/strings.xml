@@ -48,6 +48,36 @@
     <string name="app_terminal_initialcommand">terminal?initialCommand=%1$s</string>
     <string name="app_verzeichnisauswahl_wird_geoeffnet">Opening directory picker…</string>
 
+    <!-- build -->
+    <string name="build_abbrechen">Cancel</string>
+    <string name="build_abgebrochen">Build cancelled.</string>
+    <string name="build_ausgabe">Output</string>
+    <string name="build_auto_scroll">Auto-scroll</string>
+    <string name="build_bauen">Build</string>
+    <string name="build_benachrichtigung_text">Task: %1$s</string>
+    <string name="build_benachrichtigung_titel">Building %1$s</string>
+    <string name="build_benutzerdefinierter_task">Custom task</string>
+    <string name="build_bereits_aktiv">A build is already running.</string>
+    <string name="build_datei_ohne_position">General build problem</string>
+    <string name="build_dauer">%1$d s</string>
+    <string name="build_erfolgreich">Build succeeded.</string>
+    <string name="build_fehlgeschlagen">Build failed.</string>
+    <string name="build_filter_alle">All (%1$d)</string>
+    <string name="build_filter_fehler">Errors (%1$d)</string>
+    <string name="build_filter_warnungen">Warnings (%1$d)</string>
+    <string name="build_gradlew_nicht_gefunden">gradlew not found in \'%1$s\'.</string>
+    <string name="build_keine_ausgabe">No build output yet.</string>
+    <string name="build_keine_probleme">No problems found.</string>
+    <string name="build_laeuft">Building %1$s…</string>
+    <string name="build_log_kopieren">Copy log</string>
+    <string name="build_log_kopiert">Build log copied to clipboard.</string>
+    <string name="build_log_loeschen">Clear log</string>
+    <string name="build_probleme">Problems</string>
+    <string name="build_probleme_anzeigen">Show problems</string>
+    <string name="build_starten">Run</string>
+    <string name="build_suchen">Search log…</string>
+    <string name="build_task_auswaehlen">Select build task</string>
+
     <!-- composepreview -->
     <string name="composepreview_android_plattform_fehlt">Install an Android platform via the SDK Manager (Settings → SDK Manager → Platforms).</string>
     <string name="composepreview_bild_konnte_nicht_dekodiert_werden">Image could not be decoded.</string>

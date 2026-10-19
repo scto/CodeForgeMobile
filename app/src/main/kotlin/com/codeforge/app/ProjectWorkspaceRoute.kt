@@ -19,27 +19,44 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
-import com.codeforge.core.ui.rememberIsExpandedWidth
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.rememberIsExpandedWidth
+import com.codeforge.feature.build.BuildBottomSheet
+import com.codeforge.feature.build.BuildTab
+import com.codeforge.feature.build.BuildUiEffect
+import com.codeforge.feature.build.BuildUiIntent
+import com.codeforge.feature.build.BuildViewModel
 import com.codeforge.feature.composepreview.ComposePreviewRoute
 import com.codeforge.feature.dependencyupdates.DependencyUpdatesHost
 import com.codeforge.feature.editor.EditorRoute
@@ -60,6 +77,38 @@ fun ProjectWorkspaceRoute(
     val bridgeViewModel: ComposablePreviewBridgeViewModel = hiltViewModel()
     val activeFile by bridgeViewModel.activeFile.collectAsState()
 
+    val buildViewModel: BuildViewModel = hiltViewModel()
+    val buildState by buildViewModel.uiState.collectAsState()
+    var showBuildSheet by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(rootPath) {
+        buildViewModel.connectProject(rootPath)
+    }
+
+    LaunchedEffect(buildViewModel) {
+        buildViewModel.effects.collect { effect ->
+            when (effect) {
+                is BuildUiEffect.ShowSnackbar -> {
+                    val isFailure = effect.message == Res.string(R.string.build_fehlgeschlagen)
+                    val actionLabel = if (isFailure) Res.string(R.string.build_probleme_anzeigen) else null
+                    val result = snackbarHostState.showSnackbar(
+                        message = effect.message,
+                        actionLabel = actionLabel
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        buildViewModel.handleIntent(BuildUiIntent.SelectTab(BuildTab.PROBLEMS))
+                        showBuildSheet = true
+                    }
+                }
+                is BuildUiEffect.OpenEditorAt -> {
+                    showBuildSheet = false
+                }
+                else -> {}
+            }
+        }
+    }
+
     // Prüft beim Öffnen des Projekts (Neu/Clone/Import/Wieder-Öffnen — alle führen hierher) im
     // Hintergrund auf Dependency-Updates und zeigt bei Treffern den Dismiss/Ask later/Update-Dialog.
     DependencyUpdatesHost(rootPath = rootPath)
@@ -69,6 +118,7 @@ fun ProjectWorkspaceRoute(
     val workspaceContent: @Composable (Modifier) -> Unit = { contentModifier ->
         Scaffold(
             modifier = contentModifier,
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
                 TopAppBar(
                     title = { Text(rootPath.substringAfterLast('/').ifBlank { Res.string(R.string.common_projekt) }) },
@@ -76,6 +126,22 @@ fun ProjectWorkspaceRoute(
                         if (!permanentDrawer) {
                             IconButton(onClick = { coroutineScope.launch { drawerState.open() } }) {
                                 Icon(Icons.Filled.Menu, contentDescription = stringRes(R.string.app_menue_oeffnen))
+                            }
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { showBuildSheet = true }) {
+                            if (buildState.isBuilding) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Build,
+                                    contentDescription = stringRes(R.string.build_bauen)
+                                )
                             }
                         }
                     }
@@ -127,5 +193,12 @@ fun ProjectWorkspaceRoute(
         ) {
             workspaceContent(Modifier.fillMaxSize())
         }
+    }
+
+    if (showBuildSheet) {
+        BuildBottomSheet(
+            onDismissRequest = { showBuildSheet = false },
+            viewModel = buildViewModel
+        )
     }
 }

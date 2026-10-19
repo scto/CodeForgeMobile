@@ -11,9 +11,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class GradleToolingBridgeModule {
+
     @Binds
     @Singleton
     abstract fun bindGradleBuildRepository(
-        impl: GradleToolingBridgeRepositoryImpl
+        impl: ProcessGradleBuildRepository
     ): GradleBuildRepository
 }

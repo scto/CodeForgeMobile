@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
     <application>
         <!--
-          Läuft im eigenen Prozess (:gradletooling), damit die Gradle-Tooling-API
-          (org.gradle.tooling.*) mit ihrer eigenen Classloader-Hierarchie isoliert
-          vom App-Hauptprozess bleibt. Kommunikation ausschließlich über die
-          AIDL-Interfaces IGradleBridgeService / IGradleBridgeCallback.
+          Veraltet / Nicht verwendet: läuft im eigenen Prozess (:gradletooling)
+          mit der Gradle-Tooling-API. Durch ProcessGradleBuildRepository ersetzt.
         -->
         <service
             android:name="com.codeforge.libs.gradle_tooling_bridge.GradleBridgeService"
             android:process=":gradletooling"
             android:exported="false" />
+
+        <!--
+          Foreground Service zur unterbrechungsfreien Ausführung von Gradle-Builds
+          mit Statusbar-Benachrichtigung und Abbruch-Möglichkeit.
+        -->
+        <service
+            android:name="com.codeforge.libs.gradle_tooling_bridge.BuildForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Gradle build execution in background" />
+        </service>
     </application>
 
 </manifest>

@@ -17,10 +17,14 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(project(":core:domain"))
 
+    implementation(project(":libs:terminal-engine"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    // Gradle Tooling API: läuft ausschließlich im :gradletooling-Prozess
-    // (siehe GradleBridgeService), nie im App-Hauptprozess-Classloader.
+    // Gradle Tooling API: Veraltet / nicht verwendet (siehe GradleBridgeService).
+    // Durch ProcessGradleBuildRepository ersetzt.
     implementation(libs.gradle.tooling.api)
+
+    testImplementation(libs.junit)
+    testImplementation(project(":core:testing"))
 }

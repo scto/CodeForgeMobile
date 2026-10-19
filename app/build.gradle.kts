@@ -63,6 +63,7 @@ dependencies {
     implementation(project(":feature:plugins"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:dependencyupdates"))
+    implementation(project(":feature:build"))
 
     implementation(project(":libs:termux-app"))
     implementation(project(":libs:terminal-engine"))

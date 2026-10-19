@@ -48,6 +48,36 @@
     <string name="app_terminal_initialcommand">terminal?initialCommand=%1$s</string>
     <string name="app_verzeichnisauswahl_wird_geoeffnet">Verzeichnisauswahl wird geöffnet…</string>
 
+    <!-- build -->
+    <string name="build_abbrechen">Abbrechen</string>
+    <string name="build_abgebrochen">Build abgebrochen.</string>
+    <string name="build_ausgabe">Ausgabe</string>
+    <string name="build_auto_scroll">Automatischer Bildlauf</string>
+    <string name="build_bauen">Bauen</string>
+    <string name="build_benachrichtigung_text">Task: %1$s</string>
+    <string name="build_benachrichtigung_titel">Build %1$s läuft</string>
+    <string name="build_benutzerdefinierter_task">Benutzerdefinierter Task</string>
+    <string name="build_bereits_aktiv">Ein Build wird bereits ausgeführt.</string>
+    <string name="build_datei_ohne_position">Allgemeines Build-Problem</string>
+    <string name="build_dauer">%1$d s</string>
+    <string name="build_erfolgreich">Build erfolgreich.</string>
+    <string name="build_fehlgeschlagen">Build fehlgeschlagen.</string>
+    <string name="build_filter_alle">Alle (%1$d)</string>
+    <string name="build_filter_fehler">Fehler (%1$d)</string>
+    <string name="build_filter_warnungen">Warnungen (%1$d)</string>
+    <string name="build_gradlew_nicht_gefunden">gradlew in \'%1$s\' nicht gefunden.</string>
+    <string name="build_keine_ausgabe">Noch keine Build-Ausgabe vorhanden.</string>
+    <string name="build_keine_probleme">Keine Probleme gefunden.</string>
+    <string name="build_laeuft">Build %1$s läuft…</string>
+    <string name="build_log_kopieren">Log kopieren</string>
+    <string name="build_log_kopiert">Build-Log in Zwischenablage kopiert.</string>
+    <string name="build_log_loeschen">Log leeren</string>
+    <string name="build_probleme">Probleme</string>
+    <string name="build_probleme_anzeigen">Probleme anzeigen</string>
+    <string name="build_starten">Ausführen</string>
+    <string name="build_suchen">Log durchsuchen…</string>
+    <string name="build_task_auswaehlen">Build-Task auswählen</string>
+
     <!-- composepreview -->
     <string name="composepreview_android_plattform_fehlt">Android-Plattform über den SDK-Manager installieren (Einstellungen → SDK-Manager → Plattformen).</string>
     <string name="composepreview_bild_konnte_nicht_dekodiert_werden">Bild konnte nicht dekodiert werden.</string>

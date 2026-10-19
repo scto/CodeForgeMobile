@@ -31,11 +31,20 @@
 | **25** | `25-large-packages-release-assets.md` | ✅ `ae1824f` | Große Pakete (> 95 MiB) über Release-Asset `large-packages` & `large-packages.txt` (+ `.asc`) in `codeforge-env` (`install_repo_pkg` / `pkg_install`), Mock-Tests (`docs/task-25-report.md`) |
 | **26** | `26-compose-preview-compiler-runtime.md` | ✅ `9e09f84` | Compose-Preview: Gradle-Task `packCompilerRuntime` (30 JARs ohne Plugin, 21.80 MiB unpacked / 20.22 MiB ZIP), CI-Workflow `build-compiler-runtime.yml`, `CompilerRuntimeProviderImpl` mit SHA-256/Zip-Slip/Versions-Check, Classpath-Trennung & Android-SDK-Einbindung, JVM-Unit-Tests (`docs/compose-preview-runtime-report.md`) |
 | **27a** | `27a-compose-preview-kotlinc-in-termux.md` | ✅ `3029076` | Compose-Preview: Kotlin-Compiler als Termux-Prozess (`$PREFIX/opt/kotlin/bin/kotlinc`), Spike auf Gerät (4–6 s, `javap` verifiziert), Entfernung embeddable (-4,67 MB APK), `KotlincProcessCompiler` & `KotlincOutputParser`, JVM-Tests (`docs/compose-preview-kotlinc-report.md`) |
-| **27b** | `27b-compose-preview-offscreen-render.md` | ✅ (dieser Commit) | Compose-Preview: Offscreen-Rendering mit GraphicsLayer, Frame-Synchronisation via `withFrameNanos`, 5s-Timeout, Fehlerisolation/Host-Schutz, Signaturvalidierung `(Composer, Int)`, dynamische Größe, androidTest kompiliert (`assembleDebugAndroidTest`) (`docs/compose-preview-render-report.md`) |
+| **27b** | `27b-compose-preview-offscreen-render.md` | ✅ `43c55b7` | Compose-Preview: Offscreen-Rendering mit GraphicsLayer, Frame-Synchronisation via `withFrameNanos`, 5s-Timeout, Fehlerisolation/Host-Schutz, Signaturvalidierung `(Composer, Int)`, dynamische Größe, androidTest kompiliert (`assembleDebugAndroidTest`) (`docs/compose-preview-render-report.md`) |
+| **28** | `28-gradle-build-output-problems.md` | ✅ (dieser Commit) | Gradle-Build-Ausgabe und Problemfenster: Entscheidung 28.0 (Option A Termux-Prozess), Domain-Modelle `BuildProblem` & `BuildSession`, reiner Kotlin-Parser `GradleOutputParser` mit 5 Fixtures, `CircularLineBuffer` (20.000 Zeilen), `ProcessGradleBuildRepository`, `BuildForegroundService`, UI-Modul `:feature:build` mit MVI/Hilt, `OutputTab`, `ProblemsTab` mit Klick-Navigation via `OpenFileRequestBridge`, Integration in `ProjectWorkspaceRoute` (`docs/gradle-build-output-problems-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
+
+### Task 28 – Gradle-Build-Ausgabe und Problemfenster (✅ erledigt)
+1. **Entscheidung 28.0**: Option A (Termux-Prozess `./gradlew <task> --console=plain`) gewählt; bisherige Tooling-API-Bridge als `@Deprecated` markiert.
+2. **Domain-Modelle & Schnittstelle (28.1)**: `BuildProblem`, `BuildSession`, `BuildStatus`, `BuildEvent.Problem` in `:core:domain`; `GradleBuildRepository` mit `currentSession` aktualisiert.
+3. **Parser & Fixtures (28.2)**: `GradleOutputParser` mit ANSI-Stripping, Kotlin-, Java-javac-, AAPT2- und Gradle-Execution-Erkennung. 5 Fixtures unter `core/domain/src/test/resources/fixtures/` und JVM-Tests in `GradleOutputParserTest`.
+4. **Prozessausführung & Ringpuffer (28.3)**: `CircularLineBuffer` (20.000 Zeilen Obergrenze), `ProcessGradleBuildRepository` mit Mehrfachstartschutz und Abbruch via `cancelBuild()`, `BuildForegroundService` für Hintergrundausführung mit Statusbar-Benachrichtigung und Abbruchaktion.
+5. **UI-Modul `:feature:build` (28.4)**: `BuildViewModel`, `BuildContract`, `BuildScreen` / `BuildBottomSheet` mit Reiter „Ausgabe“ (Auto-Scroll, Monospace, Suche, Kopieren, Löschen, Syntax-Farben) und „Probleme“ (Dateigruppierung, Schweregrad-Filter, Navigation via `OpenFileRequestBridge.requestOpenAt`), `TaskSelectorDialog`.
+6. **Integration in `:app` & Verifikation (28.5)**: Bauen-Button und Fehler-Snackbar in `ProjectWorkspaceRoute.kt`; alle Modul-Tests und `:app:assembleDebug` erfolgreich.
 
 ### Task 26 – Compose-Preview: Jar-Bundle für den On-Device-Compiler bereitstellen (✅ erledigt)
 1. **Gradle-Task `packCompilerRuntime` (26.1)**: Compose BOM 2025.09.00 + Kotlin 2.1.21 Artefakte aufgelöst, AARs entpackt (`classes.jar`), alle 31 JARs geprüft (`unzip -t`), `manifest.json`, ZIP (`compiler-runtime-2025.09.00-k2.1.21.zip`) und `.sha256` erzeugt. Optional `-PwithExtendedIcons`.

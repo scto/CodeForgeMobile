@@ -11,6 +11,33 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🔨 Gradle-Build-Ausgabe und Problemfenster (Task 28)
+
+* **Entscheidung 28.0 (Option A Termux-Prozess)**:
+  * Ausführung von `./gradlew <task> --console=plain` über `ProcessGradleBuildRepository` mit `TermuxEnvironment.environment()`.
+  * Verwaiste Tooling-API-Bridge (`GradleToolingBridgeRepositoryImpl`, `GradleBridgeService`) als `@Deprecated` markiert.
+* **Domain-Erweiterungen (`:core:domain`)**:
+  * Modelle `BuildProblem` (Severity, Source, Path, Line, Column, Message, Task), `BuildSession`, `BuildStatus`.
+  * Ereignis `BuildEvent.Problem(val problem: BuildProblem)` und `currentSession: StateFlow<BuildSession?>` in `GradleBuildRepository`.
+* **Reiner Kotlin-Parser (`GradleOutputParser`)**:
+  * ANSI-Sequenzen bereinigen (`\u001B[...]`).
+  * Erkennung von Kotlin-Compiler-Fehlern (`e:` / `w:`), Java-javac-Mehrzeilern (Zusammenfassung von Symbol, Location und Caret), AAPT2-Fehlern und Gradle-Execution-Failures (`* What went wrong:`).
+  * 5 Fixture-Logs unter `core/domain/src/test/resources/fixtures/` und JVM-Tests in `GradleOutputParserTest`.
+* **Prozess-Repository & Ringpuffer (`:libs:gradle-tooling-bridge`)**:
+  * `CircularLineBuffer`: Thread-sicherer Ringpuffer mit 20.000 Zeilen Kapazitätsgrenze zur Verhinderung von Speicherüberläufen.
+  * `ProcessGradleBuildRepository`: Start, Abbruch, atomarer Schutz vor Mehrfachstarts, Prüfung auf vorhandenes `gradlew`.
+  * `BuildForegroundService`: Android Foreground Service mit Statusbar-Benachrichtigung und Direktaktion „Abbrechen“.
+* **UI-Modul `:feature:build`**:
+  * `BuildViewModel` und `BuildContract` (MVI) mit 100-ms-Batching für ruckelfreie Compose-Aktualisierung.
+  * `OutputTab`: Monospace-Ausgabe, Auto-Scroll, Suchfilter, Log kopieren & löschen, Syntax-Einfärbung.
+  * `ProblemsTab`: Gruppierung nach Datei, Filter (Alle/Fehler/Warnungen), Klick-Navigation via `OpenFileRequestBridge` an die exakte `line:column` im Sora Code Editor.
+  * `TaskSelectorDialog`: Task-Auswahl (`assembleDebug`, `assembleRelease`, `clean`, `test`, `lint`) und benutzerdefinierte Tasks.
+* **Integration & Lokalisierung (`:app` & `:core:resources`)**:
+  * „Bauen“-Button und Lade-Spinner in der `TopAppBar` von `ProjectWorkspaceRoute.kt`.
+  * Snackbar mit Schnellaktion „Probleme anzeigen“ bei fehlgeschlagenen Builds.
+  * 19 neue zweisprachige Strings (`build_*`) in `values/` und `values-de/`.
+  * Ausführlicher Bericht in [`docs/gradle-build-output-problems-report.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/docs/gradle-build-output-problems-report.md).
+
 ### 🎨 Compose-Preview: Offscreen-Rendering mit GraphicsLayer (Task 27b)
 
 * **Reproduktion des leeren Bitmaps (`27b.0`)**:
