@@ -35,7 +35,7 @@
 | **28** | `28-gradle-build-output-problems.md` | ✅ `3399403` | Gradle-Build-Ausgabe und Problemfenster: Entscheidung 28.0 (Option A Termux-Prozess), Domain-Modelle `BuildProblem` & `BuildSession`, reiner Kotlin-Parser `GradleOutputParser` mit 5 Fixtures, `CircularLineBuffer` (20.000 Zeilen), `ProcessGradleBuildRepository`, `BuildForegroundService`, UI-Modul `:feature:build` mit MVI/Hilt, `OutputTab`, `ProblemsTab` mit Klick-Navigation via `OpenFileRequestBridge`, Integration in `ProjectWorkspaceRoute` (`docs/gradle-build-output-problems-report.md`) |
 | **29** | `29-install-and-run-apk.md` | ✅ `a35aee7` | APK installieren und starten: `ApkMetadataParser`, `PackageInstaller`-Session, Statuscode-Mapping, Selbstaktualisierungs-Schutz, „Bauen & Starten“-Ablauf (`docs/install-and-run-apk-report.md`) |
 | **30** | `30-logcat-viewer.md` | ✅ `9c0215f` | Logcat-Ansicht: Filter nach Level, Paket & Tag, Erkennung von Abstürzen mit Klick-Navigation zum Stacktrace im Sora Editor, 3 Quellen (`OWN_PROCESS`, `READ_LOGS_PERMISSION`, `ADB_LOOPBACK`), 50k Ringpuffer (`docs/logcat-viewer-report.md`) |
-| **31** | `31-lsp-code-actions-rename.md` | ✅ erledigt | LSP Code-Aktionen, Umbenennen (atomar, Multi-File), Struktur-Ansicht (Outline mit Fallback), Definition & Referenzen, Beantwortung von `workspace/applyEdit` (`docs/lsp-code-actions-rename-report.md`) |
+| **31** | `31-lsp-code-actions-rename.md` | ✅ `df4ded4` | LSP Code-Aktionen, Umbenennen (atomar, Multi-File), Struktur-Ansicht (Outline mit Fallback), Definition & Referenzen, Beantwortung von `workspace/applyEdit` (`docs/lsp-code-actions-rename-report.md`) |
 
 ---
 
