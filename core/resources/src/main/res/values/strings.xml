@@ -1019,6 +1019,32 @@
     <string name="logcat_datei_nicht_gefunden">File not found in project: %1$s</string>
     <string name="logcat_teilen_titel">Share Logcat</string>
 
+    <!-- LSP Code Actions, Rename, Outline (Task 31) -->
+    <string name="lsp_quick_fix">Quick-Fix</string>
+    <string name="lsp_quick_fixes_title">Quick-Fixes and Code Actions</string>
+    <string name="lsp_no_code_actions">No code actions available</string>
+    <string name="lsp_rename">Rename</string>
+    <string name="lsp_rename_title">Rename Symbol</string>
+    <string name="lsp_rename_new_name">New name</string>
+    <string name="lsp_rename_preview_title">Confirm Rename</string>
+    <string name="lsp_rename_preview_summary">%1$d change(s) in %2$d file(s)</string>
+    <string name="lsp_rename_applied">Renamed: %1$d change(s) in %2$d file(s)</string>
+    <string name="lsp_rename_undo">Undo</string>
+    <string name="lsp_rename_undone">Rename undone</string>
+    <string name="lsp_rename_failed">Rename failed: %1$s</string>
+    <string name="lsp_outline">Outline</string>
+    <string name="lsp_outline_title">Document Outline</string>
+    <string name="lsp_outline_search">Filter symbols…</string>
+    <string name="lsp_outline_empty">No symbols found</string>
+    <string name="lsp_definition">Go to Definition</string>
+    <string name="lsp_definition_not_found">No definition found</string>
+    <string name="lsp_references">Find References</string>
+    <string name="lsp_references_title">References</string>
+    <string name="lsp_references_not_found">No references found</string>
+    <string name="lsp_edit_rollback_failed">Failed to apply edit, changes rolled back: %1$s</string>
+    <string name="lsp_overlapping_edits_rejected">Rejected overlapping edits in file %1$s</string>
+    <string name="lsp_unsupported_operation">Unsupported file operation: %1$s</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

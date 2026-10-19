@@ -4,76 +4,92 @@
  */
 package com.codeforge.feature.editor
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material3.Surface
-import com.codeforge.core.domain.model.LspServerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.filled.FormatIndentDecrease
+import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.AccountTree
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
-import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.ControlPointDuplicate
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.automirrored.filled.FormatIndentDecrease
-import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.FindInPage
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
-import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.codeforge.core.domain.model.LspServerCapabilities
+import com.codeforge.core.domain.model.LspServerState
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import com.codeforge.feature.editor.fileprovider.EditorFileProvider
 import com.codeforge.feature.editor.overlay.UpdateChipDialog
+import com.codeforge.feature.editor.ui.DocumentOutlineSheet
 import com.codeforge.feature.editor.ui.EditorSymbolBar
 import com.codeforge.feature.editor.ui.ImageFilePreview
+import com.codeforge.feature.editor.ui.QuickFixSheet
+import com.codeforge.feature.editor.ui.ReferencesSheet
+import com.codeforge.feature.editor.ui.RenameDialog
 import com.codeforge.feature.editor.ui.isImageFilePath
 import com.codeforge.libs.code_tools.edit.LineEdits
 import com.codeforge.libs.code_tools.format.CodeFormatter
@@ -82,7 +98,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun EditorRoute(
     modifier: Modifier = Modifier,
@@ -128,17 +144,55 @@ fun EditorRoute(
         }
     }
 
+    fun triggerQuickFix() {
+        val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
+        viewModel.onEvent(EditorUiEvent.TriggerQuickFix(pos.first, pos.second))
+    }
+
+    fun triggerRename() {
+        val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
+        val word = controller?.getWordAtCursor() ?: ""
+        viewModel.onEvent(EditorUiEvent.TriggerRename(pos.first, pos.second, word))
+    }
+
+    fun triggerDefinition() {
+        val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
+        viewModel.onEvent(EditorUiEvent.GoToDefinition(pos.first, pos.second))
+    }
+
+    fun triggerReferences() {
+        val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
+        val word = controller?.getWordAtCursor() ?: ""
+        viewModel.onEvent(EditorUiEvent.FindReferences(pos.first, pos.second, word))
+    }
+
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
-                is EditorUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
+                is EditorUiEffect.ShowSnackbar -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = effect.message,
+                        actionLabel = effect.actionLabel
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        effect.onAction?.invoke()
+                    }
+                }
                 is EditorUiEffect.NavigateTo -> onNavigate(effect.route)
             }
         }
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .onPreviewKeyEvent { event ->
+                // Alt+Enter Shortcut für Quick-Fix
+                if (event.isAltPressed && event.key == Key.Enter && event.type == KeyEventType.KeyDown) {
+                    triggerQuickFix()
+                    true
+                } else false
+            },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -165,6 +219,8 @@ fun EditorRoute(
                 activePath = uiState.activeFile?.path,
                 isLspConnected = uiState.isLspConnected,
                 lspServerState = uiState.lspServerState,
+                capabilities = uiState.serverCapabilities,
+                hasDiagnostics = uiState.activeDiagnostics.isNotEmpty(),
                 tabSize = uiState.displaySettings.tabSize,
                 onFormat = ::formatDocument,
                 onFormatLsp = { viewModel.onEvent(EditorUiEvent.RunLspFormat) },
@@ -175,7 +231,12 @@ fun EditorRoute(
                     uiState.activeFile?.let { active ->
                         context.startActivity(EditorFileProvider.buildShareIntent(context, active.path))
                     }
-                }
+                },
+                onQuickFix = ::triggerQuickFix,
+                onRename = ::triggerRename,
+                onOutline = { viewModel.onEvent(EditorUiEvent.ToggleOutline) },
+                onDefinition = ::triggerDefinition,
+                onReferences = ::triggerReferences
             )
 
             if (uiState.isSearchBarVisible) {
@@ -219,7 +280,6 @@ fun EditorRoute(
         }
     }
 
-
     if (showGoToLine) {
         GoToLineDialog(
             lineCount = uiState.activeFile?.content?.count { it == '\n' }?.plus(1) ?: 1,
@@ -238,6 +298,45 @@ fun EditorRoute(
             onCancel = { viewModel.onEvent(EditorUiEvent.UpdateDialogCancel) }
         )
     }
+
+    // Task 31 Sheets & Dialogs
+    if (uiState.isCodeActionsSheetVisible) {
+        QuickFixSheet(
+            actions = uiState.codeActions,
+            onSelectAction = { viewModel.onEvent(EditorUiEvent.ApplyCodeAction(it)) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.DismissQuickFix) }
+        )
+    }
+
+    uiState.renameDialog?.let { renameState ->
+        RenameDialog(
+            state = renameState,
+            onNameChanged = { viewModel.onEvent(EditorUiEvent.RenameNameChanged(it)) },
+            onRequestPreview = { viewModel.onEvent(EditorUiEvent.RequestRenamePreview) },
+            onConfirm = { viewModel.onEvent(EditorUiEvent.ConfirmRename) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.DismissRename) }
+        )
+    }
+
+    if (uiState.isOutlineVisible) {
+        DocumentOutlineSheet(
+            symbols = uiState.filteredOutlineSymbols,
+            filter = uiState.outlineFilter,
+            isLoading = uiState.isLoadingOutline,
+            onFilterChanged = { viewModel.onEvent(EditorUiEvent.OutlineFilterChanged(it)) },
+            onSelectSymbol = { viewModel.onEvent(EditorUiEvent.SelectOutlineSymbol(it)) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.ToggleOutline) }
+        )
+    }
+
+    if (uiState.isReferencesSheetVisible) {
+        ReferencesSheet(
+            symbolName = uiState.referencesSymbol,
+            locations = uiState.referencesList,
+            onSelectLocation = { viewModel.onEvent(EditorUiEvent.SelectLocation(it)) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.DismissReferences) }
+        )
+    }
 }
 
 @Composable
@@ -247,13 +346,20 @@ private fun EditorToolbar(
     activePath: String?,
     isLspConnected: Boolean,
     lspServerState: LspServerState,
+    capabilities: LspServerCapabilities?,
+    hasDiagnostics: Boolean,
     tabSize: Int,
     onFormat: () -> Unit,
     onFormatLsp: () -> Unit,
     onGoToLine: () -> Unit,
     onSave: () -> Unit,
     onToggleSearch: () -> Unit,
-    onShare: () -> Unit
+    onShare: () -> Unit,
+    onQuickFix: () -> Unit,
+    onRename: () -> Unit,
+    onOutline: () -> Unit,
+    onDefinition: () -> Unit,
+    onReferences: () -> Unit
 ) {
     val isImage = activePath?.let { isImageFilePath(it) } == true
     Row(
@@ -264,6 +370,50 @@ private fun EditorToolbar(
             state = lspServerState,
             modifier = Modifier.padding(start = 8.dp, end = 4.dp)
         )
+
+        // Outline / Struktur: immer verfügbar (LSP oder Fallback)
+        if (!isImage) {
+            IconButton(onClick = onOutline) {
+                Icon(Icons.Default.AccountTree, contentDescription = stringRes(R.string.lsp_outline))
+            }
+        }
+
+        // Quick-Fix (Glühbirne): wenn LSP aktiv und (Capabilities erlaubt oder null)
+        val allowCodeAction = isLspConnected && (capabilities == null || capabilities.codeActionProvider)
+        if (allowCodeAction && !isImage) {
+            IconButton(onClick = onQuickFix) {
+                Icon(
+                    Icons.Default.Lightbulb,
+                    contentDescription = stringRes(R.string.lsp_quick_fix),
+                    tint = if (hasDiagnostics) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Rename (Umbenennen): wenn LSP aktiv und (Capabilities erlaubt oder null)
+        val allowRename = isLspConnected && (capabilities == null || capabilities.renameProvider)
+        if (allowRename && !isImage) {
+            IconButton(onClick = onRename) {
+                Icon(Icons.Default.DriveFileRenameOutline, contentDescription = stringRes(R.string.lsp_rename))
+            }
+        }
+
+        // Definition: wenn LSP aktiv und (Capabilities erlaubt oder null)
+        val allowDefinition = isLspConnected && (capabilities == null || capabilities.definitionProvider)
+        if (allowDefinition && !isImage) {
+            IconButton(onClick = onDefinition) {
+                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = stringRes(R.string.lsp_definition))
+            }
+        }
+
+        // References (Verwendungen): wenn LSP aktiv und (Capabilities erlaubt oder null)
+        val allowReferences = isLspConnected && (capabilities == null || capabilities.referencesProvider)
+        if (allowReferences && !isImage) {
+            IconButton(onClick = onReferences) {
+                Icon(Icons.Default.FindInPage, contentDescription = stringRes(R.string.lsp_references))
+            }
+        }
+
         IconButton(onClick = { controller?.undo() }, enabled = !isImage && (controller?.canUndo() ?: false)) {
             Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringRes(R.string.editor_rueckgaengig))
         }
@@ -298,7 +448,6 @@ private fun EditorToolbar(
         IconButton(
             onClick = { commentStyle?.let { style -> controller?.runLineCommand { t, a, b -> LineEdits.toggleComment(t, a, b, style) } } },
             enabled = commentStyle != null
-
         ) {
             Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = stringRes(R.string.editor_kommentar_umschalten))
         }
@@ -397,4 +546,3 @@ private fun LspStatusBadge(
         )
     }
 }
-

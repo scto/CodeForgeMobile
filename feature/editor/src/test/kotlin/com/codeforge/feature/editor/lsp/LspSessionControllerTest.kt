@@ -62,12 +62,42 @@ class LspSessionControllerTest {
         override suspend fun didOpen(path: String, languageId: String, content: String) {}
         override suspend fun didChange(path: String, newContent: String, version: Int) {}
         override suspend fun didClose(path: String) {}
+        private val _serverCapabilities = MutableStateFlow<com.codeforge.core.domain.model.LspServerCapabilities?>(null)
+        override val serverCapabilities: StateFlow<com.codeforge.core.domain.model.LspServerCapabilities?> = _serverCapabilities.asStateFlow()
+
+        override var applyEditHandler: (suspend (com.codeforge.core.domain.model.LspWorkspaceEdit) -> Boolean)? = null
+
         override suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>> =
             Result.success(emptyList())
         override suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> =
             Result.success(null)
         override suspend fun requestFormat(path: String, content: String): Result<String> =
             Result.success(content)
+        override suspend fun requestCodeActions(
+            path: String,
+            range: com.codeforge.core.domain.model.LspRange,
+            diagnostics: List<LspDiagnostic>
+        ): Result<List<com.codeforge.core.domain.model.LspCodeAction>> = Result.success(emptyList())
+        override suspend fun requestPrepareRename(
+            path: String,
+            position: LspPosition
+        ): Result<com.codeforge.core.domain.model.LspPrepareRenameResult?> = Result.success(null)
+        override suspend fun requestRename(
+            path: String,
+            position: LspPosition,
+            newName: String
+        ): Result<com.codeforge.core.domain.model.LspWorkspaceEdit?> = Result.success(null)
+        override suspend fun requestDocumentSymbols(path: String): Result<List<com.codeforge.core.domain.model.LspDocumentSymbol>> =
+            Result.success(emptyList())
+        override suspend fun requestDefinition(path: String, position: LspPosition): Result<List<com.codeforge.core.domain.model.LspLocation>> =
+            Result.success(emptyList())
+        override suspend fun requestReferences(
+            path: String,
+            position: LspPosition,
+            includeDeclaration: Boolean
+        ): Result<List<com.codeforge.core.domain.model.LspLocation>> = Result.success(emptyList())
+        override suspend fun executeCommand(command: String, arguments: List<Any?>): Result<Unit> =
+            Result.success(Unit)
     }
 
     private class FakeLspServerResolver(

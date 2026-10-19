@@ -54,5 +54,6 @@ dependencies {
     implementation(project(":libs:dependency-updater-api"))
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(project(":core:testing"))
 }

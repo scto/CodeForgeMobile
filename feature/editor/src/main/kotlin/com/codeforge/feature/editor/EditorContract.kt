@@ -5,12 +5,17 @@
 package com.codeforge.feature.editor
 
 import androidx.compose.runtime.Immutable
+import com.codeforge.core.domain.model.LspCodeAction
 import com.codeforge.core.domain.model.LspDiagnostic
+import com.codeforge.core.domain.model.LspDocumentSymbol
+import com.codeforge.core.domain.model.LspLocation
+import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspServerCapabilities
+import com.codeforge.core.domain.model.LspServerState
+import com.codeforge.core.domain.model.LspWorkspaceEdit
 import com.codeforge.core.navigation.JumpTarget
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import com.codeforge.libs.dependency_updater_api.FileUpdateAnnotation
-
-import com.codeforge.core.domain.model.LspServerState
 
 data class OpenFile(
     val path: String,
@@ -19,10 +24,23 @@ data class OpenFile(
 )
 
 @Immutable
+data class RenameDialogState(
+    val path: String,
+    val position: LspPosition,
+    val currentName: String,
+    val newName: String = currentName,
+    val pendingEdit: LspWorkspaceEdit? = null,
+    val pendingFileCount: Int = 0,
+    val pendingEditCount: Int = 0,
+    val isPreview: Boolean = false
+)
+
+@Immutable
 data class EditorUiState(
     val openFiles: List<OpenFile> = emptyList(),
     val activeFileIndex: Int = 0,
     val lspServerState: LspServerState = LspServerState.STOPPED,
+    val serverCapabilities: LspServerCapabilities? = null,
     val isLoading: Boolean = false,
     val displaySettings: EditorDisplaySettings = EditorDisplaySettings(),
     val diagnosticsByPath: Map<String, List<LspDiagnostic>> = emptyMap(),
@@ -40,7 +58,19 @@ data class EditorUiState(
     val pendingUpdateCount: Int = 0,
     /** Per Chip-Klick geöffneter Dialog (Update / Update All). */
     val updateDialog: DependencyUpdate? = null,
-    val isApplyingUpdate: Boolean = false
+    val isApplyingUpdate: Boolean = false,
+
+    // LSP Task 31 UI-States
+    val codeActions: List<LspCodeAction> = emptyList(),
+    val isCodeActionsSheetVisible: Boolean = false,
+    val renameDialog: RenameDialogState? = null,
+    val isOutlineVisible: Boolean = false,
+    val outlineSymbols: List<LspDocumentSymbol> = emptyList(),
+    val outlineFilter: String = "",
+    val isLoadingOutline: Boolean = false,
+    val isReferencesSheetVisible: Boolean = false,
+    val referencesList: List<LspLocation> = emptyList(),
+    val referencesSymbol: String = ""
 ) {
     val isLspConnected: Boolean get() = lspServerState == LspServerState.RUNNING
 
@@ -49,6 +79,21 @@ data class EditorUiState(
 
     val activeFile: OpenFile? get() = openFiles.getOrNull(activeFileIndex)
     val activeDiagnostics: List<LspDiagnostic> get() = activeFile?.let { diagnosticsByPath[it.path] } ?: emptyList()
+
+    val filteredOutlineSymbols: List<LspDocumentSymbol>
+        get() = if (outlineFilter.isBlank()) outlineSymbols
+        else filterSymbols(outlineSymbols, outlineFilter.trim().lowercase())
+
+    private fun filterSymbols(symbols: List<LspDocumentSymbol>, query: String): List<LspDocumentSymbol> {
+        val filtered = mutableListOf<LspDocumentSymbol>()
+        for (sym in symbols) {
+            val matchingChildren = filterSymbols(sym.children, query)
+            if (sym.name.lowercase().contains(query) || matchingChildren.isNotEmpty()) {
+                filtered.add(sym.copy(children = matchingChildren))
+            }
+        }
+        return filtered
+    }
 }
 
 sealed interface EditorUiEvent {
@@ -74,9 +119,34 @@ sealed interface EditorUiEvent {
     data object ToggleWholeWordSearch : EditorUiEvent
     data object JumpHandled : EditorUiEvent
     data class InsertText(val text: String) : EditorUiEvent
+
+    // Task 31 Events
+    data class TriggerQuickFix(val line: Int, val col: Int) : EditorUiEvent
+    data object DismissQuickFix : EditorUiEvent
+    data class ApplyCodeAction(val action: LspCodeAction) : EditorUiEvent
+
+    data class TriggerRename(val line: Int, val col: Int, val fallbackName: String) : EditorUiEvent
+    data class RenameNameChanged(val newName: String) : EditorUiEvent
+    data object RequestRenamePreview : EditorUiEvent
+    data object ConfirmRename : EditorUiEvent
+    data object DismissRename : EditorUiEvent
+    data object UndoLastRename : EditorUiEvent
+
+    data object ToggleOutline : EditorUiEvent
+    data class OutlineFilterChanged(val query: String) : EditorUiEvent
+    data class SelectOutlineSymbol(val symbol: LspDocumentSymbol) : EditorUiEvent
+
+    data class GoToDefinition(val line: Int, val col: Int) : EditorUiEvent
+    data class FindReferences(val line: Int, val col: Int, val symbolName: String) : EditorUiEvent
+    data object DismissReferences : EditorUiEvent
+    data class SelectLocation(val location: LspLocation) : EditorUiEvent
 }
 
 sealed interface EditorUiEffect {
-    data class ShowSnackbar(val message: String) : EditorUiEffect
+    data class ShowSnackbar(
+        val message: String,
+        val actionLabel: String? = null,
+        val onAction: (() -> Unit)? = null
+    ) : EditorUiEffect
     data class NavigateTo(val route: String) : EditorUiEffect
 }

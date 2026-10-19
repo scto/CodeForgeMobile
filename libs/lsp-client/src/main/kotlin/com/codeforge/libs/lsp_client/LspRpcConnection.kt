@@ -1,17 +1,17 @@
 // Modul: :libs:lsp-client
 package com.codeforge.libs.lsp_client
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.int
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -26,23 +26,34 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Kapselt die rohe JSON-RPC-2.0-Kommunikation mit einem Language-Server-Prozess
  * gemäß LSP-Spec: jede Nachricht besitzt einen "Content-Length: N"-Header, eine
- * Leerzeile, dann N Bytes UTF-8-kodiertes JSON. Läuft im :libs:lsp-client-Modul
- * innerhalb des App-Prozesses (der Server selbst läuft als separater Subprozess,
- * gestartet z.B. innerhalb der PRoot-Rootfs von :libs:terminal-engine).
+ * Leerzeile, dann N Bytes UTF-8-kodiertes JSON.
  */
-class LspRpcConnection(process: Process) {
+class LspRpcConnection(
+    private val output: OutputStream,
+    private val input: InputStream
+) {
 
-    private val output: OutputStream = BufferedOutputStream(process.outputStream)
-    private val input: InputStream = BufferedInputStream(process.inputStream)
+    constructor(process: Process) : this(
+        output = BufferedOutputStream(process.outputStream),
+        input = BufferedInputStream(process.inputStream)
+    )
 
     private val requestIdCounter = AtomicInteger(0)
     private val pendingRequests = ConcurrentHashMap<Int, CompletableDeferred<JsonObject>>()
 
     private var notificationHandler: ((method: String, params: JsonObject?) -> Unit)? = null
+    private var requestHandler: (suspend (method: String, id: JsonElement, params: JsonObject?) -> JsonElement?)? = null
+    private var connectionScope: CoroutineScope? = null
     private var readerJob: Job? = null
 
-    fun start(scope: CoroutineScope, onNotification: (method: String, params: JsonObject?) -> Unit) {
+    fun start(
+        scope: CoroutineScope,
+        onNotification: (method: String, params: JsonObject?) -> Unit,
+        onRequest: (suspend (method: String, id: JsonElement, params: JsonObject?) -> JsonElement?)? = null
+    ) {
+        connectionScope = scope
         notificationHandler = onNotification
+        requestHandler = onRequest
         readerJob = scope.launch(Dispatchers.IO) { readLoop() }
     }
 
@@ -58,8 +69,34 @@ class LspRpcConnection(process: Process) {
         val method = (message["method"] as? JsonPrimitive)?.content
 
         if (method != null) {
-            // Notification oder Server->Client-Request (z.B. textDocument/publishDiagnostics)
-            notificationHandler?.invoke(method, message["params"] as? JsonObject)
+            if (idElement != null) {
+                // Server->Client Request (z.B. workspace/applyEdit)
+                val handler = requestHandler
+                connectionScope?.launch(Dispatchers.IO) {
+                    try {
+                        val result = handler?.invoke(method, idElement, message["params"] as? JsonObject)
+                        val response = buildJsonObject {
+                            put("jsonrpc", "2.0")
+                            put("id", idElement)
+                            put("result", result ?: buildJsonObject { put("applied", false) })
+                        }
+                        writeMessage(output, response)
+                    } catch (e: Exception) {
+                        val errorResponse = buildJsonObject {
+                            put("jsonrpc", "2.0")
+                            put("id", idElement)
+                            put("error", buildJsonObject {
+                                put("code", -32603)
+                                put("message", e.message ?: "Internal error")
+                            })
+                        }
+                        writeMessage(output, errorResponse)
+                    }
+                }
+            } else {
+                // Notification (z.B. textDocument/publishDiagnostics)
+                notificationHandler?.invoke(method, message["params"] as? JsonObject)
+            }
             return
         }
 
@@ -103,7 +140,7 @@ class LspRpcConnection(process: Process) {
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
-        private fun readMessage(input: InputStream): JsonObject? {
+        fun readMessage(input: InputStream): JsonObject? {
             val headers = mutableMapOf<String, String>()
             while (true) {
                 val line = readHeaderLine(input) ?: return null
@@ -138,7 +175,7 @@ class LspRpcConnection(process: Process) {
             }
         }
 
-        private fun writeMessage(output: OutputStream, payload: JsonObject) {
+        fun writeMessage(output: OutputStream, payload: JsonObject) {
             val bodyText = json.encodeToString(JsonObject.serializer(), payload)
             val bodyBytes = bodyText.toByteArray(Charsets.UTF_8)
             val header = "Content-Length: ${bodyBytes.size}\r\n\r\n".toByteArray(Charsets.UTF_8)

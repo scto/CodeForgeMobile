@@ -56,8 +56,9 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 ### 🌿 5. Git (`:feature:git`, `:feature:settings`) ✅🧪
 * 🐙 JGit-Panel: Diff, Merge, Commit, Push/Pull, Graph, Stash, Tags, Rebase, Cherry-Pick, Revert, Reset, Amend, Blame, Hunk-weises Stage, Konflikt-Editor; Settings für Name/E-Mail/Token.
 
-### 🔌 6. Language Server & Plugins (`:libs:lsp-client`, `:libs:plugin-api`) 🟡
-* 🔌 LSP-Client (JSON-RPC) und Plugin-API; Beispiel-Plugins in `examples/` (Kotlin/Java). Ein Extensions-Manager mit Download und SHA-256-Prüfung existiert nur im lokalen Experimentzweig (`agy-tasks/16`).
+### 🔌 6. Language Server & Plugins (`:libs:lsp-client`, `:libs:plugin-api`) ✅🧪
+* 🔌 LSP-Client (JSON-RPC) mit Code-Vervollständigung, Hover, Formatierung, Diagnosen, Quick-Fixes/Code-Aktionen, atomarem dateiübergreifendem Umbenennen mit Vorschau & Undo, Dokumentstruktur (Outline) mit Fallback, Definition & Referenzen sowie Beantwortung von `workspace/applyEdit`. Siehe [docs/lsp-code-actions-rename-report.md](docs/lsp-code-actions-rename-report.md).
+* 🧩 Plugin-API mit Beispiel-Plugins in `examples/` (Kotlin/Java). Extensions-Manager in `feature:plugins` (Task 23).
 
 ### 📐 7. Indexierung & Dependency-Updater (`:libs:indexing-*`, `:libs:dependency-updater-*`) ✅
 * 🔄 Projektindexierung und Versions-Check (TOML-Katalog bzw. `build.gradle(.kts)` aller Module) mit Dialog Dismiss / Ask later / Update.

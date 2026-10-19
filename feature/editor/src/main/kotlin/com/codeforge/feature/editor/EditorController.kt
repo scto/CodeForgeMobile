@@ -73,6 +73,28 @@ class EditorController {
         editor.ensurePositionVisible(targetLine, targetColumn)
     }
 
+    /** Liefert 0-basierte (Zeile, Spalte) der aktuellen Cursorposition. */
+    fun getCursorLineAndColumn(): Pair<Int, Int>? = editorRef?.get()?.let { editor ->
+        val pos = editor.text.indexer.getCharPosition(editor.cursor.left)
+        pos.line to pos.column
+    }
+
+    /** Liefert das Wort unter dem Cursor (für Rename/Definition/References). */
+    fun getWordAtCursor(): String? = editorRef?.get()?.let { editor ->
+        val text = editor.text.toString()
+        val cursor = editor.cursor.left
+        if (cursor !in 0..text.length) return null
+        var start = cursor
+        while (start > 0 && (text[start - 1].isLetterOrDigit() || text[start - 1] == '_')) {
+            start--
+        }
+        var end = cursor
+        while (end < text.length && (text[end].isLetterOrDigit() || text[end] == '_')) {
+            end++
+        }
+        if (start < end) text.substring(start, end) else null
+    }
+
     /** Springt zu 0-basierter [line]/[column] und markiert [length] Zeichen (Projektsuche-Treffer). */
     fun jumpToMatch(line: Int, column: Int, length: Int) = withEditor { editor ->
         val l = line.coerceIn(0, (editor.text.lineCount - 1).coerceAtLeast(0))

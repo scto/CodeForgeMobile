@@ -1019,6 +1019,32 @@
     <string name="logcat_datei_nicht_gefunden">Datei nicht im Projekt gefunden: %1$s</string>
     <string name="logcat_teilen_titel">Logcat teilen</string>
 
+    <!-- LSP Code Actions, Rename, Outline (Task 31) -->
+    <string name="lsp_quick_fix">Quick-Fix</string>
+    <string name="lsp_quick_fixes_title">Quick-Fixes und Code-Aktionen</string>
+    <string name="lsp_no_code_actions">Keine Code-Aktionen verfügbar</string>
+    <string name="lsp_rename">Umbenennen</string>
+    <string name="lsp_rename_title">Symbol umbenennen</string>
+    <string name="lsp_rename_new_name">Neuer Name</string>
+    <string name="lsp_rename_preview_title">Umbenennen bestätigen</string>
+    <string name="lsp_rename_preview_summary">%1$d Änderung(en) in %2$d Datei(en)</string>
+    <string name="lsp_rename_applied">Umbenannt: %1$d Änderung(en) in %2$d Datei(en)</string>
+    <string name="lsp_rename_undo">Rückgängig</string>
+    <string name="lsp_rename_undone">Umbenennen rückgängig gemacht</string>
+    <string name="lsp_rename_failed">Umbenennen fehlgeschlagen: %1$s</string>
+    <string name="lsp_outline">Struktur</string>
+    <string name="lsp_outline_title">Dokument-Struktur</string>
+    <string name="lsp_outline_search">Symbole filtern…</string>
+    <string name="lsp_outline_empty">Keine Symbole gefunden</string>
+    <string name="lsp_definition">Gehe zu Definition</string>
+    <string name="lsp_definition_not_found">Keine Definition gefunden</string>
+    <string name="lsp_references">Verwendungen suchen</string>
+    <string name="lsp_references_title">Verwendungen</string>
+    <string name="lsp_references_not_found">Keine Verwendungen gefunden</string>
+    <string name="lsp_edit_rollback_failed">Änderung fehlgeschlagen, Änderungen zurückgerollt: %1$s</string>
+    <string name="lsp_overlapping_edits_rejected">Überlappende Änderungen in Datei %1$s abgelehnt</string>
+    <string name="lsp_unsupported_operation">Nicht unterstützte Dateioperation: %1$s</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

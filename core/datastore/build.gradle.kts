@@ -24,8 +24,8 @@ android {
 
 dependencies {
     implementation(project(":core:resources"))
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.datastore.proto)
+    api(libs.androidx.datastore.preferences)
+    api(libs.androidx.datastore.proto)
     api(libs.protobuf.javalite)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

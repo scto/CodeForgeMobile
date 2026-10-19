@@ -56,8 +56,9 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 ### 🌿 5. Git (`:feature:git`, `:feature:settings`) ✅🧪
 * 🐙 JGit panel: diff, merge, commit, push/pull, graph, stash, tags, rebase, cherry-pick, revert, reset, amend, blame, hunk-wise staging, conflict editor; settings for name/email/token.
 
-### 🔌 6. Language Server & Plugins (`:libs:lsp-client`, `:libs:plugin-api`) 🟡
-* 🔌 LSP client (JSON-RPC) and plugin API; example plugins in `examples/` (Kotlin/Java). An extensions manager with download and SHA-256 verification exists only in the local experiment branch (`agy-tasks/16`).
+### 🔌 6. Language Server & Plugins (`:libs:lsp-client`, `:libs:plugin-api`) ✅🧪
+* 🔌 LSP client (JSON-RPC) with code completion, hover, formatting, diagnostics, Quick-Fixes/Code Actions, atomic multi-file rename with preview & undo, document outline with fallback, definition & references, and `workspace/applyEdit` response support. See [docs/lsp-code-actions-rename-report.md](docs/lsp-code-actions-rename-report.md).
+* 🧩 Plugin API with example plugins in `examples/` (Kotlin/Java). Extensions manager in `feature:plugins` (Task 23).
 
 ### 📐 7. Indexing & Dependency Updater (`:libs:indexing-*`, `:libs:dependency-updater-*`) ✅
 * 🔄 Project indexing and version check (TOML catalog or `build.gradle(.kts)` of all modules) with a Dismiss / Ask later / Update dialog.

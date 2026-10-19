@@ -18,4 +18,7 @@ dependencies {
 
     // JSON-RPC-Nachrichten (LSP-Framing: Content-Length-Header + JSON-Body)
     implementation(libs.kotlinx.serialization.json)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

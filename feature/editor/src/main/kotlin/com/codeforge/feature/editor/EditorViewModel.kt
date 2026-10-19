@@ -7,6 +7,12 @@ package com.codeforge.feature.editor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.datastore.SettingsRepository
+import com.codeforge.core.domain.model.LspCodeAction
+import com.codeforge.core.domain.model.LspDocumentSymbol
+import com.codeforge.core.domain.model.LspLocation
+import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspRange
+import com.codeforge.core.domain.model.LspWorkspaceEdit
 import com.codeforge.core.domain.repository.ComposeSourceAnalyzer
 import com.codeforge.core.domain.repository.FileSystemRepository
 import com.codeforge.core.domain.repository.LspClientRepository
@@ -19,9 +25,12 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.feature.editor.lsp.LspCompletionProvider
 import com.codeforge.feature.editor.lsp.LspSessionController
+import com.codeforge.feature.editor.outline.SymbolOutlineExtractor
 import com.codeforge.feature.editor.textmate.TextMateAssetLoader
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import com.codeforge.libs.dependency_updater_api.DependencyUpdateRepository
+import com.codeforge.libs.lsp_client.LspWorkspaceEditApplier
+import com.codeforge.libs.lsp_client.WorkspaceEditException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +76,9 @@ class EditorViewModel @Inject constructor(
     /** Dokumentversion je Pfad, für LSP `textDocument/didChange` (versionierte Syncs). */
     private val documentVersions = mutableMapOf<String, Int>()
 
+    /** Zuletzt angewendete Rückgängig-Aktion (z. B. für Rename). */
+    private var lastUndoAction: (suspend () -> Unit)? = null
+
     /** Vom Composable konsumiert, um LSP-Completion-Vorschläge in [LspAwareLanguage] einzuspeisen. */
     val completionProvider = LspCompletionProvider(lspClient) { _uiState.value.activeFile?.path }
 
@@ -80,12 +92,83 @@ class EditorViewModel @Inject constructor(
         observeExternalChanges()
         observeDirectoryChanges()
         observeUpdateAnnotations()
+        observeServerCapabilities()
+        setupApplyEditHandler()
     }
 
     private val projectRoot = MutableStateFlow<String?>(null)
 
     /** Zuletzt gemeldete, nicht dismissed Updates des Projekts (Basis für „Update All“). */
     private var pendingUpdates: List<DependencyUpdate> = emptyList()
+
+    private fun observeServerCapabilities() = viewModelScope.launch {
+        lspClient.serverCapabilities.collect { caps ->
+            _uiState.update { it.copy(serverCapabilities = caps) }
+        }
+    }
+
+    private fun setupApplyEditHandler() {
+        lspClient.applyEditHandler = { edit ->
+            handleWorkspaceEditFromLsp(edit)
+        }
+    }
+
+    private suspend fun handleWorkspaceEditFromLsp(edit: LspWorkspaceEdit): Boolean {
+        val applier = createApplier()
+        return applier.apply(edit).fold(
+            onSuccess = { result ->
+                fileSyncBridge.notifyExternalChange(result.changedFiles)
+                lastUndoAction = result.undo
+                _effect.emit(
+                    EditorUiEffect.ShowSnackbar(
+                        message = Res.string(R.string.lsp_rename_applied, result.totalEdits, result.changedFiles.size),
+                        actionLabel = Res.string(R.string.lsp_rename_undo),
+                        onAction = {
+                            viewModelScope.launch {
+                                lastUndoAction?.invoke()
+                                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_rename_undone)))
+                            }
+                        }
+                    )
+                )
+                true
+            },
+            onFailure = { e ->
+                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_edit_rollback_failed, e.message.orEmpty())))
+                false
+            }
+        )
+    }
+
+    private fun createApplier(): LspWorkspaceEditApplier {
+        return LspWorkspaceEditApplier(
+            getOpenFileContent = { path ->
+                val norm = normalize(path)
+                _uiState.value.openFiles.firstOrNull { normalize(it.path) == norm }?.content
+            },
+            updateOpenFileContent = { path, newContent ->
+                updateBufferForPath(path, newContent)
+            }
+        )
+    }
+
+    private fun updateBufferForPath(path: String, newContent: String) {
+        val norm = normalize(path)
+        _uiState.update { s ->
+            val updated = s.openFiles.map { f ->
+                if (normalize(f.path) == norm) {
+                    f.copy(content = newContent, isDirty = true)
+                } else f
+            }
+            s.copy(openFiles = updated)
+        }
+        val nextVer = (documentVersions[path] ?: 1) + 1
+        documentVersions[path] = nextVer
+        viewModelScope.launch { lspClient.didChange(path, newContent, nextVer) }
+        if (_uiState.value.activeFile?.let { normalize(it.path) == norm } == true) {
+            publishActiveFileToBridge()
+        }
+    }
 
     /**
      * Berechnet die Update-Chips für die aktive Datei aus dem LIVE-Puffer (leicht verzögert, damit
@@ -162,7 +245,6 @@ class EditorViewModel @Inject constructor(
                 .onSuccess {
                     _uiState.update { s ->
                         s.copy(openFiles = s.openFiles.map { f ->
-                            // nur als sauber markieren, wenn der Puffer seitdem nicht weiter geändert wurde
                             if (f.path == file.path && f.content == file.content) f.copy(isDirty = false) else f
                         })
                     }
@@ -204,16 +286,10 @@ class EditorViewModel @Inject constructor(
 
     private fun normalize(path: String): String = File(path).absoluteFile.normalize().path
 
-    /**
-     * Konsumiert Klicks aus dem Bonsai-Dateibaum im NavigationDrawer (:feature:filetree),
-     * verdrahtet über :core:navigation — siehe [OpenFileRequestBridge]-KDoc zur Begründung
-     * dieser Entkopplung (keine direkte :feature:*→:feature:*-Abhängigkeit erlaubt).
-     */
     private fun observeOpenFileRequests() = viewModelScope.launch {
         openFileRequestBridge.openRequests.collect { path -> openFile(path) }
     }
 
-    /** Sprung aus der Projektsuche: Ziel merken; [EditorRoute] positioniert den Cursor, sobald die Datei aktiv ist. */
     private fun observeJumpRequests() = viewModelScope.launch {
         openFileRequestBridge.jumpRequests.collect { target ->
             _uiState.update { it.copy(pendingJump = target) }
@@ -242,7 +318,6 @@ class EditorViewModel @Inject constructor(
                     )
                 )
             }
-
         }
     }
 
@@ -298,8 +373,222 @@ class EditorViewModel @Inject constructor(
             EditorUiEvent.ToggleRegexSearch -> _uiState.update { it.copy(isRegexSearch = !it.isRegexSearch) }
             EditorUiEvent.ToggleWholeWordSearch -> _uiState.update { it.copy(isWholeWordSearch = !it.isWholeWordSearch) }
             EditorUiEvent.JumpHandled -> _uiState.update { it.copy(pendingJump = null) }
-            is EditorUiEvent.InsertText -> { /* Direkte View-Ausführung über EditorController; Puffer wird via TextChanged aktualisiert */ }
+            is EditorUiEvent.InsertText -> { }
+
+            // LSP Task 31 Events
+            is EditorUiEvent.TriggerQuickFix -> triggerQuickFix(event.line, event.col)
+            EditorUiEvent.DismissQuickFix -> _uiState.update { it.copy(isCodeActionsSheetVisible = false) }
+            is EditorUiEvent.ApplyCodeAction -> applyCodeAction(event.action)
+
+            is EditorUiEvent.TriggerRename -> triggerRename(event.line, event.col, event.fallbackName)
+            is EditorUiEvent.RenameNameChanged -> _uiState.update { s ->
+                s.copy(renameDialog = s.renameDialog?.copy(newName = event.newName))
+            }
+            EditorUiEvent.RequestRenamePreview -> requestRenamePreview()
+            EditorUiEvent.ConfirmRename -> confirmRename()
+            EditorUiEvent.DismissRename -> _uiState.update { it.copy(renameDialog = null) }
+            EditorUiEvent.UndoLastRename -> undoLastRename()
+
+            EditorUiEvent.ToggleOutline -> toggleOutline()
+            is EditorUiEvent.OutlineFilterChanged -> _uiState.update { it.copy(outlineFilter = event.query) }
+            is EditorUiEvent.SelectOutlineSymbol -> {
+                _uiState.update { it.copy(isOutlineVisible = false) }
+                val active = _uiState.value.activeFile
+                if (active != null) {
+                    viewModelScope.launch {
+                        openFileRequestBridge.requestOpenAt(
+                            active.path,
+                            event.symbol.selectionRange.start.line + 1,
+                            event.symbol.selectionRange.start.character + 1
+                        )
+                    }
+                }
+            }
+
+            is EditorUiEvent.GoToDefinition -> goToDefinition(event.line, event.col)
+            is EditorUiEvent.FindReferences -> findReferences(event.line, event.col, event.symbolName)
+            EditorUiEvent.DismissReferences -> _uiState.update { it.copy(isReferencesSheetVisible = false) }
+            is EditorUiEvent.SelectLocation -> {
+                _uiState.update { it.copy(isReferencesSheetVisible = false) }
+                val path = event.location.uri.removePrefix("file://")
+                viewModelScope.launch {
+                    openFileRequestBridge.requestOpenAt(
+                        path,
+                        event.location.range.start.line + 1,
+                        event.location.range.start.character + 1
+                    )
+                }
+            }
         }
+    }
+
+    private fun triggerQuickFix(line: Int, col: Int) = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        val pos = LspPosition(line, col)
+        val range = LspRange(pos, pos)
+        val diagnosticsOnLine = _uiState.value.activeDiagnostics.filter {
+            it.range.start.line <= line && line <= it.range.end.line
+        }
+        val result = lspClient.requestCodeActions(active.path, range, diagnosticsOnLine)
+        result.onSuccess { actions ->
+            _uiState.update { it.copy(codeActions = actions, isCodeActionsSheetVisible = true) }
+        }.onFailure {
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_no_code_actions)))
+        }
+    }
+
+    private fun applyCodeAction(action: LspCodeAction) = viewModelScope.launch {
+        _uiState.update { it.copy(isCodeActionsSheetVisible = false) }
+        var handled = false
+        val edit = action.edit
+        if (edit != null) {
+            handleWorkspaceEditFromLsp(edit)
+            handled = true
+        }
+        val command = action.command
+        if (command != null) {
+            lspClient.executeCommand(command.command, command.arguments)
+            handled = true
+        }
+        if (!handled) {
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_no_code_actions)))
+        }
+    }
+
+    private fun triggerRename(line: Int, col: Int, fallbackName: String) = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        val pos = LspPosition(line, col)
+        var nameToPropose = fallbackName
+        lspClient.requestPrepareRename(active.path, pos).onSuccess { prepareResult ->
+            if (prepareResult != null && prepareResult.placeholder.isNotBlank()) {
+                nameToPropose = prepareResult.placeholder
+            }
+        }
+        _uiState.update {
+            it.copy(
+                renameDialog = RenameDialogState(
+                    path = active.path,
+                    position = pos,
+                    currentName = nameToPropose,
+                    newName = nameToPropose
+                )
+            )
+        }
+    }
+
+    private fun requestRenamePreview() = viewModelScope.launch {
+        val state = _uiState.value.renameDialog ?: return@launch
+        if (state.newName.isBlank() || state.newName == state.currentName) return@launch
+
+        lspClient.requestRename(state.path, state.position, state.newName)
+            .onSuccess { edit ->
+                if (edit == null || (edit.changes.isEmpty() && edit.documentChanges.isEmpty())) {
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_rename_failed, "No changes returned")))
+                    return@launch
+                }
+                val allEdits = edit.allTextEdits()
+                val totalEditCount = allEdits.values.sumOf { it.size }
+                val totalFileCount = allEdits.keys.size
+                _uiState.update { s ->
+                    s.copy(
+                        renameDialog = s.renameDialog?.copy(
+                            pendingEdit = edit,
+                            pendingFileCount = totalFileCount,
+                            pendingEditCount = totalEditCount,
+                            isPreview = true
+                        )
+                    )
+                }
+            }
+            .onFailure {
+                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_rename_failed, it.message.orEmpty())))
+            }
+    }
+
+    private fun confirmRename() = viewModelScope.launch {
+        val state = _uiState.value.renameDialog ?: return@launch
+        val edit = state.pendingEdit ?: return@launch
+        _uiState.update { it.copy(renameDialog = null) }
+        handleWorkspaceEditFromLsp(edit)
+    }
+
+    private fun undoLastRename() = viewModelScope.launch {
+        val undo = lastUndoAction ?: return@launch
+        undo.invoke()
+        lastUndoAction = null
+        _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_rename_undone)))
+    }
+
+    private fun toggleOutline() = viewModelScope.launch {
+        val current = _uiState.value.isOutlineVisible
+        if (current) {
+            _uiState.update { it.copy(isOutlineVisible = false) }
+            return@launch
+        }
+
+        val active = _uiState.value.activeFile ?: return@launch
+        _uiState.update { it.copy(isLoadingOutline = true, isOutlineVisible = true) }
+
+        var symbols: List<LspDocumentSymbol> = emptyList()
+        val caps = _uiState.value.serverCapabilities
+        if (caps?.documentSymbolProvider == true) {
+            symbols = lspClient.requestDocumentSymbols(active.path).getOrDefault(emptyList())
+        }
+
+        if (symbols.isEmpty()) {
+            symbols = SymbolOutlineExtractor.extract(active.path, active.content)
+        }
+
+        _uiState.update {
+            it.copy(
+                outlineSymbols = symbols,
+                isLoadingOutline = false
+            )
+        }
+    }
+
+    private fun goToDefinition(line: Int, col: Int) = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        val pos = LspPosition(line, col)
+        lspClient.requestDefinition(active.path, pos)
+            .onSuccess { locations ->
+                if (locations.isEmpty()) {
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_definition_not_found)))
+                } else {
+                    val first = locations.first()
+                    val targetPath = first.uri.removePrefix("file://")
+                    openFileRequestBridge.requestOpenAt(
+                        targetPath,
+                        first.range.start.line + 1,
+                        first.range.start.character + 1
+                    )
+                }
+            }
+            .onFailure {
+                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_definition_not_found)))
+            }
+    }
+
+    private fun findReferences(line: Int, col: Int, symbolName: String) = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        val pos = LspPosition(line, col)
+        lspClient.requestReferences(active.path, pos)
+            .onSuccess { locations ->
+                if (locations.isEmpty()) {
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_references_not_found)))
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            referencesList = locations,
+                            referencesSymbol = symbolName,
+                            isReferencesSheetVisible = true
+                        )
+                    }
+                }
+            }
+            .onFailure {
+                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_references_not_found)))
+            }
     }
 
     private fun selectTab(index: Int) {
@@ -381,8 +670,6 @@ class EditorViewModel @Inject constructor(
             if (s.openFiles.isEmpty()) return@update s
             val updated = s.openFiles.toMutableList()
             val current = updated[s.activeFileIndex]
-            // sora feuert ContentChangeEvent auch bei programmatischem setText (Tab-Wechsel/Reload):
-            // identischer Inhalt ist keine Benutzeränderung und darf nicht „dirty“ markieren
             if (current.content == text) return@update s
             updated[s.activeFileIndex] = current.copy(content = text, isDirty = true)
             s.copy(openFiles = updated)
@@ -415,7 +702,6 @@ class EditorViewModel @Inject constructor(
             }
     }
 
-
     private fun languageIdFor(path: String): String = when (path.substringAfterLast('.', "").lowercase()) {
         "kt", "kts" -> "kotlin"
         "java" -> "java"
@@ -436,11 +722,6 @@ class EditorViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Erkennt @Composable-Funktionen in der aktiven Datei und meldet das Ergebnis an die
-     * :core:navigation-Bridge — von dort konsumiert :feature:composepreview sowie der
-     * :app-NavHost (zur Entscheidung, ob ein "Preview"-Tab neben dem Editor erscheint).
-     */
     private fun publishActiveFileToBridge() {
         val active = _uiState.value.activeFile
         if (active == null || !active.path.endsWith(".kt")) {

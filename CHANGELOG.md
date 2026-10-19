@@ -11,7 +11,26 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-### 📋 Logcat-Ansicht (Task 30)
+### 💡 LSP Code-Aktionen, Umbenennen & Struktur (Task 31)
+
+* **LSP-Protokoll & Modelle (`:core:domain`)**:
+  * Modelle `LspSymbolKind`, `LspDocumentSymbol`, `LspLocation`, `LspTextEdit`, `LspTextDocumentEdit`, `LspFileOperation`, `LspDocumentChange`, `LspWorkspaceEdit`, `LspCommand`, `LspCodeAction`, `LspPrepareRenameResult`, `LspServerCapabilities`.
+  * Erweiterte Methoden in `LspClientRepository`: `requestCodeActions`, `requestPrepareRename`, `requestRename`, `requestDocumentSymbols`, `requestDefinition`, `requestReferences`, `executeCommand`.
+  * Reaktivität auf `serverCapabilities` aus `initializeResult` und `applyEditHandler`-Callback.
+* **JSON-RPC & WorkspaceEdit-Engine (`:libs:lsp-client`)**:
+  * `LspRpcConnection`: Beantwortung eingehender `workspace/applyEdit` Server-Requests mit bidirektionalem JSON-RPC `{ applied: true }`.
+  * `LspJsonMapper`: UTF-16 Code-Unit-zu-Offset-Umrechnung (validiert für Emojis/Surrogate-Pairs und Umlaute), Validierung und absteigende Ausführung von `LspTextEdit`s.
+  * `LspWorkspaceEditApplier`: Atomares Anwenden von WorkspaceEdits über mehrere Dateien mit In-Memory-Rollback-Sicherung bei Fehlern und Undo-Funktion.
+* **UI im Editor (`:feature:editor`)**:
+  * **Quick-Fix Glühbirne:** Icon in der Toolbar am Cursor/bei Diagnosen, Shortcut Alt+Eingabe, `QuickFixSheet` mit CodeAction-Details.
+  * **Umbenennen (Rename):** Dialog mit Vorbelegung des aktuellen Namens (`prepareRename`), Vorschau ("n Änderungen in m Dateien") mit Sicherheitsabfrage vor dem Anwenden und Undo-Snackbar.
+  * **Struktur-Ansicht (Outline):** Hierarchischer Symbolbaum mit `SymbolKind`-Icons im BottomSheet, Suchfeld zur Symbolfilterung und Klick-Navigation zur Position; `SymbolOutlineExtractor` als Fallback für Kotlin, Java, Python, Rust und JSON.
+  * **Navigation:** „Gehe zu Definition“ mit automatischem Öffnen und Sprung über `OpenFileRequestBridge` sowie „Verwendungen finden“ mit interaktivem `ReferencesSheet`.
+  * Dynamische Steuerung aller LSP-UI-Elemente anhand der vom Server gemeldeten `ServerCapabilities`.
+* **Lokalisierung & Tests**:
+  * 24 neue zweisprachige Strings (`lsp_*`) in `values/` und `values-de/`.
+  * Umfassende JVM-Unit-Tests in `LspJsonMapperTest`, `LspWorkspaceEditApplierTest`, `LspFakeServerTest` (Piped Streams) und `EditorViewModelLspTest`.
+  * Dokumentation in [`docs/lsp-code-actions-rename-report.md`](docs/lsp-code-actions-rename-report.md).
 
 * **Spike & Quellen-Transparenz**:
   * Vor- und Nachteile der Log-Quellen `OWN_PROCESS` (Standard-Fallback), `READ_LOGS_PERMISSION` (per ADB gewährt) und `ADB_LOOPBACK` (Wireless ADB via Termux) analysiert.

@@ -35,10 +35,18 @@
 | **28** | `28-gradle-build-output-problems.md` | ✅ `3399403` | Gradle-Build-Ausgabe und Problemfenster: Entscheidung 28.0 (Option A Termux-Prozess), Domain-Modelle `BuildProblem` & `BuildSession`, reiner Kotlin-Parser `GradleOutputParser` mit 5 Fixtures, `CircularLineBuffer` (20.000 Zeilen), `ProcessGradleBuildRepository`, `BuildForegroundService`, UI-Modul `:feature:build` mit MVI/Hilt, `OutputTab`, `ProblemsTab` mit Klick-Navigation via `OpenFileRequestBridge`, Integration in `ProjectWorkspaceRoute` (`docs/gradle-build-output-problems-report.md`) |
 | **29** | `29-install-and-run-apk.md` | ✅ `a35aee7` | APK installieren und starten: `ApkMetadataParser`, `PackageInstaller`-Session, Statuscode-Mapping, Selbstaktualisierungs-Schutz, „Bauen & Starten“-Ablauf (`docs/install-and-run-apk-report.md`) |
 | **30** | `30-logcat-viewer.md` | ✅ `9c0215f` | Logcat-Ansicht: Filter nach Level, Paket & Tag, Erkennung von Abstürzen mit Klick-Navigation zum Stacktrace im Sora Editor, 3 Quellen (`OWN_PROCESS`, `READ_LOGS_PERMISSION`, `ADB_LOOPBACK`), 50k Ringpuffer (`docs/logcat-viewer-report.md`) |
+| **31** | `31-lsp-code-actions-rename.md` | ✅ erledigt | LSP Code-Aktionen, Umbenennen (atomar, Multi-File), Struktur-Ansicht (Outline mit Fallback), Definition & Referenzen, Beantwortung von `workspace/applyEdit` (`docs/lsp-code-actions-rename-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
+
+### Task 31 – Code-Aktionen, Umbenennen und Struktur über LSP (✅ erledigt)
+1. **Protokoll & Modelle (31.1)**: `LspCodeAction`, `LspWorkspaceEdit`, `LspTextEdit`, `LspDocumentSymbol`, `LspLocation`, `LspServerCapabilities`; Methoden `requestCodeActions`, `requestPrepareRename`, `requestRename`, `requestDocumentSymbols`, `requestDefinition`, `requestReferences`, `executeCommand` in `core:domain` & `libs:lsp-client`.
+2. **Bidirektionales JSON-RPC & Capabilities (31.1)**: Beantwortung eingehender Server-Anfragen `workspace/applyEdit` mit `{ applied: true }`; Auslesen von `ServerCapabilities` aus `initializeResult` und dynamisches Ausblenden nicht unterstützter UI-Elemente.
+3. **WorkspaceEdit anwenden (31.2)**: `LspWorkspaceEditApplier` mit Validierung, Puffer-Edits bei offenen Dateien, Dateisystem-Edits bei geschlossenen Dateien, Vorab-Sicherung und atomarem Rollback bei Fehlern; UTF-16 Code-Unit Offset-Umrechnung (validiert mit Emojis und Umlauten).
+4. **UI im Editor (31.3)**: Glühbirnen-Symbol am Cursor/bei Diagnosen mit `QuickFixSheet`, Alt+Eingabe Shortcut; Rename-Dialog mit Namensvorschlag, Vorschau ("n Änderungen in m Dateien") und Undo-Snackbar; Struktur-Ansicht (Outline) im BottomSheet mit SymbolKind-Icons, Suchfilter und `SymbolOutlineExtractor`-Fallback für Kotlin/Java/Python/Rust/JSON; Definition & Referenzen Sheets.
+5. **Tests & Doku (31.4)**: Fake JSON-RPC Server über Piped Streams (`LspFakeServerTest`), UTF-16- & Overlap-Tests (`LspJsonMapperTest`), atomare Rollback- & Undo-Tests (`LspWorkspaceEditApplierTest`), ViewModel-Tests (`EditorViewModelLspTest`); 965 Strings zweisprachig; Bericht in `docs/lsp-code-actions-rename-report.md`.
 
 ### Task 30 – Logcat-Ansicht (✅ erledigt)
 1. **Spike & Quellen (30.0)**: Dokumentation der Vor-/Nachteile von `OWN_PROCESS`, `READ_LOGS_PERMISSION` und `ADB_LOOPBACK`. Permission `android.permission.READ_LOGS` im Manifest ergänzt. Transparenter Quell-Auswahldialog `LogcatSourceDialog` mit Terminal-Befehlen.
