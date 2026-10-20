@@ -229,6 +229,66 @@ fun SoraCodeEditor(
                     overlayTick++
                 }
                 subscribeEvent<ScrollEvent> { _, _ -> overlayTick++ }
+
+                // --- Snippet-Variablen-Resolver ($TM_FILENAME, $PACKAGE, $CLASSNAME, $CURRENT_YEAR, $CLIPBOARD) ---
+                runCatching {
+                    snippetController.fileVariableResolver = object : io.github.rosemoe.sora.widget.snippet.variable.FileBasedSnippetVariableResolver() {
+                        override fun getResolvableNames(): Array<String> = arrayOf(
+                            "TM_FILENAME", "TM_FILENAME_BASE", "TM_DIRECTORY", "TM_FILEPATH", "RELATIVE_PATH",
+                            "PACKAGE", "CLASSNAME", "CURRENT_YEAR", "CLIPBOARD"
+                        )
+
+                        override fun resolve(name: String): String {
+                            val file = java.io.File(path)
+                            return when (name) {
+                                "TM_FILENAME" -> file.name
+                                "TM_FILENAME_BASE" -> file.name.substringBeforeLast('.')
+                                "TM_DIRECTORY" -> file.parent.orEmpty()
+                                "TM_FILEPATH" -> path
+                                "RELATIVE_PATH" -> path
+                                "CLASSNAME" -> com.codeforge.core.domain.model.SnippetVariableResolver.deriveClassName(path)
+                                "PACKAGE" -> com.codeforge.core.domain.model.SnippetVariableResolver.derivePackageName(path)
+                                "CURRENT_YEAR" -> java.time.Year.now().value.toString()
+                                "CLIPBOARD" -> {
+                                    val clip = ctx.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                                    clip?.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
+                                }
+                                else -> ""
+                            }
+                        }
+                    }
+
+                    snippetController.workspaceVariableResolver = object : io.github.rosemoe.sora.widget.snippet.variable.WorkspaceBasedSnippetVariableResolver() {
+                        override fun resolve(name: String): String {
+                            val root = java.io.File(path).parent.orEmpty()
+                            return when (name) {
+                                "WORKSPACE_NAME" -> java.io.File(root).name
+                                "WORKSPACE_FOLDER" -> root
+                                else -> ""
+                            }
+                        }
+                    }
+                }
+
+                // --- Snippet Tabstopp-Navigation (Tab/Shift+Tab, Esc beendet) ---
+                subscribeEvent<io.github.rosemoe.sora.event.EditorKeyEvent> { event, _ ->
+                    if (snippetController.isInSnippet()) {
+                        if (event.keyCode == android.view.KeyEvent.KEYCODE_TAB && event.eventType == io.github.rosemoe.sora.event.EditorKeyEvent.Type.DOWN) {
+                            if (event.isShiftPressed) {
+                                snippetController.shiftToPreviousTabStop()
+                            } else {
+                                snippetController.shiftToNextTabStop()
+                            }
+                            event.intercept()
+                            event.result(true)
+                        } else if (event.keyCode == android.view.KeyEvent.KEYCODE_ESCAPE && event.eventType == io.github.rosemoe.sora.event.EditorKeyEvent.Type.DOWN) {
+                            snippetController.stopSnippet()
+                            event.intercept()
+                            event.result(true)
+                        }
+                    }
+                }
+
                 overlayEditor = this
 
                 controller.attach(this)

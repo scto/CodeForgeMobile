@@ -60,6 +60,7 @@ Repo-Stand: `adb101f`. ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen
 | 30 | `30-logcat-viewer.md` | ✅ `293fdc6` | Logcat-Ansicht: Filter nach Level, Paket & Tag, Erkennung von Abstürzen mit Klick-Navigation zum Stacktrace im Sora Editor, 3 Quellen (`OWN_PROCESS`, `READ_LOGS_PERMISSION`, `ADB_LOOPBACK`), 50k Ringpuffer (`docs/logcat-viewer-report.md`) |
 | 31 | `31-lsp-code-actions-rename.md` | ✅ `25af384` | LSP Code-Aktionen, Umbenennen (atomar, Multi-File), Struktur-Ansicht (Outline mit Fallback), Definition & Referenzen, Beantwortung von `workspace/applyEdit` (`docs/lsp-code-actions-rename-report.md`) |
 | 32 | `32-unified-formatter.md` | ✅ `ff4ff41` | Einheitlicher „Formatieren“-Befehl mit 3-Stufen-Fallback (LSP → CLI-Prozess `ktlint`/`google-java-format` → Built-in `CodeFormatter`), `.editorconfig`, Format-on-Save, Cursor-/Scroll-Erhalt (`docs/unified-formatter-report.md`) |
+| 33 | `33-snippets-live-templates.md` | ✅ `HEAD` | Code-Snippets & Live-Templates: Vorlagen mit Tabstopps (`$1`, `$0`), Navigation via Tab/Shift+Tab/Esc in sora-editor 0.23.4, dynamische Variablen (`$PACKAGE`, `$CLASSNAME`, etc.), reiner Kotlin-Parser mit Zeilen-/Spaltenvalidierung, VS-Code JSON Import/Export & Einstellungs-UI (`docs/snippets-live-templates-report.md`) |
 
 ## Nächste Schritte
 

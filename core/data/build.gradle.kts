@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":libs:code-tools"))
 
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.hilt.android)

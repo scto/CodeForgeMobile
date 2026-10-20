@@ -1063,6 +1063,38 @@
     <string name="settings_format_on_save_xml_desc">Format .xml files upon saving</string>
     <string name="settings_format_on_save_json_desc">Format .json files upon saving</string>
 
+    <!-- Snippets and Live Templates (Task 33) -->
+    <string name="snippets_title">Snippets &amp; Live-Templates</string>
+    <string name="snippets_add">Add Snippet</string>
+    <string name="snippets_edit">Edit Snippet</string>
+    <string name="snippets_delete">Delete</string>
+    <string name="snippets_delete_confirm">Delete snippet \"%1$s\"?</string>
+    <string name="snippets_reset_defaults">Reset to Defaults</string>
+    <string name="snippets_reset_confirm">Reset all snippets to default templates? Custom snippets will be deleted.</string>
+    <string name="snippets_import">Import</string>
+    <string name="snippets_export">Export</string>
+    <string name="snippets_import_title">Import Snippets (VS Code JSON)</string>
+    <string name="snippets_export_title">Export Snippets (VS Code JSON)</string>
+    <string name="snippets_import_hint">Paste VS Code snippet JSON here…</string>
+    <string name="snippets_import_success">%1$d snippets imported successfully</string>
+    <string name="snippets_export_copied">Snippets copied to clipboard</string>
+    <string name="snippets_scope">Scope (Languages)</string>
+    <string name="snippets_scope_hint">e.g. kotlin, java, xml (empty = all)</string>
+    <string name="snippets_prefix">Prefix (Shortcut)</string>
+    <string name="snippets_name">Name</string>
+    <string name="snippets_description">Description</string>
+    <string name="snippets_body">Template Body</string>
+    <string name="snippets_syntax_valid">Syntax valid</string>
+    <string name="snippets_syntax_error">Syntax error at line %1$d, column %2$d: %3$s</string>
+    <string name="snippets_builtin_badge">Built-in</string>
+    <string name="snippets_custom_badge">Custom</string>
+    <string name="snippets_all_filter">All</string>
+    <string name="snippets_search_hint">Search snippets…</string>
+    <string name="snippets_empty">No snippets found</string>
+    <string name="snippets_insert_variable">Insert Variable</string>
+    <string name="settings_editor_snippets">Snippets &amp; Live-Templates</string>
+    <string name="settings_editor_snippets_desc">Manage code shortcuts, templates and variables</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

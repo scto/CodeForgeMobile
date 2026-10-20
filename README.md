@@ -41,6 +41,7 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 * 🧩 Overlays: version hints (`4.0.1 → 4.0.3`) in TOML catalogs with Update/Update All, color swatches next to color values.
 * 🔎 Find & replace (file and project, regex/case/word) 🧪, formatter/highlighter logic 🧪 (`:libs:code-tools`).
 * 🧹 **Unified Code Formatter** 🧪: Single action for document & range formatting across Kotlin, Java, XML, and JSON with 3-tier strategy (LSP → CLI `ktlint`/`google-java-format` with 10s timeout & syntax guard → built-in `CodeFormatter` fallback), `.editorconfig` resolution, format-on-save per language, and cursor/scroll position preservation (see [docs/unified-formatter-report.md](docs/unified-formatter-report.md)).
+* ⚡ **Code Snippets & Live-Templates** 🧪: Keyboard shortcuts (`fun`, `composable`, `fori`, `linearlayout` etc.) in autocompletion, tabstop navigation (`Tab`/`Shift+Tab`/`Esc`), dynamic variable resolution (`$TM_FILENAME`, `$PACKAGE`, `$CLASSNAME`, etc.), pure Kotlin validator with line/column tracking, VS Code JSON import/export, and snippet management UI in Settings (see [docs/snippets-live-templates-report.md](docs/snippets-live-templates-report.md)).
 
 ### 💻 2. Terminal & Environment (`:feature:terminal`, `:libs:terminal-engine`, `:libs:termux-*`) ✅
 * 🐚 A real Termux shell (vendored from `scto/AndroidIDE`, package `com.codeforge`).

@@ -28,6 +28,7 @@ import com.codeforge.feature.settings.GitSettingsRoute
 import com.codeforge.feature.settings.SettingsHubRoute
 import com.codeforge.feature.settings.TerminalSettingsRoute
 import com.codeforge.feature.settings.extensions.ExtensionsRoute
+import com.codeforge.feature.settings.snippets.SnippetSettingsRoute
 import com.codeforge.feature.terminal.TerminalRoute
 import com.codeforge.feature.themebuilder.ThemeBuilderRoute
 import com.codeforge.feature.welcome.WelcomeRoute
@@ -41,6 +42,7 @@ internal object Routes {
     const val SETTINGS = "settings"
     const val SETTINGS_THEME = "settings_theme"
     const val SETTINGS_EDITOR = "settings_editor"
+    const val SETTINGS_SNIPPETS = "settings_snippets"
     const val SETTINGS_TERMINAL = "settings_terminal"
     const val SETTINGS_SDK_MANAGER = "settings_sdk_manager"
     const val SETTINGS_PLUGINS = "settings_plugins"
@@ -148,7 +150,14 @@ fun CodeForgeNavHost(
             ThemeBuilderRoute()
         }
         composable(Routes.SETTINGS_EDITOR) {
-            EditorSettingsRoute()
+            EditorSettingsRoute(
+                onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) }
+            )
+        }
+        composable(Routes.SETTINGS_SNIPPETS) {
+            SnippetSettingsRoute(
+                onBack = { navController.popBackStack() }
+            )
         }
         composable(Routes.SETTINGS_TERMINAL) {
             TerminalSettingsRoute()

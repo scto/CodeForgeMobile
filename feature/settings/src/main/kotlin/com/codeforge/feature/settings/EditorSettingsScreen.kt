@@ -27,6 +27,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -35,10 +38,16 @@ import com.codeforge.core.resources.stringRes
 @Composable
 fun EditorSettingsRoute(
     modifier: Modifier = Modifier,
+    onNavigateToSnippets: () -> Unit = {},
     viewModel: EditorSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    EditorSettingsScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
+    EditorSettingsScreen(
+        modifier = modifier,
+        uiState = uiState,
+        onNavigateToSnippets = onNavigateToSnippets,
+        onEvent = viewModel::onEvent
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +55,7 @@ fun EditorSettingsRoute(
 private fun EditorSettingsScreen(
     modifier: Modifier = Modifier,
     uiState: EditorSettingsUiState,
+    onNavigateToSnippets: () -> Unit = {},
     onEvent: (EditorSettingsUiEvent) -> Unit
 ) {
     Scaffold(
@@ -53,6 +63,31 @@ private fun EditorSettingsScreen(
         topBar = { TopAppBar(title = { Text(stringRes(R.string.common_editor)) }) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onNavigateToSnippets
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringRes(R.string.settings_editor_snippets), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringRes(R.string.settings_editor_snippets_desc),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = stringRes(R.string.settings_editor_snippets)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),

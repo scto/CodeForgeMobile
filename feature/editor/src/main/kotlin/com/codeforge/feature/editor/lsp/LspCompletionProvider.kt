@@ -10,11 +10,14 @@ package com.codeforge.feature.editor.lsp
 
 import com.codeforge.core.domain.model.LspCompletionItem
 import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.Snippet
 import com.codeforge.core.domain.repository.LspClientRepository
+import com.codeforge.core.domain.repository.SnippetRepository
 import kotlinx.coroutines.runBlocking
 
 class LspCompletionProvider(
     private val lspClient: LspClientRepository,
+    private val snippetRepository: SnippetRepository? = null,
     private val activePathProvider: () -> String?
 ) {
     /**
@@ -27,6 +30,16 @@ class LspCompletionProvider(
         return runBlocking {
             lspClient.requestCompletion(path, LspPosition(line, column))
                 .getOrDefault(emptyList())
+        }
+    }
+
+    /**
+     * Liefert alle für [languageId] aktiven Snippets / Live-Templates.
+     */
+    fun fetchSnippets(languageId: String): List<Snippet> {
+        val repo = snippetRepository ?: return emptyList()
+        return runBlocking {
+            repo.getSnippetsForLanguage(languageId)
         }
     }
 }

@@ -58,6 +58,13 @@ object EditorLanguageFactory {
         // aktuellen Dokument). Die LSP-gestützte Vervollständigung (Snippets, Member-Access)
         // wird zusätzlich darüber gelegt, siehe [LspAwareLanguage] / [SoraCodeEditor].
         val base = TextMateLanguage.create(languageType.scopeName, true)
-        return if (completionProvider != null) LspAwareLanguage(base, completionProvider) else base
+        val languageId = when (languageType) {
+            EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
+            EditorLanguageType.JAVA -> "java"
+            EditorLanguageType.XML -> "xml"
+            EditorLanguageType.JSON -> "json"
+            EditorLanguageType.PLAIN -> "plaintext"
+        }
+        return if (completionProvider != null) LspAwareLanguage(base, completionProvider, languageId) else base
     }
 }

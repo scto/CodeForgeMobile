@@ -11,6 +11,26 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### ⚡ Code-Snippets & Live-Templates (Task 33)
+
+* **Editor-Integration & Autovervollständigung (`:feature:editor`)**:
+  * Tastatur-Kürzel (`fun`, `main`, `composable`, `preview`, `lazycolumn`, `state`, `vm`, `fori`, `psvm`, `sout`, `linearlayout`, `textview` etc.) erscheinen in der Autovervollständigung (`LspAwareLanguage`).
+  * Nutzung der vorhandenen sora-editor-Snippet-Infrastruktur (`io.github.Rosemoe.sora-editor:editor:0.23.4`, `SimpleSnippetCompletionItem`, `SnippetDescription`, `SnippetController`).
+  * Tabstopp-Navigation per Tastatur: `Tab` wechselt zum nächsten Tabstopp, `Shift + Tab` zum vorherigen, `Esc` beendet das Template (`snippetController.isInSnippet()`).
+  * Dynamische Variablenauflösung (`FileBasedSnippetVariableResolver`, `WorkspaceBasedSnippetVariableResolver`) für `$TM_FILENAME`, `$TM_FILENAME_BASE`, `$PACKAGE`, `$CLASSNAME`, `$CURRENT_YEAR` und `$CLIPBOARD`.
+* **Reiner Kotlin-Parser & Validierung (`:core:domain`)**:
+  * `SnippetParser`: Vollständige syntaktische Prüfung von VS-Code-/TextMate-/LSP-Syntax (`$0`, `$1`, `${1:default}`, `${1|a,b,c|}`, `${VAR:default}`) ohne Android-Runtime-Abhängigkeiten.
+  * Exakte Fehlerlokalisierung mit Zeilen- und Spaltenangaben (`SnippetValidationResult.Invalid(error, line, column)`).
+  * `VsCodeSnippetJsonSerializer`: Pure Kotlin Im-/Export-Serialisierung im Standard-VS-Code-Snippet-Format.
+* **Snippet-Verwaltung & UI (`:feature:settings`, `:core:data`, `:core:resources`)**:
+  * Neuer Einstellungsbildschirm unter **Einstellungen > Editor > Snippets & Live-Templates** (`SnippetSettingsScreen`).
+  * Sprach-Filterchips (All, Kotlin, Java, XML...), Suchleiste, Scope- und Builtin-Badges, Aktivieren/Deaktivieren-Schalter.
+  * Erstellungs- und Bearbeitungsdialog mit Live-Validierung, Schnell-Einfügechips für Tabstopps und Variablen.
+  * Import- und Export-Dialog für VS-Code-Snippet-JSON mit Zwischenablage-Unterstützung.
+  * Built-in Snippet-Bibliothek (`assets/snippets/builtin_snippets.json`) mit Rücksetzfunktion auf Standardwerte (`resetToDefaults`).
+  * 29 zweisprachige Strings (`snippets_*`, `settings_editor_snippets*`) in Englisch und Deutsch.
+  * Dokumentation in [`docs/snippets-live-templates-report.md`](docs/snippets-live-templates-report.md).
+
 ### 🧹 Einheitlicher Code-Formatter (Task 32)
 
 * **Zentraler Formatierungs-Befehl & 3-Stufen-Strategie (`:core:domain`, `:core:data`)**:

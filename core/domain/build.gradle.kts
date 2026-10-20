@@ -15,6 +15,7 @@ dependencies {
 
     // javax.inject für Hilt-annotierte UseCases ohne Hilt-Plugin-Abhängigkeit in :core:domain
     implementation("javax.inject:javax.inject:1")
+    implementation(libs.kotlinx.serialization.json)
 }
 
 dependencies {

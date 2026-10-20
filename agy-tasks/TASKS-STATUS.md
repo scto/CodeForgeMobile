@@ -37,10 +37,18 @@
 | **30** | `30-logcat-viewer.md` | ✅ `293fdc6` | Logcat-Ansicht: Filter nach Level, Paket & Tag, Erkennung von Abstürzen mit Klick-Navigation zum Stacktrace im Sora Editor, 3 Quellen (`OWN_PROCESS`, `READ_LOGS_PERMISSION`, `ADB_LOOPBACK`), 50k Ringpuffer (`docs/logcat-viewer-report.md`) |
 | **31** | `31-lsp-code-actions-rename.md` | ✅ `25af384` | LSP Code-Aktionen, Umbenennen (atomar, Multi-File), Struktur-Ansicht (Outline mit Fallback), Definition & Referenzen, Beantwortung von `workspace/applyEdit` (`docs/lsp-code-actions-rename-report.md`) |
 | **32** | `32-unified-formatter.md` | ✅ `ff4ff41` | Einheitlicher „Formatieren“-Befehl mit 3-Stufen-Fallback (LSP → CLI-Prozess `ktlint`/`google-java-format` → Built-in `CodeFormatter`), `.editorconfig`, Format-on-Save, Cursor-/Scroll-Erhalt (`docs/unified-formatter-report.md`) |
+| **33** | `33-snippets-live-templates.md` | ✅ HEAD | Code-Snippets & Live-Templates: Vorlagen mit Tabstopps ($1, $0), Navigation via Tab/Shift+Tab/Esc in sora-editor 0.23.4, dynamische Variablen ($PACKAGE, $CLASSNAME, etc.), reiner Kotlin-Parser mit Zeilen-/Spaltenvalidierung, VS-Code JSON Import/Export & Einstellungs-UI (`docs/snippets-live-templates-report.md`) |
 
 ---
 
 ## 🔍 Offene Arbeitsliste
+
+### Task 33 – Code-Snippets und Live-Templates (✅ erledigt)
+1. **Domain-Modelle & Parser (33.1)**: `Snippet`, `SnippetValidationResult`, `SnippetParser` (reiner Kotlin-Parser für Tabstopps, Placeholders, Choices, Escapes und Variablen mit Zeilen-/Spaltenangabe ohne Android-Abhängigkeiten), `SnippetVariableResolver`, `VsCodeSnippetJsonSerializer` für VS-Code-Snippet-JSON.
+2. **Repository & Datenhaltung (33.2)**: `SnippetRepository` mit `observeSnippets()`, `saveSnippet()`, `deleteSnippet()`, `resetToDefaults()`, `importSnippets()`, `exportSnippets()`. `SnippetRepositoryImpl` lädt Built-ins aus Assets (`builtin_snippets.json` für Kotlin, Compose, Java, XML) mit Fallback und speichert User-Snippets in `snippets_user.json` reentrancy-sicher.
+3. **Editor-Integration (33.3)**: `LspCompletionProvider` liefert Snippets für die aktive Sprache; `LspAwareLanguage` integriert `SimpleSnippetCompletionItem` mit `SnippetDescription`; `SoraCodeEditor` konfiguriert `fileVariableResolver` & `workspaceVariableResolver` und fängt `Tab`, `Shift+Tab` und `Esc` ab, wenn `snippetController.isInSnippet()` aktiv ist.
+4. **Settings-UI (33.4)**: Einstellungs-UI unter **Einstellungen > Editor > Snippets & Live-Templates** mit Sprachfilter, Suche, Erstellen/Bearbeiten mit Live-Validierung, Löschschutz für Built-ins, Reset auf Defaults, Import und Export von VS-Code-Snippet-JSON.
+5. **Tests & Lokalisierung (33.5)**: Unit-Tests in `:core:domain`, `:core:data`, `:feature:settings`, instrumentierter Editor-Test in `:feature:editor`; 29 zweisprachige Strings (1011 Strings gesamt, 0 Fehler); `assembleDebug` verifiziert; Bericht in `docs/snippets-live-templates-report.md`.
 
 ### Task 32 – Einheitlicher Formatter (✅ erledigt)
 1. **Zentraler Vertrag & Kette (32.1)**: `CodeFormatterRepository` in `:core:domain`, implementiert in `:core:data` (`CodeFormatterRepositoryImpl`). 3-Stufen-Strategie: LSP (`textDocument/formatting` bzw. `textDocument/rangeFormatting`), Termux-CLI-Prozesse (`ktlint`, `google-java-format`), syntaxtoleranter Built-in-Fallback (`CodeFormatter` aus `:libs:code-tools`).

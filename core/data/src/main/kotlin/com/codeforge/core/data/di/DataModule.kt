@@ -98,4 +98,10 @@ abstract class DataModule {
     abstract fun bindCodeFormatterRepository(
         impl: com.codeforge.core.data.repository.CodeFormatterRepositoryImpl
     ): com.codeforge.core.domain.repository.CodeFormatterRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSnippetRepository(
+        impl: com.codeforge.core.data.repository.SnippetRepositoryImpl
+    ): com.codeforge.core.domain.repository.SnippetRepository
 }

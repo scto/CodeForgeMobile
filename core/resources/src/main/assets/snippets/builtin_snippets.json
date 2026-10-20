@@ -1,0 +1,229 @@
+{
+  "fun": {
+    "prefix": "fun",
+    "scope": "kotlin",
+    "description": "Function declaration",
+    "body": [
+      "fun ${1:name}(${2:params}): ${3:Unit} {",
+      "    $0",
+      "}"
+    ]
+  },
+  "main": {
+    "prefix": "main",
+    "scope": "kotlin",
+    "description": "Kotlin main entry point",
+    "body": [
+      "fun main(args: Array<String>) {",
+      "    $0",
+      "}"
+    ]
+  },
+  "ifn": {
+    "prefix": "ifn",
+    "scope": "kotlin",
+    "description": "If not null check",
+    "body": [
+      "if (${1:condition} != null) {",
+      "    $0",
+      "}"
+    ]
+  },
+  "when": {
+    "prefix": "when",
+    "scope": "kotlin",
+    "description": "When expression",
+    "body": [
+      "when (${1:target}) {",
+      "    ${2:condition} -> $0",
+      "}"
+    ]
+  },
+  "tryc": {
+    "prefix": "tryc",
+    "scope": "kotlin",
+    "description": "Try-catch block",
+    "body": [
+      "try {",
+      "    $1",
+      "} catch (${2:e}: ${3:Exception}) {",
+      "    $0",
+      "}"
+    ]
+  },
+  "log": {
+    "prefix": "log",
+    "scope": "kotlin",
+    "description": "Log.d statement",
+    "body": [
+      "android.util.Log.d(\"${1:$CLASSNAME}\", \"${2:message}\")"
+    ]
+  },
+  "dc": {
+    "prefix": "dc",
+    "scope": "kotlin",
+    "description": "Data class declaration",
+    "body": [
+      "data class ${1:Name}(",
+      "    $0",
+      ")"
+    ]
+  },
+  "sealed": {
+    "prefix": "sealed",
+    "scope": "kotlin",
+    "description": "Sealed interface declaration",
+    "body": [
+      "sealed interface ${1:Name} {",
+      "    $0",
+      "}"
+    ]
+  },
+  "composable": {
+    "prefix": "composable",
+    "scope": "kotlin",
+    "description": "Jetpack Compose @Composable function",
+    "body": [
+      "@androidx.compose.runtime.Composable",
+      "fun ${1:Name}(",
+      "    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier$0",
+      ") {",
+      "}"
+    ]
+  },
+  "preview": {
+    "prefix": "preview",
+    "scope": "kotlin",
+    "description": "Compose @Preview composable function",
+    "body": [
+      "@androidx.compose.ui.tooling.preview.Preview",
+      "@androidx.compose.runtime.Composable",
+      "fun ${1:Name}Preview() {",
+      "    $0",
+      "}"
+    ]
+  },
+  "lazycolumn": {
+    "prefix": "lazycolumn",
+    "scope": "kotlin",
+    "description": "Compose LazyColumn with items",
+    "body": [
+      "androidx.compose.foundation.lazy.LazyColumn(",
+      "    modifier = ${1:Modifier}",
+      ") {",
+      "    items(${2:items}) { ${3:item} ->",
+      "        $0",
+      "    }",
+      "}"
+    ]
+  },
+  "state": {
+    "prefix": "state",
+    "scope": "kotlin",
+    "description": "Compose remember { mutableStateOf }",
+    "body": [
+      "var ${1:state} by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(${2:initial}) }"
+    ]
+  },
+  "vm": {
+    "prefix": "vm",
+    "scope": "kotlin",
+    "description": "ViewModel with StateFlow UiState",
+    "body": [
+      "class ${1:$CLASSNAME}ViewModel : androidx.lifecycle.ViewModel() {",
+      "    private val _uiState = kotlinx.coroutines.flow.MutableStateFlow(${1:$CLASSNAME}UiState())",
+      "    val uiState: kotlinx.coroutines.flow.StateFlow<${1:$CLASSNAME}UiState> = _uiState.asStateFlow()",
+      "    $0",
+      "}"
+    ]
+  },
+  "scaffold": {
+    "prefix": "scaffold",
+    "scope": "kotlin",
+    "description": "Compose Material 3 Scaffold",
+    "body": [
+      "androidx.compose.material3.Scaffold(",
+      "    topBar = {",
+      "        $1",
+      "    }",
+      ") { innerPadding ->",
+      "    $0",
+      "}"
+    ]
+  },
+  "psvm": {
+    "prefix": "psvm",
+    "scope": "java",
+    "description": "Java main method",
+    "body": [
+      "public static void main(String[] args) {",
+      "    $0",
+      "}"
+    ]
+  },
+  "sout": {
+    "prefix": "sout",
+    "scope": "java",
+    "description": "System.out.println",
+    "body": [
+      "System.out.println($0);"
+    ]
+  },
+  "fori": {
+    "prefix": "fori",
+    "scope": "java",
+    "description": "For loop with index",
+    "body": [
+      "for (int ${1:i} = 0; ${1:i} < ${2:max}; ${1:i}++) {",
+      "    $0",
+      "}"
+    ]
+  },
+  "foreach": {
+    "prefix": "foreach",
+    "scope": "java",
+    "description": "For-each loop",
+    "body": [
+      "for (${1:Object} ${2:item} : ${3:collection}) {",
+      "    $0",
+      "}"
+    ]
+  },
+  "tryc_java": {
+    "prefix": "tryc",
+    "scope": "java",
+    "description": "Java try-catch block",
+    "body": [
+      "try {",
+      "    $1",
+      "} catch (${2:Exception} ${3:e}) {",
+      "    $0",
+      "}"
+    ]
+  },
+  "linearlayout": {
+    "prefix": "linearlayout",
+    "scope": "xml",
+    "description": "Android LinearLayout XML root",
+    "body": [
+      "<LinearLayout",
+      "    xmlns:android=\"http://schemas.android.com/apk/res/android\"",
+      "    android:layout_width=\"${1|match_parent,wrap_content|}\"",
+      "    android:layout_height=\"${2|wrap_content,match_parent|}\"",
+      "    android:orientation=\"${3|vertical,horizontal|}\">",
+      "    $0",
+      "</LinearLayout>"
+    ]
+  },
+  "textview": {
+    "prefix": "textview",
+    "scope": "xml",
+    "description": "Android TextView XML element",
+    "body": [
+      "<TextView",
+      "    android:layout_width=\"${1|wrap_content,match_parent|}\"",
+      "    android:layout_height=\"wrap_content\"",
+      "    android:text=\"${2:text}\" />"
+    ]
+  }
+}

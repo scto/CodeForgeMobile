@@ -41,6 +41,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 * 🧩 Overlays: Versions-Hinweis (`4.0.1 → 4.0.3`) in TOML-Katalogen mit Update/Update-All, Farb-Kästchen neben Farbwerten.
 * 🔎 Suchen & Ersetzen (Datei und Projekt, Regex/Case/Wort) 🧪, Formatter/Highlighter-Logik 🧪 (`:libs:code-tools`).
 * 🧹 **Einheitlicher Code-Formatter** 🧪: Zentraler Befehl für Dokument- und Auswahlformatierung für Kotlin, Java, XML und JSON mit 3-Stufen-Strategie (LSP → CLI-Prozesse `ktlint`/`google-java-format` mit 10s Timeout & Syntax-Prüfung → integrierter `CodeFormatter`-Fallback), `.editorconfig`-Auflösung, Format-on-Save je Sprache und Erhalt der Cursor-/Scrollposition (siehe [docs/unified-formatter-report.md](docs/unified-formatter-report.md)).
+* ⚡ **Code-Snippets & Live-Templates** 🧪: Tastatur-Kürzel (`fun`, `composable`, `fori`, `linearlayout` etc.) in der Autovervollständigung, Tabstopp-Navigation (`Tab`/`Shift+Tab`/`Esc`), dynamische Variablen (`$TM_FILENAME`, `$PACKAGE`, `$CLASSNAME`, etc.), reiner Kotlin-Validator mit Zeilen-/Spaltenangabe, VS-Code-JSON-Import/Export und Snippet-Verwaltungs-UI in den Einstellungen (siehe [docs/snippets-live-templates-report.md](docs/snippets-live-templates-report.md)).
 
 ### 💻 2. Terminal & Umgebung (`:feature:terminal`, `:libs:terminal-engine`, `:libs:termux-*`) ✅
 * 🐚 Echte Termux-Shell (vendort aus `scto/AndroidIDE`, Paket `com.codeforge`).

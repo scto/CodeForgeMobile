@@ -68,7 +68,8 @@ class EditorViewModel @Inject constructor(
     private val fileSystemRepository: FileSystemRepository,
     private val updateRepository: DependencyUpdateRepository,
     private val fileSyncBridge: FileSyncBridge,
-    private val codeFormatterRepository: CodeFormatterRepository
+    private val codeFormatterRepository: CodeFormatterRepository,
+    private val snippetRepository: com.codeforge.core.domain.repository.SnippetRepository = com.codeforge.core.domain.repository.NoOpSnippetRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -86,8 +87,8 @@ class EditorViewModel @Inject constructor(
     /** Gecachte AppSettings für Format on Save etc. */
     private var currentAppSettings: AppSettings? = null
 
-    /** Vom Composable konsumiert, um LSP-Completion-Vorschläge in [LspAwareLanguage] einzuspeisen. */
-    val completionProvider = LspCompletionProvider(lspClient) { _uiState.value.activeFile?.path }
+    /** Vom Composable konsumiert, um LSP- und Snippet-Completion-Vorschläge in [LspAwareLanguage] einzuspeisen. */
+    val completionProvider = LspCompletionProvider(lspClient, snippetRepository) { _uiState.value.activeFile?.path }
 
     init {
         observeSettings()

@@ -1063,6 +1063,38 @@
     <string name="settings_format_on_save_xml_desc">.xml-Dateien beim Speichern formatieren</string>
     <string name="settings_format_on_save_json_desc">.json-Dateien beim Speichern formatieren</string>
 
+    <!-- Snippets and Live Templates (Task 33) -->
+    <string name="snippets_title">Snippets &amp; Live-Templates</string>
+    <string name="snippets_add">Snippet hinzufügen</string>
+    <string name="snippets_edit">Snippet bearbeiten</string>
+    <string name="snippets_delete">Löschen</string>
+    <string name="snippets_delete_confirm">Snippet \"%1$s\" wirklich löschen?</string>
+    <string name="snippets_reset_defaults">Auf Standard zurücksetzen</string>
+    <string name="snippets_reset_confirm">Alle Snippets auf die Standardvorlagen zurücksetzen? Eigene Snippets werden gelöscht.</string>
+    <string name="snippets_import">Importieren</string>
+    <string name="snippets_export">Exportieren</string>
+    <string name="snippets_import_title">Snippets importieren (VS-Code-JSON)</string>
+    <string name="snippets_export_title">Snippets exportieren (VS-Code-JSON)</string>
+    <string name="snippets_import_hint">VS-Code-Snippet-JSON hier einfügen…</string>
+    <string name="snippets_import_success">%1$d Snippets erfolgreich importiert</string>
+    <string name="snippets_export_copied">Snippets in die Zwischenablage kopiert</string>
+    <string name="snippets_scope">Gültigkeitsbereich (Sprachen)</string>
+    <string name="snippets_scope_hint">z. B. kotlin, java, xml (leer = alle)</string>
+    <string name="snippets_prefix">Präfix (Kürzel)</string>
+    <string name="snippets_name">Name</string>
+    <string name="snippets_description">Beschreibung</string>
+    <string name="snippets_body">Vorlagentext</string>
+    <string name="snippets_syntax_valid">Syntax gültig</string>
+    <string name="snippets_syntax_error">Syntaxfehler in Zeile %1$d, Spalte %2$d: %3$s</string>
+    <string name="snippets_builtin_badge">Integriert</string>
+    <string name="snippets_custom_badge">Benutzerdefiniert</string>
+    <string name="snippets_all_filter">Alle</string>
+    <string name="snippets_search_hint">Snippets suchen…</string>
+    <string name="snippets_empty">Keine Snippets gefunden</string>
+    <string name="snippets_insert_variable">Variable einfügen</string>
+    <string name="settings_editor_snippets">Snippets &amp; Live-Templates</string>
+    <string name="settings_editor_snippets_desc">Code-Kürzel, Vorlagen und Variablen verwalten</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>
