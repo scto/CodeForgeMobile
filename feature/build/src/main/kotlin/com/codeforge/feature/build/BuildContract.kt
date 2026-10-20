@@ -94,6 +94,7 @@ sealed interface BuildUiIntent {
     data class ConfirmSelfReplace(val confirmed: Boolean) : BuildUiIntent
     data object DismissIncompatibleSignatureDialog : BuildUiIntent
     data object RequestInstallPermission : BuildUiIntent
+    data class AnalyzeApk(val apkPath: String) : BuildUiIntent
 
     // Logcat
     data class UpdateLogcatFilter(val filter: LogcatFilter) : BuildUiIntent
@@ -113,4 +114,5 @@ sealed interface BuildUiEffect {
     data class OpenEditorAt(val path: String, val line: Int, val column: Int) : BuildUiEffect
     data class LaunchIntent(val intent: android.content.Intent) : BuildUiEffect
     data class ShareText(val text: String, val title: String) : BuildUiEffect
+    data class OpenApkAnalyzer(val apkPath: String) : BuildUiEffect
 }

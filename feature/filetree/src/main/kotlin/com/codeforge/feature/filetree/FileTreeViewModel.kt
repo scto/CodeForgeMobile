@@ -52,6 +52,7 @@ class FileTreeViewModel @Inject constructor(
             FileTreeUiEvent.CreateDirectoryClicked -> startAction(FileTreeActionType.CREATE_DIRECTORY)
             FileTreeUiEvent.RenameClicked -> startActionOnContextTarget(FileTreeActionType.RENAME)
             FileTreeUiEvent.PropertiesClicked -> showProperties()
+            FileTreeUiEvent.AnalyzeApkClicked -> analyzeApk()
             FileTreeUiEvent.DismissProperties -> _uiState.update { it.copy(propertiesTarget = null) }
             FileTreeUiEvent.DeleteClicked -> requestDelete()
             FileTreeUiEvent.ConfirmDelete -> confirmDelete()
@@ -84,6 +85,14 @@ class FileTreeViewModel @Inject constructor(
         val target = _uiState.value.contextTarget ?: return
         val props = FileTreeFormatters.extractFileProperties(java.io.File(target.path), target.isDirectory)
         _uiState.update { it.copy(contextTarget = null, propertiesTarget = props) }
+    }
+
+    private fun analyzeApk() {
+        val target = _uiState.value.contextTarget ?: return
+        _uiState.update { it.copy(contextTarget = null) }
+        viewModelScope.launch {
+            _effect.emit(FileTreeUiEffect.OpenApkAnalyzer(target.path))
+        }
     }
 
     private fun requestDelete() {

@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Delete
@@ -85,6 +86,7 @@ fun FileTreeRoute(
     modifier: Modifier = Modifier,
     rootPath: String,
     onOpenFile: (path: String) -> Unit,
+    onOpenApkAnalyzer: (path: String) -> Unit = {},
     viewModel: FileTreeViewModel = hiltViewModel()
 ) {
     LaunchedEffect(rootPath) { viewModel.initialize(rootPath) }
@@ -96,6 +98,7 @@ fun FileTreeRoute(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is FileTreeUiEffect.FileOpenedInEditor -> onOpenFile(effect.path)
+                is FileTreeUiEffect.OpenApkAnalyzer -> onOpenApkAnalyzer(effect.path)
                 is FileTreeUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
             }
         }
@@ -181,6 +184,7 @@ private fun FileTreeScreen(
             onProperties = { onEvent(FileTreeUiEvent.PropertiesClicked) },
             onRename = { onEvent(FileTreeUiEvent.RenameClicked) },
             onDelete = { onEvent(FileTreeUiEvent.DeleteClicked) },
+            onAnalyzeApk = { onEvent(FileTreeUiEvent.AnalyzeApkClicked) },
             onDismiss = { onEvent(FileTreeUiEvent.DismissContextMenu) }
         )
     }
@@ -358,6 +362,7 @@ private fun FileTreeContextMenuDialog(
     onProperties: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
+    onAnalyzeApk: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -371,6 +376,13 @@ private fun FileTreeContextMenuDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
+                if (!target.isDirectory && target.path.endsWith(".apk", ignoreCase = true)) {
+                    ListItem(
+                        headlineContent = { Text(stringRes(R.string.apk_analyzer_kontextmenue)) },
+                        leadingContent = { Icon(Icons.Default.Analytics, contentDescription = null) },
+                        modifier = Modifier.clickable(onClick = onAnalyzeApk)
+                    )
+                }
                 ListItem(
                     headlineContent = { Text(stringRes(R.string.filetree_eigenschaften)) },
                     leadingContent = { Icon(Icons.Default.Info, contentDescription = null) },

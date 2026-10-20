@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import com.codeforge.feature.build.analyzer.ApkAnalyzerRoute
 import com.codeforge.feature.git.GitCloneRoute
 import com.codeforge.feature.git.GitRoute
 import com.codeforge.feature.layoutdesigner.LayoutDesignerRoute
@@ -55,11 +56,16 @@ internal object Routes {
     const val PROJECT_WORKSPACE_PATTERN = "workspace/{rootPath}"
     const val GIT_PATTERN = "git/{repoPath}"
     const val LAYOUT_DESIGNER_PATTERN = "layout_designer/{filePath}"
+    const val APK_ANALYZER_PATTERN = "apk_analyzer?apkPath={apkPath}&comparePath={comparePath}"
 
     fun projectWorkspace(rootPath: String) = "workspace/${Uri.encode(rootPath)}"
     fun terminalWith(command: String) = Res.string(R.string.app_terminal_initialcommand, Uri.encode(command))
     fun git(repoPath: String) = "git/${Uri.encode(repoPath)}"
     fun layoutDesigner(filePath: String) = "layout_designer/${Uri.encode(filePath)}"
+    fun apkAnalyzer(apkPath: String, comparePath: String? = null): String {
+        val base = "apk_analyzer?apkPath=${Uri.encode(apkPath)}"
+        return if (comparePath != null) "$base&comparePath=${Uri.encode(comparePath)}" else base
+    }
 }
 
 @Composable
@@ -236,6 +242,29 @@ fun CodeForgeNavHost(
                 rootPath = rootPath,
                 onNavigate = { route -> navController.navigate(route) },
                 onOpenGitSettings = { navController.navigate(Routes.SETTINGS_GIT) }
+            )
+        }
+        composable(
+            route = Routes.APK_ANALYZER_PATTERN,
+            arguments = listOf(
+                navArgument("apkPath") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("comparePath") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val apkPath = backStackEntry.arguments?.getString("apkPath")
+            val comparePath = backStackEntry.arguments?.getString("comparePath")
+            ApkAnalyzerRoute(
+                initialApkPath = apkPath,
+                compareApkPath = comparePath,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

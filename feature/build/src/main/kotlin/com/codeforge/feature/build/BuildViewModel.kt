@@ -193,6 +193,11 @@ class BuildViewModel internal constructor(
                     }
                 }
             }
+            is BuildUiIntent.AnalyzeApk -> {
+                scope.launch {
+                    _effects.send(BuildUiEffect.OpenApkAnalyzer(intent.apkPath))
+                }
+            }
             is BuildUiIntent.UpdateLogcatFilter -> {
                 _uiState.update { it.copy(logcatFilter = intent.filter) }
                 if (intent.filter.packageName.isNotBlank() && intent.filter.targetPid == null) {

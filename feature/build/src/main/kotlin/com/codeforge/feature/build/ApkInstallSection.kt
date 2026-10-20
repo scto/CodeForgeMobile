@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
@@ -149,17 +150,33 @@ fun ApkInstallSection(
                                 )
                             }
 
-                            Button(
-                                onClick = { onIntent(BuildUiIntent.InstallApk) },
-                                modifier = Modifier.padding(start = 8.dp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.InstallMobile,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(stringRes(R.string.install_schaltflaeche), fontSize = 12.sp)
+                                OutlinedButton(
+                                    onClick = { onIntent(BuildUiIntent.AnalyzeApk(info.file.absolutePath)) },
+                                    modifier = Modifier.padding(end = 8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Analytics,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringRes(R.string.apk_analyzer_schaltflaeche), fontSize = 12.sp)
+                                }
+
+                                Button(
+                                    onClick = { onIntent(BuildUiIntent.InstallApk) }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.InstallMobile,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringRes(R.string.install_schaltflaeche), fontSize = 12.sp)
+                                }
                             }
                         }
                     }

@@ -11,6 +11,33 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📦 APK-Analyse & APK-Vergleich (Task 35)
+
+* **Reine JVM-Größenanalyse ohne Zusatzwerkzeuge (`:core:domain`, `ApkZipAnalyzer`)**:
+  * Vollständige Berechnung komprimierter und unkomprimierter Dateigrößen über `ZipFile` ohne externe Tools (`aapt` oder `apksigner` nicht zwingend erforderlich).
+  * Gruppierung nach Bereichen: `classes*.dex`, `res/`, `resources.arsc`, `lib/<abi>/`, `assets/`, `META-INF/`, `AndroidManifest.xml`, Sonstiges.
+  * Ermittlung der Top-N größten Dateien und prozentualer Anteil an Gesamtgröße.
+  * Pro-ABI-Aufschlüsselung nativer Bibliotheken mit automatischer Erkennung und Warnung bei Multi-ABI-APKs.
+  * Robuster Schutz vor Zip-Slip (`..` und führende Pfadtrenner) sowie sicheres Abfangen beschädigter Archive (`ApkAnalysisException`).
+* **Metadaten, Komponenten & Signatur (`ApkDetailedMetadata`, `ApkAnalyzerRepositoryImpl`)**:
+  * Dreistufige Metadaten-Erkennung: `aapt` / `aapt2` (`AaptBadgingParser`, `AaptPermissionsParser`) → `PackageManager.getPackageArchiveInfo` → Reines Kotlin Binary XML Parsing (`AxmlManifestParser`).
+  * Paketname, Versionen (`versionName`, `versionCode`), Min-, Target- und Compile-SDK.
+  * Sicherheitswarnungen bei `FLAG_DEBUGGABLE` und `android:allowBackup="true"`.
+  * Komponenten-Statistik für Aktivitäten, Dienste, Empfänger und Provider mit Zählung exportierter Komponenten.
+  * Deklarierte Berechtigungen mit automatischer Kennzeichnung gefährlicher Runtime-Berechtigungen (`AndroidDangerousPermissions`).
+  * Signaturprüfung über `apksigner verify --verbose --print-certs` (`ApksignerOutputParser`) für Schemas v1–v4 und Zertifikat-Fingerabdrücke (SHA-1, SHA-256), mit informativem Hinweis bei fehlendem `apksigner`.
+* **Zwei-APK-Vergleichsmodus (`ApkComparator`)**:
+  * Gegenüberstellung zweier APKs (z. B. vorheriger und aktueller Build).
+  * Gesamtdifferenz in Bytes und Prozent.
+  * Delta je Bereich und je Datei (neu, entfernt, größer, kleiner, unverändert).
+* **UI & Integration (`:feature:build`, `:feature:filetree`, `:app`)**:
+  * Material 3 Bildschirm `ApkAnalyzerScreen` mit gestapeltem Größenbalken, 6 Reitern (Übersicht, Dateien mit Suche/Filtern/Sortierung, Berechtigungen, Komponenten, Signatur, Vergleich).
+  * „Als Markdown teilen“-Funktion (`ApkReportFormatter`) via Android Share Sheet.
+  * Integration in den Dateibaum (`FileTreeRoute` / `FileTreeContextMenuDialog` auf `.apk`-Dateien) und in die Build-Ausgabe (`ApkInstallSection`).
+  * 39 neue zweisprachige String-Ressourcen in `:core:resources` (Englisch Standard, Deutsch in `values-de`), String-Check grün.
+* **Umfassende JVM-Tests**:
+  * Unit-Tests in `:core:domain` (`ApkZipAnalyzerTest`, `ApkComparatorTest`, `AaptPermissionsParserTest`, `AaptBadgingParserTest`, `ApkReportFormatterTest`) und `:feature:build` (`ApkAnalyzerViewModelTest`).
+
 ### 🔐 Signatur-Verwaltung & Release-Signierung (Task 34)
 
 * **Sichere Schlüsselspeicher-Verwaltung (`:feature:signing`, `:core:domain`, `:core:data`)**:

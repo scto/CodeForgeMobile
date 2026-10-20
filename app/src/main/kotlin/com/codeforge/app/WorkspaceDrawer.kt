@@ -138,7 +138,14 @@ fun WorkspaceDrawer(
                 HorizontalDivider()
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     when (selected) {
-                        DrawerSection.FILES -> FileTreeRoute(rootPath = rootPath, onOpenFile = { onCloseDrawer() })
+                        DrawerSection.FILES -> FileTreeRoute(
+                            rootPath = rootPath,
+                            onOpenFile = { onCloseDrawer() },
+                            onOpenApkAnalyzer = { path ->
+                                onCloseDrawer()
+                                onNavigate(Routes.apkAnalyzer(path))
+                            }
+                        )
                         DrawerSection.SEARCH -> SearchRoute(
                             rootPath = rootPath,
                             onMatchOpened = onCloseDrawer,

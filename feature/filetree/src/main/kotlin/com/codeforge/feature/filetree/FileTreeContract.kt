@@ -43,6 +43,7 @@ sealed interface FileTreeUiEvent {
     data object CreateDirectoryClicked : FileTreeUiEvent
     data object RenameClicked : FileTreeUiEvent
     data object PropertiesClicked : FileTreeUiEvent
+    data object AnalyzeApkClicked : FileTreeUiEvent
     data object DismissProperties : FileTreeUiEvent
     data object DeleteClicked : FileTreeUiEvent
     data object ConfirmDelete : FileTreeUiEvent
@@ -55,5 +56,6 @@ sealed interface FileTreeUiEvent {
 sealed interface FileTreeUiEffect {
     /** Signalisiert der Host-Composable (NavigationDrawer in :app), die Drawer zu schließen. */
     data class FileOpenedInEditor(val path: String) : FileTreeUiEffect
+    data class OpenApkAnalyzer(val path: String) : FileTreeUiEffect
     data class ShowSnackbar(val message: String) : FileTreeUiEffect
 }
