@@ -78,6 +78,13 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 * 📲 One-tap APK installation via Android `PackageInstaller` session and direct app launching; "Build & Run" (`StartBuildAndRun`), auto-launch option, ABI-split matching, self-update protection, and signing conflict resolution (see [docs/install-and-run-apk-report.md](docs/install-and-run-apk-report.md)).
 * 📋 Integrated Logcat viewer with filtering by log level, package, tag, and query; crash grouping and clickable stack traces navigating straight into Sora Editor; support for 3 log sources (`OWN_PROCESS`, `READ_LOGS_PERMISSION`, and `ADB_LOOPBACK`) with clear permission instructions (see [docs/logcat-viewer-report.md](docs/logcat-viewer-report.md)).
 
+### 🔐 11. Keystore Management & Release Signing (`:feature:signing`, `:core:domain`, `:core:data`) ✅🧪
+* 🔑 Manage keystores stored securely in private app storage (`filesDir/keystores/`), encrypted passwords in `SecretStorage` via AES-256-GCM.
+* 🛡️ Zero argument leakage: passwords passed exclusively via child process environment variables (`-storepass:env`, `--ks-pass env:`).
+* 🛠️ Creation via `keytool -genkeypair` (PKCS12, RSA 4096 / EC) with live password strength meter, import with pre-validation via `keytool -list`, and export with loss warning.
+* ✍️ APK signing via `apksigner sign` (v1–v4 schemes) and automatic verification (`apksigner verify --print-certs`), SHA-1/SHA-256 fingerprint copying, debug key detection.
+* 📦 Gradle build signing integration setting temporary `CODEFORGE_KEYSTORE_*` variables and copy-ready `signingConfigs` block. See [docs/signing-keystore-manager-report.md](docs/signing-keystore-manager-report.md).
+
 ---
 
 ## 🏗️ System Architecture

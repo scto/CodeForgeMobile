@@ -11,6 +11,32 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🔐 Signatur-Verwaltung & Release-Signierung (Task 34)
+
+* **Sichere Schlüsselspeicher-Verwaltung (`:feature:signing`, `:core:domain`, `:core:data`)**:
+  * Neues Modul `:feature:signing` mit Material 3 UI (`SigningScreen`), MVI (`SigningViewModel`, `SigningContract`) und Hilt-DI.
+  * Keystore-Dateien werden ausschließlich im privaten App-Speicher (`filesDir/keystores/`) abgelegt; Passwörter werden niemals im Klartext oder in Projektdateien gespeichert.
+  * Verschlüsselter Passwortspeicher `SecretStorage` (`SecretStorageImpl` in `:core:data`) mit AES-256-GCM und hardware-gestütztem Android Keystore Schlüssel (`codeforge_secrets_key`).
+  * Strikte Prozesssicherheit: Passwörter werden nie in Befehlszeilen-Argumenten an Kindprozesse übergeben (Schutz vor `ps`/`/proc/$PID/cmdline`-Inspektion), sondern ausschließlich über Umgebungsvariablen (`-storepass:env CF_STORE_PASS`, `--ks-pass env:CF_STORE_PASS`).
+* **Erstellung, Import und Export**:
+  * Neuer Keystore Dialog mit Live-Passwortstärkeanzeige (`PasswordStrengthEvaluator`), Algorithmus-Auswahl (RSA 4096, RSA 2048, EC 256, EC 384) und X.500 DN-Konfiguration via `keytool -genkeypair` im PKCS12-Format.
+  * Import-Dialog mit Vorab-Passwortprüfung über `keytool -list`.
+  * Export-Funktion mit verpflichtendem Bestätigungsdialog und Verlust-Warnung.
+  * Detailansicht mit Anzeige und Kopierfunktion für SHA-1- und SHA-256-Fingerabdrücke (Google Play / Firebase).
+  * Automatische Erkennung und Warnbadge bei Debug-Schlüsseln (`CN=Android Debug`, `androiddebugkey`).
+* **APK-Signierung & Verifikation**:
+  * Signieren von APKs über `apksigner sign` mit anpassbaren Signaturschemata (v1, v2, v3, v4).
+  * Automatische Verifikation via `apksigner verify --verbose --print-certs` und Anzeige der Zertifikats- und Schema-Details.
+  * Ausgabe als `*-signed.apk` neben der Quell-APK.
+* **Gradle-Build-Integration (`:libs:gradle-tooling-bridge`)**:
+  * Ein-Klick-Aktivierung: Setzt `CODEFORGE_KEYSTORE_*`-Umgebungsvariablen isoliert für den `./gradlew`-Buildprozess.
+  * Kopierfertiger `signingConfigs`-Block für `app/build.gradle.kts`.
+* **Pure Kotlin Parser & Tests**:
+  * `KeytoolOutputParser`: Robust für englische und deutsche `keytool -list -v` Ausgaben.
+  * `ApksignerOutputParser`: Parst Verifikationsergebnisse, Schemas und Zertifikats-DNs.
+  * `SigningProcessSecurityTest`: Verifiziert, dass kein Argument Passwörter enthält.
+  * 1085 Strings zweisprachig (en/de) synchronisiert.
+
 ### ⚡ Code-Snippets & Live-Templates (Task 33)
 
 * **Editor-Integration & Autovervollständigung (`:feature:editor`)**:

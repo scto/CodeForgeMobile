@@ -29,6 +29,7 @@ import com.codeforge.feature.settings.SettingsHubRoute
 import com.codeforge.feature.settings.TerminalSettingsRoute
 import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.settings.snippets.SnippetSettingsRoute
+import com.codeforge.feature.signing.SigningRoute
 import com.codeforge.feature.terminal.TerminalRoute
 import com.codeforge.feature.themebuilder.ThemeBuilderRoute
 import com.codeforge.feature.welcome.WelcomeRoute
@@ -43,6 +44,7 @@ internal object Routes {
     const val SETTINGS_THEME = "settings_theme"
     const val SETTINGS_EDITOR = "settings_editor"
     const val SETTINGS_SNIPPETS = "settings_snippets"
+    const val SETTINGS_SIGNING = "settings_signing"
     const val SETTINGS_TERMINAL = "settings_terminal"
     const val SETTINGS_SDK_MANAGER = "settings_sdk_manager"
     const val SETTINGS_PLUGINS = "settings_plugins"
@@ -143,7 +145,8 @@ fun CodeForgeNavHost(
                 onNavigateToSdkManager = { navController.navigate(Routes.SETTINGS_SDK_MANAGER) },
                 onNavigateToPlugins = { navController.navigate(Routes.SETTINGS_PLUGINS) },
                 onNavigateToGit = { navController.navigate(Routes.SETTINGS_GIT) },
-                onNavigateToExtensions = { navController.navigate(Routes.EXTENSIONS) }
+                onNavigateToExtensions = { navController.navigate(Routes.EXTENSIONS) },
+                onNavigateToSigning = { navController.navigate(Routes.SETTINGS_SIGNING) }
             )
         }
         composable(Routes.SETTINGS_THEME) {
@@ -157,6 +160,11 @@ fun CodeForgeNavHost(
         composable(Routes.SETTINGS_SNIPPETS) {
             SnippetSettingsRoute(
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.SETTINGS_SIGNING) {
+            SigningRoute(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         composable(Routes.SETTINGS_TERMINAL) {

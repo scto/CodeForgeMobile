@@ -160,4 +160,33 @@ class ProcessGradleBuildRepositoryTest {
         isFirstRunning = false
         job.cancel()
     }
+
+    @Test
+    fun forwardsExtraEnvironmentVariablesToProcess() = runBlocking {
+        val gradlew = File(projectDir, "gradlew").apply { writeText("#!/bin/sh") }
+        repository.connect(projectDir.absolutePath)
+
+        val customEnv = mapOf(
+            "CODEFORGE_KEYSTORE_PATH" to "/data/keystores/release.keystore",
+            "CODEFORGE_KEYSTORE_ALIAS" to "release",
+            "CODEFORGE_KEYSTORE_PASSWORD" to "storepass123",
+            "CODEFORGE_KEY_PASSWORD" to "keypass123"
+        )
+        repository.setExtraEnvironment(customEnv)
+        assertEquals(customEnv, repository.getExtraEnvironment())
+
+        var capturedEnv: Map<String, String>? = null
+        repository.processLauncher = { _, env, _ ->
+            capturedEnv = env
+            FakeProcess(0, listOf("BUILD SUCCESSFUL"))
+        }
+
+        repository.runTask("assembleRelease").toList()
+
+        assertNotNull(capturedEnv)
+        assertEquals("/data/keystores/release.keystore", capturedEnv?.get("CODEFORGE_KEYSTORE_PATH"))
+        assertEquals("release", capturedEnv?.get("CODEFORGE_KEYSTORE_ALIAS"))
+        assertEquals("storepass123", capturedEnv?.get("CODEFORGE_KEYSTORE_PASSWORD"))
+        assertEquals("keypass123", capturedEnv?.get("CODEFORGE_KEY_PASSWORD"))
+    }
 }

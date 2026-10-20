@@ -1,15 +1,22 @@
 // Modul: :core:data
 package com.codeforge.core.data.security
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import com.codeforge.core.domain.security.SecretStorage
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** Minimaler Key-Value-Speicher (SharedPreferences in Produktion, Map in Tests). */
 internal interface KeyValueStore {
@@ -67,3 +74,35 @@ internal class KeystoreSecretBox(private val alias: String = "codeforge_git_secr
         const val IV_SIZE = 12
     }
 }
+
+/**
+ * Standardimplementierung von [SecretStorage] für verschlüsselte Ablage
+ * vertraulicher Nutzereingaben (z. B. Passwörter, Tokens).
+ */
+@Singleton
+class SecretStorageImpl internal constructor(
+    private val store: KeyValueStore,
+    private val box: SecretBox,
+) : SecretStorage {
+
+    @Inject
+    constructor(@ApplicationContext context: Context) : this(
+        SharedPreferencesStore(context.getSharedPreferences("codeforge_secrets", Context.MODE_PRIVATE)),
+        KeystoreSecretBox(alias = "codeforge_secrets_key"),
+    )
+
+    override suspend fun getSecret(key: String): String? = withContext(Dispatchers.IO) {
+        val encrypted = store.get(key) ?: return@withContext null
+        box.decrypt(encrypted)
+    }
+
+    override suspend fun storeSecret(key: String, secret: String): Unit = withContext(Dispatchers.IO) {
+        val encrypted = box.encrypt(secret)
+        store.put(key, encrypted)
+    }
+
+    override suspend fun removeSecret(key: String): Unit = withContext(Dispatchers.IO) {
+        store.remove(key)
+    }
+}
+

@@ -27,4 +27,6 @@ interface GradleBuildRepository {
     fun runTask(taskName: String): Flow<BuildEvent>
     suspend fun cancelBuild()
     suspend fun disconnect()
+    fun setExtraEnvironment(env: Map<String, String>) {}
+    fun getExtraEnvironment(): Map<String, String> = emptyMap()
 }

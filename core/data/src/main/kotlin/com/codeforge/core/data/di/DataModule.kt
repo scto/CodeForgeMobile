@@ -104,4 +104,10 @@ abstract class DataModule {
     abstract fun bindSnippetRepository(
         impl: com.codeforge.core.data.repository.SnippetRepositoryImpl
     ): com.codeforge.core.domain.repository.SnippetRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSecretStorage(
+        impl: com.codeforge.core.data.security.SecretStorageImpl
+    ): com.codeforge.core.domain.security.SecretStorage
 }

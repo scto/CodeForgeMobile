@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SdCard
 import androidx.compose.material.icons.filled.Source
@@ -44,11 +45,13 @@ fun SettingsHubRoute(
     onNavigateToSdkManager: () -> Unit,
     onNavigateToPlugins: () -> Unit,
     onNavigateToGit: () -> Unit,
-    onNavigateToExtensions: () -> Unit
+    onNavigateToExtensions: () -> Unit,
+    onNavigateToSigning: () -> Unit = {}
 ) {
     val entries = listOf(
         SettingsEntry(R.string.settings_hub_theme, Icons.Filled.Palette, onNavigateToTheme),
         SettingsEntry(R.string.common_editor, Icons.Filled.Code, onNavigateToEditor),
+        SettingsEntry(R.string.settings_hub_signing, Icons.Filled.Key, onNavigateToSigning),
         SettingsEntry(R.string.settings_hub_terminal, Icons.Filled.Terminal, onNavigateToTerminal),
         SettingsEntry(R.string.settings_hub_git, Icons.Filled.Source, onNavigateToGit),
         SettingsEntry(R.string.sdkmanager_title, Icons.Filled.SdCard, onNavigateToSdkManager),

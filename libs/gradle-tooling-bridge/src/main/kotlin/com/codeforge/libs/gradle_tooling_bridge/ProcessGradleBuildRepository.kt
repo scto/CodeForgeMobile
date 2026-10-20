@@ -49,8 +49,16 @@ class ProcessGradleBuildRepository @Inject constructor(
     private val isCancelled = AtomicBoolean(false)
     private var activeProcess: Process? = null
     private var projectRootPath: String? = null
+    private val extraEnvironment = java.util.concurrent.ConcurrentHashMap<String, String>()
 
     val outputBuffer = CircularLineBuffer(maxLines = 20_000)
+
+    override fun setExtraEnvironment(env: Map<String, String>) {
+        extraEnvironment.clear()
+        extraEnvironment.putAll(env)
+    }
+
+    override fun getExtraEnvironment(): Map<String, String> = extraEnvironment.toMap()
 
     // Für JVM-Unit-Tests überschreibbar
     internal var processLauncher: (command: List<String>, env: Map<String, String>, workingDir: File) -> Process = { cmd, env, dir ->
@@ -126,7 +134,9 @@ class ProcessGradleBuildRepository @Inject constructor(
             add("--console=plain")
         }
 
-        val env = TermuxEnvironment.environment()
+        val env = TermuxEnvironment.environment().toMutableMap().apply {
+            putAll(extraEnvironment)
+        }
 
         try {
             val process = processLauncher(command, env, rootDir)

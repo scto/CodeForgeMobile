@@ -78,6 +78,13 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 * 📲 1-Tipp-APK-Installation via Android `PackageInstaller`-Session und direkter App-Start; „Bauen & Starten“-Ablauf (`StartBuildAndRun`), Auto-Start-Option, ABI-Split-Auswahl, Selbstaktualisierungs-Schutz und Signaturkonflikt-Behandlung (siehe [docs/install-and-run-apk-report.md](docs/install-and-run-apk-report.md)).
 * 📋 Integrierter Logcat-Viewer mit Filterung nach Log-Level, Paket, Tag und Volltext; Gruppierung von Abstürzen und anklickbare Stacktraces mit direktem Sprung in den Sora Editor; Unterstützung für 3 Log-Quellen (`OWN_PROCESS`, `READ_LOGS_PERMISSION` und `ADB_LOOPBACK`) mit transparenter Rechtevergabe-Anleitung (siehe [docs/logcat-viewer-report.md](docs/logcat-viewer-report.md)).
 
+### 🔐 11. Signatur-Verwaltung & Release-Signierung (`:feature:signing`, `:core:domain`, `:core:data`) ✅🧪
+* 🔑 Verwaltung von Keystores sicher im privaten App-Speicher (`filesDir/keystores/`), verschlüsselte Passwörter in `SecretStorage` via AES-256-GCM.
+* 🛡️ Strikte Prozesssicherheit: Passwörter werden nie als Befehlsargumente übergeben (kein Leak über `ps`), sondern ausschließlich via Umgebungsvariablen (`-storepass:env`, `--ks-pass env:`).
+* 🛠️ Erstellung über `keytool -genkeypair` (PKCS12, RSA 4096 / EC) mit Live-Passwortstärkemesser, Import mit Vorab-Passwortprüfung via `keytool -list` und Export mit Verlustwarnung.
+* ✍️ APK-Signierung via `apksigner sign` (v1–v4 Schemas) und automatische Verifikation (`apksigner verify --print-certs`), Fingerabdruck-Kopieren (SHA-1/SHA-256), Debug-Schlüssel-Erkennung.
+* 📦 Gradle-Build-Signierung per Knopfdruck über isolierte `CODEFORGE_KEYSTORE_*`-Variablen und kopierfertigen `signingConfigs`-Block. Siehe [docs/signing-keystore-manager-report.md](docs/signing-keystore-manager-report.md).
+
 ---
 
 ## 🏗️ Systemarchitektur

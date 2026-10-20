@@ -49,6 +49,7 @@ include(
     ":feature:search",
     ":feature:modulemaker",
     ":feature:build",
+    ":feature:signing",
 
     ":libs:terminal-engine",
     ":libs:gradle-tooling-bridge",
