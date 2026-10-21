@@ -60,6 +60,7 @@ dependencies {
     implementation(project(":feature:git"))
     implementation(project(":feature:search"))
     implementation(project(":feature:modulemaker"))
+    implementation(project(":feature:hardcodedstrings"))
     implementation(project(":feature:plugins"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:dependencyupdates"))

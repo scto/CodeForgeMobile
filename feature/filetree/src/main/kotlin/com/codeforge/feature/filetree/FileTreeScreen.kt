@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -87,6 +88,7 @@ fun FileTreeRoute(
     rootPath: String,
     onOpenFile: (path: String) -> Unit,
     onOpenApkAnalyzer: (path: String) -> Unit = {},
+    onScanHardcodedStrings: (path: String) -> Unit = {},
     viewModel: FileTreeViewModel = hiltViewModel()
 ) {
     LaunchedEffect(rootPath) { viewModel.initialize(rootPath) }
@@ -99,6 +101,7 @@ fun FileTreeRoute(
             when (effect) {
                 is FileTreeUiEffect.FileOpenedInEditor -> onOpenFile(effect.path)
                 is FileTreeUiEffect.OpenApkAnalyzer -> onOpenApkAnalyzer(effect.path)
+                is FileTreeUiEffect.ScanHardcodedStrings -> onScanHardcodedStrings(effect.path)
                 is FileTreeUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
             }
         }
@@ -185,6 +188,7 @@ private fun FileTreeScreen(
             onRename = { onEvent(FileTreeUiEvent.RenameClicked) },
             onDelete = { onEvent(FileTreeUiEvent.DeleteClicked) },
             onAnalyzeApk = { onEvent(FileTreeUiEvent.AnalyzeApkClicked) },
+            onScanHardcodedStrings = { onEvent(FileTreeUiEvent.ScanHardcodedStringsClicked) },
             onDismiss = { onEvent(FileTreeUiEvent.DismissContextMenu) }
         )
     }
@@ -363,6 +367,7 @@ private fun FileTreeContextMenuDialog(
     onRename: () -> Unit,
     onDelete: () -> Unit,
     onAnalyzeApk: () -> Unit,
+    onScanHardcodedStrings: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -383,6 +388,11 @@ private fun FileTreeContextMenuDialog(
                         modifier = Modifier.clickable(onClick = onAnalyzeApk)
                     )
                 }
+                ListItem(
+                    headlineContent = { Text(stringRes(R.string.hardcoded_strings_kontextmenue)) },
+                    leadingContent = { Icon(Icons.Default.Translate, contentDescription = null) },
+                    modifier = Modifier.clickable(onClick = onScanHardcodedStrings)
+                )
                 ListItem(
                     headlineContent = { Text(stringRes(R.string.filetree_eigenschaften)) },
                     leadingContent = { Icon(Icons.Default.Info, contentDescription = null) },

@@ -60,7 +60,7 @@ Zuletzt aktualisiert: 2026-10-21. Stand Basis-Branch: `87e4e6d`.
 | **39** | `39-git-conflict-ui-extend.md` | ⬜ offen | Git-Konfliktoberfläche: erst Bestandsaufnahme (`ConflictEditor`/`ConflictParser` existieren bereits), dann gezielt ausbauen |
 | **40** | `40-dependency-graph.md` | ⬜ offen | Abhängigkeitsgraph: Baum, „Warum ist das drin?“, Versionskonflikte und Duplikate. Abhängigkeit: Task 28 (erledigt) |
 | **41** | `41-layout-designer-drag-drop-and-features.md` | ⬜ offen | Layout-Designer ausbauen: Drag & Drop, Größen-Griffe, ConstraintLayout/RelativeLayout echt darstellen, Ressourcen, Lint. Keine harte Abhängigkeit (Task 15 erledigt) |
-| **42** | `42-hardcoded-strings-module.md` | ⬜ offen | Modul `:libs:hardcoded-strings` + `:feature:hardcodedstrings`: harte Texte in **Nutzerprojekten** finden, nach `res/values/strings.xml` auslagern und im Code ersetzen (Vorschau, Sicherung, Rückgängig). Abgrenzung: Task 17 prüft nur das CodeForge-Repo |
+| **42** | `42-hardcoded-strings-module.md` | ✅ umgesetzt | Modul `:libs:hardcoded-strings` + `:feature:hardcodedstrings`: harte Texte in **Nutzerprojekten** finden, nach `res/values/strings.xml` auslagern und im Code ersetzen (Vorschau, Sicherung, Rückgängig; `docs/hardcoded-strings-module-report.md`) |
 | **43** | `43-lsp-extensions-xml-yaml-toml-bash.md` | ✅ `cf24ff3` | LSP-Erweiterungen: XML (LemMinX), YAML (`yaml-language-server`), TOML (`taplo`), Bash (`bash-language-server`); Groovy-Gradle ohne LSP (`docs/lsp-extensions-xml-yaml-toml-bash-report.md`) |
 | **44** | `44-lsp-multi-session.md` | ✅ `46fe905` | LSP: mehrere Server gleichzeitig (eine Sitzung pro Server und Workspace), Begrenzung und Leerlauf-Timeout, Wiederanmelden offener Dateien (`docs/lsp-multi-session-report.md`) |
 

@@ -48,6 +48,7 @@ include(
     ":feature:dependencyupdates",
     ":feature:search",
     ":feature:modulemaker",
+    ":feature:hardcodedstrings",
     ":feature:build",
     ":feature:signing",
 
@@ -63,6 +64,7 @@ include(
     ":libs:dependency-updater-api",
     ":libs:dependency-updater-impl",
     ":libs:code-tools",
+    ":libs:hardcoded-strings",
 
     // Termux-Vendoring (siehe docs/sub/TERMUX-PORTING.md) — :libs:terminal-engine nutzt
     // diese jetzt statt PRoot für die interaktive :feature:terminal-Session

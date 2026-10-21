@@ -1300,5 +1300,39 @@
 
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
+
+    <!-- hardcoded strings module (task 42) -->
+    <string name="hardcoded_strings_title">Hardcoded Strings</string>
+    <string name="hardcoded_strings_kontextmenue">Scan for Hardcoded Strings</string>
+    <string name="hardcoded_strings_alle">All</string>
+    <string name="hardcoded_strings_sicher">Certain (High)</string>
+    <string name="hardcoded_strings_wahrscheinlich">Medium</string>
+    <string name="hardcoded_strings_unsicher">Low</string>
+    <string name="hardcoded_strings_keine_treffer">No hardcoded strings found</string>
+    <string name="hardcoded_strings_suche_platzhalter">Filter strings, keys or files…</string>
+    <string name="hardcoded_strings_alle_auswaehlen">Select All</string>
+    <string name="hardcoded_strings_vorschau_und_anwenden">Preview &amp; Apply</string>
+    <string name="hardcoded_strings_rueckgaengig">Undo</string>
+    <string name="hardcoded_strings_neu_scannen">Rescan</string>
+    <string name="hardcoded_strings_ignoriert">“%1$s” ignored</string>
+    <string name="hardcoded_strings_in_editor_oeffnen">Open in editor</string>
+    <string name="hardcoded_strings_ignorieren">Ignore</string>
+    <string name="hardcoded_strings_diff_titel">Review Changes</string>
+    <string name="hardcoded_strings_diff_anwenden">Apply Now</string>
+    <string name="hardcoded_strings_scanne">Scanning for hardcoded strings…</string>
+    <string name="hardcoded_strings_anwenden_laeuft">Applying changes…</string>
+    <string name="hardcoded_strings_strings_gefunden">%1$d hardcoded strings found</string>
+    <string name="hardcoded_strings_ausgewaehlt">%1$d selected</string>
+    <string name="hardcoded_strings_res_key">Resource key</string>
+    <string name="hardcoded_strings_extrahiert_erfolg">%1$d strings extracted successfully</string>
+    <string name="hardcoded_strings_extrahiert_fehler">Extraction failed: %1$s</string>
+    <string name="hardcoded_strings_undo_erfolg">Last extraction undone</string>
+    <string name="hardcoded_strings_undo_keine_sicherung">No backup found to restore</string>
+    <string name="hardcoded_strings_extract_action">Extract String Resource</string>
+    <string name="hardcoded_strings_diff_summary">%1$d strings in %2$d files</string>
+    <string name="hardcoded_strings_type_compose">Compose (stringResource)</string>
+    <string name="hardcoded_strings_type_context">Context (getString)</string>
+    <string name="hardcoded_strings_type_xml">XML (@string)</string>
+    <string name="hardcoded_strings_type_manual">Manual</string>
 </resources>
 

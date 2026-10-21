@@ -144,6 +144,10 @@ fun WorkspaceDrawer(
                             onOpenApkAnalyzer = { path ->
                                 onCloseDrawer()
                                 onNavigate(Routes.apkAnalyzer(path))
+                            },
+                            onScanHardcodedStrings = { path ->
+                                onCloseDrawer()
+                                onNavigate(Routes.hardcodedStrings(path, rootPath))
                             }
                         )
                         DrawerSection.SEARCH -> SearchRoute(

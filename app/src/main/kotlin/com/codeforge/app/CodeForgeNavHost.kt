@@ -19,6 +19,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.feature.build.analyzer.ApkAnalyzerRoute
 import com.codeforge.feature.git.GitCloneRoute
 import com.codeforge.feature.git.GitRoute
+import com.codeforge.feature.hardcodedstrings.HardcodedStringsRoute
 import com.codeforge.feature.layoutdesigner.LayoutDesignerRoute
 import com.codeforge.feature.onboarding.OnboardingRoute
 import com.codeforge.feature.plugins.PluginsRoute
@@ -57,6 +58,7 @@ internal object Routes {
     const val GIT_PATTERN = "git/{repoPath}"
     const val LAYOUT_DESIGNER_PATTERN = "layout_designer/{filePath}"
     const val APK_ANALYZER_PATTERN = "apk_analyzer?apkPath={apkPath}&comparePath={comparePath}"
+    const val HARDCODED_STRINGS_PATTERN = "hardcoded_strings?targetPath={targetPath}&projectRoot={projectRoot}"
 
     fun projectWorkspace(rootPath: String) = "workspace/${Uri.encode(rootPath)}"
     fun terminalWith(command: String) = Res.string(R.string.app_terminal_initialcommand, Uri.encode(command))
@@ -65,6 +67,9 @@ internal object Routes {
     fun apkAnalyzer(apkPath: String, comparePath: String? = null): String {
         val base = "apk_analyzer?apkPath=${Uri.encode(apkPath)}"
         return if (comparePath != null) "$base&comparePath=${Uri.encode(comparePath)}" else base
+    }
+    fun hardcodedStrings(targetPath: String, projectRoot: String = targetPath): String {
+        return "hardcoded_strings?targetPath=${Uri.encode(targetPath)}&projectRoot=${Uri.encode(projectRoot)}"
     }
 }
 
@@ -265,6 +270,24 @@ fun CodeForgeNavHost(
                 initialApkPath = apkPath,
                 compareApkPath = comparePath,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = Routes.HARDCODED_STRINGS_PATTERN,
+            arguments = listOf(
+                navArgument("targetPath") { type = NavType.StringType },
+                navArgument("projectRoot") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val targetPath = backStackEntry.arguments?.getString("targetPath").orEmpty()
+            val projectRoot = backStackEntry.arguments?.getString("projectRoot").orEmpty()
+            HardcodedStringsRoute(
+                targetPath = targetPath,
+                projectRoot = projectRoot,
+                onNavigateBack = { navController.popBackStack() },
+                onOpenEditorAt = { _, _, _ ->
+                    navController.popBackStack()
+                }
             )
         }
     }

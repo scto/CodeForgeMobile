@@ -53,6 +53,7 @@ class FileTreeViewModel @Inject constructor(
             FileTreeUiEvent.RenameClicked -> startActionOnContextTarget(FileTreeActionType.RENAME)
             FileTreeUiEvent.PropertiesClicked -> showProperties()
             FileTreeUiEvent.AnalyzeApkClicked -> analyzeApk()
+            FileTreeUiEvent.ScanHardcodedStringsClicked -> scanHardcodedStrings()
             FileTreeUiEvent.DismissProperties -> _uiState.update { it.copy(propertiesTarget = null) }
             FileTreeUiEvent.DeleteClicked -> requestDelete()
             FileTreeUiEvent.ConfirmDelete -> confirmDelete()
@@ -92,6 +93,14 @@ class FileTreeViewModel @Inject constructor(
         _uiState.update { it.copy(contextTarget = null) }
         viewModelScope.launch {
             _effect.emit(FileTreeUiEffect.OpenApkAnalyzer(target.path))
+        }
+    }
+
+    private fun scanHardcodedStrings() {
+        val target = _uiState.value.contextTarget ?: return
+        _uiState.update { it.copy(contextTarget = null) }
+        viewModelScope.launch {
+            _effect.emit(FileTreeUiEffect.ScanHardcodedStrings(target.path))
         }
     }
 

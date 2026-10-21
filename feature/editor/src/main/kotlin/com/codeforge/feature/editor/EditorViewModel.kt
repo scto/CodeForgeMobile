@@ -4,10 +4,12 @@
  */
 package com.codeforge.feature.editor
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.domain.model.LspCodeAction
+import com.codeforge.core.domain.model.LspCommand
 import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
@@ -501,23 +503,48 @@ class EditorViewModel @Inject constructor(
         val diagnosticsOnLine = _uiState.value.activeDiagnostics.filter {
             it.range.start.line <= line && line <= it.range.end.line
         }
+        val actions = mutableListOf<LspCodeAction>()
         val result = lspClient.requestCodeActions(active.path, range, diagnosticsOnLine)
-        result.onSuccess { actions ->
+        result.onSuccess { lspActions ->
+            actions.addAll(lspActions)
+        }
+        val ext = File(active.path).extension.lowercase()
+        if (ext in setOf("kt", "java", "xml")) {
+            actions.add(
+                LspCodeAction(
+                    title = Res.string(R.string.hardcoded_strings_extract_action),
+                    kind = "refactor.extract",
+                    command = LspCommand(
+                        title = Res.string(R.string.hardcoded_strings_extract_action),
+                        command = "codeforge.extractStringResource",
+                        arguments = listOf(active.path)
+                    )
+                )
+            )
+        }
+        if (actions.isNotEmpty()) {
             _uiState.update { it.copy(codeActions = actions, isCodeActionsSheetVisible = true) }
-        }.onFailure {
+        } else {
             _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_no_code_actions)))
         }
     }
 
     private fun applyCodeAction(action: LspCodeAction) = viewModelScope.launch {
         _uiState.update { it.copy(isCodeActionsSheetVisible = false) }
+        val active = _uiState.value.activeFile
+        val command = action.command
+        if (command != null && command.command == "codeforge.extractStringResource" && active != null) {
+            val root = projectRoot.value ?: File(active.path).parentFile?.absolutePath ?: active.path
+            val route = "hardcoded_strings?targetPath=${Uri.encode(active.path)}&projectRoot=${Uri.encode(root)}"
+            _effect.emit(EditorUiEffect.NavigateTo(route))
+            return@launch
+        }
         var handled = false
         val edit = action.edit
         if (edit != null) {
             handleWorkspaceEditFromLsp(edit)
             handled = true
         }
-        val command = action.command
         if (command != null) {
             lspClient.executeCommand(command.command, command.arguments)
             handled = true
