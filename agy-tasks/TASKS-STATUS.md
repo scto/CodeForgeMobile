@@ -51,7 +51,7 @@ Zuletzt aktualisiert: 2026-10-21. Stand Basis-Branch: `87e4e6d`.
 | **32** | `32-unified-formatter.md` | ✅ `ff4ff41` | Einheitlicher „Formatieren“-Befehl mit 3-Stufen-Fallback (LSP → CLI-Prozess `ktlint`/`google-java-format` → Built-in `CodeFormatter`), `.editorconfig`, Format-on-Save, Cursor-/Scroll-Erhalt (`docs/unified-formatter-report.md`) |
 | **33** | `33-snippets-live-templates.md` | ✅ `36745de` | Code-Snippets & Live-Templates: Vorlagen mit Tabstopps ($1, $0), Navigation via Tab/Shift+Tab/Esc in sora-editor 0.23.4, dynamische Variablen ($PACKAGE, $CLASSNAME, etc.), reiner Kotlin-Parser mit Zeilen-/Spaltenvalidierung, VS-Code JSON Import/Export & Einstellungs-UI (`docs/snippets-live-templates-report.md`) |
 | **34** | `34-signing-keystore-manager.md` | ✅ `6749b2a` | Signatur-Verwaltung & Release-Signierung: Keystores im privaten Speicher (`filesDir/keystores/`), Passwörter in `SecretStorage` (AES-256-GCM), argument-leak-freie Ausführung von `keytool`/`apksigner`, PKCS12, RSA 4096 / EC, V1–V4 Schemas, Gradle-Build-Integration (`docs/signing-keystore-manager-report.md`) |
-| **35** | `35-apk-analyzer.md` | ✅ `b3388eb` | APK-Analyse & Vergleich: Größenanalyse nach Bereichen (`ApkZipAnalyzer`), Metadaten & Komponenten (`AxmlManifestParser`, `AaptBadgingParser`, `AaptPermissionsParser`), Signaturprüfung (`ApksignerOutputParser`), Zwei-APK-Vergleich (`ApkComparator`), Zip-Slip-Schutz, UI in `:feature:build`, Kontextmenü in Dateibaum & Build-Ausgabe, Markdown-Export (`docs/apk-analyzer-report.md`) |
+| **35** | `35-apk-analyzer.md` | ✅ `ba0fb74` | APK-Analyse & Vergleich: Größenanalyse nach Bereichen (`ApkZipAnalyzer`), Metadaten & Komponenten (`AxmlManifestParser`, `AaptBadgingParser`, `AaptPermissionsParser`), Signaturprüfung (`ApksignerOutputParser`), Zwei-APK-Vergleich (`ApkComparator`), Zip-Slip-Schutz, UI in `:feature:build`, Kontextmenü in Dateibaum & Build-Ausgabe, Markdown-Export (`docs/apk-analyzer-report.md`) |
 | **36** | `36-test-runner.md` | ✅ `2f04ba5` | Test-Läufer mit Ergebnisbaum (Status, Dauer, klickbarer Fehlerort) aus JUnit-XML, Re-Run, Gutter-Integration im Editor (`docs/test-runner-report.md`) |
 | **37a** | `37a-debugger-spike-and-session-core.md` | ⬜ offen | Debugger: Machbarkeitsspike (JDI/JDWP in Termux) und UI-freier Sitzungskern. Messung auf dem Gerät (2026-10-19): `jdk.jdi` und `jdk.jdwp.agent` 17.0.20 vorhanden, JDWP-Agent lauscht auf `127.0.0.1:5005`; JDI-Attach durch einen Client noch nicht getestet |
 | **37b** | `37b-debugger-editor-ui.md` | ⬜ offen | Debugger: Breakpoints, Variablen, Schritte im Editor. Abhängigkeit: 37a mit positivem Spike |
@@ -66,9 +66,9 @@ Zuletzt aktualisiert: 2026-10-21. Stand Basis-Branch: `87e4e6d`.
 
 ---
 
-## 🧭 Geplante Tasks 35–44: Abhängigkeiten und Reihenfolge
+## 🧭 Geplante Tasks 37a–44: Abhängigkeiten und Reihenfolge
 
-Tasks 35–44 liegen als Spezifikationsdateien vor. Tasks 35 und 36 sind umgesetzt. Die Reihenfolge ist eine Empfehlung, keine Vorgabe.
+Tasks 37a–44 liegen als Spezifikationsdateien vor. Tasks 35 (`ba0fb74`) und 36 (`2f04ba5`) sind umgesetzt. Die Reihenfolge ist eine Empfehlung, keine Vorgabe.
 
 | Gruppe | Tasks | Abhängigkeiten / Hinweise |
 |---|---|---|
