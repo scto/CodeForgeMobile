@@ -136,8 +136,7 @@ on:
         description: "Konsistenzprüfung vor Veröffentlichung: fail (Standard) bricht bei unerfüllten Abhängigkeiten ab, warn erzeugt nur Warnungen"
         required: false
         default: "fail"
-        type: choice
-        options: [fail, warn]
+        type: string
       run_label:
         description: "Interner Name für Artefakte"
         required: false
