@@ -802,24 +802,53 @@ class EditorViewModel @Inject constructor(
         }
     }
 
-    private fun languageIdFor(path: String): String = when (path.substringAfterLast('.', "").lowercase()) {
-        "kt", "kts" -> "kotlin"
-        "java" -> "java"
-        "xml" -> "xml"
-        "json" -> "json"
-        "py" -> "python"
-        "c", "h" -> "c"
-        "cpp", "cc", "cxx", "hpp", "hh" -> "cpp"
-        "rs" -> "rust"
-        "html", "htm" -> "html"
-        "css" -> "css"
-        else -> when (EditorLanguageType.fromPath(path)) {
-            EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
-            EditorLanguageType.JAVA -> "java"
-            EditorLanguageType.XML -> "xml"
-            EditorLanguageType.JSON -> "json"
-            EditorLanguageType.PLAIN -> "plaintext"
+    companion object {
+        fun languageIdFor(path: String): String {
+            val extension = path.substringAfterLast('.', "").lowercase()
+            return when (extension) {
+                "kt", "kts" -> "kotlin"
+                "java" -> "java"
+                "xml", "xsd", "xsl", "xslt", "svg", "plist" -> "xml"
+                "json" -> "json"
+                "py" -> "python"
+                "c", "h" -> "c"
+                "cpp", "cc", "cxx", "hpp", "hh" -> "cpp"
+                "rs" -> "rust"
+                "html", "htm" -> "html"
+                "css" -> "css"
+                "yaml", "yml" -> "yaml"
+                "toml" -> "toml"
+                "sh", "bash", "zsh" -> "shellscript"
+                "gradle" -> "plaintext"
+                else -> {
+                    if (hasShellShebang(path)) {
+                        "shellscript"
+                    } else {
+                        when (EditorLanguageType.fromPath(path)) {
+                            EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
+                            EditorLanguageType.JAVA -> "java"
+                            EditorLanguageType.XML -> "xml"
+                            EditorLanguageType.JSON -> "json"
+                            EditorLanguageType.PLAIN -> "plaintext"
+                        }
+                    }
+                }
+            }
         }
+
+        private fun hasShellShebang(path: String): Boolean = runCatching {
+            val file = java.io.File(path)
+            if (file.isFile && file.length() > 2) {
+                file.bufferedReader().use { reader ->
+                    val firstLine = reader.readLine()?.trim() ?: ""
+                    firstLine.startsWith("#!") && (
+                        firstLine.contains("bash") ||
+                        firstLine.contains("sh") ||
+                        firstLine.contains("zsh")
+                    )
+                }
+            } else false
+        }.getOrDefault(false)
     }
 
     private fun publishActiveFileToBridge() {

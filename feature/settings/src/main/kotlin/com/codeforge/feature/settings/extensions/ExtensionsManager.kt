@@ -59,6 +59,8 @@ class ExtensionsManager internal constructor(
         return getExecutableFile(pkg) != null
     }
 
+    var customNpmRunner: (suspend (packageDir: File) -> Result<Unit>)? = null
+
     /**
      * Prüft die Laufzeitvoraussetzungen (`requires`) für ein Paket.
      * Liefert eine Liste der fehlenden Binaries/Paketnamen zurück (z. B. "openjdk-17", "nodejs").
@@ -69,9 +71,30 @@ class ExtensionsManager internal constructor(
             val satisfied = when (req) {
                 "openjdk-17", "java" -> hasBinary("java")
                 "nodejs", "node" -> hasBinary("node")
+                "npm" -> hasBinary("npm")
                 "python", "python3" -> hasBinary("python3") || hasBinary("python")
                 "clang" -> hasBinary("clangd") || hasBinary("clang")
                 "rust-analyzer" -> hasBinary("rust-analyzer")
+                "taplo" -> hasBinary("taplo")
+                "shellcheck" -> hasBinary("shellcheck")
+                else -> hasBinary(req)
+            }
+            if (!satisfied) {
+                missing.add(req)
+            }
+        }
+        return missing
+    }
+
+    /**
+     * Prüft optionale Laufzeitvoraussetzungen (`optionalRequires`) für ein Paket.
+     * Fehlende optionale Abhängigkeiten verhindern nicht die Installation oder den Start.
+     */
+    fun checkMissingOptionalRequirements(pkg: LspExtensionPackage): List<String> {
+        val missing = mutableListOf<String>()
+        for (req in pkg.optionalRequires) {
+            val satisfied = when (req) {
+                "shellcheck" -> hasBinary("shellcheck")
                 else -> hasBinary(req)
             }
             if (!satisfied) {
@@ -153,6 +176,18 @@ class ExtensionsManager internal constructor(
                 // Delete temporary archive after successful extraction
                 archiveFile.delete()
 
+                // 4. Install npm dependencies if required
+                if (pkg.needsNpmInstall) {
+                    onProgress(1f, ExtensionStatus.INSTALLING_DEPENDENCIES)
+                    val packageDir = File(extensionDir, "package").takeIf { it.exists() } ?: extensionDir
+                    val runner = customNpmRunner
+                    if (runner != null) {
+                        runner(packageDir).getOrThrow()
+                    } else {
+                        runNpmInstall(packageDir).getOrThrow()
+                    }
+                }
+
                 val executable = getExecutableFile(pkg)
                     ?: throw IllegalStateException("Executable not found after extraction: ${pkg.executableRelativePath}")
 
@@ -167,6 +202,23 @@ class ExtensionsManager internal constructor(
                 }
                 throw e
             }
+        }
+    }
+
+    private fun runNpmInstall(packageDir: File): Result<Unit> = runCatching {
+        val npmBin = File(termuxBinDir, "npm").takeIf { it.canExecute() }
+            ?: findBinaryOnPath("npm")
+            ?: throw IllegalStateException("npm binary not found in Termux. Please install nodejs via 'pkg install nodejs'.")
+
+        val process = ProcessBuilder(npmBin.absolutePath, "install", "--omit=dev")
+            .directory(packageDir)
+            .redirectErrorStream(true)
+            .start()
+
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        val exitCode = process.waitFor()
+        if (exitCode != 0) {
+            throw IllegalStateException("npm install failed with exit code $exitCode: $output")
         }
     }
 

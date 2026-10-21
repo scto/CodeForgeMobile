@@ -9,7 +9,8 @@ data class ExtensionUiItem(
     val installedPath: String?,
     val status: ExtensionStatus,
     val progress: Float,
-    val missingRequirements: List<String> = emptyList()
+    val missingRequirements: List<String> = emptyList(),
+    val missingOptionalRequirements: List<String> = emptyList()
 )
 
 data class ExtensionsUiState(

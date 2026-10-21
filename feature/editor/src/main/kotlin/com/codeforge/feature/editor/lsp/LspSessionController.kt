@@ -278,13 +278,17 @@ class LspSessionController @Inject constructor(
         "vscode-html-language-server" -> "html"
         "vscode-css-language-server" -> "css"
         "vscode-json-language-server" -> "json"
+        "lemminx" -> "xml"
+        "yaml-language-server" -> "yaml"
+        "taplo" -> "toml"
+        "bash-language-server" -> "shellscript"
         else -> serverId
     }
 
     private fun languageIdForPath(path: String): String = when (path.substringAfterLast('.', "").lowercase()) {
         "kt", "kts" -> "kotlin"
         "java" -> "java"
-        "xml" -> "xml"
+        "xml", "xsd", "xsl", "xslt", "svg", "plist" -> "xml"
         "json" -> "json"
         "py" -> "python"
         "c", "h" -> "c"
@@ -292,6 +296,9 @@ class LspSessionController @Inject constructor(
         "rs" -> "rust"
         "html", "htm" -> "html"
         "css" -> "css"
+        "yaml", "yml" -> "yaml"
+        "toml" -> "toml"
+        "sh", "bash", "zsh" -> "shellscript"
         else -> "plaintext"
     }
 }

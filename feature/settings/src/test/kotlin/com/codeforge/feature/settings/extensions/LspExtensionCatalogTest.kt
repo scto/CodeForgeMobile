@@ -14,7 +14,7 @@ class LspExtensionCatalogTest {
     @Test
     fun `catalog has unique non-blank IDs`() {
         val catalog = LspExtensionCatalog.ALL
-        assertTrue("Catalog should contain at least 6 packages", catalog.size >= 6)
+        assertTrue("Catalog should contain at least 10 packages", catalog.size >= 10)
 
         val ids = catalog.map { it.id }
         assertEquals("Catalog IDs must be unique", ids.size, ids.distinct().size)
@@ -33,7 +33,7 @@ class LspExtensionCatalogTest {
     @Test
     fun `download packages have valid https URLs, 64-char hex SHA256, and matching archive types`() {
         val downloadPackages = LspExtensionCatalog.ALL.filter { it.isDownloadable }
-        assertTrue("Must have at least 4 downloadable packages", downloadPackages.size >= 4)
+        assertTrue("Must have at least 7 downloadable packages", downloadPackages.size >= 7)
 
         for (pkg in downloadPackages) {
             val source = pkg.source as ExtensionSource.Download
@@ -41,6 +41,10 @@ class LspExtensionCatalogTest {
             assertTrue(
                 "SHA-256 must be exactly 64 hex characters for ${pkg.id} (got: ${source.sha256})",
                 hexRegex.matches(source.sha256)
+            )
+            assertFalse(
+                "SHA-256 must not be a zero placeholder for ${pkg.id}",
+                source.sha256 == "0".repeat(64)
             )
 
             when (source.archiveType) {
@@ -69,7 +73,7 @@ class LspExtensionCatalogTest {
     @Test
     fun `termux packages have valid package and binary names and launch commands`() {
         val termuxPackages = LspExtensionCatalog.ALL.filter { it.isTermuxPackage }
-        assertEquals("Must have 2 Termux packages (clangd, rust-analyzer)", 2, termuxPackages.size)
+        assertEquals("Must have 3 Termux packages (clangd, rust-analyzer, taplo)", 3, termuxPackages.size)
 
         for (pkg in termuxPackages) {
             val source = pkg.source as ExtensionSource.TermuxPackage
@@ -90,5 +94,9 @@ class LspExtensionCatalogTest {
         assertNotNull(LspExtensionCatalog.findById("pyright"))
         assertNotNull(LspExtensionCatalog.findById("rust-analyzer"))
         assertNotNull(LspExtensionCatalog.findById("vscode-langservers-extracted"))
+        assertNotNull(LspExtensionCatalog.findById("lemminx"))
+        assertNotNull(LspExtensionCatalog.findById("yaml-language-server"))
+        assertNotNull(LspExtensionCatalog.findById("taplo"))
+        assertNotNull(LspExtensionCatalog.findById("bash-language-server"))
     }
 }

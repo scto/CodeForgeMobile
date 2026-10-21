@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -277,9 +278,34 @@ private fun ExtensionCard(
                 }
             }
 
+            if (item.missingOptionalRequirements.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringRes(
+                            R.string.extensions_optional_prerequisite_missing,
+                            item.missingOptionalRequirements.joinToString(", ")
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
             val isBusy = item.status == ExtensionStatus.DOWNLOADING ||
                 item.status == ExtensionStatus.VERIFYING ||
-                item.status == ExtensionStatus.EXTRACTING
+                item.status == ExtensionStatus.EXTRACTING ||
+                item.status == ExtensionStatus.INSTALLING_DEPENDENCIES
 
             if (isBusy) {
                 Spacer(modifier = Modifier.height(12.dp))
@@ -295,6 +321,7 @@ private fun ExtensionCard(
                     )
                     ExtensionStatus.VERIFYING -> stringRes(R.string.extensions_verifying)
                     ExtensionStatus.EXTRACTING -> stringRes(R.string.extensions_extracting)
+                    ExtensionStatus.INSTALLING_DEPENDENCIES -> stringRes(R.string.extensions_installing_dependencies)
                     else -> ""
                 }
                 Text(

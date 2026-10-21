@@ -942,7 +942,17 @@
     <string name="extension_rust_analyzer_desc">Modulare Sprachserver-Implementierung für die Programmiersprache Rust.</string>
     <string name="extension_html_css_json_name">HTML / CSS / JSON Server</string>
     <string name="extension_html_css_json_desc">Sprachserver für Web-Technologien und strukturierte Datenformate.</string>
+    <string name="extension_lemminx_name">Eclipse LemMinX (XML)</string>
+    <string name="extension_lemminx_desc">XML-Sprachserver der Eclipse Foundation für XML, XSD, XSL und Android-Layouts.</string>
+    <string name="extension_yaml_lsp_name">YAML Language Server</string>
+    <string name="extension_yaml_lsp_desc">Sprachserver von Red Hat für YAML-Dateien mit Schema-Validierung und Autovervollständigung.</string>
+    <string name="extension_taplo_name">Taplo (TOML)</string>
+    <string name="extension_taplo_desc">TOML-Sprachserver für Konfigurationsdateien, Cargo.toml und pyproject.toml.</string>
+    <string name="extension_bash_lsp_name">Bash Language Server</string>
+    <string name="extension_bash_lsp_desc">Sprachserver für Shell-Skripte (sh, bash, zsh) basierend auf Tree-sitter.</string>
     <string name="extensions_missing_prerequisite">Voraussetzung fehlt: %1$s</string>
+    <string name="extensions_optional_prerequisite_missing">Hinweis: %1$s nicht installiert – Server läuft ohne Diagnosen.</string>
+    <string name="extensions_installing_dependencies">Installiere Abhängigkeiten…</string>
     <string name="extensions_termux_install_hint">Im Terminal ausführen: codeforge-env pkg %1$s</string>
     <string name="extensions_termux_package">Termux-Paket</string>
     <string name="editor_lsp_status_running">LSP: Aktiv</string>

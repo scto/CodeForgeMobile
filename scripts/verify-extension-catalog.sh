@@ -73,6 +73,24 @@ verify_package \
     "https://registry.npmjs.org/vscode-langservers-extracted/-/vscode-langservers-extracted-4.8.0.tgz" \
     "8c7102927a32fa145077f0406b66bb3a7d85f5b0a208d4efeb40702b5a6cd2e1"
 
+verify_package \
+    "lemminx" \
+    "0.31.2" \
+    "https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar" \
+    "f4fde164e785c635e5f86361dbf4b993bfe2c5f83fdb52891d058b7dfc9bcfc8"
+
+verify_package \
+    "yaml-language-server" \
+    "2.0.0" \
+    "https://registry.npmjs.org/yaml-language-server/-/yaml-language-server-2.0.0.tgz" \
+    "8dcd68cc8bcdde719def62e651de9744576d3227de2e4ab85961603c92a52423"
+
+verify_package \
+    "bash-language-server" \
+    "5.8.1" \
+    "https://registry.npmjs.org/bash-language-server/-/bash-language-server-5.8.1.tgz" \
+    "2ae910de8c50f4ec148222bdc580c121f2c621bdacc1225716218ca700f8ec79"
+
 echo "============================================================"
 echo "Gesamt geprüft: ${TOTAL} Pakete"
 if [ "${FAILED}" -eq 0 ]; then

@@ -63,6 +63,27 @@ class LspServerResolverImpl @Inject constructor(
                     ?: return null
                 listOf(exe.absolutePath)
             }
+            "lemminx" -> {
+                val jar = extensionsManager.getExecutableFile(pkg) ?: return null
+                val javaBin = File(termuxBin, "java").takeIf { it.canExecute() }?.absolutePath ?: "java"
+                listOf(javaBin, "-jar", jar.absolutePath)
+            }
+            "yaml-language-server" -> {
+                val nodeBin = File(termuxBin, "node").takeIf { it.canExecute() }?.absolutePath ?: "node"
+                val script = File(extensionDir, "package/bin/yaml-language-server").absolutePath
+                listOf(nodeBin, script, "--stdio")
+            }
+            "taplo" -> {
+                val exe = extensionsManager.getExecutableFile(pkg)
+                    ?: File(termuxBin, "taplo").takeIf { it.canExecute() }
+                    ?: return null
+                listOf(exe.absolutePath, "lsp", "stdio")
+            }
+            "bash-language-server" -> {
+                val nodeBin = File(termuxBin, "node").takeIf { it.canExecute() }?.absolutePath ?: "node"
+                val script = File(extensionDir, "package/out/cli.js").absolutePath
+                listOf(nodeBin, script, "start")
+            }
             else -> {
                 val exe = extensionsManager.getExecutableFile(pkg) ?: return null
                 listOf(exe.absolutePath)
@@ -88,6 +109,10 @@ class LspServerResolverImpl @Inject constructor(
         "html", "css", "json" -> LspExtensionCatalog.htmlCssJson
         "c", "cpp", "c_cpp" -> LspExtensionCatalog.clangd
         "rust" -> LspExtensionCatalog.rustAnalyzer
+        "xml" -> LspExtensionCatalog.lemminx
+        "yaml", "yml" -> LspExtensionCatalog.yamlLanguageServer
+        "toml" -> LspExtensionCatalog.taplo
+        "shellscript", "bash", "sh" -> LspExtensionCatalog.bashLanguageServer
         else -> null
     }
 }

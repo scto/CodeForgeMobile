@@ -942,7 +942,17 @@
     <string name="extension_rust_analyzer_desc">Modular language server implementation for the Rust programming language.</string>
     <string name="extension_html_css_json_name">HTML / CSS / JSON Server</string>
     <string name="extension_html_css_json_desc">Language server for web technologies and structured data formats.</string>
+    <string name="extension_lemminx_name">Eclipse LemMinX (XML)</string>
+    <string name="extension_lemminx_desc">XML language server by the Eclipse Foundation for XML, XSD, XSL, and Android layouts.</string>
+    <string name="extension_yaml_lsp_name">YAML Language Server</string>
+    <string name="extension_yaml_lsp_desc">Language server by Red Hat for YAML files with schema validation and autocompletion.</string>
+    <string name="extension_taplo_name">Taplo (TOML)</string>
+    <string name="extension_taplo_desc">TOML language server for configuration files, Cargo.toml, and pyproject.toml.</string>
+    <string name="extension_bash_lsp_name">Bash Language Server</string>
+    <string name="extension_bash_lsp_desc">Language server for shell scripts (sh, bash, zsh) based on Tree-sitter.</string>
     <string name="extensions_missing_prerequisite">Prerequisite missing: %1$s</string>
+    <string name="extensions_optional_prerequisite_missing">Notice: %1$s not installed – server runs without diagnostics.</string>
+    <string name="extensions_installing_dependencies">Installing dependencies…</string>
     <string name="extensions_termux_install_hint">Run in terminal: codeforge-env pkg %1$s</string>
     <string name="extensions_termux_package">Termux Package</string>
     <string name="editor_lsp_status_running">LSP: Running</string>

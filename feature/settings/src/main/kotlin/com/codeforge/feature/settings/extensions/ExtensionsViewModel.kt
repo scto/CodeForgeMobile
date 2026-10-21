@@ -41,13 +41,15 @@ class ExtensionsViewModel @Inject constructor(
         val items = catalog.map { pkg ->
             val installedFile = extensionsManager.getExecutableFile(pkg)
             val missing = extensionsManager.checkMissingRequirements(pkg)
+            val missingOptional = extensionsManager.checkMissingOptionalRequirements(pkg)
             ExtensionUiItem(
                 pkg = pkg,
                 isInstalled = installedFile != null,
                 installedPath = installedFile?.absolutePath,
                 status = if (installedFile != null) ExtensionStatus.INSTALLED else ExtensionStatus.NOT_INSTALLED,
                 progress = 0f,
-                missingRequirements = missing
+                missingRequirements = missing,
+                missingOptionalRequirements = missingOptional
             )
         }
         _uiState.update { it.copy(extensions = items, isRefreshing = false) }
@@ -69,7 +71,8 @@ class ExtensionsViewModel @Inject constructor(
                                     installedPath = executable.absolutePath,
                                     status = ExtensionStatus.INSTALLED,
                                     progress = 1f,
-                                    missingRequirements = extensionsManager.checkMissingRequirements(pkg)
+                                    missingRequirements = extensionsManager.checkMissingRequirements(pkg),
+                                    missingOptionalRequirements = extensionsManager.checkMissingOptionalRequirements(pkg)
                                 )
                             } else item
                         }

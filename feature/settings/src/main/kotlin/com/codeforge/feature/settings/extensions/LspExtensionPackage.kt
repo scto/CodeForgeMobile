@@ -17,6 +17,7 @@ enum class ExtensionStatus {
     DOWNLOADING,
     VERIFYING,
     EXTRACTING,
+    INSTALLING_DEPENDENCIES,
     INSTALLED,
     ERROR
 }
@@ -42,6 +43,8 @@ data class LspExtensionPackage(
     val language: String,
     val source: ExtensionSource,
     val requires: List<String> = emptyList(),
+    val optionalRequires: List<String> = emptyList(),
+    val needsNpmInstall: Boolean = false,
     val launchCommand: List<String>,
     val executableRelativePath: String
 ) {
@@ -57,6 +60,8 @@ data class LspExtensionPackage(
         archiveType: ExtensionArchiveType,
         executableRelativePath: String,
         requires: List<String> = emptyList(),
+        optionalRequires: List<String> = emptyList(),
+        needsNpmInstall: Boolean = false,
         launchCommand: List<String> = listOf(executableRelativePath)
     ) : this(
         id = id,
@@ -66,6 +71,8 @@ data class LspExtensionPackage(
         language = language,
         source = ExtensionSource.Download(downloadUrl, expectedSha256, archiveType),
         requires = requires,
+        optionalRequires = optionalRequires,
+        needsNpmInstall = needsNpmInstall,
         launchCommand = launchCommand,
         executableRelativePath = executableRelativePath
     )
@@ -208,13 +215,112 @@ object LspExtensionCatalog {
         executableRelativePath = "package/bin/vscode-html-language-server"
     )
 
+    /**
+     * Eclipse LemMinX XML Language Server (Eclipse Foundation)
+     * Download: Eclipse LemMinX Releases (0.31.2 uber-jar)
+     * URL: https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar
+     * SHA-256 verifiziert 2026-10-21: f4fde164e785c635e5f86361dbf4b993bfe2c5f83fdb52891d058b7dfc9bcfc8
+     * Benötigt: openjdk-17
+     */
+    val lemminx = LspExtensionPackage(
+        id = "lemminx",
+        nameRes = R.string.extension_lemminx_name,
+        descriptionRes = R.string.extension_lemminx_desc,
+        version = "0.31.2",
+        language = "XML",
+        source = ExtensionSource.Download(
+            url = "https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar",
+            sha256 = "f4fde164e785c635e5f86361dbf4b993bfe2c5f83fdb52891d058b7dfc9bcfc8",
+            archiveType = ExtensionArchiveType.JAR
+        ),
+        requires = listOf("openjdk-17"),
+        launchCommand = listOf("java", "-jar", "org.eclipse.lemminx-uber.jar"),
+        executableRelativePath = "org.eclipse.lemminx-uber.jar"
+    )
+
+    /**
+     * YAML Language Server (Red Hat)
+     * Download: npm registry tarball yaml-language-server-2.0.0.tgz
+     * URL: https://registry.npmjs.org/yaml-language-server/-/yaml-language-server-2.0.0.tgz
+     * SHA-256 verifiziert 2026-10-21: 8dcd68cc8bcdde719def62e651de9744576d3227de2e4ab85961603c92a52423
+     * dist.integrity (sha512): vT6ZEMTkXJA9Ixo07ByLgPkkt/L22fJdVDGAoB3EpPq3DCfKkMYeEeZdK5ECU6alwFUofhETo94/OV8GUxGuBg==
+     * Benötigt: nodejs, npm
+     */
+    val yamlLanguageServer = LspExtensionPackage(
+        id = "yaml-language-server",
+        nameRes = R.string.extension_yaml_lsp_name,
+        descriptionRes = R.string.extension_yaml_lsp_desc,
+        version = "2.0.0",
+        language = "YAML",
+        source = ExtensionSource.Download(
+            url = "https://registry.npmjs.org/yaml-language-server/-/yaml-language-server-2.0.0.tgz",
+            sha256 = "8dcd68cc8bcdde719def62e651de9744576d3227de2e4ab85961603c92a52423",
+            archiveType = ExtensionArchiveType.TAR_GZ
+        ),
+        requires = listOf("nodejs"),
+        needsNpmInstall = true,
+        launchCommand = listOf("node", "package/bin/yaml-language-server", "--stdio"),
+        executableRelativePath = "package/bin/yaml-language-server"
+    )
+
+    /**
+     * Taplo TOML Language Server
+     * Bereitstellung über das Termux-Paket 'taplo' (APT-Paket 'taplo', Binary 'taplo')
+     * Binary: $PREFIX/bin/taplo
+     * Befehl: taplo lsp stdio
+     */
+    val taplo = LspExtensionPackage(
+        id = "taplo",
+        nameRes = R.string.extension_taplo_name,
+        descriptionRes = R.string.extension_taplo_desc,
+        version = "0.10.0",
+        language = "TOML",
+        source = ExtensionSource.TermuxPackage(
+            packageName = "taplo",
+            binaryName = "taplo"
+        ),
+        requires = listOf("taplo"),
+        launchCommand = listOf("taplo", "lsp", "stdio"),
+        executableRelativePath = "taplo"
+    )
+
+    /**
+     * Bash Language Server
+     * Download: npm registry tarball bash-language-server-5.8.1.tgz
+     * URL: https://registry.npmjs.org/bash-language-server/-/bash-language-server-5.8.1.tgz
+     * SHA-256 verifiziert 2026-10-21: 2ae910de8c50f4ec148222bdc580c121f2c621bdacc1225716218ca700f8ec79
+     * dist.integrity (sha512): F3g0hKZhCiKbLUf9wkrST6+ZypsHvJqaJxw/+J7WK2ywhFyc8+7jSHSTU1UDYncZkyWgbKV6+eZy5qWTZtoXww==
+     * Benötigt: nodejs; Optional: shellcheck für Diagnosen
+     */
+    val bashLanguageServer = LspExtensionPackage(
+        id = "bash-language-server",
+        nameRes = R.string.extension_bash_lsp_name,
+        descriptionRes = R.string.extension_bash_lsp_desc,
+        version = "5.8.1",
+        language = "Shell / Bash",
+        source = ExtensionSource.Download(
+            url = "https://registry.npmjs.org/bash-language-server/-/bash-language-server-5.8.1.tgz",
+            sha256 = "2ae910de8c50f4ec148222bdc580c121f2c621bdacc1225716218ca700f8ec79",
+            archiveType = ExtensionArchiveType.TAR_GZ
+        ),
+        requires = listOf("nodejs"),
+        optionalRequires = listOf("shellcheck"),
+        needsNpmInstall = true,
+        launchCommand = listOf("node", "package/out/cli.js", "start"),
+        executableRelativePath = "package/out/cli.js"
+    )
+
     val ALL: List<LspExtensionPackage> = listOf(
         kotlinLanguageServer,
         jdtls,
         clangd,
         pyright,
         rustAnalyzer,
-        htmlCssJson
+        htmlCssJson,
+        lemminx,
+        yamlLanguageServer,
+        taplo,
+        bashLanguageServer
     )
 
     fun findById(id: String): LspExtensionPackage? = ALL.find { it.id == id }
