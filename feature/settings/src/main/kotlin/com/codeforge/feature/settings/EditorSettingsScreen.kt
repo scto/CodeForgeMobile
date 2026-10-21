@@ -152,6 +152,48 @@ private fun EditorSettingsScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(stringRes(R.string.settings_lsp_section_title), style = MaterialTheme.typography.titleSmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringRes(R.string.settings_lsp_max_sessions_label), style = MaterialTheme.typography.bodyMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { onEvent(EditorSettingsUiEvent.LspMaxConcurrentSessionsChanged((uiState.lspMaxConcurrentSessions - 1).coerceAtLeast(1))) }) {
+                                Text("–")
+                            }
+                            Text("${uiState.lspMaxConcurrentSessions}", modifier = Modifier.padding(horizontal = 8.dp))
+                            IconButton(onClick = { onEvent(EditorSettingsUiEvent.LspMaxConcurrentSessionsChanged((uiState.lspMaxConcurrentSessions + 1).coerceAtMost(10))) }) {
+                                Text("+")
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringRes(R.string.settings_lsp_idle_timeout_label), style = MaterialTheme.typography.bodyMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { onEvent(EditorSettingsUiEvent.LspIdleTimeoutMinutesChanged((uiState.lspIdleTimeoutMinutes - 1).coerceAtLeast(1))) }) {
+                                Text("–")
+                            }
+                            Text("${uiState.lspIdleTimeoutMinutes}m", modifier = Modifier.padding(horizontal = 8.dp))
+                            IconButton(onClick = { onEvent(EditorSettingsUiEvent.LspIdleTimeoutMinutesChanged((uiState.lspIdleTimeoutMinutes + 5).coerceAtMost(120))) }) {
+                                Text("+")
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,

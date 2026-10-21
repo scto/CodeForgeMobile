@@ -71,7 +71,9 @@ data class EditorUiState(
     val isLoadingOutline: Boolean = false,
     val isReferencesSheetVisible: Boolean = false,
     val referencesList: List<LspLocation> = emptyList(),
-    val referencesSymbol: String = ""
+    val referencesSymbol: String = "",
+    val runningLspSessions: List<com.codeforge.core.domain.model.LspSessionInfo> = emptyList(),
+    val isLspSessionsDialogVisible: Boolean = false
 ) {
     val isLspConnected: Boolean get() = lspServerState == LspServerState.RUNNING
 
@@ -143,6 +145,9 @@ sealed interface EditorUiEvent {
     data object DismissReferences : EditorUiEvent
     data class SelectLocation(val location: LspLocation) : EditorUiEvent
     data class RunTestTarget(val target: com.codeforge.feature.editor.overlay.TestTarget) : EditorUiEvent
+    data object ToggleLspSessionsDialog : EditorUiEvent
+    data class RestartLspSession(val sessionId: String) : EditorUiEvent
+    data class StopLspSession(val sessionId: String) : EditorUiEvent
 }
 
 sealed interface EditorUiEffect {

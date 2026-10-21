@@ -69,7 +69,16 @@ class LspServerResolverImpl @Inject constructor(
             }
         }
 
-        return LspServerLaunch(command = command, env = env)
+        val serverId = when (pkg.id) {
+            "vscode-langservers-extracted" -> when (languageId.lowercase()) {
+                "css" -> "vscode-css-language-server"
+                "json" -> "vscode-json-language-server"
+                else -> "vscode-html-language-server"
+            }
+            else -> pkg.id
+        }
+
+        return LspServerLaunch(command = command, env = env, serverId = serverId)
     }
 
     private fun findPackageForLanguage(languageId: String): LspExtensionPackage? = when (languageId.lowercase()) {

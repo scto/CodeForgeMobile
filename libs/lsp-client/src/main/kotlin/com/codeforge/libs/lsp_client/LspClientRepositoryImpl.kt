@@ -16,39 +16,32 @@ import com.codeforge.core.domain.model.LspWorkspaceEdit
 import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * JSON-RPC-Bridge zum Language Server (LSP).
+ * Multi-Session Router für LSP-Sitzungen.
+ * Hält mehrere [LspServerSession]s gleichzeitig (je eine pro Server/Workspace-Kombination).
+ * Leitet pfadbasierte Anfragen an die zuständige Sitzung weiter.
  */
 @Singleton
 class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val sessions = ConcurrentHashMap<String, LspServerSession>()
+    private val documentToSession = ConcurrentHashMap<String, String>()
+    private val diagnosticsBySession = ConcurrentHashMap<String, ConcurrentHashMap<String, List<LspDiagnostic>>>()
 
-    private var process: Process? = null
-    private var connection: LspRpcConnection? = null
-    private val documentVersions = ConcurrentHashMap<String, Int>()
+    private val _sessionStates = MutableStateFlow<Map<String, LspServerState>>(emptyMap())
+    override val sessionStates: StateFlow<Map<String, LspServerState>> = _sessionStates.asStateFlow()
+
+    private val _activeDocumentPath = MutableStateFlow<String?>(null)
 
     private val _serverState = MutableStateFlow(LspServerState.STOPPED)
     override val serverState: StateFlow<LspServerState> = _serverState.asStateFlow()
@@ -56,367 +49,324 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
     private val _serverCapabilities = MutableStateFlow<LspServerCapabilities?>(null)
     override val serverCapabilities: StateFlow<LspServerCapabilities?> = _serverCapabilities.asStateFlow()
 
-    private val _diagnostics = MutableSharedFlow<Pair<String, List<LspDiagnostic>>>(extraBufferCapacity = 32)
+    private val _diagnostics = MutableSharedFlow<Pair<String, List<LspDiagnostic>>>(extraBufferCapacity = 64)
     override val diagnostics: Flow<Pair<String, List<LspDiagnostic>>> = _diagnostics.asSharedFlow()
 
     override var applyEditHandler: (suspend (LspWorkspaceEdit) -> Boolean)? = null
 
-    /** Ermöglicht Injection einer bestehenden Verbindung (z. B. für Mock-/Pipes-Tests). */
-    internal fun attachConnection(rpcConnection: LspRpcConnection) {
-        connection = rpcConnection
-        rpcConnection.start(scope, ::handleNotification, ::handleServerRequest)
-        _serverState.value = LspServerState.RUNNING
+    /** Ermöglicht Injection einer bestehenden Verbindung für Tests. */
+    internal fun attachConnection(rpcConnection: LspRpcConnection, sessionId: String = "default") {
+        val session = LspServerSession(
+            sessionId = sessionId,
+            serverId = sessionId,
+            workspaceRootPath = "",
+            onDiagnostics = { sId, path, diags ->
+                val map = diagnosticsBySession.computeIfAbsent(sId) { ConcurrentHashMap() }
+                map[path] = diags
+                _diagnostics.tryEmit(path to diags)
+            },
+            onApplyEdit = { edit -> applyEditHandler?.invoke(edit) ?: false }
+        )
+        session.attachConnection(rpcConnection)
+        sessions[sessionId] = session
+        updateSessionStates()
+        updateActiveSessionState()
+    }
+
+    internal fun attachSession(session: LspServerSession) {
+        sessions[session.sessionId] = session
+        updateSessionStates()
+        updateActiveSessionState()
+    }
+
+    override fun setActiveDocument(path: String?) {
+        _activeDocumentPath.value = path
+        updateActiveSessionState()
+    }
+
+    override fun capabilitiesFor(path: String): LspServerCapabilities? =
+        sessionForPath(path)?.serverCapabilities?.value
+
+    override fun stateFor(path: String): LspServerState =
+        sessionForPath(path)?.serverState?.value ?: LspServerState.STOPPED
+
+    override suspend fun startSession(
+        sessionId: String,
+        languageIds: Set<String>,
+        serverCommand: List<String>,
+        workspaceRootPath: String,
+        extraProcessEnv: Map<String, String>
+    ): Result<Unit> {
+        val existing = sessions[sessionId]
+        if (existing != null && (existing.serverState.value == LspServerState.RUNNING || existing.serverState.value == LspServerState.STARTING)) {
+            updateActiveSessionState()
+            return Result.success(Unit)
+        }
+
+        val serverId = sessionId.substringBefore('@')
+        val session = LspServerSession(
+            sessionId = sessionId,
+            serverId = serverId,
+            workspaceRootPath = workspaceRootPath,
+            languageIds = languageIds,
+            onDiagnostics = { sId, path, diags ->
+                val map = diagnosticsBySession.computeIfAbsent(sId) { ConcurrentHashMap() }
+                map[path] = diags
+                _diagnostics.tryEmit(path to diags)
+            },
+            onApplyEdit = { edit -> applyEditHandler?.invoke(edit) ?: false }
+        )
+        sessions[sessionId] = session
+        updateSessionStates()
+
+        val result = session.start(serverCommand, extraProcessEnv)
+        updateSessionStates()
+        updateActiveSessionState()
+        return result
+    }
+
+    override suspend fun stopSession(sessionId: String) {
+        val session = sessions.remove(sessionId) ?: return
+        session.stop()
+
+        // Diagnosen dieser Sitzung leeren
+        val sessionDiags = diagnosticsBySession.remove(sessionId)
+        if (sessionDiags != null) {
+            for (path in sessionDiags.keys) {
+                _diagnostics.tryEmit(path to emptyList())
+            }
+        }
+
+        // Dokumentzuordnungen dieser Sitzung entfernen
+        val iterator = documentToSession.entries.iterator()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            if (entry.value == sessionId) {
+                iterator.remove()
+            }
+        }
+
+        updateSessionStates()
+        updateActiveSessionState()
+    }
+
+    override suspend fun stopAll() {
+        val allIds = sessions.keys.toList()
+        for (id in allIds) {
+            stopSession(id)
+        }
     }
 
     override suspend fun start(
         serverCommand: List<String>,
         workspaceRootPath: String,
         extraProcessEnv: Map<String, String>
-    ): Result<Unit> =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                _serverState.value = LspServerState.STARTING
+    ): Result<Unit> = startSession(
+        sessionId = "default",
+        languageIds = emptySet(),
+        serverCommand = serverCommand,
+        workspaceRootPath = workspaceRootPath,
+        extraProcessEnv = extraProcessEnv
+    )
 
-                val processBuilder = ProcessBuilder(serverCommand).redirectErrorStream(false)
-                if (extraProcessEnv.isNotEmpty()) {
-                    processBuilder.environment().putAll(extraProcessEnv)
-                }
-                val startedProcess = processBuilder.start()
-                process = startedProcess
-
-                val rpcConnection = LspRpcConnection(startedProcess)
-                connection = rpcConnection
-                rpcConnection.start(scope, ::handleNotification, ::handleServerRequest)
-
-                val initializeParams = buildJsonObject {
-                    put("processId", android.os.Process.myPid())
-                    put("rootUri", "file://$workspaceRootPath")
-                    put("capabilities", buildJsonObject {
-                        put("textDocument", buildJsonObject {
-                            put("synchronization", buildJsonObject {
-                                put("dynamicRegistration", true)
-                                put("willSave", false)
-                                put("willSaveWaitUntil", false)
-                                put("didSave", false)
-                            })
-                            put("completion", buildJsonObject {
-                                put("dynamicRegistration", true)
-                                put("completionItem", buildJsonObject {
-                                    put("snippetSupport", true)
-                                })
-                            })
-                            put("hover", buildJsonObject {
-                                put("contentFormat", buildJsonArray {
-                                    add(JsonPrimitive("markdown"))
-                                    add(JsonPrimitive("plaintext"))
-                                })
-                            })
-                            put("codeAction", buildJsonObject {
-                                put("dynamicRegistration", true)
-                                put("codeActionLiteralSupport", buildJsonObject {
-                                    put("codeActionKind", buildJsonObject {
-                                        put("valueSet", buildJsonArray {
-                                            add(JsonPrimitive(""))
-                                            add(JsonPrimitive("quickfix"))
-                                            add(JsonPrimitive("refactor"))
-                                            add(JsonPrimitive("refactor.extract"))
-                                            add(JsonPrimitive("refactor.inline"))
-                                            add(JsonPrimitive("refactor.rewrite"))
-                                            add(JsonPrimitive("source"))
-                                            add(JsonPrimitive("source.organizeImports"))
-                                        })
-                                    })
-                                })
-                            })
-                            put("rename", buildJsonObject {
-                                put("dynamicRegistration", true)
-                                put("prepareSupport", true)
-                            })
-                            put("documentSymbol", buildJsonObject {
-                                put("hierarchicalDocumentSymbolSupport", true)
-                            })
-                            put("definition", buildJsonObject {
-                                put("dynamicRegistration", true)
-                            })
-                            put("references", buildJsonObject {
-                                put("dynamicRegistration", true)
-                            })
-                        })
-                        put("workspace", buildJsonObject {
-                            put("applyEdit", true)
-                            put("workspaceEdit", buildJsonObject {
-                                put("documentChanges", true)
-                                put("resourceOperations", buildJsonArray {
-                                    add(JsonPrimitive("create"))
-                                    add(JsonPrimitive("rename"))
-                                    add(JsonPrimitive("delete"))
-                                })
-                            })
-                        })
-                    })
-                }
-                val initResponse = rpcConnection.sendRequest("initialize", initializeParams)
-                _serverCapabilities.value = parseServerCapabilities(initResponse["result"])
-                rpcConnection.sendNotification("initialized", buildJsonObject { })
-
-                _serverState.value = LspServerState.RUNNING
-            }.onFailure {
-                _serverState.value = LspServerState.FAILED
-            }
-        }
-
-    override suspend fun stop() = withContext(Dispatchers.IO) {
-        runCatching {
-            connection?.sendNotification("shutdown", buildJsonObject { })
-            connection?.sendNotification("exit", buildJsonObject { })
-        }
-        connection?.close()
-        process?.destroy()
-        connection = null
-        process = null
-        documentVersions.clear()
-        _serverCapabilities.value = null
-        _serverState.value = LspServerState.STOPPED
-        Unit
+    override suspend fun stop() {
+        stopAll()
     }
 
     override suspend fun didOpen(path: String, languageId: String, content: String) {
-        documentVersions[path] = 1
-        connection?.sendNotification(
-            "textDocument/didOpen",
-            buildJsonObject {
-                put(
-                    "textDocument",
-                    buildJsonObject {
-                        put("uri", "file://$path")
-                        put("languageId", languageId)
-                        put("version", 1)
-                        put("text", content)
-                    }
-                )
-            }
-        )
+        val session = findOrCreateRoutingForOpen(path, languageId)
+        if (session != null) {
+            documentToSession[path] = session.sessionId
+            session.didOpen(path, languageId, content)
+            updateActiveSessionState()
+        }
     }
 
     override suspend fun didChange(path: String, newContent: String, version: Int) {
-        documentVersions[path] = version
-        connection?.sendNotification(
-            "textDocument/didChange",
-            buildJsonObject {
-                put(
-                    "textDocument",
-                    buildJsonObject {
-                        put("uri", "file://$path")
-                        put("version", version)
-                    }
-                )
-                put(
-                    "contentChanges",
-                    buildJsonArray {
-                        add(buildJsonObject { put("text", newContent) })
-                    }
-                )
-            }
-        )
+        val session = sessionForPath(path)
+        session?.didChange(path, newContent, version)
     }
 
     override suspend fun didClose(path: String) {
-        documentVersions.remove(path)
-        connection?.sendNotification(
-            "textDocument/didClose",
-            buildJsonObject {
-                put("textDocument", buildJsonObject { put("uri", "file://$path") })
-            }
-        )
+        val session = sessionForPath(path)
+        session?.didClose(path)
+        documentToSession.remove(path)
+        updateActiveSessionState()
     }
 
-    override suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>> =
-        runCatching {
-            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-            val response = activeConnection.sendRequest(
-                "textDocument/completion",
-                buildJsonObject {
-                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                    put("position", positionToJson(position))
-                }
-            )
-            parseCompletionResult(response["result"])
-        }
+    override suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestCompletion(path, position)
+    }
 
-    override suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> =
-        runCatching {
-            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-            val response = activeConnection.sendRequest(
-                "textDocument/hover",
-                buildJsonObject {
-                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                    put("position", positionToJson(position))
-                }
-            )
-            parseHoverResult(response["result"])
-        }
+    override suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestHover(path, position)
+    }
 
-    override suspend fun requestFormat(path: String, content: String): Result<String> =
-        runCatching {
-            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-            val response = activeConnection.sendRequest(
-                "textDocument/formatting",
-                buildJsonObject {
-                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                    put(
-                        "options",
-                        buildJsonObject {
-                            put("tabSize", 4)
-                            put("insertSpaces", true)
-                        }
-                    )
-                }
-            )
-            applyTextEdits(content, response["result"])
-        }
+    override suspend fun requestFormat(path: String, content: String): Result<String> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestFormat(path, content)
+    }
 
-    override suspend fun requestRangeFormat(path: String, content: String, range: LspRange): Result<String> =
-        runCatching {
-            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-            val response = activeConnection.sendRequest(
-                "textDocument/rangeFormatting",
-                buildJsonObject {
-                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                    put("range", rangeToJson(range))
-                    put(
-                        "options",
-                        buildJsonObject {
-                            put("tabSize", 4)
-                            put("insertSpaces", true)
-                        }
-                    )
-                }
-            )
-            applyTextEdits(content, response["result"])
-        }
+    override suspend fun requestRangeFormat(path: String, content: String, range: LspRange): Result<String> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestRangeFormat(path, content, range)
+    }
 
     override suspend fun requestCodeActions(
         path: String,
         range: LspRange,
         diagnostics: List<LspDiagnostic>
-    ): Result<List<LspCodeAction>> = runCatching {
-        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-        val params = buildJsonObject {
-            put("textDocument", buildJsonObject { put("uri", "file://$path") })
-            put("range", rangeToJson(range))
-            put("context", buildJsonObject {
-                put("diagnostics", buildJsonArray {
-                    diagnostics.forEach { add(diagnosticToJson(it)) }
-                })
-            })
-        }
-        val response = activeConnection.sendRequest("textDocument/codeAction", params)
-        parseCodeActions(response["result"])
+    ): Result<List<LspCodeAction>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestCodeActions(path, range, diagnostics)
     }
 
-    override suspend fun requestPrepareRename(
-        path: String,
-        position: LspPosition
-    ): Result<LspPrepareRenameResult?> = runCatching {
-        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-        val params = buildJsonObject {
-            put("textDocument", buildJsonObject { put("uri", "file://$path") })
-            put("position", positionToJson(position))
-        }
-        val response = activeConnection.sendRequest("textDocument/prepareRename", params)
-        parsePrepareRename(response["result"])
+    override suspend fun requestPrepareRename(path: String, position: LspPosition): Result<LspPrepareRenameResult?> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestPrepareRename(path, position)
     }
 
-    override suspend fun requestRename(
-        path: String,
-        position: LspPosition,
-        newName: String
-    ): Result<LspWorkspaceEdit?> = runCatching {
-        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-        val params = buildJsonObject {
-            put("textDocument", buildJsonObject { put("uri", "file://$path") })
-            put("position", positionToJson(position))
-            put("newName", newName)
-        }
-        val response = activeConnection.sendRequest("textDocument/rename", params)
-        parseWorkspaceEdit(response["result"])
+    override suspend fun requestRename(path: String, position: LspPosition, newName: String): Result<LspWorkspaceEdit?> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestRename(path, position, newName)
     }
 
-    override suspend fun requestDocumentSymbols(path: String): Result<List<LspDocumentSymbol>> = runCatching {
-        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-        val params = buildJsonObject {
-            put("textDocument", buildJsonObject { put("uri", "file://$path") })
-        }
-        val response = activeConnection.sendRequest("textDocument/documentSymbol", params)
-        parseDocumentSymbols(response["result"])
+    override suspend fun requestDocumentSymbols(path: String): Result<List<LspDocumentSymbol>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestDocumentSymbols(path)
     }
 
-    override suspend fun requestDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
-        runCatching {
-            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-            val params = buildJsonObject {
-                put("textDocument", buildJsonObject { put("uri", "file://$path") })
-                put("position", positionToJson(position))
-            }
-            val response = activeConnection.sendRequest("textDocument/definition", params)
-            parseLocations(response["result"])
-        }
+    override suspend fun requestDefinition(path: String, position: LspPosition): Result<List<LspLocation>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestDefinition(path, position)
+    }
 
     override suspend fun requestReferences(
         path: String,
         position: LspPosition,
         includeDeclaration: Boolean
-    ): Result<List<LspLocation>> = runCatching {
-        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-        val params = buildJsonObject {
-            put("textDocument", buildJsonObject { put("uri", "file://$path") })
-            put("position", positionToJson(position))
-            put("context", buildJsonObject {
-                put("includeDeclaration", includeDeclaration)
-            })
+    ): Result<List<LspLocation>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestReferences(path, position, includeDeclaration)
+    }
+
+    override suspend fun executeCommand(command: String, arguments: List<Any?>): Result<Unit> {
+        val session = sessionForPath(_activeDocumentPath.value ?: "")
+            ?: sessions.values.firstOrNull()
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.executeCommand(command, arguments)
+    }
+
+    override fun getOpenDocumentCount(sessionId: String): Int =
+        sessions[sessionId]?.openDocumentCount ?: 0
+
+    override fun getSessionLastUsed(sessionId: String): Long =
+        sessions[sessionId]?.lastUsedTimestamp ?: 0L
+
+    override fun getRunningSessionIds(): List<String> =
+        sessions.keys.toList()
+
+    fun getSession(sessionId: String): LspServerSession? = sessions[sessionId]
+
+    fun getAllSessions(): List<LspServerSession> = sessions.values.toList()
+
+    private fun findOrCreateRoutingForOpen(path: String, languageId: String): LspServerSession? {
+        val existingSessionId = documentToSession[path]
+        if (existingSessionId != null) {
+            val existing = sessions[existingSessionId]
+            if (existing != null) return existing
         }
-        val response = activeConnection.sendRequest("textDocument/references", params)
-        parseLocations(response["result"])
-    }
 
-    override suspend fun executeCommand(command: String, arguments: List<Any?>): Result<Unit> = runCatching {
-        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
-        val params = buildJsonObject {
-            put("command", command)
-            put("arguments", buildJsonArray {
-                arguments.forEach { arg ->
-                    when (arg) {
-                        is Number -> add(JsonPrimitive(arg))
-                        is Boolean -> add(JsonPrimitive(arg))
-                        is String -> add(JsonPrimitive(arg))
-                        else -> add(JsonPrimitive(arg?.toString() ?: ""))
-                    }
-                }
-            })
+        val langLower = languageId.lowercase()
+        // 1. Suche nach passender Sprache
+        val byLanguage = sessions.values.firstOrNull { it.languageIds.contains(langLower) }
+        if (byLanguage != null) return byLanguage
+
+        // 2. Spezialfälle (C/C++ teilen sich clangd)
+        if (langLower == "c" || langLower == "cpp") {
+            val clangd = sessions.values.firstOrNull { it.serverId == "clangd" }
+            if (clangd != null) return clangd
         }
-        activeConnection.sendRequest("workspace/executeCommand", params)
-        Unit
+
+        // 3. Wenn genau eine Sitzung existiert
+        if (sessions.size == 1) {
+            return sessions.values.first()
+        }
+
+        // 4. Fallback auf aktive Sitzung
+        val activePath = _activeDocumentPath.value
+        if (activePath != null) {
+            val activeSessionId = documentToSession[activePath]
+            if (activeSessionId != null) {
+                val activeSession = sessions[activeSessionId]
+                if (activeSession != null) return activeSession
+            }
+        }
+
+        return sessions.values.firstOrNull()
     }
 
-    private fun handleNotification(method: String, params: JsonObject?) {
-        if (method != "textDocument/publishDiagnostics" || params == null) return
-
-        val uri = (params["uri"] as? JsonPrimitive)?.content ?: return
-        val path = uri.removePrefix("file://")
-        val diagnosticsList = parseDiagnostics(params["diagnostics"] as? JsonArray)
-        _diagnostics.tryEmit(path to diagnosticsList)
-    }
-
-    private suspend fun handleServerRequest(method: String, id: JsonElement, params: JsonObject?): JsonElement? {
-        if (method == "workspace/applyEdit" && params != null) {
-            val edit = parseWorkspaceEdit(params["edit"])
-            val applied = if (edit != null) {
-                applyEditHandler?.invoke(edit) ?: false
-            } else false
-            return buildJsonObject {
-                put("applied", applied)
+    private fun sessionForPath(path: String): LspServerSession? {
+        val sessionId = documentToSession[path]
+        if (sessionId != null) {
+            val session = sessions[sessionId]
+            if (session != null) return session
+        }
+        for (session in sessions.values) {
+            if (session.hasDocument(path)) {
+                documentToSession[path] = session.sessionId
+                return session
+            }
+        }
+        if (sessions.size == 1) {
+            return sessions.values.first()
+        }
+        val activePath = _activeDocumentPath.value
+        if (activePath != null && activePath != path) {
+            val activeSessionId = documentToSession[activePath]
+            if (activeSessionId != null) {
+                val activeSession = sessions[activeSessionId]
+                if (activeSession != null) return activeSession
             }
         }
         return null
+    }
+
+    private fun updateSessionStates() {
+        _sessionStates.value = sessions.mapValues { it.value.serverState.value }
+    }
+
+    private fun updateActiveSessionState() {
+        val activePath = _activeDocumentPath.value
+        val activeSession = if (activePath != null) {
+            val sId = documentToSession[activePath]
+            if (sId != null) sessions[sId] else null
+        } else null
+
+        if (activeSession != null) {
+            _serverState.value = activeSession.serverState.value
+            _serverCapabilities.value = activeSession.serverCapabilities.value
+        } else {
+            val single = if (sessions.size == 1) sessions.values.first() else null
+            if (single != null) {
+                _serverState.value = single.serverState.value
+                _serverCapabilities.value = single.serverCapabilities.value
+            } else {
+                _serverState.value = LspServerState.STOPPED
+                _serverCapabilities.value = null
+            }
+        }
     }
 }

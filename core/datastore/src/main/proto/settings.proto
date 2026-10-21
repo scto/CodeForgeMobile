@@ -58,6 +58,8 @@ message EditorConfig {
   bool format_on_save_java = 17;
   bool format_on_save_xml = 18;
   bool format_on_save_json = 19;
+  int32 lsp_max_concurrent_sessions = 20;
+  int32 lsp_idle_timeout_minutes = 21;
 }
 
 

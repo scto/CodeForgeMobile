@@ -42,6 +42,8 @@ class EditorSettingsViewModel @Inject constructor(
                 formatOnSaveJava = settings.editor.formatOnSaveJava,
                 formatOnSaveXml = settings.editor.formatOnSaveXml,
                 formatOnSaveJson = settings.editor.formatOnSaveJson,
+                lspMaxConcurrentSessions = settings.editor.lspMaxConcurrentSessions.takeIf { it > 0 } ?: 3,
+                lspIdleTimeoutMinutes = settings.editor.lspIdleTimeoutMinutes.takeIf { it > 0 } ?: 10,
                 isLoading = false
             )
         }
@@ -52,6 +54,12 @@ class EditorSettingsViewModel @Inject constructor(
             when (event) {
                 is EditorSettingsUiEvent.TabSizeChanged ->
                     settingsRepository.updateEditor { it.toBuilder().setTabSize(event.size).build() }
+
+                is EditorSettingsUiEvent.LspMaxConcurrentSessionsChanged ->
+                    settingsRepository.updateEditor { it.toBuilder().setLspMaxConcurrentSessions(event.count).build() }
+
+                is EditorSettingsUiEvent.LspIdleTimeoutMinutesChanged ->
+                    settingsRepository.updateEditor { it.toBuilder().setLspIdleTimeoutMinutes(event.minutes).build() }
 
                 EditorSettingsUiEvent.TreeSitterToggled ->
                     settingsRepository.updateEditor { it.toBuilder().setUseTreeSitter(!it.useTreeSitter).build() }

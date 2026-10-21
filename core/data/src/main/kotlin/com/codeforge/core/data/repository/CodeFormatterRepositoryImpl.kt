@@ -99,8 +99,8 @@ class CodeFormatterRepositoryImpl @Inject constructor(
     }
 
     private suspend fun tryLspFormatFile(path: String, content: String): Result<FormattedCode>? {
-        if (lspClient.serverState.value != LspServerState.RUNNING) return null
-        val caps = lspClient.serverCapabilities.value ?: return null
+        if (lspClient.stateFor(path) != LspServerState.RUNNING) return null
+        val caps = lspClient.capabilitiesFor(path) ?: return null
         if (!caps.formattingProvider) return null
 
         val result = lspClient.requestFormat(path, content)
@@ -119,8 +119,8 @@ class CodeFormatterRepositoryImpl @Inject constructor(
         content: String,
         range: LspRange
     ): Result<FormattedCode>? {
-        if (lspClient.serverState.value != LspServerState.RUNNING) return null
-        val caps = lspClient.serverCapabilities.value ?: return null
+        if (lspClient.stateFor(path) != LspServerState.RUNNING) return null
+        val caps = lspClient.capabilitiesFor(path) ?: return null
         if (!caps.rangeFormattingProvider && !caps.formattingProvider) return null
 
         val result = if (caps.rangeFormattingProvider) {

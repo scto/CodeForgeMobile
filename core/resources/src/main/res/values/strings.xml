@@ -951,6 +951,15 @@
     <string name="editor_lsp_status_failed">LSP: Error</string>
     <string name="editor_lsp_open_settings">Settings → Extensions</string>
     <string name="editor_lsp_start_failed">LSP server could not be started. Check Settings → Extensions.</string>
+    <string name="editor_lsp_sessions_title">Running LSP Servers</string>
+    <string name="editor_lsp_heavyweight_tag">JVM / high memory usage</string>
+    <string name="editor_lsp_restart">Restart</string>
+    <string name="editor_lsp_stop">Stop</string>
+    <string name="editor_lsp_no_sessions">No active language servers</string>
+    <string name="editor_lsp_open_docs_count">%1$d open document(s)</string>
+    <string name="settings_lsp_section_title">Language Server (LSP)</string>
+    <string name="settings_lsp_max_sessions_label">Max Concurrent Sessions</string>
+    <string name="settings_lsp_idle_timeout_label">Idle Timeout (Minutes)</string>
 
     <!-- install (Task 29) -->
     <string name="build_bauen_und_starten">Build &amp; Run</string>

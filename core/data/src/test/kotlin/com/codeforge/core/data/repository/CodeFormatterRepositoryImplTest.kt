@@ -63,6 +63,23 @@ class CodeFormatterRepositoryImplTest {
     }
 
     @Test
+    fun `strategy 1 resolves capabilities per path rather than globally`() = runTest {
+        // Global state is STOPPED, but path-specific state for schema.yaml is RUNNING with formatting
+        fakeLspClient.setServerState(LspServerState.STOPPED)
+        fakeLspClient.setCapabilities(null)
+
+        fakeLspClient.pathStates["schema.yaml"] = LspServerState.RUNNING
+        fakeLspClient.pathCapabilities["schema.yaml"] = LspServerCapabilities(formattingProvider = true)
+        fakeLspClient.formatResult = "name: codeforge\nversion: 1"
+
+        val result = repository.formatFile("schema.yaml", "name:codeforge\nversion:1")
+        assertTrue(result.isSuccess)
+        val formatted = result.getOrThrow()
+        assertEquals(UnifiedFormatSource.LSP, formatted.source)
+        assertEquals("name: codeforge\nversion: 1", formatted.text)
+    }
+
+    @Test
     fun `strategy 2 uses ktlint process for kotlin when LSP is unavailable and ktlint exists`() = runTest {
         fakeLspClient.setServerState(LspServerState.STOPPED)
         fakeProcessExecutor.availableExecutables["ktlint"] = "/usr/bin/ktlint"
@@ -193,6 +210,14 @@ class CodeFormatterRepositoryImplTest {
 
         var formatResult: String = ""
         var rangeFormatResult: String = ""
+        val pathCapabilities = mutableMapOf<String, LspServerCapabilities?>()
+        val pathStates = mutableMapOf<String, LspServerState>()
+
+        override fun capabilitiesFor(path: String): LspServerCapabilities? =
+            pathCapabilities[path] ?: serverCapabilities.value
+
+        override fun stateFor(path: String): LspServerState =
+            pathStates[path] ?: serverState.value
 
         override suspend fun start(serverCommand: List<String>, workspaceRootPath: String, extraProcessEnv: Map<String, String>) = Result.success(Unit)
         override suspend fun stop() {}

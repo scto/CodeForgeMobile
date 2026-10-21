@@ -30,6 +30,64 @@ interface LspClientRepository {
     val serverCapabilities: StateFlow<LspServerCapabilities?>
 
     /**
+     * Zustand aller laufenden Sitzungen nach Sitzungs-ID.
+     */
+    val sessionStates: StateFlow<Map<String, LspServerState>>
+        get() = kotlinx.coroutines.flow.MutableStateFlow(emptyMap())
+
+    /**
+     * Liefert die Capabilities der für diesen Dateipfad zuständigen Sitzung.
+     */
+    fun capabilitiesFor(path: String): LspServerCapabilities? = serverCapabilities.value
+
+    /**
+     * Liefert den Zustand der für diesen Dateipfad zuständigen Sitzung.
+     */
+    fun stateFor(path: String): LspServerState = serverState.value
+
+    /**
+     * Setzt das aktuell im Editor aktive Dokument, wodurch [serverState] und [serverCapabilities]
+     * auf die entsprechende Sitzung ausgerichtet werden.
+     */
+    fun setActiveDocument(path: String?) {}
+
+    /**
+     * Startet eine gezielte LSP-Sitzung für die gegebene [sessionId] und den [workspaceRootPath].
+     */
+    suspend fun startSession(
+        sessionId: String,
+        languageIds: Set<String>,
+        serverCommand: List<String>,
+        workspaceRootPath: String,
+        extraProcessEnv: Map<String, String> = emptyMap()
+    ): Result<Unit> = start(serverCommand, workspaceRootPath, extraProcessEnv)
+
+    /**
+     * Beendet die LSP-Sitzung mit der [sessionId].
+     */
+    suspend fun stopSession(sessionId: String) = stop()
+
+    /**
+     * Beendet alle aktiven LSP-Sitzungen.
+     */
+    suspend fun stopAll() = stop()
+
+    /**
+     * Liefert die Anzahl offener Dokumente in der Sitzung [sessionId].
+     */
+    fun getOpenDocumentCount(sessionId: String): Int = 0
+
+    /**
+     * Liefert den Zeitstempel (ms) der letzten Nutzung der Sitzung [sessionId].
+     */
+    fun getSessionLastUsed(sessionId: String): Long = 0L
+
+    /**
+     * Liefert alle aktuell registrierten Sitzungs-IDs.
+     */
+    fun getRunningSessionIds(): List<String> = emptyList()
+
+    /**
      * Handler für eingehende `workspace/applyEdit`-Anfragen vom Server.
      * Liefert true, wenn der WorkspaceEdit erfolgreich angewendet wurde.
      */

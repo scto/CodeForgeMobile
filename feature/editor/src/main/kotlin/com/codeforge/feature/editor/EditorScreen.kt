@@ -5,17 +5,26 @@
 package com.codeforge.feature.editor
 
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.Card
+import com.codeforge.core.domain.model.LspSessionInfo
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
@@ -229,7 +238,8 @@ fun EditorRoute(
                 onRename = ::triggerRename,
                 onOutline = { viewModel.onEvent(EditorUiEvent.ToggleOutline) },
                 onDefinition = ::triggerDefinition,
-                onReferences = ::triggerReferences
+                onReferences = ::triggerReferences,
+                onToggleLspSessions = { viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog) }
             )
 
             if (uiState.isSearchBarVisible) {
@@ -331,6 +341,15 @@ fun EditorRoute(
             onDismiss = { viewModel.onEvent(EditorUiEvent.DismissReferences) }
         )
     }
+
+    if (uiState.isLspSessionsDialogVisible) {
+        LspSessionsDialog(
+            sessions = uiState.runningLspSessions,
+            onRestart = { viewModel.onEvent(EditorUiEvent.RestartLspSession(it)) },
+            onStop = { viewModel.onEvent(EditorUiEvent.StopLspSession(it)) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog) }
+        )
+    }
 }
 
 @Composable
@@ -352,7 +371,8 @@ private fun EditorToolbar(
     onRename: () -> Unit,
     onOutline: () -> Unit,
     onDefinition: () -> Unit,
-    onReferences: () -> Unit
+    onReferences: () -> Unit,
+    onToggleLspSessions: () -> Unit
 ) {
     val isImage = activePath?.let { isImageFilePath(it) } == true
     Row(
@@ -361,7 +381,8 @@ private fun EditorToolbar(
     ) {
         LspStatusBadge(
             state = lspServerState,
-            modifier = Modifier.padding(start = 8.dp, end = 4.dp)
+            modifier = Modifier.padding(start = 8.dp, end = 4.dp),
+            onClick = onToggleLspSessions
         )
 
         // Outline / Struktur: immer verfügbar (LSP oder Fallback)
@@ -495,7 +516,8 @@ private fun GoToLineDialog(lineCount: Int, onDismiss: () -> Unit, onGo: (line: I
 @Composable
 private fun LspStatusBadge(
     state: LspServerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     if (state == LspServerState.STOPPED) return
 
@@ -525,7 +547,7 @@ private fun LspStatusBadge(
     Surface(
         shape = RoundedCornerShape(8.dp),
         color = bgColor,
-        modifier = modifier
+        modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier
     ) {
         Text(
             text = stringRes(textRes),
@@ -535,4 +557,84 @@ private fun LspStatusBadge(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
     }
+}
+
+@Composable
+private fun LspSessionsDialog(
+    sessions: List<LspSessionInfo>,
+    onRestart: (String) -> Unit,
+    onStop: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringRes(R.string.editor_lsp_sessions_title)) },
+        text = {
+            if (sessions.isEmpty()) {
+                Text(stringRes(R.string.editor_lsp_no_sessions))
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(sessions, key = { it.sessionId }) { session ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = session.serverId,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    LspStatusBadge(state = session.state)
+                                }
+                                if (session.isHeavyweight) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = MaterialTheme.colorScheme.tertiaryContainer
+                                    ) {
+                                        Text(
+                                            text = stringRes(R.string.editor_lsp_heavyweight_tag),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = stringRes(R.string.editor_lsp_open_docs_count, session.openDocumentCount),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    TextButton(onClick = { onRestart(session.sessionId) }) {
+                                        Text(stringRes(R.string.editor_lsp_restart))
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    TextButton(onClick = { onStop(session.sessionId) }) {
+                                        Text(stringRes(R.string.editor_lsp_stop))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringRes(R.string.common_schliessen))
+            }
+        }
+    )
 }

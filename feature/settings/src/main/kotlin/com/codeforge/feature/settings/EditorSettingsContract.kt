@@ -27,11 +27,15 @@ data class EditorSettingsUiState(
     val formatOnSaveJava: Boolean = false,
     val formatOnSaveXml: Boolean = false,
     val formatOnSaveJson: Boolean = false,
+    val lspMaxConcurrentSessions: Int = 3,
+    val lspIdleTimeoutMinutes: Int = 10,
     val isLoading: Boolean = true
 )
 
 sealed interface EditorSettingsUiEvent {
     data class TabSizeChanged(val size: Int) : EditorSettingsUiEvent
+    data class LspMaxConcurrentSessionsChanged(val count: Int) : EditorSettingsUiEvent
+    data class LspIdleTimeoutMinutesChanged(val minutes: Int) : EditorSettingsUiEvent
     data object TreeSitterToggled : EditorSettingsUiEvent
     data class TextmateThemeChanged(val value: String) : EditorSettingsUiEvent
     data class LspServerPathChanged(val value: String) : EditorSettingsUiEvent

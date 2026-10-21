@@ -93,9 +93,11 @@ class EditorViewModel @Inject constructor(
     val completionProvider = LspCompletionProvider(lspClient, snippetRepository) { _uiState.value.activeFile?.path }
 
     init {
+        setupOpenDocumentsProvider()
         observeSettings()
         observeDiagnostics()
         observeLspSession()
+        observeLspSessions()
         observeOpenFileRequests()
         observeJumpRequests()
         observeFlushRequests()
@@ -104,6 +106,26 @@ class EditorViewModel @Inject constructor(
         observeUpdateAnnotations()
         observeServerCapabilities()
         setupApplyEditHandler()
+    }
+
+    private fun setupOpenDocumentsProvider() {
+        lspSessionController.setOpenDocumentsProvider(object : com.codeforge.core.domain.repository.OpenDocumentsProvider {
+            override fun getOpenDocuments(): List<com.codeforge.core.domain.repository.OpenDocumentInfo> {
+                return _uiState.value.openFiles.map { file ->
+                    com.codeforge.core.domain.repository.OpenDocumentInfo(
+                        path = file.path,
+                        languageId = languageIdFor(file.path),
+                        content = file.content
+                    )
+                }
+            }
+        })
+    }
+
+    private fun observeLspSessions() = viewModelScope.launch {
+        lspSessionController.sessionInfos.collect { list ->
+            _uiState.update { it.copy(runningLspSessions = list) }
+        }
     }
 
     private val projectRoot = MutableStateFlow<String?>(null)
@@ -378,12 +400,17 @@ class EditorViewModel @Inject constructor(
             EditorUiEvent.RunLspFormat -> formatCode(null)
             EditorUiEvent.Save -> saveActive()
             is EditorUiEvent.SetProjectRoot -> {
+                val oldRoot = projectRoot.value
                 projectRoot.value = event.rootPath
-                val active = _uiState.value.activeFile
-                if (active != null && event.rootPath != null) {
-                    val langId = languageIdFor(active.path)
-                    viewModelScope.launch {
-                        lspSessionController.onFileOpened(langId, event.rootPath)
+                if (event.rootPath == null && oldRoot != null) {
+                    viewModelScope.launch { lspSessionController.onProjectClosed() }
+                } else {
+                    val active = _uiState.value.activeFile
+                    if (active != null && event.rootPath != null) {
+                        val langId = languageIdFor(active.path)
+                        viewModelScope.launch {
+                            lspSessionController.onFileOpened(langId, event.rootPath, active.path)
+                        }
                     }
                 }
             }
@@ -449,6 +476,19 @@ class EditorViewModel @Inject constructor(
             is EditorUiEvent.RunTestTarget -> {
                 viewModelScope.launch {
                     testRunRequestBridge?.requestRunTest(testFilter = event.target.filterTarget)
+                }
+            }
+            EditorUiEvent.ToggleLspSessionsDialog -> {
+                _uiState.update { it.copy(isLspSessionsDialogVisible = !it.isLspSessionsDialogVisible) }
+            }
+            is EditorUiEvent.RestartLspSession -> {
+                viewModelScope.launch {
+                    lspSessionController.restartSession(event.sessionId)
+                }
+            }
+            is EditorUiEvent.StopLspSession -> {
+                viewModelScope.launch {
+                    lspSessionController.stopSession(event.sessionId)
                 }
             }
         }
@@ -629,11 +669,14 @@ class EditorViewModel @Inject constructor(
         publishActiveFileToBridge()
         val file = _uiState.value.openFiles.getOrNull(index)
         if (file != null) {
+            lspClient.setActiveDocument(file.path)
             val langId = languageIdFor(file.path)
             val workspaceRoot = projectRoot.value ?: File(file.path).parentFile?.absolutePath
             viewModelScope.launch {
-                lspSessionController.onFileOpened(langId, workspaceRoot)
+                lspSessionController.onFileOpened(langId, workspaceRoot, file.path)
             }
+        } else {
+            lspClient.setActiveDocument(null)
         }
     }
 
@@ -655,9 +698,10 @@ class EditorViewModel @Inject constructor(
                     )
                 }
                 documentVersions[file.path] = 1
+                lspClient.setActiveDocument(file.path)
                 val langId = languageIdFor(file.path)
                 val workspaceRoot = projectRoot.value ?: File(file.path).parentFile?.absolutePath
-                lspSessionController.onFileOpened(langId, workspaceRoot)
+                lspSessionController.onFileOpened(langId, workspaceRoot, file.path)
                 lspClient.didOpen(file.path, langId, file.content)
                 publishActiveFileToBridge()
             }
@@ -669,11 +713,9 @@ class EditorViewModel @Inject constructor(
 
     private fun closeTab(index: Int) {
         val closedPath = _uiState.value.openFiles.getOrNull(index)?.path
-        var remainingCount = 0
         var newActivePath: String? = null
         _uiState.update { s ->
             val updated = s.openFiles.toMutableList().apply { removeAt(index) }
-            remainingCount = updated.size
             val newActive = when {
                 updated.isEmpty() -> 0
                 s.activeFileIndex >= updated.size -> updated.size - 1
@@ -686,12 +728,13 @@ class EditorViewModel @Inject constructor(
             documentVersions.remove(closedPath)
             viewModelScope.launch { lspClient.didClose(closedPath) }
         }
-        if (remainingCount == 0) {
-            viewModelScope.launch { lspSessionController.stop() }
-        } else if (newActivePath != null) {
+        if (newActivePath != null) {
+            lspClient.setActiveDocument(newActivePath)
             val langId = languageIdFor(newActivePath!!)
             val workspaceRoot = projectRoot.value ?: File(newActivePath!!).parentFile?.absolutePath
-            viewModelScope.launch { lspSessionController.onFileOpened(langId, workspaceRoot) }
+            viewModelScope.launch { lspSessionController.onFileOpened(langId, workspaceRoot, newActivePath) }
+        } else {
+            lspClient.setActiveDocument(null)
         }
         publishActiveFileToBridge()
     }

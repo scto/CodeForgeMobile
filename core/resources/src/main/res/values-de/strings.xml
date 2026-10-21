@@ -951,6 +951,15 @@
     <string name="editor_lsp_status_failed">LSP: Fehler</string>
     <string name="editor_lsp_open_settings">Einstellungen → Extensions</string>
     <string name="editor_lsp_start_failed">LSP-Server konnte nicht gestartet werden. Siehe Einstellungen → Extensions.</string>
+    <string name="editor_lsp_sessions_title">Laufende LSP-Server</string>
+    <string name="editor_lsp_heavyweight_tag">JVM / hoher RAM-Bedarf</string>
+    <string name="editor_lsp_restart">Neu starten</string>
+    <string name="editor_lsp_stop">Beenden</string>
+    <string name="editor_lsp_no_sessions">Keine aktiven Language Server</string>
+    <string name="editor_lsp_open_docs_count">%1$d offene(s) Dokument(e)</string>
+    <string name="settings_lsp_section_title">Language Server (LSP)</string>
+    <string name="settings_lsp_max_sessions_label">Max. gleichzeitige Sitzungen</string>
+    <string name="settings_lsp_idle_timeout_label">Leerlauf-Timeout (Minuten)</string>
 
     <!-- install (Task 29) -->
     <string name="build_bauen_und_starten">Bauen &amp; Starten</string>
