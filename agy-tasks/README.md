@@ -66,7 +66,7 @@ Repo-Stand: `87e4e6d`. ✅ umgesetzt (Commit-Hash verlinkt / eingetragen), ⬜ n
 | 41 | `41-layout-designer-drag-drop-and-features.md` | ⬜ offen | Layout-Designer ausbauen: Drag & Drop, Größen-Griffe, ConstraintLayout/RelativeLayout echt darstellen, Ressourcen, Lint. Keine harte Abhängigkeit (Task 15 erledigt) |
 | 42 | `42-hardcoded-strings-module.md` | ⬜ offen | Modul `:libs:hardcoded-strings` + `:feature:hardcodedstrings`: harte Texte in **Nutzerprojekten** finden, nach `res/values/strings.xml` auslagern und im Code ersetzen (Vorschau, Sicherung, Rückgängig). Abgrenzung: Task 17 prüft nur das CodeForge-Repo |
 | 43 | `43-lsp-extensions-xml-yaml-toml-bash.md` | ⬜ offen | LSP-Erweiterungen: XML (LemMinX), YAML, TOML (`taplo`), Bash; Groovy-Gradle bewusst ausgenommen. Offen: Abhängigkeiten der npm-Tarballs, `taplo lsp`-Feature, `taplo` im APT-Repo |
-| 44 | `44-lsp-multi-session.md` | ✅ `6d71e62` | LSP: mehrere Server gleichzeitig (eine Sitzung pro Server und Workspace), Begrenzung und Leerlauf-Timeout (`docs/lsp-multi-session-report.md`) |
+| 44 | `44-lsp-multi-session.md` | ✅ `46fe905` | LSP: mehrere Server gleichzeitig (eine Sitzung pro Server und Workspace), Begrenzung und Leerlauf-Timeout (`docs/lsp-multi-session-report.md`) |
 
 ## Nächste Schritte
 
