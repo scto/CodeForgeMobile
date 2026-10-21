@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.codeforge.core.domain.parser.SampleFailedTest" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-10-20T22:00:00.000Z" hostname="localhost" time="0.045">
+  <properties/>
+  <testcase name="testSuccess" classname="com.codeforge.core.domain.parser.SampleFailedTest" time="0.010"/>
+  <testcase name="testAssertionFailure" classname="com.codeforge.core.domain.parser.SampleFailedTest" time="0.035">
+    <failure message="expected:&lt;hello&gt; but was:&lt;world&gt;" type="org.junit.ComparisonFailure">org.junit.ComparisonFailure: expected:&lt;hello&gt; but was:&lt;world&gt;
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at com.codeforge.core.domain.parser.SampleFailedTest.testAssertionFailure(SampleFailedTest.kt:42)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    </failure>
+    <system-out><![CDATA[Testing assertion failure logic]]></system-out>
+    <system-err><![CDATA[Some warning on stderr]]></system-err>
+  </testcase>
+</testsuite>

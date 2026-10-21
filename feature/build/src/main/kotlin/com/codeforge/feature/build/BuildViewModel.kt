@@ -12,8 +12,11 @@ import com.codeforge.core.domain.model.BuildProblem
 import com.codeforge.core.domain.model.BuildStatus
 import com.codeforge.core.domain.repository.ApkInstallerRepository
 import com.codeforge.core.domain.repository.BuildEvent
+import com.codeforge.core.domain.parser.ProjectStackFrameResolver
 import com.codeforge.core.domain.repository.GradleBuildRepository
+import com.codeforge.core.domain.repository.TestRunnerRepository
 import com.codeforge.core.navigation.OpenFileRequestBridge
+import com.codeforge.core.navigation.TestRunRequestBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,6 +47,8 @@ class BuildViewModel internal constructor(
     private val apkInstallerRepository: ApkInstallerRepository,
     private val logcatRepository: LogcatRepository,
     private val ownPackageName: String = "",
+    private val testRunnerRepository: TestRunnerRepository? = null,
+    private val testRunRequestBridge: TestRunRequestBridge? = null,
     externalScope: CoroutineScope? = null
 ) : ViewModel() {
 
@@ -53,6 +58,8 @@ class BuildViewModel internal constructor(
         openFileRequestBridge: OpenFileRequestBridge,
         apkInstallerRepository: ApkInstallerRepository,
         logcatRepository: LogcatRepository,
+        testRunnerRepository: TestRunnerRepository,
+        testRunRequestBridge: TestRunRequestBridge,
         @ApplicationContext context: Context
     ) : this(
         gradleBuildRepository,
@@ -60,6 +67,8 @@ class BuildViewModel internal constructor(
         apkInstallerRepository,
         logcatRepository,
         context.packageName,
+        testRunnerRepository,
+        testRunRequestBridge,
         null
     )
 
@@ -94,6 +103,28 @@ class BuildViewModel internal constructor(
             }
         }
 
+        testRunnerRepository?.let { repo ->
+            scope.launch {
+                repo.lastRunResult.collect { result ->
+                    _uiState.update { it.copy(testRunResult = result) }
+                }
+            }
+            scope.launch {
+                repo.isRunning.collect { running ->
+                    _uiState.update { it.copy(isTesting = running) }
+                }
+            }
+        }
+
+        testRunRequestBridge?.let { bridge ->
+            scope.launch {
+                bridge.runRequests.collect { req ->
+                    _uiState.update { it.copy(activeTab = BuildTab.TESTS) }
+                    runTests(req.moduleGradlePath, req.testFilter)
+                }
+            }
+        }
+
         val sources = logcatRepository.detectAvailableSources()
         val preferredSource = sources.firstOrNull { it.isAvailable && it.source != LogcatSource.OWN_PROCESS }?.source
             ?: LogcatSource.OWN_PROCESS
@@ -109,10 +140,35 @@ class BuildViewModel internal constructor(
     }
 
     fun connectProject(rootPath: String) {
-        currentProjectRoot = File(rootPath)
+        val root = File(rootPath)
+        currentProjectRoot = root
         scope.launch {
             gradleBuildRepository.connect(rootPath)
+            testRunnerRepository?.loadLastResults(root)
+            detectModules(root)
         }
+    }
+
+    private fun detectModules(root: File) {
+        val modules = mutableListOf<String>()
+        modules.add(":")
+        val subDirs = root.listFiles { f -> f.isDirectory && !f.name.startsWith(".") && f.name != "build" }
+        if (subDirs != null) {
+            for (dir in subDirs) {
+                if (File(dir, "build.gradle.kts").isFile || File(dir, "build.gradle").isFile) {
+                    modules.add(":${dir.name}")
+                }
+                val nested = dir.listFiles { f -> f.isDirectory && !f.name.startsWith(".") && f.name != "build" }
+                if (nested != null) {
+                    for (n in nested) {
+                        if (File(n, "build.gradle.kts").isFile || File(n, "build.gradle").isFile) {
+                            modules.add(":${dir.name}:${n.name}")
+                        }
+                    }
+                }
+            }
+        }
+        _uiState.update { it.copy(availableModules = modules.sorted()) }
     }
 
     fun handleIntent(intent: BuildUiIntent) {
@@ -248,6 +304,32 @@ class BuildViewModel internal constructor(
             }
             is BuildUiIntent.ClickStackFrame -> {
                 onStackFrameClicked(intent.frame)
+            }
+
+            // Test Runner Intents
+            is BuildUiIntent.RunTests -> {
+                runTests(intent.moduleGradlePath, intent.testFilter)
+            }
+            is BuildUiIntent.RerunFailedTests -> {
+                rerunFailedTests()
+            }
+            is BuildUiIntent.SelectTestCase -> {
+                _uiState.update { it.copy(selectedTestCase = intent.testCase) }
+            }
+            is BuildUiIntent.SetTestFilterMode -> {
+                _uiState.update { it.copy(testFilterMode = intent.mode) }
+            }
+            is BuildUiIntent.SetTestSearchQuery -> {
+                _uiState.update { it.copy(testSearchQuery = intent.query) }
+            }
+            is BuildUiIntent.SelectTestModule -> {
+                _uiState.update { it.copy(selectedModuleGradlePath = intent.moduleGradlePath) }
+            }
+            is BuildUiIntent.DismissPreTestBuildError -> {
+                _uiState.update { it.copy(didBuildFailBeforeTests = false) }
+            }
+            is BuildUiIntent.ClickTestStackFrame -> {
+                onTestStackFrameClicked(intent.frame)
             }
         }
     }
@@ -464,8 +546,167 @@ class BuildViewModel internal constructor(
         scope.launch {
             gradleBuildRepository.cancelBuild()
             activeBuildJob?.cancel()
-            _uiState.update { it.copy(isBuilding = false) }
+            _uiState.update { it.copy(isBuilding = false, isTesting = false) }
             _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_abgebrochen)))
+        }
+    }
+
+    fun runTests(moduleGradlePath: String? = null, testFilter: String? = null) {
+        val root = currentProjectRoot ?: return
+        val runner = testRunnerRepository ?: return
+        if (_uiState.value.isBuilding || _uiState.value.isTesting) {
+            scope.launch {
+                _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_bereits_aktiv)))
+            }
+            return
+        }
+
+        activeBuildJob?.cancel()
+        synchronized(lineBufferLock) {
+            pendingLines.clear()
+        }
+
+        _uiState.update {
+            it.copy(
+                isTesting = true,
+                problems = emptyList(),
+                didBuildFailBeforeTests = false,
+                outputLines = emptyList()
+            )
+        }
+
+        val flushJob = scope.launch {
+            while (isActive) {
+                delay(100L)
+                flushPendingLines()
+            }
+        }
+
+        activeBuildJob = scope.launch {
+            try {
+                runner.runTests(root, moduleGradlePath, "Debug", testFilter).collect { event ->
+                    when (event) {
+                        is BuildEvent.Output -> {
+                            synchronized(lineBufferLock) {
+                                pendingLines.add(event.line)
+                            }
+                        }
+                        is BuildEvent.Problem -> {
+                            _uiState.update { current ->
+                                current.copy(problems = current.problems + event.problem)
+                            }
+                        }
+                        is BuildEvent.BuildFinished -> {
+                            flushPendingLines()
+                            _uiState.update { it.copy(isTesting = false) }
+                            if (!event.success) {
+                                val hasTestResults = (_uiState.value.testRunResult?.totalCount ?: 0) > 0
+                                if (!hasTestResults) {
+                                    _uiState.update { it.copy(didBuildFailBeforeTests = true) }
+                                }
+                            }
+                        }
+                        is BuildEvent.BuildFailed -> {
+                            flushPendingLines()
+                            _uiState.update {
+                                it.copy(
+                                    isTesting = false,
+                                    didBuildFailBeforeTests = true
+                                )
+                            }
+                            _effects.send(BuildUiEffect.ShowSnackbar(event.message))
+                        }
+                        else -> {}
+                    }
+                }
+            } finally {
+                flushPendingLines()
+                flushJob.cancel()
+                _uiState.update { it.copy(isTesting = false) }
+            }
+        }
+    }
+
+    fun rerunFailedTests() {
+        val root = currentProjectRoot ?: return
+        val runner = testRunnerRepository ?: return
+        if (_uiState.value.isBuilding || _uiState.value.isTesting) {
+            scope.launch {
+                _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_bereits_aktiv)))
+            }
+            return
+        }
+
+        activeBuildJob?.cancel()
+        synchronized(lineBufferLock) {
+            pendingLines.clear()
+        }
+
+        _uiState.update {
+            it.copy(
+                isTesting = true,
+                problems = emptyList(),
+                didBuildFailBeforeTests = false,
+                outputLines = emptyList()
+            )
+        }
+
+        val flushJob = scope.launch {
+            while (isActive) {
+                delay(100L)
+                flushPendingLines()
+            }
+        }
+
+        activeBuildJob = scope.launch {
+            try {
+                runner.rerunFailedTests(root, "Debug").collect { event ->
+                    when (event) {
+                        is BuildEvent.Output -> {
+                            synchronized(lineBufferLock) {
+                                pendingLines.add(event.line)
+                            }
+                        }
+                        is BuildEvent.Problem -> {
+                            _uiState.update { current ->
+                                current.copy(problems = current.problems + event.problem)
+                            }
+                        }
+                        is BuildEvent.BuildFinished -> {
+                            flushPendingLines()
+                            _uiState.update { it.copy(isTesting = false) }
+                        }
+                        is BuildEvent.BuildFailed -> {
+                            flushPendingLines()
+                            _uiState.update { it.copy(isTesting = false) }
+                            _effects.send(BuildUiEffect.ShowSnackbar(event.message))
+                        }
+                        else -> {}
+                    }
+                }
+            } finally {
+                flushPendingLines()
+                flushJob.cancel()
+                _uiState.update { it.copy(isTesting = false) }
+            }
+        }
+    }
+
+    private fun onTestStackFrameClicked(frame: StackFrame) {
+        val root = currentProjectRoot
+        val targetFile = if (root != null) {
+            ProjectStackFrameResolver.resolve(root, frame) ?: resolveStackFrameFile(root, frame)
+        } else null
+
+        if (targetFile != null) {
+            scope.launch {
+                openFileRequestBridge.requestOpenAt(targetFile.absolutePath, frame.lineNumber, 1)
+                _effects.send(BuildUiEffect.OpenEditorAt(targetFile.absolutePath, frame.lineNumber, 1))
+            }
+        } else {
+            scope.launch {
+                _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.test_runner_datei_nicht_gefunden, frame.fileName)))
+            }
         }
     }
 

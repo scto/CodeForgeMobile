@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.codeforge.core.domain.parser.SampleSkippedTest" tests="2" skipped="1" failures="0" errors="0" timestamp="2026-10-20T22:00:00.000Z" hostname="localhost" time="0.015">
+  <properties/>
+  <testcase name="testActive" classname="com.codeforge.core.domain.parser.SampleSkippedTest" time="0.015"/>
+  <testcase name="testIgnored" classname="com.codeforge.core.domain.parser.SampleSkippedTest" time="0.000">
+    <skipped message="Disabled on CI due to flaky network"/>
+  </testcase>
+</testsuite>

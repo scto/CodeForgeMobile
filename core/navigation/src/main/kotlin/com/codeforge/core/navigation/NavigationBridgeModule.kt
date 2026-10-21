@@ -30,4 +30,10 @@ abstract class NavigationBridgeModule {
     abstract fun bindFileSyncBridge(
         impl: FileSyncBridgeImpl
     ): FileSyncBridge
+
+    @Binds
+    @Singleton
+    abstract fun bindTestRunRequestBridge(
+        impl: TestRunRequestBridgeImpl
+    ): TestRunRequestBridge
 }

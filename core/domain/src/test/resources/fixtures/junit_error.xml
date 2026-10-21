@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.codeforge.core.domain.parser.SampleErrorTest" tests="1" skipped="0" failures="0" errors="1" timestamp="2026-10-20T22:00:00.000Z" hostname="localhost" time="0.020">
+  <properties/>
+  <testcase name="testCrash" classname="com.codeforge.core.domain.parser.SampleErrorTest" time="0.020">
+    <error message="Crash occurred: null pointer" type="java.lang.NullPointerException">java.lang.NullPointerException: Crash occurred: null pointer
+	at com.codeforge.core.domain.parser.SampleErrorTest.testCrash(SampleErrorTest.kt:18)
+    </error>
+  </testcase>
+</testsuite>

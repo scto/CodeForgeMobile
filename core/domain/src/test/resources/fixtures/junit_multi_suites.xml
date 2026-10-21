@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="com.codeforge.core.domain.parser.SuiteA" tests="1" skipped="0" failures="0" errors="0" time="0.005">
+    <testcase name="testA1" classname="com.codeforge.core.domain.parser.SuiteA" time="0.005"/>
+  </testsuite>
+  <testsuite name="com.codeforge.core.domain.parser.SuiteB" tests="1" skipped="0" failures="1" errors="0" time="0.010">
+    <testcase name="testB1" classname="com.codeforge.core.domain.parser.SuiteB" time="0.010">
+      <failure message="expected: &quot;true&quot; but was: &quot;false&quot;" type="java.lang.AssertionError">java.lang.AssertionError: expected: &quot;true&quot; but was: &quot;false&quot;
+	at com.codeforge.core.domain.parser.SuiteB.testB1(SuiteB.kt:15)
+      </failure>
+    </testcase>
+  </testsuite>
+</testsuites>

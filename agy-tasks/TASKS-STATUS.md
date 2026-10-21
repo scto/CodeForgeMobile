@@ -52,7 +52,7 @@ Zuletzt aktualisiert: 2026-10-21. Stand Basis-Branch: `87e4e6d`.
 | **33** | `33-snippets-live-templates.md` | ✅ `36745de` | Code-Snippets & Live-Templates: Vorlagen mit Tabstopps ($1, $0), Navigation via Tab/Shift+Tab/Esc in sora-editor 0.23.4, dynamische Variablen ($PACKAGE, $CLASSNAME, etc.), reiner Kotlin-Parser mit Zeilen-/Spaltenvalidierung, VS-Code JSON Import/Export & Einstellungs-UI (`docs/snippets-live-templates-report.md`) |
 | **34** | `34-signing-keystore-manager.md` | ✅ `6749b2a` | Signatur-Verwaltung & Release-Signierung: Keystores im privaten Speicher (`filesDir/keystores/`), Passwörter in `SecretStorage` (AES-256-GCM), argument-leak-freie Ausführung von `keytool`/`apksigner`, PKCS12, RSA 4096 / EC, V1–V4 Schemas, Gradle-Build-Integration (`docs/signing-keystore-manager-report.md`) |
 | **35** | `35-apk-analyzer.md` | ✅ `b3388eb` | APK-Analyse & Vergleich: Größenanalyse nach Bereichen (`ApkZipAnalyzer`), Metadaten & Komponenten (`AxmlManifestParser`, `AaptBadgingParser`, `AaptPermissionsParser`), Signaturprüfung (`ApksignerOutputParser`), Zwei-APK-Vergleich (`ApkComparator`), Zip-Slip-Schutz, UI in `:feature:build`, Kontextmenü in Dateibaum & Build-Ausgabe, Markdown-Export (`docs/apk-analyzer-report.md`) |
-| **36** | `36-test-runner.md` | ⬜ offen | Test-Läufer mit Ergebnisbaum (Status, Dauer, klickbarer Fehlerort) aus JUnit-XML. Abhängigkeit: Task 28 (erledigt) |
+| **36** | `36-test-runner.md` | ✅ umgesetzt | Test-Läufer mit Ergebnisbaum (Status, Dauer, klickbarer Fehlerort) aus JUnit-XML, Re-Run, Gutter-Integration im Editor (`docs/test-runner-report.md`) |
 | **37a** | `37a-debugger-spike-and-session-core.md` | ⬜ offen | Debugger: Machbarkeitsspike (JDI/JDWP in Termux) und UI-freier Sitzungskern. Messung auf dem Gerät (2026-10-19): `jdk.jdi` und `jdk.jdwp.agent` 17.0.20 vorhanden, JDWP-Agent lauscht auf `127.0.0.1:5005`; JDI-Attach durch einen Client noch nicht getestet |
 | **37b** | `37b-debugger-editor-ui.md` | ⬜ offen | Debugger: Breakpoints, Variablen, Schritte im Editor. Abhängigkeit: 37a mit positivem Spike |
 | **37c** | `37c-debugger-attach-android-app.md` | ⬜ offen | Debugger: laufende Android-App anhängen (ADB/JDWP). Abhängigkeit: 37a, 37b, Task 29 und 29.5 (erledigt); ART-Kompatibilität ungeprüft |
@@ -68,11 +68,11 @@ Zuletzt aktualisiert: 2026-10-21. Stand Basis-Branch: `87e4e6d`.
 
 ## 🧭 Geplante Tasks 35–44: Abhängigkeiten und Reihenfolge
 
-Tasks 35–44 liegen als Spezifikationsdateien vor. Task 35 ist umgesetzt. Die Reihenfolge ist eine Empfehlung, keine Vorgabe.
+Tasks 35–44 liegen als Spezifikationsdateien vor. Tasks 35 und 36 sind umgesetzt. Die Reihenfolge ist eine Empfehlung, keine Vorgabe.
 
 | Gruppe | Tasks | Abhängigkeiten / Hinweise |
 |---|---|---|
-| Sofort startbar, unabhängig | 35, 36, 39, 40, 41, 42 | 36 und 40 bauen auf Task 28 auf (erledigt). 39 beginnt mit einer Bestandsaufnahme. 41 hat keine harte Abhängigkeit. 42 darf Task 17 (`scripts/find_hardcoded_strings.py`) nicht widersprechen |
+| Sofort startbar, unabhängig | 39, 40, 41, 42 | 40 baut auf Task 28 auf (erledigt). 39 beginnt mit einer Bestandsaufnahme. 41 hat keine harte Abhängigkeit. 42 darf Task 17 (`scripts/find_hardcoded_strings.py`) nicht widersprechen |
 | LSP | 43, 44 | Unabhängig voneinander umsetzbar; 44 vor oder zusammen mit 43, sonst startet jeder Tab-Wechsel zwischen Sprachen den Server neu (heute: genau eine Sitzung, `LspSessionController`/`LspClientRepositoryImpl`). 44 ändert `LspClientRepository`, das auch Plugins nutzen: quellkompatibel bleiben |
 | Debugger | 37a → 37b → 37c | 37a zuerst (Spike belegt Machbarkeit). 37b und 37c erst bei positivem Spike. 37c nutzt Task 29/29.5 |
 | KI | 38 | Unabhängig. Inhalte verlassen das Gerät: Hinweis- und Schlüsselregeln im Task sind verbindlich |

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.codeforge.core.domain.parser.SampleParameterizedTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-20T22:00:00.000Z" hostname="localhost" time="0.012">
+  <properties/>
+  <testcase name="testCalculation[0: 1 + 1 = 2]" classname="com.codeforge.core.domain.parser.SampleParameterizedTest" time="0.004"/>
+  <testcase name="testCalculation[1: 2 + 2 = 4]" classname="com.codeforge.core.domain.parser.SampleParameterizedTest" time="0.004"/>
+  <testcase name="testCalculation[2: 3 + 3 = 6]" classname="com.codeforge.core.domain.parser.SampleParameterizedTest" time="0.004"/>
+</testsuite>

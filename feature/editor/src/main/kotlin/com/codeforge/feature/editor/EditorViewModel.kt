@@ -21,6 +21,7 @@ import com.codeforge.core.navigation.ActiveComposableFile
 import com.codeforge.core.navigation.ActiveComposablePreviewBridge
 import com.codeforge.core.navigation.FileSyncBridge
 import com.codeforge.core.navigation.OpenFileRequestBridge
+import com.codeforge.core.navigation.TestRunRequestBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.feature.editor.lsp.LspCompletionProvider
@@ -69,7 +70,8 @@ class EditorViewModel @Inject constructor(
     private val updateRepository: DependencyUpdateRepository,
     private val fileSyncBridge: FileSyncBridge,
     private val codeFormatterRepository: CodeFormatterRepository,
-    private val snippetRepository: com.codeforge.core.domain.repository.SnippetRepository = com.codeforge.core.domain.repository.NoOpSnippetRepository
+    private val snippetRepository: com.codeforge.core.domain.repository.SnippetRepository = com.codeforge.core.domain.repository.NoOpSnippetRepository,
+    private val testRunRequestBridge: TestRunRequestBridge? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -442,6 +444,11 @@ class EditorViewModel @Inject constructor(
                         event.location.range.start.line + 1,
                         event.location.range.start.character + 1
                     )
+                }
+            }
+            is EditorUiEvent.RunTestTarget -> {
+                viewModelScope.launch {
+                    testRunRequestBridge?.requestRunTest(testFilter = event.target.filterTarget)
                 }
             }
         }

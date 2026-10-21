@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -38,7 +39,16 @@ import com.codeforge.core.domain.model.LogcatFilter
 import com.codeforge.core.domain.model.LogcatSource
 import com.codeforge.core.domain.model.LogcatSourceAvailability
 import com.codeforge.core.domain.model.StackFrame
+import com.codeforge.core.domain.model.TestCaseResult
+import com.codeforge.core.domain.model.TestClassSuite
+import com.codeforge.core.domain.model.TestFilterMode
+import com.codeforge.core.domain.model.TestModuleSuite
+import com.codeforge.core.domain.model.TestRunResult
+import com.codeforge.core.domain.model.TestStatus
 import com.codeforge.core.domain.repository.LogcatRepository
+import com.codeforge.core.domain.repository.TestRunnerRepository
+import com.codeforge.core.navigation.TestRunRequest
+import com.codeforge.core.navigation.TestRunRequestBridge
 import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Before
 import org.junit.Test
@@ -49,6 +59,8 @@ class BuildViewModelTest {
     private lateinit var fakeBridge: FakeOpenFileRequestBridge
     private lateinit var fakeInstaller: FakeApkInstallerRepository
     private lateinit var fakeLogcatRepository: FakeLogcatRepository
+    private lateinit var fakeTestRunner: FakeTestRunnerRepository
+    private lateinit var fakeTestRunBridge: FakeTestRunRequestBridge
     private lateinit var viewModel: BuildViewModel
 
     @Before
@@ -57,12 +69,16 @@ class BuildViewModelTest {
         fakeBridge = FakeOpenFileRequestBridge()
         fakeInstaller = FakeApkInstallerRepository()
         fakeLogcatRepository = FakeLogcatRepository()
+        fakeTestRunner = FakeTestRunnerRepository()
+        fakeTestRunBridge = FakeTestRunRequestBridge()
         viewModel = BuildViewModel(
             gradleBuildRepository = fakeRepository,
             openFileRequestBridge = fakeBridge,
             apkInstallerRepository = fakeInstaller,
             logcatRepository = fakeLogcatRepository,
             ownPackageName = "com.codeforge.app",
+            testRunnerRepository = fakeTestRunner,
+            testRunRequestBridge = fakeTestRunBridge,
             externalScope = CoroutineScope(Dispatchers.Default)
         )
         viewModel.connectProject("/workspace/test-project")
@@ -574,5 +590,207 @@ class BuildViewModelTest {
         override suspend fun resolvePidForPackage(packageName: String): Int? = pidResolution(packageName)
 
         override fun detectAvailableSources(): List<LogcatSourceAvailability> = availableSources
+    }
+
+    @Test
+    fun testRunnerRunsTestsAndUpdatesState() = runBlocking {
+        val sampleResult = TestRunResult(
+            moduleSuites = listOf(
+                TestModuleSuite(
+                    moduleGradlePath = ":core:domain",
+                    moduleName = "core-domain",
+                    classes = listOf(
+                        TestClassSuite(
+                            className = "com.codeforge.core.domain.SampleTest",
+                            packageName = "com.codeforge.core.domain",
+                            cases = listOf(
+                                TestCaseResult("testOne", "com.codeforge.core.domain.SampleTest", 0.05, TestStatus.PASSED),
+                                TestCaseResult("testTwo", "com.codeforge.core.domain.SampleTest", 0.08, TestStatus.FAILED)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        fakeTestRunner.runTaskFlow = flowOf(
+            BuildEvent.Output("> Task :core:domain:testDebugUnitTest"),
+            BuildEvent.BuildFinished(success = true)
+        )
+
+        // When tests complete, fake repo emits sampleResult
+        fakeTestRunner._lastRunResult.value = sampleResult
+
+        viewModel.handleIntent(BuildUiIntent.RunTests(moduleGradlePath = ":core:domain"))
+        delay(250)
+
+        val state = viewModel.uiState.value
+        assertEquals(2, state.testTotalCount)
+        assertEquals(1, state.testPassedCount)
+        assertEquals(1, state.testFailedCount)
+        assertFalse(state.isTesting)
+        assertFalse(state.didBuildFailBeforeTests)
+    }
+
+    @Test
+    fun testRunnerPreTestFailureTriggersNotice() = runBlocking {
+        fakeTestRunner._lastRunResult.value = null
+
+        fakeTestRunner.runTaskFlow = flowOf(
+            BuildEvent.Output("Compilation error in source file"),
+            BuildEvent.BuildFinished(success = false)
+        )
+
+        viewModel.handleIntent(BuildUiIntent.RunTests())
+        delay(250)
+
+        val state = viewModel.uiState.value
+        assertTrue("didBuildFailBeforeTests should be true on pre-test build failure", state.didBuildFailBeforeTests)
+        assertEquals(0, state.testTotalCount)
+
+        viewModel.handleIntent(BuildUiIntent.DismissPreTestBuildError)
+        assertFalse(viewModel.uiState.value.didBuildFailBeforeTests)
+    }
+
+    @Test
+    fun testRunnerRerunFailedTests() = runBlocking {
+        fakeTestRunner.runTaskFlow = flowOf(
+            BuildEvent.BuildFinished(success = true)
+        )
+
+        viewModel.handleIntent(BuildUiIntent.RerunFailedTests)
+        delay(200)
+
+        assertFalse(viewModel.uiState.value.isTesting)
+    }
+
+    @Test
+    fun testRunnerFilterAndSearch() = runBlocking {
+        val sampleResult = TestRunResult(
+            moduleSuites = listOf(
+                TestModuleSuite(
+                    moduleGradlePath = ":core:domain",
+                    moduleName = "core-domain",
+                    classes = listOf(
+                        TestClassSuite(
+                            className = "com.example.AlphaTest",
+                            packageName = "com.example",
+                            cases = listOf(
+                                TestCaseResult("testAlphaPassed", "com.example.AlphaTest", 0.01, TestStatus.PASSED),
+                                TestCaseResult("testAlphaFailed", "com.example.AlphaTest", 0.02, TestStatus.FAILED)
+                            )
+                        ),
+                        TestClassSuite(
+                            className = "com.example.BetaTest",
+                            packageName = "com.example",
+                            cases = listOf(
+                                TestCaseResult("testBetaPassed", "com.example.BetaTest", 0.01, TestStatus.PASSED)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        fakeTestRunner._lastRunResult.value = sampleResult
+        delay(150)
+        assertEquals(2, viewModel.uiState.value.filteredModuleSuites.first().classes.size)
+
+        // Filter only failures
+        viewModel.handleIntent(BuildUiIntent.SetTestFilterMode(TestFilterMode.FAILURES_ONLY))
+        val failuresOnly = viewModel.uiState.value.filteredModuleSuites.first().classes
+        assertEquals(1, failuresOnly.size)
+        assertEquals("AlphaTest", failuresOnly.first().simpleClassName)
+        assertEquals(1, failuresOnly.first().cases.size)
+        assertEquals("testAlphaFailed", failuresOnly.first().cases.first().name)
+
+        // Reset filter, search for Beta
+        viewModel.handleIntent(BuildUiIntent.SetTestFilterMode(TestFilterMode.ALL))
+        viewModel.handleIntent(BuildUiIntent.SetTestSearchQuery("Beta"))
+        val betaFiltered = viewModel.uiState.value.filteredModuleSuites.first().classes
+        assertEquals(1, betaFiltered.size)
+        assertEquals("BetaTest", betaFiltered.first().simpleClassName)
+    }
+
+    @Test
+    fun testRunnerClickStackFrameNavigatesToEditor() = runBlocking {
+        val tempDir = File.createTempFile("codeforge_test_runner_", "").apply {
+            delete()
+            mkdirs()
+        }
+        try {
+            val srcDir = File(tempDir, "core/domain/src/test/kotlin/com/example").apply { mkdirs() }
+            val testFile = File(srcDir, "SampleTest.kt").apply { writeText("package com.example\nclass SampleTest") }
+
+            viewModel.connectProject(tempDir.absolutePath)
+
+            val frame = StackFrame(
+                className = "com.example.SampleTest",
+                methodName = "testFailure",
+                fileName = "SampleTest.kt",
+                lineNumber = 33,
+                rawLine = "at com.example.SampleTest.testFailure(SampleTest.kt:33)"
+            )
+
+            viewModel.handleIntent(BuildUiIntent.ClickTestStackFrame(frame))
+            delay(150)
+
+            assertEquals(1, fakeBridge.jumpTargets.size)
+            assertEquals(testFile.canonicalPath, File(fakeBridge.jumpTargets[0].path).canonicalPath)
+            assertEquals(33, fakeBridge.jumpTargets[0].line)
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun testRunRequestBridgeTriggersTestsTabAndExecution() = runBlocking {
+        fakeTestRunner.runTaskFlow = flowOf(
+            BuildEvent.BuildFinished(success = true)
+        )
+
+        fakeTestRunBridge.requestRunTest(moduleGradlePath = ":core:domain", testFilter = "MyTest.testA")
+        delay(250)
+
+        assertEquals(BuildTab.TESTS, viewModel.uiState.value.activeTab)
+    }
+
+    private class FakeTestRunnerRepository : TestRunnerRepository {
+        val _lastRunResult = MutableStateFlow<TestRunResult?>(null)
+        override val lastRunResult: StateFlow<TestRunResult?> = _lastRunResult.asStateFlow()
+
+        val _isRunning = MutableStateFlow(false)
+        override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+
+        var runTaskFlow: Flow<BuildEvent> = flowOf(BuildEvent.BuildFinished(true))
+
+        override suspend fun loadLastResults(projectRoot: File): TestRunResult? {
+            return _lastRunResult.value
+        }
+
+        override fun runTests(
+            projectRoot: File,
+            moduleGradlePath: String?,
+            variant: String,
+            testFilter: String?
+        ): Flow<BuildEvent> {
+            return runTaskFlow
+        }
+
+        override fun rerunFailedTests(
+            projectRoot: File,
+            variant: String
+        ): Flow<BuildEvent> {
+            return runTaskFlow
+        }
+    }
+
+    private class FakeTestRunRequestBridge : TestRunRequestBridge {
+        val _runRequests = MutableSharedFlow<TestRunRequest>(extraBufferCapacity = 4)
+        override val runRequests: SharedFlow<TestRunRequest> = _runRequests.asSharedFlow()
+
+        override suspend fun requestRunTest(moduleGradlePath: String?, testFilter: String?) {
+            _runRequests.emit(TestRunRequest(moduleGradlePath, testFilter))
+        }
     }
 }

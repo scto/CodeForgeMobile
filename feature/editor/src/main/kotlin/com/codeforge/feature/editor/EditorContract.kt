@@ -142,6 +142,7 @@ sealed interface EditorUiEvent {
     data class FindReferences(val line: Int, val col: Int, val symbolName: String) : EditorUiEvent
     data object DismissReferences : EditorUiEvent
     data class SelectLocation(val location: LspLocation) : EditorUiEvent
+    data class RunTestTarget(val target: com.codeforge.feature.editor.overlay.TestTarget) : EditorUiEvent
 }
 
 sealed interface EditorUiEffect {

@@ -14,11 +14,16 @@ import com.codeforge.core.domain.model.LogcatSource
 import com.codeforge.core.domain.model.LogcatSourceAvailability
 import com.codeforge.core.domain.model.ProblemSeverity
 import com.codeforge.core.domain.model.StackFrame
+import com.codeforge.core.domain.model.TestCaseResult
+import com.codeforge.core.domain.model.TestFilterMode
+import com.codeforge.core.domain.model.TestModuleSuite
+import com.codeforge.core.domain.model.TestRunResult
 
 enum class BuildTab {
     OUTPUT,
     PROBLEMS,
     LOGCAT,
+    TESTS,
 }
 
 enum class ProblemFilter {
@@ -53,6 +58,16 @@ data class BuildUiState(
     val isLogcatPaused: Boolean = false,
     val isLogcatSourceDialogVisible: Boolean = false,
     val recentPackages: List<String> = emptyList(),
+
+    // Test Runner
+    val testRunResult: TestRunResult? = null,
+    val isTesting: Boolean = false,
+    val testFilterMode: TestFilterMode = TestFilterMode.ALL,
+    val testSearchQuery: String = "",
+    val selectedTestCase: TestCaseResult? = null,
+    val selectedModuleGradlePath: String? = null,
+    val availableModules: List<String> = emptyList(),
+    val didBuildFailBeforeTests: Boolean = false
 ) {
     val filteredProblems: List<BuildProblem> get() = when (problemFilter) {
         ProblemFilter.ALL -> problems
@@ -64,12 +79,53 @@ data class BuildUiState(
     val warningCount: Int get() = problems.count { it.severity == ProblemSeverity.WARNING }
     val crashCount: Int get() = logcatEntries.count { it.isCrash }
 
+    val testPassedCount: Int get() = testRunResult?.passedCount ?: 0
+    val testFailedCount: Int get() = testRunResult?.failedCount ?: 0
+    val testSkippedCount: Int get() = testRunResult?.skippedCount ?: 0
+    val testTotalCount: Int get() = testRunResult?.totalCount ?: 0
+    val testDurationSeconds: Double get() = testRunResult?.durationSeconds ?: 0.0
+
     val filteredLines: List<String> get() {
         if (searchQuery.isBlank()) return outputLines
         return outputLines.filter { it.contains(searchQuery, ignoreCase = true) }
     }
 
     val filteredLogcatEntries: List<LogEntry> get() = logcatEntries.filter { logcatFilter.matches(it) }
+
+    val filteredModuleSuites: List<TestModuleSuite> get() {
+        val result = testRunResult ?: return emptyList()
+        val query = testSearchQuery.trim()
+
+        return result.moduleSuites.mapNotNull { moduleSuite ->
+            if (selectedModuleGradlePath != null && selectedModuleGradlePath != ":" &&
+                moduleSuite.moduleGradlePath != selectedModuleGradlePath
+            ) {
+                return@mapNotNull null
+            }
+
+            val matchingClasses = moduleSuite.classes.mapNotNull { classSuite ->
+                val matchingCases = classSuite.cases.filter { case ->
+                    val matchesFilter = when (testFilterMode) {
+                        TestFilterMode.ALL -> true
+                        TestFilterMode.FAILURES_ONLY -> case.isFailure
+                    }
+                    val matchesSearch = query.isEmpty() ||
+                            case.name.contains(query, ignoreCase = true) ||
+                            case.className.contains(query, ignoreCase = true)
+
+                    matchesFilter && matchesSearch
+                }
+
+                if (matchingCases.isNotEmpty()) {
+                    classSuite.copy(cases = matchingCases)
+                } else null
+            }
+
+            if (matchingClasses.isNotEmpty()) {
+                moduleSuite.copy(classes = matchingClasses)
+            } else null
+        }
+    }
 }
 
 sealed interface BuildUiIntent {
@@ -106,6 +162,16 @@ sealed interface BuildUiIntent {
     data object CopyAllLogcat : BuildUiIntent
     data object ShareLogcat : BuildUiIntent
     data class ClickStackFrame(val frame: StackFrame) : BuildUiIntent
+
+    // Test Runner
+    data class RunTests(val moduleGradlePath: String? = null, val testFilter: String? = null) : BuildUiIntent
+    data object RerunFailedTests : BuildUiIntent
+    data class SelectTestCase(val testCase: TestCaseResult?) : BuildUiIntent
+    data class SetTestFilterMode(val mode: TestFilterMode) : BuildUiIntent
+    data class SetTestSearchQuery(val query: String) : BuildUiIntent
+    data class SelectTestModule(val moduleGradlePath: String?) : BuildUiIntent
+    data object DismissPreTestBuildError : BuildUiIntent
+    data class ClickTestStackFrame(val frame: StackFrame) : BuildUiIntent
 }
 
 sealed interface BuildUiEffect {

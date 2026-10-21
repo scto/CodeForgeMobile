@@ -254,6 +254,7 @@ fun EditorRoute(
                             completionProvider = viewModel.completionProvider,
                             updateAnnotations = uiState.activeUpdateAnnotations,
                             onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
+                            onTestTargetClick = { viewModel.onEvent(EditorUiEvent.RunTestTarget(it)) },
                             onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
                             onControllerReady = { controller = it }
                         )

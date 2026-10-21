@@ -1247,6 +1247,38 @@
     <string name="apk_analyzer_vergleich_apk">Comparison APK</string>
     <string name="apk_analyzer_keine_eintraege">No entries found</string>
 
+    <!-- test-runner -->
+    <string name="test_runner_tab_titel">Tests</string>
+    <string name="test_runner_alle_ausfuehren">Run All Tests</string>
+    <string name="test_runner_fehlgeschlagene_wiederholen">Rerun Failed Tests</string>
+    <string name="test_runner_nur_fehler_filter">Only Failures</string>
+    <string name="test_runner_suche_placeholder">Search tests…</string>
+    <string name="test_runner_zaehler_bestanden">Passed: %1$d</string>
+    <string name="test_runner_zaehler_fehlgeschlagen">Failed: %1$d</string>
+    <string name="test_runner_zaehler_uebersprungen">Skipped: %1$d</string>
+    <string name="test_runner_zaehler_gesamt">Total: %1$d</string>
+    <string name="test_runner_dauer">Duration: %1$s</string>
+    <string name="test_runner_keine_tests_gefunden">No tests match the current filter</string>
+    <string name="test_runner_noch_keine_tests">No tests executed yet. Tap \"Run All Tests\" to start.</string>
+    <string name="test_runner_build_abgebrochen_vor_tests">Build failed before tests could be executed (compilation error).</string>
+    <string name="test_runner_zu_problemen_wechseln">View Problems</string>
+    <string name="test_runner_details_titel">Test Details</string>
+    <string name="test_runner_erwartet">Expected:</string>
+    <string name="test_runner_tatsaechlich">Actual:</string>
+    <string name="test_runner_stacktrace">Stacktrace</string>
+    <string name="test_runner_standardausgabe">Standard Output</string>
+    <string name="test_runner_fehlerausgabe">Error Output</string>
+    <string name="test_runner_datei_nicht_gefunden">Source file could not be found: %1$s</string>
+    <string name="test_runner_ausfuehren_tooltip">Run this test</string>
+    <string name="test_runner_klasse_ausfuehren_tooltip">Run test class</string>
+    <string name="test_runner_laeuft">Running tests…</string>
+    <string name="test_runner_status_bestanden">Passed</string>
+    <string name="test_runner_status_fehlgeschlagen">Failed</string>
+    <string name="test_runner_status_fehler">Error</string>
+    <string name="test_runner_status_uebersprungen">Skipped</string>
+    <string name="test_runner_modul_label">Module: %1$s</string>
+    <string name="test_runner_filter_zuruecksetzen">Reset Filter</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

@@ -1247,6 +1247,38 @@
     <string name="apk_analyzer_vergleich_apk">Vergleichs-APK</string>
     <string name="apk_analyzer_keine_eintraege">Keine Einträge gefunden</string>
 
+    <!-- test-runner -->
+    <string name="test_runner_tab_titel">Tests</string>
+    <string name="test_runner_alle_ausfuehren">Alle Tests ausführen</string>
+    <string name="test_runner_fehlgeschlagene_wiederholen">Fehlgeschlagene wiederholen</string>
+    <string name="test_runner_nur_fehler_filter">Nur Fehler</string>
+    <string name="test_runner_suche_placeholder">Tests durchsuchen…</string>
+    <string name="test_runner_zaehler_bestanden">Bestanden: %1$d</string>
+    <string name="test_runner_zaehler_fehlgeschlagen">Fehlgeschlagen: %1$d</string>
+    <string name="test_runner_zaehler_uebersprungen">Übersprungen: %1$d</string>
+    <string name="test_runner_zaehler_gesamt">Gesamt: %1$d</string>
+    <string name="test_runner_dauer">Dauer: %1$s</string>
+    <string name="test_runner_keine_tests_gefunden">Keine Tests entsprechen dem aktuellen Filter</string>
+    <string name="test_runner_noch_keine_tests">Noch keine Tests ausgeführt. Tippe auf „Alle Tests ausführen“ zum Starten.</string>
+    <string name="test_runner_build_abgebrochen_vor_tests">Build vor Testausführung fehlgeschlagen (Kompilierfehler).</string>
+    <string name="test_runner_zu_problemen_wechseln">Probleme anzeigen</string>
+    <string name="test_runner_details_titel">Test-Details</string>
+    <string name="test_runner_erwartet">Erwartet:</string>
+    <string name="test_runner_tatsaechlich">Tatsächlich:</string>
+    <string name="test_runner_stacktrace">Stacktrace</string>
+    <string name="test_runner_standardausgabe">Standard-Ausgabe</string>
+    <string name="test_runner_fehlerausgabe">Fehler-Ausgabe</string>
+    <string name="test_runner_datei_nicht_gefunden">Quelldatei konnte nicht gefunden werden: %1$s</string>
+    <string name="test_runner_ausfuehren_tooltip">Diesen Test ausführen</string>
+    <string name="test_runner_klasse_ausfuehren_tooltip">Testklasse ausführen</string>
+    <string name="test_runner_laeuft">Tests laufen…</string>
+    <string name="test_runner_status_bestanden">Bestanden</string>
+    <string name="test_runner_status_fehlgeschlagen">Fehlgeschlagen</string>
+    <string name="test_runner_status_fehler">Fehler</string>
+    <string name="test_runner_status_uebersprungen">Übersprungen</string>
+    <string name="test_runner_modul_label">Modul: %1$s</string>
+    <string name="test_runner_filter_zuruecksetzen">Filter zurücksetzen</string>
+
     <!-- App-Name (Manifest-Label) -->
     <string name="app_name">CodeForge Mobile</string>
 </resources>

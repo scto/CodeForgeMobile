@@ -42,6 +42,8 @@ import com.codeforge.feature.editor.textmate.TextMateAssetLoader
 import com.codeforge.core.domain.model.LspDiagnostic
 import com.codeforge.feature.editor.overlay.ColorLiteralScanner
 import com.codeforge.feature.editor.overlay.EditorOverlayLayer
+import com.codeforge.feature.editor.overlay.TestTarget
+import com.codeforge.feature.editor.overlay.TestTargetScanner
 import com.codeforge.feature.editor.overlay.buildLineOverlays
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import com.codeforge.libs.dependency_updater_api.FileUpdateAnnotation
@@ -87,6 +89,7 @@ fun SoraCodeEditor(
     completionProvider: LspCompletionProvider? = null,
     updateAnnotations: List<FileUpdateAnnotation> = emptyList(),
     onUpdateChipClick: (DependencyUpdate) -> Unit = {},
+    onTestTargetClick: (TestTarget) -> Unit = {},
     onContentChanged: (String) -> Unit,
     onControllerReady: (EditorController) -> Unit = {}
 ) {
@@ -94,12 +97,13 @@ fun SoraCodeEditor(
     val controller = remember(path) { EditorController() }
     val diagnosticsContainer = remember(path) { DiagnosticsContainer() }
 
-    // Overlay (Farbkästchen + Update-Chips): Editor-Referenz und „Tick“ für Scroll/Text-Änderungen
+    // Overlay (Farbkästchen + Update-Chips + Test-Starter): Editor-Referenz und „Tick“ für Scroll/Text-Änderungen
     var overlayEditor by remember { mutableStateOf<CodeEditor?>(null) }
     var overlayTick by remember { mutableIntStateOf(0) }
     val colorMatches = remember(path, content) { ColorLiteralScanner.scanForPath(path, content) }
-    val lineOverlays = remember(colorMatches, updateAnnotations) {
-        buildLineOverlays(colorMatches, updateAnnotations.map { it.line to it.update })
+    val testTargets = remember(path, content) { TestTargetScanner.scan(path, content) }
+    val lineOverlays = remember(colorMatches, updateAnnotations, testTargets) {
+        buildLineOverlays(colorMatches, updateAnnotations.map { it.line to it.update }, testTargets)
     }
 
     DisposableEffect(Unit) {
@@ -340,7 +344,8 @@ fun SoraCodeEditor(
         editor = overlayEditor,
         tick = overlayTick,
         overlays = lineOverlays,
-        onUpdateChipClick = onUpdateChipClick
+        onUpdateChipClick = onUpdateChipClick,
+        onTestTargetClick = onTestTargetClick
     )
     }
 

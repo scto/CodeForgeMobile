@@ -51,6 +51,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.BuildStatus
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.feature.build.testrunner.TestDetailSheet
+import com.codeforge.feature.build.testrunner.TestsTab
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,11 +126,12 @@ fun BuildPanel(
             onIntent = onIntent
         )
 
-        // Reiter: Ausgabe, Probleme & Logcat
+        // Reiter: Ausgabe, Probleme, Logcat & Tests
         val selectedIndex = when (state.activeTab) {
             BuildTab.OUTPUT -> 0
             BuildTab.PROBLEMS -> 1
             BuildTab.LOGCAT -> 2
+            BuildTab.TESTS -> 3
         }
 
         TabRow(
@@ -201,6 +204,33 @@ fun BuildPanel(
                     }
                 }
             )
+            Tab(
+                selected = state.activeTab == BuildTab.TESTS,
+                onClick = { onIntent(BuildUiIntent.SelectTab(BuildTab.TESTS)) },
+                text = {
+                    if (state.testFailedCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                ) {
+                                    Text("${state.testFailedCount}")
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = stringRes(R.string.test_runner_tab_titel),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = stringRes(R.string.test_runner_tab_titel),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                }
+            )
         }
 
         // Tab Content
@@ -213,8 +243,18 @@ fun BuildPanel(
                 BuildTab.OUTPUT -> OutputTab(state = state, onIntent = onIntent)
                 BuildTab.PROBLEMS -> ProblemsTab(state = state, onIntent = onIntent)
                 BuildTab.LOGCAT -> LogcatTab(state = state, onIntent = onIntent)
+                BuildTab.TESTS -> TestsTab(state = state, onIntent = onIntent)
             }
         }
+    }
+
+    // Detailansicht für ausgewählten Test
+    state.selectedTestCase?.let { testCase ->
+        TestDetailSheet(
+            testCase = testCase,
+            onDismiss = { onIntent(BuildUiIntent.SelectTestCase(null)) },
+            onStackFrameClick = { onIntent(BuildUiIntent.ClickTestStackFrame(it)) }
+        )
     }
 
     // Task-Auswahl-Dialog
