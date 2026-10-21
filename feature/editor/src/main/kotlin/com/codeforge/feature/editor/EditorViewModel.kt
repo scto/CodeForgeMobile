@@ -91,6 +91,21 @@ class EditorViewModel @Inject constructor(
     /** Gecachte AppSettings für Format on Save etc. */
     private var currentAppSettings: AppSettings? = null
 
+    /**
+     * WICHTIG: Eigenschaften, auf die in Coroutinen zugegriffen wird, die im `init`-Block gestartet
+     * werden (wie z. B. in [observeUpdateAnnotations]), MÜSSEN VOR dem `init`-Block deklariert werden!
+     *
+     * Grund: `viewModelScope.launch` verwendet zur Laufzeit `Dispatchers.Main.immediate`. Läuft der
+     * Aufrufer auf dem Main-Thread (wie bei der Instanziierung des ViewModels via Hilt/Compose),
+     * wird der Coroutinen-Block SOFORT synchron innerhalb des Konstruktors ausgeführt.
+     * Da Kotlin Eigenschaften streng in Deklarationsreihenfolge initialisiert, sind Eigenschaften,
+     * die unterhalb von `init` deklariert sind, zu diesem Zeitpunkt noch `null` im Java-Bytecode.
+     */
+    private val projectRoot = MutableStateFlow<String?>(null)
+
+    /** Zuletzt gemeldete, nicht dismissed Updates des Projekts (Basis für „Update All“). */
+    private var pendingUpdates: List<DependencyUpdate> = emptyList()
+
     /** Vom Composable konsumiert, um LSP- und Snippet-Completion-Vorschläge in [LspAwareLanguage] einzuspeisen. */
     val completionProvider = LspCompletionProvider(lspClient, snippetRepository) { _uiState.value.activeFile?.path }
 
@@ -129,11 +144,6 @@ class EditorViewModel @Inject constructor(
             _uiState.update { it.copy(runningLspSessions = list) }
         }
     }
-
-    private val projectRoot = MutableStateFlow<String?>(null)
-
-    /** Zuletzt gemeldete, nicht dismissed Updates des Projekts (Basis für „Update All“). */
-    private var pendingUpdates: List<DependencyUpdate> = emptyList()
 
     private fun observeServerCapabilities() = viewModelScope.launch {
         lspClient.serverCapabilities.collect { caps ->

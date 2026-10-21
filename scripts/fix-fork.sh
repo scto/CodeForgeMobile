@@ -222,9 +222,15 @@ fix_bootstrap_second_stage() {
         echo "build-bootstraps.sh: add_termux_bootstrap_second_stage_files mit \$TERMUX_ARCH statt leerem \$package_arch."
     fi
 
-    if [ -f "${dp}" ] && grep -qF 'cpan -Ti Locale::gettext' "${dp}" && ! grep -qF 'cpan -Ti Locale::gettext || true' "${dp}"; then
-        sed -i 's/cpan -Ti Locale::gettext/command -v make >\/dev\/null 2>\&1 \&\& cpan -Ti Locale::gettext || true/' "${dp}"
-        echo "dpkg-perl.subpackage.sh: cpan-Aufruf in postinst abgesichert."
+    if [ -f "${dp}" ]; then
+        if grep -qF 'cpan -Ti Locale::gettext' "${dp}" && ! grep -qF 'cpan -Ti Locale::gettext || true' "${dp}"; then
+            sed -i 's/cpan -Ti Locale::gettext/command -v make >\/dev\/null 2>\&1 \&\& cpan -Ti Locale::gettext || true/' "${dp}"
+            echo "dpkg-perl.subpackage.sh: cpan-Aufruf in postinst abgesichert."
+        fi
+        if grep -qE 'TERMUX_SUBPKG_DEPENDS=.*clang' "${dp}"; then
+            sed -i -E 's/clang,[[:space:]]*//g; s/,[[:space:]]*clang//g' "${dp}"
+            echo "dpkg-perl.subpackage.sh: clang aus TERMUX_SUBPKG_DEPENDS entfernt."
+        fi
     fi
 }
 fix_bootstrap_second_stage "${ROOT}"

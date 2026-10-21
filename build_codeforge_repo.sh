@@ -377,9 +377,15 @@ fix_bootstrap_second_stage() {
         echo "build-bootstraps.sh: add_termux_bootstrap_second_stage_files mit \$TERMUX_ARCH statt leerem \$package_arch."
     fi
 
-    if [ -f "${dp}" ] && grep -qF 'cpan -Ti Locale::gettext' "${dp}" && ! grep -qF 'cpan -Ti Locale::gettext || true' "${dp}"; then
-        sed -i 's/cpan -Ti Locale::gettext/command -v make >\/dev\/null 2>\&1 \&\& cpan -Ti Locale::gettext || true/' "${dp}"
-        echo "dpkg-perl.subpackage.sh: cpan-Aufruf in postinst abgesichert."
+    if [ -f "${dp}" ]; then
+        if grep -qF 'cpan -Ti Locale::gettext' "${dp}" && ! grep -qF 'cpan -Ti Locale::gettext || true' "${dp}"; then
+            sed -i 's/cpan -Ti Locale::gettext/command -v make >\/dev\/null 2>\&1 \&\& cpan -Ti Locale::gettext || true/' "${dp}"
+            echo "dpkg-perl.subpackage.sh: cpan-Aufruf in postinst abgesichert."
+        fi
+        if grep -qE 'TERMUX_SUBPKG_DEPENDS=.*clang' "${dp}"; then
+            sed -i -E 's/clang,[[:space:]]*//g; s/,[[:space:]]*clang//g' "${dp}"
+            echo "dpkg-perl.subpackage.sh: clang aus TERMUX_SUBPKG_DEPENDS entfernt."
+        fi
     fi
 }
 
@@ -810,6 +816,11 @@ for arch in "${ARCHS_LIST[@]}"; do
         fi
     fi
     echo "[${arch}] geprüft: $(find "${dest}" -type f | wc -l) Dateien"
+
+    if [ -f "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" ]; then
+        echo "  [${arch}] Prüfe Abhängigkeits-Konsistenz (check-apt-consistency.py)..."
+        python3 "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" bootstrap "${CLONE_DIR}/output/bootstrap-${arch}.zip" || verify_failed=1
+    fi
 done
 rm -rf "${VERIFY_DIR}"
 [ "${verify_failed}" -eq 0 ] || die "Verifikation fehlgeschlagen – Bootstraps NICHT veröffentlichen."
@@ -942,6 +953,14 @@ big_files="$(find "${REPO_DIR}" -type f -size +95M)"
 if [ -n "${big_files}" ]; then
     echo "WARNUNG: Dateien > 95 MB (GitHub-Limit 100 MB), z. B.:" >&2
     find "${REPO_DIR}" -type f -size +95M -exec ls -l {} \; >&2
+fi
+
+# Konsistenzprüfung des APT-Repositories
+if [ -f "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" ]; then
+    echo "Prüfe Abhängigkeits-Konsistenz des APT-Repositories..."
+    CONSISTENCY_CHECK="${CONSISTENCY_CHECK:-fail}"
+    python3 "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" repo "${REPO_DIR}" --on-error "${CONSISTENCY_CHECK}" \
+        || [ "${CONSISTENCY_CHECK}" = "warn" ] || die "Konsistenzprüfung des APT-Repositories fehlgeschlagen."
 fi
 
 # ----------------------------------------------------

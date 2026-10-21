@@ -12,6 +12,7 @@
 #   uninstall <id>
 #   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 95 MiB über large-packages.txt, sonst per pkg)
 #   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 3.22.1] [--no-ndk] [--no-cmake] [--gradle]
+#   repair [--yes]               repariert defekte Bootstrap-Pakete
 #   env                          schreibt/zeigt die Umgebungsdatei (ANDROID_HOME, JAVA_HOME …)
 #   doctor                       prüft die Umgebung
 #
@@ -84,6 +85,7 @@ LOG_FILE="$LOG_DIR/setup-$(date +%Y-%m-%d).log"
 CURRENT_SETUP_RETRY_CMD=""
 PKG_UPDATED=0
 mkdir -p "$TMP" "$SDK_ROOT" "$LOG_DIR" 2>/dev/null
+APT_OPTS=(-o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::ftp::Timeout=30)
 
 # cmdline-tools (reines Java, läuft mit dem Termux-JDK). Standard: Release cmdline-tools-$CMDLINE_REV des Mirrors
 # (https://github.com/scto/codeforge-tools/releases/tag/cmdline-tools-19.0, Asset cmdline-tools-19.0.tar.xz).
@@ -226,12 +228,33 @@ need_tools() {
 
 download() { # url ziel basis-prozent spanne
   local url=$1 dest=$2 base=$3 span=$4 total size pid pct
-  total=$(curl -sIL "$url" 2>/dev/null | tr -d '\r' | awk 'tolower($1)=="content-length:"{v=$2} END{print v+0}')
-  curl -fsSL -o "$dest" "$url" 2>"$TMP/.cfsdk-curl-err" &
+  total=$(curl -sIL --max-time 15 "$url" 2>/dev/null | tr -d '\r' | awk 'tolower($1)=="content-length:"{v=$2} END{print v+0}')
+  curl -fsSL --connect-timeout 30 --speed-limit 1024 --speed-time 120 -o "$dest" "$url" 2>"$TMP/.cfsdk-curl-err" &
   pid=$!
+  local last_size=0 stall_sec=0
   while kill -0 "$pid" 2>/dev/null; do
     size=$(stat -c %s "$dest" 2>/dev/null || echo 0)
-    if [ "${total:-0}" -gt 0 ]; then pct=$(( base + size * span / total )); [ "$pct" -gt $(( base + span )) ] && pct=$(( base + span )); progress "$pct" "Lade herunter …"; fi
+    if [ "$size" -eq "$last_size" ]; then
+      stall_sec=$((stall_sec + 1))
+      if [ "$stall_sec" -ge 120 ]; then
+        kill -9 "$pid" 2>/dev/null || true
+        wait "$pid" 2>/dev/null || true
+        err "Download abgebrochen: Stall-Timeout (keine Daten empfangen seit 120s): $url"
+        return 1
+      fi
+    else
+      last_size=$size
+      stall_sec=0
+    fi
+    if [ "${total:-0}" -gt 0 ]; then
+      pct=$(( base + size * span / total ))
+      [ "$pct" -gt $(( base + span )) ] && pct=$(( base + span ))
+      local mb=$(( size / 1048576 )) total_mb=$(( total / 1048576 ))
+      progress "$pct" "Lade herunter ($mb/$total_mb MB) …"
+    else
+      local mb=$(( size / 1048576 ))
+      progress "$base" "Lade herunter ($mb MB) …"
+    fi
     sleep 1
   done
   wait "$pid" || { err "Download fehlgeschlagen: $url ($(head -c 200 "$TMP/.cfsdk-curl-err" 2>/dev/null))"; return 1; }
@@ -282,9 +305,9 @@ install_repo_pkg() {
 
   if [ -z "$row" ]; then
     if [ -n "${PKG_INSTALL_OUT:-}" ]; then
-      DEBIAN_FRONTEND=noninteractive pkg install -y "$want" >"$PKG_INSTALL_OUT" 2>&1
+      DEBIAN_FRONTEND=noninteractive pkg install "${APT_OPTS[@]}" -y "$want" >"$PKG_INSTALL_OUT" 2>&1
     else
-      DEBIAN_FRONTEND=noninteractive pkg install -y "$want"
+      DEBIAN_FRONTEND=noninteractive pkg install "${APT_OPTS[@]}" -y "$want"
     fi
     return $?
   fi
@@ -315,11 +338,11 @@ install_repo_pkg() {
 
   say "Installiere $asset …"
   if [ -n "${PKG_INSTALL_OUT:-}" ]; then
-    if ! DEBIAN_FRONTEND=noninteractive apt install -y "$deb" >"$PKG_INSTALL_OUT" 2>&1; then
+    if ! DEBIAN_FRONTEND=noninteractive apt install "${APT_OPTS[@]}" -y "$deb" >"$PKG_INSTALL_OUT" 2>&1; then
       rm -f "$deb"
       return 1
     fi
-  elif ! DEBIAN_FRONTEND=noninteractive apt install -y "$deb"; then
+  elif ! DEBIAN_FRONTEND=noninteractive apt install "${APT_OPTS[@]}" -y "$deb"; then
     rm -f "$deb"
     return 1
   fi
@@ -342,9 +365,9 @@ pkg_update_once() {
     printf '\n=== [%s] apt-get update ===\n' "$(date '+%Y-%m-%d %H:%M:%S')"
   } >> "$LOG_FILE" 2>/dev/null
   if command -v apt-get >/dev/null 2>&1; then
-    DEBIAN_FRONTEND=noninteractive apt-get update -y >"$up_out" 2>&1 || rc=$?
+    DEBIAN_FRONTEND=noninteractive apt-get "${APT_OPTS[@]}" update -y >"$up_out" 2>&1 || rc=$?
   else
-    pkg update -y >"$up_out" 2>&1 || rc=$?
+    pkg update "${APT_OPTS[@]}" -y >"$up_out" 2>&1 || rc=$?
   fi
   cat "$up_out" >> "$LOG_FILE" 2>/dev/null
   if [ "$rc" -ne 0 ] || grep -Eq '^(Err:|E:|W: Failed to fetch|.*NO_PUBKEY|.*404  Not Found|.*Could not resolve)' "$up_out" 2>/dev/null; then
@@ -852,7 +875,201 @@ write_env() { # jdkVer ndkId cmakeId
   fi
 }
 
+ALLOWED_REPAIR_PKGS="dpkg-perl dpkg-scanpackages doxygen docbook-xml docbook-xsl xsltproc tor apt-transport-tor unbound pyunbound swig python-tkinter ca-certificates-java"
+
+is_allowed_repair_pkg() {
+  local p=$1 allowed
+  for allowed in $ALLOWED_REPAIR_PKGS; do
+    if [ "$p" = "$allowed" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+check_dpkg_consistency() {
+  if ! command -v apt-get >/dev/null 2>&1; then
+    return 0
+  fi
+  local chk_out chk_rc=0
+  chk_out=$(LANG=C apt-get check 2>&1) || chk_rc=$?
+  if [ "$chk_rc" -ne 0 ]; then
+    mkdir -p "$LOG_DIR" 2>/dev/null
+    {
+      printf '\n=== [%s] apt-get check FEHLGESCHLAGEN (Exit-Code %s) ===\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$chk_rc"
+      printf '%s\n' "$chk_out"
+    } >> "$LOG_FILE" 2>/dev/null
+
+    err "Defekter Paketzustand erkannt (apt-get check meldet Fehler)!"
+    local dep_line
+    dep_line=$(printf '%s\n' "$chk_out" | grep -E -i 'Depends:' | head -n 1)
+    if [ -n "$dep_line" ]; then
+      say "Unerfüllte Abhängigkeit:"
+      say "  $dep_line"
+    else
+      say "Fehlerausgabe:"
+      printf '%s\n' "$chk_out" | grep -E '(unmet|Depends|broken|E:)' | head -n 5 >&2
+    fi
+    say ""
+    say "Hinweis: Bitte führen Sie zur Reparatur folgenden Befehl aus:"
+    say "  codeforge-env repair"
+    say ""
+    die "Einrichtung abgebrochen wegen inkonsistentem Paketzustand. Details in $LOG_FILE"
+  fi
+  return 0
+}
+
+do_repair() {
+  local auto_yes=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --yes|-y) auto_yes=1; shift ;;
+      *) die "Unbekannte Option für repair: $1" ;;
+    esac
+  done
+
+  mkdir -p "$LOG_DIR" 2>/dev/null
+  {
+    printf '\n=== [%s] codeforge-env repair gestartet ===\n' "$(date '+%Y-%m-%d %H:%M:%S')"
+  } >> "$LOG_FILE" 2>/dev/null
+
+  if ! command -v apt-get >/dev/null 2>&1; then
+    die "apt-get ist nicht verfügbar"
+  fi
+
+  local chk_out chk_rc=0
+  chk_out=$(LANG=C apt-get check 2>&1) || chk_rc=$?
+  if [ "$chk_rc" -eq 0 ]; then
+    say "Paketzustand ist konsistent, keine Reparatur erforderlich."
+    return 0
+  fi
+
+  {
+    printf 'apt-get check Vorprüfung (Exit %s):\n%s\n' "$chk_rc" "$chk_out"
+  } >> "$LOG_FILE" 2>/dev/null
+
+  # Ermitteln der defekten Pakete
+  local broken_pkgs=()
+  while IFS= read -r line; do
+    [ -n "$line" ] && broken_pkgs+=("$line")
+  done < <(printf '%s\n' "$chk_out" | awk '
+    /The following packages have unmet dependencies:/ {flag=1; next}
+    /^E:/ {flag=0}
+    flag && /^[[:space:]]+[a-zA-Z0-9.+-]+[[:space:]]*:/ {
+      sub(/^[[:space:]]+/, "");
+      sub(/[[:space:]]*:.*$/, "");
+      print;
+    }
+  ' | sort -u)
+
+  # Fallback: Falls keine Pakete über das Parsing gefunden wurden, versuche dpkg -C
+  if [ ${#broken_pkgs[@]} -eq 0 ] && command -v dpkg >/dev/null 2>&1; then
+    local dpkg_c
+    dpkg_c=$(dpkg -C 2>/dev/null || true)
+    while IFS= read -r line; do
+      [ -n "$line" ] && broken_pkgs+=("$line")
+    done < <(printf '%s\n' "$dpkg_c" | awk '/^[[:space:]]+[a-zA-Z0-9.+-]+/{print $1}' | sort -u)
+  fi
+
+  if [ ${#broken_pkgs[@]} -eq 0 ]; then
+    err "apt-get check meldet Fehler, aber die betroffenen Pakete konnten nicht automatisch ermittelt werden:"
+    printf '%s\n' "$chk_out" >&2
+    say "Bitte prüfen Sie das System manuell mit 'apt-get -f install'."
+    exit 1
+  fi
+
+  # Falls dpkg-perl defekt ist und dpkg-scanpackages installiert ist, nehmen wir dpkg-scanpackages mit auf
+  if command -v dpkg >/dev/null 2>&1; then
+    for pkg in "${broken_pkgs[@]}"; do
+      if [ "$pkg" = "dpkg-perl" ]; then
+        if dpkg -s dpkg-scanpackages 2>/dev/null | grep -q 'Status:.*installed'; then
+          local already_in=0 sp
+          for sp in "${broken_pkgs[@]}"; do [ "$sp" = "dpkg-scanpackages" ] && already_in=1; done
+          if [ "$already_in" -eq 0 ]; then
+            broken_pkgs+=("dpkg-scanpackages")
+            say "Beziehe abhängiges Paket 'dpkg-scanpackages' in die Reparatur ein."
+          fi
+        fi
+      fi
+    done
+  fi
+
+  say "Gefundene defekte Pakete: ${broken_pkgs[*]}"
+
+  # Sicherheitsprüfung: Dürfen alle gefundenen Pakete repariert werden?
+  local pkg
+  for pkg in "${broken_pkgs[@]}"; do
+    if ! is_allowed_repair_pkg "$pkg"; then
+      err "Sicherheitsabbruch: Das defekte Paket '$pkg' ist nicht in der Liste der reparierbaren Pakete!"
+      say "Erlaubte Pakete: $ALLOWED_REPAIR_PKGS"
+      say "Dieses Paket gehört nicht zu den bekannten Bootstrap-Inkonsistenzen."
+      say "Bitte prüfen Sie das Paket manuell mit 'apt-get check' oder 'dpkg -C'."
+      {
+        printf 'Sicherheitsabbruch: %s nicht in ALLOWED_REPAIR_PKGS\n' "$pkg"
+      } >> "$LOG_FILE" 2>/dev/null
+      exit 1
+    fi
+  done
+
+  # Rückfrage falls nicht --yes
+  if [ "$auto_yes" -ne 1 ]; then
+    printf "Möchten Sie die defekten Pakete (%s) entfernen? [j/N] " "${broken_pkgs[*]}"
+    local answer
+    read -r answer
+    case "$answer" in
+      [jJyY]|[jJ][aA]|[yY][eE][sS]) ;;
+      *)
+        say "Reparatur abgebrochen."
+        return 0
+        ;;
+    esac
+  fi
+
+  # Entfernen der defekten Pakete mit dpkg --remove --force-depends
+  say "Entferne defekte Pakete (${broken_pkgs[*]})..."
+  {
+    printf 'Entferne mit dpkg --remove --force-depends: %s\n' "${broken_pkgs[*]}"
+  } >> "$LOG_FILE" 2>/dev/null
+
+  if ! dpkg --remove --force-depends "${broken_pkgs[@]}" >> "$LOG_FILE" 2>&1; then
+    err "Fehler beim Entfernen mit dpkg --remove --force-depends!"
+    say "Logdatei: $LOG_FILE"
+    exit 1
+  fi
+
+  # Bereinigung mit apt-get -f install -y
+  say "Bereinige Abhängigkeiten (apt-get -f install)..."
+  {
+    printf 'Bereinige mit apt-get -f install -y\n'
+  } >> "$LOG_FILE" 2>/dev/null
+
+  if ! DEBIAN_FRONTEND=noninteractive apt-get "${APT_OPTS[@]}" -f install -y >> "$LOG_FILE" 2>&1; then
+    err "apt-get -f install fehlgeschlagen!"
+    say "Logdatei: $LOG_FILE"
+    exit 1
+  fi
+
+  # Erneuter Check
+  say "Überprüfe Paketzustand erneut..."
+  chk_rc=0
+  chk_out=$(LANG=C apt-get check 2>&1) || chk_rc=$?
+  {
+    printf 'apt-get check Nachprüfung (Exit %s):\n%s\n' "$chk_rc" "$chk_out"
+  } >> "$LOG_FILE" 2>/dev/null
+
+  if [ "$chk_rc" -ne 0 ]; then
+    err "Reparatur unvollständig: apt-get check meldet weiterhin Fehler!"
+    printf '%s\n' "$chk_out" >&2
+    say "Logdatei: $LOG_FILE"
+    exit 1
+  fi
+
+  say "Reparatur erfolgreich abgeschlossen. Der Paketzustand ist wieder konsistent."
+  ok repair
+}
+
 do_setup() {
+  check_dpkg_consistency
   local setup_args="$*"
   local retry_cmd="codeforge-env setup${setup_args:+ $setup_args}"
   CURRENT_SETUP_RETRY_CMD="$retry_cmd"
@@ -927,6 +1144,7 @@ do_doctor() {
 cmd=${1:-help}; [ $# -gt 0 ] && shift
 case "$cmd" in
   list|install|uninstall|setup)
+    check_dpkg_consistency
     command -v jq >/dev/null 2>&1 || pkg_install jq || true
     MANIFEST_CACHE=$(build_manifest)
     ;;
@@ -935,8 +1153,9 @@ case "$cmd" in
   list) do_list ;;
   install) [ $# -ge 1 ] || die "install braucht eine ID"; do_install "$1" ;;
   uninstall) [ $# -ge 1 ] || die "uninstall braucht eine ID"; do_uninstall "$1" ;;
-  pkg) [ $# -ge 1 ] || die "pkg braucht mindestens einen Paketnamen"; pkg_install "$@" || exit 1; ok "$*" ;;
+  pkg) [ $# -ge 1 ] || die "pkg braucht mindestens einen Paketnamen"; check_dpkg_consistency; pkg_install "$@" || exit 1; ok "$*" ;;
   setup) do_setup "$@" ;;
+  repair) do_repair "$@" ;;
   env) [ -f "$ENV_FILE" ] && cat "$ENV_FILE" || die "Noch nicht eingerichtet (codeforge-env setup)" ;;
   doctor) do_doctor ;;
   help|-h|--help) sed -n '2,/^# Quellen:/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//' ;;

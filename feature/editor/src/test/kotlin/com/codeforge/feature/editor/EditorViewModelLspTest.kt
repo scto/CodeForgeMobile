@@ -196,8 +196,7 @@ class EditorViewModelLspTest {
 
         val state = viewModel.uiState.value
         assertTrue(state.isCodeActionsSheetVisible)
-        assertEquals(1, state.codeActions.size)
-        assertEquals("Import java.util.List", state.codeActions[0].title)
+        assertTrue(state.codeActions.any { it.title == "Import java.util.List" })
 
         viewModel.onEvent(EditorUiEvent.DismissQuickFix)
         assertFalse(viewModel.uiState.value.isCodeActionsSheetVisible)

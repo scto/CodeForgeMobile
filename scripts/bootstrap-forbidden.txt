@@ -1,0 +1,17 @@
+# Pakete, die NICHT im minimalen Android-Bootstrap enthalten sein dürfen.
+# Entwicklerwerkzeuge, Dokumentation und Serverdienste gehören ins APT-Repository,
+# nicht in das Basis-Bootstrap-Image.
+dpkg-perl
+dpkg-scanpackages
+doxygen
+docbook-xml
+docbook-xsl
+xsltproc
+tor
+apt-transport-tor
+unbound
+pyunbound
+swig
+python-tkinter
+ca-certificates-java
+clang

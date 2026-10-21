@@ -74,6 +74,12 @@ on:
         required: false
         default: ""
         type: string
+      consistency_check:
+        description: "Konsistenzprüfung vor Veröffentlichung: fail (Standard) bricht bei unerfüllten Abhängigkeiten ab, warn erzeugt nur Warnungen"
+        required: false
+        default: "fail"
+        type: choice
+        options: [fail, warn]
   workflow_call:
     inputs:
       mode:
@@ -126,6 +132,12 @@ on:
         required: false
         default: ""
         type: string
+      consistency_check:
+        description: "Konsistenzprüfung vor Veröffentlichung: fail (Standard) bricht bei unerfüllten Abhängigkeiten ab, warn erzeugt nur Warnungen"
+        required: false
+        default: "fail"
+        type: choice
+        options: [fail, warn]
       run_label:
         description: "Interner Name für Artefakte"
         required: false
@@ -203,6 +215,7 @@ jobs:
       - name: Bootstraps und APT-Repo bauen
         env:
           CODEFORGE_GPG_PASSPHRASE: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+          CONSISTENCY_CHECK: ${{ inputs.consistency_check || 'fail' }}
         run: |
           set -euo pipefail
           chmod +x build_codeforge_repo.sh
@@ -436,6 +449,7 @@ jobs:
       - name: Repo ergänzen, signieren, prüfen
         env:
           CODEFORGE_GPG_PASSPHRASE: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+          CONSISTENCY_CHECK: ${{ inputs.consistency_check || 'fail' }}
         run: |
           set -euo pipefail
           export BASE_REPO_DIR="$PWD/base-repo" EXTRA_DEBS_DIR="$PWD/extra-debs"
