@@ -55,6 +55,7 @@ include(
     ":libs:terminal-engine",
     ":libs:gradle-tooling-bridge",
     ":libs:lsp-client",
+    ":libs:debug-client",
     ":libs:template-engine",
     ":libs:plugin-api",
 
