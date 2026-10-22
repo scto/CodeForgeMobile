@@ -389,11 +389,95 @@ fix_bootstrap_second_stage() {
     fi
 }
 
+# Bootstrap nur aus der Abhängigkeitshülle der Bootstrap-Liste bauen. scripts/build-bootstraps.sh extrahiert sonst JEDES .deb in
+# output/ – also auch Build-Abhängigkeiten und Subpackages, die build-package.sh nebenbei baut (swig, doxygen, docbook-*, xsltproc,
+# tor, unbound, python-tkinter, ca-certificates-java, dpkg-perl, dpkg-scanpackages, ...). Lauf 2026-10-22: 159 statt ~80 Pakete,
+# dpkg-perl mit unerfüllter Abhängigkeit clang macht apt auf dem Gerät kaputt (Task 45). Hülle = Depends-Felder, wie pull_package.
+fix_bootstrap_closure() {
+    local d="$1"
+    local bb="${d}/scripts/build-bootstraps.sh"
+    [ -f "${bb}" ] || die "scripts/build-bootstraps.sh fehlt im Fork."
+    python3 -I - "${bb}" <<'PYEOF' || die "Abhängigkeitshülle in build-bootstraps.sh konnte nicht eingebaut werden (siehe oben)."
+import sys
+p = sys.argv[1]
+s = open(p, encoding="utf-8").read()
+MARK = "CODEFORGE-CLOSURE"
+if MARK in s:
+    print("build-bootstraps.sh: Abhängigkeitshülle bereits vorhanden.")
+    sys.exit(0)
+FUNC = r'''# CODEFORGE-CLOSURE: build-package.sh legt neben den Bootstrap-Paketen auch Build-Abhängigkeiten und Subpackages
+# (swig, doxygen, tor, dpkg-perl, ...) in output/ ab. Nur die Abhängigkeitshülle von ${PACKAGES[@]} darf in den Bootstrap.
+declare -A CF_CLOSURE=()
+compute_bootstrap_closure() {
+	local package_arch="$1"
+	local deb name arch dep field i=0
+	local -A deb_of=()
+	local -A via=()
+	local -a queue=()
+	CF_CLOSURE=()
+	for deb in "$TERMUX_BUILT_DEBS_DIRECTORY"/*.deb; do
+		[ -e "$deb" ] || continue
+		name="$(dpkg-deb -f "$deb" Package)"
+		arch="$(dpkg-deb -f "$deb" Architecture)"
+		[[ "$arch" == "$package_arch" || "$arch" == "all" ]] || continue
+		deb_of["$name"]="$deb"
+	done
+	for name in "${PACKAGES[@]}"; do
+		queue+=("$name")
+		via["$name"]="Wurzel"
+	done
+	while [ "$i" -lt "${#queue[@]}" ]; do
+		name="${queue[$i]}"
+		i=$((i + 1))
+		[ -z "${CF_CLOSURE[$name]:-}" ] || continue
+		if [ -z "${deb_of[$name]:-}" ]; then
+			echo "[!] WARNUNG: '$name' (benötigt von ${via[$name]:-?}) liegt nicht in output/ und wird nicht aufgenommen."
+			continue
+		fi
+		CF_CLOSURE["$name"]=1
+		echo "[*] Bootstrap-Hülle: $name (via ${via[$name]:-?})"
+		field="$(dpkg-deb -f "${deb_of[$name]}" Depends 2>/dev/null || true)"
+		while IFS= read -r dep; do
+			dep="${dep%%|*}"
+			dep="${dep%%(*}"
+			dep="${dep// /}"
+			dep="${dep%%:*}"
+			[ -n "$dep" ] || continue
+			[ -z "${CF_CLOSURE[$dep]:-}" ] || continue
+			[ -n "${via[$dep]:-}" ] || via["$dep"]="$name"
+			queue+=("$dep")
+		done < <(printf '%s\n' "$field" | tr ',' '\n')
+	done
+	echo "[*] Bootstrap-Hülle: ${#CF_CLOSURE[@]} Pakete für ${package_arch}."
+}
+
+'''
+a = "# Extract *.deb files to the bootstrap root.\nextract_debs() {"
+if a not in s:
+    sys.exit("FEHLER: extract_debs() nicht gefunden – Fork-Stand geändert, Patch anpassen.")
+s = s.replace(a, FUNC + a, 1)
+b = "\tfor deb in *.deb; do\n"
+if s.count(b) != 1:
+    sys.exit("FEHLER: 'for deb in *.deb' nicht eindeutig gefunden.")
+s = s.replace(b, "\tcompute_bootstrap_closure \"$package_arch\"\n" + b, 1)
+c = '\t\tif [[ "$current_package_name" == *"-static" ]]; then\n'
+if s.count(c) != 1:
+    sys.exit("FEHLER: Static-Prüfung nicht eindeutig gefunden.")
+skip = ('\t\tif [ -z "${CF_CLOSURE[$current_package_name]:-}" ]; then\n'
+        '\t\t\techo "[*] Überspringe \'$deb\': nicht in der Abhängigkeitshülle des Bootstraps."\n'
+        '\t\t\tcontinue\n\t\tfi\n\n')
+s = s.replace(c, skip + c, 1)
+open(p, "w", encoding="utf-8").write(s)
+print("build-bootstraps.sh: Beschränkung auf die Abhängigkeitshülle eingebaut.")
+PYEOF
+}
+
 restore_symlinks "${CLONE_DIR}"
 restore_exec_bits "${CLONE_DIR}"
 fix_bootstrap_subpackage_names "${CLONE_DIR}"
 fix_bootstrap_zip_destination "${CLONE_DIR}"
 fix_bootstrap_second_stage "${CLONE_DIR}"
+fix_bootstrap_closure "${CLONE_DIR}"
 [ -x "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || [ ! -e "${CLONE_DIR}/packages/termux-core/build/scripts/termux-replace-termux-core-src-scripts" ] || die "termux-replace-termux-core-src-scripts ist nicht ausführbar."
 [ -d "${CLONE_DIR}/packages/procps/hsearch" ] || die "packages/procps/hsearch ist kein Verzeichnis – Symlink-Reparatur unvollständig."
 fi   # Ende Step 2 (PHASE != assemble)
