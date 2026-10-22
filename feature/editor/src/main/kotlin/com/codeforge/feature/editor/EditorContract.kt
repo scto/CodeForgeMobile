@@ -73,7 +73,14 @@ data class EditorUiState(
     val referencesList: List<LspLocation> = emptyList(),
     val referencesSymbol: String = "",
     val runningLspSessions: List<com.codeforge.core.domain.model.LspSessionInfo> = emptyList(),
-    val isLspSessionsDialogVisible: Boolean = false
+    val isLspSessionsDialogVisible: Boolean = false,
+
+    // Task 37b Breakpoints
+    val breakpointsByPath: Map<String, List<com.codeforge.core.domain.model.Breakpoint>> = emptyMap(),
+    val pausedLine: Int? = null,
+    val pausedPath: String? = null,
+    val editingBreakpoint: com.codeforge.core.domain.model.Breakpoint? = null,
+    val isBreakpointsOverviewVisible: Boolean = false
 ) {
     val isLspConnected: Boolean get() = lspServerState == LspServerState.RUNNING
 
@@ -82,6 +89,10 @@ data class EditorUiState(
 
     val activeFile: OpenFile? get() = openFiles.getOrNull(activeFileIndex)
     val activeDiagnostics: List<LspDiagnostic> get() = activeFile?.let { diagnosticsByPath[it.path] } ?: emptyList()
+    val activeBreakpoints: List<com.codeforge.core.domain.model.Breakpoint>
+        get() = activeFile?.let { breakpointsByPath[it.path] } ?: emptyList()
+    val activePausedLine: Int?
+        get() = if (pausedPath != null && activeFile?.path == pausedPath) pausedLine else null
 
     val filteredOutlineSymbols: List<LspDocumentSymbol>
         get() = if (outlineFilter.isBlank()) outlineSymbols
@@ -148,6 +159,15 @@ sealed interface EditorUiEvent {
     data object ToggleLspSessionsDialog : EditorUiEvent
     data class RestartLspSession(val sessionId: String) : EditorUiEvent
     data class StopLspSession(val sessionId: String) : EditorUiEvent
+
+    // Task 37b Breakpoints
+    data class ToggleBreakpoint(val line: Int) : EditorUiEvent
+    data class EditBreakpoint(val line: Int) : EditorUiEvent
+    data class SaveBreakpoint(val breakpoint: com.codeforge.core.domain.model.Breakpoint) : EditorUiEvent
+    data class DeleteBreakpoint(val breakpointId: String) : EditorUiEvent
+    data object DeleteAllBreakpoints : EditorUiEvent
+    data class ShowBreakpointsOverview(val show: Boolean) : EditorUiEvent
+    data object DismissBreakpointEdit : EditorUiEvent
 }
 
 sealed interface EditorUiEffect {

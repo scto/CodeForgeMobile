@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
@@ -59,6 +60,7 @@ import com.codeforge.feature.build.BuildUiEffect
 import com.codeforge.feature.build.BuildUiIntent
 import com.codeforge.feature.build.BuildViewModel
 import com.codeforge.feature.composepreview.ComposePreviewRoute
+import com.codeforge.feature.debug.DebugBottomSheet
 import com.codeforge.feature.dependencyupdates.DependencyUpdatesHost
 import com.codeforge.feature.editor.EditorRoute
 import kotlinx.coroutines.launch
@@ -81,6 +83,7 @@ fun ProjectWorkspaceRoute(
     val buildViewModel: BuildViewModel = hiltViewModel()
     val buildState by buildViewModel.uiState.collectAsState()
     var showBuildSheet by remember { mutableStateOf(false) }
+    var showDebugSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
@@ -139,6 +142,12 @@ fun ProjectWorkspaceRoute(
                         }
                     },
                     actions = {
+                        IconButton(onClick = { showDebugSheet = true }) {
+                            Icon(
+                                imageVector = Icons.Default.BugReport,
+                                contentDescription = stringRes(R.string.debug_title)
+                            )
+                        }
                         IconButton(onClick = { showBuildSheet = true }) {
                             if (buildState.isBuilding) {
                                 CircularProgressIndicator(
@@ -208,6 +217,16 @@ fun ProjectWorkspaceRoute(
         BuildBottomSheet(
             onDismissRequest = { showBuildSheet = false },
             viewModel = buildViewModel
+        )
+    }
+
+    if (showDebugSheet) {
+        DebugBottomSheet(
+            projectRoot = rootPath,
+            onDismissRequest = { showDebugSheet = false },
+            onNavigateToSource = { _, _ ->
+                showDebugSheet = false
+            }
         )
     }
 }

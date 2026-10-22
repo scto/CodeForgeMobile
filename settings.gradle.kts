@@ -51,6 +51,7 @@ include(
     ":feature:hardcodedstrings",
     ":feature:build",
     ":feature:signing",
+    ":feature:debug",
 
     ":libs:terminal-engine",
     ":libs:gradle-tooling-bridge",

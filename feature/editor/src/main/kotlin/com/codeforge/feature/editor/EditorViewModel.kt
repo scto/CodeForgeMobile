@@ -52,7 +52,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.codeforge.core.datastore.proto.AppSettings
 import com.codeforge.core.domain.model.UnifiedFormatOptions
+import com.codeforge.core.domain.repository.BreakpointRepository
 import com.codeforge.core.domain.repository.CodeFormatterRepository
+import com.codeforge.core.domain.repository.DebugRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -73,7 +76,9 @@ class EditorViewModel @Inject constructor(
     private val fileSyncBridge: FileSyncBridge,
     private val codeFormatterRepository: CodeFormatterRepository,
     private val snippetRepository: com.codeforge.core.domain.repository.SnippetRepository = com.codeforge.core.domain.repository.NoOpSnippetRepository,
-    private val testRunRequestBridge: TestRunRequestBridge? = null
+    private val testRunRequestBridge: TestRunRequestBridge? = null,
+    private val breakpointRepository: BreakpointRepository? = null,
+    private val debugRepository: DebugRepository? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -109,6 +114,8 @@ class EditorViewModel @Inject constructor(
     /** Vom Composable konsumiert, um LSP- und Snippet-Completion-Vorschläge in [LspAwareLanguage] einzuspeisen. */
     val completionProvider = LspCompletionProvider(lspClient, snippetRepository) { _uiState.value.activeFile?.path }
 
+    private var breakpointObservationJob: Job? = null
+
     init {
         setupOpenDocumentsProvider()
         observeSettings()
@@ -123,6 +130,8 @@ class EditorViewModel @Inject constructor(
         observeUpdateAnnotations()
         observeServerCapabilities()
         setupApplyEditHandler()
+        observeBreakpoints()
+        observeDebugState()
     }
 
     private fun setupOpenDocumentsProvider() {
@@ -349,6 +358,45 @@ class EditorViewModel @Inject constructor(
         openFileRequestBridge.openRequests.collect { path -> openFile(path) }
     }
 
+    private fun observeBreakpoints() = viewModelScope.launch {
+        projectRoot.collect { root ->
+            breakpointObservationJob?.cancel()
+            if (root != null && breakpointRepository != null) {
+                breakpointObservationJob = viewModelScope.launch {
+                    breakpointRepository.getBreakpoints(root).collect { bpsMap ->
+                        _uiState.update { it.copy(breakpointsByPath = bpsMap) }
+                    }
+                }
+            } else {
+                _uiState.update { it.copy(breakpointsByPath = emptyMap()) }
+            }
+        }
+    }
+
+    private fun observeDebugState() = viewModelScope.launch {
+        debugRepository?.state?.collect { sessionState ->
+            when (sessionState) {
+                is com.codeforge.core.domain.model.DebugSessionState.Paused -> {
+                    val topFrame = sessionState.frames.firstOrNull()
+                    _uiState.update {
+                        it.copy(
+                            pausedLine = topFrame?.line,
+                            pausedPath = topFrame?.path
+                        )
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(
+                            pausedLine = null,
+                            pausedPath = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private fun observeJumpRequests() = viewModelScope.launch {
         openFileRequestBridge.jumpRequests.collect { target ->
             _uiState.update { it.copy(pendingJump = target) }
@@ -502,6 +550,58 @@ class EditorViewModel @Inject constructor(
                 viewModelScope.launch {
                     lspSessionController.stopSession(event.sessionId)
                 }
+            }
+
+            // Task 37b Breakpoints
+            is EditorUiEvent.ToggleBreakpoint -> {
+                val active = _uiState.value.activeFile ?: return
+                val root = projectRoot.value ?: File(active.path).parentFile?.absolutePath ?: return
+                viewModelScope.launch {
+                    breakpointRepository?.toggleBreakpoint(root, active.path, event.line)
+                }
+            }
+            is EditorUiEvent.EditBreakpoint -> {
+                val active = _uiState.value.activeFile ?: return
+                val bp = _uiState.value.breakpointsByPath[active.path]?.find { it.line == event.line }
+                    ?: com.codeforge.core.domain.model.Breakpoint(
+                        id = "bp-" + java.util.UUID.randomUUID().toString().take(8),
+                        path = active.path,
+                        line = event.line
+                    )
+                _uiState.update { it.copy(editingBreakpoint = bp) }
+            }
+            is EditorUiEvent.SaveBreakpoint -> {
+                val root = projectRoot.value ?: File(event.breakpoint.path).parentFile?.absolutePath
+                if (root != null) {
+                    viewModelScope.launch {
+                        breakpointRepository?.updateBreakpoint(root, event.breakpoint)
+                    }
+                }
+                _uiState.update { it.copy(editingBreakpoint = null) }
+            }
+            is EditorUiEvent.DeleteBreakpoint -> {
+                val root = projectRoot.value
+                if (root != null) {
+                    viewModelScope.launch {
+                        breakpointRepository?.removeBreakpoint(root, event.breakpointId)
+                    }
+                }
+                _uiState.update { it.copy(editingBreakpoint = null) }
+            }
+            EditorUiEvent.DeleteAllBreakpoints -> {
+                val root = projectRoot.value
+                if (root != null) {
+                    viewModelScope.launch {
+                        breakpointRepository?.removeAll(root)
+                    }
+                }
+                _uiState.update { it.copy(isBreakpointsOverviewVisible = false) }
+            }
+            is EditorUiEvent.ShowBreakpointsOverview -> {
+                _uiState.update { it.copy(isBreakpointsOverviewVisible = event.show) }
+            }
+            EditorUiEvent.DismissBreakpointEdit -> {
+                _uiState.update { it.copy(editingBreakpoint = null) }
             }
         }
     }
@@ -778,6 +878,10 @@ class EditorViewModel @Inject constructor(
 
     private fun updateBuffer(text: String) {
         val activePath = _uiState.value.activeFile?.path
+        val oldContent = _uiState.value.activeFile?.content.orEmpty()
+        val oldLines = oldContent.count { it == '\n' }
+        val newLines = text.count { it == '\n' }
+
         _uiState.update { s ->
             if (s.openFiles.isEmpty()) return@update s
             val updated = s.openFiles.toMutableList()
@@ -790,8 +894,30 @@ class EditorViewModel @Inject constructor(
             val nextVersion = (documentVersions[activePath] ?: 1) + 1
             documentVersions[activePath] = nextVersion
             viewModelScope.launch { lspClient.didChange(activePath, text, nextVersion) }
+
+            // Haltepunkte mitführen bei Zeilenänderungen
+            if (oldLines != newLines) {
+                val root = projectRoot.value ?: File(activePath).parentFile?.absolutePath
+                if (root != null) {
+                    val delta = newLines - oldLines
+                    val changeLine = findFirstDifferenceLine(oldContent, text)
+                    viewModelScope.launch {
+                        breakpointRepository?.adjustBreakpointsOnEdit(root, activePath, changeLine, delta)
+                    }
+                }
+            }
         }
         publishActiveFileToBridge()
+    }
+
+    private fun findFirstDifferenceLine(oldText: String, newText: String): Int {
+        var line = 1
+        val minLen = minOf(oldText.length, newText.length)
+        for (i in 0 until minLen) {
+            if (oldText[i] != newText[i]) return line
+            if (oldText[i] == '\n') line++
+        }
+        return line
     }
 
     private fun formatCode(range: LspRange? = null) = viewModelScope.launch {

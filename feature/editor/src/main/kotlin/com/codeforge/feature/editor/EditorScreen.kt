@@ -34,6 +34,9 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.AccountTree
+import androidx.compose.material.icons.filled.Adjust
+import com.codeforge.feature.editor.ui.BreakpointsOverviewSheet
+import com.codeforge.feature.editor.ui.EditBreakpointDialog
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
@@ -239,7 +242,9 @@ fun EditorRoute(
                 onOutline = { viewModel.onEvent(EditorUiEvent.ToggleOutline) },
                 onDefinition = ::triggerDefinition,
                 onReferences = ::triggerReferences,
-                onToggleLspSessions = { viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog) }
+                onToggleLspSessions = { viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog) },
+                hasBreakpoints = uiState.activeBreakpoints.isNotEmpty(),
+                onBreakpoints = { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(true)) }
             )
 
             if (uiState.isSearchBarVisible) {
@@ -263,6 +268,10 @@ fun EditorRoute(
                             diagnostics = uiState.activeDiagnostics,
                             completionProvider = viewModel.completionProvider,
                             updateAnnotations = uiState.activeUpdateAnnotations,
+                            breakpoints = uiState.activeBreakpoints,
+                            pausedLine = uiState.activePausedLine,
+                            onToggleBreakpoint = { viewModel.onEvent(EditorUiEvent.ToggleBreakpoint(it)) },
+                            onEditBreakpoint = { viewModel.onEvent(EditorUiEvent.EditBreakpoint(it)) },
                             onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
                             onTestTargetClick = { viewModel.onEvent(EditorUiEvent.RunTestTarget(it)) },
                             onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
@@ -350,6 +359,29 @@ fun EditorRoute(
             onDismiss = { viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog) }
         )
     }
+
+    if (uiState.editingBreakpoint != null) {
+        EditBreakpointDialog(
+            breakpoint = uiState.editingBreakpoint!!,
+            onSave = { viewModel.onEvent(EditorUiEvent.SaveBreakpoint(it)) },
+            onDelete = { viewModel.onEvent(EditorUiEvent.DeleteBreakpoint(it)) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.DismissBreakpointEdit) }
+        )
+    }
+
+    if (uiState.isBreakpointsOverviewVisible) {
+        BreakpointsOverviewSheet(
+            breakpointsByPath = uiState.breakpointsByPath,
+            onBreakpointClick = { path, line ->
+                viewModel.onEvent(EditorUiEvent.OpenFile(path))
+                controller?.jumpToLine(line - 1)
+                viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(false))
+            },
+            onDeleteBreakpoint = { viewModel.onEvent(EditorUiEvent.DeleteBreakpoint(it)) },
+            onDeleteAll = { viewModel.onEvent(EditorUiEvent.DeleteAllBreakpoints) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(false)) }
+        )
+    }
 }
 
 @Composable
@@ -372,7 +404,9 @@ private fun EditorToolbar(
     onOutline: () -> Unit,
     onDefinition: () -> Unit,
     onReferences: () -> Unit,
-    onToggleLspSessions: () -> Unit
+    onToggleLspSessions: () -> Unit,
+    hasBreakpoints: Boolean,
+    onBreakpoints: () -> Unit
 ) {
     val isImage = activePath?.let { isImageFilePath(it) } == true
     Row(
@@ -384,6 +418,17 @@ private fun EditorToolbar(
             modifier = Modifier.padding(start = 8.dp, end = 4.dp),
             onClick = onToggleLspSessions
         )
+
+        // Breakpoints-Übersicht
+        if (!isImage) {
+            IconButton(onClick = onBreakpoints) {
+                Icon(
+                    imageVector = Icons.Default.Adjust,
+                    contentDescription = stringRes(R.string.debug_tab_breakpoints),
+                    tint = if (hasBreakpoints) androidx.compose.ui.graphics.Color(0xFFE53935) else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
         // Outline / Struktur: immer verfügbar (LSP oder Fallback)
         if (!isImage) {

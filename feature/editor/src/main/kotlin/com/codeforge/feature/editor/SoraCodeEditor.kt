@@ -39,7 +39,9 @@ import com.codeforge.feature.editor.lsp.LspAwareLanguage
 import com.codeforge.feature.editor.lsp.LspCompletionProvider
 import com.codeforge.feature.editor.lsp.LspDiagnosticsBridge
 import com.codeforge.feature.editor.textmate.TextMateAssetLoader
+import com.codeforge.core.domain.model.Breakpoint
 import com.codeforge.core.domain.model.LspDiagnostic
+import com.codeforge.feature.editor.overlay.BreakpointOverlayLayer
 import com.codeforge.feature.editor.overlay.ColorLiteralScanner
 import com.codeforge.feature.editor.overlay.EditorOverlayLayer
 import com.codeforge.feature.editor.overlay.TestTarget
@@ -88,6 +90,10 @@ fun SoraCodeEditor(
     diagnostics: List<LspDiagnostic> = emptyList(),
     completionProvider: LspCompletionProvider? = null,
     updateAnnotations: List<FileUpdateAnnotation> = emptyList(),
+    breakpoints: List<Breakpoint> = emptyList(),
+    pausedLine: Int? = null,
+    onToggleBreakpoint: (Int) -> Unit = {},
+    onEditBreakpoint: (Int) -> Unit = {},
     onUpdateChipClick: (DependencyUpdate) -> Unit = {},
     onTestTargetClick: (TestTarget) -> Unit = {},
     onContentChanged: (String) -> Unit,
@@ -109,6 +115,12 @@ fun SoraCodeEditor(
     DisposableEffect(Unit) {
         TextMateAssetLoader.ensureInitialized(context)
         onDispose { }
+    }
+
+    androidx.compose.runtime.LaunchedEffect(pausedLine) {
+        if (pausedLine != null && pausedLine > 0) {
+            controller.jumpToLine(pausedLine - 1)
+        }
     }
 
     Box(modifier = modifier) {
@@ -346,6 +358,16 @@ fun SoraCodeEditor(
         overlays = lineOverlays,
         onUpdateChipClick = onUpdateChipClick,
         onTestTargetClick = onTestTargetClick
+    )
+
+    BreakpointOverlayLayer(
+        modifier = Modifier.fillMaxSize(),
+        editor = overlayEditor,
+        tick = overlayTick,
+        breakpoints = breakpoints,
+        pausedLine = pausedLine,
+        onToggleBreakpoint = onToggleBreakpoint,
+        onEditBreakpoint = onEditBreakpoint
     )
     }
 

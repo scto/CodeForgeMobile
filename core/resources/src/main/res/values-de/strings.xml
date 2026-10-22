@@ -1334,5 +1334,46 @@
     <string name="hardcoded_strings_type_context">Context (getString)</string>
     <string name="hardcoded_strings_type_xml">XML (@string)</string>
     <string name="hardcoded_strings_type_manual">Manuell</string>
+
+    <!-- debug -->
+    <string name="debug_title">Debugger</string>
+    <string name="debug_status_idle">Nicht aktiv</string>
+    <string name="debug_status_starting">Startet…</string>
+    <string name="debug_status_running">Läuft</string>
+    <string name="debug_status_paused">Angehalten bei %1$s:%2$d</string>
+    <string name="debug_status_terminated">Beendet (Exit-Code: %1$s)</string>
+    <string name="debug_status_failed">Fehler: %1$s</string>
+    <string name="debug_action_start">Starten</string>
+    <string name="debug_action_stop">Beenden</string>
+    <string name="debug_action_resume">Fortsetzen</string>
+    <string name="debug_action_pause">Pausieren</string>
+    <string name="debug_action_step_over">Schritt über</string>
+    <string name="debug_action_step_into">Schritt hinein</string>
+    <string name="debug_action_step_out">Schritt hinaus</string>
+    <string name="debug_tab_call_stack">Aufrufliste</string>
+    <string name="debug_tab_variables">Variablen</string>
+    <string name="debug_tab_evaluate">Auswerten</string>
+    <string name="debug_tab_breakpoints">Haltepunkte</string>
+    <string name="debug_eval_placeholder">Ausdruck zum Auswerten eingeben…</string>
+    <string name="debug_eval_button">Auswerten</string>
+    <string name="debug_eval_result">Ergebnis</string>
+    <string name="debug_empty_call_stack">Keine Aufrufliste verfügbar</string>
+    <string name="debug_empty_variables">Keine Variablen im aktuellen Gültigkeitsbereich</string>
+    <string name="debug_breakpoints_empty">Keine Haltepunkte gesetzt</string>
+    <string name="debug_breakpoints_remove_all">Alle entfernen</string>
+    <string name="debug_breakpoints_remove_all_confirm">Möchten Sie wirklich alle Haltepunkte entfernen?</string>
+    <string name="debug_breakpoint_unverified">Nicht verifiziert</string>
+    <string name="debug_breakpoint_condition">Bedingung</string>
+    <string name="debug_breakpoint_log_message">Log-Nachricht</string>
+    <string name="debug_breakpoint_enabled">Aktiviert</string>
+    <string name="debug_breakpoint_edit">Haltepunkt bearbeiten</string>
+    <string name="debug_copy_value">Wert kopieren</string>
+    <string name="debug_value_copied">In die Zwischenablage kopiert</string>
+    <string name="debug_more">Mehr</string>
+    <string name="debug_less">Weniger</string>
+    <string name="debug_expression">Ausdruck</string>
+    <string name="debug_breakpoint_line">Zeile %1$d</string>
+    <string name="debug_breakpoint_condition_placeholder">z. B. count &gt; 10</string>
+    <string name="debug_breakpoint_log_placeholder">z. B. x hat Wert {x}</string>
 </resources>
 

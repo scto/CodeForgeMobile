@@ -1334,5 +1334,46 @@
     <string name="hardcoded_strings_type_context">Context (getString)</string>
     <string name="hardcoded_strings_type_xml">XML (@string)</string>
     <string name="hardcoded_strings_type_manual">Manual</string>
+
+    <!-- debug -->
+    <string name="debug_title">Debugger</string>
+    <string name="debug_status_idle">Idle</string>
+    <string name="debug_status_starting">Starting…</string>
+    <string name="debug_status_running">Running</string>
+    <string name="debug_status_paused">Paused at %1$s:%2$d</string>
+    <string name="debug_status_terminated">Terminated (Exit code: %1$s)</string>
+    <string name="debug_status_failed">Failed: %1$s</string>
+    <string name="debug_action_start">Start</string>
+    <string name="debug_action_stop">Stop</string>
+    <string name="debug_action_resume">Resume</string>
+    <string name="debug_action_pause">Pause</string>
+    <string name="debug_action_step_over">Step Over</string>
+    <string name="debug_action_step_into">Step Into</string>
+    <string name="debug_action_step_out">Step Out</string>
+    <string name="debug_tab_call_stack">Call Stack</string>
+    <string name="debug_tab_variables">Variables</string>
+    <string name="debug_tab_evaluate">Evaluate</string>
+    <string name="debug_tab_breakpoints">Breakpoints</string>
+    <string name="debug_eval_placeholder">Enter expression to evaluate…</string>
+    <string name="debug_eval_button">Evaluate</string>
+    <string name="debug_eval_result">Result</string>
+    <string name="debug_empty_call_stack">No call stack available</string>
+    <string name="debug_empty_variables">No variables in current scope</string>
+    <string name="debug_breakpoints_empty">No breakpoints set</string>
+    <string name="debug_breakpoints_remove_all">Remove All</string>
+    <string name="debug_breakpoints_remove_all_confirm">Are you sure you want to remove all breakpoints?</string>
+    <string name="debug_breakpoint_unverified">Unverified</string>
+    <string name="debug_breakpoint_condition">Condition</string>
+    <string name="debug_breakpoint_log_message">Log message</string>
+    <string name="debug_breakpoint_enabled">Enabled</string>
+    <string name="debug_breakpoint_edit">Edit Breakpoint</string>
+    <string name="debug_copy_value">Copy Value</string>
+    <string name="debug_value_copied">Copied to clipboard</string>
+    <string name="debug_more">More</string>
+    <string name="debug_less">Less</string>
+    <string name="debug_expression">Expression</string>
+    <string name="debug_breakpoint_line">Line %1$d</string>
+    <string name="debug_breakpoint_condition_placeholder">e.g. count &gt; 10</string>
+    <string name="debug_breakpoint_log_placeholder">e.g. x has value {x}</string>
 </resources>
 
