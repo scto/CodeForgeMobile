@@ -14,12 +14,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,12 +34,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -76,6 +86,20 @@ internal fun ConflictEditorDialog(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    }
+                    if (state.conflictCount > 0 && !state.isLoading) {
+                        IconButton(
+                            onClick = { onEvent(GitUiEvent.ConflictUndo) },
+                            enabled = !busy && state.history.isNotEmpty()
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Undo, stringRes(R.string.git_konflikt_rueckgaengig))
+                        }
+                        IconButton(onClick = { onEvent(GitUiEvent.ConflictTogglePreview) }) {
+                            Icon(
+                                if (state.showPreview) Icons.Filled.Edit else Icons.Filled.Visibility,
+                                stringRes(R.string.git_konflikt_vorschau)
+                            )
+                        }
                     }
                     IconButton(onClick = { onEvent(GitUiEvent.CloseConflict) }) { Icon(Icons.Filled.Close, stringRes(R.string.common_schliessen)) }
                 }
@@ -159,23 +183,52 @@ internal fun ConflictEditorDialog(
                             HorizontalDivider()
                         }
 
-                        Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.OURS)) }) { Text(stringRes(R.string.git_alle_aktuell)) }
-                            TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.THEIRS)) }) { Text(stringRes(R.string.git_alle_eingehend)) }
-                            TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.BOTH)) }) { Text(stringRes(R.string.git_alle_beide)) }
-                        }
-                        LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth()) {
-                            items(state.segments.size, key = { it }) { i ->
-                                when (val seg = state.segments[i]) {
-                                    is ConflictSegment.Plain -> PlainBlock(seg.lines)
-                                    is ConflictSegment.Conflict -> ConflictBlock(seg, state.choices[seg.index], onEvent)
+                        if (state.showPreview) {
+                            Column(
+                                Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    stringRes(R.string.git_konflikt_vorschau),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                                SelectionContainer(
+                                    modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())
+                                ) {
+                                    Text(
+                                        text = state.previewText,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 12.sp,
+                                        modifier = Modifier.padding(vertical = 4.dp)
+                                    )
+                                }
+                            }
+                        } else {
+                            Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.OURS)) }) { Text(stringRes(R.string.git_alle_aktuell)) }
+                                TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.THEIRS)) }) { Text(stringRes(R.string.git_alle_eingehend)) }
+                                TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.BOTH)) }) { Text(stringRes(R.string.git_alle_beide)) }
+                            }
+                            LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth()) {
+                                items(state.segments.size, key = { it }) { i ->
+                                    when (val seg = state.segments[i]) {
+                                        is ConflictSegment.Plain -> PlainBlock(seg.lines)
+                                        is ConflictSegment.Conflict -> ConflictBlock(
+                                            block = seg,
+                                            choice = state.choices[seg.index],
+                                            customText = state.customTexts[seg.index],
+                                            isEditing = state.editingBlockIndex == seg.index,
+                                            onEvent = onEvent,
+                                        )
+                                    }
                                 }
                             }
                         }
                         HorizontalDivider()
                         Button(
                             onClick = { onEvent(GitUiEvent.ConflictApply) },
-                            enabled = !busy && state.choices.isNotEmpty(),
+                            enabled = !busy && (state.choices.isNotEmpty() || state.customTexts.isNotEmpty()),
                             modifier = Modifier.fillMaxWidth().padding(12.dp),
                         ) {
                             Text(if (state.unresolved == 0) stringRes(R.string.git_uebernehmen_vormerken) else stringRes(R.string.git_uebernehmen_offen, state.unresolved))
@@ -208,20 +261,77 @@ private fun PlainBlock(lines: List<String>) {
 }
 
 @Composable
-private fun ConflictBlock(block: ConflictSegment.Conflict, choice: ConflictResolution?, onEvent: (GitUiEvent) -> Unit) {
+private fun ConflictBlock(
+    block: ConflictSegment.Conflict,
+    choice: ConflictResolution?,
+    customText: String?,
+    isEditing: Boolean,
+    onEvent: (GitUiEvent) -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
     ) {
         Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(stringRes(R.string.git_conflict_n, block.index + 1), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.error)
-            Side(Res.string(R.string.common_aktuell) + block.oursLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(), block.ours, OURS_BG, choice == ConflictResolution.OURS || choice == ConflictResolution.BOTH)
-            Side(Res.string(R.string.git_eingehend) + block.theirsLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(), block.theirs, THEIRS_BG, choice == ConflictResolution.THEIRS || choice == ConflictResolution.BOTH_REVERSED || choice == ConflictResolution.BOTH)
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Choice(Res.string(R.string.common_aktuell), ConflictResolution.OURS, block, choice, onEvent)
-                Choice(Res.string(R.string.git_eingehend), ConflictResolution.THEIRS, block, choice, onEvent)
-                Choice(Res.string(R.string.git_beide), ConflictResolution.BOTH, block, choice, onEvent)
-                Choice(Res.string(R.string.git_beide_umgekehrt), ConflictResolution.BOTH_REVERSED, block, choice, onEvent)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(stringRes(R.string.git_conflict_n, block.index + 1), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.error)
+                if (customText != null) {
+                    Text(
+                        stringRes(R.string.git_konflikt_benutzerdefiniert),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
+
+            if (isEditing) {
+                var editBuffer by remember(block.index) {
+                    mutableStateOf(
+                        customText ?: when (choice) {
+                            ConflictResolution.OURS -> block.ours.joinToString("\n")
+                            ConflictResolution.THEIRS -> block.theirs.joinToString("\n")
+                            ConflictResolution.BOTH -> (block.ours + block.theirs).joinToString("\n")
+                            ConflictResolution.BOTH_REVERSED -> (block.theirs + block.ours).joinToString("\n")
+                            null -> block.ours.joinToString("\n")
+                        }
+                    )
+                }
+                OutlinedTextField(
+                    value = editBuffer,
+                    onValueChange = { editBuffer = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringRes(R.string.git_konflikt_bearbeiten)) },
+                    textStyle = androidx.compose.ui.text.TextStyle(fontFamily = FontFamily.Monospace, fontSize = 12.sp),
+                    minLines = 3,
+                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = { onEvent(GitUiEvent.ConflictCancelEditing) }) {
+                        Text(stringRes(R.string.common_abbrechen))
+                    }
+                    Button(
+                        onClick = { onEvent(GitUiEvent.ConflictCustomText(block.index, editBuffer)) },
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text(stringRes(R.string.git_konflikt_speichern))
+                    }
+                }
+            } else {
+                Side(Res.string(R.string.common_aktuell) + block.oursLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(), block.ours, OURS_BG, (choice == ConflictResolution.OURS || choice == ConflictResolution.BOTH) && customText == null)
+                Side(Res.string(R.string.git_eingehend) + block.theirsLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(), block.theirs, THEIRS_BG, (choice == ConflictResolution.THEIRS || choice == ConflictResolution.BOTH_REVERSED || choice == ConflictResolution.BOTH) && customText == null)
+                if (customText != null) {
+                    Side(Res.string(R.string.git_konflikt_benutzerdefiniert), customText.split('\n'), MaterialTheme.colorScheme.tertiaryContainer, selected = true)
+                }
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Choice(Res.string(R.string.common_aktuell), ConflictResolution.OURS, block, choice.takeIf { customText == null }, onEvent)
+                    Choice(Res.string(R.string.git_eingehend), ConflictResolution.THEIRS, block, choice.takeIf { customText == null }, onEvent)
+                    Choice(Res.string(R.string.git_beide), ConflictResolution.BOTH, block, choice.takeIf { customText == null }, onEvent)
+                    Choice(Res.string(R.string.git_beide_umgekehrt), ConflictResolution.BOTH_REVERSED, block, choice.takeIf { customText == null }, onEvent)
+                    FilterChip(
+                        selected = customText != null,
+                        onClick = { onEvent(GitUiEvent.ConflictStartEditing(block.index)) },
+                        label = { Text(stringRes(R.string.git_konflikt_bearbeiten)) }
+                    )
+                }
             }
         }
     }

@@ -106,12 +106,43 @@ class GitViewModel @Inject constructor(
             GitUiEvent.CloseConflict -> _uiState.update { it.copy(conflict = null) }
             is GitUiEvent.ConflictChoice -> _uiState.update { s ->
                 s.copy(conflict = s.conflict?.let { c ->
-                    c.copy(choices = if (event.resolution == null) c.choices - event.index else c.choices + (event.index to event.resolution))
+                    val newChoices = if (event.resolution == null) c.choices - event.index else c.choices + (event.index to event.resolution)
+                    val newCustom = c.customTexts - event.index
+                    val newHistory = c.history + (c.choices to c.customTexts)
+                    c.copy(choices = newChoices, customTexts = newCustom, history = newHistory)
                 })
             }
             is GitUiEvent.ConflictChooseAll -> _uiState.update { s ->
                 s.copy(conflict = s.conflict?.let { c ->
-                    c.copy(choices = c.segments.filterIsInstance<ConflictSegment.Conflict>().associate { it.index to event.resolution })
+                    val newChoices = c.segments.filterIsInstance<ConflictSegment.Conflict>().associate { it.index to event.resolution }
+                    val newHistory = c.history + (c.choices to c.customTexts)
+                    c.copy(choices = newChoices, customTexts = emptyMap(), history = newHistory)
+                })
+            }
+            is GitUiEvent.ConflictCustomText -> _uiState.update { s ->
+                s.copy(conflict = s.conflict?.let { c ->
+                    val newCustom = c.customTexts + (event.index to event.text)
+                    val newChoices = c.choices - event.index
+                    val newHistory = c.history + (c.choices to c.customTexts)
+                    c.copy(choices = newChoices, customTexts = newCustom, history = newHistory, editingBlockIndex = null)
+                })
+            }
+            is GitUiEvent.ConflictStartEditing -> _uiState.update { s ->
+                s.copy(conflict = s.conflict?.copy(editingBlockIndex = event.index))
+            }
+            GitUiEvent.ConflictCancelEditing -> _uiState.update { s ->
+                s.copy(conflict = s.conflict?.copy(editingBlockIndex = null))
+            }
+            GitUiEvent.ConflictTogglePreview -> _uiState.update { s ->
+                s.copy(conflict = s.conflict?.copy(showPreview = !s.conflict.showPreview))
+            }
+            GitUiEvent.ConflictUndo -> _uiState.update { s ->
+                s.copy(conflict = s.conflict?.let { c ->
+                    if (c.history.isEmpty()) c
+                    else {
+                        val last = c.history.last()
+                        c.copy(choices = last.first, customTexts = last.second, history = c.history.dropLast(1))
+                    }
                 })
             }
             is GitUiEvent.ConflictNavigateFile -> openConflict(event.path)
@@ -392,9 +423,15 @@ class GitViewModel @Inject constructor(
 
     private fun applyConflict() {
         val c = _uiState.value.conflict ?: return
-        if (c.choices.isEmpty()) return
+        if (c.choices.isEmpty() && c.customTexts.isEmpty()) return
         op(Res.string(R.string.git_konflikt_loesen), touchesFiles = true) {
-            val text = ConflictParser.resolve(c.segments, c.choices)
+            val rawOriginal = withContext(Dispatchers.IO) { runCatching { File(repoPath(), c.path).readText() }.getOrDefault("") }
+            val lineSep = if (rawOriginal.contains("\r\n")) "\r\n" else "\n"
+            val text = ConflictParser.resolve(c.segments, c.choices, c.customTexts, lineSeparator = lineSep)
+            if (c.unresolved == 0 && ConflictParser.hasUnresolvedMarkers(text)) {
+                snack(Res.string(R.string.git_konfliktmarker_reste_gefunden))
+                return@op Result.failure<Unit>(IllegalStateException(Res.string(R.string.git_konfliktmarker_reste_gefunden)))
+            }
             val written = withContext(Dispatchers.IO) { runCatching { File(repoPath(), c.path).writeText(text) } }
             if (written.isFailure) return@op Result.failure<Unit>(written.exceptionOrNull()!!)
             if (c.unresolved == 0) {

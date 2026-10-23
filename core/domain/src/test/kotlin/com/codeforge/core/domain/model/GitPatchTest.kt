@@ -138,4 +138,21 @@ class GitPatchTest {
         assertFalse(segs.any { it is ConflictSegment.Conflict })
         assertEquals(t, ConflictParser.resolve(segs, emptyMap()))
     }
+
+    @Test fun resolvesWithCustomTexts() {
+        val segs = ConflictParser.parse(conflicted)
+        val custom = mapOf(0 to "my custom resolution line")
+        val r = ConflictParser.resolve(segs, mapOf(1 to ConflictResolution.OURS), customTexts = custom)
+        assertEquals("head\nmy custom resolution line\nmid\nA\ntail\n", r)
+        assertFalse(ConflictParser.hasUnresolvedMarkers(r))
+    }
+
+    @Test fun hasUnresolvedMarkersDetectsLeftoverMarkers() {
+        assertTrue(ConflictParser.hasUnresolvedMarkers(conflicted))
+        assertTrue(ConflictParser.hasUnresolvedMarkers("some code\n<<<<<<< HEAD\nours\n=======\ntheirs\n>>>>>>> branch\n"))
+        assertTrue(ConflictParser.hasUnresolvedMarkers("code\n<<<<<<<\n"))
+        assertTrue(ConflictParser.hasUnresolvedMarkers("code\n=======\n"))
+        assertTrue(ConflictParser.hasUnresolvedMarkers("code\n>>>>>>>\n"))
+        assertFalse(ConflictParser.hasUnresolvedMarkers("clean code without markers\nval x = 1\n"))
+    }
 }

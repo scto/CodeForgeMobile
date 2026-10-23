@@ -409,6 +409,12 @@
     <string name="git_konflikte_fortschritt">%1$d of %2$d resolved</string>
     <string name="git_konflikt_geloest_naechste_datei">Conflict in %1$s resolved and staged. Opened next file.</string>
     <string name="git_alle_konflikte_im_repo_geloest">All conflicts resolved! Operation can now be completed.</string>
+    <string name="git_konflikt_bearbeiten">Edit block</string>
+    <string name="git_konflikt_speichern">Save block</string>
+    <string name="git_konflikt_benutzerdefiniert">Custom</string>
+    <string name="git_konflikt_vorschau">Preview</string>
+    <string name="git_konfliktmarker_reste_gefunden">Error: File still contains unresolved conflict markers. Staging cancelled.</string>
+    <string name="git_konflikt_rueckgaengig">Undo resolution</string>
     <string name="git_remote">Remote</string>
     <string name="git_remote_branch_loeschen">Delete remote branch</string>
     <string name="git_remote_branch_loeschen_2">Delete remote branch…</string>

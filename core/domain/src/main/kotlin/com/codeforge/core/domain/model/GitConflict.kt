@@ -43,6 +43,18 @@ object ConflictParser {
 
     fun hasConflicts(text: String): Boolean = parse(text).any { it is ConflictSegment.Conflict }
 
+    /** Prüft, ob im Text noch unaufgelöste Git-Konfliktmarker vorhanden sind. */
+    fun hasUnresolvedMarkers(text: String): Boolean {
+        val lines = text.split('\n')
+        return lines.any { line ->
+            val trimmed = line.trimEnd('\r')
+            trimmed.startsWith(OURS) || trimmed == OURS.trim() ||
+            trimmed == SEP ||
+            trimmed.startsWith(THEIRS) || trimmed == THEIRS.trim() ||
+            trimmed.startsWith(BASE) || trimmed == BASE.trim()
+        }
+    }
+
     /**
      * Unvollständige Marker (z. B. fehlendes `>>>>>>>`) gelten als normaler Text, damit nie Inhalt verloren geht.
      */
@@ -102,28 +114,40 @@ object ConflictParser {
         return null
     }
 
-    /** Setzt die Segmente wieder zusammen; Blöcke ohne Eintrag in [choices] bleiben als Marker erhalten. */
-    fun resolve(segments: List<ConflictSegment>, choices: Map<Int, ConflictResolution>): String {
+    /** Setzt die Segmente wieder zusammen; Blöcke mit [customTexts] oder [choices] werden aufgelöst, sonstige bleiben als Marker erhalten. */
+    fun resolve(
+        segments: List<ConflictSegment>,
+        choices: Map<Int, ConflictResolution>,
+        customTexts: Map<Int, String> = emptyMap(),
+        lineSeparator: String = "\n",
+    ): String {
         val out = ArrayList<String>()
         for (seg in segments) {
             when (seg) {
                 is ConflictSegment.Plain -> out += seg.lines
-                is ConflictSegment.Conflict -> when (choices[seg.index]) {
-                    ConflictResolution.OURS -> out += seg.ours
-                    ConflictResolution.THEIRS -> out += seg.theirs
-                    ConflictResolution.BOTH -> { out += seg.ours; out += seg.theirs }
-                    ConflictResolution.BOTH_REVERSED -> { out += seg.theirs; out += seg.ours }
-                    null -> {
-                        out += (OURS + seg.oursLabel).trimEnd()
-                        out += seg.ours
-                        seg.base?.let { out += (BASE + seg.baseLabel).trimEnd(); out += it }
-                        out += SEP
-                        out += seg.theirs
-                        out += (THEIRS + seg.theirsLabel).trimEnd()
+                is ConflictSegment.Conflict -> {
+                    val custom = customTexts[seg.index]
+                    if (custom != null) {
+                        out += custom.split('\n')
+                    } else {
+                        when (choices[seg.index]) {
+                            ConflictResolution.OURS -> out += seg.ours
+                            ConflictResolution.THEIRS -> out += seg.theirs
+                            ConflictResolution.BOTH -> { out += seg.ours; out += seg.theirs }
+                            ConflictResolution.BOTH_REVERSED -> { out += seg.theirs; out += seg.ours }
+                            null -> {
+                                out += (OURS + seg.oursLabel).trimEnd()
+                                out += seg.ours
+                                seg.base?.let { out += (BASE + seg.baseLabel).trimEnd(); out += it }
+                                out += SEP
+                                out += seg.theirs
+                                out += (THEIRS + seg.theirsLabel).trimEnd()
+                            }
+                        }
                     }
                 }
             }
         }
-        return out.joinToString("\n")
+        return out.joinToString(lineSeparator)
     }
 }

@@ -2,6 +2,7 @@
 package com.codeforge.feature.git
 
 import androidx.compose.runtime.Immutable
+import com.codeforge.core.domain.model.ConflictParser
 import com.codeforge.core.domain.model.ConflictResolution
 import com.codeforge.core.domain.model.ConflictSegment
 import com.codeforge.core.domain.model.DiffFile
@@ -71,16 +72,21 @@ data class ConflictEditorState(
     val isLoading: Boolean = true,
     val segments: List<ConflictSegment> = emptyList(),
     val choices: Map<Int, ConflictResolution> = emptyMap(),
+    val customTexts: Map<Int, String> = emptyMap(),
     val error: String? = null,
     val allConflictingPaths: List<String> = emptyList(),
     val activeBlockIndex: Int = 0,
+    val editingBlockIndex: Int? = null,
+    val showPreview: Boolean = false,
+    val history: List<Pair<Map<Int, ConflictResolution>, Map<Int, String>>> = emptyList(),
 ) {
     val conflictCount: Int get() = segments.count { it is ConflictSegment.Conflict }
-    val unresolved: Int get() = conflictCount - choices.size
+    val unresolved: Int get() = segments.filterIsInstance<ConflictSegment.Conflict>().count { choices[it.index] == null && customTexts[it.index] == null }
     val currentFileIndex: Int get() = allConflictingPaths.indexOf(path).coerceAtLeast(0)
     val totalFiles: Int get() = allConflictingPaths.size.coerceAtLeast(1)
     val hasPrevFile: Boolean get() = currentFileIndex > 0
     val hasNextFile: Boolean get() = currentFileIndex >= 0 && currentFileIndex < allConflictingPaths.size - 1
+    val previewText: String get() = ConflictParser.resolve(segments, choices, customTexts)
 }
 
 /** Modale Eingaben/Bestätigungen. */
@@ -184,6 +190,11 @@ sealed interface GitUiEvent {
     data class ResolveConflictFile(val path: String, val side: GitConflictSide) : GitUiEvent
     data class ConflictNavigateFile(val path: String) : GitUiEvent
     data class ConflictJumpToBlock(val blockIndex: Int) : GitUiEvent
+    data class ConflictCustomText(val index: Int, val text: String) : GitUiEvent
+    data class ConflictStartEditing(val index: Int) : GitUiEvent
+    data object ConflictCancelEditing : GitUiEvent
+    data object ConflictTogglePreview : GitUiEvent
+    data object ConflictUndo : GitUiEvent
 
     // Branches / Merge / Rebase
     data class Checkout(val branch: String) : GitUiEvent

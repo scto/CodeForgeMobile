@@ -49,4 +49,37 @@ class GitConflictNavigationTest {
         assertFalse(lastState.hasNextFile)
         assertEquals(1, lastState.currentFileIndex)
     }
+
+    @Test
+    fun testCustomTextAndPreview() {
+        val state = ConflictEditorState(
+            path = "Test.kt",
+            segments = listOf(
+                ConflictSegment.Plain(listOf("line1")),
+                ConflictSegment.Conflict(0, listOf("ours"), listOf("theirs")),
+                ConflictSegment.Plain(listOf("line2")),
+            ),
+            customTexts = mapOf(0 to "custom resolved text"),
+        )
+        assertEquals(0, state.unresolved)
+        assertEquals("line1\ncustom resolved text\nline2", state.previewText)
+    }
+
+    @Test
+    fun testHistoryTracking() {
+        val initial = ConflictEditorState(path = "Test.kt")
+        val step1 = initial.copy(
+            choices = mapOf(0 to ConflictResolution.OURS),
+            history = listOf(emptyMap<Int, ConflictResolution>() to emptyMap())
+        )
+        assertEquals(1, step1.history.size)
+        // Undo
+        val undone = step1.copy(
+            choices = step1.history.last().first,
+            customTexts = step1.history.last().second,
+            history = step1.history.dropLast(1)
+        )
+        assertTrue(undone.choices.isEmpty())
+        assertTrue(undone.history.isEmpty())
+    }
 }

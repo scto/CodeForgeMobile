@@ -409,6 +409,12 @@
     <string name="git_konflikte_fortschritt">%1$d von %2$d gelöst</string>
     <string name="git_konflikt_geloest_naechste_datei">Konflikt in %1$s gelöst und vorgemerkt. Nächste Datei geöffnet.</string>
     <string name="git_alle_konflikte_im_repo_geloest">Alle Konflikte gelöst! Vorgang kann jetzt abgeschlossen werden.</string>
+    <string name="git_konflikt_bearbeiten">Block bearbeiten</string>
+    <string name="git_konflikt_speichern">Block übernehmen</string>
+    <string name="git_konflikt_benutzerdefiniert">Benutzerdefiniert</string>
+    <string name="git_konflikt_vorschau">Vorschau</string>
+    <string name="git_konfliktmarker_reste_gefunden">Fehler: Datei enthält noch unaufgelöste Konfliktmarker. Vormerken abgebrochen.</string>
+    <string name="git_konflikt_rueckgaengig">Letzte Auflösung rückgängig</string>
     <string name="git_remote">Remote</string>
     <string name="git_remote_branch_loeschen">Remote-Branch löschen</string>
     <string name="git_remote_branch_loeschen_2">Remote-Branch löschen…</string>
