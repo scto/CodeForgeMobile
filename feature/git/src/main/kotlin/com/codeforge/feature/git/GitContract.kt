@@ -80,6 +80,8 @@ data class ConflictEditorState(
     val showPreview: Boolean = false,
     val showThreeWay: Boolean = false,
     val wordDiffEnabled: Boolean = true,
+    val isBinary: Boolean = false,
+    val isDeletedVsModified: Boolean = false,
     val history: List<Pair<Map<Int, ConflictResolution>, Map<Int, String>>> = emptyList(),
 ) {
     val conflictCount: Int get() = segments.count { it is ConflictSegment.Conflict }

@@ -82,4 +82,21 @@ class GitConflictNavigationTest {
         assertTrue(undone.choices.isEmpty())
         assertTrue(undone.history.isEmpty())
     }
+
+    @Test
+    fun testBinaryFileDetection() {
+        assertTrue(com.codeforge.core.domain.model.BinaryFileDetector.isBinaryExtension("image.png"))
+        assertTrue(com.codeforge.core.domain.model.BinaryFileDetector.isBinaryExtension("build/app.apk"))
+        assertFalse(com.codeforge.core.domain.model.BinaryFileDetector.isBinaryExtension("MainActivity.kt"))
+        assertFalse(com.codeforge.core.domain.model.BinaryFileDetector.isBinaryExtension("strings.xml"))
+    }
+
+    @Test
+    fun testBinaryAndDeletedVsModifiedState() {
+        val binaryState = ConflictEditorState(path = "lib.so", isBinary = true)
+        assertTrue(binaryState.isBinary)
+
+        val deletedVsModifiedState = ConflictEditorState(path = "OldFile.kt", isDeletedVsModified = true)
+        assertTrue(deletedVsModifiedState.isDeletedVsModified)
+    }
 }

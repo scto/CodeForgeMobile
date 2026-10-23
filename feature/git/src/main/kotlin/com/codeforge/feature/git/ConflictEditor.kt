@@ -114,6 +114,52 @@ internal fun ConflictEditorDialog(
                 }
                 when {
                     state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                    state.isBinary -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Text(stringRes(R.string.git_binaerdatei_konflikt), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                                Text(stringRes(R.string.git_binaerdatei_konflikt_hinweis), style = MaterialTheme.typography.bodyMedium)
+                                Button(
+                                    onClick = { onEvent(GitUiEvent.ResolveConflictFile(state.path, com.codeforge.core.domain.model.GitConflictSide.OURS)) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(stringRes(R.string.git_aktuelle_version_behalten))
+                                }
+                                OutlinedButton(
+                                    onClick = { onEvent(GitUiEvent.ResolveConflictFile(state.path, com.codeforge.core.domain.model.GitConflictSide.THEIRS)) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(stringRes(R.string.git_eingehende_version_behalten))
+                                }
+                            }
+                        }
+                    }
+                    state.isDeletedVsModified -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Text(stringRes(R.string.git_konflikt_geloescht_vs_geaendert), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                                Text(stringRes(R.string.git_konflikt_geloescht_vs_geaendert_hinweis), style = MaterialTheme.typography.bodyMedium)
+                                Button(
+                                    onClick = { onEvent(GitUiEvent.ResolveConflictFile(state.path, com.codeforge.core.domain.model.GitConflictSide.OURS)) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(stringRes(R.string.git_datei_behalten))
+                                }
+                                OutlinedButton(
+                                    onClick = { onEvent(GitUiEvent.ResolveConflictFile(state.path, com.codeforge.core.domain.model.GitConflictSide.THEIRS)) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(stringRes(R.string.git_datei_loeschen))
+                                }
+                            }
+                        }
+                    }
                     state.conflictCount == 0 -> Text(
                         state.error ?: stringRes(R.string.git_keine_konfliktmarker_gefunden),
                         modifier = Modifier.padding(16.dp),

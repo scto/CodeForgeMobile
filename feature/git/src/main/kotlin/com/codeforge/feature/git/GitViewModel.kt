@@ -157,7 +157,19 @@ class GitViewModel @Inject constructor(
             }
             GitUiEvent.ConflictApply -> applyConflict()
             is GitUiEvent.ResolveConflictFile -> op(Res.string(R.string.git_konflikt_loesen), touchesFiles = true) {
-                git.resolveConflict(repoPath(), event.path, event.side)
+                git.resolveConflict(repoPath(), event.path, event.side).onSuccess {
+                    val c = _uiState.value.conflict
+                    if (c != null && c.path == event.path) {
+                        val remaining = c.allConflictingPaths.filter { it != c.path }
+                        if (remaining.isNotEmpty()) {
+                            snack(Res.string(R.string.git_konflikt_geloest_naechste_datei, c.path.substringAfterLast('/')))
+                            openConflict(remaining.first())
+                        } else {
+                            _uiState.update { s -> s.copy(conflict = null) }
+                            snack(Res.string(R.string.git_alle_konflikte_im_repo_geloest))
+                        }
+                    }
+                }
             }
 
             is GitUiEvent.Checkout -> op(Res.string(R.string.git_op_checkout), touchesFiles = true) { git.checkout(repoPath(), event.branch) }
@@ -405,11 +417,31 @@ class GitViewModel @Inject constructor(
         _uiState.update { it.copy(conflict = ConflictEditorState(path = path, allConflictingPaths = initialList)) }
         viewModelScope.launch {
             fileSync.requestFlushDirectory(repoPath())
+            val file = File(repoPath(), path)
+            val isBinary = withContext(Dispatchers.IO) {
+                com.codeforge.core.domain.model.BinaryFileDetector.isBinary(file) ||
+                com.codeforge.core.domain.model.BinaryFileDetector.isBinaryExtension(path)
+            }
+            if (isBinary) {
+                _uiState.update { s ->
+                    if (s.conflict?.path != path) s
+                    else s.copy(conflict = s.conflict.copy(isLoading = false, isBinary = true))
+                }
+                return@launch
+            }
+
+            val fileExists = withContext(Dispatchers.IO) { file.exists() && file.isFile }
+            if (!fileExists) {
+                _uiState.update { s ->
+                    if (s.conflict?.path != path) s
+                    else s.copy(conflict = s.conflict.copy(isLoading = false, isDeletedVsModified = true))
+                }
+                return@launch
+            }
+
             val loaded = withContext(Dispatchers.IO) {
                 runCatching {
-                    val f = File(repoPath(), path)
-                    check(f.isFile) { Res.string(R.string.git_datei_existiert_nicht_mehr_konflikt) }
-                    ConflictParser.parse(f.readText())
+                    ConflictParser.parse(file.readText())
                 }
             }
             _uiState.update { s ->
@@ -417,10 +449,12 @@ class GitViewModel @Inject constructor(
                 else {
                     val segments = loaded.getOrNull().orEmpty()
                     val hasBlocks = segments.any { it is ConflictSegment.Conflict }
+                    val isDeletedOrModified = !hasBlocks && s.status?.conflicts?.any { it.path == path } == true
                     s.copy(conflict = s.conflict.copy(
                         isLoading = false,
                         segments = segments,
-                        error = loaded.exceptionOrNull()?.message ?: if (!hasBlocks) Res.string(R.string.git_keine_konfliktmarker_gefunden_datei_ka) else null,
+                        isDeletedVsModified = isDeletedOrModified,
+                        error = loaded.exceptionOrNull()?.message ?: if (!hasBlocks && !isDeletedOrModified) Res.string(R.string.git_keine_konfliktmarker_gefunden_datei_ka) else null,
                     ))
                 }
             }
@@ -490,7 +524,7 @@ class GitViewModel @Inject constructor(
                     branches = branches ?: it.branches,
                     tags = tags ?: it.tags,
                     // Nachricht einer laufenden Operation (Merge/Cherry-Pick/Revert) vorbelegen
-                    commitMessage = if (it.commitMessage.isBlank() && pending != null && newStatus != null && newStatus.state.completesWithCommit) pending else it.commitMessage,
+                    commitMessage = if (it.commitMessage.isBlank() && pending != null && newStatus.state.completesWithCommit) pending else it.commitMessage,
                     isLoading = false,
                 )
             }

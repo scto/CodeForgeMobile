@@ -419,6 +419,14 @@
     <string name="git_wortvergleich">Word Diff</string>
     <string name="git_basis">Base</string>
     <string name="git_keine_diff3_basis">No common base available in this file</string>
+    <string name="git_konflikt_geloescht_vs_geaendert">Conflict: Deleted vs. Modified</string>
+    <string name="git_konflikt_geloescht_vs_geaendert_hinweis">One side deleted this file, while the other side modified it.</string>
+    <string name="git_datei_behalten">Keep modified file</string>
+    <string name="git_datei_loeschen">Delete file</string>
+    <string name="git_binaerdatei_konflikt">Binary file conflict</string>
+    <string name="git_binaerdatei_konflikt_hinweis">Binary files cannot be merged line-by-line. Choose which version to keep:</string>
+    <string name="git_aktuelle_version_behalten">Keep current version (Ours)</string>
+    <string name="git_eingehende_version_behalten">Take incoming version (Theirs)</string>
     <string name="git_remote">Remote</string>
     <string name="git_remote_branch_loeschen">Delete remote branch</string>
     <string name="git_remote_branch_loeschen_2">Delete remote branch…</string>
