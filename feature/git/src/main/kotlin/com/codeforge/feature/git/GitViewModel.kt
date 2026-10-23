@@ -114,6 +114,10 @@ class GitViewModel @Inject constructor(
                     c.copy(choices = c.segments.filterIsInstance<ConflictSegment.Conflict>().associate { it.index to event.resolution })
                 })
             }
+            is GitUiEvent.ConflictNavigateFile -> openConflict(event.path)
+            is GitUiEvent.ConflictJumpToBlock -> _uiState.update { s ->
+                s.copy(conflict = s.conflict?.copy(activeBlockIndex = event.blockIndex))
+            }
             GitUiEvent.ConflictApply -> applyConflict()
             is GitUiEvent.ResolveConflictFile -> op(Res.string(R.string.git_konflikt_loesen), touchesFiles = true) {
                 git.resolveConflict(repoPath(), event.path, event.side)
@@ -359,7 +363,9 @@ class GitViewModel @Inject constructor(
     // ---------------------------------------------------------------- Konflikt-Editor
 
     private fun openConflict(path: String) {
-        _uiState.update { it.copy(conflict = ConflictEditorState(path)) }
+        val allConflicting = _uiState.value.status?.conflicts?.map { it.path }?.distinct() ?: listOf(path)
+        val initialList = if (path in allConflicting) allConflicting else listOf(path) + allConflicting
+        _uiState.update { it.copy(conflict = ConflictEditorState(path = path, allConflictingPaths = initialList)) }
         viewModelScope.launch {
             fileSync.requestFlushDirectory(repoPath())
             val loaded = withContext(Dispatchers.IO) {
@@ -393,8 +399,14 @@ class GitViewModel @Inject constructor(
             if (written.isFailure) return@op Result.failure<Unit>(written.exceptionOrNull()!!)
             if (c.unresolved == 0) {
                 git.stage(repoPath(), listOf(c.path)).onSuccess {
-                    _uiState.update { s -> s.copy(conflict = null) }
-                    snack(Res.string(R.string.git_konflikt_geloest_und_vorgemerkt))
+                    val remaining = c.allConflictingPaths.filter { it != c.path }
+                    if (remaining.isNotEmpty()) {
+                        snack(Res.string(R.string.git_konflikt_geloest_naechste_datei, c.path.substringAfterLast('/')))
+                        openConflict(remaining.first())
+                    } else {
+                        _uiState.update { s -> s.copy(conflict = null) }
+                        snack(Res.string(R.string.git_alle_konflikte_im_repo_geloest))
+                    }
                 }
             } else {
                 snack(Res.string(R.string.git_block_bloecke_noch_offen, c.unresolved))

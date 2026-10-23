@@ -239,8 +239,14 @@ class GitAdvancedTest {
         val d = conflictingFeature()
         val r = run { repo.rebase(d.path, "main").getOrThrow() }
         assertEquals(GitMergeStatus.CONFLICTING, r.status)
-        assertEquals(GitRepoState.REBASING, status(d).state)
-        assertEquals(listOf("a.txt"), status(d).conflicts.map { it.path })
+        val st = status(d)
+        assertEquals(GitRepoState.REBASING, st.state)
+        assertEquals(listOf("a.txt"), st.conflicts.map { it.path })
+        // Prüfen, dass Rebase-Schritte ermittelt werden falls rebase-merge vorhanden ist
+        if (st.rebaseCurrentStep != null) {
+            assertEquals(1, st.rebaseCurrentStep)
+            assertNotNull(st.rebaseTotalSteps)
+        }
 
         run { repo.resolveConflict(d.path, "a.txt", GitConflictSide.THEIRS).getOrThrow() } // THEIRS = der eigene Commit beim Rebase
         val c = run { repo.rebaseControl(d.path, GitRebaseOperation.CONTINUE).getOrThrow() }

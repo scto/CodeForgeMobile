@@ -216,25 +216,45 @@ class GitRepositoryImpl @Inject constructor(
         val detached = fullBranch == null || !fullBranch.startsWith(Constants.R_HEADS)
         val branch = if (detached) null else repo.branch
         val tracking = branch?.let { runCatching { BranchTrackingStatus.of(repo, it) }.getOrNull() }
+        val repoState = when (repo.repositoryState) {
+            RepositoryState.SAFE -> GitRepoState.NORMAL
+            RepositoryState.MERGING, RepositoryState.MERGING_RESOLVED -> GitRepoState.MERGING
+            RepositoryState.REBASING, RepositoryState.REBASING_REBASING, RepositoryState.REBASING_INTERACTIVE,
+            RepositoryState.REBASING_MERGE -> GitRepoState.REBASING
+            RepositoryState.CHERRY_PICKING, RepositoryState.CHERRY_PICKING_RESOLVED -> GitRepoState.CHERRY_PICKING
+            RepositoryState.REVERTING, RepositoryState.REVERTING_RESOLVED -> GitRepoState.REVERTING
+            else -> GitRepoState.OTHER
+        }
+        val rebaseStep = if (repoState == GitRepoState.REBASING) readRebaseStep(repo.directory) else null
         GitRepoStatus(
             branch = branch,
             detachedHead = detached && hasCommits(repo),
             upstream = tracking?.remoteTrackingBranch?.removePrefix("refs/remotes/"),
             ahead = tracking?.aheadCount ?: 0,
             behind = tracking?.behindCount ?: 0,
-            state = when (repo.repositoryState) {
-                RepositoryState.SAFE -> GitRepoState.NORMAL
-                RepositoryState.MERGING, RepositoryState.MERGING_RESOLVED -> GitRepoState.MERGING
-                RepositoryState.REBASING, RepositoryState.REBASING_REBASING, RepositoryState.REBASING_INTERACTIVE,
-                RepositoryState.REBASING_MERGE -> GitRepoState.REBASING
-                RepositoryState.CHERRY_PICKING, RepositoryState.CHERRY_PICKING_RESOLVED -> GitRepoState.CHERRY_PICKING
-                RepositoryState.REVERTING, RepositoryState.REVERTING_RESOLVED -> GitRepoState.REVERTING
-                else -> GitRepoState.OTHER
-            },
+            state = repoState,
             entries = entries,
             hasCommits = hasCommits(repo),
             pendingMessage = if (repo.repositoryState == RepositoryState.SAFE) null else repo.readMergeCommitMsg()?.trim()?.ifEmpty { null },
+            rebaseCurrentStep = rebaseStep?.first,
+            rebaseTotalSteps = rebaseStep?.second,
         )
+    }
+
+    private fun readRebaseStep(gitDir: File): Pair<Int, Int>? {
+        val mergeDir = File(gitDir, "rebase-merge")
+        if (mergeDir.isDirectory) {
+            val cur = File(mergeDir, "msgnum").takeIf { it.isFile }?.readText()?.trim()?.toIntOrNull()
+            val total = File(mergeDir, "end").takeIf { it.isFile }?.readText()?.trim()?.toIntOrNull()
+            if (cur != null && total != null) return cur to total
+        }
+        val applyDir = File(gitDir, "rebase-apply")
+        if (applyDir.isDirectory) {
+            val cur = File(applyDir, "next").takeIf { it.isFile }?.readText()?.trim()?.toIntOrNull()
+            val total = File(applyDir, "last").takeIf { it.isFile }?.readText()?.trim()?.toIntOrNull()
+            if (cur != null && total != null) return cur to total
+        }
+        return null
     }
 
     override suspend fun stage(repoPath: String, paths: List<String>): Result<Unit> = git(repoPath) { git ->

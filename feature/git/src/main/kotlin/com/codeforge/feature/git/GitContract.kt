@@ -72,9 +72,15 @@ data class ConflictEditorState(
     val segments: List<ConflictSegment> = emptyList(),
     val choices: Map<Int, ConflictResolution> = emptyMap(),
     val error: String? = null,
+    val allConflictingPaths: List<String> = emptyList(),
+    val activeBlockIndex: Int = 0,
 ) {
     val conflictCount: Int get() = segments.count { it is ConflictSegment.Conflict }
     val unresolved: Int get() = conflictCount - choices.size
+    val currentFileIndex: Int get() = allConflictingPaths.indexOf(path).coerceAtLeast(0)
+    val totalFiles: Int get() = allConflictingPaths.size.coerceAtLeast(1)
+    val hasPrevFile: Boolean get() = currentFileIndex > 0
+    val hasNextFile: Boolean get() = currentFileIndex >= 0 && currentFileIndex < allConflictingPaths.size - 1
 }
 
 /** Modale Eingaben/Bestätigungen. */
@@ -176,6 +182,8 @@ sealed interface GitUiEvent {
     data class ConflictChooseAll(val resolution: ConflictResolution) : GitUiEvent
     data object ConflictApply : GitUiEvent
     data class ResolveConflictFile(val path: String, val side: GitConflictSide) : GitUiEvent
+    data class ConflictNavigateFile(val path: String) : GitUiEvent
+    data class ConflictJumpToBlock(val blockIndex: Int) : GitUiEvent
 
     // Branches / Merge / Rebase
     data class Checkout(val branch: String) : GitUiEvent

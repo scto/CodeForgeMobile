@@ -24,4 +24,8 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    testImplementation(project(":core:testing"))
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

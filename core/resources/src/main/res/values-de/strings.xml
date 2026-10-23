@@ -399,6 +399,16 @@
     <string name="git_rebase_angehalten_konflikt_loesen_vorm">Rebase angehalten: %1$s Konflikt(e) – lösen, vormerken, dann „Fortsetzen“</string>
     <string name="git_rebase_fortsetzen">Rebase fortsetzen…</string>
     <string name="git_rebase_laeuft">Rebase läuft</string>
+    <string name="git_rebase_schritt_n_von_m">Rebase (%1$d/%2$d)</string>
+    <string name="git_datei_x_von_y">Datei %1$d von %2$d</string>
+    <string name="git_vorherige_datei">Vorherige Datei</string>
+    <string name="git_naechste_datei">Nächste Datei</string>
+    <string name="git_vorheriger_konflikt">Vorheriger Konflikt</string>
+    <string name="git_naechster_konflikt">Nächster Konflikt</string>
+    <string name="git_konflikt_x_von_y">Konflikt %1$d von %2$d</string>
+    <string name="git_konflikte_fortschritt">%1$d von %2$d gelöst</string>
+    <string name="git_konflikt_geloest_naechste_datei">Konflikt in %1$s gelöst und vorgemerkt. Nächste Datei geöffnet.</string>
+    <string name="git_alle_konflikte_im_repo_geloest">Alle Konflikte gelöst! Vorgang kann jetzt abgeschlossen werden.</string>
     <string name="git_remote">Remote</string>
     <string name="git_remote_branch_loeschen">Remote-Branch löschen</string>
     <string name="git_remote_branch_loeschen_2">Remote-Branch löschen…</string>

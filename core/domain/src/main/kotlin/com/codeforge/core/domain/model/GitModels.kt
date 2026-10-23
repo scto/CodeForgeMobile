@@ -43,6 +43,10 @@ data class GitRepoStatus(
     val hasCommits: Boolean = true,
     /** Vorgeschlagene Nachricht einer laufenden Operation (MERGE_MSG), sonst `null`. */
     val pendingMessage: String? = null,
+    /** Aktueller Schritt bei einem Rebase (1-basiert), z. B. 3 bei „Rebase 3/7“. */
+    val rebaseCurrentStep: Int? = null,
+    /** Gesamtanzahl der Schritte bei einem Rebase, z. B. 7 bei „Rebase 3/7“. */
+    val rebaseTotalSteps: Int? = null,
 ) {
     val staged: List<GitStatusEntry> get() = entries.filter { it.staged }
     val unstaged: List<GitStatusEntry> get() = entries.filter { !it.staged && it.status != GitFileStatus.CONFLICTING }

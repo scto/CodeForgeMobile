@@ -216,8 +216,16 @@ private fun OperationBanner(state: GitUiState, onEvent: (GitUiEvent) -> Unit) {
     val (title, hint) = when (operation) {
         GitRepoState.MERGING -> Res.string(R.string.git_merge_laeuft) to
             if (conflicts > 0) Res.string(R.string.git_konflikt_loesen_vormerken_committen, conflicts) else Res.string(R.string.git_alle_konflikte_geloest_merge_commit)
-        GitRepoState.REBASING -> Res.string(R.string.git_rebase_laeuft) to
-            if (conflicts > 0) Res.string(R.string.git_konflikt_loesen_und_vormerken_dann, conflicts) else Res.string(R.string.git_konflikte_geloest_fortsetzen_oder_comm)
+        GitRepoState.REBASING -> {
+            val cur = status.rebaseCurrentStep
+            val total = status.rebaseTotalSteps
+            val titleText = if (cur != null && total != null) {
+                Res.string(R.string.git_rebase_schritt_n_von_m, cur, total)
+            } else {
+                Res.string(R.string.git_rebase_laeuft)
+            }
+            titleText to (if (conflicts > 0) Res.string(R.string.git_konflikt_loesen_und_vormerken_dann, conflicts) else Res.string(R.string.git_konflikte_geloest_fortsetzen_oder_comm))
+        }
         GitRepoState.CHERRY_PICKING -> Res.string(R.string.git_cherry_pick_laeuft) to
             if (conflicts > 0) Res.string(R.string.git_konflikt_loesen_vormerken_committen, conflicts) else Res.string(R.string.git_konflikte_geloest_commit_erstellen)
         GitRepoState.REVERTING -> Res.string(R.string.git_revert_laeuft) to

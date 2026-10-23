@@ -12,9 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,6 +33,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -80,12 +87,84 @@ internal fun ConflictEditorDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     else -> {
+                        val listState = rememberLazyListState()
+                        val conflictSegmentIndices = remember(state.segments) {
+                            state.segments.mapIndexedNotNull { index, seg -> if (seg is ConflictSegment.Conflict) index else null }
+                        }
+                        LaunchedEffect(state.activeBlockIndex) {
+                            if (state.activeBlockIndex in conflictSegmentIndices.indices) {
+                                listState.animateScrollToItem(conflictSegmentIndices[state.activeBlockIndex])
+                            }
+                        }
+
+                        if (state.totalFiles > 1 || state.conflictCount > 1) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (state.totalFiles > 1) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        IconButton(
+                                            onClick = {
+                                                val prevPath = state.allConflictingPaths[state.currentFileIndex - 1]
+                                                onEvent(GitUiEvent.ConflictNavigateFile(prevPath))
+                                            },
+                                            enabled = !busy && state.hasPrevFile
+                                        ) {
+                                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringRes(R.string.git_vorherige_datei))
+                                        }
+                                        Text(
+                                            stringRes(R.string.git_datei_x_von_y, state.currentFileIndex + 1, state.totalFiles),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        IconButton(
+                                            onClick = {
+                                                val nextPath = state.allConflictingPaths[state.currentFileIndex + 1]
+                                                onEvent(GitUiEvent.ConflictNavigateFile(nextPath))
+                                            },
+                                            enabled = !busy && state.hasNextFile
+                                        ) {
+                                            Icon(Icons.AutoMirrored.Filled.ArrowForward, stringRes(R.string.git_naechste_datei))
+                                        }
+                                    }
+                                } else {
+                                    Box {}
+                                }
+                                if (state.conflictCount > 1) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        IconButton(
+                                            onClick = {
+                                                onEvent(GitUiEvent.ConflictJumpToBlock(state.activeBlockIndex - 1))
+                                            },
+                                            enabled = state.activeBlockIndex > 0
+                                        ) {
+                                            Icon(Icons.Filled.KeyboardArrowUp, stringRes(R.string.git_vorheriger_konflikt))
+                                        }
+                                        Text(
+                                            stringRes(R.string.git_konflikt_x_von_y, (state.activeBlockIndex + 1).coerceAtMost(state.conflictCount), state.conflictCount),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        IconButton(
+                                            onClick = {
+                                                onEvent(GitUiEvent.ConflictJumpToBlock(state.activeBlockIndex + 1))
+                                            },
+                                            enabled = state.activeBlockIndex < state.conflictCount - 1
+                                        ) {
+                                            Icon(Icons.Filled.KeyboardArrowDown, stringRes(R.string.git_naechster_konflikt))
+                                        }
+                                    }
+                                }
+                            }
+                            HorizontalDivider()
+                        }
+
                         Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.OURS)) }) { Text(stringRes(R.string.git_alle_aktuell)) }
                             TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.THEIRS)) }) { Text(stringRes(R.string.git_alle_eingehend)) }
                             TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.BOTH)) }) { Text(stringRes(R.string.git_alle_beide)) }
                         }
-                        LazyColumn(Modifier.weight(1f).fillMaxWidth()) {
+                        LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth()) {
                             items(state.segments.size, key = { it }) { i ->
                                 when (val seg = state.segments[i]) {
                                     is ConflictSegment.Plain -> PlainBlock(seg.lines)

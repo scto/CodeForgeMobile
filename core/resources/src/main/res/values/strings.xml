@@ -399,6 +399,16 @@
     <string name="git_rebase_angehalten_konflikt_loesen_vorm">Rebase paused: %1$s conflict(s) – resolve, stage, then “Continue”</string>
     <string name="git_rebase_fortsetzen">Continue rebase…</string>
     <string name="git_rebase_laeuft">Rebase in progress</string>
+    <string name="git_rebase_schritt_n_von_m">Rebase (%1$d/%2$d)</string>
+    <string name="git_datei_x_von_y">File %1$d of %2$d</string>
+    <string name="git_vorherige_datei">Previous file</string>
+    <string name="git_naechste_datei">Next file</string>
+    <string name="git_vorheriger_konflikt">Previous conflict</string>
+    <string name="git_naechster_konflikt">Next conflict</string>
+    <string name="git_konflikt_x_von_y">Conflict %1$d of %2$d</string>
+    <string name="git_konflikte_fortschritt">%1$d of %2$d resolved</string>
+    <string name="git_konflikt_geloest_naechste_datei">Conflict in %1$s resolved and staged. Opened next file.</string>
+    <string name="git_alle_konflikte_im_repo_geloest">All conflicts resolved! Operation can now be completed.</string>
     <string name="git_remote">Remote</string>
     <string name="git_remote_branch_loeschen">Delete remote branch</string>
     <string name="git_remote_branch_loeschen_2">Delete remote branch…</string>
