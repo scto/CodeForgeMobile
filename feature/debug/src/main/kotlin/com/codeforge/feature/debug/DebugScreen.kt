@@ -98,6 +98,18 @@ fun DebugScreen(
             onIntent = onIntent
         )
 
+        // Dialog für Android App Debug-Ziel
+        if (state.showAttachDialog) {
+            AttachAndroidDialog(
+                currentTarget = state.androidTarget,
+                onDismissRequest = { onIntent(DebugUiIntent.SetShowAttachDialog(false)) },
+                onConfirm = { target ->
+                    onIntent(DebugUiIntent.UpdateAndroidTarget(target))
+                    onIntent(DebugUiIntent.AttachAndroid(target))
+                }
+            )
+        }
+
         // Fehlermeldung
         if (state.errorMessage != null) {
             Snackbar(

@@ -8,6 +8,8 @@ import com.codeforge.core.domain.model.DebugStackFrame
 import com.codeforge.core.domain.model.Scope
 import com.codeforge.core.domain.model.Variable
 import com.codeforge.core.domain.repository.DebugRepository
+import com.codeforge.core.domain.repository.SourceToClassMapper
+import com.codeforge.libs.debug_client.mapping.SourceToClassMapperImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,23 +29,26 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
+import java.io.File
 import java.net.Socket
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class DebugRepositoryImpl internal constructor(
-    private val connectionFactory: suspend (DebugConfig) -> DapConnection
+    private val connectionFactory: suspend (DebugConfig) -> DapConnection,
+    private val sourceToClassMapper: SourceToClassMapper = SourceToClassMapperImpl()
 ) : DebugRepository {
 
     @Inject
-    constructor() : this(
+    constructor(sourceToClassMapper: SourceToClassMapper) : this(
         connectionFactory = { config ->
             val socket = withContext(Dispatchers.IO) {
                 Socket(config.host, config.port)
             }
             DapConnection(socket.getInputStream(), socket.getOutputStream())
-        }
+        },
+        sourceToClassMapper = sourceToClassMapper
     )
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -148,25 +153,38 @@ class DebugRepositoryImpl internal constructor(
     }
 
     override suspend fun setBreakpoints(path: String, breakpoints: List<Breakpoint>): Result<List<Breakpoint>> = withContext(Dispatchers.IO) {
+        val file = File(path)
+        val preVerified = if (file.exists() && file.isFile) {
+            val content = runCatching { file.readText() }.getOrDefault("")
+            sourceToClassMapper.verifyBreakpoints(path, content, breakpoints)
+        } else {
+            breakpoints
+        }
+
         val conn = activeConnection
         if (conn != null && conn.isConnected) {
-            val result = conn.sendRequest("setBreakpoints", DapJsonMapper.buildSetBreakpointsArguments(path, breakpoints))
+            val result = conn.sendRequest("setBreakpoints", DapJsonMapper.buildSetBreakpointsArguments(path, preVerified))
             result.fold(
                 onSuccess = { res ->
-                    val verified = DapJsonMapper.parseSetBreakpointsResponse(path, breakpoints, res.body)
-                    _activeBreakpoints.value = _activeBreakpoints.value + (path to verified)
-                    Result.success(verified)
+                    val parsed = DapJsonMapper.parseSetBreakpointsResponse(path, preVerified, res.body)
+                    // Stelle sicher, dass Haltepunkte auf nicht zuordenbaren Zeilen nicht verifiziert bleiben
+                    val finalVerified = parsed.mapIndexed { index, bp ->
+                        val canVerify = preVerified.getOrNull(index)?.verified ?: false
+                        bp.copy(verified = bp.verified && canVerify)
+                    }
+                    _activeBreakpoints.value = _activeBreakpoints.value + (path to finalVerified)
+                    Result.success(finalVerified)
                 },
                 onFailure = {
                     // Auch bei Fehler lokal merken
-                    _activeBreakpoints.value = _activeBreakpoints.value + (path to breakpoints)
-                    Result.success(breakpoints)
+                    _activeBreakpoints.value = _activeBreakpoints.value + (path to preVerified)
+                    Result.success(preVerified)
                 }
             )
         } else {
             // Noch keine Verbindung: lokal für späteren Start vorhalten
-            _activeBreakpoints.value = _activeBreakpoints.value + (path to breakpoints)
-            Result.success(breakpoints)
+            _activeBreakpoints.value = _activeBreakpoints.value + (path to preVerified)
+            Result.success(preVerified)
         }
     }
 

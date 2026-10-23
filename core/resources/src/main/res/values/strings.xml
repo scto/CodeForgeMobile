@@ -1375,5 +1375,21 @@
     <string name="debug_breakpoint_line">Line %1$d</string>
     <string name="debug_breakpoint_condition_placeholder">e.g. count &gt; 10</string>
     <string name="debug_breakpoint_log_placeholder">e.g. x has value {x}</string>
+    <string name="debug_mode_jvm">JVM</string>
+    <string name="debug_mode_android">Android App</string>
+    <string name="debug_target_package">Package Name</string>
+    <string name="debug_target_activity">Activity (optional)</string>
+    <string name="debug_target_port">Forward Port</string>
+    <string name="debug_target_wait_for_debugger">Wait for debugger (am start -D)</string>
+    <string name="debug_target_stop_on_detach">Stop app on detach</string>
+    <string name="debug_action_attach_android">Attach to Android App</string>
+    <string name="debug_action_configure_target">Debug Target</string>
+    <string name="debug_attach_dialog_title">Attach to Android App</string>
+    <string name="debug_attach_dialog_confirm">Attach</string>
+    <string name="debug_error_adb_not_found">ADB binary not found. Please install Android Platform-Tools.</string>
+    <string name="debug_error_app_not_debuggable">App %1$s is not debuggable (android:debuggable is false). Please build in debug mode.</string>
+    <string name="debug_error_app_start_failed">Failed to start app for debugging: %1$s</string>
+    <string name="debug_error_pid_not_found">Process ID for %1$s could not be determined</string>
+    <string name="debug_error_manager_unavailable">Android debug manager is not available</string>
 </resources>
 

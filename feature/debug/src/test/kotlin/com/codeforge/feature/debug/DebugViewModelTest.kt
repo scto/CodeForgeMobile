@@ -1,5 +1,6 @@
 package com.codeforge.feature.debug
 
+import com.codeforge.core.domain.model.AndroidDebugTarget
 import com.codeforge.core.domain.model.Breakpoint
 import com.codeforge.core.domain.model.DebugConfig
 import com.codeforge.core.domain.model.DebugEvent
@@ -7,6 +8,7 @@ import com.codeforge.core.domain.model.DebugSessionState
 import com.codeforge.core.domain.model.DebugStackFrame
 import com.codeforge.core.domain.model.Scope
 import com.codeforge.core.domain.model.Variable
+import com.codeforge.core.domain.repository.AndroidDebugManager
 import com.codeforge.core.domain.repository.BreakpointRepository
 import com.codeforge.core.domain.repository.DebugRepository
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +30,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DebugViewModelTest {
@@ -115,12 +118,35 @@ class DebugViewModelTest {
         override suspend fun adjustBreakpointsOnEdit(projectRoot: String, path: String, changeLine: Int, lineDelta: Int) {}
     }
 
+    private var attachCalls = 0
+    private var detachCalls = 0
+    private val fakeAndroidDebugManager = object : AndroidDebugManager {
+        override suspend fun isAdbAvailable(): Boolean = true
+        override suspend fun getDebuggablePids(): Result<List<Int>> = Result.success(listOf(1234))
+        override suspend fun isAppDebuggable(packageName: String, apkFile: File?): Result<Boolean> = Result.success(true)
+        override suspend fun startAppWaitingForDebugger(packageName: String, activityName: String?, timeoutMs: Long): Result<Int> = Result.success(1234)
+        override suspend fun forwardPort(port: Int, pid: Int): Result<Unit> = Result.success(Unit)
+        override suspend fun removeForward(port: Int): Result<Unit> = Result.success(Unit)
+        override suspend fun attach(target: AndroidDebugTarget, apkFile: File?): Result<Unit> {
+            attachCalls++
+            fakeState.value = DebugSessionState.Running
+            return Result.success(Unit)
+        }
+        override suspend fun detach(target: AndroidDebugTarget): Result<Unit> {
+            detachCalls++
+            fakeState.value = DebugSessionState.Terminated(0)
+            return Result.success(Unit)
+        }
+    }
+
     private lateinit var viewModel: DebugViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = DebugViewModel(fakeDebugRepository, fakeBreakpointRepository)
+        attachCalls = 0
+        detachCalls = 0
+        viewModel = DebugViewModel(fakeDebugRepository, fakeBreakpointRepository, fakeAndroidDebugManager)
         viewModel.setProjectRoot("/test/project")
     }
 
@@ -233,5 +259,39 @@ class DebugViewModelTest {
 
         assertEquals(1, stopCalls)
         assertEquals(DebugSessionState.Terminated(null), viewModel.uiState.value.sessionState)
+    }
+
+    @Test
+    fun attachAndroidTransitionsToRunning() = runTest {
+        val target = AndroidDebugTarget(packageName = "com.example.test", port = 5005)
+        viewModel.handleIntent(DebugUiIntent.AttachAndroid(target))
+        advanceUntilIdle()
+
+        assertEquals(1, attachCalls)
+        assertEquals(DebugSessionState.Running, viewModel.uiState.value.sessionState)
+        assertTrue(viewModel.uiState.value.isRunning)
+    }
+
+    @Test
+    fun stopInvokesDetachWhenAndroidTargetActive() = runTest {
+        val target = AndroidDebugTarget(packageName = "com.example.test", port = 5005)
+        viewModel.handleIntent(DebugUiIntent.AttachAndroid(target))
+        advanceUntilIdle()
+
+        viewModel.handleIntent(DebugUiIntent.Stop)
+        advanceUntilIdle()
+
+        assertEquals(1, detachCalls)
+        assertEquals(DebugSessionState.Terminated(0), viewModel.uiState.value.sessionState)
+    }
+
+    @Test
+    fun setDebugModeAndTargetUpdatesState() = runTest {
+        viewModel.handleIntent(DebugUiIntent.SetDebugMode(DebugMode.JVM))
+        assertEquals(DebugMode.JVM, viewModel.uiState.value.debugMode)
+
+        val target = AndroidDebugTarget(packageName = "com.new.target", port = 5010)
+        viewModel.handleIntent(DebugUiIntent.UpdateAndroidTarget(target))
+        assertEquals(target, viewModel.uiState.value.androidTarget)
     }
 }

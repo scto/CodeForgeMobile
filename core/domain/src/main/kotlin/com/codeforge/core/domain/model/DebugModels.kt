@@ -76,6 +76,19 @@ data class DebugConfig(
 )
 
 /**
+ * Konfiguration zum Anhängen des Debuggers an eine Android-Anwendung über ADB/JDWP.
+ */
+data class AndroidDebugTarget(
+    val packageName: String,
+    val activityName: String? = null,
+    val host: String = "127.0.0.1",
+    val port: Int = 5005,
+    val pid: Int? = null,
+    val waitForDebugger: Boolean = true,
+    val stopAppOnDetach: Boolean = false
+)
+
+/**
  * Ereignisse aus dem Debug Adapter Protocol (DAP).
  */
 sealed interface DebugEvent {

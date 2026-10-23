@@ -1,6 +1,7 @@
 package com.codeforge.feature.debug
 
 import androidx.compose.runtime.Immutable
+import com.codeforge.core.domain.model.AndroidDebugTarget
 import com.codeforge.core.domain.model.Breakpoint
 import com.codeforge.core.domain.model.DebugConfig
 import com.codeforge.core.domain.model.DebugSessionState
@@ -15,10 +16,19 @@ enum class DebugTab {
     BREAKPOINTS
 }
 
+enum class DebugMode {
+    JVM,
+    ANDROID
+}
+
 @Immutable
 data class DebugUiState(
     val sessionState: DebugSessionState = DebugSessionState.Idle,
     val selectedTab: DebugTab = DebugTab.CALL_STACK,
+    val debugMode: DebugMode = DebugMode.ANDROID,
+    val androidTarget: AndroidDebugTarget = AndroidDebugTarget(packageName = ""),
+    val isAdbAvailable: Boolean = false,
+    val showAttachDialog: Boolean = false,
     val frames: List<DebugStackFrame> = emptyList(),
     val selectedFrameId: Long? = null,
     val scopes: List<Scope> = emptyList(),
@@ -41,6 +51,10 @@ data class DebugUiState(
 
 sealed interface DebugUiIntent {
     data class Start(val config: DebugConfig) : DebugUiIntent
+    data class AttachAndroid(val target: AndroidDebugTarget) : DebugUiIntent
+    data class SetDebugMode(val mode: DebugMode) : DebugUiIntent
+    data class UpdateAndroidTarget(val target: AndroidDebugTarget) : DebugUiIntent
+    data class SetShowAttachDialog(val show: Boolean) : DebugUiIntent
     data object Stop : DebugUiIntent
     data object Resume : DebugUiIntent
     data object Pause : DebugUiIntent

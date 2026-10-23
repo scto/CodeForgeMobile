@@ -1375,5 +1375,21 @@
     <string name="debug_breakpoint_line">Zeile %1$d</string>
     <string name="debug_breakpoint_condition_placeholder">z. B. count &gt; 10</string>
     <string name="debug_breakpoint_log_placeholder">z. B. x hat Wert {x}</string>
+    <string name="debug_mode_jvm">JVM</string>
+    <string name="debug_mode_android">Android-App</string>
+    <string name="debug_target_package">Paketname</string>
+    <string name="debug_target_activity">Activity (optional)</string>
+    <string name="debug_target_port">Weiterleitungs-Port</string>
+    <string name="debug_target_wait_for_debugger">Auf Debugger warten (am start -D)</string>
+    <string name="debug_target_stop_on_detach">App beim Trennen beenden</string>
+    <string name="debug_action_attach_android">An Android-App anhängen</string>
+    <string name="debug_action_configure_target">Debug-Ziel</string>
+    <string name="debug_attach_dialog_title">An Android-App anhängen</string>
+    <string name="debug_attach_dialog_confirm">Anhängen</string>
+    <string name="debug_error_adb_not_found">ADB nicht gefunden. Bitte Android Platform-Tools installieren.</string>
+    <string name="debug_error_app_not_debuggable">App %1$s ist nicht debuggbar (android:debuggable ist false). Bitte erstelle einen Debug-Build.</string>
+    <string name="debug_error_app_start_failed">Starten der App für Debugger fehlgeschlagen: %1$s</string>
+    <string name="debug_error_pid_not_found">Prozess-ID für %1$s konnte nicht ermittelt werden</string>
+    <string name="debug_error_manager_unavailable">Android-Debug-Manager ist nicht verfügbar</string>
 </resources>
 

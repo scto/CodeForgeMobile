@@ -2,13 +2,17 @@ package com.codeforge.feature.debug
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codeforge.core.domain.model.AndroidDebugTarget
 import com.codeforge.core.domain.model.DebugConfig
 import com.codeforge.core.domain.model.DebugEvent
 import com.codeforge.core.domain.model.DebugSessionState
 import com.codeforge.core.domain.model.Variable
+import com.codeforge.core.domain.repository.AndroidDebugManager
 import com.codeforge.core.domain.repository.BreakpointRepository
 import com.codeforge.core.domain.repository.DebugRepository
 import com.codeforge.core.navigation.OpenFileRequestBridge
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,12 +22,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class DebugViewModel @Inject constructor(
     private val debugRepository: DebugRepository,
     private val breakpointRepository: BreakpointRepository,
+    private val androidDebugManager: AndroidDebugManager? = null,
     private val openFileRequestBridge: OpenFileRequestBridge? = null
 ) : ViewModel() {
 
@@ -31,6 +37,7 @@ class DebugViewModel @Inject constructor(
     val uiState: StateFlow<DebugUiState> = _uiState.asStateFlow()
 
     private var breakpointCollectionJob: Job? = null
+    private var activeAndroidTarget: AndroidDebugTarget? = null
 
     init {
         // Beobachte Sitzungszustand
@@ -89,6 +96,22 @@ class DebugViewModel @Inject constructor(
         if (_uiState.value.projectRoot == projectRoot) return
         _uiState.update { it.copy(projectRoot = projectRoot) }
 
+        // Paketname und ADB-Verfügbarkeit im Hintergrund ermitteln
+        viewModelScope.launch {
+            val adbOk = androidDebugManager?.isAdbAvailable() ?: false
+            val detectedPkg = detectPackageName(projectRoot)
+            _uiState.update { current ->
+                current.copy(
+                    isAdbAvailable = adbOk,
+                    androidTarget = if (detectedPkg != null && current.androidTarget.packageName.isBlank()) {
+                        current.androidTarget.copy(packageName = detectedPkg)
+                    } else {
+                        current.androidTarget
+                    }
+                )
+            }
+        }
+
         breakpointCollectionJob?.cancel()
         breakpointCollectionJob = breakpointRepository.getBreakpoints(projectRoot).onEach { bpsMap ->
             _uiState.update { it.copy(allBreakpoints = bpsMap) }
@@ -102,6 +125,10 @@ class DebugViewModel @Inject constructor(
     fun handleIntent(intent: DebugUiIntent) {
         when (intent) {
             is DebugUiIntent.Start -> start(intent.config)
+            is DebugUiIntent.AttachAndroid -> attachAndroid(intent.target)
+            is DebugUiIntent.SetDebugMode -> _uiState.update { it.copy(debugMode = intent.mode) }
+            is DebugUiIntent.UpdateAndroidTarget -> _uiState.update { it.copy(androidTarget = intent.target) }
+            is DebugUiIntent.SetShowAttachDialog -> _uiState.update { it.copy(showAttachDialog = intent.show) }
             DebugUiIntent.Stop -> stop()
             DebugUiIntent.Resume -> resume()
             DebugUiIntent.Pause -> pause()
@@ -153,9 +180,34 @@ class DebugViewModel @Inject constructor(
         }
     }
 
+    private fun attachAndroid(target: AndroidDebugTarget) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(errorMessage = null, showAttachDialog = false) }
+            activeAndroidTarget = target
+            val manager = androidDebugManager
+            if (manager == null) {
+                _uiState.update { it.copy(errorMessage = Res.string(R.string.debug_error_manager_unavailable)) }
+                return@launch
+            }
+            val root = _uiState.value.projectRoot
+            val apkFile = findApkInProject(root)
+            val result = manager.attach(target, apkFile)
+            result.onFailure { error ->
+                activeAndroidTarget = null
+                _uiState.update { it.copy(errorMessage = error.message) }
+            }
+        }
+    }
+
     private fun stop() {
         viewModelScope.launch {
-            debugRepository.stop()
+            val target = activeAndroidTarget
+            if (target != null) {
+                activeAndroidTarget = null
+                androidDebugManager?.detach(target)
+            } else {
+                debugRepository.stop()
+            }
         }
     }
 
@@ -266,5 +318,57 @@ class DebugViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    private fun detectPackageName(projectRoot: String): String? {
+        val root = File(projectRoot)
+        if (!root.exists()) return null
+
+        val manifestFiles = listOf(
+            File(root, "app/src/main/AndroidManifest.xml"),
+            File(root, "src/main/AndroidManifest.xml")
+        )
+        for (file in manifestFiles) {
+            if (file.exists() && file.isFile) {
+                val content = runCatching { file.readText() }.getOrNull() ?: continue
+                val pkgMatch = Regex("""package\s*=\s*"([^"]+)"""").find(content)
+                if (pkgMatch != null) return pkgMatch.groupValues[1]
+            }
+        }
+
+        val buildFiles = listOf(
+            File(root, "app/build.gradle.kts"),
+            File(root, "app/build.gradle")
+        )
+        for (file in buildFiles) {
+            if (file.exists() && file.isFile) {
+                val content = runCatching { file.readText() }.getOrNull() ?: continue
+                val nsMatch = Regex("""namespace\s*=?\s*["']([^"']+)["']""").find(content)
+                if (nsMatch != null) return nsMatch.groupValues[1]
+                val appMatch = Regex("""applicationId\s*=?\s*["']([^"']+)["']""").find(content)
+                if (appMatch != null) return appMatch.groupValues[1]
+            }
+        }
+        return null
+    }
+
+    private fun findApkInProject(projectRoot: String): File? {
+        val root = File(projectRoot)
+        if (!root.exists()) return null
+
+        val candidateDirs = listOf(
+            File(root, "app/build/outputs/apk/debug"),
+            File(root, "build/outputs/apk/debug"),
+            File(root, "app/build/outputs/apk"),
+            File(root, "build/outputs/apk")
+        )
+        for (dir in candidateDirs) {
+            if (dir.exists() && dir.isDirectory) {
+                val apk = dir.listFiles { f -> f.isFile && f.name.endsWith(".apk") }
+                    ?.maxByOrNull { it.lastModified() }
+                if (apk != null) return apk
+            }
+        }
+        return null
     }
 }

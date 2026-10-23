@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:common"))
     implementation(project(":libs:terminal-engine"))
+    implementation(project(":libs:indexing-api"))
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.hilt.android)
