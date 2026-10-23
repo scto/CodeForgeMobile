@@ -78,6 +78,7 @@ Repo-Stand: `6749b2a`. ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen
 | 46 | `46-viewmodel-init-order-crash.md` | ⬜ offen | Absturz beim Öffnen des Editors (NPE im `EditorViewModel`-`init`, Feld-Reihenfolge); Fix, Regressionstest, Durchsicht anderer ViewModels |
 | 47 | `47-settings-editor-welcome-project-keys.md` | ⬜ offen | Einstellungen/UI in fünf Teilen: Zurück-Navigation, Editor-Einstellungen (Theme-Dropdown, Dateikopf), Willkommensbildschirm, Projekteinstellungen, Schlüssel↔Projekt-Zuweisung |
 | 48 | `48-openssh-prefix-gate.md` | ⬜ offen | openssh-Prefix im Service-Skript, Sichtbarkeit verworfener Pakete im APT-Lauf |
+| 49 | `49-group-chain-order-and-prefix-exceptions.md` | ⬜ offen | Gruppenkette (Lauf 2026-10-22/23): Reihenfolge nach Abhängigkeiten (JDK, `m4`, `jq`, `nodejs` vor Gruppe A), Abbruch ohne Veröffentlichen nach fehlgeschlagenem Zusammenbau, Ausnahmeliste für eingebaute Pfade in ELF-Dateien (taplo, shellcheck), Sichtbarkeit verworfener Pakete, shellcheck-arm-Download (HTTP 403). Voraussetzung: Task 48 |
 | 99 | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task) | Anwendungsdoku (Mermaid) und API-Doku (Dokka), wiederholbar über `docsGenerate`/`docsCheck`, CI-Wochenlauf · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“) |
 
 ## Nächste Schritte
@@ -87,7 +88,7 @@ Repo-Stand: `6749b2a`. ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen
 | 1 | Fork `scto/terminal-packages-codeforge` | Alle Gruppen und `openjdk-17`/`-21`/`-25` sind laut Inhaber/Paketliste (2026-10-21) im APT-Repo (`-21`/`-25` als große Pakete). Offen: Vollständigkeit gegen `apt-groups.json` prüfen, Installation und LSP-Start auf dem Gerät testen |
 | 2 | Compiler-Runtime und `gradle` | Release `compiler-runtime-2025.09.00-k2.1.21` und Paket `gradle` existieren laut Inhaber. Offen: Prüfsumme/Manifest gegen die App und Gerätetest |
 | 3 | Gerätetests | `docs/device-test-checklist.md` + Punkte aus `docs/task-24-report.md` & `docs/task-25-report.md` (`codeforge-env setup --gradle`) + Folge-Task 27b |
-| 4 | Neue Tasks 35–47 | Empfehlung: **46 zuerst (Editor stürzt ab)**, danach **45, wenn Geräte-Setup scheitert** (Bootstrap/APT-Zustand); 44 vor oder mit 43; 37a als Spike zuerst, 37b/37c erst bei positivem Spike; 36 und 40 bauen auf Task 28 auf. Übersicht mit Abhängigkeiten in `TASKS-STATUS.md` |
+| 4 | Neue Tasks 35–49 | Empfehlung: **46 zuerst (Editor stürzt ab)**, danach **45, wenn Geräte-Setup scheitert** (Bootstrap/APT-Zustand), **48 vor 49** (APT-Lauf: openssh, verworfene Pakete sichtbar; 49: Gruppenreihenfolge, Abbruch, Ausnahmen); 44 vor oder mit 43; 37a als Spike zuerst, 37b/37c erst bei positivem Spike; 36 und 40 bauen auf Task 28 auf. Übersicht mit Abhängigkeiten in `TASKS-STATUS.md` |
 | laufend | **17** | vor jedem Commit/PR; neue Texte in `values/` **und** `values-de/`. Task 42 ist die App-Variante für Nutzerprojekte, nicht ein Ersatz |
 
 Nicht Teil der Tasks: das Bauen von Bootstrap und APT-Paketen (GitHub-Actions im Fork). Weitere Backlog-Punkte: `STATUS.md` (Abschnitt „Noch offene Features"): Expressive ab stabiler material3 ≥ 1.4, ktlint-Umbenennung `template_engine`. (`:libs:gradle-tooling-bridge` ist seit Task 28 als `@Deprecated` markiert, die Layout-Designer-Erweiterungen sind Task 41.)
