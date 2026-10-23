@@ -78,6 +78,8 @@ data class ConflictEditorState(
     val activeBlockIndex: Int = 0,
     val editingBlockIndex: Int? = null,
     val showPreview: Boolean = false,
+    val showThreeWay: Boolean = false,
+    val wordDiffEnabled: Boolean = true,
     val history: List<Pair<Map<Int, ConflictResolution>, Map<Int, String>>> = emptyList(),
 ) {
     val conflictCount: Int get() = segments.count { it is ConflictSegment.Conflict }
@@ -86,6 +88,7 @@ data class ConflictEditorState(
     val totalFiles: Int get() = allConflictingPaths.size.coerceAtLeast(1)
     val hasPrevFile: Boolean get() = currentFileIndex > 0
     val hasNextFile: Boolean get() = currentFileIndex >= 0 && currentFileIndex < allConflictingPaths.size - 1
+    val hasDiff3Base: Boolean get() = segments.filterIsInstance<ConflictSegment.Conflict>().any { it.base != null }
     val previewText: String get() = ConflictParser.resolve(segments, choices, customTexts)
 }
 
@@ -194,6 +197,8 @@ sealed interface GitUiEvent {
     data class ConflictStartEditing(val index: Int) : GitUiEvent
     data object ConflictCancelEditing : GitUiEvent
     data object ConflictTogglePreview : GitUiEvent
+    data object ConflictToggleThreeWay : GitUiEvent
+    data object ConflictToggleWordDiff : GitUiEvent
     data object ConflictUndo : GitUiEvent
 
     // Branches / Merge / Rebase

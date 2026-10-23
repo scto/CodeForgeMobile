@@ -415,6 +415,10 @@
     <string name="git_konflikt_vorschau">Vorschau</string>
     <string name="git_konfliktmarker_reste_gefunden">Fehler: Datei enthält noch unaufgelöste Konfliktmarker. Vormerken abgebrochen.</string>
     <string name="git_konflikt_rueckgaengig">Letzte Auflösung rückgängig</string>
+    <string name="git_drei_wege_ansicht">3-Wege-Ansicht</string>
+    <string name="git_wortvergleich">Wortvergleich</string>
+    <string name="git_basis">Basis</string>
+    <string name="git_keine_diff3_basis">Keine gemeinsame Basis in dieser Datei vorhanden</string>
     <string name="git_remote">Remote</string>
     <string name="git_remote_branch_loeschen">Remote-Branch löschen</string>
     <string name="git_remote_branch_loeschen_2">Remote-Branch löschen…</string>

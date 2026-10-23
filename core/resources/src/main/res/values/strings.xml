@@ -415,6 +415,10 @@
     <string name="git_konflikt_vorschau">Preview</string>
     <string name="git_konfliktmarker_reste_gefunden">Error: File still contains unresolved conflict markers. Staging cancelled.</string>
     <string name="git_konflikt_rueckgaengig">Undo resolution</string>
+    <string name="git_drei_wege_ansicht">3-Way View</string>
+    <string name="git_wortvergleich">Word Diff</string>
+    <string name="git_basis">Base</string>
+    <string name="git_keine_diff3_basis">No common base available in this file</string>
     <string name="git_remote">Remote</string>
     <string name="git_remote_branch_loeschen">Delete remote branch</string>
     <string name="git_remote_branch_loeschen_2">Delete remote branch…</string>

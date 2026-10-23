@@ -136,6 +136,12 @@ class GitViewModel @Inject constructor(
             GitUiEvent.ConflictTogglePreview -> _uiState.update { s ->
                 s.copy(conflict = s.conflict?.copy(showPreview = !s.conflict.showPreview))
             }
+            GitUiEvent.ConflictToggleThreeWay -> _uiState.update { s ->
+                s.copy(conflict = s.conflict?.copy(showThreeWay = !s.conflict.showThreeWay))
+            }
+            GitUiEvent.ConflictToggleWordDiff -> _uiState.update { s ->
+                s.copy(conflict = s.conflict?.copy(wordDiffEnabled = !s.conflict.wordDiffEnabled))
+            }
             GitUiEvent.ConflictUndo -> _uiState.update { s ->
                 s.copy(conflict = s.conflict?.let { c ->
                     if (c.history.isEmpty()) c

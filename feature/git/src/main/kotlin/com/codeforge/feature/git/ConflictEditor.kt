@@ -48,20 +48,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.codeforge.core.domain.model.ConflictResolution
 import com.codeforge.core.domain.model.ConflictSegment
+import com.codeforge.core.domain.model.WordDiff
+import com.codeforge.core.domain.model.WordDiffSpan
+import com.codeforge.core.domain.model.WordDiffType
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 
 private val OURS_BG = Color(0x3329A329)
 private val THEIRS_BG = Color(0x334C8DFF)
+private val BASE_BG = Color(0x33FFB300)
 private const val PLAIN_CONTEXT = 2
 
 /**
@@ -209,6 +218,16 @@ internal fun ConflictEditorDialog(
                                 TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.OURS)) }) { Text(stringRes(R.string.git_alle_aktuell)) }
                                 TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.THEIRS)) }) { Text(stringRes(R.string.git_alle_eingehend)) }
                                 TextButton(onClick = { onEvent(GitUiEvent.ConflictChooseAll(ConflictResolution.BOTH)) }) { Text(stringRes(R.string.git_alle_beide)) }
+                                FilterChip(
+                                    selected = state.showThreeWay,
+                                    onClick = { onEvent(GitUiEvent.ConflictToggleThreeWay) },
+                                    label = { Text(stringRes(R.string.git_drei_wege_ansicht)) }
+                                )
+                                FilterChip(
+                                    selected = state.wordDiffEnabled,
+                                    onClick = { onEvent(GitUiEvent.ConflictToggleWordDiff) },
+                                    label = { Text(stringRes(R.string.git_wortvergleich)) }
+                                )
                             }
                             LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth()) {
                                 items(state.segments.size, key = { it }) { i ->
@@ -219,6 +238,8 @@ internal fun ConflictEditorDialog(
                                             choice = state.choices[seg.index],
                                             customText = state.customTexts[seg.index],
                                             isEditing = state.editingBlockIndex == seg.index,
+                                            showThreeWay = state.showThreeWay,
+                                            wordDiffEnabled = state.wordDiffEnabled,
                                             onEvent = onEvent,
                                         )
                                     }
@@ -266,6 +287,8 @@ private fun ConflictBlock(
     choice: ConflictResolution?,
     customText: String?,
     isEditing: Boolean,
+    showThreeWay: Boolean,
+    wordDiffEnabled: Boolean,
     onEvent: (GitUiEvent) -> Unit,
 ) {
     Card(
@@ -316,11 +339,52 @@ private fun ConflictBlock(
                     }
                 }
             } else {
-                Side(Res.string(R.string.common_aktuell) + block.oursLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(), block.ours, OURS_BG, (choice == ConflictResolution.OURS || choice == ConflictResolution.BOTH) && customText == null)
-                Side(Res.string(R.string.git_eingehend) + block.theirsLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(), block.theirs, THEIRS_BG, (choice == ConflictResolution.THEIRS || choice == ConflictResolution.BOTH_REVERSED || choice == ConflictResolution.BOTH) && customText == null)
+                val (oursSpans, theirsSpans) = if (wordDiffEnabled && customText == null) {
+                    remember(block.ours, block.theirs) {
+                        WordDiff.diffWords(block.ours.joinToString("\n"), block.theirs.joinToString("\n"))
+                    }
+                } else null to null
+
+                Side(
+                    title = Res.string(R.string.common_aktuell) + block.oursLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(),
+                    lines = block.ours,
+                    background = OURS_BG,
+                    selected = (choice == ConflictResolution.OURS || choice == ConflictResolution.BOTH) && customText == null,
+                    wordSpans = oursSpans
+                )
+
+                if (showThreeWay) {
+                    val baseLines = block.base
+                    if (baseLines != null) {
+                        Side(
+                            title = Res.string(R.string.git_basis) + block.baseLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(),
+                            lines = baseLines,
+                            background = BASE_BG,
+                            selected = false,
+                            wordSpans = null
+                        )
+                    } else {
+                        Text(
+                            stringRes(R.string.git_keine_diff3_basis),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 6.dp)
+                        )
+                    }
+                }
+
+                Side(
+                    title = Res.string(R.string.git_eingehend) + block.theirsLabel.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty(),
+                    lines = block.theirs,
+                    background = THEIRS_BG,
+                    selected = (choice == ConflictResolution.THEIRS || choice == ConflictResolution.BOTH_REVERSED || choice == ConflictResolution.BOTH) && customText == null,
+                    wordSpans = theirsSpans
+                )
+
                 if (customText != null) {
                     Side(Res.string(R.string.git_konflikt_benutzerdefiniert), customText.split('\n'), MaterialTheme.colorScheme.tertiaryContainer, selected = true)
                 }
+
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Choice(Res.string(R.string.common_aktuell), ConflictResolution.OURS, block, choice.takeIf { customText == null }, onEvent)
                     Choice(Res.string(R.string.git_eingehend), ConflictResolution.THEIRS, block, choice.takeIf { customText == null }, onEvent)
@@ -347,10 +411,34 @@ private fun Choice(label: String, value: ConflictResolution, block: ConflictSegm
 }
 
 @Composable
-private fun Side(title: String, lines: List<String>, background: Color, selected: Boolean) {
+private fun Side(
+    title: String,
+    lines: List<String>,
+    background: Color,
+    selected: Boolean,
+    wordSpans: List<WordDiffSpan>? = null,
+) {
     Column(Modifier.fillMaxWidth().background(background.copy(alpha = if (selected) 0.6f else 0.25f)).padding(6.dp)) {
         Text(title, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        if (lines.isEmpty()) Text(stringRes(R.string.git_leer), fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        lines.forEach { Text(it.ifEmpty { " " }, fontFamily = FontFamily.Monospace, fontSize = 12.sp) }
+        if (lines.isEmpty()) {
+            Text(stringRes(R.string.git_leer), fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else if (wordSpans != null && wordSpans.isNotEmpty()) {
+            val annotated = buildAnnotatedString {
+                for (span in wordSpans) {
+                    when (span.type) {
+                        WordDiffType.UNCHANGED -> append(span.text)
+                        WordDiffType.ADDED -> withStyle(SpanStyle(background = Color(0x664C8DFF), fontWeight = FontWeight.Bold)) {
+                            append(span.text)
+                        }
+                        WordDiffType.REMOVED -> withStyle(SpanStyle(background = Color(0x66E53935), textDecoration = TextDecoration.LineThrough)) {
+                            append(span.text)
+                        }
+                    }
+                }
+            }
+            Text(text = annotated, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+        } else {
+            lines.forEach { Text(it.ifEmpty { " " }, fontFamily = FontFamily.Monospace, fontSize = 12.sp) }
+        }
     }
 }
