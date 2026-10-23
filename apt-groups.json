@@ -4,7 +4,7 @@
       "name": "A-leicht-jvm",
       "heavy": false,
       "stage": "04-jvm-tools",
-      "repo_packages": "codeforge-env,yarn,autoconf,automake"
+      "repo_packages": "m4,codeforge-env,yarn,autoconf,automake"
     },
     {
       "name": "B-leicht-dev",
