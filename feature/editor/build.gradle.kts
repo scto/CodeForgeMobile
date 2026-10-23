@@ -55,6 +55,7 @@ dependencies {
 
 
     implementation(project(":libs:lsp-client"))
+    implementation(project(":libs:ai-client"))
     // Update-Chips/Dialog im Editor (nur das -api; Implementierung wird in :app per Hilt gebunden)
     implementation(project(":libs:dependency-updater-api"))
 

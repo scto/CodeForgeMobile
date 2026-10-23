@@ -80,7 +80,33 @@ data class EditorUiState(
     val pausedLine: Int? = null,
     val pausedPath: String? = null,
     val editingBreakpoint: com.codeforge.core.domain.model.Breakpoint? = null,
-    val isBreakpointsOverviewVisible: Boolean = false
+    val isBreakpointsOverviewVisible: Boolean = false,
+
+    // Task 38 KI-Assistent
+    val isAiAssistantOpen: Boolean = false,
+    val isAiSettingsOpen: Boolean = false,
+    val isAiQuickActionsOpen: Boolean = false,
+    val aiHistory: List<com.codeforge.core.domain.ai.AiChatMessage> = emptyList(),
+    val isAiStreaming: Boolean = false,
+    val aiStreamingText: String = "",
+    val aiTokensUsage: com.codeforge.core.domain.ai.AiUsage? = null,
+    val aiSelectedContextSources: Set<com.codeforge.core.domain.ai.AiContextSource> = setOf(
+        com.codeforge.core.domain.ai.AiContextSource.CURRENT_FILE,
+        com.codeforge.core.domain.ai.AiContextSource.SELECTION
+    ),
+    val aiPreparedContext: com.codeforge.core.domain.ai.AiPreparedContext? = null,
+    val aiProposedDiff: com.codeforge.core.domain.ai.AiProposedChange? = null,
+    val aiFileConflictChange: com.codeforge.core.domain.ai.AiProposedChange? = null,
+    val isAiPrivacyWarningVisible: Boolean = false,
+    val pendingAiPrompt: String? = null,
+    val isAiDailyLimitWarningVisible: Boolean = false,
+    val aiChatOptions: com.codeforge.core.domain.ai.AiChatOptions = com.codeforge.core.domain.ai.AiChatOptions(
+        provider = com.codeforge.core.domain.ai.AiProviderType.OPENAI,
+        model = "gpt-4o"
+    ),
+    val aiPrivacyPolicy: com.codeforge.core.domain.ai.AiPrivacyPolicy = com.codeforge.core.domain.ai.AiPrivacyPolicy.ALWAYS_ASK,
+    val aiDailyLimit: Int = 50,
+    val aiTodayRequestCount: Int = 0
 ) {
     val isLspConnected: Boolean get() = lspServerState == LspServerState.RUNNING
 
@@ -168,6 +194,31 @@ sealed interface EditorUiEvent {
     data object DeleteAllBreakpoints : EditorUiEvent
     data class ShowBreakpointsOverview(val show: Boolean) : EditorUiEvent
     data object DismissBreakpointEdit : EditorUiEvent
+
+    // Task 38 KI-Assistent
+    data class ToggleAiAssistant(val open: Boolean) : EditorUiEvent
+    data class ToggleAiSettings(val open: Boolean) : EditorUiEvent
+    data class ToggleAiQuickActions(val open: Boolean) : EditorUiEvent
+    data class ToggleAiContextSource(val source: com.codeforge.core.domain.ai.AiContextSource) : EditorUiEvent
+    data class SendAiPrompt(val prompt: String, val selectedText: String? = null) : EditorUiEvent
+    data class TriggerAiQuickAction(
+        val action: com.codeforge.feature.editor.ui.AiQuickActionType,
+        val selectedText: String? = null,
+        val cursorLine: Int? = null
+    ) : EditorUiEvent
+    data object StopAiStream : EditorUiEvent
+    data object ClearAiHistory : EditorUiEvent
+    data class SaveAiOptions(val options: com.codeforge.core.domain.ai.AiChatOptions) : EditorUiEvent
+    data class SaveAiPrivacyPolicy(val policy: com.codeforge.core.domain.ai.AiPrivacyPolicy) : EditorUiEvent
+    data class SaveAiDailyLimit(val limit: Int) : EditorUiEvent
+    data object ConfirmAiPrivacyWarning : EditorUiEvent
+    data object DismissAiPrivacyWarning : EditorUiEvent
+    data object ConfirmAiDailyLimit : EditorUiEvent
+    data object DismissAiDailyLimit : EditorUiEvent
+    data class ShowAiDiff(val change: com.codeforge.core.domain.ai.AiProposedChange) : EditorUiEvent
+    data class AcceptAiProposedChange(val change: com.codeforge.core.domain.ai.AiProposedChange, val forceOverwrite: Boolean = false) : EditorUiEvent
+    data object DismissAiDiff : EditorUiEvent
+    data object DismissAiFileConflict : EditorUiEvent
 }
 
 sealed interface EditorUiEffect {

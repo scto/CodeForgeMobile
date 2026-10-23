@@ -75,6 +75,7 @@ dependencies {
     implementation(project(":libs:lsp-client"))
     implementation(project(":libs:plugin-api"))
     // Hilt-Bindings für Indexierung + Dependency-Updater (Features sehen nur die -api-Module)
+    implementation(project(":libs:ai-client"))
     implementation(project(":libs:indexing-api"))
     implementation(project(":libs:indexing-impl"))
     implementation(project(":libs:dependency-updater-api"))

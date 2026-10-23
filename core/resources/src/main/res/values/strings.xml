@@ -1278,7 +1278,7 @@
     <string name="test_runner_zaehler_gesamt">Total: %1$d</string>
     <string name="test_runner_dauer">Duration: %1$s</string>
     <string name="test_runner_keine_tests_gefunden">No tests match the current filter</string>
-    <string name="test_runner_noch_keine_tests">No tests executed yet. Tap \"Run All Tests\" to start.</string>
+    <string name="test_runner_noch_keine_tests">No tests executed yet. Tap \u201cRun All Tests\u201d to start.</string>
     <string name="test_runner_build_abgebrochen_vor_tests">Build failed before tests could be executed (compilation error).</string>
     <string name="test_runner_zu_problemen_wechseln">View Problems</string>
     <string name="test_runner_details_titel">Test Details</string>
@@ -1391,5 +1391,64 @@
     <string name="debug_error_app_start_failed">Failed to start app for debugging: %1$s</string>
     <string name="debug_error_pid_not_found">Process ID for %1$s could not be determined</string>
     <string name="debug_error_manager_unavailable">Android debug manager is not available</string>
+
+    <!-- ai assistant (Task 38) -->
+    <string name="ai_assistant_title">AI Assistant</string>
+    <string name="ai_quick_action_explain">Explain code</string>
+    <string name="ai_quick_action_fix_error">Fix error</string>
+    <string name="ai_quick_action_write_tests">Write tests</string>
+    <string name="ai_quick_action_rewrite">Rewrite with instruction</string>
+    <string name="ai_quick_action_kdoc">Generate documentation (KDoc)</string>
+    <string name="ai_quick_actions">Quick Actions</string>
+    <string name="ai_chat_title">AI Chat</string>
+    <string name="ai_chat_placeholder">Ask a question or describe changes…</string>
+    <string name="ai_send">Send</string>
+    <string name="ai_stop">Stop</string>
+    <string name="ai_clear_history">Clear history</string>
+    <string name="ai_history_cleared">Chat history cleared</string>
+    <string name="ai_context_sources">Context Sources</string>
+    <string name="ai_context_current_file">Current file</string>
+    <string name="ai_context_selection">Selection</string>
+    <string name="ai_context_open_files">Open files</string>
+    <string name="ai_context_build_problems">Build output / problems</string>
+    <string name="ai_context_lsp_diagnostics">LSP diagnostics</string>
+    <string name="ai_context_git_diff">Git diff</string>
+    <string name="ai_context_what_will_be_sent">What will be sent</string>
+    <string name="ai_context_item_summary">\u2022 %1$s (%2$d chars)</string>
+    <string name="ai_context_redacted_notice">%1$d sensitive secrets redacted</string>
+    <string name="ai_context_truncated_notice">Context truncated to size limit</string>
+    <string name="ai_privacy_warning_title">Privacy Notice</string>
+    <string name="ai_privacy_warning_message">Content will leave this device and will be transmitted to the configured AI provider (%1$s).</string>
+    <string name="ai_privacy_policy_always_ask">Always ask before sending</string>
+    <string name="ai_privacy_policy_only_selected">Only send selected context</string>
+    <string name="ai_privacy_policy_full_file">Allow full file context</string>
+    <string name="ai_privacy_policy_label">Privacy Policy</string>
+    <string name="ai_exclusion_list_title">Excluded Files (Never Sent)</string>
+    <string name="ai_exclusion_list_desc">The following files and secret patterns are never transmitted: %1$s</string>
+    <string name="ai_settings_title">AI Settings</string>
+    <string name="ai_provider">Provider</string>
+    <string name="ai_model">Model name</string>
+    <string name="ai_base_url">Base URL</string>
+    <string name="ai_api_key">API Key</string>
+    <string name="ai_test_connection">Test Connection</string>
+    <string name="ai_connection_success">Connection successful (%1$s)</string>
+    <string name="ai_connection_failed">Connection failed: %1$s</string>
+    <string name="ai_tokens_usage">Tokens: %1$d prompt, %2$d completion (%3$d total)</string>
+    <string name="ai_daily_limit">Daily request limit</string>
+    <string name="ai_daily_limit_desc">Warn after this many requests per day (0 = unlimited)</string>
+    <string name="ai_daily_limit_reached">Daily request limit (%1$d) reached. Proceed anyway?</string>
+    <string name="ai_copy_code">Copy code</string>
+    <string name="ai_insert_into_file">Insert at cursor</string>
+    <string name="ai_apply_as_diff">Review &amp; Apply Diff</string>
+    <string name="ai_diff_accept">Accept &amp; Apply</string>
+    <string name="ai_diff_discard">Discard</string>
+    <string name="ai_diff_title">Proposed Changes</string>
+    <string name="ai_file_changed_warning">File modified</string>
+    <string name="ai_file_changed_message">The file %1$s was modified since this suggestion was generated. Overwrite anyway?</string>
+    <string name="ai_error_invalid_key">Invalid API key (401/403). Please verify your settings.</string>
+    <string name="ai_error_quota_exceeded">Rate limit or quota exceeded (429). Please try again later.</string>
+    <string name="ai_error_offline">Network error: Unable to reach provider server.</string>
+    <string name="ai_error_generic">AI error: %1$s</string>
+    <string name="ai_code_applied_success">Changes applied to %1$s</string>
 </resources>
 

@@ -78,7 +78,9 @@ class EditorViewModel @Inject constructor(
     private val snippetRepository: com.codeforge.core.domain.repository.SnippetRepository = com.codeforge.core.domain.repository.NoOpSnippetRepository,
     private val testRunRequestBridge: TestRunRequestBridge? = null,
     private val breakpointRepository: BreakpointRepository? = null,
-    private val debugRepository: DebugRepository? = null
+    private val debugRepository: DebugRepository? = null,
+    private val aiRepository: com.codeforge.core.domain.repository.AiRepository? = null,
+    private val aiProvider: com.codeforge.core.domain.ai.AiProvider? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -115,6 +117,8 @@ class EditorViewModel @Inject constructor(
     val completionProvider = LspCompletionProvider(lspClient, snippetRepository) { _uiState.value.activeFile?.path }
 
     private var breakpointObservationJob: Job? = null
+    private var aiStreamJob: Job? = null
+    private val aiFileBackups = mutableMapOf<String, String>()
 
     init {
         setupOpenDocumentsProvider()
@@ -132,6 +136,7 @@ class EditorViewModel @Inject constructor(
         setupApplyEditHandler()
         observeBreakpoints()
         observeDebugState()
+        observeAiSettings()
     }
 
     private fun setupOpenDocumentsProvider() {
@@ -603,7 +608,410 @@ class EditorViewModel @Inject constructor(
             EditorUiEvent.DismissBreakpointEdit -> {
                 _uiState.update { it.copy(editingBreakpoint = null) }
             }
+
+            // Task 38 KI-Assistent Events
+            is EditorUiEvent.ToggleAiAssistant -> {
+                _uiState.update {
+                    val next = event.open
+                    val prepared = if (next) assembleContext(null) else it.aiPreparedContext
+                    it.copy(isAiAssistantOpen = next, aiPreparedContext = prepared)
+                }
+            }
+            is EditorUiEvent.ToggleAiSettings -> _uiState.update { it.copy(isAiSettingsOpen = event.open) }
+            is EditorUiEvent.ToggleAiQuickActions -> _uiState.update { it.copy(isAiQuickActionsOpen = event.open) }
+            is EditorUiEvent.ToggleAiContextSource -> {
+                _uiState.update { s ->
+                    val sources = s.aiSelectedContextSources.toMutableSet()
+                    if (sources.contains(event.source)) sources.remove(event.source) else sources.add(event.source)
+                    val newPrepared = assembleContext(null)
+                    s.copy(aiSelectedContextSources = sources, aiPreparedContext = newPrepared)
+                }
+            }
+            is EditorUiEvent.TriggerAiQuickAction -> triggerAiQuickAction(event.action, event.selectedText, event.cursorLine)
+            is EditorUiEvent.SendAiPrompt -> sendAiPrompt(event.prompt, event.selectedText)
+            EditorUiEvent.StopAiStream -> stopAiStream()
+            EditorUiEvent.ClearAiHistory -> clearAiHistory()
+            is EditorUiEvent.SaveAiOptions -> viewModelScope.launch { aiRepository?.saveAiOptions(event.options) }
+            is EditorUiEvent.SaveAiPrivacyPolicy -> viewModelScope.launch { aiRepository?.savePrivacyPolicy(event.policy) }
+            is EditorUiEvent.SaveAiDailyLimit -> viewModelScope.launch { aiRepository?.saveDailyLimit(event.limit) }
+            EditorUiEvent.ConfirmAiPrivacyWarning -> {
+                val prompt = _uiState.value.pendingAiPrompt
+                _uiState.update { it.copy(isAiPrivacyWarningVisible = false, pendingAiPrompt = null) }
+                if (!prompt.isNullOrBlank()) {
+                    executeAiPrompt(prompt, null)
+                }
+            }
+            EditorUiEvent.DismissAiPrivacyWarning -> _uiState.update { it.copy(isAiPrivacyWarningVisible = false, pendingAiPrompt = null) }
+            EditorUiEvent.ConfirmAiDailyLimit -> {
+                val prompt = _uiState.value.pendingAiPrompt
+                _uiState.update { it.copy(isAiDailyLimitWarningVisible = false, pendingAiPrompt = null) }
+                if (!prompt.isNullOrBlank()) {
+                    executeAiPrompt(prompt, null)
+                }
+            }
+            EditorUiEvent.DismissAiDailyLimit -> _uiState.update { it.copy(isAiDailyLimitWarningVisible = false, pendingAiPrompt = null) }
+            is EditorUiEvent.ShowAiDiff -> _uiState.update { it.copy(aiProposedDiff = event.change) }
+            is EditorUiEvent.AcceptAiProposedChange -> acceptAiProposedChange(event.change, event.forceOverwrite)
+            EditorUiEvent.DismissAiDiff -> _uiState.update { it.copy(aiProposedDiff = null) }
+            EditorUiEvent.DismissAiFileConflict -> _uiState.update { it.copy(aiFileConflictChange = null) }
         }
+    }
+
+    private fun observeAiSettings() {
+        val repo = aiRepository ?: return
+        viewModelScope.launch {
+            repo.getAiOptions().collect { opts ->
+                _uiState.update { it.copy(aiChatOptions = opts) }
+            }
+        }
+        viewModelScope.launch {
+            repo.getPrivacyPolicy().collect { pol ->
+                _uiState.update { it.copy(aiPrivacyPolicy = pol) }
+            }
+        }
+        viewModelScope.launch {
+            repo.getDailyLimit().collect { lim ->
+                _uiState.update { it.copy(aiDailyLimit = lim) }
+            }
+        }
+        viewModelScope.launch {
+            repo.getTodayRequestCount().collect { cnt ->
+                _uiState.update { it.copy(aiTodayRequestCount = cnt) }
+            }
+        }
+        viewModelScope.launch {
+            projectRoot.filterNotNull().distinctUntilChanged().flatMapLatest { root ->
+                repo.getHistory(root)
+            }.collect { hist ->
+                _uiState.update { it.copy(aiHistory = hist) }
+            }
+        }
+    }
+
+    private fun triggerAiQuickAction(action: com.codeforge.feature.editor.ui.AiQuickActionType, selectedText: String?, cursorLine: Int?) {
+        _uiState.update { it.copy(isAiQuickActionsOpen = false, isAiAssistantOpen = true) }
+        val active = _uiState.value.activeFile
+        val fileName = active?.path?.substringAfterLast('/') ?: "Code"
+
+        val prompt = when (action) {
+            com.codeforge.feature.editor.ui.AiQuickActionType.EXPLAIN -> {
+                if (!selectedText.isNullOrBlank()) {
+                    "Erkläre den folgenden Code-Abschnitt in $fileName verständlich und präzise:\n```\n$selectedText\n```"
+                } else {
+                    "Erkläre die Datei $fileName und ihren Aufbau."
+                }
+            }
+            com.codeforge.feature.editor.ui.AiQuickActionType.FIX_ERROR -> {
+                val diagnostics = _uiState.value.activeDiagnostics
+                val diagInfo = diagnostics.joinToString("\n") { d ->
+                    "[Zeile ${d.range.start.line + 1}] ${d.message}"
+                }
+                "Analysiere und behebe folgende Fehler in $fileName:\n$diagInfo\nGib den korrigierten Code bzw. ein Unified Diff an."
+            }
+            com.codeforge.feature.editor.ui.AiQuickActionType.WRITE_TESTS -> {
+                val targetCode = selectedText?.ifBlank { null } ?: active?.content.orEmpty()
+                "Schreibe aussagekräftige Unit-Tests (JUnit 4/Kotlin) für folgenden Code in $fileName:\n```\n$targetCode\n```"
+            }
+            com.codeforge.feature.editor.ui.AiQuickActionType.REWRITE -> {
+                val targetCode = selectedText?.ifBlank { null } ?: active?.content.orEmpty()
+                "Überarbeite und verbessere folgenden Code in $fileName (Lesbarkeit, Idiomatik, Performance):\n```\n$targetCode\n```"
+            }
+            com.codeforge.feature.editor.ui.AiQuickActionType.GENERATE_KDOC -> {
+                val targetCode = selectedText?.ifBlank { null } ?: active?.content.orEmpty()
+                "Erstelle vollständige KDoc-/JavaDoc-Kommentare für alle Funktionen und Klassen in:\n```\n$targetCode\n```"
+            }
+        }
+        sendAiPrompt(prompt, selectedText)
+    }
+
+    private fun sendAiPrompt(prompt: String, selectedText: String?) {
+        val state = _uiState.value
+
+        if (state.aiPrivacyPolicy == com.codeforge.core.domain.ai.AiPrivacyPolicy.ALWAYS_ASK) {
+            _uiState.update { it.copy(isAiPrivacyWarningVisible = true, pendingAiPrompt = prompt) }
+            return
+        }
+
+        if (state.aiDailyLimit > 0 && state.aiTodayRequestCount >= state.aiDailyLimit) {
+            _uiState.update { it.copy(isAiDailyLimitWarningVisible = true, pendingAiPrompt = prompt) }
+            return
+        }
+
+        executeAiPrompt(prompt, selectedText)
+    }
+
+    private fun executeAiPrompt(prompt: String, selectedText: String?) {
+        val provider = aiProvider
+        if (provider == null) {
+            viewModelScope.launch {
+                _effect.emit(EditorUiEffect.ShowSnackbar("KI-Anbieter nicht verfügbar"))
+            }
+            return
+        }
+
+        val prepContext = assembleContext(selectedText)
+        val fullPromptWithContext = buildString {
+            if (prepContext.fullPrompt.isNotBlank()) {
+                append("=== KONTEXT ===\n")
+                append(prepContext.fullPrompt)
+                append("\n=== ANFRAGE ===\n")
+            }
+            append(prompt)
+        }
+
+        val userMsg = com.codeforge.core.domain.ai.AiChatMessage(
+            id = java.util.UUID.randomUUID().toString(),
+            role = com.codeforge.core.domain.ai.AiRole.USER,
+            content = prompt
+        )
+
+        val currentHistory = _uiState.value.aiHistory.toMutableList()
+        currentHistory.add(userMsg)
+
+        _uiState.update {
+            it.copy(
+                aiHistory = currentHistory,
+                isAiStreaming = true,
+                aiStreamingText = "",
+                aiPreparedContext = prepContext
+            )
+        }
+
+        val systemMsg = com.codeforge.core.domain.ai.AiChatMessage(
+            id = "system",
+            role = com.codeforge.core.domain.ai.AiRole.SYSTEM,
+            content = "Du bist ein erfahrener KI-Programmierassistent in CodeForge Mobile. " +
+                "Antworte präzise auf Deutsch oder Englisch passend zur Nutzeranfrage. " +
+                "Änderungsvorschläge immer als Markdown-Code-Block mit Dateipfad z. B. `// file: path/to/File.kt` oder als Unified Diff mit `--- a/...` und `+++ b/...` formatieren."
+        )
+
+        val messagesToSend = listOf(systemMsg) + currentHistory.dropLast(1) + userMsg.copy(content = fullPromptWithContext)
+
+        aiStreamJob?.cancel()
+        aiStreamJob = viewModelScope.launch {
+            val textBuilder = StringBuilder()
+            var lastUsage: com.codeforge.core.domain.ai.AiUsage? = null
+
+            try {
+                provider.streamChat(messagesToSend, _uiState.value.aiChatOptions).collect { event ->
+                    when (event) {
+                        is com.codeforge.core.domain.ai.AiEvent.TextDelta -> {
+                            textBuilder.append(event.text)
+                            _uiState.update { it.copy(aiStreamingText = textBuilder.toString()) }
+                        }
+                        is com.codeforge.core.domain.ai.AiEvent.Usage -> {
+                            lastUsage = com.codeforge.core.domain.ai.AiUsage(event.promptTokens, event.completionTokens, event.totalTokens)
+                            _uiState.update { it.copy(aiTokensUsage = lastUsage) }
+                        }
+                        is com.codeforge.core.domain.ai.AiEvent.Error -> {
+                            _effect.emit(EditorUiEffect.ShowSnackbar(event.message))
+                        }
+                        com.codeforge.core.domain.ai.AiEvent.Done -> Unit
+                    }
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // stream cancelled
+            } catch (e: Exception) {
+                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.ai_error_generic, e.message.orEmpty())))
+            } finally {
+                val fullResponse = textBuilder.toString()
+                _uiState.update { it.copy(isAiStreaming = false) }
+
+                if (fullResponse.isNotBlank()) {
+                    val activePath = _uiState.value.activeFile?.path
+                    val activeContent = _uiState.value.activeFile?.content
+                    val proposedChanges = com.codeforge.core.domain.ai.AiPatchParser.parseProposedChanges(
+                        fullResponse,
+                        activePath,
+                        activeContent
+                    )
+
+                    val assistantMsg = com.codeforge.core.domain.ai.AiChatMessage(
+                        id = java.util.UUID.randomUUID().toString(),
+                        role = com.codeforge.core.domain.ai.AiRole.ASSISTANT,
+                        content = fullResponse,
+                        usage = lastUsage,
+                        proposedChanges = proposedChanges
+                    )
+                    val updatedList = _uiState.value.aiHistory.toMutableList().apply { add(assistantMsg) }
+                    _uiState.update {
+                        it.copy(
+                            aiHistory = updatedList,
+                            aiProposedDiff = proposedChanges.firstOrNull()
+                        )
+                    }
+
+                    val root = projectRoot.value ?: "default"
+                    aiRepository?.saveHistory(root, updatedList)
+                    aiRepository?.incrementTodayRequestCount()
+                }
+            }
+        }
+    }
+
+    private fun stopAiStream() {
+        aiStreamJob?.cancel()
+        _uiState.update { it.copy(isAiStreaming = false) }
+    }
+
+    private fun clearAiHistory() {
+        val root = projectRoot.value ?: "default"
+        viewModelScope.launch {
+            aiRepository?.clearHistory(root)
+            _uiState.update { it.copy(aiHistory = emptyList(), aiProposedDiff = null) }
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.ai_history_cleared)))
+        }
+    }
+
+    private fun acceptAiProposedChange(change: com.codeforge.core.domain.ai.AiProposedChange, forceOverwrite: Boolean) {
+        val active = _uiState.value.openFiles.firstOrNull { it.path == change.filePath }
+        val currentContent = active?.content ?: try {
+            File(change.filePath).takeIf { it.exists() }?.readText()
+        } catch (_: Exception) {
+            null
+        }
+
+        if (!forceOverwrite && currentContent != null && change.originalContent.isNotBlank() && currentContent != change.originalContent) {
+            _uiState.update { it.copy(aiFileConflictChange = change) }
+            return
+        }
+
+        viewModelScope.launch {
+            currentContent?.let { aiFileBackups[change.filePath] = it }
+
+            fileSystemRepository.writeFile(change.filePath, change.proposedContent)
+                .onSuccess {
+                    if (active != null) {
+                        updateBuffer(change.proposedContent)
+                    }
+                    _uiState.update {
+                        it.copy(
+                            aiProposedDiff = null,
+                            aiFileConflictChange = null
+                        )
+                    }
+                    _effect.emit(
+                        EditorUiEffect.ShowSnackbar(
+                            message = Res.string(R.string.ai_code_applied_success, change.filePath.substringAfterLast('/')),
+                            actionLabel = Res.string(R.string.editor_rueckgaengig),
+                            onAction = {
+                                val backup = aiFileBackups[change.filePath]
+                                if (backup != null) {
+                                    viewModelScope.launch {
+                                        fileSystemRepository.writeFile(change.filePath, backup)
+                                        if (active != null) updateBuffer(backup)
+                                    }
+                                }
+                            }
+                        )
+                    )
+                }
+                .onFailure { err ->
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_speichern_fehlgeschlagen, err.message.orEmpty())))
+                }
+        }
+    }
+
+    private fun assembleContext(selectedText: String?): com.codeforge.core.domain.ai.AiPreparedContext {
+        val state = _uiState.value
+        val items = mutableListOf<com.codeforge.core.domain.ai.AiContextItem>()
+        var totalRedacted = 0
+
+        // Current file
+        if (state.aiSelectedContextSources.contains(com.codeforge.core.domain.ai.AiContextSource.CURRENT_FILE)) {
+            state.activeFile?.let { file ->
+                if (!com.codeforge.core.domain.ai.AiSanitizer.isPathExcluded(file.path)) {
+                    val (sanitized, count) = com.codeforge.core.domain.ai.AiSanitizer.sanitizeText(file.content)
+                    totalRedacted += count
+                    items.add(
+                        com.codeforge.core.domain.ai.AiContextItem(
+                            source = com.codeforge.core.domain.ai.AiContextSource.CURRENT_FILE,
+                            title = file.path.substringAfterLast('/'),
+                            content = sanitized,
+                            path = file.path,
+                            isRedacted = count > 0,
+                            redactedSecretsCount = count
+                        )
+                    )
+                }
+            }
+        }
+
+        // Selection
+        if (state.aiSelectedContextSources.contains(com.codeforge.core.domain.ai.AiContextSource.SELECTION) && !selectedText.isNullOrBlank()) {
+            val (sanitized, count) = com.codeforge.core.domain.ai.AiSanitizer.sanitizeText(selectedText)
+            totalRedacted += count
+            items.add(
+                com.codeforge.core.domain.ai.AiContextItem(
+                    source = com.codeforge.core.domain.ai.AiContextSource.SELECTION,
+                    title = state.activeFile?.path?.substringAfterLast('/') ?: "",
+                    content = sanitized,
+                    path = state.activeFile?.path,
+                    isRedacted = count > 0,
+                    redactedSecretsCount = count
+                )
+            )
+        }
+
+        // Open files
+        if (state.aiSelectedContextSources.contains(com.codeforge.core.domain.ai.AiContextSource.OPEN_FILES)) {
+            for (file in state.openFiles) {
+                if (file.path != state.activeFile?.path && !com.codeforge.core.domain.ai.AiSanitizer.isPathExcluded(file.path)) {
+                    val (sanitized, count) = com.codeforge.core.domain.ai.AiSanitizer.sanitizeText(file.content)
+                    totalRedacted += count
+                    items.add(
+                        com.codeforge.core.domain.ai.AiContextItem(
+                            source = com.codeforge.core.domain.ai.AiContextSource.OPEN_FILES,
+                            title = file.path.substringAfterLast('/'),
+                            content = sanitized,
+                            path = file.path,
+                            isRedacted = count > 0,
+                            redactedSecretsCount = count
+                        )
+                    )
+                }
+            }
+        }
+
+        // LSP Diagnostics
+        if (state.aiSelectedContextSources.contains(com.codeforge.core.domain.ai.AiContextSource.LSP_DIAGNOSTICS) && state.activeDiagnostics.isNotEmpty()) {
+            val diagText = state.activeDiagnostics.joinToString("\n") { d ->
+                "[Zeile ${d.range.start.line + 1}, Severity: ${d.severity}] ${d.message}"
+            }
+            val (sanitized, count) = com.codeforge.core.domain.ai.AiSanitizer.sanitizeText(diagText)
+            totalRedacted += count
+            items.add(
+                com.codeforge.core.domain.ai.AiContextItem(
+                    source = com.codeforge.core.domain.ai.AiContextSource.LSP_DIAGNOSTICS,
+                    title = "",
+                    content = sanitized,
+                    isRedacted = count > 0,
+                    redactedSecretsCount = count
+                )
+            )
+        }
+
+        val combinedText = buildString {
+            for (item in items) {
+                append("--- Kontext: ${item.title} (${item.source.name}) ---\n")
+                append(item.content)
+                append("\n\n")
+            }
+        }
+
+        val (truncatedText, isTruncated) = com.codeforge.core.domain.ai.AiSanitizer.truncateWithNotice(combinedText, 40_000)
+
+        return com.codeforge.core.domain.ai.AiPreparedContext(
+            items = items,
+            fullPrompt = truncatedText,
+            totalCharacters = truncatedText.length,
+            isTruncated = isTruncated,
+            redactedCount = totalRedacted
+        )
+    }
+
+    suspend fun testAiConnection(options: com.codeforge.core.domain.ai.AiChatOptions): Result<String> {
+        return aiProvider?.testConnection(options) ?: Result.failure(IllegalStateException("No AI provider"))
     }
 
     private fun triggerQuickFix(line: Int, col: Int) = viewModelScope.launch {

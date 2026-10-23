@@ -67,6 +67,7 @@ include(
     ":libs:dependency-updater-impl",
     ":libs:code-tools",
     ":libs:hardcoded-strings",
+    ":libs:ai-client",
 
     // Termux-Vendoring (siehe docs/sub/TERMUX-PORTING.md) — :libs:terminal-engine nutzt
     // diese jetzt statt PRoot für die interaktive :feature:terminal-Session

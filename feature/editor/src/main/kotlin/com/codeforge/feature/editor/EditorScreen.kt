@@ -37,7 +37,13 @@ import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Adjust
 import com.codeforge.feature.editor.ui.BreakpointsOverviewSheet
 import com.codeforge.feature.editor.ui.EditBreakpointDialog
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.Psychology
+import com.codeforge.feature.editor.ui.AiAssistantSheet
+import com.codeforge.feature.editor.ui.AiDiffDialog
+import com.codeforge.feature.editor.ui.AiQuickActionsSheet
+import com.codeforge.feature.editor.ui.AiSettingsDialog
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.ContentPaste
@@ -244,7 +250,9 @@ fun EditorRoute(
                 onReferences = ::triggerReferences,
                 onToggleLspSessions = { viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog) },
                 hasBreakpoints = uiState.activeBreakpoints.isNotEmpty(),
-                onBreakpoints = { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(true)) }
+                onBreakpoints = { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(true)) },
+                onOpenAiAssistant = { viewModel.onEvent(EditorUiEvent.ToggleAiAssistant(true)) },
+                onOpenAiQuickActions = { viewModel.onEvent(EditorUiEvent.ToggleAiQuickActions(true)) }
             )
 
             if (uiState.isSearchBarVisible) {
@@ -382,6 +390,126 @@ fun EditorRoute(
             onDismiss = { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(false)) }
         )
     }
+
+    if (uiState.isAiAssistantOpen) {
+        AiAssistantSheet(
+            history = uiState.aiHistory,
+            isStreaming = uiState.isAiStreaming,
+            streamingText = uiState.aiStreamingText,
+            tokenUsage = uiState.aiTokensUsage,
+            preparedContext = uiState.aiPreparedContext,
+            selectedSources = uiState.aiSelectedContextSources,
+            onToggleSource = { viewModel.onEvent(EditorUiEvent.ToggleAiContextSource(it)) },
+            onSendMessage = { prompt ->
+                val selected = controller?.hasSelection() == true
+                val selText = if (selected) controller?.let { c ->
+                    val (s, e) = c.selection() ?: (0 to 0)
+                    c.currentText()?.substring(s, e)
+                } else null
+                viewModel.onEvent(EditorUiEvent.SendAiPrompt(prompt, selText))
+            },
+            onStopStreaming = { viewModel.onEvent(EditorUiEvent.StopAiStream) },
+            onClearHistory = { viewModel.onEvent(EditorUiEvent.ClearAiHistory) },
+            onOpenSettings = { viewModel.onEvent(EditorUiEvent.ToggleAiSettings(true)) },
+            onInsertText = { text -> controller?.insertText(text) },
+            onApplyDiff = { change -> viewModel.onEvent(EditorUiEvent.ShowAiDiff(change)) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.ToggleAiAssistant(false)) }
+        )
+    }
+
+    if (uiState.isAiQuickActionsOpen) {
+        val selected = controller?.hasSelection() == true
+        val selText = if (selected) controller?.let { c ->
+            val (s, e) = c.selection() ?: (0 to 0)
+            c.currentText()?.substring(s, e)
+        } else null
+        val cursorLine = controller?.getCursorLineAndColumn()?.first
+
+        AiQuickActionsSheet(
+            onDismiss = { viewModel.onEvent(EditorUiEvent.ToggleAiQuickActions(false)) },
+            onActionSelected = { action ->
+                viewModel.onEvent(EditorUiEvent.TriggerAiQuickAction(action, selText, cursorLine))
+            },
+            hasError = uiState.activeDiagnostics.isNotEmpty()
+        )
+    }
+
+    if (uiState.isAiSettingsOpen) {
+        AiSettingsDialog(
+            initialOptions = uiState.aiChatOptions,
+            initialPolicy = uiState.aiPrivacyPolicy,
+            initialDailyLimit = uiState.aiDailyLimit,
+            onDismiss = { viewModel.onEvent(EditorUiEvent.ToggleAiSettings(false)) },
+            onSave = { opts, policy, limit ->
+                viewModel.onEvent(EditorUiEvent.SaveAiOptions(opts))
+                viewModel.onEvent(EditorUiEvent.SaveAiPrivacyPolicy(policy))
+                viewModel.onEvent(EditorUiEvent.SaveAiDailyLimit(limit))
+            },
+            onTestConnection = { opts -> viewModel.testAiConnection(opts) }
+        )
+    }
+
+    uiState.aiProposedDiff?.let { change ->
+        AiDiffDialog(
+            proposedChange = change,
+            onAccept = { viewModel.onEvent(EditorUiEvent.AcceptAiProposedChange(change)) },
+            onDiscard = { viewModel.onEvent(EditorUiEvent.DismissAiDiff) }
+        )
+    }
+
+    uiState.aiFileConflictChange?.let { conflict ->
+        AlertDialog(
+            onDismissRequest = { viewModel.onEvent(EditorUiEvent.DismissAiFileConflict) },
+            title = { Text(stringRes(R.string.ai_file_changed_warning)) },
+            text = { Text(stringRes(R.string.ai_file_changed_message, conflict.filePath.substringAfterLast('/'))) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.onEvent(EditorUiEvent.AcceptAiProposedChange(conflict, forceOverwrite = true)) }) {
+                    Text(stringRes(R.string.editor_los))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.onEvent(EditorUiEvent.DismissAiFileConflict) }) {
+                    Text(stringRes(R.string.common_abbrechen))
+                }
+            }
+        )
+    }
+
+    if (uiState.isAiPrivacyWarningVisible) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onEvent(EditorUiEvent.DismissAiPrivacyWarning) },
+            title = { Text(stringRes(R.string.ai_privacy_warning_title)) },
+            text = { Text(stringRes(R.string.ai_privacy_warning_message, uiState.aiChatOptions.provider.displayName)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.onEvent(EditorUiEvent.ConfirmAiPrivacyWarning) }) {
+                    Text(stringRes(R.string.ai_send))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.onEvent(EditorUiEvent.DismissAiPrivacyWarning) }) {
+                    Text(stringRes(R.string.common_abbrechen))
+                }
+            }
+        )
+    }
+
+    if (uiState.isAiDailyLimitWarningVisible) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onEvent(EditorUiEvent.DismissAiDailyLimit) },
+            title = { Text(stringRes(R.string.ai_daily_limit)) },
+            text = { Text(stringRes(R.string.ai_daily_limit_reached, uiState.aiDailyLimit)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.onEvent(EditorUiEvent.ConfirmAiDailyLimit) }) {
+                    Text(stringRes(R.string.ai_send))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.onEvent(EditorUiEvent.DismissAiDailyLimit) }) {
+                    Text(stringRes(R.string.common_abbrechen))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -406,13 +534,30 @@ private fun EditorToolbar(
     onReferences: () -> Unit,
     onToggleLspSessions: () -> Unit,
     hasBreakpoints: Boolean,
-    onBreakpoints: () -> Unit
+    onBreakpoints: () -> Unit,
+    onOpenAiAssistant: () -> Unit,
+    onOpenAiQuickActions: () -> Unit
 ) {
     val isImage = activePath?.let { isImageFilePath(it) } == true
     Row(
         modifier = modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // KI-Assistent & Schnellaktionen
+        IconButton(onClick = onOpenAiAssistant) {
+            Icon(
+                Icons.Filled.AutoAwesome,
+                contentDescription = stringRes(R.string.ai_assistant_title),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        IconButton(onClick = onOpenAiQuickActions) {
+            Icon(
+                Icons.Filled.Psychology,
+                contentDescription = stringRes(R.string.ai_quick_actions)
+            )
+        }
+
         LspStatusBadge(
             state = lspServerState,
             modifier = Modifier.padding(start = 8.dp, end = 4.dp),

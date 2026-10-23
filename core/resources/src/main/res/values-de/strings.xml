@@ -1391,5 +1391,64 @@
     <string name="debug_error_app_start_failed">Starten der App für Debugger fehlgeschlagen: %1$s</string>
     <string name="debug_error_pid_not_found">Prozess-ID für %1$s konnte nicht ermittelt werden</string>
     <string name="debug_error_manager_unavailable">Android-Debug-Manager ist nicht verfügbar</string>
+
+    <!-- ai assistant (Task 38) -->
+    <string name="ai_assistant_title">KI-Assistent</string>
+    <string name="ai_quick_action_explain">Code erklären</string>
+    <string name="ai_quick_action_fix_error">Fehler beheben</string>
+    <string name="ai_quick_action_write_tests">Tests schreiben</string>
+    <string name="ai_quick_action_rewrite">Umschreiben mit Anweisung</string>
+    <string name="ai_quick_action_kdoc">Dokumentation (KDoc) erzeugen</string>
+    <string name="ai_quick_actions">Schnellaktionen</string>
+    <string name="ai_chat_title">KI-Chat</string>
+    <string name="ai_chat_placeholder">Frage stellen oder Änderung beschreiben…</string>
+    <string name="ai_send">Senden</string>
+    <string name="ai_stop">Abbrechen</string>
+    <string name="ai_clear_history">Verlauf löschen</string>
+    <string name="ai_history_cleared">Chat-Verlauf gelöscht</string>
+    <string name="ai_context_sources">Kontextquellen</string>
+    <string name="ai_context_current_file">Aktuelle Datei</string>
+    <string name="ai_context_selection">Markierter Text</string>
+    <string name="ai_context_open_files">Offene Dateien</string>
+    <string name="ai_context_build_problems">Build-Ausgabe / Probleme</string>
+    <string name="ai_context_lsp_diagnostics">LSP-Diagnosen</string>
+    <string name="ai_context_git_diff">Git Diff</string>
+    <string name="ai_context_what_will_be_sent">Was wird gesendet</string>
+    <string name="ai_context_item_summary">\u2022 %1$s (%2$d Zeichen)</string>
+    <string name="ai_context_redacted_notice">%1$d sensible Geheimnisse geschwärzt</string>
+    <string name="ai_context_truncated_notice">Kontext auf Größenbegrenzung gekürzt</string>
+    <string name="ai_privacy_warning_title">Datenschutzhinweis</string>
+    <string name="ai_privacy_warning_message">Inhalte verlassen dieses Gerät und werden an den gewählten KI-Anbieter (%1$s) übertragen.</string>
+    <string name="ai_privacy_policy_always_ask">Vor dem Senden immer fragen</string>
+    <string name="ai_privacy_policy_only_selected">Nur markierten Kontext senden</string>
+    <string name="ai_privacy_policy_full_file">Ganze Datei erlauben</string>
+    <string name="ai_privacy_policy_label">Datenschutz-Einstellung</string>
+    <string name="ai_exclusion_list_title">Ausschlussliste (wird nie gesendet)</string>
+    <string name="ai_exclusion_list_desc">Folgende Dateien und Geheimnismuster werden niemals übertragen: %1$s</string>
+    <string name="ai_settings_title">KI-Einstellungen</string>
+    <string name="ai_provider">Anbieter</string>
+    <string name="ai_model">Modellname</string>
+    <string name="ai_base_url">Basis-URL</string>
+    <string name="ai_api_key">API-Schlüssel</string>
+    <string name="ai_test_connection">Verbindung testen</string>
+    <string name="ai_connection_success">Verbindung erfolgreich (%1$s)</string>
+    <string name="ai_connection_failed">Verbindung fehlgeschlagen: %1$s</string>
+    <string name="ai_tokens_usage">Token: %1$d Prompt, %2$d Vervollständigung (%3$d gesamt)</string>
+    <string name="ai_daily_limit">Tageslimit (Anfragen)</string>
+    <string name="ai_daily_limit_desc">Nach dieser Anzahl Anfragen pro Tag warnen (0 = unbegrenzt)</string>
+    <string name="ai_daily_limit_reached">Tageslimit von %1$d Anfragen erreicht. Trotzdem senden?</string>
+    <string name="ai_copy_code">Code kopieren</string>
+    <string name="ai_insert_into_file">Am Cursor einfügen</string>
+    <string name="ai_apply_as_diff">Diff prüfen &amp; anwenden</string>
+    <string name="ai_diff_accept">Annehmen &amp; anwenden</string>
+    <string name="ai_diff_discard">Verwerfen</string>
+    <string name="ai_diff_title">Vorgeschlagene Änderungen</string>
+    <string name="ai_file_changed_warning">Datei geändert</string>
+    <string name="ai_file_changed_message">Die Datei %1$s wurde seit der Erstellung des Vorschlags geändert. Trotzdem überschreiben?</string>
+    <string name="ai_error_invalid_key">Ungültiger API-Schlüssel (401/403). Bitte Einstellungen prüfen.</string>
+    <string name="ai_error_quota_exceeded">Kontingent überschritten oder Rate-Limit erreicht (429). Bitte später erneut versuchen.</string>
+    <string name="ai_error_offline">Netzwerkfehler: KI-Server nicht erreichbar.</string>
+    <string name="ai_error_generic">KI-Fehler: %1$s</string>
+    <string name="ai_code_applied_success">Änderungen auf %1$s angewendet</string>
 </resources>
 
