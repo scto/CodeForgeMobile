@@ -17,6 +17,7 @@ import androidx.navigation.navArgument
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.feature.build.analyzer.ApkAnalyzerRoute
+import com.codeforge.feature.dependencies.DependenciesRoute
 import com.codeforge.feature.git.GitCloneRoute
 import com.codeforge.feature.git.GitRoute
 import com.codeforge.feature.hardcodedstrings.HardcodedStringsRoute
@@ -59,11 +60,13 @@ internal object Routes {
     const val LAYOUT_DESIGNER_PATTERN = "layout_designer/{filePath}"
     const val APK_ANALYZER_PATTERN = "apk_analyzer?apkPath={apkPath}&comparePath={comparePath}"
     const val HARDCODED_STRINGS_PATTERN = "hardcoded_strings?targetPath={targetPath}&projectRoot={projectRoot}"
+    const val DEPENDENCIES_PATTERN = "dependencies?rootPath={rootPath}"
 
     fun projectWorkspace(rootPath: String) = "workspace/${Uri.encode(rootPath)}"
     fun terminalWith(command: String) = Res.string(R.string.app_terminal_initialcommand, Uri.encode(command))
     fun git(repoPath: String) = "git/${Uri.encode(repoPath)}"
     fun layoutDesigner(filePath: String) = "layout_designer/${Uri.encode(filePath)}"
+    fun dependencies(rootPath: String) = "dependencies?rootPath=${Uri.encode(rootPath)}"
     fun apkAnalyzer(apkPath: String, comparePath: String? = null): String {
         val base = "apk_analyzer?apkPath=${Uri.encode(apkPath)}"
         return if (comparePath != null) "$base&comparePath=${Uri.encode(comparePath)}" else base
@@ -286,6 +289,21 @@ fun CodeForgeNavHost(
                 projectRoot = projectRoot,
                 onNavigateBack = { navController.popBackStack() },
                 onOpenEditorAt = { _, _, _ ->
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(
+            route = Routes.DEPENDENCIES_PATTERN,
+            arguments = listOf(
+                navArgument("rootPath") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val rootPath = backStackEntry.arguments?.getString("rootPath").orEmpty()
+            DependenciesRoute(
+                projectRoot = rootPath,
+                onNavigateBack = { navController.popBackStack() },
+                onShowInCatalog = {
                     navController.popBackStack()
                 }
             )

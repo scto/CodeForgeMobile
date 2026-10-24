@@ -73,6 +73,7 @@ enum class DrawerSection(@StringRes val labelRes: Int, val icon: ImageVector, va
     GIT(R.string.common_git, Icons.Filled.Source),
     MODULES(R.string.drawer_modules, Icons.Filled.CreateNewFolder),
     LAYOUTS(R.string.drawer_layouts, Icons.Filled.GridView),
+    DEPENDENCIES(R.string.drawer_dependencies, Icons.Filled.AccountTree, isPanel = false),
     TERMINAL(R.string.settings_hub_terminal, Icons.Filled.Terminal, isPanel = false),
     SETTINGS(R.string.settings_hub_title, Icons.Filled.Settings, isPanel = false),
 }
@@ -129,6 +130,7 @@ fun WorkspaceDrawer(
                             onNavigate(
                                 when (section) {
                                     DrawerSection.TERMINAL -> Routes.TERMINAL
+                                    DrawerSection.DEPENDENCIES -> Routes.dependencies(rootPath)
                                     else -> Routes.SETTINGS
                                 }
                             )
@@ -175,7 +177,7 @@ fun WorkspaceDrawer(
                                 onNavigate(Routes.layoutDesigner(path))
                             },
                         )
-                        DrawerSection.TERMINAL, DrawerSection.SETTINGS -> Unit
+                        DrawerSection.TERMINAL, DrawerSection.SETTINGS, DrawerSection.DEPENDENCIES -> Unit
                     }
                 }
             }

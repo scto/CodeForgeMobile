@@ -116,4 +116,10 @@ abstract class DataModule {
     abstract fun bindAiRepository(
         impl: com.codeforge.core.data.repository.AiRepositoryImpl
     ): com.codeforge.core.domain.repository.AiRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDependencyGraphRepository(
+        impl: com.codeforge.core.data.repository.DependencyGraphRepositoryImpl
+    ): com.codeforge.core.domain.repository.DependencyGraphRepository
 }

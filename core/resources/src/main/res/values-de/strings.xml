@@ -1478,5 +1478,40 @@
     <string name="ai_error_offline">Netzwerkfehler: KI-Server nicht erreichbar.</string>
     <string name="ai_error_generic">KI-Fehler: %1$s</string>
     <string name="ai_code_applied_success">Änderungen auf %1$s angewendet</string>
+
+    <!-- dependency graph (Task 40) -->
+    <string name="dep_graph_title">Abhängigkeitsgraph</string>
+    <string name="dep_graph_module">Modul</string>
+    <string name="dep_graph_configuration">Konfiguration</string>
+    <string name="dep_graph_filter_all">Alle</string>
+    <string name="dep_graph_filter_conflicts">Konflikte</string>
+    <string name="dep_graph_filter_projects">Projekte</string>
+    <string name="dep_graph_filter_direct">Direkte</string>
+    <string name="dep_graph_search_hint">Abhängigkeit suchen…</string>
+    <string name="dep_graph_stats_total">Gesamt: %1$d</string>
+    <string name="dep_graph_stats_conflicts">Konflikte: %1$d</string>
+    <string name="dep_graph_stats_depth">Max. Tiefe: %1$d</string>
+    <string name="dep_graph_detail_title">Abhängigkeitsdetails</string>
+    <string name="dep_graph_detail_requested">Angefragt: %1$s</string>
+    <string name="dep_graph_detail_resolved">Aufgelöst: %1$s</string>
+    <string name="dep_graph_detail_selection_reasons">Auswahlgründe</string>
+    <string name="dep_graph_detail_paths_to_root">Pfade zur Wurzel</string>
+    <string name="dep_graph_detail_copy_coordinate">Koordinate kopieren</string>
+    <string name="dep_graph_detail_show_in_catalog">Im Versionskatalog anzeigen</string>
+    <string name="dep_graph_detail_copied">Koordinate in Zwischenablage kopiert</string>
+    <string name="dep_graph_export">Exportieren</string>
+    <string name="dep_graph_export_title">Abhängigkeitsgraph-Export</string>
+    <string name="dep_graph_expand_all">Alle aufklappen</string>
+    <string name="dep_graph_collapse_all">Alle zuklappen</string>
+    <string name="dep_graph_loading">Löse Abhängigkeitsgraph auf…</string>
+    <string name="dep_graph_empty">Keine Abhängigkeiten gefunden</string>
+    <string name="dep_graph_badge_repeated">(*)</string>
+    <string name="dep_graph_badge_constraint">(c)</string>
+    <string name="dep_graph_badge_failed">FEHLGESCHLAGEN</string>
+    <string name="dep_graph_update_available">Update: %1$s</string>
+    <string name="dep_graph_graph_snippet">Graph-Ausschnitt</string>
+    <string name="dep_graph_detail_default_reason">Durch direkte Abhängigkeit oder transitive Standardauflösung ausgewählt</string>
+    <string name="dep_graph_more_dependencies">+ %1$d weitere Abhängigkeiten</string>
+    <string name="drawer_dependencies">Abhängigkeiten</string>
 </resources>
 

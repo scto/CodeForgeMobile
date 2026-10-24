@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:resources"))
     implementation(project(":core:common"))
     implementation(project(":core:domain"))
+    implementation(project(":libs:dependency-updater-api"))
     implementation(project(":libs:code-tools"))
 
     implementation(libs.kotlinx.coroutines.core)

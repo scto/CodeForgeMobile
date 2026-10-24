@@ -46,6 +46,7 @@ include(
     ":feature:plugins",
     ":feature:settings",
     ":feature:dependencyupdates",
+    ":feature:dependencies",
     ":feature:search",
     ":feature:modulemaker",
     ":feature:hardcodedstrings",

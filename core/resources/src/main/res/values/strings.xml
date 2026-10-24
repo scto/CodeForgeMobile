@@ -1478,5 +1478,40 @@
     <string name="ai_error_offline">Network error: Unable to reach provider server.</string>
     <string name="ai_error_generic">AI error: %1$s</string>
     <string name="ai_code_applied_success">Changes applied to %1$s</string>
+
+    <!-- dependency graph (Task 40) -->
+    <string name="dep_graph_title">Dependency Graph</string>
+    <string name="dep_graph_module">Module</string>
+    <string name="dep_graph_configuration">Configuration</string>
+    <string name="dep_graph_filter_all">All</string>
+    <string name="dep_graph_filter_conflicts">Conflicts</string>
+    <string name="dep_graph_filter_projects">Projects</string>
+    <string name="dep_graph_filter_direct">Direct</string>
+    <string name="dep_graph_search_hint">Search dependency…</string>
+    <string name="dep_graph_stats_total">Total: %1$d</string>
+    <string name="dep_graph_stats_conflicts">Conflicts: %1$d</string>
+    <string name="dep_graph_stats_depth">Max Depth: %1$d</string>
+    <string name="dep_graph_detail_title">Dependency Details</string>
+    <string name="dep_graph_detail_requested">Requested: %1$s</string>
+    <string name="dep_graph_detail_resolved">Resolved: %1$s</string>
+    <string name="dep_graph_detail_selection_reasons">Selection Reasons</string>
+    <string name="dep_graph_detail_paths_to_root">Paths to Root</string>
+    <string name="dep_graph_detail_copy_coordinate">Copy Coordinate</string>
+    <string name="dep_graph_detail_show_in_catalog">Show in Catalog</string>
+    <string name="dep_graph_detail_copied">Coordinate copied to clipboard</string>
+    <string name="dep_graph_export">Export</string>
+    <string name="dep_graph_export_title">Dependency Graph Export</string>
+    <string name="dep_graph_expand_all">Expand All</string>
+    <string name="dep_graph_collapse_all">Collapse All</string>
+    <string name="dep_graph_loading">Resolving dependency graph…</string>
+    <string name="dep_graph_empty">No dependencies found</string>
+    <string name="dep_graph_badge_repeated">(*)</string>
+    <string name="dep_graph_badge_constraint">(c)</string>
+    <string name="dep_graph_badge_failed">FAILED</string>
+    <string name="dep_graph_update_available">Update: %1$s</string>
+    <string name="dep_graph_graph_snippet">Graph Snippet</string>
+    <string name="dep_graph_detail_default_reason">Selected by direct dependency or standard transitive resolution</string>
+    <string name="dep_graph_more_dependencies">+ %1$d more dependencies</string>
+    <string name="drawer_dependencies">Dependencies</string>
 </resources>
 

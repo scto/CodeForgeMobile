@@ -64,6 +64,7 @@ dependencies {
     implementation(project(":feature:plugins"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:dependencyupdates"))
+    implementation(project(":feature:dependencies"))
     implementation(project(":feature:build"))
     implementation(project(":feature:signing"))
     implementation(project(":feature:debug"))
