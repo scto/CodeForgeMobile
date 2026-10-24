@@ -5,6 +5,8 @@
 package com.codeforge.feature.layoutdesigner
 
 import androidx.compose.runtime.Immutable
+import com.codeforge.feature.layoutdesigner.dnd.DropTarget
+import com.codeforge.feature.layoutdesigner.model.DragPayload
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.PaletteEntry
 
@@ -51,6 +53,7 @@ sealed interface LayoutDesignerUiEvent {
     data class TabChanged(val tab: DesignerTab) : LayoutDesignerUiEvent
     data class DeviceChanged(val device: DevicePreset) : LayoutDesignerUiEvent
     data class AddWidget(val entry: PaletteEntry) : LayoutDesignerUiEvent
+    data class DropWidget(val payload: DragPayload, val target: DropTarget) : LayoutDesignerUiEvent
     data object DeleteSelected : LayoutDesignerUiEvent
     data object DuplicateSelected : LayoutDesignerUiEvent
     data class MoveSelected(val delta: Int) : LayoutDesignerUiEvent

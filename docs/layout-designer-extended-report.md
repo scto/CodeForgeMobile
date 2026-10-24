@@ -4,7 +4,7 @@
 
 - [x] **41.0** Bestand und Ausgangsbuild (Abweichungen notiert, Baseline-Tests, ViewModel-Tests)
 - [x] **41.1** Modell: Kommentare, Formatierung, neue Baum-Operationen (`moveNode`, `insertNode`, `canDrop`, `wrapIn`, `renameId`, `removeWithReferences`, Mehrfachauswahl)
-- [ ] **41.2** Drag & Drop (eigene Gesten-Implementierung, `DragController`, `NodeBoundsRegistry`, reiner `DropResolver`)
+- [x] **41.2** Drag & Drop (eigene Gesten-Implementierung, `DragController`, `NodeBoundsRegistry`, reiner `DropResolver`)
 - [ ] **41.3** Leinwand und Werkzeuge (Zoom/Pan, Größengriffe, Overlays, Breadcrumbs, Zwischenablage, Tastatur, PNG-Export)
 - [ ] **41.4** ConstraintLayout und RelativeLayout echt darstellen und bearbeiten (`ConstraintMapper`, Anker-Editor, topologischer RelativeLayout-Solver)
 - [ ] **41.5** Ressourcen auflösen (`ResourceRepository`, Qualifizierer, Themes/Styles, Drawables/VectorDrawables, „In Ressource auslagern“)
@@ -102,5 +102,45 @@
 ### Testabdeckung
 - 47 Tests in `:feature:layoutdesigner` erfolgreich (100 % bestanden).
 - `./gradlew :app:assembleDebug` erfolgreich.
+
+---
+
+## 41.2 Drag & Drop
+
+### Architekturentscheidung Gesten-Implementierung
+- **Entscheidung:** Eigene Gesten-Implementierung via `Modifier.pointerInput` und `detectDragGesturesAfterLongPress` (statt Compose `Modifier.dragAndDrop*`).
+- **Begründung:** Drag & Drop findet ausschließlich innerhalb des Layout-Designers statt (kein systemweites `ClipData` erforderlich). Vollständige Kontrolle über Zoom, Pan, Auto-Scroll und Drop-Indikatoren ohne API-Bruch zwischen Compose-Foundation-Versionen.
+
+### Komponenten & Logik
+- **`DragController` & `NodeBoundsRegistry`:**
+  - `@Stable` Controller verwaltet `DragPayload` (`NewWidget(PaletteEntry)` | `ExistingNodes(Set<Int>)`), Zeigerkoordinaten und aktuelles `DropTarget`.
+  - Jeder gezeichnete Knoten registriert seine Leinwand-Grenzen (`DesignerRect`) per `onGloballyPositioned` und räumt sich bei `onDispose` auf.
+- **Reiner `DropResolver` (JVM-getestet):**
+  - Tiefster Container unter dem Zeiger gewinnt.
+  - `LinearLayout`: Orientierung + Mittelpunkte der Kinder bestimmen Einfüge-Index und Indikator-Linie.
+  - `FrameLayout` / `CoordinatorLayout`: 3×3-Zonen berechnen automatisches `android:layout_gravity` (z. B. `bottom|end`, `center`).
+  - `ConstraintLayout` & `RelativeLayout`: Automatische Eltern-Constraints und 8-dp-gerasterte Margins (`android:layout_marginStart/Top`).
+  - Über einem Blatt: Oberes/unteres Drittel bzw. linkes/rechtes Drittel platziert davor oder dahinter.
+  - Ungültige Ziele liefern `DropVerdict.Rejected(reason)`.
+- **Rückmeldung & Zustand:**
+  - Halbtransparenter Schatten / Badge des Widgets am Finger.
+  - Einfüge-Linie bzw. Container-Highlighting (`primary` bzw. `error` bei Verstoß).
+  - Fehler-Chip am Finger mit detaillierter Begründung.
+  - Jeder erfolgreiche Drop erzeugt genau einen Undo-Schritt und selektiert das neue/verschobene Element.
+
+### Testabdeckung
+- 6 neue Unit-Tests in `DropResolverTest`:
+  1. `resolveDrop_linearLayout_vertical_calculatesIndexAndLine`
+  2. `resolveDrop_linearLayout_horizontal_calculatesIndexByX`
+  3. `resolveDrop_frameLayout_computesGravityZones`
+  4. `resolveDrop_constraintLayout_setsParentConstraintsAndSnappedMargins`
+  5. `resolveDrop_deepestContainerWins`
+  6. `resolveDrop_outsideBounds_returnsNull`
+- 2 neue ViewModel-Tests in `LayoutDesignerViewModelTest`:
+  1. `dropWidget_insertsNewWidget_recordsSingleUndoStep`
+  2. `dropWidget_movesExistingNode_recordsSingleUndoStep`
+- Insgesamt 55 Unit-Tests in `:feature:layoutdesigner` bestanden (100 %).
+- `./gradlew :app:assembleDebug` erfolgreich.
+
 
 

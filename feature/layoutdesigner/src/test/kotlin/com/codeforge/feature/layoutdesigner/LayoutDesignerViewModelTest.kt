@@ -4,8 +4,15 @@ import com.codeforge.core.navigation.FileSyncBridge
 import com.codeforge.core.navigation.FlushRequest
 import com.codeforge.core.navigation.JumpTarget
 import com.codeforge.core.navigation.OpenFileRequestBridge
+import com.codeforge.feature.layoutdesigner.dnd.DesignerRect
+import com.codeforge.feature.layoutdesigner.dnd.DropIndicator
+import com.codeforge.feature.layoutdesigner.dnd.DropTarget
 import com.codeforge.feature.layoutdesigner.files.LayoutFileStore
+import com.codeforge.feature.layoutdesigner.model.DragPayload
+import com.codeforge.feature.layoutdesigner.model.DropVerdict
+import com.codeforge.feature.layoutdesigner.model.PaletteEntry
 import com.codeforge.feature.layoutdesigner.model.WidgetCatalog
+import com.codeforge.feature.layoutdesigner.model.WidgetCategory
 import com.codeforge.feature.layoutdesigner.model.find
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
@@ -465,6 +472,69 @@ class LayoutDesignerViewModelTest {
 
         viewModel.onEvent(LayoutDesignerUiEvent.SetReformatOnSave(false))
         assertFalse(viewModel.state.value.reformatOnSave)
+    }
+
+    @Test
+    fun dropWidget_insertsNewWidget_recordsSingleUndoStep() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        val button = PaletteEntry("button", "Button", WidgetCategory.BUTTON, emptyMap())
+        val target = DropTarget(
+            parentUid = 0,
+            index = 0,
+            indicator = DropIndicator.Line(0f, 0f, 100f, 0f),
+            verdict = DropVerdict.Allowed,
+            suggestedAttributes = mapOf("android:text" to "DroppedButton"),
+        )
+
+        viewModel.onEvent(LayoutDesignerUiEvent.DropWidget(DragPayload.NewWidget(button), target))
+        val state = viewModel.state.value
+        assertEquals(2, state.document.root.children.size)
+        assertEquals("Button", state.document.root.children[0].tag)
+        assertEquals("DroppedButton", state.document.root.children[0].attributes["android:text"])
+        assertEquals(state.document.root.children[0].uid, state.selectedUid)
+        assertTrue(state.canUndo)
+
+        // Single undo reverts drop
+        viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+        assertEquals(1, viewModel.state.value.document.root.children.size)
+        assertFalse(viewModel.state.value.canUndo)
+    }
+
+    @Test
+    fun dropWidget_movesExistingNode_recordsSingleUndoStep() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = """
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <TextView android:id="@+id/t1" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                <Button android:id="@+id/b1" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+        """.trimIndent()
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        // Move Button (uid 2) before TextView (uid 1) -> index 0
+        val target = DropTarget(
+            parentUid = 0,
+            index = 0,
+            indicator = DropIndicator.Line(0f, 0f, 100f, 0f),
+            verdict = DropVerdict.Allowed,
+        )
+
+        viewModel.onEvent(LayoutDesignerUiEvent.DropWidget(DragPayload.ExistingNodes(setOf(2)), target))
+        assertEquals("Button", viewModel.state.value.document.root.children[0].tag)
+        assertEquals("TextView", viewModel.state.value.document.root.children[1].tag)
+        assertTrue(viewModel.state.value.canUndo)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+        assertEquals("TextView", viewModel.state.value.document.root.children[0].tag)
+        assertEquals("Button", viewModel.state.value.document.root.children[1].tag)
     }
 
     // --- Fakes ---

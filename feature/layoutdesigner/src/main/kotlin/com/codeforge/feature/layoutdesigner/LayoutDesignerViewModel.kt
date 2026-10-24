@@ -11,13 +11,17 @@ import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.feature.layoutdesigner.files.LayoutFileStore
+import com.codeforge.feature.layoutdesigner.model.DragPayload
+import com.codeforge.feature.layoutdesigner.model.DropVerdict
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.addWidget
+import com.codeforge.feature.layoutdesigner.model.addWidgetAt
 import com.codeforge.feature.layoutdesigner.model.changeTag
 import com.codeforge.feature.layoutdesigner.model.duplicate
 import com.codeforge.feature.layoutdesigner.model.duplicateNodes
 import com.codeforge.feature.layoutdesigner.model.find
 import com.codeforge.feature.layoutdesigner.model.indent
+import com.codeforge.feature.layoutdesigner.model.moveNode
 import com.codeforge.feature.layoutdesigner.model.moveWithinParent
 import com.codeforge.feature.layoutdesigner.model.outdent
 import com.codeforge.feature.layoutdesigner.model.parentOf
@@ -87,6 +91,34 @@ class LayoutDesignerViewModel @Inject constructor(
                 val result = s.document.addWidget(event.entry, s.selectedUid)
                 commit(result.document, selectUid = result.newUid)
                 _state.update { it.copy(showPalette = false) }
+            }
+            is LayoutDesignerUiEvent.DropWidget -> {
+                val s = _state.value
+                val target = event.target
+                if (target.verdict is DropVerdict.Rejected) {
+                    // Ignored on drop
+                } else {
+                    when (val p = event.payload) {
+                        is DragPayload.NewWidget -> {
+                            val addResult = s.document.addWidgetAt(p.entry, target.parentUid, target.index)
+                            var newDoc = addResult.document
+                            val newUid = addResult.newUid
+                            if (newUid != null && target.suggestedAttributes.isNotEmpty()) {
+                                for ((k, v) in target.suggestedAttributes) {
+                                    newDoc = newDoc.setAttribute(newUid, k, v)
+                                }
+                            }
+                            commit(newDoc, selectUid = newUid)
+                        }
+                        is DragPayload.ExistingNodes -> {
+                            var newDoc = s.document
+                            for (uid in p.uids) {
+                                newDoc = newDoc.moveNode(uid, target.parentUid, target.index)
+                            }
+                            commit(newDoc, selectUid = p.uids.firstOrNull())
+                        }
+                    }
+                }
             }
             LayoutDesignerUiEvent.DeleteSelected -> {
                 val s = _state.value

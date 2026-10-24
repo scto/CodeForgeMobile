@@ -63,6 +63,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.WidthClass
 import com.codeforge.core.ui.rememberWidthClass
+import com.codeforge.feature.layoutdesigner.dnd.DragController
 import com.codeforge.feature.layoutdesigner.model.flatten
 import com.codeforge.feature.layoutdesigner.preview.LayoutPreview
 import com.codeforge.feature.layoutdesigner.preview.isApproximatedTag
@@ -286,6 +287,7 @@ private fun PreviewPane(
     val approximated = remember(state.document) {
         state.document.flatten().any { isApproximatedTag(it.first.tag) }
     }
+    val dragController = remember { DragController() }
     Column(modifier) {
         LazyRow(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp),
@@ -312,6 +314,8 @@ private fun PreviewPane(
             selectedUid = state.selectedUid,
             device = state.device,
             onSelect = { onEvent(LayoutDesignerUiEvent.Select(it)) },
+            dragController = dragController,
+            onDrop = { payload, target -> onEvent(LayoutDesignerUiEvent.DropWidget(payload, target)) },
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         HorizontalDivider()
