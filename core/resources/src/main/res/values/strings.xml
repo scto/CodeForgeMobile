@@ -947,6 +947,9 @@
     <string name="layout_add_guideline_h">Guideline (horizontal)</string>
     <string name="layout_relative_card_title">Relative alignment</string>
     <string name="layout_connect_parent">Connect to parent</string>
+    <string name="layout_extract_resource">Extract to resource…</string>
+    <string name="layout_extract_name">Resource name</string>
+    <string name="layout_extract_confirm">Extract</string>
     <string name="modulemaker_gradle_pfad">Gradle path</string>
     <string name="plugins_geladen">Loaded</string>
     <string name="plugins_nicht_geladen">Not loaded</string>

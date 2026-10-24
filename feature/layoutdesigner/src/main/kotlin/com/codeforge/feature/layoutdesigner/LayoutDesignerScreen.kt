@@ -689,6 +689,14 @@ private fun PreviewPane(
             effectiveWidthDp = state.effectiveWidthDp,
             effectiveHeightDp = state.effectiveHeightDp,
             graphicsLayer = graphicsLayer,
+            resourceRepo = state.resourceRepo,
+            resourceConfig = com.codeforge.feature.layoutdesigner.res.ResourceConfig(
+                isNight = state.isDarkTheme,
+                isLandscape = state.isLandscape,
+                swDp = state.effectiveWidthDp,
+                wDp = state.effectiveWidthDp,
+            ),
+            showTools = state.showToolsAttributes,
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         HorizontalDivider()

@@ -262,6 +262,55 @@
 - Insgesamt **70 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
 - `./gradlew :app:assembleDebug` erfolgreich.
 
+---
+
+## 41.5 Ressourcen auflösen & auslagern
+
+### Architektur & Res-Ordner-Erkennung
+- **Reiner JVM-Parser (`ResourceRepository.kt`, `ResourceModels.kt`):**
+  - Erkennt Quellverzeichnisse automatisch: Durchsucht von der Layout-Datei ausgehend `src/*/res/` im Modul.
+  - Parst XML-Ressourcen in `values*`-Ordnern: `<string>`, `<color>`, `<dimen>`, `<integer>`, `<bool>`, `<plurals>`.
+  - Qualifier-Matching mit Best-Match-Bewertung für:
+    - Nachtmodus (`night` vs default)
+    - Sprache / Region (`de`, `en`, `es`, etc.)
+    - Orientierung (`land` vs `port`)
+    - Bildschirmbreite (`sw600dp`, `w400dp`)
+    - Plattform-API-Level (`v21`, `v31`, etc.)
+  - Referenzketten-Auflösung (`@color/primary -> @color/purple_500 -> #6200EE`) mit Zyklenerkennung und Tiefenlimit (10).
+  - Built-in Material 3 Attribut-Tabelle für Theme-Referenzen (`?attr/colorPrimary`, `?attr/colorSurface`, etc.).
+  - Robuste Dimensionen-Konvertierung (`sp`, `dp`, `pt`, `in`, `mm`, `px`) in Compose-Dichte.
+
+### VectorDrawables & Vorschau
+- **`VectorDrawableParser.kt`:**
+  - Parst `<vector>`-XML-Dateien aus `res/drawable/`.
+  - Konvertiert `<path android:pathData="..." android:fillColor="..." ...>` in Compose `ImageVector` zur direkten Darstellung in der Vorschau.
+
+### UI-Integration & In-Place-Auflösung
+- **Vorschau-Canvas (`LayoutPreview.kt`):**
+  - Reagiert auf Konfigurations-Änderungen (`ResourceConfig` mit Nachtmodus, Sprache, Orientierung, Bildschirmbreite).
+  - Löst Attribute wie `android:text`, `tools:text`, `android:textColor`, `android:background`, `tools:background`, `tools:visibility` über das `ResourceRepository` auf.
+  - `tools:`-Präzedenz aktiv; Toolbar-Toggle zum Ein-/Ausblenden von Tools-Attributen.
+- **Eigenschaften-Panel (`DesignerPanels.kt`):**
+  - Zeigt unterhalb von Referenzwerten (`@string/...`, `@color/...`) den aktuell aufgelösten Wert in Grau an (`= ...`).
+  - Integrierte Farb-Vorschau in Attributfeldern.
+  - Quick-Action „Ressource auslagern“ (`BookmarkAdd`-Icon) für ungebundene Texte, Farben und Dimensionen.
+  - `ExtractResourceDialog`: Schlägt Namen vor, schreibt strukturiert in `values/strings.xml`, `colors.xml` oder `dimens.xml`, aktualisiert das XML-Attribut auf `@type/name` und benachrichtigt `FileSyncBridge`.
+  - Vollständige Undo/Redo-Fähigkeit für Auslagerungsoperationen.
+
+### Testabdeckung
+- 6 neue Tests in `ResourceRepositoryTest`:
+  1. `resolveString_withQualifierPreference`
+  2. `resolveColor_withReferenceChain`
+  3. `resolveDimen_withUnits`
+  4. `resolvePlurals_selectsOther`
+  5. `resolveThemeAttr_usesMaterial3Fallback`
+  6. `extractToResource_appendsAndReloads`
+- 2 neue ViewModel-Tests in `LayoutDesignerViewModelTest`:
+  1. `setShowToolsAttributes_togglesFlag`
+  2. `extractToResource_replacesAttributeAndEnablesUndo`
+- Insgesamt **78 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+- `./gradlew :app:assembleDebug` erfolgreich.
+
 
 
 

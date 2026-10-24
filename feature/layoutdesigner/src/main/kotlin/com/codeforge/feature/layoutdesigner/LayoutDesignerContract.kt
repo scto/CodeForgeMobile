@@ -60,6 +60,8 @@ data class LayoutDesignerUiState(
     val blueprintMode: Boolean = false,
     val snapTo8DpGrid: Boolean = true,
     val clipboardXml: String? = null,
+    val showToolsAttributes: Boolean = true,
+    val resourceRepo: com.codeforge.feature.layoutdesigner.res.ResourceRepository? = null,
 ) {
     val fileName: String get() = filePath.substringAfterLast('/')
 
@@ -138,6 +140,16 @@ sealed interface LayoutDesignerUiEvent {
     data class AddGuideline(val parentUid: Int, val isVertical: Boolean) : LayoutDesignerUiEvent
     data class SetHorizontalBias(val uid: Int, val bias: Float) : LayoutDesignerUiEvent
     data class SetVerticalBias(val uid: Int, val bias: Float) : LayoutDesignerUiEvent
+
+    // 41.5 Ressourcen auflösen & auslagern
+    data class ExtractToResource(
+        val nodeUid: Int,
+        val attrName: String,
+        val resType: com.codeforge.feature.layoutdesigner.res.ResType,
+        val name: String,
+        val value: String,
+    ) : LayoutDesignerUiEvent
+    data class SetShowToolsAttributes(val enabled: Boolean) : LayoutDesignerUiEvent
 }
 
 sealed interface LayoutDesignerUiEffect {

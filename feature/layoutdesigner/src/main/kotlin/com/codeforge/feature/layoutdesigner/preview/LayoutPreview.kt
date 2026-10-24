@@ -91,6 +91,8 @@ import com.codeforge.feature.layoutdesigner.model.parentOf
 import com.codeforge.feature.layoutdesigner.model.parseColorArgb
 import com.codeforge.feature.layoutdesigner.model.parseDimension
 import com.codeforge.feature.layoutdesigner.model.parseSize
+import com.codeforge.feature.layoutdesigner.res.ResourceConfig
+import com.codeforge.feature.layoutdesigner.res.ResourceRepository
 import com.codeforge.feature.layoutdesigner.ui.ResizeHandles
 import com.codeforge.feature.layoutdesigner.ui.ZoomControls
 import kotlin.math.roundToInt
@@ -102,6 +104,9 @@ internal class PreviewContext(
     val dragController: DragController?,
     val onDrop: ((DragPayload, DropTarget) -> Unit)?,
     val document: LayoutDocument,
+    val resourceRepo: ResourceRepository? = null,
+    val resourceConfig: ResourceConfig = ResourceConfig(),
+    val showTools: Boolean = true,
 )
 
 /** Tags, die nur als gestapelte Näherung gezeichnet werden (ConstraintLayout & RelativeLayout werden echt gerendert). */
@@ -130,9 +135,12 @@ fun LayoutPreview(
     effectiveWidthDp: Int = device.widthDp,
     effectiveHeightDp: Int = device.heightDp,
     graphicsLayer: GraphicsLayer? = null,
+    resourceRepo: ResourceRepository? = null,
+    resourceConfig: ResourceConfig = ResourceConfig(),
+    showTools: Boolean = true,
 ) {
-    val context = remember(selectedUid, onSelect, dragController, onDrop, document) {
-        PreviewContext(selectedUid, onSelect, dragController, onDrop, document)
+    val context = remember(selectedUid, onSelect, dragController, onDrop, document, resourceRepo, resourceConfig, showTools) {
+        PreviewContext(selectedUid, onSelect, dragController, onDrop, document, resourceRepo, resourceConfig, showTools)
     }
 
     Box(
@@ -290,7 +298,11 @@ fun LayoutPreview(
 
 @Composable
 internal fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modifier) {
-    val visibility = node.attr("android:visibility")
+    val visibility = if (ctx.showTools && node.attr("tools:visibility") != null) {
+        node.attr("tools:visibility")
+    } else {
+        node.attr("android:visibility")
+    }
     if (visibility == "gone") return
 
     DisposableEffect(node.uid) {
@@ -304,7 +316,13 @@ internal fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modi
     val weight = node.attr("android:layout_weight")?.toFloatOrNull() ?: 0f
     val margin = (parseDimension(node.attr("android:layout_margin")) ?: 0f).dp
     val padding = (parseDimension(node.attr("android:padding")) ?: 0f).dp
-    val bg = parseColorArgb(node.attr("android:background"))?.let { Color(it.toInt()) }
+
+    val rawBg = if (ctx.showTools && node.attr("tools:background") != null) {
+        node.attr("tools:background")
+    } else {
+        node.attr("android:background")
+    }
+    val bg = (ctx.resourceRepo?.resolveColor(rawBg, ctx.resourceConfig) ?: parseColorArgb(rawBg))?.let { Color(it.toInt()) }
     val selected = ctx.selectedUid == node.uid
     val tag = node.tag.substringAfterLast('.')
     val isContainer = node.isContainer
@@ -394,7 +412,7 @@ internal fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modi
         tag == "ConstraintLayout" || tag.endsWith("ConstraintLayout") -> ConstraintView(node, ctx, m)
         tag == "ScrollView" || tag == "HorizontalScrollView" || tag == "FrameLayout" || isContainer ->
             FrameView(node, ctx, m)
-        else -> LeafView(node, tag, m)
+        else -> LeafView(node, tag, ctx, m)
     }
 }
 
@@ -478,12 +496,17 @@ private fun resolveGravity(spec: String?): Alignment {
 }
 
 @Composable
-private fun LeafView(node: LayoutNode, tag: String, modifier: Modifier) {
+private fun LeafView(node: LayoutNode, tag: String, ctx: PreviewContext, modifier: Modifier) {
+    fun resolveText(raw: String?): String =
+        raw?.let { ctx.resourceRepo?.resolveString(it, ctx.resourceConfig) ?: it } ?: ""
+
     when (tag) {
         "TextView" -> {
-            val text = node.attr("android:text") ?: node.attr("android:hint") ?: "(TextView)"
+            val rawText = if (ctx.showTools && node.attr("tools:text") != null) node.attr("tools:text") else node.attr("android:text") ?: node.attr("android:hint") ?: "(TextView)"
+            val text = resolveText(rawText)
             val size = (parseDimension(node.attr("android:textSize")) ?: 14f).sp
-            val color = parseColorArgb(node.attr("android:textColor"))?.let { Color(it.toInt()) }
+            val rawColor = node.attr("android:textColor")
+            val color = (ctx.resourceRepo?.resolveColor(rawColor, ctx.resourceConfig) ?: parseColorArgb(rawColor))?.let { Color(it.toInt()) }
                 ?: MaterialTheme.colorScheme.onSurface
             val style = if (node.attr("android:text") == null && node.attr("android:hint") != null) FontStyle.Italic else FontStyle.Normal
             Text(
@@ -496,7 +519,8 @@ private fun LeafView(node: LayoutNode, tag: String, modifier: Modifier) {
             )
         }
         "Button", "MaterialButton" -> {
-            val text = node.attr("android:text") ?: "Button"
+            val rawText = if (ctx.showTools && node.attr("tools:text") != null) node.attr("tools:text") else node.attr("android:text") ?: "Button"
+            val text = resolveText(rawText)
             Surface(
                 modifier = modifier.defaultMinSize(minWidth = 64.dp, minHeight = 36.dp),
                 shape = RoundedCornerShape(8.dp),
@@ -508,7 +532,8 @@ private fun LeafView(node: LayoutNode, tag: String, modifier: Modifier) {
             }
         }
         "EditText", "TextInputEditText" -> {
-            val text = node.attr("android:text") ?: node.attr("android:hint") ?: "Eingabe…"
+            val rawText = if (ctx.showTools && node.attr("tools:text") != null) node.attr("tools:text") else node.attr("android:text") ?: node.attr("android:hint") ?: "Eingabe…"
+            val text = resolveText(rawText)
             Surface(
                 modifier = modifier.defaultMinSize(minHeight = 44.dp),
                 shape = RoundedCornerShape(4.dp),
@@ -536,15 +561,18 @@ private fun LeafView(node: LayoutNode, tag: String, modifier: Modifier) {
             }
         }
         "CheckBox" -> Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+            val rawText = if (ctx.showTools && node.attr("tools:text") != null) node.attr("tools:text") else node.attr("android:text").orEmpty()
             Checkbox(checked = node.attr("android:checked") == "true", onCheckedChange = null)
-            Text(node.attr("android:text").orEmpty(), modifier = Modifier.padding(start = 4.dp))
+            Text(resolveText(rawText), modifier = Modifier.padding(start = 4.dp))
         }
         "RadioButton" -> Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+            val rawText = if (ctx.showTools && node.attr("tools:text") != null) node.attr("tools:text") else node.attr("android:text").orEmpty()
             RadioButton(selected = node.attr("android:checked") == "true", onClick = null)
-            Text(node.attr("android:text").orEmpty(), modifier = Modifier.padding(start = 4.dp))
+            Text(resolveText(rawText), modifier = Modifier.padding(start = 4.dp))
         }
         "Switch", "MaterialSwitch" -> Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-            Text(node.attr("android:text").orEmpty(), modifier = Modifier.padding(end = 8.dp))
+            val rawText = if (ctx.showTools && node.attr("tools:text") != null) node.attr("tools:text") else node.attr("android:text").orEmpty()
+            Text(resolveText(rawText), modifier = Modifier.padding(end = 8.dp))
             Switch(checked = node.attr("android:checked") == "true", onCheckedChange = null)
         }
         "ProgressBar" -> Box(modifier = modifier, contentAlignment = Alignment.Center) {

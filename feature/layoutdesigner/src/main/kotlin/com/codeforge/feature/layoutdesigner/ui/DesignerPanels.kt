@@ -31,7 +31,9 @@ import androidx.compose.material.icons.automirrored.filled.FormatIndentDecrease
 import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Close
+import com.codeforge.feature.layoutdesigner.res.ResType
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
@@ -207,6 +209,7 @@ internal fun PropertiesPanel(
     val specs = remember(node.tag, parentTag) { WidgetCatalog.attrsFor(node.tag, parentTag) }
     val specNames = remember(specs) { specs.map { it.name }.toSet() }
     var showAdd by remember { mutableStateOf(false) }
+    var extractRequest by remember { mutableStateOf<ExtractRequest?>(null) }
 
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
@@ -230,6 +233,10 @@ internal fun PropertiesPanel(
                 spec = spec,
                 value = node.attr(spec.name).orEmpty(),
                 onChange = { onEvent(LayoutDesignerUiEvent.SetAttribute(node.uid, spec.name, it)) },
+                repo = state.resourceRepo,
+                onExtract = { resType, valToExtract ->
+                    extractRequest = ExtractRequest(node.uid, spec.name, resType, valToExtract)
+                },
             )
         }
         val others = node.attributes.keys.filter { it !in specNames }
@@ -245,6 +252,10 @@ internal fun PropertiesPanel(
                             value = node.attr(name).orEmpty(),
                             onChange = { onEvent(LayoutDesignerUiEvent.SetAttribute(node.uid, name, it)) },
                             labelOverride = name,
+                            repo = state.resourceRepo,
+                            onExtract = { resType, valToExtract ->
+                                extractRequest = ExtractRequest(node.uid, name, resType, valToExtract)
+                            },
                         )
                     }
                     IconButton(onClick = { onEvent(LayoutDesignerUiEvent.SetAttribute(node.uid, name, null)) }) {
@@ -254,6 +265,25 @@ internal fun PropertiesPanel(
             }
         }
         OutlinedButton(onClick = { showAdd = true }) { Text(stringRes(R.string.layout_add_attribute)) }
+    }
+
+    extractRequest?.let { req ->
+        ExtractResourceDialog(
+            request = req,
+            onDismiss = { extractRequest = null },
+            onConfirm = { resName, resValue ->
+                extractRequest = null
+                onEvent(
+                    LayoutDesignerUiEvent.ExtractToResource(
+                        nodeUid = req.nodeUid,
+                        attrName = req.attrName,
+                        resType = req.resType,
+                        name = resName,
+                        value = resValue,
+                    )
+                )
+            },
+        )
     }
 
     if (showAdd) {
@@ -275,44 +305,81 @@ private fun AttributeEditor(
     value: String,
     onChange: (String?) -> Unit,
     labelOverride: String? = null,
+    repo: com.codeforge.feature.layoutdesigner.res.ResourceRepository? = null,
+    onExtract: ((ResType, String) -> Unit)? = null,
 ) {
     val label = labelOverride ?: spec.name.removePrefix("android:")
     when (spec.kind) {
         AttrKind.ENUM -> EnumField(label, value, spec.options, onChange)
         else -> {
-            // Lokaler Text, damit Cursor/Eingabe beim Zurückschreiben nicht springen; Undo/Redo
-            // von außen wird über den LaunchedEffect eingespielt.
             var text by remember(node.uid, spec.name) { mutableStateOf(value) }
             LaunchedEffect(value) { if (value != text) text = value }
+
+            val resolved = remember(text, repo) {
+                when {
+                    text.startsWith("@string/") -> repo?.resolveString(text)
+                    text.startsWith("@color/") || text.startsWith("?") -> repo?.resolveColor(text)?.let { String.format("#%08X", it) }
+                    text.startsWith("@dimen/") -> repo?.resolveDimension(text)?.let { "${it}dp" }
+                    else -> null
+                }
+            }
+
+            val canExtract = onExtract != null && text.isNotBlank() && !text.startsWith("@") && !text.startsWith("?") &&
+                (spec.kind == AttrKind.TEXT || spec.kind == AttrKind.COLOR || spec.kind == AttrKind.DIMENSION)
+
             Column {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = {
-                        text = it
-                        onChange(it.ifEmpty { null })
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(label) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = if (spec.kind == AttrKind.NUMBER) KeyboardType.Decimal else KeyboardType.Text,
-                    ),
-                    leadingIcon = if (spec.kind == AttrKind.COLOR) {
-                        {
-                            val argb = parseColorArgb(text)
-                            Box(
-                                Modifier
-                                    .size(20.dp)
-                                    .background(
-                                        if (argb != null) Color(argb.toInt()) else MaterialTheme.colorScheme.surfaceVariant,
-                                        RoundedCornerShape(4.dp),
-                                    ),
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = text,
+                        onValueChange = {
+                            text = it
+                            onChange(it.ifEmpty { null })
+                        },
+                        modifier = Modifier.weight(1f),
+                        label = { Text(label) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = if (spec.kind == AttrKind.NUMBER) KeyboardType.Decimal else KeyboardType.Text,
+                        ),
+                        leadingIcon = if (spec.kind == AttrKind.COLOR) {
+                            {
+                                val argb = parseColorArgb(text)
+                                Box(
+                                    Modifier
+                                        .size(20.dp)
+                                        .background(
+                                            if (argb != null) Color(argb.toInt()) else MaterialTheme.colorScheme.surfaceVariant,
+                                            RoundedCornerShape(4.dp),
+                                        ),
+                                )
+                            }
+                        } else null,
+                    )
+                    if (canExtract) {
+                        val resType = when (spec.kind) {
+                            AttrKind.COLOR -> ResType.COLOR
+                            AttrKind.DIMENSION -> ResType.DIMEN
+                            else -> ResType.STRING
+                        }
+                        IconButton(onClick = { onExtract?.invoke(resType, text) }) {
+                            Icon(
+                                Icons.Filled.BookmarkAdd,
+                                contentDescription = stringRes(R.string.layout_extract_resource),
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
-                    } else null,
-                )
+                    }
+                }
+                if (resolved != null && resolved != text) {
+                    Text(
+                        text = "= $resolved",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.padding(start = 12.dp, top = 2.dp),
+                    )
+                }
                 if (spec.kind == AttrKind.SIZE) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
                         spec.options.forEach { option ->
                             AssistChip(onClick = { text = option; onChange(option) }, label = { Text(option) })
                         }
@@ -358,6 +425,72 @@ private fun AddAttributeDialog(onDismiss: () -> Unit, onConfirm: (String, String
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringRes(R.string.common_abbrechen)) } },
+    )
+}
+
+private data class ExtractRequest(
+    val nodeUid: Int,
+    val attrName: String,
+    val resType: ResType,
+    val currentValue: String,
+)
+
+@Composable
+private fun ExtractResourceDialog(
+    request: ExtractRequest,
+    onDismiss: () -> Unit,
+    onConfirm: (name: String, value: String) -> Unit,
+) {
+    var resName by remember {
+        mutableStateOf(
+            request.attrName.substringAfterLast(':') + "_" +
+                request.currentValue.lowercase()
+                    .filter { it.isLetterOrDigit() || it == '_' }
+                    .take(20)
+                    .ifEmpty { "val" }
+        )
+    }
+    var resValue by remember { mutableStateOf(request.currentValue) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringRes(R.string.layout_extract_resource)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "${request.resType.name.lowercase()} / ${request.attrName}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                OutlinedTextField(
+                    value = resName,
+                    onValueChange = { resName = it.filter { c -> c.isLetterOrDigit() || c == '_' } },
+                    label = { Text(stringRes(R.string.layout_extract_name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = resValue,
+                    onValueChange = { resValue = it },
+                    label = { Text("Wert") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { if (resName.isNotBlank() && resValue.isNotBlank()) onConfirm(resName, resValue) },
+                enabled = resName.isNotBlank() && resValue.isNotBlank(),
+            ) {
+                Text(stringRes(R.string.layout_extract_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringRes(R.string.common_abbrechen))
+            }
+        },
     )
 }
 

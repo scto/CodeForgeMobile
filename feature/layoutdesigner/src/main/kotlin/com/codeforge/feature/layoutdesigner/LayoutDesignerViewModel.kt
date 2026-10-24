@@ -4,6 +4,12 @@
  */
 package com.codeforge.feature.layoutdesigner
 
+import com.codeforge.feature.layoutdesigner.res.ResType
+import com.codeforge.feature.layoutdesigner.res.ResourceRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.navigation.FileSyncBridge
@@ -56,6 +62,17 @@ class LayoutDesignerViewModel @Inject constructor(
     private val fileSyncBridge: FileSyncBridge,
     private val fileStore: LayoutFileStore,
 ) : ViewModel() {
+
+    internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+
+    internal constructor(
+        openFileBridge: OpenFileRequestBridge,
+        fileSyncBridge: FileSyncBridge,
+        fileStore: LayoutFileStore,
+        ioDispatcher: CoroutineDispatcher,
+    ) : this(openFileBridge, fileSyncBridge, fileStore) {
+        this.ioDispatcher = ioDispatcher
+    }
 
     private val _state = MutableStateFlow(LayoutDesignerUiState())
     val state: StateFlow<LayoutDesignerUiState> = _state.asStateFlow()
@@ -405,6 +422,32 @@ class LayoutDesignerViewModel @Inject constructor(
                 val doc = _state.value.document.setAttribute(event.uid, "app:layout_constraintVertical_bias", String.format(java.util.Locale.US, "%.2f", event.bias))
                 commit(doc, selectUid = event.uid)
             }
+            is LayoutDesignerUiEvent.SetShowToolsAttributes -> {
+                _state.update { it.copy(showToolsAttributes = event.enabled) }
+            }
+            is LayoutDesignerUiEvent.ExtractToResource -> {
+                val layoutFile = File(_state.value.filePath)
+                val resDirs = ResourceRepository.findResDirsForLayout(layoutFile)
+                val targetResDir = resDirs.firstOrNull()
+                    ?: layoutFile.parentFile?.parentFile?.let { File(it, "res") }
+                    ?: File(layoutFile.parentFile ?: File("."), "res")
+                val repo = _state.value.resourceRepo ?: ResourceRepository(resDirs)
+                repo.extractToResource(targetResDir, event.resType, event.name, event.value)
+                _state.update { it.copy(resourceRepo = repo) }
+
+                val refStr = when (event.resType) {
+                    ResType.STRING -> "@string/${event.name}"
+                    ResType.COLOR -> "@color/${event.name}"
+                    ResType.DIMEN -> "@dimen/${event.name}"
+                    ResType.INTEGER -> "@integer/${event.name}"
+                    ResType.BOOL -> "@bool/${event.name}"
+                    else -> "@${event.resType.name.lowercase()}/${event.name}"
+                }
+                commit(_state.value.document.setAttribute(event.nodeUid, event.attrName, refStr), selectUid = event.nodeUid)
+                viewModelScope.launch(ioDispatcher) {
+                    fileSyncBridge.notifyExternalChange(listOf(targetResDir.absolutePath))
+                }
+            }
         }
     }
 
@@ -420,6 +463,13 @@ class LayoutDesignerViewModel @Inject constructor(
                 val xml = LayoutXml.write(doc, reformat = _state.value.reformatOnSave)
                 savedXml = xml
                 undoStack.clear(); redoStack.clear(); lastEditKey = null
+
+                val layoutFile = File(path)
+                val repo = withContext(ioDispatcher) {
+                    val dirs = ResourceRepository.findResDirsForLayout(layoutFile)
+                    if (dirs.isNotEmpty()) ResourceRepository(dirs) else null
+                }
+
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -430,6 +480,7 @@ class LayoutDesignerViewModel @Inject constructor(
                         dirty = false,
                         canUndo = false,
                         canRedo = false,
+                        resourceRepo = repo,
                     )
                 }
             }.onFailure { e ->

@@ -65,7 +65,7 @@ class LayoutDesignerViewModelTest {
         openFileBridge = FakeOpenFileRequestBridge()
         fileSyncBridge = FakeFileSyncBridge()
         fileStore = FakeLayoutFileStore()
-        viewModel = LayoutDesignerViewModel(openFileBridge, fileSyncBridge, fileStore)
+        viewModel = LayoutDesignerViewModel(openFileBridge, fileSyncBridge, fileStore, testDispatcher)
     }
 
     @After
@@ -759,6 +759,54 @@ class LayoutDesignerViewModelTest {
 
         viewModel.onEvent(LayoutDesignerUiEvent.Undo)
         assertEquals(0, viewModel.state.value.document.root.children.size)
+    }
+
+    @Test
+    fun setShowToolsAttributes_togglesFlag() = runTest {
+        fileStore.files["/test/layout.xml"] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load("/test/layout.xml"))
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showToolsAttributes)
+        viewModel.onEvent(LayoutDesignerUiEvent.SetShowToolsAttributes(false))
+        assertFalse(viewModel.state.value.showToolsAttributes)
+        viewModel.onEvent(LayoutDesignerUiEvent.SetShowToolsAttributes(true))
+        assertTrue(viewModel.state.value.showToolsAttributes)
+    }
+
+    @Test
+    fun extractToResource_replacesAttributeAndEnablesUndo() = runTest {
+        val tempDir = java.nio.file.Files.createTempDirectory("layout_test").toFile()
+        try {
+            val layoutFile = java.io.File(tempDir, "src/main/res/layout/test.xml")
+            layoutFile.parentFile?.mkdirs()
+            val path = layoutFile.absolutePath
+            fileStore.files[path] = sampleValidXml
+            viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+            advanceUntilIdle()
+
+            val textNode = viewModel.state.value.document.find(1)!!
+            assertEquals("Hello", textNode.attr("android:text"))
+
+            viewModel.onEvent(
+                LayoutDesignerUiEvent.ExtractToResource(
+                    nodeUid = 1,
+                    attrName = "android:text",
+                    resType = com.codeforge.feature.layoutdesigner.res.ResType.STRING,
+                    name = "hello_title",
+                    value = "Hello",
+                )
+            )
+            advanceUntilIdle()
+
+            assertEquals("@string/hello_title", viewModel.state.value.document.find(1)!!.attr("android:text"))
+            assertTrue(viewModel.state.value.canUndo)
+
+            viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+            assertEquals("Hello", viewModel.state.value.document.find(1)!!.attr("android:text"))
+        } finally {
+            tempDir.deleteRecursively()
+        }
     }
 
     // --- Fakes ---
