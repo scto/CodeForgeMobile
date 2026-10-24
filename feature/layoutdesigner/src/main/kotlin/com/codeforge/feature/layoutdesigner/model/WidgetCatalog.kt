@@ -5,7 +5,10 @@
 package com.codeforge.feature.layoutdesigner.model
 
 /** Art des Editors für ein Attribut in der Eigenschaftenliste. */
-enum class AttrKind { TEXT, NUMBER, DIMENSION, SIZE, COLOR, ENUM }
+enum class AttrKind {
+    TEXT, NUMBER, DIMENSION, SIZE, COLOR, ENUM,
+    BOOLEAN, FLAG, REFERENCE, FLOAT, INTEGER, ID
+}
 
 data class AttrSpec(
     val name: String,
@@ -107,6 +110,117 @@ object WidgetCatalog {
         WidgetDef("ViewStub", false, WidgetCategory.LAYOUT, listOf(AttrSpec("android:layout", AttrKind.TEXT), AttrSpec("android:inflatedId", AttrKind.TEXT))),
         WidgetDef("fragment", false, WidgetCategory.LAYOUT, listOf(AttrSpec("android:name", AttrKind.TEXT), AttrSpec("tools:layout", AttrKind.TEXT))),
         WidgetDef("androidx.fragment.app.FragmentContainerView", false, WidgetCategory.LAYOUT, listOf(AttrSpec("android:name", AttrKind.TEXT), AttrSpec("tools:layout", AttrKind.TEXT))),
+
+        // Erweiterte Layouts (41.7)
+        WidgetDef("androidx.core.widget.NestedScrollView", true, WidgetCategory.LAYOUT),
+        WidgetDef("GridLayout", true, WidgetCategory.LAYOUT, listOf(
+            AttrSpec("android:rowCount", AttrKind.INTEGER),
+            AttrSpec("android:columnCount", AttrKind.INTEGER),
+            AttrSpec("android:orientation", AttrKind.ENUM, listOf("horizontal", "vertical")),
+        )),
+        WidgetDef("TableLayout", true, WidgetCategory.LAYOUT),
+        WidgetDef("TableRow", true, WidgetCategory.LAYOUT),
+        WidgetDef("RadioGroup", true, WidgetCategory.INPUT, listOf(
+            AttrSpec("android:orientation", AttrKind.ENUM, listOf("vertical", "horizontal")),
+            AttrSpec("android:checkedButton", AttrKind.ID),
+        )),
+        WidgetDef("androidx.coordinatorlayout.widget.CoordinatorLayout", true, WidgetCategory.LAYOUT),
+        WidgetDef("com.google.android.material.appbar.AppBarLayout", true, WidgetCategory.LAYOUT),
+        WidgetDef("com.google.android.material.appbar.CollapsingToolbarLayout", true, WidgetCategory.LAYOUT),
+        WidgetDef("androidx.cardview.widget.CardView", true, WidgetCategory.LAYOUT, listOf(
+            AttrSpec("app:cardCornerRadius", AttrKind.DIMENSION),
+            AttrSpec("app:cardElevation", AttrKind.DIMENSION),
+        )),
+        WidgetDef("com.google.android.material.card.MaterialCardView", true, WidgetCategory.LAYOUT, listOf(
+            AttrSpec("app:cardCornerRadius", AttrKind.DIMENSION),
+            AttrSpec("app:cardElevation", AttrKind.DIMENSION),
+            AttrSpec("app:strokeWidth", AttrKind.DIMENSION),
+            AttrSpec("app:strokeColor", AttrKind.COLOR),
+        )),
+        WidgetDef("com.google.android.material.chip.ChipGroup", true, WidgetCategory.INPUT),
+        WidgetDef("com.google.android.flexbox.FlexboxLayout", true, WidgetCategory.LAYOUT),
+
+        // Erweiterte Widgets (41.7)
+        WidgetDef("com.google.android.material.button.MaterialButton", false, WidgetCategory.BUTTON, textAttrs.take(3) + listOf(
+            AttrSpec("app:icon", AttrKind.REFERENCE),
+            AttrSpec("app:cornerRadius", AttrKind.DIMENSION),
+        )),
+        WidgetDef("com.google.android.material.textfield.TextInputLayout", true, WidgetCategory.INPUT, listOf(
+            AttrSpec("android:hint", AttrKind.TEXT),
+            AttrSpec("app:errorEnabled", AttrKind.BOOLEAN, listOf("true", "false")),
+            AttrSpec("app:helperText", AttrKind.TEXT),
+        )),
+        WidgetDef("com.google.android.material.textfield.TextInputEditText", false, WidgetCategory.INPUT, textAttrs),
+        WidgetDef("com.google.android.material.chip.Chip", false, WidgetCategory.BUTTON, textAttrs.take(3) + listOf(
+            AttrSpec("app:chipIcon", AttrKind.REFERENCE),
+        )),
+        WidgetDef("com.google.android.material.floatingactionbutton.FloatingActionButton", false, WidgetCategory.BUTTON, listOf(
+            AttrSpec("app:srcCompat", AttrKind.REFERENCE),
+            AttrSpec("app:fabSize", AttrKind.ENUM, listOf("normal", "mini", "auto")),
+        )),
+        WidgetDef("com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton", false, WidgetCategory.BUTTON, textAttrs.take(3)),
+        WidgetDef("com.google.android.material.appbar.MaterialToolbar", true, WidgetCategory.LAYOUT, listOf(
+            AttrSpec("app:title", AttrKind.TEXT),
+            AttrSpec("app:subtitle", AttrKind.TEXT),
+        )),
+        WidgetDef("androidx.appcompat.widget.Toolbar", true, WidgetCategory.LAYOUT, listOf(
+            AttrSpec("app:title", AttrKind.TEXT),
+        )),
+        WidgetDef("com.google.android.material.bottomnavigation.BottomNavigationView", false, WidgetCategory.OTHER, listOf(
+            AttrSpec("app:menu", AttrKind.REFERENCE),
+        )),
+        WidgetDef("com.google.android.material.navigationrail.NavigationRailView", false, WidgetCategory.OTHER, listOf(
+            AttrSpec("app:menu", AttrKind.REFERENCE),
+        )),
+        WidgetDef("com.google.android.material.tabs.TabLayout", false, WidgetCategory.OTHER),
+        WidgetDef("androidx.viewpager2.widget.ViewPager2", false, WidgetCategory.LAYOUT),
+        WidgetDef("androidx.recyclerview.widget.RecyclerView", false, WidgetCategory.LAYOUT, listOf(
+            AttrSpec("tools:listitem", AttrKind.REFERENCE),
+            AttrSpec("tools:itemCount", AttrKind.INTEGER),
+        )),
+        WidgetDef("ListView", false, WidgetCategory.LAYOUT, listOf(
+            AttrSpec("tools:listitem", AttrKind.REFERENCE),
+        )),
+        WidgetDef("GridView", false, WidgetCategory.LAYOUT, listOf(
+            AttrSpec("android:numColumns", AttrKind.INTEGER),
+        )),
+        WidgetDef("Spinner", false, WidgetCategory.INPUT),
+        WidgetDef("SeekBar", false, WidgetCategory.INPUT, listOf(
+            AttrSpec("android:max", AttrKind.INTEGER),
+            AttrSpec("android:progress", AttrKind.INTEGER),
+        )),
+        WidgetDef("com.google.android.material.slider.Slider", false, WidgetCategory.INPUT, listOf(
+            AttrSpec("android:valueFrom", AttrKind.FLOAT),
+            AttrSpec("android:valueTo", AttrKind.FLOAT),
+            AttrSpec("android:value", AttrKind.FLOAT),
+        )),
+        WidgetDef("RatingBar", false, WidgetCategory.INPUT, listOf(
+            AttrSpec("android:numStars", AttrKind.INTEGER),
+            AttrSpec("android:rating", AttrKind.FLOAT),
+            AttrSpec("android:stepSize", AttrKind.FLOAT),
+        )),
+        WidgetDef("ToggleButton", false, WidgetCategory.BUTTON, textAttrs.take(3) + listOf(
+            AttrSpec("android:textOn", AttrKind.TEXT),
+            AttrSpec("android:textOff", AttrKind.TEXT),
+        )),
+        WidgetDef("com.google.android.material.materialswitch.MaterialSwitch", false, WidgetCategory.INPUT, textAttrs.take(3)),
+        WidgetDef("com.google.android.material.divider.MaterialDivider", false, WidgetCategory.OTHER),
+        WidgetDef("com.google.android.material.imageview.ShapeableImageView", false, WidgetCategory.MEDIA, listOf(
+            AttrSpec("android:src", AttrKind.REFERENCE),
+            AttrSpec("app:shapeAppearanceOverlay", AttrKind.REFERENCE),
+        )),
+        WidgetDef("com.google.android.material.progressindicator.LinearProgressIndicator", false, WidgetCategory.OTHER, listOf(
+            AttrSpec("android:indeterminate", AttrKind.BOOLEAN, listOf("true", "false")),
+        )),
+        WidgetDef("com.google.android.material.progressindicator.CircularProgressIndicator", false, WidgetCategory.OTHER, listOf(
+            AttrSpec("android:indeterminate", AttrKind.BOOLEAN, listOf("true", "false")),
+        )),
+        WidgetDef("WebView", false, WidgetCategory.OTHER),
+        WidgetDef("VideoView", false, WidgetCategory.MEDIA),
+        WidgetDef("SurfaceView", false, WidgetCategory.MEDIA),
+        WidgetDef("TextureView", false, WidgetCategory.MEDIA),
+        WidgetDef("AutoCompleteTextView", false, WidgetCategory.INPUT, textAttrs),
+        WidgetDef("androidx.compose.ui.platform.ComposeView", false, WidgetCategory.OTHER),
     )
 
     private val byTag: Map<String, WidgetDef> = widgets.associateBy { it.tag }
@@ -214,5 +328,14 @@ object WidgetCatalog {
         PaletteEntry("view", "View", WidgetCategory.OTHER, linkedMapOf("android:layout_width" to MATCH, "android:layout_height" to "1dp", "android:background" to "#CCCCCC")),
         PaletteEntry("space", "Space", WidgetCategory.OTHER, linkedMapOf("android:layout_width" to "16dp", "android:layout_height" to "16dp")),
         PaletteEntry("include", "include", WidgetCategory.LAYOUT, linkedMapOf("layout" to "@layout/...", "android:layout_width" to MATCH, "android:layout_height" to WRAP)),
+        PaletteEntry("card_view", "androidx.cardview.widget.CardView", WidgetCategory.LAYOUT, fillDefaults()),
+        PaletteEntry("material_button", "com.google.android.material.button.MaterialButton", WidgetCategory.BUTTON, wrapDefaults("android:text" to "MaterialButton")),
+        PaletteEntry("chip", "com.google.android.material.chip.Chip", WidgetCategory.BUTTON, wrapDefaults("android:text" to "Chip")),
+        PaletteEntry("fab", "com.google.android.material.floatingactionbutton.FloatingActionButton", WidgetCategory.BUTTON, wrapDefaults()),
+        PaletteEntry("recycler_view", "androidx.recyclerview.widget.RecyclerView", WidgetCategory.LAYOUT, fillDefaults()),
+        PaletteEntry("text_input_layout", "com.google.android.material.textfield.TextInputLayout", WidgetCategory.INPUT, fillDefaults()),
+        PaletteEntry("slider", "com.google.android.material.slider.Slider", WidgetCategory.INPUT, fillDefaults()),
+        PaletteEntry("material_divider", "com.google.android.material.divider.MaterialDivider", WidgetCategory.OTHER, fillDefaults("android:layout_height" to "1dp")),
+        PaletteEntry("compose_view", "androidx.compose.ui.platform.ComposeView", WidgetCategory.OTHER, fillDefaults()),
     )
 }

@@ -7,9 +7,9 @@
 - [x] **41.2** Drag & Drop (eigene Gesten-Implementierung, `DragController`, `NodeBoundsRegistry`, reiner `DropResolver`)
 - [x] **41.3** Leinwand und Werkzeuge (Zoom/Pan, Größengriffe, Overlays, Breadcrumbs, Zwischenablage, Tastatur, PNG-Export)
 - [x] **41.4** ConstraintLayout und RelativeLayout echt darstellen und bearbeiten (`ConstraintMapper`, Anker-Editor, topologischer RelativeLayout-Solver)
-- [ ] **41.5** Ressourcen auflösen (`ResourceRepository`, Qualifizierer, Themes/Styles, Drawables/VectorDrawables, „In Ressource auslagern“)
-- [ ] **41.6** `include`, `merge`, `ViewStub`, Fragmente, eigene Views
-- [ ] **41.7** Widget-Katalog und Eigenschaften-Panel (Erweiterung Widgets/Layouts, SDK `attrs.xml` Fallback, Gruppen, Filter)
+- [x] **41.5** Ressourcen auflösen (`ResourceRepository`, Qualifizierer, Themes/Styles, Drawables/VectorDrawables, „In Ressource auslagern“)
+- [x] **41.6** `include`, `merge`, `ViewStub`, Fragmente, eigene Views
+- [x] **41.7** Widget-Katalog und Eigenschaften-Panel (Erweiterung Widgets/Layouts, SDK `attrs.xml` Fallback, Gruppen, Filter)
 - [ ] **41.8** Prüfungen (Lint) mit Schnellkorrektur (`LayoutLinter`, Regeln, UI-Panel)
 - [ ] **41.9** Zusammenspiel mit dem Code-Editor und Dateien (`FileSyncBridge`, Vorlagen, Varianten, `SavedStateHandle`)
 - [ ] **41.10** Leistung und Robustheit (500 Knoten Benchmark, Fehlerisolation)
@@ -365,6 +365,50 @@
   1. `toggleInflateViewStub_togglesUidInState`
   2. `openIncludedLayout_emitsOpenLayoutFileEffect`
 - Insgesamt **85 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+- `./gradlew :app:assembleDebug` erfolgreich.
+
+---
+
+## 41.7 Widget-Katalog und Eigenschaften-Panel
+
+### Erweiterung des Widget-Katalogs (`WidgetCatalog.kt`)
+- **Neue Attribut-Typen (`AttrKind`):**
+  - `DIMENSION`, `COLOR`, `STRING`, `BOOLEAN`, `ENUM`, `FLAG`, `REFERENCE`, `FLOAT`, `INTEGER`, `ID`.
+- **Katalog-Erweiterung Layouts & Container:**
+  - `NestedScrollView`, `GridLayout`, `TableLayout`, `TableRow`, `RadioGroup`, `CoordinatorLayout`, `AppBarLayout`, `CollapsingToolbarLayout`, `CardView`, `MaterialCardView`, `ChipGroup`, `FlexboxLayout`.
+- **Katalog-Erweiterung Widgets & Steuerelemente:**
+  - `MaterialButton`, `TextInputLayout`, `TextInputEditText`, `Chip`, `FloatingActionButton`, `ExtendedFloatingActionButton`, `MaterialToolbar`, `Toolbar`, `BottomNavigationView`, `NavigationRailView`, `TabLayout`, `ViewPager2`, `RecyclerView`, `ListView`, `GridView`, `Spinner`, `SeekBar`, `Slider`, `RatingBar`, `ToggleButton`, `MaterialSwitch`, `MaterialDivider`, `ShapeableImageView`, `LinearProgressIndicator`, `CircularProgressIndicator`, `WebView`, `VideoView`, `SurfaceView`, `TextureView`, `AutoCompleteTextView`, `ComposeView`.
+- **Eltern-spezifische Layout-Attribute:**
+  - Dynamische Ergänzung von Layout-Attributen je nach Containertyp (`GridLayout`, `TableLayout`, `CoordinatorLayout`, `FlexboxLayout`, `ConstraintLayout`, `RelativeLayout`, `LinearLayout`, `FrameLayout`).
+
+### Android SDK `attrs.xml` Parser (`SdkAttrsParser.kt`)
+- Reine JVM-Implementierung ohne Android-Framework-Abhängigkeiten.
+- Liest `declare-styleable`, `attr`, `enum` und `flag` Definitionen direkt aus SDK-Pfad oder InputStreams.
+- Unterstützt Caching für performante Wiederverwendung.
+- Liefert Attribute, Typen (`AttrKind`) und Optionen (Werte für Enums und Flags) als Fallback für nicht fest im Katalog verdrahtete Attribute.
+
+### Eigenschaften-Panel & Palette (`DesignerPanels.kt`)
+- **PalettePanel:**
+  - Schnellsuchfeld zur Filterung nach Tag- oder Anzeigenamen.
+  - Kategorie-Filter-Chips: *Alle*, *Layouts*, *Text*, *Buttons*, *Eingabe*, *Medien*, *Sonstige*, *Projekt*.
+  - Einheitliches Drag-and-Drop- und Klick-Verhalten.
+- **PropertiesPanel:**
+  - Suchfeld für Attributnamen.
+  - Filter-Chip „Nur gesetzte“ (`onlySetFilter`) zur schnellen Übersicht über existierende Attribute.
+  - Gruppierung nach logischen Kategorien: *Layout*, *Ränder*, *Text*, *Erscheinungsbild*, *Verhalten*, *Constraints*, *Sonstige* mit Ein-/Ausklapp-Zustand.
+  - Spezialisierte Editoren je Attribut-Typ:
+    - `BOOLEAN`: Auswahlschalter / Segmentierte Chips (`true`, `false`).
+    - `FLAG`: Mehrfachauswahl-Chips in `FlowRow`.
+    - `ENUM`: Dropdown / Optionsauswahl.
+    - `DIMENSION`: Textfeld mit schnellen `+/- 4dp` Tasten.
+    - Zurücksetzen-Schaltfläche (Mülleimer-Symbol) zum gezielten Entfernen eines gesetzten Attributs.
+  - Verknüpfung mit „In Ressource auslagern“ (`onExtractToResource`) für String-, Color- und Dimen-Werte.
+
+### Testabdeckung
+- 2 neue Tests in `SdkAttrsParserTest`:
+  1. `parseAttrs_extractsStyleablesAndAttributes`
+  2. `parseAttrs_resolvesFlagsAndEnums`
+- Insgesamt **87 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
 - `./gradlew :app:assembleDebug` erfolgreich.
 
 

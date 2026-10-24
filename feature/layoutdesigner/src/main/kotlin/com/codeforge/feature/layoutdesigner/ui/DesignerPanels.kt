@@ -17,6 +17,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.annotation.StringRes
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -29,25 +34,33 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatIndentDecrease
 import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
-import com.codeforge.feature.layoutdesigner.res.ResType
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Search
+import com.codeforge.feature.layoutdesigner.res.ResType
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -68,6 +81,8 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.feature.layoutdesigner.LayoutDesignerUiEvent
 import com.codeforge.feature.layoutdesigner.LayoutDesignerUiState
+import com.codeforge.feature.layoutdesigner.model.parseDimension
+import kotlin.math.roundToInt
 import com.codeforge.feature.layoutdesigner.model.AttrKind
 import com.codeforge.feature.layoutdesigner.model.AttrSpec
 import com.codeforge.feature.layoutdesigner.model.LayoutNode
@@ -85,7 +100,10 @@ internal fun PalettePanel(
     customViews: List<com.codeforge.feature.layoutdesigner.model.CustomViewInfo> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
-    val groups = remember(customViews) {
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<com.codeforge.feature.layoutdesigner.model.WidgetCategory?>(null) }
+
+    val allEntries = remember(customViews) {
         val projectEntries = customViews.map { cv ->
             PaletteEntry(
                 key = "custom_${cv.qualifiedName}",
@@ -97,32 +115,86 @@ internal fun PalettePanel(
                 ),
             )
         }
-        (WidgetCatalog.palette + projectEntries).groupBy { it.category }
+        WidgetCatalog.palette + projectEntries
     }
-    LazyVerticalGrid(
-        modifier = modifier.fillMaxWidth(),
-        columns = GridCells.Adaptive(minSize = 104.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        groups.forEach { (category, entries) ->
-            item(span = { GridItemSpan(maxLineSpan) }, key = "h_${category.name}") {
-                Text(stringRes(categoryLabel(category)), style = MaterialTheme.typography.titleSmall)
+
+    val filteredEntries = remember(allEntries, searchQuery, selectedCategory) {
+        allEntries.filter { entry ->
+            val matchesCat = selectedCategory == null || entry.category == selectedCategory
+            val matchesQuery = searchQuery.isBlank() ||
+                entry.tag.contains(searchQuery, ignoreCase = true) ||
+                entry.key.contains(searchQuery, ignoreCase = true)
+            matchesCat && matchesQuery
+        }
+    }
+
+    val groups = remember(filteredEntries) {
+        filteredEntries.groupBy { it.category }
+    }
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            placeholder = { Text(stringRes(R.string.layout_search_palette)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = if (searchQuery.isNotEmpty()) {
+                {
+                    IconButton(onClick = { searchQuery = "" }) {
+                        Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                    }
+                }
+            } else null,
+            singleLine = true,
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            FilterChip(
+                selected = selectedCategory == null,
+                onClick = { selectedCategory = null },
+                label = { Text(stringRes(R.string.layout_filter_all)) },
+            )
+            com.codeforge.feature.layoutdesigner.model.WidgetCategory.entries.forEach { cat ->
+                FilterChip(
+                    selected = selectedCategory == cat,
+                    onClick = { selectedCategory = if (selectedCategory == cat) null else cat },
+                    label = { Text(stringRes(categoryLabel(cat))) },
+                )
             }
-            items(entries, key = { it.key }) { entry ->
-                ElevatedCard(onClick = { onPick(entry) }) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Icon(paletteIcon(entry.key), contentDescription = null)
-                        Text(
-                            text = if (entry.key.startsWith("custom_")) entry.tag.substringAfterLast('.') else stringRes(paletteLabel(entry.key)),
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+        }
+
+        LazyVerticalGrid(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            columns = GridCells.Adaptive(minSize = 104.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            groups.forEach { (category, entries) ->
+                item(span = { GridItemSpan(maxLineSpan) }, key = "h_${category.name}") {
+                    Text(stringRes(categoryLabel(category)), style = MaterialTheme.typography.titleSmall)
+                }
+                items(entries, key = { it.key }) { entry ->
+                    ElevatedCard(onClick = { onPick(entry) }) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Icon(paletteIcon(entry.key), contentDescription = null)
+                            Text(
+                                text = if (entry.key.startsWith("custom_")) entry.tag.substringAfterLast('.') else stringRes(paletteLabel(entry.key)),
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 }
             }
@@ -202,6 +274,31 @@ internal fun TreePanel(
     }
 }
 
+private enum class AttrGroup {
+    LAYOUT, MARGINS, TEXT, APPEARANCE, BEHAVIOR, CONSTRAINTS, OTHER;
+
+    @StringRes
+    fun labelRes(): Int = when (this) {
+        LAYOUT -> R.string.layout_group_layout
+        MARGINS -> R.string.layout_group_margins
+        TEXT -> R.string.layout_group_text
+        APPEARANCE -> R.string.layout_group_appearance
+        BEHAVIOR -> R.string.layout_group_behavior
+        CONSTRAINTS -> R.string.layout_group_constraints
+        OTHER -> R.string.layout_group_other
+    }
+}
+
+private fun classifyAttr(name: String): AttrGroup = when {
+    name.contains("constraint") -> AttrGroup.CONSTRAINTS
+    name.contains("margin") || name.contains("padding") -> AttrGroup.MARGINS
+    name.contains("text") || name.contains("gravity") || name.contains("hint") || name.contains("font") -> AttrGroup.TEXT
+    name.contains("background") || name.contains("color") || name.contains("tint") || name.contains("src") || name.contains("elevation") || name.contains("alpha") -> AttrGroup.APPEARANCE
+    name.contains("layout_width") || name.contains("layout_height") || name.contains("orientation") || name.contains("layout_weight") || name.contains("row") || name.contains("column") -> AttrGroup.LAYOUT
+    name.contains("visibility") || name.contains("checked") || name.contains("enabled") || name.contains("clickable") || name.contains("inputType") -> AttrGroup.BEHAVIOR
+    else -> AttrGroup.OTHER
+}
+
 /** Eigenschaftenliste des ausgewählten Elements. */
 @Composable
 internal fun PropertiesPanel(
@@ -222,8 +319,28 @@ internal fun PropertiesPanel(
     val parentTag = state.document.parentOf(node.uid)?.tag?.substringAfterLast('.')
     val specs = remember(node.tag, parentTag) { WidgetCatalog.attrsFor(node.tag, parentTag) }
     val specNames = remember(specs) { specs.map { it.name }.toSet() }
+    val otherAttrs = remember(node.attributes, specNames) {
+        node.attributes.keys.filter { it !in specNames }.map { AttrSpec(it, AttrKind.TEXT) }
+    }
+    val allSpecs = remember(specs, otherAttrs) { specs + otherAttrs }
+
+    var searchQuery by remember { mutableStateOf("") }
+    var onlySet by remember { mutableStateOf(false) }
+    var collapsedGroups by remember { mutableStateOf(setOf<AttrGroup>()) }
     var showAdd by remember { mutableStateOf(false) }
     var extractRequest by remember { mutableStateOf<ExtractRequest?>(null) }
+
+    val filteredSpecs = remember(allSpecs, searchQuery, onlySet, node.attributes) {
+        allSpecs.filter { spec ->
+            val matchesSearch = searchQuery.isBlank() || spec.name.contains(searchQuery, ignoreCase = true)
+            val matchesOnlySet = !onlySet || !node.attr(spec.name).isNullOrEmpty()
+            matchesSearch && matchesOnlySet
+        }
+    }
+
+    val groupedSpecs = remember(filteredSpecs) {
+        filteredSpecs.groupBy { classifyAttr(it.name) }
+    }
 
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
@@ -241,44 +358,80 @@ internal fun PropertiesPanel(
             )
         }
 
-        specs.forEach { spec ->
-            AttributeEditor(
-                node = node,
-                spec = spec,
-                value = node.attr(spec.name).orEmpty(),
-                onChange = { onEvent(LayoutDesignerUiEvent.SetAttribute(node.uid, spec.name, it)) },
-                repo = state.resourceRepo,
-                onExtract = { resType, valToExtract ->
-                    extractRequest = ExtractRequest(node.uid, spec.name, resType, valToExtract)
-                },
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(stringRes(R.string.layout_search_attrs)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = if (searchQuery.isNotEmpty()) {
+                {
+                    IconButton(onClick = { searchQuery = "" }) {
+                        Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                    }
+                }
+            } else null,
+            singleLine = true,
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            FilterChip(
+                selected = onlySet,
+                onClick = { onlySet = !onlySet },
+                label = { Text(stringRes(R.string.layout_filter_only_set)) },
             )
+            OutlinedButton(onClick = { showAdd = true }) { Text(stringRes(R.string.layout_add_attribute)) }
         }
-        val others = node.attributes.keys.filter { it !in specNames }
-        if (others.isNotEmpty()) {
-            HorizontalDivider(Modifier.padding(vertical = 4.dp))
-            Text(stringRes(R.string.layout_other_attributes), style = MaterialTheme.typography.titleSmall)
-            others.forEach { name ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.weight(1f)) {
-                        AttributeEditor(
-                            node = node,
-                            spec = AttrSpec(name, AttrKind.TEXT),
-                            value = node.attr(name).orEmpty(),
-                            onChange = { onEvent(LayoutDesignerUiEvent.SetAttribute(node.uid, name, it)) },
-                            labelOverride = name,
-                            repo = state.resourceRepo,
-                            onExtract = { resType, valToExtract ->
-                                extractRequest = ExtractRequest(node.uid, name, resType, valToExtract)
-                            },
+
+        AttrGroup.entries.forEach { group ->
+            val attrsInGroup = groupedSpecs[group] ?: emptyList()
+            if (attrsInGroup.isNotEmpty()) {
+                val isCollapsed = group in collapsedGroups
+                Surface(
+                    onClick = {
+                        collapsedGroups = if (isCollapsed) collapsedGroups - group else collapsedGroups + group
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    shape = RoundedCornerShape(4.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "${stringRes(group.labelRes())} (${attrsInGroup.size})",
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                        Icon(
+                            imageVector = if (isCollapsed) Icons.Filled.ExpandMore else Icons.Filled.ExpandLess,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
-                    IconButton(onClick = { onEvent(LayoutDesignerUiEvent.SetAttribute(node.uid, name, null)) }) {
-                        Icon(Icons.Filled.Close, contentDescription = stringRes(R.string.layout_remove_attribute))
+                }
+
+                if (!isCollapsed) {
+                    attrsInGroup.forEach { spec ->
+                        AttributeEditor(
+                            node = node,
+                            spec = spec,
+                            value = node.attr(spec.name).orEmpty(),
+                            onChange = { onEvent(LayoutDesignerUiEvent.SetAttribute(node.uid, spec.name, it)) },
+                            repo = state.resourceRepo,
+                            onExtract = { resType, valToExtract ->
+                                extractRequest = ExtractRequest(node.uid, spec.name, resType, valToExtract)
+                            },
+                        )
                     }
                 }
             }
         }
-        OutlinedButton(onClick = { showAdd = true }) { Text(stringRes(R.string.layout_add_attribute)) }
     }
 
     extractRequest?.let { req ->
@@ -312,6 +465,7 @@ internal fun PropertiesPanel(
 }
 
 /** Ein Eingabefeld passend zur [AttrSpec.kind]. Leerer Wert entfernt das Attribut. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AttributeEditor(
     node: LayoutNode,
@@ -322,9 +476,50 @@ private fun AttributeEditor(
     repo: com.codeforge.feature.layoutdesigner.res.ResourceRepository? = null,
     onExtract: ((ResType, String) -> Unit)? = null,
 ) {
-    val label = labelOverride ?: spec.name.removePrefix("android:")
+    val label = labelOverride ?: spec.name.removePrefix("android:").removePrefix("app:")
     when (spec.kind) {
         AttrKind.ENUM -> EnumField(label, value, spec.options, onChange)
+        AttrKind.BOOLEAN -> {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(label, style = MaterialTheme.typography.bodyMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("true", "false").forEach { opt ->
+                        FilterChip(
+                            selected = value == opt,
+                            onClick = { onChange(if (value == opt) null else opt) },
+                            label = { Text(opt) },
+                        )
+                    }
+                }
+            }
+        }
+        AttrKind.FLAG -> {
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                Text(label, style = MaterialTheme.typography.bodyMedium)
+                val currentFlags = remember(value) {
+                    value.split('|').map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+                }
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    spec.options.forEach { flag ->
+                        FilterChip(
+                            selected = flag in currentFlags,
+                            onClick = {
+                                val updated = if (flag in currentFlags) currentFlags - flag else currentFlags + flag
+                                onChange(if (updated.isEmpty()) null else updated.joinToString("|"))
+                            },
+                            label = { Text(flag) },
+                        )
+                    }
+                }
+            }
+        }
         else -> {
             var text by remember(node.uid, spec.name) { mutableStateOf(value) }
             LaunchedEffect(value) { if (value != text) text = value }
@@ -353,7 +548,7 @@ private fun AttributeEditor(
                         label = { Text(label) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = if (spec.kind == AttrKind.NUMBER) KeyboardType.Decimal else KeyboardType.Text,
+                            keyboardType = if (spec.kind == AttrKind.NUMBER || spec.kind == AttrKind.INTEGER || spec.kind == AttrKind.FLOAT) KeyboardType.Decimal else KeyboardType.Text,
                         ),
                         leadingIcon = if (spec.kind == AttrKind.COLOR) {
                             {
@@ -368,7 +563,38 @@ private fun AttributeEditor(
                                 )
                             }
                         } else null,
+                        trailingIcon = if (text.isNotEmpty()) {
+                            {
+                                IconButton(onClick = { text = ""; onChange(null) }) {
+                                    Icon(Icons.Filled.Close, contentDescription = stringRes(R.string.layout_clear_attr), modifier = Modifier.size(16.dp))
+                                }
+                            }
+                        } else null,
                     )
+                    if (spec.kind == AttrKind.DIMENSION) {
+                        IconButton(
+                            onClick = {
+                                val cur = parseDimension(text)?.roundToInt() ?: 0
+                                val next = maxOf(0, cur - 4)
+                                text = "${next}dp"
+                                onChange(text)
+                            },
+                            modifier = Modifier.size(32.dp),
+                        ) {
+                            Icon(Icons.Filled.Remove, contentDescription = "-4dp", modifier = Modifier.size(16.dp))
+                        }
+                        IconButton(
+                            onClick = {
+                                val cur = parseDimension(text)?.roundToInt() ?: 0
+                                val next = cur + 4
+                                text = "${next}dp"
+                                onChange(text)
+                            },
+                            modifier = Modifier.size(32.dp),
+                        ) {
+                            Icon(Icons.Filled.Add, contentDescription = "+4dp", modifier = Modifier.size(16.dp))
+                        }
+                    }
                     if (canExtract) {
                         val resType = when (spec.kind) {
                             AttrKind.COLOR -> ResType.COLOR

@@ -46,6 +46,15 @@ internal fun paletteLabel(key: String): Int = when (key) {
     "view" -> R.string.layout_w_view
     "space" -> R.string.layout_w_space
     "include" -> R.string.layout_w_include
+    "card_view" -> R.string.layout_w_card_view
+    "material_button" -> R.string.layout_w_material_button
+    "chip" -> R.string.layout_w_chip
+    "fab" -> R.string.layout_w_fab
+    "recycler_view" -> R.string.layout_w_recycler_view
+    "text_input_layout" -> R.string.layout_w_text_input_layout
+    "slider" -> R.string.layout_w_slider
+    "material_divider" -> R.string.layout_w_material_divider
+    "compose_view" -> R.string.layout_w_compose_view
     else -> R.string.layout_w_space
 }
 
@@ -65,6 +74,15 @@ internal fun paletteIcon(key: String): ImageVector = when (key) {
     "view" -> Icons.Filled.HorizontalRule
     "space" -> Icons.Filled.SpaceBar
     "include" -> Icons.Filled.Layers
+    "card_view" -> Icons.Filled.Layers
+    "material_button" -> Icons.Filled.TouchApp
+    "chip" -> Icons.Filled.TouchApp
+    "fab" -> Icons.Filled.TouchApp
+    "recycler_view" -> Icons.Filled.ViewAgenda
+    "text_input_layout" -> Icons.Filled.Edit
+    "slider" -> Icons.Filled.HorizontalRule
+    "material_divider" -> Icons.Filled.HorizontalRule
+    "compose_view" -> Icons.Filled.Widgets
     else -> Icons.Filled.Widgets
 }
 

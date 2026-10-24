@@ -43,14 +43,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -632,6 +636,63 @@ private fun LeafView(node: LayoutNode, tag: String, ctx: PreviewContext, modifie
         }
         "ProgressBar" -> Box(modifier = modifier, contentAlignment = Alignment.Center) {
             CircularProgressIndicator(modifier = Modifier.size(36.dp))
+        }
+        "Chip" -> {
+            val rawText = if (ctx.showTools && node.attr("tools:text") != null) node.attr("tools:text") else node.attr("android:text").orEmpty()
+            AssistChip(onClick = {}, label = { Text(resolveText(rawText).ifEmpty { "Chip" }) }, modifier = modifier)
+        }
+        "Slider", "SeekBar" -> {
+            Slider(value = 0.5f, onValueChange = {}, modifier = modifier.width(120.dp))
+        }
+        "MaterialDivider" -> {
+            HorizontalDivider(modifier = modifier)
+        }
+        "RecyclerView", "ListView", "GridView" -> {
+            val listItem = if (ctx.showTools) node.attr("tools:listitem") else null
+            val itemCount = (if (ctx.showTools) node.attr("tools:itemCount")?.toIntOrNull() else null) ?: 3
+            val itemRes = remember(listItem, ctx.includeResolver) {
+                if (!listItem.isNullOrBlank() && ctx.includeResolver != null) {
+                    ctx.includeResolver.resolve(listItem)
+                } else null
+            }
+            Surface(
+                modifier = modifier.defaultMinSize(100.dp, 80.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            ) {
+                if (itemRes is IncludedLayoutResult.Success) {
+                    Column(Modifier.fillMaxSize()) {
+                        repeat(minOf(itemCount, 4)) {
+                            NodeView(itemRes.mergedRoot, ctx, Modifier)
+                            HorizontalDivider()
+                        }
+                    }
+                } else {
+                    Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "<${node.tag.substringAfterLast('.')}>",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                    }
+                }
+            }
+        }
+        "ComposeView" -> {
+            Surface(
+                modifier = modifier.defaultMinSize(80.dp, 40.dp),
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(4.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
+            ) {
+                Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "ComposeView",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
         }
         else -> {
             if (node.tag.contains('.')) {
