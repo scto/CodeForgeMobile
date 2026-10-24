@@ -1,2 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
+<!-- Modul: :feature:layoutdesigner — @author Thomas Schmid -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <provider
+            android:name="com.codeforge.feature.layoutdesigner.files.LayoutDesignerFileProvider"
+            android:authorities="${applicationId}.feature.layoutdesigner.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/layout_designer_file_provider_paths" />
+        </provider>
+    </application>
+
+</manifest>

@@ -20,6 +20,8 @@ enum class DevicePreset(val widthDp: Int, val heightDp: Int) {
     TABLET_10(800, 1280),
 }
 
+enum class OverlayType { BOUNDS, MARGINS_PADDINGS, BLUEPRINT, GRID_SNAP }
+
 @Immutable
 data class LayoutDesignerUiState(
     val filePath: String = "",
@@ -42,8 +44,36 @@ data class LayoutDesignerUiState(
     val showPalette: Boolean = false,
     val showDiscardConfirm: Boolean = false,
     val reformatOnSave: Boolean = false,
+
+    // 41.3 Leinwand, Konfiguration und Werkzeuge
+    val zoom: Float = 1.0f,
+    val panX: Float = 0f,
+    val panY: Float = 0f,
+    val isLandscape: Boolean = false,
+    val isDarkTheme: Boolean = false,
+    val fontScale: Float = 1.0f,
+    val isRtl: Boolean = false,
+    val customWidthDp: Int? = null,
+    val customHeightDp: Int? = null,
+    val showBoundsOverlay: Boolean = false,
+    val showMarginsPaddingsOverlay: Boolean = true,
+    val blueprintMode: Boolean = false,
+    val snapTo8DpGrid: Boolean = true,
+    val clipboardXml: String? = null,
 ) {
     val fileName: String get() = filePath.substringAfterLast('/')
+
+    val effectiveWidthDp: Int get() {
+        val baseW = customWidthDp ?: device.widthDp
+        val baseH = customHeightDp ?: device.heightDp
+        return if (isLandscape) maxOf(baseW, baseH) else minOf(baseW, baseH)
+    }
+
+    val effectiveHeightDp: Int get() {
+        val baseW = customWidthDp ?: device.widthDp
+        val baseH = customHeightDp ?: device.heightDp
+        return if (isLandscape) minOf(baseW, baseH) else maxOf(baseW, baseH)
+    }
 }
 
 sealed interface LayoutDesignerUiEvent {
@@ -76,9 +106,26 @@ sealed interface LayoutDesignerUiEvent {
     data object DismissDiscard : LayoutDesignerUiEvent
     data object ConfirmDiscard : LayoutDesignerUiEvent
     data class SetReformatOnSave(val enabled: Boolean) : LayoutDesignerUiEvent
+
+    // 41.3 Neue Ereignisse
+    data class SetZoom(val zoom: Float) : LayoutDesignerUiEvent
+    data class SetPan(val panX: Float, val panY: Float) : LayoutDesignerUiEvent
+    data object ResetZoomPan : LayoutDesignerUiEvent
+    data class SetLandscape(val isLandscape: Boolean) : LayoutDesignerUiEvent
+    data class SetDarkTheme(val isDark: Boolean) : LayoutDesignerUiEvent
+    data class SetFontScale(val scale: Float) : LayoutDesignerUiEvent
+    data class SetRtl(val isRtl: Boolean) : LayoutDesignerUiEvent
+    data class SetCustomDimensions(val widthDp: Int?, val heightDp: Int?) : LayoutDesignerUiEvent
+    data class ToggleOverlay(val overlayType: OverlayType) : LayoutDesignerUiEvent
+    data object CopySelected : LayoutDesignerUiEvent
+    data object CutSelected : LayoutDesignerUiEvent
+    data class PasteSnippet(val xmlSnippet: String) : LayoutDesignerUiEvent
+    data class ResizeSelected(val widthDp: Int?, val heightDp: Int?) : LayoutDesignerUiEvent
+    data class ToggleSizeMode(val isWidth: Boolean) : LayoutDesignerUiEvent
 }
 
 sealed interface LayoutDesignerUiEffect {
     data class ShowSnackbar(val message: String) : LayoutDesignerUiEffect
     data object NavigateBack : LayoutDesignerUiEffect
+    data class CopyToClipboard(val text: String) : LayoutDesignerUiEffect
 }

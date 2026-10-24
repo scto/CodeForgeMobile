@@ -13,6 +13,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.feature.layoutdesigner.files.LayoutFileStore
 import com.codeforge.feature.layoutdesigner.model.DragPayload
 import com.codeforge.feature.layoutdesigner.model.DropVerdict
+import com.codeforge.feature.layoutdesigner.model.LayoutClipboard
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.addWidget
 import com.codeforge.feature.layoutdesigner.model.addWidgetAt
@@ -21,6 +22,7 @@ import com.codeforge.feature.layoutdesigner.model.duplicate
 import com.codeforge.feature.layoutdesigner.model.duplicateNodes
 import com.codeforge.feature.layoutdesigner.model.find
 import com.codeforge.feature.layoutdesigner.model.indent
+import com.codeforge.feature.layoutdesigner.model.insertTarget
 import com.codeforge.feature.layoutdesigner.model.moveNode
 import com.codeforge.feature.layoutdesigner.model.moveWithinParent
 import com.codeforge.feature.layoutdesigner.model.outdent
@@ -188,6 +190,72 @@ class LayoutDesignerViewModel @Inject constructor(
                 val updatedDoc = s.document.copy(reformatOnSave = event.enabled)
                 val xml = LayoutXml.write(updatedDoc, reformat = event.enabled)
                 _state.update { it.copy(reformatOnSave = event.enabled, document = updatedDoc, xmlText = xml) }
+            }
+            is LayoutDesignerUiEvent.SetZoom -> _state.update { it.copy(zoom = event.zoom.coerceIn(0.25f, 4.0f)) }
+            is LayoutDesignerUiEvent.SetPan -> _state.update { it.copy(panX = event.panX, panY = event.panY) }
+            LayoutDesignerUiEvent.ResetZoomPan -> _state.update { it.copy(zoom = 1.0f, panX = 0f, panY = 0f) }
+            is LayoutDesignerUiEvent.SetLandscape -> _state.update { it.copy(isLandscape = event.isLandscape) }
+            is LayoutDesignerUiEvent.SetDarkTheme -> _state.update { it.copy(isDarkTheme = event.isDark) }
+            is LayoutDesignerUiEvent.SetFontScale -> _state.update { it.copy(fontScale = event.scale) }
+            is LayoutDesignerUiEvent.SetRtl -> _state.update { it.copy(isRtl = event.isRtl) }
+            is LayoutDesignerUiEvent.SetCustomDimensions -> _state.update { it.copy(customWidthDp = event.widthDp, customHeightDp = event.heightDp) }
+            is LayoutDesignerUiEvent.ToggleOverlay -> _state.update { s ->
+                when (event.overlayType) {
+                    OverlayType.BOUNDS -> s.copy(showBoundsOverlay = !s.showBoundsOverlay)
+                    OverlayType.MARGINS_PADDINGS -> s.copy(showMarginsPaddingsOverlay = !s.showMarginsPaddingsOverlay)
+                    OverlayType.BLUEPRINT -> s.copy(blueprintMode = !s.blueprintMode)
+                    OverlayType.GRID_SNAP -> s.copy(snapTo8DpGrid = !s.snapTo8DpGrid)
+                }
+            }
+            LayoutDesignerUiEvent.CopySelected -> {
+                val s = _state.value
+                val targets = if (s.selectedUids.isNotEmpty()) s.selectedUids else s.selectedUid?.let { setOf(it) } ?: emptySet()
+                val snippet = LayoutClipboard.createSnippet(s.document, targets)
+                if (snippet.isNotBlank()) {
+                    _state.update { it.copy(clipboardXml = snippet) }
+                    viewModelScope.launch { _effects.send(LayoutDesignerUiEffect.CopyToClipboard(snippet)) }
+                }
+            }
+            LayoutDesignerUiEvent.CutSelected -> {
+                val s = _state.value
+                val targets = if (s.selectedUids.isNotEmpty()) s.selectedUids else s.selectedUid?.let { setOf(it) } ?: emptySet()
+                val snippet = LayoutClipboard.createSnippet(s.document, targets)
+                if (snippet.isNotBlank()) {
+                    _state.update { it.copy(clipboardXml = snippet) }
+                    viewModelScope.launch { _effects.send(LayoutDesignerUiEffect.CopyToClipboard(snippet)) }
+                    val firstParent = targets.firstNotNullOfOrNull { s.document.parentOf(it) }?.uid
+                    commit(s.document.removeNodes(targets), selectUid = firstParent)
+                }
+            }
+            is LayoutDesignerUiEvent.PasteSnippet -> {
+                val s = _state.value
+                val targetContainer = s.document.insertTarget(s.selectedUid)
+                val res = LayoutClipboard.pasteSnippet(s.document, event.xmlSnippet, targetContainer.uid)
+                if (res.newUid != null) {
+                    commit(res.document, selectUid = res.newUid)
+                }
+            }
+            is LayoutDesignerUiEvent.ResizeSelected -> selected()?.let { uid ->
+                var doc = _state.value.document
+                val grid = _state.value.snapTo8DpGrid
+                if (event.widthDp != null) {
+                    val w = if (grid) (Math.round(event.widthDp / 8.0) * 8).toInt() else event.widthDp
+                    doc = doc.setAttribute(uid, "android:layout_width", "${w}dp")
+                }
+                if (event.heightDp != null) {
+                    val h = if (grid) (Math.round(event.heightDp / 8.0) * 8).toInt() else event.heightDp
+                    doc = doc.setAttribute(uid, "android:layout_height", "${h}dp")
+                }
+                commit(doc, selectUid = uid)
+            }
+            is LayoutDesignerUiEvent.ToggleSizeMode -> selected()?.let { uid ->
+                val node = _state.value.document.find(uid) ?: return@let
+                val attr = if (event.isWidth) "android:layout_width" else "android:layout_height"
+                val current = node.attr(attr) ?: "wrap_content"
+                val parentTag = _state.value.document.parentOf(uid)?.tag
+                val matchVal = if (parentTag == "ConstraintLayout" || parentTag?.endsWith(".ConstraintLayout") == true) "0dp" else "match_parent"
+                val next = if (current == matchVal) "wrap_content" else matchVal
+                commit(_state.value.document.setAttribute(uid, attr, next), selectUid = uid)
             }
         }
     }

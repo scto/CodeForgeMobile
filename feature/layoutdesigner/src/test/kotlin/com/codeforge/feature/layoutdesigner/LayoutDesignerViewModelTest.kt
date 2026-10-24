@@ -537,6 +537,118 @@ class LayoutDesignerViewModelTest {
         assertEquals("Button", viewModel.state.value.document.root.children[1].tag)
     }
 
+    @Test
+    fun zoomAndPan_updatesStateAndResetRestoresDefaults() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        viewModel.onEvent(LayoutDesignerUiEvent.SetZoom(2.5f))
+        assertEquals(2.5f, viewModel.state.value.zoom)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.SetPan(150f, -50f))
+        assertEquals(150f, viewModel.state.value.panX)
+        assertEquals(-50f, viewModel.state.value.panY)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.ResetZoomPan)
+        assertEquals(1.0f, viewModel.state.value.zoom)
+        assertEquals(0f, viewModel.state.value.panX)
+        assertEquals(0f, viewModel.state.value.panY)
+    }
+
+    @Test
+    fun configurationToggles_updateState() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        viewModel.onEvent(LayoutDesignerUiEvent.SetLandscape(true))
+        assertTrue(viewModel.state.value.isLandscape)
+        assertTrue(viewModel.state.value.effectiveWidthDp > viewModel.state.value.effectiveHeightDp)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.SetDarkTheme(true))
+        assertTrue(viewModel.state.value.isDarkTheme)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.SetFontScale(1.3f))
+        assertEquals(1.3f, viewModel.state.value.fontScale)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.SetRtl(true))
+        assertTrue(viewModel.state.value.isRtl)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.ToggleOverlay(OverlayType.BLUEPRINT))
+        assertTrue(viewModel.state.value.blueprintMode)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.ToggleOverlay(OverlayType.MARGINS_PADDINGS))
+        assertFalse(viewModel.state.value.showMarginsPaddingsOverlay)
+    }
+
+    @Test
+    fun clipboard_copyCutPaste_worksWithUndo() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        val effects = mutableListOf<LayoutDesignerUiEffect>()
+        val job = launch { viewModel.effects.collect { effects.add(it) } }
+
+        // Select TextView (uid 1) and copy
+        viewModel.onEvent(LayoutDesignerUiEvent.Select(1))
+        viewModel.onEvent(LayoutDesignerUiEvent.CopySelected)
+        advanceUntilIdle()
+
+        val copyEffect = effects.filterIsInstance<LayoutDesignerUiEffect.CopyToClipboard>().firstOrNull()
+        assertNotNull(copyEffect)
+        assertTrue(copyEffect!!.text.contains("<TextView"))
+
+        // Paste the snippet into root
+        viewModel.onEvent(LayoutDesignerUiEvent.Select(0))
+        viewModel.onEvent(LayoutDesignerUiEvent.PasteSnippet(copyEffect.text))
+        advanceUntilIdle()
+
+        assertEquals(2, viewModel.state.value.document.root.children.size)
+        assertTrue(viewModel.state.value.canUndo)
+
+        // Cut the first child
+        viewModel.onEvent(LayoutDesignerUiEvent.Select(1))
+        viewModel.onEvent(LayoutDesignerUiEvent.CutSelected)
+        advanceUntilIdle()
+
+        assertEquals(1, viewModel.state.value.document.root.children.size)
+
+        // Undo cut
+        viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+        assertEquals(2, viewModel.state.value.document.root.children.size)
+
+        job.cancel()
+    }
+
+    @Test
+    fun resizeAndToggleSizeMode_updatesAttributesAndRecordsUndo() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        viewModel.onEvent(LayoutDesignerUiEvent.Select(1))
+        viewModel.onEvent(LayoutDesignerUiEvent.ResizeSelected(120, 80))
+        advanceUntilIdle()
+
+        val resizedNode = viewModel.state.value.document.find(1)!!
+        assertEquals("120dp", resizedNode.attr("android:layout_width"))
+        assertEquals("80dp", resizedNode.attr("android:layout_height"))
+        assertTrue(viewModel.state.value.canUndo)
+
+        // Toggle width mode wrap_content <-> match_parent
+        viewModel.onEvent(LayoutDesignerUiEvent.ToggleSizeMode(isWidth = true))
+        assertEquals("match_parent", viewModel.state.value.document.find(1)!!.attr("android:layout_width"))
+
+        viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+        assertEquals("120dp", viewModel.state.value.document.find(1)!!.attr("android:layout_width"))
+    }
+
     // --- Fakes ---
 
     private class FakeLayoutFileStore : LayoutFileStore {

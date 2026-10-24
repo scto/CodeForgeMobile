@@ -6,7 +6,7 @@
  * FrameLayout (layout_gravity), Scroll-Container und die gängigen Widgets. Constraint-/Relative-
  * und unbekannte Container werden gestapelt (wie FrameLayout) gezeichnet. Jedes Element ist
  * antippbar und wählt den Knoten aus; Auswahl und Container-Umrisse werden hervorgehoben.
- * Unterstützt visuelle Drag & Drop Rückmeldungen und Knoten-Grenzen-Erfassung.
+ * Unterstützt visuelle Drag & Drop Rückmeldungen, Zoom/Pan-Transformationen und Größengriffe.
  */
 package com.codeforge.feature.layoutdesigner.preview
 
@@ -15,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -57,10 +58,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -82,9 +87,12 @@ import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.LayoutNode
 import com.codeforge.feature.layoutdesigner.model.SizeMode
 import com.codeforge.feature.layoutdesigner.model.find
+import com.codeforge.feature.layoutdesigner.model.parentOf
 import com.codeforge.feature.layoutdesigner.model.parseColorArgb
 import com.codeforge.feature.layoutdesigner.model.parseDimension
 import com.codeforge.feature.layoutdesigner.model.parseSize
+import com.codeforge.feature.layoutdesigner.ui.ResizeHandles
+import com.codeforge.feature.layoutdesigner.ui.ZoomControls
 import kotlin.math.roundToInt
 
 @Immutable
@@ -110,6 +118,17 @@ fun LayoutPreview(
     modifier: Modifier = Modifier,
     dragController: DragController? = null,
     onDrop: ((DragPayload, DropTarget) -> Unit)? = null,
+    zoom: Float = 1.0f,
+    panX: Float = 0f,
+    panY: Float = 0f,
+    onZoomChange: ((Float) -> Unit)? = null,
+    onPanChange: ((Float, Float) -> Unit)? = null,
+    onResetZoomPan: (() -> Unit)? = null,
+    onResizeDelta: ((Float, Float) -> Unit)? = null,
+    onToggleSizeMode: ((Boolean) -> Unit)? = null,
+    effectiveWidthDp: Int = device.widthDp,
+    effectiveHeightDp: Int = device.heightDp,
+    graphicsLayer: GraphicsLayer? = null,
 ) {
     val context = remember(selectedUid, onSelect, dragController, onDrop, document) {
         PreviewContext(selectedUid, onSelect, dragController, onDrop, document)
@@ -117,102 +136,153 @@ fun LayoutPreview(
 
     Box(
         modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .horizontalScroll(rememberScrollState())
-            .padding(16.dp),
-        contentAlignment = Alignment.TopCenter,
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTransformGestures { _, pan, zoomFactor, _ ->
+                    onZoomChange?.invoke((zoom * zoomFactor).coerceIn(0.25f, 4.0f))
+                    onPanChange?.invoke(panX + pan.x, panY + pan.y)
+                }
+            },
     ) {
-        Surface(
+        Box(
             modifier = Modifier
-                .size(device.widthDp.dp, device.heightDp.dp)
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp)),
-            color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(4.dp),
+                .fillMaxSize()
+                .padding(16.dp)
+                .graphicsLayer {
+                    scaleX = zoom
+                    scaleY = zoom
+                    translationX = panX
+                    translationY = panY
+                },
+            contentAlignment = Alignment.Center,
         ) {
-            Box(Modifier.fillMaxSize()) {
-                NodeView(document.root, context, scopeModifier = Modifier)
+            Surface(
+                modifier = Modifier
+                    .size(effectiveWidthDp.dp, effectiveHeightDp.dp)
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+                    .then(
+                        if (graphicsLayer != null) {
+                            Modifier.drawWithContent {
+                                graphicsLayer.record {
+                                    this@drawWithContent.drawContent()
+                                }
+                                drawLayer(graphicsLayer)
+                            }
+                        } else Modifier
+                    ),
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(4.dp),
+            ) {
+                Box(Modifier.fillMaxSize()) {
+                    NodeView(document.root, context, scopeModifier = Modifier)
 
-                // Drag & Drop Overlays
-                if (dragController != null && dragController.isDragging) {
-                    val target = dragController.currentTarget
-                    val primaryColor = MaterialTheme.colorScheme.primary
-                    val errorColor = MaterialTheme.colorScheme.error
+                    // Drag & Drop Overlays
+                    if (dragController != null && dragController.isDragging) {
+                        val target = dragController.currentTarget
+                        val primaryColor = MaterialTheme.colorScheme.primary
+                        val errorColor = MaterialTheme.colorScheme.error
 
-                    if (target != null) {
-                        val indicatorColor = if (target.verdict is DropVerdict.Rejected) errorColor else primaryColor
-                        when (val ind = target.indicator) {
-                            is DropIndicator.Line -> {
-                                Canvas(Modifier.fillMaxSize()) {
-                                    drawLine(
-                                        color = indicatorColor,
-                                        start = Offset(ind.startX, ind.startY),
-                                        end = Offset(ind.endX, ind.endY),
-                                        strokeWidth = 4.dp.toPx(),
-                                    )
+                        if (target != null) {
+                            val indicatorColor = if (target.verdict is DropVerdict.Rejected) errorColor else primaryColor
+                            when (val ind = target.indicator) {
+                                is DropIndicator.Line -> {
+                                    Canvas(Modifier.fillMaxSize()) {
+                                        drawLine(
+                                            color = indicatorColor,
+                                            start = Offset(ind.startX, ind.startY),
+                                            end = Offset(ind.endX, ind.endY),
+                                            strokeWidth = 4.dp.toPx(),
+                                        )
+                                    }
+                                }
+                                is DropIndicator.HighlightContainer -> {
+                                    Canvas(Modifier.fillMaxSize()) {
+                                        drawRect(
+                                            color = indicatorColor.copy(alpha = 0.15f),
+                                            topLeft = Offset(ind.rect.left, ind.rect.top),
+                                            size = Size(ind.rect.width, ind.rect.height),
+                                        )
+                                        drawRect(
+                                            color = indicatorColor,
+                                            topLeft = Offset(ind.rect.left, ind.rect.top),
+                                            size = Size(ind.rect.width, ind.rect.height),
+                                            style = Stroke(width = 2.dp.toPx()),
+                                        )
+                                    }
                                 }
                             }
-                            is DropIndicator.HighlightContainer -> {
-                                Canvas(Modifier.fillMaxSize()) {
-                                    drawRect(
-                                        color = indicatorColor.copy(alpha = 0.15f),
-                                        topLeft = Offset(ind.rect.left, ind.rect.top),
-                                        size = Size(ind.rect.width, ind.rect.height),
-                                    )
-                                    drawRect(
-                                        color = indicatorColor,
-                                        topLeft = Offset(ind.rect.left, ind.rect.top),
-                                        size = Size(ind.rect.width, ind.rect.height),
-                                        style = Stroke(width = 2.dp.toPx()),
+
+                            if (target.verdict is DropVerdict.Rejected) {
+                                Box(
+                                    modifier = Modifier
+                                        .offset { IntOffset(dragController.dragPosition.x.roundToInt() + 16, dragController.dragPosition.y.roundToInt() + 16) }
+                                        .background(errorColor, RoundedCornerShape(4.dp))
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                ) {
+                                    Text(
+                                        text = target.verdict.reason,
+                                        color = MaterialTheme.colorScheme.onError,
+                                        style = MaterialTheme.typography.labelSmall,
                                     )
                                 }
                             }
                         }
 
-                        if (target.verdict is DropVerdict.Rejected) {
-                            Box(
+                        // Drag Badge under finger
+                        val payload = dragController.activePayload
+                        if (payload != null) {
+                            val label = when (payload) {
+                                is DragPayload.NewWidget -> payload.entry.tag.substringAfterLast('.')
+                                is DragPayload.ExistingNodes -> {
+                                    val firstNode = document.find(payload.uids.firstOrNull() ?: -1)
+                                    firstNode?.tag?.substringAfterLast('.') ?: "View"
+                                }
+                            }
+                            ElevatedCard(
                                 modifier = Modifier
-                                    .offset { IntOffset(dragController.dragPosition.x.roundToInt() + 16, dragController.dragPosition.y.roundToInt() + 16) }
-                                    .background(errorColor, RoundedCornerShape(4.dp))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                    .offset { IntOffset(dragController.dragPosition.x.roundToInt() - 32, dragController.dragPosition.y.roundToInt() - 48) }
+                                    .alpha(0.85f),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = CardDefaults.elevatedCardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                ),
                             ) {
                                 Text(
-                                    text = target.verdict.reason,
-                                    color = MaterialTheme.colorScheme.onError,
-                                    style = MaterialTheme.typography.labelSmall,
+                                    text = label,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
                             }
                         }
                     }
 
-                    // Drag Badge under finger
-                    val payload = dragController.activePayload
-                    if (payload != null) {
-                        val label = when (payload) {
-                            is DragPayload.NewWidget -> payload.entry.tag.substringAfterLast('.')
-                            is DragPayload.ExistingNodes -> {
-                                val firstNode = document.find(payload.uids.firstOrNull() ?: -1)
-                                firstNode?.tag?.substringAfterLast('.') ?: "View"
-                            }
-                        }
-                        ElevatedCard(
-                            modifier = Modifier
-                                .offset { IntOffset(dragController.dragPosition.x.roundToInt() - 32, dragController.dragPosition.y.roundToInt() - 48) }
-                                .alpha(0.85f),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = CardDefaults.elevatedCardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            ),
-                        ) {
-                            Text(
-                                text = label,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    // Resize Handles am ausgewählten Element
+                    if (selectedUid != null && dragController?.isDragging != true && onResizeDelta != null && onToggleSizeMode != null) {
+                        val bounds = dragController?.boundsRegistry?.bounds?.get(selectedUid)
+                        if (bounds != null) {
+                            ResizeHandles(
+                                rect = bounds,
+                                onResizeDelta = onResizeDelta,
+                                onToggleWidth = { onToggleSizeMode(true) },
+                                onToggleHeight = { onToggleSizeMode(false) },
                             )
                         }
                     }
                 }
             }
+        }
+
+        // Schwebende Zoom-Steuerung
+        if (onZoomChange != null && onResetZoomPan != null) {
+            ZoomControls(
+                zoom = zoom,
+                onZoomChange = onZoomChange,
+                onReset = onResetZoomPan,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+            )
         }
     }
 }
@@ -307,7 +377,14 @@ private fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modif
                 },
             )
         }
-        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { ctx.onSelect(node.uid) }
+        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+            if (ctx.selectedUid == node.uid) {
+                val parent = ctx.document.parentOf(node.uid)
+                if (parent != null) ctx.onSelect(parent.uid)
+            } else {
+                ctx.onSelect(node.uid)
+            }
+        }
         .padding(padding)
 
     when {

@@ -5,7 +5,7 @@
 - [x] **41.0** Bestand und Ausgangsbuild (Abweichungen notiert, Baseline-Tests, ViewModel-Tests)
 - [x] **41.1** Modell: Kommentare, Formatierung, neue Baum-Operationen (`moveNode`, `insertNode`, `canDrop`, `wrapIn`, `renameId`, `removeWithReferences`, Mehrfachauswahl)
 - [x] **41.2** Drag & Drop (eigene Gesten-Implementierung, `DragController`, `NodeBoundsRegistry`, reiner `DropResolver`)
-- [ ] **41.3** Leinwand und Werkzeuge (Zoom/Pan, Größengriffe, Overlays, Breadcrumbs, Zwischenablage, Tastatur, PNG-Export)
+- [x] **41.3** Leinwand und Werkzeuge (Zoom/Pan, Größengriffe, Overlays, Breadcrumbs, Zwischenablage, Tastatur, PNG-Export)
 - [ ] **41.4** ConstraintLayout und RelativeLayout echt darstellen und bearbeiten (`ConstraintMapper`, Anker-Editor, topologischer RelativeLayout-Solver)
 - [ ] **41.5** Ressourcen auflösen (`ResourceRepository`, Qualifizierer, Themes/Styles, Drawables/VectorDrawables, „In Ressource auslagern“)
 - [ ] **41.6** `include`, `merge`, `ViewStub`, Fragmente, eigene Views
@@ -141,6 +141,57 @@
   2. `dropWidget_movesExistingNode_recordsSingleUndoStep`
 - Insgesamt 55 Unit-Tests in `:feature:layoutdesigner` bestanden (100 %).
 - `./gradlew :app:assembleDebug` erfolgreich.
+
+---
+
+## 41.3 Leinwand und Werkzeuge
+
+### Features & Implementierung
+- **Zoom & Pan:**
+  - Zwei-Finger-Gesten (Pinch-to-Zoom 25 % bis 400 %, Pan über Zwei-Finger-Verschiebung).
+  - Schwebende `ZoomControls` (+, -, 100 %, Reset-Taste) am unteren rechten Rand.
+- **Konfigurationsleiste (`CanvasConfigBar`):**
+  - Querformat / Hochformat Umschalter mit automatischer Breiten-/Höhenumkehr (`effectiveWidthDp`, `effectiveHeightDp`).
+  - Dunkel / Hell Vorschau-Modus.
+  - Schriftskalierung (1.0x, 1.3x, 2.0x).
+  - Overlays (Blueprint-Modus, Abstände / Margins & Paddings, Grenzen).
+- **Größengriffe (`ResizeHandles`):**
+  - Griffe rechts, unten und rechts-unten am selektierten Element mit Live-Anzeige der Dimensionen.
+  - 8-dp-Raster-Snapping beim Ziehen.
+  - Doppeltippen auf einen Griff schaltet zwischen `wrap_content` und `match_parent` (bzw. `0dp` bei ConstraintLayout).
+- **Breadcrumbs & Navigation:**
+  - `BreadcrumbBar` (Wurzel › … › Auswahl) mit direktem Klick zur Elternelement-Auswahl.
+  - „Durchklicken“ auf der Leinwand: Erneutes Antippen eines bereits gewählten Elements wählt automatisch dessen Elternelement aus.
+- **Zwischenablage (`LayoutClipboard`):**
+  - Reine JVM-Logik: Erzeugt und parst XML-Schnipsel.
+  - Beim Einfügen automatische Neuzuordnung von UIDs und IDs bei Kollisionen (`@+id/textView1`, `@+id/button2` usw.).
+  - Vollständige Integration mit Undo/Redo und System-Zwischenablage über `LocalClipboardManager` und ViewModel-Effekt `CopyToClipboard`.
+- **Tastatur-Kurzbefehle (`onPreviewKeyEvent`):**
+  - Strg+Z / Strg+Y / Strg+Umschalt+Z (Undo / Redo)
+  - Strg+S (Speichern)
+  - Strg+C / Strg+X / Strg+V (Kopieren, Ausschneiden, Einfügen)
+  - Strg+D (Duplizieren)
+  - Entf / Backspace (Löschen)
+  - Alt+Pfeiltasten (Verschieben)
+  - Pfeiltasten Oben/Unten (Knotennavigation)
+- **Kontextmenü & Dialoge:**
+  - Modal-BottomSheet Kontextmenü mit Ausschneiden, Kopieren, Einfügen, Duplizieren, Löschen, „In Container packen…“, „Container auflösen“, „Tag ändern…“, „ID umbenennen…“, „Im XML zeigen“.
+  - Dialoge für Container-Auswahl, Tag-Änderung und ID-Eingabe.
+- **PNG-Export:**
+  - Aufnahme der Vorschau über `rememberGraphicsLayer()` und `GraphicsLayer.record { drawContent() }`.
+  - Bitmap-Konvertierung und Speichern in den App-Cache.
+  - Eigener `LayoutDesignerFileProvider` zur Vermeidung von Manifest-Merger-Kollisionen und sicheres Teilen über das Android Share Sheet (`Intent.ACTION_SEND`).
+
+### Testabdeckung
+- 5 neue Tests in `LayoutDesignerViewModelTest` & `LayoutClipboardTest`:
+  1. `createSnippet_and_pasteWithCollisionHandling`
+  2. `zoomAndPan_updatesStateAndResetRestoresDefaults`
+  3. `configurationToggles_updateState`
+  4. `clipboard_copyCutPaste_worksWithUndo`
+  5. `resizeAndToggleSizeMode_updatesAttributesAndRecordsUndo`
+- Insgesamt **60 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+- `./gradlew :app:assembleDebug` erfolgreich.
+
 
 
 
