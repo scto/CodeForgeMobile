@@ -311,6 +311,62 @@
 - Insgesamt **78 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
 - `./gradlew :app:assembleDebug` erfolgreich.
 
+---
+
+## 41.6 `include`, `merge`, `ViewStub`, Fragmente, eigene Views
+
+### Reine JVM-Logik (`IncludeResolver.kt`, `CustomViewScanner.kt`)
+- **`IncludeResolver`:**
+  - Löst Layout-Referenzen (`@layout/...`) in den `res/layout*`-Verzeichnissen des Moduls auf.
+  - Überschreibt Attribute des eingebundenen Wurzelknotens mit den im `<include>`-Tag definierten Attributen (`android:id` und alle `layout_*`-Attribute wie Maße, Ränder, Gravity und Constraints).
+  - Robuste Zyklenerkennung über kanonische Pfade im Rekursionsstapel (`IncludedLayoutResult.CycleDetected`).
+  - Rekursionstiefen-Begrenzung auf maximal 8 Ebenen (`IncludedLayoutResult.DepthLimitExceeded`).
+  - Behandelt nicht gefundene oder fehlerhafte Layouts graceful als `NotFound` bzw. `ParseError`.
+- **`CustomViewScanner`:**
+  - Durchsucht das Projekt- bzw. Modul-Quellverzeichnis (`src/`) nach Kotlin- und Java-Klassen, die von `View`, `ViewGroup` oder bekannten AndroidX/Material-View-Basisklassen erben.
+  - Erkennt automatisch `isViewGroup` anhand der Vererbungshierarchie.
+  - Liefert `CustomViewInfo` mit qualifiziertem Klassennamen, einfachem Namen und Quellpfad.
+
+### Compose-Vorschau (`LayoutPreview.kt`)
+- **`<include>`-Darstellung:**
+  - Schreibgeschützte Darstellung mit gestricheltem Rahmen, Titelchip `<include @layout/...>` und Schaltfläche „Eingebundenes Layout öffnen“ (`OpenInNew`).
+  - Zeigt bei Zyklen ein deutliches Fehler-Badge („Zirkulärer include erkannt“).
+- **`<merge>` als Wurzel:**
+  - Wertet `tools:parentTag` aus (Standard: `FrameLayout`).
+  - Zeigt Banner `merge (Elternteil: <parentTag>)` und rendert Kindelemente im entsprechenden Container (`LinearLayout`, `ConstraintLayout`, `RelativeLayout`, `FrameLayout`).
+- **`ViewStub`:**
+  - Vorschau als gestrichelter Platzhalter mit `android:layout`-Referenz.
+  - Interaktive Schaltfläche zum Auf- und Zuklappen („ViewStub aufklappen“ / „ViewStub zuklappen“).
+  - Im aufgeklappten Zustand wird das referenzierte Layout eingebettet dargestellt.
+- **`<fragment>` & `FragmentContainerView`:**
+  - Wertet `tools:layout` aus und bettet bei Angabe das referenzierte Layout ein.
+  - Andernfalls stilisierter Platzhalter mit Klassenname bzw. Fragment-Bezeichnung.
+- **Eigene Views & Nicht-Widget-Tags:**
+  - Benutzerdefinierte Projekt-Views werden mit Klassenname und Paketbeschriftung dargestellt (als Container, falls `isViewGroup`).
+  - `<requestFocus/>` und `<tag>` werden syntaktisch erhalten, aber nicht als sichtbare Widgets gerendert.
+
+### Palette & ViewModel-Integration
+- **Palette:**
+  - `include` in der Kategorie „Layouts“.
+  - Gefundene eigene Views aus dem Quellverzeichnis erscheinen dynamisch unter der Kategorie „Projekt“.
+- **Events & Effekte:**
+  - `ToggleInflateViewStub(uid)` zur Steuerung des Aufklapp-Zustands.
+  - `OpenIncludedLayout(layoutRef)` emittiert `LayoutDesignerUiEffect.OpenLayoutFile(path)` zum Wechsel in das eingebundene Layout.
+
+### Testabdeckung
+- 4 neue Tests in `IncludeResolverTest`:
+  1. `resolve_normalInclude_mergesAttributesCorrectly`
+  2. `resolve_cycleDetected_returnsCycleResult`
+  3. `resolve_depthLimitExceeded_returnsDepthLimitResult`
+  4. `resolve_notFound_returnsNotFoundResult`
+- 1 neuer Test in `CustomViewScannerTest`:
+  1. `scanDirectory_detectsKotlinAndJavaViews`
+- 2 neue ViewModel-Tests in `LayoutDesignerViewModelTest`:
+  1. `toggleInflateViewStub_togglesUidInState`
+  2. `openIncludedLayout_emitsOpenLayoutFileEffect`
+- Insgesamt **85 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+- `./gradlew :app:assembleDebug` erfolgreich.
+
 
 
 

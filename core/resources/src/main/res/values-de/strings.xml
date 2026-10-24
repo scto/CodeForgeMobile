@@ -843,6 +843,7 @@
     <string name="layout_w_progress">Fortschritt</string>
     <string name="layout_w_view">Trennlinie</string>
     <string name="layout_w_space">Abstand</string>
+    <string name="layout_w_include">Include</string>
     <string name="layout_cat_layout">Layouts</string>
     <string name="layout_cat_text">Text</string>
     <string name="layout_cat_button">Schaltflächen</string>
@@ -950,6 +951,14 @@
     <string name="layout_extract_resource">In Ressource auslagern…</string>
     <string name="layout_extract_name">Ressourcen-Name</string>
     <string name="layout_extract_confirm">Auslagern</string>
+    <string name="layout_cat_project">Projekt</string>
+    <string name="layout_include_open">Eingebundenes Layout öffnen</string>
+    <string name="layout_include_cycle">Zirkulärer include erkannt</string>
+    <string name="layout_merge_hint">merge (Elternteil: %1$s)</string>
+    <string name="layout_viewstub_inflate">ViewStub aufklappen</string>
+    <string name="layout_viewstub_deflate">ViewStub zuklappen</string>
+    <string name="layout_custom_view">Eigene View</string>
+    <string name="layout_fragment_placeholder">Fragment</string>
     <string name="modulemaker_gradle_pfad">Gradle-Pfad</string>
     <string name="plugins_geladen">Geladen</string>
     <string name="plugins_nicht_geladen">Nicht geladen</string>

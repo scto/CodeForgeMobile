@@ -809,6 +809,49 @@ class LayoutDesignerViewModelTest {
         }
     }
 
+    @Test
+    fun toggleInflateViewStub_togglesUidInState() = runTest {
+        fileStore.files["/test/layout.xml"] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load("/test/layout.xml"))
+        advanceUntilIdle()
+
+        assertFalse(10 in viewModel.state.value.inflatedViewStubs)
+        viewModel.onEvent(LayoutDesignerUiEvent.ToggleInflateViewStub(10))
+        assertTrue(10 in viewModel.state.value.inflatedViewStubs)
+        viewModel.onEvent(LayoutDesignerUiEvent.ToggleInflateViewStub(10))
+        assertFalse(10 in viewModel.state.value.inflatedViewStubs)
+    }
+
+    @Test
+    fun openIncludedLayout_emitsOpenLayoutFileEffect() = runTest {
+        val tempDir = java.nio.file.Files.createTempDirectory("layout_inc_test").toFile()
+        try {
+            val resDir = java.io.File(tempDir, "src/main/res/layout").apply { mkdirs() }
+            val mainLayout = java.io.File(resDir, "main.xml")
+            val incLayout = java.io.File(resDir, "header.xml")
+            incLayout.writeText("<TextView xmlns:android=\"http://schemas.android.com/apk/res/android\" android:layout_width=\"wrap_content\" android:layout_height=\"wrap_content\" android:text=\"Inc\" />")
+
+            fileStore.files[mainLayout.absolutePath] = "<FrameLayout xmlns:android=\"http://schemas.android.com/apk/res/android\" android:layout_width=\"match_parent\" android:layout_height=\"match_parent\"><include layout=\"@layout/header\" /></FrameLayout>"
+
+            val effects = mutableListOf<LayoutDesignerUiEffect>()
+            val job = launch { viewModel.effects.collect { effects.add(it) } }
+
+            viewModel.onEvent(LayoutDesignerUiEvent.Load(mainLayout.absolutePath))
+            advanceUntilIdle()
+
+            viewModel.onEvent(LayoutDesignerUiEvent.OpenIncludedLayout("@layout/header"))
+            advanceUntilIdle()
+
+            val openEffect = effects.filterIsInstance<LayoutDesignerUiEffect.OpenLayoutFile>().firstOrNull()
+            assertNotNull(openEffect)
+            assertEquals(incLayout.canonicalPath, java.io.File(openEffect!!.path).canonicalPath)
+
+            job.cancel()
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
+
     // --- Fakes ---
 
     private class FakeLayoutFileStore : LayoutFileStore {

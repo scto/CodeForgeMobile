@@ -843,6 +843,7 @@
     <string name="layout_w_progress">Progress bar</string>
     <string name="layout_w_view">Divider</string>
     <string name="layout_w_space">Space</string>
+    <string name="layout_w_include">Include</string>
     <string name="layout_cat_layout">Layouts</string>
     <string name="layout_cat_text">Text</string>
     <string name="layout_cat_button">Buttons</string>
@@ -950,6 +951,14 @@
     <string name="layout_extract_resource">Extract to resource…</string>
     <string name="layout_extract_name">Resource name</string>
     <string name="layout_extract_confirm">Extract</string>
+    <string name="layout_cat_project">Project</string>
+    <string name="layout_include_open">Open included layout</string>
+    <string name="layout_include_cycle">Cyclic include detected</string>
+    <string name="layout_merge_hint">merge (parent: %1$s)</string>
+    <string name="layout_viewstub_inflate">Inflate ViewStub</string>
+    <string name="layout_viewstub_deflate">Collapse ViewStub</string>
+    <string name="layout_custom_view">Custom View</string>
+    <string name="layout_fragment_placeholder">Fragment</string>
     <string name="modulemaker_gradle_pfad">Gradle path</string>
     <string name="plugins_geladen">Loaded</string>
     <string name="plugins_nicht_geladen">Not loaded</string>

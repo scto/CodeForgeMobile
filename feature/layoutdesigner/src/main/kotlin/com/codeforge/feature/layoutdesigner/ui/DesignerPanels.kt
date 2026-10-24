@@ -82,9 +82,23 @@ import com.codeforge.feature.layoutdesigner.model.parseColorArgb
 @Composable
 internal fun PalettePanel(
     onPick: (PaletteEntry) -> Unit,
+    customViews: List<com.codeforge.feature.layoutdesigner.model.CustomViewInfo> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
-    val groups = remember { WidgetCatalog.palette.groupBy { it.category } }
+    val groups = remember(customViews) {
+        val projectEntries = customViews.map { cv ->
+            PaletteEntry(
+                key = "custom_${cv.qualifiedName}",
+                tag = cv.qualifiedName,
+                category = com.codeforge.feature.layoutdesigner.model.WidgetCategory.PROJECT,
+                defaults = mapOf(
+                    "android:layout_width" to "wrap_content",
+                    "android:layout_height" to "wrap_content",
+                ),
+            )
+        }
+        (WidgetCatalog.palette + projectEntries).groupBy { it.category }
+    }
     LazyVerticalGrid(
         modifier = modifier.fillMaxWidth(),
         columns = GridCells.Adaptive(minSize = 104.dp),
@@ -104,7 +118,7 @@ internal fun PalettePanel(
                     ) {
                         Icon(paletteIcon(entry.key), contentDescription = null)
                         Text(
-                            stringRes(paletteLabel(entry.key)),
+                            text = if (entry.key.startsWith("custom_")) entry.tag.substringAfterLast('.') else stringRes(paletteLabel(entry.key)),
                             style = MaterialTheme.typography.labelMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,

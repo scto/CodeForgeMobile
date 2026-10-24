@@ -44,6 +44,8 @@ internal fun paletteLabel(key: String): Int = when (key) {
     "image" -> R.string.layout_w_image
     "progress" -> R.string.layout_w_progress
     "view" -> R.string.layout_w_view
+    "space" -> R.string.layout_w_space
+    "include" -> R.string.layout_w_include
     else -> R.string.layout_w_space
 }
 
@@ -62,6 +64,7 @@ internal fun paletteIcon(key: String): ImageVector = when (key) {
     "progress" -> Icons.Filled.HourglassEmpty
     "view" -> Icons.Filled.HorizontalRule
     "space" -> Icons.Filled.SpaceBar
+    "include" -> Icons.Filled.Layers
     else -> Icons.Filled.Widgets
 }
 
@@ -73,6 +76,7 @@ internal fun categoryLabel(category: WidgetCategory): Int = when (category) {
     WidgetCategory.INPUT -> R.string.layout_cat_input
     WidgetCategory.MEDIA -> R.string.layout_cat_media
     WidgetCategory.OTHER -> R.string.layout_cat_other
+    WidgetCategory.PROJECT -> R.string.layout_cat_project
 }
 
 @StringRes

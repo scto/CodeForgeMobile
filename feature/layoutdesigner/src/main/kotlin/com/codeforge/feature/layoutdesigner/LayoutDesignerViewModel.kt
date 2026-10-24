@@ -4,6 +4,10 @@
  */
 package com.codeforge.feature.layoutdesigner
 
+import com.codeforge.feature.layoutdesigner.model.CustomViewInfo
+import com.codeforge.feature.layoutdesigner.model.CustomViewScanner
+import com.codeforge.feature.layoutdesigner.res.IncludeResolver
+import com.codeforge.feature.layoutdesigner.res.IncludedLayoutResult
 import com.codeforge.feature.layoutdesigner.res.ResType
 import com.codeforge.feature.layoutdesigner.res.ResourceRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -448,10 +452,36 @@ class LayoutDesignerViewModel @Inject constructor(
                     fileSyncBridge.notifyExternalChange(listOf(targetResDir.absolutePath))
                 }
             }
+            is LayoutDesignerUiEvent.ToggleInflateViewStub -> {
+                val current = _state.value.inflatedViewStubs
+                val next = if (event.uid in current) current - event.uid else current + event.uid
+                _state.update { it.copy(inflatedViewStubs = next) }
+            }
+            is LayoutDesignerUiEvent.OpenIncludedLayout -> {
+                val layoutFile = File(_state.value.filePath)
+                val resDirs = ResourceRepository.findResDirsForLayout(layoutFile)
+                val target = IncludeResolver(resDirs).resolve(event.layoutRef)
+                if (target is IncludedLayoutResult.Success) {
+                    viewModelScope.launch {
+                        _effects.send(LayoutDesignerUiEffect.OpenLayoutFile(target.file.absolutePath))
+                    }
+                }
+            }
         }
     }
 
     private fun selected(): Int? = _state.value.selectedUid?.takeIf { _state.value.document.find(it) != null }
+
+    private fun findSrcDir(file: File): File? {
+        var curr: File? = file.parentFile
+        while (curr != null) {
+            if (curr.name == "src") return curr
+            val directSrc = File(curr, "src")
+            if (directSrc.exists() && directSrc.isDirectory) return directSrc
+            curr = curr.parentFile
+        }
+        return null
+    }
 
     private fun load(path: String) {
         if (_state.value.filePath == path && !_state.value.isLoading) return
@@ -465,9 +495,13 @@ class LayoutDesignerViewModel @Inject constructor(
                 undoStack.clear(); redoStack.clear(); lastEditKey = null
 
                 val layoutFile = File(path)
-                val repo = withContext(ioDispatcher) {
+                val (repo, includeRes, customViews) = withContext(ioDispatcher) {
                     val dirs = ResourceRepository.findResDirsForLayout(layoutFile)
-                    if (dirs.isNotEmpty()) ResourceRepository(dirs) else null
+                    val r = if (dirs.isNotEmpty()) ResourceRepository(dirs) else null
+                    val inc = if (dirs.isNotEmpty()) IncludeResolver(dirs) else null
+                    val srcDir = findSrcDir(layoutFile)
+                    val cvs = srcDir?.let { CustomViewScanner().scanDirectory(it) } ?: emptyList()
+                    Triple(r, inc, cvs)
                 }
 
                 _state.update {
@@ -481,6 +515,8 @@ class LayoutDesignerViewModel @Inject constructor(
                         canUndo = false,
                         canRedo = false,
                         resourceRepo = repo,
+                        includeResolver = includeRes,
+                        customViews = customViews,
                     )
                 }
             }.onFailure { e ->

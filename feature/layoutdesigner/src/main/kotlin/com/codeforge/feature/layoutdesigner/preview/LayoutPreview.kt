@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -39,17 +40,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
@@ -75,6 +80,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.stringRes
 import com.codeforge.feature.layoutdesigner.DevicePreset
 import com.codeforge.feature.layoutdesigner.dnd.DesignerOffset
 import com.codeforge.feature.layoutdesigner.dnd.DesignerRect
@@ -91,6 +98,8 @@ import com.codeforge.feature.layoutdesigner.model.parentOf
 import com.codeforge.feature.layoutdesigner.model.parseColorArgb
 import com.codeforge.feature.layoutdesigner.model.parseDimension
 import com.codeforge.feature.layoutdesigner.model.parseSize
+import com.codeforge.feature.layoutdesigner.res.IncludeResolver
+import com.codeforge.feature.layoutdesigner.res.IncludedLayoutResult
 import com.codeforge.feature.layoutdesigner.res.ResourceConfig
 import com.codeforge.feature.layoutdesigner.res.ResourceRepository
 import com.codeforge.feature.layoutdesigner.ui.ResizeHandles
@@ -107,13 +116,17 @@ internal class PreviewContext(
     val resourceRepo: ResourceRepository? = null,
     val resourceConfig: ResourceConfig = ResourceConfig(),
     val showTools: Boolean = true,
+    val includeResolver: IncludeResolver? = null,
+    val inflatedViewStubs: Set<Int> = emptySet(),
+    val onToggleInflateViewStub: ((Int) -> Unit)? = null,
+    val onOpenIncluded: ((String) -> Unit)? = null,
 )
 
 /** Tags, die nur als gestapelte Näherung gezeichnet werden (ConstraintLayout & RelativeLayout werden echt gerendert). */
 fun isApproximatedTag(tag: String): Boolean =
     tag.endsWith("CoordinatorLayout") ||
-    (tag !in setOf("LinearLayout", "FrameLayout", "ScrollView", "HorizontalScrollView", "RelativeLayout") &&
-     !tag.endsWith("ConstraintLayout") && tag.contains('.'))
+    (tag !in setOf("LinearLayout", "FrameLayout", "ScrollView", "HorizontalScrollView", "RelativeLayout", "include", "merge", "ViewStub") &&
+     !tag.endsWith("ConstraintLayout") && !tag.endsWith("FragmentContainerView") && tag != "fragment" && tag.contains('.'))
 
 @Composable
 fun LayoutPreview(
@@ -138,9 +151,19 @@ fun LayoutPreview(
     resourceRepo: ResourceRepository? = null,
     resourceConfig: ResourceConfig = ResourceConfig(),
     showTools: Boolean = true,
+    includeResolver: IncludeResolver? = null,
+    inflatedViewStubs: Set<Int> = emptySet(),
+    onToggleInflateViewStub: ((Int) -> Unit)? = null,
+    onOpenIncluded: ((String) -> Unit)? = null,
 ) {
-    val context = remember(selectedUid, onSelect, dragController, onDrop, document, resourceRepo, resourceConfig, showTools) {
-        PreviewContext(selectedUid, onSelect, dragController, onDrop, document, resourceRepo, resourceConfig, showTools)
+    val context = remember(
+        selectedUid, onSelect, dragController, onDrop, document, resourceRepo,
+        resourceConfig, showTools, includeResolver, inflatedViewStubs, onToggleInflateViewStub, onOpenIncluded,
+    ) {
+        PreviewContext(
+            selectedUid, onSelect, dragController, onDrop, document, resourceRepo,
+            resourceConfig, showTools, includeResolver, inflatedViewStubs, onToggleInflateViewStub, onOpenIncluded,
+        )
     }
 
     Box(
@@ -183,7 +206,33 @@ fun LayoutPreview(
                 shape = RoundedCornerShape(4.dp),
             ) {
                 Box(Modifier.fillMaxSize()) {
-                    NodeView(document.root, context, scopeModifier = Modifier)
+                    if (document.root.tag == "merge") {
+                        val parentTag = (if (context.showTools) document.root.attr("tools:parentTag") else null) ?: "FrameLayout"
+                        Column(Modifier.fillMaxSize()) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(
+                                    text = stringRes(R.string.layout_merge_hint, parentTag),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                )
+                            }
+                            Box(Modifier.weight(1f).fillMaxWidth()) {
+                                when {
+                                    parentTag == "LinearLayout" -> LinearView(document.root, context, Modifier)
+                                    parentTag == "RelativeLayout" -> RelativeView(document.root, context, Modifier)
+                                    parentTag.endsWith("ConstraintLayout") -> ConstraintView(document.root, context, Modifier)
+                                    else -> FrameView(document.root, context, Modifier)
+                                }
+                            }
+                        }
+                    } else {
+                        NodeView(document.root, context, scopeModifier = Modifier)
+                    }
 
                     // Drag & Drop Overlays
                     if (dragController != null && dragController.isDragging) {
@@ -298,6 +347,8 @@ fun LayoutPreview(
 
 @Composable
 internal fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modifier) {
+    if (node.tag == "requestFocus" || node.tag == "tag") return
+
     val visibility = if (ctx.showTools && node.attr("tools:visibility") != null) {
         node.attr("tools:visibility")
     } else {
@@ -410,7 +461,11 @@ internal fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modi
         tag == "LinearLayout" -> LinearView(node, ctx, m)
         tag == "RelativeLayout" -> RelativeView(node, ctx, m)
         tag == "ConstraintLayout" || tag.endsWith("ConstraintLayout") -> ConstraintView(node, ctx, m)
-        tag == "ScrollView" || tag == "HorizontalScrollView" || tag == "FrameLayout" || isContainer ->
+        tag == "include" -> IncludeView(node, ctx, m)
+        tag == "ViewStub" -> ViewStubView(node, ctx, m)
+        tag == "fragment" || tag == "FragmentContainerView" || tag.endsWith("FragmentContainerView") ->
+            FragmentView(node, ctx, m)
+        tag == "ScrollView" || tag == "HorizontalScrollView" || tag == "FrameLayout" || tag == "merge" || isContainer ->
             FrameView(node, ctx, m)
         else -> LeafView(node, tag, ctx, m)
     }
@@ -579,15 +634,241 @@ private fun LeafView(node: LayoutNode, tag: String, ctx: PreviewContext, modifie
             CircularProgressIndicator(modifier = Modifier.size(36.dp))
         }
         else -> {
-            Box(
-                modifier = modifier.defaultMinSize(40.dp, 32.dp),
-                contentAlignment = Alignment.Center,
+            if (node.tag.contains('.')) {
+                Surface(
+                    modifier = modifier.defaultMinSize(48.dp, 36.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.25f),
+                    shape = RoundedCornerShape(4.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f)),
+                ) {
+                    Box(Modifier.fillMaxSize().padding(6.dp), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = node.tag.substringAfterLast('.'),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(
+                                text = node.tag.substringBeforeLast('.'),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                        }
+                    }
+                }
+            } else {
+                Box(
+                    modifier = modifier.defaultMinSize(40.dp, 32.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "<$tag>",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun IncludeView(node: LayoutNode, ctx: PreviewContext, modifier: Modifier) {
+    val layoutRef = node.attr("layout")
+    val res = remember(layoutRef, ctx.includeResolver, ctx.resourceConfig) {
+        if (!layoutRef.isNullOrBlank() && ctx.includeResolver != null) {
+            ctx.includeResolver.resolve(layoutRef, includeNode = node)
+        } else null
+    }
+
+    Column(
+        modifier = modifier
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(4.dp),
+            )
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.08f), RoundedCornerShape(4.dp))
+            .padding(2.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "<include ${layoutRef ?: ""}>",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            if (res is IncludedLayoutResult.Success && ctx.onOpenIncluded != null) {
+                IconButton(
+                    onClick = { ctx.onOpenIncluded.invoke(res.file.absolutePath) },
+                    modifier = Modifier.size(20.dp),
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.OpenInNew,
+                        contentDescription = stringRes(R.string.layout_include_open),
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+        }
+
+        when (res) {
+            is IncludedLayoutResult.Success -> {
+                Box(Modifier.fillMaxWidth()) {
+                    NodeView(res.mergedRoot, ctx, Modifier)
+                }
+            }
+            is IncludedLayoutResult.CycleDetected -> {
+                Row(
+                    modifier = Modifier.padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                    Text(
+                        text = stringRes(R.string.layout_include_cycle),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+            is IncludedLayoutResult.DepthLimitExceeded -> {
+                Text(
+                    text = "Include depth limit exceeded (> 8)",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(4.dp),
+                )
+            }
+            is IncludedLayoutResult.NotFound -> {
+                Text(
+                    text = "${layoutRef ?: "layout"} (not found)",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(4.dp),
+                )
+            }
+            is IncludedLayoutResult.ParseError -> {
+                Text(
+                    text = "Parse error: ${res.message}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(4.dp),
+                )
+            }
+            null -> {
+                Text(
+                    text = "<include> (no layout)",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(4.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ViewStubView(node: LayoutNode, ctx: PreviewContext, modifier: Modifier) {
+    val layoutRef = node.attr("android:layout") ?: (if (ctx.showTools) node.attr("tools:layout") else null)
+    val isInflated = node.uid in ctx.inflatedViewStubs
+    val res = remember(layoutRef, isInflated, ctx.includeResolver) {
+        if (isInflated && !layoutRef.isNullOrBlank() && ctx.includeResolver != null) {
+            ctx.includeResolver.resolve(layoutRef, includeNode = node)
+        } else null
+    }
+
+    Surface(
+        modifier = modifier.defaultMinSize(48.dp, 36.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+        shape = RoundedCornerShape(4.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(modifier = Modifier.padding(4.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "<$tag>",
+                    text = "ViewStub: ${layoutRef ?: ""}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (layoutRef != null && ctx.onToggleInflateViewStub != null) {
+                    TextButton(
+                        onClick = { ctx.onToggleInflateViewStub.invoke(node.uid) },
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                        modifier = Modifier.height(24.dp),
+                    ) {
+                        Text(
+                            text = if (isInflated) stringRes(R.string.layout_viewstub_deflate) else stringRes(R.string.layout_viewstub_inflate),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+            }
+            if (isInflated && res is IncludedLayoutResult.Success) {
+                Box(Modifier.fillMaxWidth().padding(top = 2.dp)) {
+                    NodeView(res.mergedRoot, ctx, Modifier)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FragmentView(node: LayoutNode, ctx: PreviewContext, modifier: Modifier) {
+    val toolsLayout = if (ctx.showTools) node.attr("tools:layout") else null
+    val res = remember(toolsLayout, ctx.includeResolver) {
+        if (!toolsLayout.isNullOrBlank() && ctx.includeResolver != null) {
+            ctx.includeResolver.resolve(toolsLayout, includeNode = node)
+        } else null
+    }
+
+    if (res is IncludedLayoutResult.Success) {
+        Column(
+            modifier = modifier
+                .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
+                .padding(2.dp),
+        ) {
+            Text(
+                text = "Fragment: $toolsLayout",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            )
+            NodeView(res.mergedRoot, ctx, Modifier)
+        }
+    } else {
+        val name = node.attr("android:name")?.substringAfterLast('.')
+            ?: node.attr("tools:layout")
+            ?: node.tag.substringAfterLast('.')
+        Surface(
+            modifier = modifier.defaultMinSize(64.dp, 48.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+            shape = RoundedCornerShape(4.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)),
+        ) {
+            Box(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = stringRes(R.string.layout_fragment_placeholder),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
             }
         }
     }

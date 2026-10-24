@@ -21,7 +21,7 @@ data class WidgetDef(
     val attrs: List<AttrSpec> = emptyList(),
 )
 
-enum class WidgetCategory { LAYOUT, TEXT, BUTTON, INPUT, MEDIA, OTHER }
+enum class WidgetCategory { LAYOUT, TEXT, BUTTON, INPUT, MEDIA, OTHER, PROJECT }
 
 /** Eintrag der Palette; [key] dient der UI zur Zuordnung des lokalisierten Namens. */
 data class PaletteEntry(
@@ -102,6 +102,11 @@ object WidgetCatalog {
         WidgetDef("ProgressBar", false, WidgetCategory.OTHER),
         WidgetDef("View", false, WidgetCategory.OTHER),
         WidgetDef("Space", false, WidgetCategory.OTHER),
+        WidgetDef("include", false, WidgetCategory.LAYOUT, listOf(AttrSpec("layout", AttrKind.TEXT))),
+        WidgetDef("merge", true, WidgetCategory.LAYOUT, listOf(AttrSpec("tools:parentTag", AttrKind.TEXT))),
+        WidgetDef("ViewStub", false, WidgetCategory.LAYOUT, listOf(AttrSpec("android:layout", AttrKind.TEXT), AttrSpec("android:inflatedId", AttrKind.TEXT))),
+        WidgetDef("fragment", false, WidgetCategory.LAYOUT, listOf(AttrSpec("android:name", AttrKind.TEXT), AttrSpec("tools:layout", AttrKind.TEXT))),
+        WidgetDef("androidx.fragment.app.FragmentContainerView", false, WidgetCategory.LAYOUT, listOf(AttrSpec("android:name", AttrKind.TEXT), AttrSpec("tools:layout", AttrKind.TEXT))),
     )
 
     private val byTag: Map<String, WidgetDef> = widgets.associateBy { it.tag }
@@ -112,6 +117,10 @@ object WidgetCatalog {
     fun attrsFor(tag: String, parentTag: String?): List<AttrSpec> = buildList {
         addAll(commonAttrs)
         byTag[tag]?.attrs?.let { addAll(it) }
+        if (tag !in byTag && tag.contains('.')) {
+            val simple = tag.substringAfterLast('.')
+            byTag[simple]?.attrs?.let { addAll(it) }
+        }
         when {
             parentTag == "LinearLayout" -> {
                 add(AttrSpec("android:layout_weight", AttrKind.NUMBER))
@@ -204,5 +213,6 @@ object WidgetCatalog {
         PaletteEntry("progress", "ProgressBar", WidgetCategory.OTHER, wrapDefaults()),
         PaletteEntry("view", "View", WidgetCategory.OTHER, linkedMapOf("android:layout_width" to MATCH, "android:layout_height" to "1dp", "android:background" to "#CCCCCC")),
         PaletteEntry("space", "Space", WidgetCategory.OTHER, linkedMapOf("android:layout_width" to "16dp", "android:layout_height" to "16dp")),
+        PaletteEntry("include", "include", WidgetCategory.LAYOUT, linkedMapOf("layout" to "@layout/...", "android:layout_width" to MATCH, "android:layout_height" to WRAP)),
     )
 }

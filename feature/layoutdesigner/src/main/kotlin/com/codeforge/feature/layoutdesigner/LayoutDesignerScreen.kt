@@ -128,6 +128,9 @@ fun LayoutDesignerRoute(
                     clipboardManager.setText(AnnotatedString(effect.text))
                     snackbar.showSnackbar(copiedMessage)
                 }
+                is LayoutDesignerUiEffect.OpenLayoutFile -> {
+                    viewModel.onEvent(LayoutDesignerUiEvent.Load(effect.path))
+                }
             }
         }
     }
@@ -346,7 +349,10 @@ private fun LayoutDesignerScreen(
 
     if (state.showPalette) {
         ModalBottomSheet(onDismissRequest = { onEvent(LayoutDesignerUiEvent.PaletteVisible(false)) }) {
-            PalettePanel(onPick = { onEvent(LayoutDesignerUiEvent.AddWidget(it)) })
+            PalettePanel(
+                onPick = { onEvent(LayoutDesignerUiEvent.AddWidget(it)) },
+                customViews = state.customViews,
+            )
         }
     }
 
@@ -697,6 +703,10 @@ private fun PreviewPane(
                 wDp = state.effectiveWidthDp,
             ),
             showTools = state.showToolsAttributes,
+            includeResolver = state.includeResolver,
+            inflatedViewStubs = state.inflatedViewStubs,
+            onToggleInflateViewStub = { onEvent(LayoutDesignerUiEvent.ToggleInflateViewStub(it)) },
+            onOpenIncluded = { onEvent(LayoutDesignerUiEvent.OpenIncludedLayout(it)) },
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         HorizontalDivider()

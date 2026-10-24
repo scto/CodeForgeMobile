@@ -62,6 +62,9 @@ data class LayoutDesignerUiState(
     val clipboardXml: String? = null,
     val showToolsAttributes: Boolean = true,
     val resourceRepo: com.codeforge.feature.layoutdesigner.res.ResourceRepository? = null,
+    val includeResolver: com.codeforge.feature.layoutdesigner.res.IncludeResolver? = null,
+    val customViews: List<com.codeforge.feature.layoutdesigner.model.CustomViewInfo> = emptyList(),
+    val inflatedViewStubs: Set<Int> = emptySet(),
 ) {
     val fileName: String get() = filePath.substringAfterLast('/')
 
@@ -150,10 +153,15 @@ sealed interface LayoutDesignerUiEvent {
         val value: String,
     ) : LayoutDesignerUiEvent
     data class SetShowToolsAttributes(val enabled: Boolean) : LayoutDesignerUiEvent
+
+    // 41.6 include, merge, ViewStub & eigene Views
+    data class ToggleInflateViewStub(val uid: Int) : LayoutDesignerUiEvent
+    data class OpenIncludedLayout(val layoutRef: String) : LayoutDesignerUiEvent
 }
 
 sealed interface LayoutDesignerUiEffect {
     data class ShowSnackbar(val message: String) : LayoutDesignerUiEffect
     data object NavigateBack : LayoutDesignerUiEffect
     data class CopyToClipboard(val text: String) : LayoutDesignerUiEffect
+    data class OpenLayoutFile(val path: String) : LayoutDesignerUiEffect
 }
