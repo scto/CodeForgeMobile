@@ -159,6 +159,7 @@ object LayoutXml {
         }
 
         val rootNode = convert(rootElement)
+        val detectedLineEnding = if (cleanXml.contains("\r\n")) "\r\n" else "\n"
 
         return LayoutDocument(
             root = rootNode,
@@ -167,6 +168,7 @@ object LayoutXml {
             rootNamespaces = rootNamespaces,
             indentation = detectedIndent,
             reformatOnSave = false,
+            lineEnding = detectedLineEnding,
         )
     }
 
@@ -174,15 +176,16 @@ object LayoutXml {
 
     private fun extractTagAttributesInOrder(xml: String): List<ParsedTagInfo> {
         val result = ArrayList<ParsedTagInfo>()
-        val tagRegex = Regex("""<([A-Za-z0-9_.]+)([^>]*)>""")
+        val tagRegex = Regex("""<([A-Za-z0-9_.:$]+)([^>]*)>""")
         for (m in tagRegex.findAll(xml)) {
             val tagName = m.groupValues[1]
             if (tagName.startsWith("?") || tagName.startsWith("!") || tagName.startsWith("/")) continue
             val attrString = m.groupValues[2]
             val attrs = ArrayList<Pair<String, String>>()
-            val attrRegex = Regex("""([A-Za-z0-9_:]+)\s*=\s*"([^"]*)"""")
+            val attrRegex = Regex("""([A-Za-z0-9_.:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""")
             for (attrMatch in attrRegex.findAll(attrString)) {
-                attrs.add(attrMatch.groupValues[1] to attrMatch.groupValues[2])
+                val value = attrMatch.groups[2]?.value ?: attrMatch.groups[3]?.value ?: ""
+                attrs.add(attrMatch.groupValues[1] to value)
             }
             result.add(ParsedTagInfo(attrs, m.range))
         }
@@ -208,7 +211,7 @@ object LayoutXml {
     }
 
     private fun isFirstAttributeInline(xml: String, tagName: String): Boolean {
-        val pattern = Regex("<$tagName([ \t\r\n]+)[^>]*>")
+        val pattern = Regex("<" + Regex.escape(tagName) + """([ \t\r\n]+)[^>]*>""")
         val match = pattern.find(xml) ?: return false
         val whitespace = match.groupValues[1]
         return !whitespace.contains('\n')
@@ -235,13 +238,14 @@ object LayoutXml {
         }
 
         val step = if (reformat) "    " else document.indentation
+        val nl = if (reformat) "\n" else document.lineEnding
 
         return buildString {
-            append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+            append("<?xml version=\"1.0\" encoding=\"utf-8\"?>").append(nl)
             document.leadingComments.forEach { comment ->
-                append("<!--").append(comment).append("-->\n")
+                append("<!--").append(comment).append("-->").append(nl)
             }
-            writeNode(document.root, 0, namespaces, step, reformat)
+            writeNode(document.root, 0, namespaces, step, nl, reformat)
         }
     }
 
@@ -250,13 +254,14 @@ object LayoutXml {
         depth: Int,
         namespaces: Map<String, String>?,
         step: String,
+        nl: String,
         reformat: Boolean,
     ) {
         val indent = step.repeat(depth)
         val attrIndent = step.repeat(depth + 1)
 
         node.leadingComments.forEach { comment ->
-            append(indent).append("<!--").append(comment).append("-->\n")
+            append(indent).append("<!--").append(comment).append("-->").append(nl)
         }
 
         append(indent).append('<').append(node.tag)
@@ -287,10 +292,10 @@ object LayoutXml {
             if (inlineFirst) {
                 append(' ').append(lines[0])
                 for (i in 1 until lines.size) {
-                    append('\n').append(attrIndent).append(lines[i])
+                    append(nl).append(attrIndent).append(lines[i])
                 }
             } else {
-                lines.forEach { append('\n').append(attrIndent).append(it) }
+                lines.forEach { append(nl).append(attrIndent).append(it) }
             }
         }
 
@@ -299,19 +304,19 @@ object LayoutXml {
         val hasText = !node.textContent.isNullOrEmpty()
 
         if (!hasChildren && !hasTrailingComments && !hasText) {
-            append(" />\n")
+            append(" />").append(nl)
         } else {
-            append(">\n")
+            append(">").append(nl)
             if (hasText) {
-                append(attrIndent).append(escape(node.textContent!!)).append('\n')
+                append(attrIndent).append(escape(node.textContent!!)).append(nl)
             }
             node.children.forEach { child ->
-                writeNode(child, depth + 1, null, step, reformat)
+                writeNode(child, depth + 1, null, step, nl, reformat)
             }
             node.trailingComments.forEach { comment ->
-                append(attrIndent).append("<!--").append(comment).append("-->\n")
+                append(attrIndent).append("<!--").append(comment).append("-->").append(nl)
             }
-            append(indent).append("</").append(node.tag).append(">\n")
+            append(indent).append("</").append(node.tag).append(">").append(nl)
         }
     }
 
@@ -321,6 +326,7 @@ object LayoutXml {
             '<' -> append("&lt;")
             '>' -> append("&gt;")
             '"' -> append("&quot;")
+            '\r' -> append("&#13;")
             '\n' -> append("&#10;")
             '\t' -> append("&#9;")
             else -> append(ch)

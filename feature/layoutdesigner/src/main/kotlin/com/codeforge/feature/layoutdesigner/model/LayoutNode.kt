@@ -51,6 +51,7 @@ data class LayoutDocument(
     val rootNamespaces: Map<String, String> = emptyMap(),
     val indentation: String = "    ",
     val reformatOnSave: Boolean = false,
+    val lineEnding: String = "\n",
 ) {
     companion object {
         /** Leeres Standard-Layout für neue Dateien. */

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +46,9 @@ internal fun RelativeView(
             modifier = Modifier.fillMaxSize(),
             content = {
                 for (spec in solveResult.orderedNodes) {
-                    NodeView(spec.node, ctx, Modifier)
+                    key(spec.node.uid) {
+                        NodeView(spec.node, ctx, Modifier)
+                    }
                 }
             },
         ) { measurables, constraints ->

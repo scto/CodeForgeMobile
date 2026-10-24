@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -166,12 +167,14 @@ internal fun ConstraintView(
             modifier = Modifier.fillMaxSize(),
         ) {
             container.children.forEach { child ->
-                val simpleTag = child.tag.substringAfterLast('.')
-                if (simpleTag == "Guideline") {
-                    // Visuelle Guideline-Linie zeichnen
-                    GuidelineView(child, Modifier.layoutId("n_${child.uid}"))
-                } else if (simpleTag != "Barrier" && simpleTag != "Group") {
-                    NodeView(child, ctx, Modifier.layoutId("n_${child.uid}"))
+                key(child.uid) {
+                    val simpleTag = child.tag.substringAfterLast('.')
+                    if (simpleTag == "Guideline") {
+                        // Visuelle Guideline-Linie zeichnen
+                        GuidelineView(child, Modifier.layoutId("n_${child.uid}"))
+                    } else if (simpleTag != "Barrier" && simpleTag != "Group") {
+                        NodeView(child, ctx, Modifier.layoutId("n_${child.uid}"))
+                    }
                 }
             }
         }

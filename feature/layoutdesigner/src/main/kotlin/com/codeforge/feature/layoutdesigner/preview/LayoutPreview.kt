@@ -62,6 +62,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,6 +98,7 @@ import com.codeforge.feature.layoutdesigner.model.DropVerdict
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.LayoutNode
 import com.codeforge.feature.layoutdesigner.model.SizeMode
+import com.codeforge.feature.layoutdesigner.model.SizeSpec
 import com.codeforge.feature.layoutdesigner.model.find
 import com.codeforge.feature.layoutdesigner.model.parentOf
 import com.codeforge.feature.layoutdesigner.model.parseColorArgb
@@ -366,18 +368,20 @@ internal fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modi
         }
     }
 
-    val widthSpec = parseSize(node.attr("android:layout_width"))
-    val heightSpec = parseSize(node.attr("android:layout_height"))
-    val weight = node.attr("android:layout_weight")?.toFloatOrNull() ?: 0f
-    val margin = (parseDimension(node.attr("android:layout_margin")) ?: 0f).dp
-    val padding = (parseDimension(node.attr("android:padding")) ?: 0f).dp
+    val widthSpec = runCatching { parseSize(node.attr("android:layout_width")) }.getOrDefault(SizeSpec(SizeMode.WRAP_CONTENT))
+    val heightSpec = runCatching { parseSize(node.attr("android:layout_height")) }.getOrDefault(SizeSpec(SizeMode.WRAP_CONTENT))
+    val weight = runCatching { node.attr("android:layout_weight")?.toFloatOrNull() ?: 0f }.getOrDefault(0f)
+    val margin = (runCatching { parseDimension(node.attr("android:layout_margin")) ?: 0f }.getOrDefault(0f)).dp
+    val padding = (runCatching { parseDimension(node.attr("android:padding")) ?: 0f }.getOrDefault(0f)).dp
 
     val rawBg = if (ctx.showTools && node.attr("tools:background") != null) {
         node.attr("tools:background")
     } else {
         node.attr("android:background")
     }
-    val bg = (ctx.resourceRepo?.resolveColor(rawBg, ctx.resourceConfig) ?: parseColorArgb(rawBg))?.let { Color(it.toInt()) }
+    val bg = runCatching {
+        (ctx.resourceRepo?.resolveColor(rawBg, ctx.resourceConfig) ?: parseColorArgb(rawBg))?.let { Color(it.toInt()) }
+    }.getOrNull()
     val selected = ctx.selectedUid == node.uid
     val tag = node.tag.substringAfterLast('.')
     val isContainer = node.isContainer
@@ -497,9 +501,11 @@ private fun LinearView(node: LayoutNode, ctx: PreviewContext, modifier: Modifier
         }
         Column(modifier = modifier, horizontalAlignment = horizAlign, verticalArrangement = vertArr) {
             node.children.forEach { child ->
-                val weight = child.attr("android:layout_weight")?.toFloatOrNull() ?: 0f
-                val childScopeModifier = if (weight > 0f) Modifier.weight(weight) else Modifier
-                NodeView(child, ctx, childScopeModifier)
+                key(child.uid) {
+                    val weight = child.attr("android:layout_weight")?.toFloatOrNull() ?: 0f
+                    val childScopeModifier = if (weight > 0f) Modifier.weight(weight) else Modifier
+                    NodeView(child, ctx, childScopeModifier)
+                }
             }
         }
     } else {
@@ -515,9 +521,11 @@ private fun LinearView(node: LayoutNode, ctx: PreviewContext, modifier: Modifier
         }
         Row(modifier = modifier, verticalAlignment = vertAlign, horizontalArrangement = horizArr) {
             node.children.forEach { child ->
-                val weight = child.attr("android:layout_weight")?.toFloatOrNull() ?: 0f
-                val childScopeModifier = if (weight > 0f) Modifier.weight(weight) else Modifier
-                NodeView(child, ctx, childScopeModifier)
+                key(child.uid) {
+                    val weight = child.attr("android:layout_weight")?.toFloatOrNull() ?: 0f
+                    val childScopeModifier = if (weight > 0f) Modifier.weight(weight) else Modifier
+                    NodeView(child, ctx, childScopeModifier)
+                }
             }
         }
     }
@@ -527,8 +535,10 @@ private fun LinearView(node: LayoutNode, ctx: PreviewContext, modifier: Modifier
 private fun FrameView(node: LayoutNode, ctx: PreviewContext, modifier: Modifier) {
     Box(modifier = modifier) {
         node.children.forEach { child ->
-            val align = resolveGravity(child.attr("android:layout_gravity"))
-            NodeView(child, ctx, Modifier.align(align))
+            key(child.uid) {
+                val align = resolveGravity(child.attr("android:layout_gravity"))
+                NodeView(child, ctx, Modifier.align(align))
+            }
         }
     }
 }
@@ -557,7 +567,7 @@ private fun resolveGravity(spec: String?): Alignment {
 @Composable
 private fun LeafView(node: LayoutNode, tag: String, ctx: PreviewContext, modifier: Modifier) {
     fun resolveText(raw: String?): String =
-        raw?.let { ctx.resourceRepo?.resolveString(it, ctx.resourceConfig) ?: it } ?: ""
+        raw?.let { runCatching { ctx.resourceRepo?.resolveString(it, ctx.resourceConfig) ?: it }.getOrDefault(it) } ?: ""
 
     when (tag) {
         "TextView" -> {

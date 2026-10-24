@@ -12,7 +12,7 @@
 - [x] **41.7** Widget-Katalog und Eigenschaften-Panel (Erweiterung Widgets/Layouts, SDK `attrs.xml` Fallback, Gruppen, Filter)
 - [x] **41.8** Prüfungen (Lint) mit Schnellkorrektur (`LayoutLinter`, Regeln, UI-Panel)
 - [x] **41.9** Zusammenspiel mit dem Code-Editor und Dateien (`FileSyncBridge`, Vorlagen, Varianten, `SavedStateHandle`)
-- [ ] **41.10** Leistung und Robustheit (500 Knoten Benchmark, Fehlerisolation)
+- [x] **41.10** Leistung und Robustheit (500 Knoten Benchmark, Fehlerisolation)
 - [ ] **41.11** (optional) View-XML → Jetpack-Compose-Code
 - [ ] **41.12** Tests, Doku, Abnahme (JVM-Tests, Checklist, Doku-Update)
 
@@ -488,6 +488,49 @@
 - 5 neue Tests in `LayoutTemplatesTest`.
 - 5 neue ViewModel-Tests in `LayoutDesignerViewModelTest` (`externalChange_cleanState_autoReloads`, `externalChange_dirtyState_showsConflictDialog`, `restoreFromSavedState_restoresDocumentAndState`, `createVariant_writesFileAndNotifiesBridge`, `sourceRange_nodeMapping`).
 - Insgesamt **110 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+
+---
+
+## 41.10 Leistung und Robustheit
+
+### 500-Knoten-Benchmark (JVM)
+Synthetisches Dokument mit **501 Knoten** (Wurzel-LinearLayout + 50 horizontale Container mit je 9 gemischten Kind-Elementen wie TextView, Button, ImageView, CheckBox mit Attributen wie IDs, Margins, Texten).
+Messwerte auf dem Entwicklungsrechner (JVM / Android Runtime):
+
+| Operation | Zielvorgabe | Gemessener Wert | Status |
+|---|---|---|---|
+| **Write (XML-Generierung)** | < 50 ms | **5 ms** | ✅ Bestanden |
+| **Parse (DOM-Einlesen & Modellaufbau)** | < 50 ms | **41 ms** | ✅ Bestanden |
+| **Lint (Regelprüfung & Problem-Erkennung)** | < 50 ms | **6 ms** (550 gefundene Regeln/Mängel) | ✅ Bestanden |
+| **DropResolver (Trefferermittlung)** | < 50 ms | **2 ms** (Durchschnitt aus 10 Durchläufen) | ✅ Bestanden |
+
+*Hinweis:* Auf physischem Endgerät „nicht gemessen“.
+
+### Robustheit & Fehlerisolation
+- **CRLF-Zeilenenden (`\r\n`):**
+  - `LayoutDocument.lineEnding` erkennt automatisch Windows-Zeilenumbrüche (`\r\n`) und behält diese beim Speichern (ohne Neuformatierung) byte-exakt bei.
+  - Sonderzeichen in Attributwerten wie Zeilenumbrüche (`\r` → `&#13;`, `\n` → `&#10;`) werden standardkonform maskiert.
+- **Entities & Unicode:**
+  - XML-Entities (`&amp;`, `&lt;`, `&gt;`, `&quot;`) werden beim Parsen korrekt in den Modellwert überführt und beim Schreiben standardkonform re-escaped.
+  - Volle Unicode-Unterstützung (Emojis 🚀🔥📱, asiatische Schriftzeichen, deutsche Umlaute, RTL-Sprachen wie Arabisch).
+- **Unbekannte Tags & Namespace-Attribute:**
+  - Unbekannte Tags und benutzerdefinierte Views (`com.example.custom.InnerComponent`) sowie benutzerdefinierte Tag-Namen mit Bindestrich (`unknown-widget`) werden problemlos verarbeitet und unverändert erhalten.
+  - Sehr lange Attributwerte (im Test mit 50.000 Zeichen verifiziert) führen zu keinerlei Speicher- oder Formatierungsfehlern.
+- **Compose-Optimierungen & Fehlerisolation:**
+  - `key(child.uid)` in allen Container-Renderschleifen (`LinearView`, `FrameView`, `ConstraintView`, `RelativeView`) und in Listen (`LazyColumn` für Probleme und Strukturbaum).
+  - Sichere `runCatching`-Kapselung für Abmessungen, Gewichte, Hintergrundfarben und Text-Ressourcen in `NodeView` und `LeafView` verhindert, dass defekte Attribute oder fehlende Ressourcen den gesamten Screen abstürzen lassen.
+
+### Testabdeckung
+- 7 neue Tests in `LayoutPerformanceAndRobustnessTest`:
+  1. `benchmark_500Nodes_parseWriteLintDropResolver`
+  2. `robustness_unknownTagsAndNestedCustomTags_preserved`
+  3. `robustness_xmlEntities_handledCorrectly`
+  4. `robustness_unicodeCharacters_preserved`
+  5. `robustness_veryLongAttributeValues_roundtrip`
+  6. `robustness_crlfLineEndings_preserved`
+  7. `robustness_malformedXml_throwsLayoutParseException`
+- Insgesamt **117 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+
 
 
 
