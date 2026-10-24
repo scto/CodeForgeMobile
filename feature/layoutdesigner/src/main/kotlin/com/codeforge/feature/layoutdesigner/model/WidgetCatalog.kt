@@ -112,12 +112,70 @@ object WidgetCatalog {
     fun attrsFor(tag: String, parentTag: String?): List<AttrSpec> = buildList {
         addAll(commonAttrs)
         byTag[tag]?.attrs?.let { addAll(it) }
-        when (parentTag) {
-            "LinearLayout" -> {
+        when {
+            parentTag == "LinearLayout" -> {
                 add(AttrSpec("android:layout_weight", AttrKind.NUMBER))
                 add(AttrSpec("android:layout_gravity", AttrKind.ENUM, gravityOptions))
             }
-            "FrameLayout" -> add(AttrSpec("android:layout_gravity", AttrKind.ENUM, gravityOptions))
+            parentTag == "FrameLayout" -> {
+                add(AttrSpec("android:layout_gravity", AttrKind.ENUM, gravityOptions))
+            }
+            parentTag == "ConstraintLayout" || parentTag?.endsWith("ConstraintLayout") == true -> {
+                add(AttrSpec("app:layout_constraintTop_toTopOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintTop_toBottomOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintBottom_toTopOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintBottom_toBottomOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintStart_toStartOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintStart_toEndOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintEnd_toStartOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintEnd_toEndOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintBaseline_toBaselineOf", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintHorizontal_bias", AttrKind.NUMBER))
+                add(AttrSpec("app:layout_constraintVertical_bias", AttrKind.NUMBER))
+                add(AttrSpec("app:layout_constraintDimensionRatio", AttrKind.TEXT))
+                add(AttrSpec("app:layout_constraintHorizontal_chainStyle", AttrKind.ENUM, listOf("spread", "spread_inside", "packed")))
+                add(AttrSpec("app:layout_constraintVertical_chainStyle", AttrKind.ENUM, listOf("spread", "spread_inside", "packed")))
+                add(AttrSpec("app:layout_constraintHorizontal_weight", AttrKind.NUMBER))
+                add(AttrSpec("app:layout_constraintVertical_weight", AttrKind.NUMBER))
+                add(AttrSpec("app:layout_goneMarginStart", AttrKind.DIMENSION))
+                add(AttrSpec("app:layout_goneMarginEnd", AttrKind.DIMENSION))
+                add(AttrSpec("app:layout_goneMarginTop", AttrKind.DIMENSION))
+                add(AttrSpec("app:layout_goneMarginBottom", AttrKind.DIMENSION))
+            }
+            parentTag == "RelativeLayout" -> {
+                add(AttrSpec("android:layout_alignParentStart", AttrKind.ENUM, listOf("true", "false")))
+                add(AttrSpec("android:layout_alignParentEnd", AttrKind.ENUM, listOf("true", "false")))
+                add(AttrSpec("android:layout_alignParentTop", AttrKind.ENUM, listOf("true", "false")))
+                add(AttrSpec("android:layout_alignParentBottom", AttrKind.ENUM, listOf("true", "false")))
+                add(AttrSpec("android:layout_centerInParent", AttrKind.ENUM, listOf("true", "false")))
+                add(AttrSpec("android:layout_centerHorizontal", AttrKind.ENUM, listOf("true", "false")))
+                add(AttrSpec("android:layout_centerVertical", AttrKind.ENUM, listOf("true", "false")))
+                add(AttrSpec("android:layout_below", AttrKind.TEXT))
+                add(AttrSpec("android:layout_above", AttrKind.TEXT))
+                add(AttrSpec("android:layout_toStartOf", AttrKind.TEXT))
+                add(AttrSpec("android:layout_toEndOf", AttrKind.TEXT))
+                add(AttrSpec("android:layout_alignStart", AttrKind.TEXT))
+                add(AttrSpec("android:layout_alignEnd", AttrKind.TEXT))
+                add(AttrSpec("android:layout_alignTop", AttrKind.TEXT))
+                add(AttrSpec("android:layout_alignBottom", AttrKind.TEXT))
+            }
+            parentTag == "GridLayout" || parentTag?.endsWith("GridLayout") == true -> {
+                add(AttrSpec("android:layout_row", AttrKind.NUMBER))
+                add(AttrSpec("android:layout_column", AttrKind.NUMBER))
+                add(AttrSpec("android:layout_rowSpan", AttrKind.NUMBER))
+                add(AttrSpec("android:layout_columnSpan", AttrKind.NUMBER))
+                add(AttrSpec("android:layout_columnWeight", AttrKind.NUMBER))
+                add(AttrSpec("android:layout_gravity", AttrKind.ENUM, gravityOptions))
+            }
+            parentTag == "TableLayout" || parentTag == "TableRow" -> {
+                add(AttrSpec("android:layout_column", AttrKind.NUMBER))
+                add(AttrSpec("android:layout_span", AttrKind.NUMBER))
+            }
+            parentTag == "CoordinatorLayout" || parentTag?.endsWith("CoordinatorLayout") == true -> {
+                add(AttrSpec("app:layout_anchor", AttrKind.TEXT))
+                add(AttrSpec("app:layout_anchorGravity", AttrKind.ENUM, gravityOptions))
+                add(AttrSpec("app:layout_behavior", AttrKind.TEXT))
+            }
         }
     }.distinctBy { it.name }
 

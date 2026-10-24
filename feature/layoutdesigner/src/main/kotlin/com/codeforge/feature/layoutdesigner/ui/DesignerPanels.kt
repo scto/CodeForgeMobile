@@ -213,6 +213,17 @@ internal fun PropertiesPanel(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(node.tag, style = MaterialTheme.typography.titleMedium)
+
+        val parent = state.document.parentOf(node.uid)
+        if (parent != null && parentTag != null) {
+            ConstraintCard(
+                node = node,
+                parentTag = parentTag,
+                parentUid = parent.uid,
+                onEvent = onEvent,
+            )
+        }
+
         specs.forEach { spec ->
             AttributeEditor(
                 node = node,

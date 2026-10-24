@@ -6,7 +6,7 @@
 - [x] **41.1** Modell: Kommentare, Formatierung, neue Baum-Operationen (`moveNode`, `insertNode`, `canDrop`, `wrapIn`, `renameId`, `removeWithReferences`, Mehrfachauswahl)
 - [x] **41.2** Drag & Drop (eigene Gesten-Implementierung, `DragController`, `NodeBoundsRegistry`, reiner `DropResolver`)
 - [x] **41.3** Leinwand und Werkzeuge (Zoom/Pan, Größengriffe, Overlays, Breadcrumbs, Zwischenablage, Tastatur, PNG-Export)
-- [ ] **41.4** ConstraintLayout und RelativeLayout echt darstellen und bearbeiten (`ConstraintMapper`, Anker-Editor, topologischer RelativeLayout-Solver)
+- [x] **41.4** ConstraintLayout und RelativeLayout echt darstellen und bearbeiten (`ConstraintMapper`, Anker-Editor, topologischer RelativeLayout-Solver)
 - [ ] **41.5** Ressourcen auflösen (`ResourceRepository`, Qualifizierer, Themes/Styles, Drawables/VectorDrawables, „In Ressource auslagern“)
 - [ ] **41.6** `include`, `merge`, `ViewStub`, Fragmente, eigene Views
 - [ ] **41.7** Widget-Katalog und Eigenschaften-Panel (Erweiterung Widgets/Layouts, SDK `attrs.xml` Fallback, Gruppen, Filter)
@@ -191,6 +191,77 @@
   5. `resizeAndToggleSizeMode_updatesAttributesAndRecordsUndo`
 - Insgesamt **60 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
 - `./gradlew :app:assembleDebug` erfolgreich.
+
+---
+
+## 41.4 ConstraintLayout und RelativeLayout echt darstellen und bearbeiten
+
+### Bibliotheken & Auflösung
+- Gewählte Version: `androidx.constraintlayout:constraintlayout-compose:1.1.1` in `gradle/libs.versions.toml` als `libs.androidx.constraintlayout.compose` hinterlegt.
+- Erfolgreich verifiziert gegen Compose-BOM `2025.09.00` mittels `./gradlew :feature:layoutdesigner:dependencies --configuration debugCompileClasspath` (1.1.1 aufgelöst).
+
+### Reines Kotlin-Modell & Mapper (JVM-testbar)
+- **`ConstraintModel.kt`:**
+  - `ConstraintAnchor` (START, END, TOP, BOTTOM, BASELINE, LEFT, RIGHT).
+  - `ConstraintTarget` (`Parent` oder `Sibling(id)`).
+  - `DimensionSpec` (`Wrap`, `MatchParent`, `Fixed(dp)`, `MatchConstraints(0dp)` mit Ratio und Percent).
+  - `GuidelineSpec`, `BarrierSpec`, `GroupSpec`.
+  - Typisierte Warnungen `ConstraintWarning`: `MissingHorizontalConstraint`, `MissingVerticalConstraint`, `UnknownTargetId`, `CircularConstraint`.
+- **`ConstraintMapper.kt`:**
+  - Reine JVM-Logik zur Extraktion und Zuordnung aller XML-Constraint-Attribute.
+  - Erkennt Margins und GoneMargins (`layout_goneMargin*`).
+  - Erkennt Ketten (`layout_constraintHorizontal_chainStyle`, `layout_constraintVertical_chainStyle`, `weight`).
+  - Zyklenerkennung über gerichtete Graphen-Tiefensuche.
+  - Erkennt Verweise auf nicht existente Geschwister-IDs.
+- **`RelativeSolver.kt`:**
+  - Reine JVM-Logik zur Auflösung von `RelativeLayout`-Abhängigkeiten.
+  - Topologische Sortierung via Kahn's Algorithmus.
+  - Erkennt Zyklen und meldet betroffene Knoten.
+  - Wertet Eltern-Ausrichtungen (`alignParent*`, `centerInParent`, `centerHorizontal/Vertical`) und Geschwister-Bezüge (`below`, `above`, `toStartOf`, `toEndOf`, `align*`) aus.
+
+### Echte Darstellung in Compose
+- **`ConstraintLayoutPreview.kt`:**
+  - Nutzt `androidx.constraintlayout.compose.ConstraintLayout` mit `ConstraintSet`.
+  - Guidelines werden über `createGuidelineFrom*` gerendert.
+  - Barriers werden über `createStartBarrier` / `createEndBarrier` etc. erstellt.
+  - Kindelemente werden dynamisch verknüpft (`linkTo`) inklusive Margins, GoneMargins und Biases.
+  - Warnungs-Badge in der Vorschau bei fehlerhaften Constraints.
+- **`RelativeLayoutPreview.kt`:**
+  - Eigener Compose-`Layout`-Container mit Mess- und Platzierungslogik.
+  - Berechnet Kind-Positionen `(x, y)` in Abhängigkeit von den topologisch sortierten Geschwistern.
+  - Zyklus-Warnanzeige bei Ring-Abhängigkeiten.
+- **`isApproximatedTag`:**
+  - Drastisch verkleinert: `ConstraintLayout` und `RelativeLayout` werden nicht mehr als Näherung eingestuft. Der Näherungs-Hinweis entfällt für diese Container.
+
+### Constraint-Editor UI
+- **`ConstraintCard.kt`:**
+  - Interaktives Mini-Diagramm im Eigenschaften-Panel für das selektierte Element.
+  - Anker-Toggles für Top, Bottom, Start und End (Verbinden mit Elternteil bzw. Entfernen).
+  - Bias-Schieberegler für horizontalen und vertikalen Bias.
+  - Schnellaktionen: „Horizontal zentrieren“, „Vertikal zentrieren“, „Alle Constraints entfernen“, „Guideline hinzufügen (vertikal)“.
+- **Events in Contract & ViewModel:**
+  - `SetConstraint`, `RemoveConstraint`, `CenterHorizontally`, `CenterVertically`, `ClearConstraints`, `AddGuideline`, `SetHorizontalBias`, `SetVerticalBias`.
+  - Vollständige Undo/Redo-Unterstützung.
+- **`WidgetCatalog.attrsFor`:**
+  - Ergänzt um alle Eltern-spezifischen Attribute für `ConstraintLayout`, `RelativeLayout`, `GridLayout`, `TableRow` und `CoordinatorLayout`.
+
+### Testabdeckung
+- 4 neue Tests in `ConstraintMapperTest`:
+  1. `mapContainer_linksAndMarginsCorrect`
+  2. `mapContainer_detectsMissingConstraints`
+  3. `mapContainer_detectsUnknownTargetId`
+  4. `mapContainer_detectsCycles`
+- 3 neue Tests in `RelativeSolverTest`:
+  1. `solve_topologicalOrder_placesDependenciesFirst`
+  2. `solve_detectsCycle`
+  3. `solve_missingTarget_reportedInMissingList`
+- 3 neue Tests in `LayoutDesignerViewModelTest`:
+  1. `setAndRemoveConstraint_updatesAttributesAndUndo`
+  2. `centerHorizontallyAndVertically_setsConstraintsAndBiases`
+  3. `addGuideline_insertsGuidelineChildAndEnablesUndo`
+- Insgesamt **70 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+- `./gradlew :app:assembleDebug` erfolgreich.
+
 
 
 

@@ -96,7 +96,7 @@ import com.codeforge.feature.layoutdesigner.ui.ZoomControls
 import kotlin.math.roundToInt
 
 @Immutable
-private class PreviewContext(
+internal class PreviewContext(
     val selectedUid: Int?,
     val onSelect: (Int) -> Unit,
     val dragController: DragController?,
@@ -104,10 +104,11 @@ private class PreviewContext(
     val document: LayoutDocument,
 )
 
-/** Tags, die nur als gestapelte Näherung gezeichnet werden. */
-fun isApproximatedTag(tag: String): Boolean = tag == "RelativeLayout" ||
-    tag.endsWith("ConstraintLayout") || tag.endsWith("CoordinatorLayout") ||
-    (tag !in setOf("LinearLayout", "FrameLayout", "ScrollView", "HorizontalScrollView") && tag.contains('.'))
+/** Tags, die nur als gestapelte Näherung gezeichnet werden (ConstraintLayout & RelativeLayout werden echt gerendert). */
+fun isApproximatedTag(tag: String): Boolean =
+    tag.endsWith("CoordinatorLayout") ||
+    (tag !in setOf("LinearLayout", "FrameLayout", "ScrollView", "HorizontalScrollView", "RelativeLayout") &&
+     !tag.endsWith("ConstraintLayout") && tag.contains('.'))
 
 @Composable
 fun LayoutPreview(
@@ -288,7 +289,7 @@ fun LayoutPreview(
 }
 
 @Composable
-private fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modifier) {
+internal fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modifier) {
     val visibility = node.attr("android:visibility")
     if (visibility == "gone") return
 
@@ -389,6 +390,8 @@ private fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modif
 
     when {
         tag == "LinearLayout" -> LinearView(node, ctx, m)
+        tag == "RelativeLayout" -> RelativeView(node, ctx, m)
+        tag == "ConstraintLayout" || tag.endsWith("ConstraintLayout") -> ConstraintView(node, ctx, m)
         tag == "ScrollView" || tag == "HorizontalScrollView" || tag == "FrameLayout" || isContainer ->
             FrameView(node, ctx, m)
         else -> LeafView(node, tag, m)

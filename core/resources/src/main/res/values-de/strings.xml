@@ -939,6 +939,14 @@
     <string name="layout_cfg_font_scale">%1$sx Schrift</string>
     <string name="layout_cfg_blueprint">Blueprint</string>
     <string name="layout_cfg_margins">Abstände</string>
+    <string name="layout_constraint_card_title">Constraints</string>
+    <string name="layout_center_horizontal">Horizontal zentrieren</string>
+    <string name="layout_center_vertical">Vertikal zentrieren</string>
+    <string name="layout_clear_constraints">Alle Constraints entfernen</string>
+    <string name="layout_add_guideline_v">Guideline (vertikal)</string>
+    <string name="layout_add_guideline_h">Guideline (horizontal)</string>
+    <string name="layout_relative_card_title">Relative Ausrichtung</string>
+    <string name="layout_connect_parent">Mit Eltern verbinden</string>
     <string name="modulemaker_gradle_pfad">Gradle-Pfad</string>
     <string name="plugins_geladen">Geladen</string>
     <string name="plugins_nicht_geladen">Nicht geladen</string>

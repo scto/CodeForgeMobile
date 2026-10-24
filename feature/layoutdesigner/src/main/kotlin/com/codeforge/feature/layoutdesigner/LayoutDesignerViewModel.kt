@@ -11,10 +11,15 @@ import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.feature.layoutdesigner.files.LayoutFileStore
+import com.codeforge.feature.layoutdesigner.model.ConstraintAnchor
+import com.codeforge.feature.layoutdesigner.model.ConstraintTarget
+import com.codeforge.feature.layoutdesigner.model.freshId
+import com.codeforge.feature.layoutdesigner.model.insertNode
 import com.codeforge.feature.layoutdesigner.model.DragPayload
 import com.codeforge.feature.layoutdesigner.model.DropVerdict
 import com.codeforge.feature.layoutdesigner.model.LayoutClipboard
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
+import com.codeforge.feature.layoutdesigner.model.LayoutNode
 import com.codeforge.feature.layoutdesigner.model.addWidget
 import com.codeforge.feature.layoutdesigner.model.addWidgetAt
 import com.codeforge.feature.layoutdesigner.model.changeTag
@@ -256,6 +261,149 @@ class LayoutDesignerViewModel @Inject constructor(
                 val matchVal = if (parentTag == "ConstraintLayout" || parentTag?.endsWith(".ConstraintLayout") == true) "0dp" else "match_parent"
                 val next = if (current == matchVal) "wrap_content" else matchVal
                 commit(_state.value.document.setAttribute(uid, attr, next), selectUid = uid)
+            }
+            is LayoutDesignerUiEvent.SetConstraint -> {
+                var doc = _state.value.document
+                val targetStr = when (val t = event.target) {
+                    ConstraintTarget.Parent -> "parent"
+                    is ConstraintTarget.Sibling -> "@id/${t.id}"
+                }
+                val attrName = when (event.anchor) {
+                    ConstraintAnchor.START -> if (event.targetAnchor == ConstraintAnchor.END) "app:layout_constraintStart_toEndOf" else "app:layout_constraintStart_toStartOf"
+                    ConstraintAnchor.END -> if (event.targetAnchor == ConstraintAnchor.START) "app:layout_constraintEnd_toStartOf" else "app:layout_constraintEnd_toEndOf"
+                    ConstraintAnchor.TOP -> if (event.targetAnchor == ConstraintAnchor.BOTTOM) "app:layout_constraintTop_toBottomOf" else "app:layout_constraintTop_toTopOf"
+                    ConstraintAnchor.BOTTOM -> if (event.targetAnchor == ConstraintAnchor.TOP) "app:layout_constraintBottom_toTopOf" else "app:layout_constraintBottom_toBottomOf"
+                    ConstraintAnchor.BASELINE -> "app:layout_constraintBaseline_toBaselineOf"
+                    else -> "app:layout_constraintStart_toStartOf"
+                }
+                when (event.anchor) {
+                    ConstraintAnchor.START -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintStart_toStartOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintStart_toEndOf", null)
+                    }
+                    ConstraintAnchor.END -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintEnd_toStartOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintEnd_toEndOf", null)
+                    }
+                    ConstraintAnchor.TOP -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintTop_toTopOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintTop_toBottomOf", null)
+                    }
+                    ConstraintAnchor.BOTTOM -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintBottom_toTopOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintBottom_toBottomOf", null)
+                    }
+                    ConstraintAnchor.BASELINE -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintBaseline_toBaselineOf", null)
+                    }
+                    else -> {}
+                }
+                doc = doc.setAttribute(event.uid, attrName, targetStr)
+                if (event.marginDp > 0) {
+                    val marginAttr = when (event.anchor) {
+                        ConstraintAnchor.START -> "android:layout_marginStart"
+                        ConstraintAnchor.END -> "android:layout_marginEnd"
+                        ConstraintAnchor.TOP -> "android:layout_marginTop"
+                        ConstraintAnchor.BOTTOM -> "android:layout_marginBottom"
+                        else -> null
+                    }
+                    if (marginAttr != null) {
+                        doc = doc.setAttribute(event.uid, marginAttr, "${event.marginDp}dp")
+                    }
+                }
+                commit(doc, selectUid = event.uid)
+            }
+            is LayoutDesignerUiEvent.RemoveConstraint -> {
+                var doc = _state.value.document
+                when (event.anchor) {
+                    ConstraintAnchor.START -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintStart_toStartOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintStart_toEndOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintLeft_toLeftOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintLeft_toRightOf", null)
+                    }
+                    ConstraintAnchor.END -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintEnd_toStartOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintEnd_toEndOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintRight_toLeftOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintRight_toRightOf", null)
+                    }
+                    ConstraintAnchor.TOP -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintTop_toTopOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintTop_toBottomOf", null)
+                    }
+                    ConstraintAnchor.BOTTOM -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintBottom_toTopOf", null)
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintBottom_toBottomOf", null)
+                    }
+                    ConstraintAnchor.BASELINE -> {
+                        doc = doc.setAttribute(event.uid, "app:layout_constraintBaseline_toBaselineOf", null)
+                    }
+                    else -> {}
+                }
+                commit(doc, selectUid = event.uid)
+            }
+            is LayoutDesignerUiEvent.CenterHorizontally -> {
+                var doc = _state.value.document
+                doc = doc.setAttribute(event.uid, "app:layout_constraintStart_toStartOf", "parent")
+                doc = doc.setAttribute(event.uid, "app:layout_constraintStart_toEndOf", null)
+                doc = doc.setAttribute(event.uid, "app:layout_constraintEnd_toEndOf", "parent")
+                doc = doc.setAttribute(event.uid, "app:layout_constraintEnd_toStartOf", null)
+                doc = doc.setAttribute(event.uid, "android:layout_marginStart", "0dp")
+                doc = doc.setAttribute(event.uid, "android:layout_marginEnd", "0dp")
+                doc = doc.setAttribute(event.uid, "app:layout_constraintHorizontal_bias", "0.5")
+                commit(doc, selectUid = event.uid)
+            }
+            is LayoutDesignerUiEvent.CenterVertically -> {
+                var doc = _state.value.document
+                doc = doc.setAttribute(event.uid, "app:layout_constraintTop_toTopOf", "parent")
+                doc = doc.setAttribute(event.uid, "app:layout_constraintTop_toBottomOf", null)
+                doc = doc.setAttribute(event.uid, "app:layout_constraintBottom_toBottomOf", "parent")
+                doc = doc.setAttribute(event.uid, "app:layout_constraintBottom_toTopOf", null)
+                doc = doc.setAttribute(event.uid, "android:layout_marginTop", "0dp")
+                doc = doc.setAttribute(event.uid, "android:layout_marginBottom", "0dp")
+                doc = doc.setAttribute(event.uid, "app:layout_constraintVertical_bias", "0.5")
+                commit(doc, selectUid = event.uid)
+            }
+            is LayoutDesignerUiEvent.ClearConstraints -> {
+                var doc = _state.value.document
+                val node = doc.find(event.uid)
+                if (node != null) {
+                    val toRemove = node.attributes.keys.filter { it.startsWith("app:layout_constraint") || it.startsWith("layout_constraint") }
+                    for (k in toRemove) {
+                        doc = doc.setAttribute(event.uid, k, null)
+                    }
+                }
+                commit(doc, selectUid = event.uid)
+            }
+            is LayoutDesignerUiEvent.AddGuideline -> {
+                val parent = _state.value.document.find(event.parentUid)
+                if (parent != null) {
+                    val orient = if (event.isVertical) "vertical" else "horizontal"
+                    val attrs = linkedMapOf(
+                        "android:id" to _state.value.document.freshId("guideline"),
+                        "android:layout_width" to "wrap_content",
+                        "android:layout_height" to "wrap_content",
+                        "android:orientation" to orient,
+                        "app:layout_constraintGuide_percent" to "0.5",
+                    )
+                    val glNode = LayoutNode(
+                        uid = _state.value.document.nextUid,
+                        tag = "androidx.constraintlayout.widget.Guideline",
+                        attributes = attrs,
+                        isNew = true,
+                    )
+                    val newDoc = _state.value.document.insertNode(glNode, event.parentUid, parent.children.size)
+                    commit(newDoc, selectUid = glNode.uid)
+                }
+            }
+            is LayoutDesignerUiEvent.SetHorizontalBias -> {
+                val doc = _state.value.document.setAttribute(event.uid, "app:layout_constraintHorizontal_bias", String.format(java.util.Locale.US, "%.2f", event.bias))
+                commit(doc, selectUid = event.uid)
+            }
+            is LayoutDesignerUiEvent.SetVerticalBias -> {
+                val doc = _state.value.document.setAttribute(event.uid, "app:layout_constraintVertical_bias", String.format(java.util.Locale.US, "%.2f", event.bias))
+                commit(doc, selectUid = event.uid)
             }
         }
     }

@@ -122,6 +122,22 @@ sealed interface LayoutDesignerUiEvent {
     data class PasteSnippet(val xmlSnippet: String) : LayoutDesignerUiEvent
     data class ResizeSelected(val widthDp: Int?, val heightDp: Int?) : LayoutDesignerUiEvent
     data class ToggleSizeMode(val isWidth: Boolean) : LayoutDesignerUiEvent
+
+    // 41.4 ConstraintLayout & RelativeLayout
+    data class SetConstraint(
+        val uid: Int,
+        val anchor: com.codeforge.feature.layoutdesigner.model.ConstraintAnchor,
+        val target: com.codeforge.feature.layoutdesigner.model.ConstraintTarget,
+        val targetAnchor: com.codeforge.feature.layoutdesigner.model.ConstraintAnchor,
+        val marginDp: Int = 0,
+    ) : LayoutDesignerUiEvent
+    data class RemoveConstraint(val uid: Int, val anchor: com.codeforge.feature.layoutdesigner.model.ConstraintAnchor) : LayoutDesignerUiEvent
+    data class CenterHorizontally(val uid: Int) : LayoutDesignerUiEvent
+    data class CenterVertically(val uid: Int) : LayoutDesignerUiEvent
+    data class ClearConstraints(val uid: Int) : LayoutDesignerUiEvent
+    data class AddGuideline(val parentUid: Int, val isVertical: Boolean) : LayoutDesignerUiEvent
+    data class SetHorizontalBias(val uid: Int, val bias: Float) : LayoutDesignerUiEvent
+    data class SetVerticalBias(val uid: Int, val bias: Float) : LayoutDesignerUiEvent
 }
 
 sealed interface LayoutDesignerUiEffect {

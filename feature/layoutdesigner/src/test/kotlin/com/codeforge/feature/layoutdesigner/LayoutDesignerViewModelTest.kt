@@ -649,6 +649,118 @@ class LayoutDesignerViewModelTest {
         assertEquals("120dp", viewModel.state.value.document.find(1)!!.attr("android:layout_width"))
     }
 
+    @Test
+    fun setAndRemoveConstraint_updatesAttributesAndUndo() = runTest {
+        val path = "/path/to/constraint.xml"
+        fileStore.files[path] = """
+            <androidx.constraintlayout.widget.ConstraintLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        """.trimIndent()
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        // Set START to Parent START with 16dp margin
+        viewModel.onEvent(
+            LayoutDesignerUiEvent.SetConstraint(
+                uid = 1,
+                anchor = com.codeforge.feature.layoutdesigner.model.ConstraintAnchor.START,
+                target = com.codeforge.feature.layoutdesigner.model.ConstraintTarget.Parent,
+                targetAnchor = com.codeforge.feature.layoutdesigner.model.ConstraintAnchor.START,
+                marginDp = 16,
+            ),
+        )
+        advanceUntilIdle()
+
+        val nodeWithConstraint = viewModel.state.value.document.find(1)!!
+        assertEquals("parent", nodeWithConstraint.attr("app:layout_constraintStart_toStartOf"))
+        assertEquals("16dp", nodeWithConstraint.attr("android:layout_marginStart"))
+        assertTrue(viewModel.state.value.canUndo)
+
+        // Remove the constraint
+        viewModel.onEvent(
+            LayoutDesignerUiEvent.RemoveConstraint(
+                uid = 1,
+                anchor = com.codeforge.feature.layoutdesigner.model.ConstraintAnchor.START,
+            ),
+        )
+        advanceUntilIdle()
+        assertNull(viewModel.state.value.document.find(1)!!.attr("app:layout_constraintStart_toStartOf"))
+
+        // Undo restores constraint
+        viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+        assertEquals("parent", viewModel.state.value.document.find(1)!!.attr("app:layout_constraintStart_toStartOf"))
+    }
+
+    @Test
+    fun centerHorizontallyAndVertically_setsConstraintsAndBiases() = runTest {
+        val path = "/path/to/constraint.xml"
+        fileStore.files[path] = """
+            <androidx.constraintlayout.widget.ConstraintLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        """.trimIndent()
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        viewModel.onEvent(LayoutDesignerUiEvent.CenterHorizontally(1))
+        viewModel.onEvent(LayoutDesignerUiEvent.CenterVertically(1))
+        advanceUntilIdle()
+
+        val centered = viewModel.state.value.document.find(1)!!
+        assertEquals("parent", centered.attr("app:layout_constraintStart_toStartOf"))
+        assertEquals("parent", centered.attr("app:layout_constraintEnd_toEndOf"))
+        assertEquals("parent", centered.attr("app:layout_constraintTop_toTopOf"))
+        assertEquals("parent", centered.attr("app:layout_constraintBottom_toBottomOf"))
+
+        viewModel.onEvent(LayoutDesignerUiEvent.ClearConstraints(1))
+        advanceUntilIdle()
+        assertNull(viewModel.state.value.document.find(1)!!.attr("app:layout_constraintStart_toStartOf"))
+    }
+
+    @Test
+    fun addGuideline_insertsGuidelineChildAndEnablesUndo() = runTest {
+        val path = "/path/to/constraint.xml"
+        fileStore.files[path] = """
+            <androidx.constraintlayout.widget.ConstraintLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        """.trimIndent()
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        viewModel.onEvent(LayoutDesignerUiEvent.AddGuideline(parentUid = 0, isVertical = true))
+        advanceUntilIdle()
+
+        val root = viewModel.state.value.document.root
+        assertEquals(1, root.children.size)
+        val gl = root.children[0]
+        assertEquals("androidx.constraintlayout.widget.Guideline", gl.tag)
+        assertEquals("vertical", gl.attr("android:orientation"))
+        assertEquals("0.5", gl.attr("app:layout_constraintGuide_percent"))
+        assertTrue(viewModel.state.value.canUndo)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+        assertEquals(0, viewModel.state.value.document.root.children.size)
+    }
+
     // --- Fakes ---
 
     private class FakeLayoutFileStore : LayoutFileStore {
