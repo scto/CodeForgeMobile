@@ -66,6 +66,10 @@ data class LayoutDesignerUiState(
     val customViews: List<com.codeforge.feature.layoutdesigner.model.CustomViewInfo> = emptyList(),
     val inflatedViewStubs: Set<Int> = emptySet(),
     val issues: List<com.codeforge.feature.layoutdesigner.lint.LayoutIssue> = emptyList(),
+    val availableVariants: List<String> = emptyList(),
+    val currentVariant: String = "default",
+    val showExternalChangeDialog: Boolean = false,
+    val externalFileContent: String? = null,
 ) {
     val fileName: String get() = filePath.substringAfterLast('/')
 
@@ -162,6 +166,13 @@ sealed interface LayoutDesignerUiEvent {
     // 41.8 Lint & Probleme
     data class ApplyQuickFix(val quickFix: com.codeforge.feature.layoutdesigner.lint.QuickFix) : LayoutDesignerUiEvent
     data class JumpToIssue(val issue: com.codeforge.feature.layoutdesigner.lint.LayoutIssue) : LayoutDesignerUiEvent
+
+    // 41.9 Editor-Integration & Varianten
+    data class SwitchVariant(val variant: String) : LayoutDesignerUiEvent
+    data class CreateVariant(val qualifier: String) : LayoutDesignerUiEvent
+    data object ReloadFromExternal : LayoutDesignerUiEvent
+    data object KeepMyVersion : LayoutDesignerUiEvent
+    data object CompareExternalWithMine : LayoutDesignerUiEvent
 }
 
 sealed interface LayoutDesignerUiEffect {

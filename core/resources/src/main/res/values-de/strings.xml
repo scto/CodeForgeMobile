@@ -872,6 +872,15 @@
     <string name="layout_filter_errors">Fehler</string>
     <string name="layout_filter_warnings">Warnungen</string>
     <string name="layout_filter_info">Hinweise</string>
+    <string name="layout_restored_unsaved">Ungespeicherte Änderungen wiederhergestellt</string>
+    <string name="layout_external_changed_title">Datei extern geändert</string>
+    <string name="layout_external_changed_message">Die Layout-Datei wurde auf dem Datenträger geändert. Wie möchten Sie fortfahren?</string>
+    <string name="layout_reload_external">Neu laden</string>
+    <string name="layout_keep_mine">Meine Version behalten</string>
+    <string name="layout_compare_mine">Vergleichen</string>
+    <string name="layout_create_variant">Variante anlegen…</string>
+    <string name="layout_variant_qualifier">Qualifizierer (z. B. land, sw600dp)</string>
+    <string name="layout_variant_invalid">Ungültiger Qualifizierer-Name</string>
     <string name="layout_undo">Rückgängig</string>
     <string name="layout_redo">Wiederholen</string>
     <string name="layout_add_widget">Widget hinzufügen</string>

@@ -45,6 +45,7 @@ class LayoutFilesViewModel @Inject constructor(
             }
             LayoutFilesUiEvent.DismissCreate -> _state.update { it.copy(showCreate = false) }
             is LayoutFilesUiEvent.NameChanged -> _state.update { it.copy(newName = event.value, createError = null) }
+            is LayoutFilesUiEvent.TemplateSelected -> _state.update { it.copy(selectedTemplate = event.template) }
             is LayoutFilesUiEvent.ResDirSelected -> _state.update { it.copy(selectedResDir = event.value, createError = null) }
             LayoutFilesUiEvent.ConfirmCreate -> create()
             is LayoutFilesUiEvent.Open -> viewModelScope.launch { _effects.send(LayoutFilesUiEffect.OpenDesigner(event.path)) }
@@ -93,7 +94,7 @@ class LayoutFilesViewModel @Inject constructor(
                     target.exists() -> Result.failure(IllegalStateException(Res.string(R.string.layout_exists)))
                     else -> runCatching {
                         target.parentFile?.mkdirs()
-                        target.writeText(LayoutScanner.TEMPLATE)
+                        target.writeText(s.selectedTemplate.xml())
                     }
                 }
             }

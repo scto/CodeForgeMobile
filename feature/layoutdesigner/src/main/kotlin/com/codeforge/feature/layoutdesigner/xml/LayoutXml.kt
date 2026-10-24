@@ -59,7 +59,7 @@ object LayoutXml {
         val rootNamespaces = LinkedHashMap<String, String>()
 
         if (sourceTags.isNotEmpty()) {
-            for ((name, value) in sourceTags[0]) {
+            for ((name, value) in sourceTags[0].attrs) {
                 if (name == "xmlns") {
                     rootNamespaces[""] = value
                 } else if (name.startsWith("xmlns:")) {
@@ -91,7 +91,9 @@ object LayoutXml {
         fun convert(e: Element): LayoutNode {
             val uid = counter++
             val attrs = LinkedHashMap<String, String>()
-            val sourceAttrs = if (tagCursor < sourceTags.size) sourceTags[tagCursor++] else null
+            val tagInfo = if (tagCursor < sourceTags.size) sourceTags[tagCursor++] else null
+            val sourceAttrs = tagInfo?.attrs
+            val sourceRange = tagInfo?.range
 
             if (sourceAttrs != null) {
                 for ((name, value) in sourceAttrs) {
@@ -152,6 +154,7 @@ object LayoutXml {
                 textContent = textContent,
                 isNew = false,
                 firstAttrInline = isInline,
+                sourceRange = sourceRange,
             )
         }
 
@@ -167,8 +170,10 @@ object LayoutXml {
         )
     }
 
-    private fun extractTagAttributesInOrder(xml: String): List<List<Pair<String, String>>> {
-        val result = ArrayList<List<Pair<String, String>>>()
+    private data class ParsedTagInfo(val attrs: List<Pair<String, String>>, val range: IntRange)
+
+    private fun extractTagAttributesInOrder(xml: String): List<ParsedTagInfo> {
+        val result = ArrayList<ParsedTagInfo>()
         val tagRegex = Regex("""<([A-Za-z0-9_.]+)([^>]*)>""")
         for (m in tagRegex.findAll(xml)) {
             val tagName = m.groupValues[1]
@@ -179,7 +184,7 @@ object LayoutXml {
             for (attrMatch in attrRegex.findAll(attrString)) {
                 attrs.add(attrMatch.groupValues[1] to attrMatch.groupValues[2])
             }
-            result.add(attrs)
+            result.add(ParsedTagInfo(attrs, m.range))
         }
         return result
     }

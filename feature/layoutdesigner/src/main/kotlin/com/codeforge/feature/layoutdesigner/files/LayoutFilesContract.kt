@@ -21,6 +21,7 @@ data class LayoutFilesUiState(
     val error: String? = null,
     val showCreate: Boolean = false,
     val newName: String = "",
+    val selectedTemplate: com.codeforge.feature.layoutdesigner.model.LayoutTemplate = com.codeforge.feature.layoutdesigner.model.LayoutTemplate.EMPTY_CONSTRAINT,
     /** Relative Pfade der gefundenen (oder vorgeschlagenen) `res`-Ordner. */
     val resDirs: List<String> = emptyList(),
     val selectedResDir: String = "",
@@ -33,6 +34,7 @@ sealed interface LayoutFilesUiEvent {
     data object ShowCreate : LayoutFilesUiEvent
     data object DismissCreate : LayoutFilesUiEvent
     data class NameChanged(val value: String) : LayoutFilesUiEvent
+    data class TemplateSelected(val template: com.codeforge.feature.layoutdesigner.model.LayoutTemplate) : LayoutFilesUiEvent
     data class ResDirSelected(val value: String) : LayoutFilesUiEvent
     data object ConfirmCreate : LayoutFilesUiEvent
     data class Open(val path: String) : LayoutFilesUiEvent

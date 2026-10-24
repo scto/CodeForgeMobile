@@ -918,6 +918,120 @@ class LayoutDesignerViewModelTest {
         assertEquals(DesignerTab.PREVIEW, viewModel.state.value.tab)
     }
 
+    @Test
+    fun externalChange_cleanState_autoReloads() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.dirty)
+
+        val updatedXml = """
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        """.trimIndent()
+        fileStore.files[path] = updatedXml
+
+        fileSyncBridge.emitExternalChange(setOf(path))
+        advanceUntilIdle()
+
+        assertEquals("FrameLayout", viewModel.state.value.document.root.tag)
+        assertFalse(viewModel.state.value.dirty)
+    }
+
+    @Test
+    fun externalChange_dirtyState_showsConflictDialog() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        val rootUid = viewModel.state.value.document.root.uid
+        viewModel.onEvent(LayoutDesignerUiEvent.SetAttribute(rootUid, "android:padding", "16dp"))
+        assertTrue(viewModel.state.value.dirty)
+
+        val diskXml = """
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        """.trimIndent()
+        fileStore.files[path] = diskXml
+
+        fileSyncBridge.emitExternalChange(setOf(path))
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showExternalChangeDialog)
+        assertEquals(diskXml, viewModel.state.value.externalFileContent)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.KeepMyVersion)
+        assertFalse(viewModel.state.value.showExternalChangeDialog)
+        assertEquals("LinearLayout", viewModel.state.value.document.root.tag)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.ReloadFromExternal)
+        advanceUntilIdle()
+        assertFalse(viewModel.state.value.showExternalChangeDialog)
+        assertEquals("RelativeLayout", viewModel.state.value.document.root.tag)
+    }
+
+    @Test
+    fun restoreProcessDeath_restoresDirtyXmlAndNotifies() = runTest {
+        val restoredXml = """
+            <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Restored" />
+        """.trimIndent()
+        val handle = androidx.lifecycle.SavedStateHandle(
+            mapOf(
+                LayoutDesignerViewModel.KEY_FILE_PATH to "/restored/path.xml",
+                LayoutDesignerViewModel.KEY_DIRTY_XML to restoredXml,
+                LayoutDesignerViewModel.KEY_TAB to DesignerTab.PROPERTIES.name,
+                LayoutDesignerViewModel.KEY_DEVICE to DevicePreset.TABLET_7.name,
+            )
+        )
+        val vm = LayoutDesignerViewModel(
+            openFileBridge = openFileBridge,
+            fileSyncBridge = fileSyncBridge,
+            fileStore = fileStore,
+            savedStateHandle = handle,
+            ioDispatcher = StandardTestDispatcher(testScheduler),
+        )
+
+        assertTrue(vm.state.value.dirty)
+        assertEquals("/restored/path.xml", vm.state.value.filePath)
+        assertEquals(DesignerTab.PROPERTIES, vm.state.value.tab)
+        assertEquals(DevicePreset.TABLET_7, vm.state.value.device)
+        assertEquals("TextView", vm.state.value.document.root.tag)
+    }
+
+    @Test
+    fun createVariant_writesVariantFileAndLoadsIt() = runTest {
+        val tempDir = java.nio.file.Files.createTempDirectory("variants_test").toFile()
+        try {
+            val resDir = java.io.File(tempDir, "app/src/main/res")
+            val layoutDir = java.io.File(resDir, "layout")
+            layoutDir.mkdirs()
+            val layoutFile = java.io.File(layoutDir, "activity_main.xml")
+            layoutFile.writeText(sampleValidXml)
+            fileStore.files[layoutFile.canonicalPath] = sampleValidXml
+
+            viewModel.onEvent(LayoutDesignerUiEvent.Load(layoutFile.canonicalPath))
+            advanceUntilIdle()
+
+            viewModel.onEvent(LayoutDesignerUiEvent.CreateVariant("land"))
+            advanceUntilIdle()
+
+            val landDir = java.io.File(resDir, "layout-land")
+            val landFile = java.io.File(landDir, "activity_main.xml")
+            assertTrue(landFile.exists())
+            assertEquals(landFile.canonicalPath, java.io.File(viewModel.state.value.filePath).canonicalPath)
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
+
     // --- Fakes ---
 
     private class FakeLayoutFileStore : LayoutFileStore {
@@ -967,6 +1081,10 @@ class LayoutDesignerViewModelTest {
 
         val flushedPaths = mutableListOf<Set<String>>()
         val notifiedChanges = mutableListOf<Collection<String>>()
+
+        suspend fun emitExternalChange(paths: Set<String>) {
+            _externalChanges.emit(paths)
+        }
 
         override suspend fun requestFlush(paths: Set<String>) {
             flushedPaths.add(paths)

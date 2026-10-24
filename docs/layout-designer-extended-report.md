@@ -11,7 +11,7 @@
 - [x] **41.6** `include`, `merge`, `ViewStub`, Fragmente, eigene Views
 - [x] **41.7** Widget-Katalog und Eigenschaften-Panel (Erweiterung Widgets/Layouts, SDK `attrs.xml` Fallback, Gruppen, Filter)
 - [x] **41.8** Prüfungen (Lint) mit Schnellkorrektur (`LayoutLinter`, Regeln, UI-Panel)
-- [ ] **41.9** Zusammenspiel mit dem Code-Editor und Dateien (`FileSyncBridge`, Vorlagen, Varianten, `SavedStateHandle`)
+- [x] **41.9** Zusammenspiel mit dem Code-Editor und Dateien (`FileSyncBridge`, Vorlagen, Varianten, `SavedStateHandle`)
 - [ ] **41.10** Leistung und Robustheit (500 Knoten Benchmark, Fehlerisolation)
 - [ ] **41.11** (optional) View-XML → Jetpack-Compose-Code
 - [ ] **41.12** Tests, Doku, Abnahme (JVM-Tests, Checklist, Doku-Update)
@@ -456,6 +456,39 @@
 - 15 neue Tests in `LayoutLinterTest` (jede Regel und Schnellkorrektur separat abgedeckt).
 - 3 neue ViewModel-Tests in `LayoutDesignerViewModelTest` (`load_populatesLintIssues`, `applyQuickFix_updatesDocumentAndEnablesUndo`, `jumpToIssue_selectsNodeAndSwitchesTab`).
 - Insgesamt **105 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+
+---
+
+## 41.9 Zusammenspiel mit dem Code-Editor und Dateien
+
+### Implementierung
+- **Layout-Vorlagen (`LayoutTemplates.kt`):**
+  - Fünf saubere Vorlagen nach Android Best-Practices und Lint-geprüft:
+    1. Leeres `ConstraintLayout`
+    2. Leeres `LinearLayout` (vertikal)
+    3. Listen-Eintrag (`ConstraintLayout` mit ImageView, zwei TextViews, Divider)
+    4. Formular / Eingabemaske (`ScrollView` mit LinearLayout, TextInputLayouts, Button)
+    5. Scrollbare Detailseite (`NestedScrollView` mit vertikalem LinearLayout)
+  - Unit-Test `LayoutTemplatesTest` verifiziert syntaktische Korrektheit und 0 Lint-Fehler bei allen Vorlagen.
+  - Integration in `LayoutFilesPanel` mit Filter- und Vorlagenauswahl-Chips sowie Dateianlege-Dialog.
+- **Zwei-Wege-Synchronisation mit Code-Editor (`FileSyncBridge`):**
+  - Automatisches Neuladen sauberer Zustände bei externen Dateiänderungen.
+  - Konfliktdialog bei ungespeicherten Änderungen (`showExternalChangeDialog`): Auswahl zwischen *Externen Stand übernehmen*, *Eigene Version behalten* und *Vergleichen*.
+  - `flushRequests` vor Ladevorgängen und `notifyExternalChange` nach Speichern/Erstellen von Varianten.
+- **XML-Syntax-Highlighting und Synchronisation (`XmlVisualTransformation`):**
+  - XML-Editor mit Syntaxhervorhebung für Kommentare, XML-Tags, Attribute und Attributwerte.
+  - Tag-Bereich-Tracking (`sourceRange: IntRange?`) an `LayoutNode` zur Synchronisation zwischen XML-Textauswahl und Leinwand/Baum.
+- **Layout-Varianten (`availableVariants`, `currentVariant`):**
+  - Automatische Erkennung vorhandener Varianten (z. B. `layout-land`, `layout-sw600dp`).
+  - Schneller Wechsel zwischen Varianten (`SwitchVariant`) und Erstellung neuer Varianten (`CreateVariant`).
+- **Prozess-Tod-Wiederherstellung (`SavedStateHandle`):**
+  - Wiederherstellung von Pfad, Entwurf, aktivem Tab, Preset und Knotenauswahl bei Android-Prozesstod.
+
+### Testabdeckung
+- 5 neue Tests in `LayoutTemplatesTest`.
+- 5 neue ViewModel-Tests in `LayoutDesignerViewModelTest` (`externalChange_cleanState_autoReloads`, `externalChange_dirtyState_showsConflictDialog`, `restoreFromSavedState_restoresDocumentAndState`, `createVariant_writesFileAndNotifiesBridge`, `sourceRange_nodeMapping`).
+- Insgesamt **110 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+
 
 
 

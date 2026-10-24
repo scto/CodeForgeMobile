@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +37,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
@@ -163,6 +166,8 @@ private fun LayoutDesignerScreen(
     var renameIdDialogOpen by remember { mutableStateOf(false) }
     var renameIdValue by remember { mutableStateOf("") }
     var changeTagDialogOpen by remember { mutableStateOf(false) }
+    var createVariantDialogOpen by remember { mutableStateOf(false) }
+    var variantMenuOpen by remember { mutableStateOf(false) }
 
     val clipboardManager = LocalClipboardManager.current
     val graphicsLayer = rememberGraphicsLayer()
@@ -251,7 +256,32 @@ private fun LayoutDesignerScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text(state.fileName.ifEmpty { stringRes(R.string.layout_title) }, maxLines = 1)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(state.fileName.ifEmpty { stringRes(R.string.layout_title) }, maxLines = 1)
+                            if (state.availableVariants.size > 1) {
+                                Spacer(Modifier.width(8.dp))
+                                Box {
+                                    AssistChip(
+                                        onClick = { variantMenuOpen = true },
+                                        label = { Text(state.currentVariant, style = MaterialTheme.typography.labelSmall) }
+                                    )
+                                    DropdownMenu(
+                                        expanded = variantMenuOpen,
+                                        onDismissRequest = { variantMenuOpen = false }
+                                    ) {
+                                        state.availableVariants.forEach { v ->
+                                            DropdownMenuItem(
+                                                text = { Text(v) },
+                                                onClick = {
+                                                    variantMenuOpen = false
+                                                    onEvent(LayoutDesignerUiEvent.SwitchVariant(v))
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         if (state.dirty) {
                             Text(
                                 stringRes(R.string.layout_unsaved_marker),
@@ -322,6 +352,14 @@ private fun LayoutDesignerScreen(
                                             snackbar.showSnackbar(t.message ?: "Export failed")
                                         }
                                     }
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringRes(R.string.layout_create_variant)) },
+                                leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    createVariantDialogOpen = true
                                 },
                             )
                             DropdownMenuItem(
@@ -573,6 +611,77 @@ private fun LayoutDesignerScreen(
                     Text(stringRes(R.string.common_abbrechen))
                 }
             },
+        )
+    }
+
+    // Externe Änderung Konflikt-Dialog
+    if (state.showExternalChangeDialog) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringRes(R.string.layout_external_changed_title)) },
+            text = { Text(stringRes(R.string.layout_external_changed_message)) },
+            confirmButton = {
+                TextButton(onClick = { onEvent(LayoutDesignerUiEvent.ReloadFromExternal) }) {
+                    Text(stringRes(R.string.layout_reload_external))
+                }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = { onEvent(LayoutDesignerUiEvent.CompareExternalWithMine) }) {
+                        Text(stringRes(R.string.layout_compare_mine))
+                    }
+                    TextButton(onClick = { onEvent(LayoutDesignerUiEvent.KeepMyVersion) }) {
+                        Text(stringRes(R.string.layout_keep_mine))
+                    }
+                }
+            },
+        )
+    }
+
+    // Variante anlegen Dialog
+    if (createVariantDialogOpen) {
+        var qualifierInput by remember { mutableStateOf("") }
+        val commonQualifiers = listOf("land", "sw600dp", "sw840dp", "night", "ldrtl", "v31", "v33", "v35")
+        AlertDialog(
+            onDismissRequest = { createVariantDialogOpen = false },
+            title = { Text(stringRes(R.string.layout_create_variant)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = qualifierInput,
+                        onValueChange = { qualifierInput = it },
+                        label = { Text(stringRes(R.string.layout_variant_qualifier)) },
+                        singleLine = true,
+                    )
+                    Text("Häufige Qualifizierer:", style = MaterialTheme.typography.labelSmall)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        commonQualifiers.forEach { q ->
+                            AssistChip(
+                                onClick = { qualifierInput = q },
+                                label = { Text(q) }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        createVariantDialogOpen = false
+                        if (qualifierInput.isNotBlank()) {
+                            onEvent(LayoutDesignerUiEvent.CreateVariant(qualifierInput))
+                        }
+                    },
+                    enabled = qualifierInput.isNotBlank()
+                ) {
+                    Text(stringRes(R.string.layout_create))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { createVariantDialogOpen = false }) {
+                    Text(stringRes(R.string.common_abbrechen))
+                }
+            }
         )
     }
 }

@@ -872,6 +872,15 @@
     <string name="layout_filter_errors">Errors</string>
     <string name="layout_filter_warnings">Warnings</string>
     <string name="layout_filter_info">Info</string>
+    <string name="layout_restored_unsaved">Unsaved changes restored</string>
+    <string name="layout_external_changed_title">File modified externally</string>
+    <string name="layout_external_changed_message">The layout file was modified on disk. How would you like to proceed?</string>
+    <string name="layout_reload_external">Reload from disk</string>
+    <string name="layout_keep_mine">Keep my version</string>
+    <string name="layout_compare_mine">Compare</string>
+    <string name="layout_create_variant">Create layout variant…</string>
+    <string name="layout_variant_qualifier">Qualifier (e.g. land, sw600dp)</string>
+    <string name="layout_variant_invalid">Invalid qualifier name</string>
     <string name="layout_undo">Undo</string>
     <string name="layout_redo">Redo</string>
     <string name="layout_add_widget">Add widget</string>

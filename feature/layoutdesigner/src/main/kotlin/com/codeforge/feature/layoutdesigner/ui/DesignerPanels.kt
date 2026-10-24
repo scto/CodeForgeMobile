@@ -20,6 +20,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.annotation.StringRes
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -756,13 +763,72 @@ private fun ExtractResourceDialog(
     )
 }
 
-/** XML-Tab: bearbeitbarer Text; Änderungen gelten erst nach „Übernehmen“. */
+private class XmlVisualTransformation(
+    private val highlightRange: IntRange?,
+    private val primaryColor: androidx.compose.ui.graphics.Color,
+    private val attrColor: androidx.compose.ui.graphics.Color,
+    private val valueColor: androidx.compose.ui.graphics.Color,
+    private val commentColor: androidx.compose.ui.graphics.Color,
+    private val highlightBg: androidx.compose.ui.graphics.Color,
+) : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val s = text.text
+        val builder = AnnotatedString.Builder(s)
+        if (highlightRange != null && highlightRange.first in 0 until s.length && highlightRange.last in 0 until s.length) {
+            builder.addStyle(
+                SpanStyle(background = highlightBg),
+                highlightRange.first,
+                (highlightRange.last + 1).coerceAtMost(s.length)
+            )
+        }
+        Regex("""<!--[\s\S]*?-->""").findAll(s).forEach { m ->
+            builder.addStyle(SpanStyle(color = commentColor, fontStyle = FontStyle.Italic), m.range.first, m.range.last + 1)
+        }
+        Regex("""</?[A-Za-z0-9_.]+|/?>""").findAll(s).forEach { m ->
+            builder.addStyle(SpanStyle(color = primaryColor, fontWeight = FontWeight.Bold), m.range.first, m.range.last + 1)
+        }
+        Regex("""([A-Za-z0-9_:]+)\s*=""").findAll(s).forEach { m ->
+            builder.addStyle(SpanStyle(color = attrColor), m.range.first, m.range.last)
+        }
+        Regex(""""[^"]*"""").findAll(s).forEach { m ->
+            builder.addStyle(SpanStyle(color = valueColor), m.range.first, m.range.last + 1)
+        }
+        return TransformedText(builder.toAnnotatedString(), OffsetMapping.Identity)
+    }
+}
+
+/** XML-Tab: bearbeitbarer Text mit Syntax-Highlighting und Auswahl-Hervorhebung. */
 @Composable
 internal fun XmlPanel(
     state: LayoutDesignerUiState,
     onEvent: (LayoutDesignerUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val selectedNode = state.selectedUid?.let { state.document.find(it) }
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val attrColor = MaterialTheme.colorScheme.tertiary
+    val valueColor = MaterialTheme.colorScheme.secondary
+    val commentColor = MaterialTheme.colorScheme.outline
+    val highlightBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+
+    val visualTransformation = remember(
+        selectedNode?.sourceRange,
+        primaryColor,
+        attrColor,
+        valueColor,
+        commentColor,
+        highlightBg,
+    ) {
+        XmlVisualTransformation(
+            highlightRange = selectedNode?.sourceRange,
+            primaryColor = primaryColor,
+            attrColor = attrColor,
+            valueColor = valueColor,
+            commentColor = commentColor,
+            highlightBg = highlightBg,
+        )
+    }
+
     Column(modifier = modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
             value = state.xmlDraft ?: state.xmlText,
@@ -770,6 +836,7 @@ internal fun XmlPanel(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 12.sp),
             isError = state.xmlError != null,
+            visualTransformation = visualTransformation,
         )
         state.xmlError?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
         if (state.xmlDraft != null && state.xmlError == null) {

@@ -130,6 +130,14 @@ private fun LayoutFilesContent(
                             label = { Text(dir, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         )
                     }
+                    Text("Vorlage", style = MaterialTheme.typography.labelMedium)
+                    com.codeforge.feature.layoutdesigner.model.LayoutTemplate.entries.forEach { tpl ->
+                        FilterChip(
+                            selected = tpl == state.selectedTemplate,
+                            onClick = { onEvent(LayoutFilesUiEvent.TemplateSelected(tpl)) },
+                            label = { Text(tpl.displayName) },
+                        )
+                    }
                 }
             },
             confirmButton = {

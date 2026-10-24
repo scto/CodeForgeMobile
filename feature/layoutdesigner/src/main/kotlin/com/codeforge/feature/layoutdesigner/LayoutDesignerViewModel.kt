@@ -53,6 +53,7 @@ import com.codeforge.feature.layoutdesigner.model.unwrap
 import com.codeforge.feature.layoutdesigner.model.wrapIn
 import com.codeforge.feature.layoutdesigner.xml.LayoutParseException
 import com.codeforge.feature.layoutdesigner.xml.LayoutXml
+import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -70,6 +71,7 @@ class LayoutDesignerViewModel @Inject constructor(
     private val openFileBridge: OpenFileRequestBridge,
     private val fileSyncBridge: FileSyncBridge,
     private val fileStore: LayoutFileStore,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -80,7 +82,18 @@ class LayoutDesignerViewModel @Inject constructor(
         fileSyncBridge: FileSyncBridge,
         fileStore: LayoutFileStore,
         ioDispatcher: CoroutineDispatcher,
-    ) : this(openFileBridge, fileSyncBridge, fileStore) {
+    ) : this(openFileBridge, fileSyncBridge, fileStore, SavedStateHandle()) {
+        this.ioDispatcher = ioDispatcher
+        this.computeDispatcher = ioDispatcher
+    }
+
+    internal constructor(
+        openFileBridge: OpenFileRequestBridge,
+        fileSyncBridge: FileSyncBridge,
+        fileStore: LayoutFileStore,
+        savedStateHandle: SavedStateHandle,
+        ioDispatcher: CoroutineDispatcher,
+    ) : this(openFileBridge, fileSyncBridge, fileStore, savedStateHandle) {
         this.ioDispatcher = ioDispatcher
         this.computeDispatcher = ioDispatcher
     }
@@ -99,6 +112,68 @@ class LayoutDesignerViewModel @Inject constructor(
 
     /** Aufeinanderfolgende Eingaben in dasselbe Feld teilen sich einen Undo-Schritt. */
     private var lastEditKey: String? = null
+
+    init {
+        observeExternalChanges()
+        restoreFromSavedState()
+    }
+
+    private fun observeExternalChanges() {
+        viewModelScope.launch {
+            fileSyncBridge.externalChanges.collect { changedPaths ->
+                val currentPath = _state.value.filePath
+                if (currentPath.isNotEmpty() && currentPath in changedPaths) {
+                    val diskContent = withContext(ioDispatcher) {
+                        runCatching { fileStore.readText(currentPath) }.getOrNull()
+                    }
+                    if (diskContent != null && diskContent != savedXml) {
+                        if (!_state.value.dirty) {
+                            load(currentPath, force = true)
+                        } else {
+                            _state.update {
+                                it.copy(
+                                    showExternalChangeDialog = true,
+                                    externalFileContent = diskContent,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun restoreFromSavedState() {
+        val path: String? = savedStateHandle[KEY_FILE_PATH]
+        val dirtyXml: String? = savedStateHandle[KEY_DIRTY_XML]
+        if (!path.isNullOrEmpty() && !dirtyXml.isNullOrEmpty()) {
+            val restoredDoc = runCatching { LayoutXml.parse(dirtyXml) }.getOrNull()
+            if (restoredDoc != null) {
+                val tabName: String? = savedStateHandle[KEY_TAB]
+                val deviceName: String? = savedStateHandle[KEY_DEVICE]
+                val selectedUid: Int? = savedStateHandle[KEY_SELECTED_UID]
+                val tab = tabName?.let { runCatching { DesignerTab.valueOf(it) }.getOrNull() } ?: DesignerTab.PREVIEW
+                val device = deviceName?.let { runCatching { DevicePreset.valueOf(it) }.getOrNull() } ?: DevicePreset.PHONE
+
+                _state.update {
+                    it.copy(
+                        filePath = path,
+                        isLoading = false,
+                        document = restoredDoc,
+                        xmlText = dirtyXml,
+                        dirty = true,
+                        tab = tab,
+                        device = device,
+                        selectedUid = selectedUid ?: restoredDoc.root.uid,
+                        selectedUids = setOf(selectedUid ?: restoredDoc.root.uid),
+                    )
+                }
+                viewModelScope.launch {
+                    _effects.send(LayoutDesignerUiEffect.ShowSnackbar(Res.string(R.string.layout_restored_unsaved)))
+                }
+            }
+        }
+    }
 
     fun onEvent(event: LayoutDesignerUiEvent) {
         when (event) {
@@ -487,6 +562,51 @@ class LayoutDesignerViewModel @Inject constructor(
                     )
                 }
             }
+            is LayoutDesignerUiEvent.SwitchVariant -> {
+                val layoutFile = File(_state.value.filePath)
+                val resDir = layoutFile.parentFile?.parentFile
+                if (resDir != null) {
+                    val targetDir = if (event.variant == "default") File(resDir, "layout") else File(resDir, "layout-${event.variant}")
+                    val targetFile = File(targetDir, layoutFile.name)
+                    if (targetFile.exists()) {
+                        load(targetFile.absolutePath)
+                    }
+                }
+            }
+            is LayoutDesignerUiEvent.CreateVariant -> {
+                val qualifier = event.qualifier.trim().removePrefix("layout-").removePrefix("-")
+                val layoutFile = File(_state.value.filePath)
+                val resDir = layoutFile.parentFile?.parentFile
+                if (resDir != null && qualifier.isNotEmpty()) {
+                    val targetDir = File(resDir, "layout-$qualifier")
+                    val targetFile = File(targetDir, layoutFile.name)
+                    runCatching {
+                        targetDir.mkdirs()
+                        targetFile.writeText(LayoutXml.write(_state.value.document, reformat = _state.value.reformatOnSave))
+                        viewModelScope.launch(ioDispatcher) {
+                            fileSyncBridge.notifyExternalChange(listOf(targetFile.absolutePath))
+                        }
+                        load(targetFile.absolutePath)
+                    }
+                }
+            }
+            LayoutDesignerUiEvent.ReloadFromExternal -> {
+                _state.update { it.copy(showExternalChangeDialog = false) }
+                load(_state.value.filePath, force = true)
+            }
+            LayoutDesignerUiEvent.KeepMyVersion -> {
+                _state.update { it.copy(showExternalChangeDialog = false) }
+            }
+            LayoutDesignerUiEvent.CompareExternalWithMine -> {
+                val externalContent = _state.value.externalFileContent
+                _state.update {
+                    it.copy(
+                        showExternalChangeDialog = false,
+                        tab = DesignerTab.XML,
+                        xmlDraft = externalContent
+                    )
+                }
+            }
         }
     }
 
@@ -503,8 +623,8 @@ class LayoutDesignerViewModel @Inject constructor(
         return null
     }
 
-    private fun load(path: String) {
-        if (_state.value.filePath == path && !_state.value.isLoading) return
+    private fun load(path: String, force: Boolean = false) {
+        if (!force && _state.value.filePath == path && !_state.value.isLoading) return
         _state.update { LayoutDesignerUiState(filePath = path, isLoading = true) }
         viewModelScope.launch {
             fileSyncBridge.requestFlush(setOf(path))
@@ -515,13 +635,24 @@ class LayoutDesignerViewModel @Inject constructor(
                 undoStack.clear(); redoStack.clear(); lastEditKey = null
 
                 val layoutFile = File(path)
-                val (repo, includeRes, customViews) = withContext(ioDispatcher) {
+                val (repo, includeRes, customViews, variants, currVariant) = withContext(ioDispatcher) {
                     val dirs = ResourceRepository.findResDirsForLayout(layoutFile)
                     val r = if (dirs.isNotEmpty()) ResourceRepository(dirs) else null
                     val inc = if (dirs.isNotEmpty()) IncludeResolver(dirs) else null
                     val srcDir = findSrcDir(layoutFile)
                     val cvs = srcDir?.let { CustomViewScanner().scanDirectory(it) } ?: emptyList()
-                    Triple(r, inc, cvs)
+
+                    val resDir = layoutFile.parentFile?.parentFile
+                    val fileName = layoutFile.name
+                    val vList = if (resDir != null && resDir.exists()) {
+                        val layoutDirs = resDir.listFiles { f -> f.isDirectory && f.name.startsWith("layout") } ?: emptyArray()
+                        layoutDirs.filter { File(it, fileName).exists() }
+                            .map { it.name.removePrefix("layout").removePrefix("-").ifEmpty { "default" } }
+                            .sorted()
+                    } else listOf("default")
+                    val curV = layoutFile.parentFile?.name?.removePrefix("layout")?.removePrefix("-")?.ifEmpty { "default" } ?: "default"
+
+                    LoadedContext(r, inc, cvs, vList, curV)
                 }
 
                 val issues = LayoutLinter.lint(doc, repo)
@@ -540,6 +671,8 @@ class LayoutDesignerViewModel @Inject constructor(
                         includeResolver = includeRes,
                         customViews = customViews,
                         issues = issues,
+                        availableVariants = variants,
+                        currentVariant = currVariant,
                     )
                 }
             }.onFailure { e ->
@@ -566,6 +699,7 @@ class LayoutDesignerViewModel @Inject constructor(
     private fun publish(doc: LayoutDocument, selectUid: Int?) {
         val xml = LayoutXml.write(doc, reformat = _state.value.reformatOnSave)
         val resolvedUid = selectUid?.takeIf { uid -> doc.find(uid) != null } ?: doc.root.uid
+        val isDirty = xml != savedXml
         _state.update {
             it.copy(
                 document = doc,
@@ -574,13 +708,30 @@ class LayoutDesignerViewModel @Inject constructor(
                 xmlError = null,
                 selectedUid = resolvedUid,
                 selectedUids = setOf(resolvedUid),
-                dirty = xml != savedXml,
+                dirty = isDirty,
                 canUndo = undoStack.isNotEmpty(),
                 canRedo = redoStack.isNotEmpty(),
             )
         }
+        savedStateHandle[KEY_FILE_PATH] = _state.value.filePath
+        savedStateHandle[KEY_TAB] = _state.value.tab.name
+        savedStateHandle[KEY_DEVICE] = _state.value.device.name
+        savedStateHandle[KEY_SELECTED_UID] = resolvedUid
+        if (isDirty) {
+            savedStateHandle[KEY_DIRTY_XML] = xml
+        } else {
+            savedStateHandle.remove<String>(KEY_DIRTY_XML)
+        }
         scheduleLint(doc, _state.value.resourceRepo)
     }
+
+    private data class LoadedContext(
+        val repo: ResourceRepository?,
+        val includeResolver: IncludeResolver?,
+        val customViews: List<CustomViewInfo>,
+        val variants: List<String>,
+        val currentVariant: String
+    )
 
     private var lintJob: Job? = null
 
@@ -652,7 +803,12 @@ class LayoutDesignerViewModel @Inject constructor(
         )
     }
 
-    private companion object {
+    companion object {
         const val MAX_HISTORY = 100
+        const val KEY_FILE_PATH = "ld_file_path"
+        const val KEY_TAB = "ld_tab"
+        const val KEY_DEVICE = "ld_device"
+        const val KEY_SELECTED_UID = "ld_selected_uid"
+        const val KEY_DIRTY_XML = "ld_dirty_xml"
     }
 }

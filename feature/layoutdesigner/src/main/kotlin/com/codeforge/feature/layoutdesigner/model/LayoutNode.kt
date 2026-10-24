@@ -28,6 +28,7 @@ data class LayoutNode(
     val textContent: String? = null,
     val isNew: Boolean = false,
     val firstAttrInline: Boolean = false,
+    val sourceRange: IntRange? = null,
 ) {
     fun attr(name: String): String? = attributes[name]
     val widget: WidgetDef? get() = WidgetCatalog.find(tag)
