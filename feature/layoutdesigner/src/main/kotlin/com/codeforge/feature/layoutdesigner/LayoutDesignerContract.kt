@@ -25,6 +25,7 @@ data class LayoutDesignerUiState(
     val loadError: String? = null,
     val document: LayoutDocument = LayoutDocument.newLinearLayout(),
     val selectedUid: Int? = null,
+    val selectedUids: Set<Int> = emptySet(),
     val tab: DesignerTab = DesignerTab.PREVIEW,
     val device: DevicePreset = DevicePreset.PHONE,
     /** Aus [document] erzeugtes XML (immer aktuell). */
@@ -38,6 +39,7 @@ data class LayoutDesignerUiState(
     val isSaving: Boolean = false,
     val showPalette: Boolean = false,
     val showDiscardConfirm: Boolean = false,
+    val reformatOnSave: Boolean = false,
 ) {
     val fileName: String get() = filePath.substringAfterLast('/')
 }
@@ -45,6 +47,7 @@ data class LayoutDesignerUiState(
 sealed interface LayoutDesignerUiEvent {
     data class Load(val filePath: String) : LayoutDesignerUiEvent
     data class Select(val uid: Int?) : LayoutDesignerUiEvent
+    data class SelectToggle(val uid: Int) : LayoutDesignerUiEvent
     data class TabChanged(val tab: DesignerTab) : LayoutDesignerUiEvent
     data class DeviceChanged(val device: DevicePreset) : LayoutDesignerUiEvent
     data class AddWidget(val entry: PaletteEntry) : LayoutDesignerUiEvent
@@ -53,6 +56,10 @@ sealed interface LayoutDesignerUiEvent {
     data class MoveSelected(val delta: Int) : LayoutDesignerUiEvent
     data object IndentSelected : LayoutDesignerUiEvent
     data object OutdentSelected : LayoutDesignerUiEvent
+    data class WrapIn(val containerTag: String) : LayoutDesignerUiEvent
+    data object UnwrapSelected : LayoutDesignerUiEvent
+    data class ChangeTag(val uid: Int, val newTag: String, val removeIncompatible: Boolean = false) : LayoutDesignerUiEvent
+    data class RenameId(val uid: Int, val newId: String) : LayoutDesignerUiEvent
     data class SetAttribute(val uid: Int, val name: String, val value: String?) : LayoutDesignerUiEvent
     data class XmlChanged(val text: String) : LayoutDesignerUiEvent
     data object ApplyXml : LayoutDesignerUiEvent
@@ -65,6 +72,7 @@ sealed interface LayoutDesignerUiEvent {
     data object BackRequested : LayoutDesignerUiEvent
     data object DismissDiscard : LayoutDesignerUiEvent
     data object ConfirmDiscard : LayoutDesignerUiEvent
+    data class SetReformatOnSave(val enabled: Boolean) : LayoutDesignerUiEvent
 }
 
 sealed interface LayoutDesignerUiEffect {

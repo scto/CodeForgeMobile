@@ -6,6 +6,7 @@ import com.codeforge.core.navigation.JumpTarget
 import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.feature.layoutdesigner.files.LayoutFileStore
 import com.codeforge.feature.layoutdesigner.model.WidgetCatalog
+import com.codeforge.feature.layoutdesigner.model.find
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -392,6 +393,78 @@ class LayoutDesignerViewModelTest {
         assertEquals(path, openFileBridge.lastRequestedOpen)
         assertTrue(receivedEffects.contains(LayoutDesignerUiEffect.NavigateBack))
         effectJob.cancel()
+    }
+
+    @Test
+    fun selectToggle_managesMultiSelection() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        viewModel.onEvent(LayoutDesignerUiEvent.Select(0))
+        assertEquals(setOf(0), viewModel.state.value.selectedUids)
+
+        // Toggle node 1 -> both 0 and 1 are selected
+        viewModel.onEvent(LayoutDesignerUiEvent.SelectToggle(1))
+        assertEquals(setOf(0, 1), viewModel.state.value.selectedUids)
+        assertEquals(1, viewModel.state.value.selectedUid)
+
+        // Toggle node 1 off -> only 0 selected
+        viewModel.onEvent(LayoutDesignerUiEvent.SelectToggle(1))
+        assertEquals(setOf(0), viewModel.state.value.selectedUids)
+    }
+
+    @Test
+    fun wrapIn_and_unwrap_recordsUndo() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        // TextView has uid 1
+        viewModel.onEvent(LayoutDesignerUiEvent.Select(1))
+        viewModel.onEvent(LayoutDesignerUiEvent.WrapIn("FrameLayout"))
+
+        val state = viewModel.state.value
+        assertEquals(1, state.document.root.children.size)
+        val container = state.document.root.children[0]
+        assertEquals("FrameLayout", container.tag)
+        assertEquals(1, container.children.size)
+        assertTrue(state.canUndo)
+
+        // Undo unwraps
+        viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+        assertEquals("TextView", viewModel.state.value.document.root.children[0].tag)
+    }
+
+    @Test
+    fun renameId_updatesStateAndRecordsUndo() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        viewModel.onEvent(LayoutDesignerUiEvent.RenameId(1, "@+id/newHeader"))
+        assertEquals("@+id/newHeader", viewModel.state.value.document.find(1)!!.attr("android:id"))
+        assertTrue(viewModel.state.value.canUndo)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.Undo)
+        assertEquals("@+id/title", viewModel.state.value.document.find(1)!!.attr("android:id"))
+    }
+
+    @Test
+    fun setReformatOnSave_togglesReformatAndRebuildsXml() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = sampleValidXml
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        viewModel.onEvent(LayoutDesignerUiEvent.SetReformatOnSave(true))
+        assertTrue(viewModel.state.value.reformatOnSave)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.SetReformatOnSave(false))
+        assertFalse(viewModel.state.value.reformatOnSave)
     }
 
     // --- Fakes ---

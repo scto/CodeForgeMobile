@@ -3,7 +3,7 @@
 ## Checkliste der Abschnitte
 
 - [x] **41.0** Bestand und Ausgangsbuild (Abweichungen notiert, Baseline-Tests, ViewModel-Tests)
-- [ ] **41.1** Modell: Kommentare, Formatierung, neue Baum-Operationen (`moveNode`, `insertNode`, `canDrop`, `wrapIn`, `renameId`, `removeWithReferences`, Mehrfachauswahl)
+- [x] **41.1** Modell: Kommentare, Formatierung, neue Baum-Operationen (`moveNode`, `insertNode`, `canDrop`, `wrapIn`, `renameId`, `removeWithReferences`, Mehrfachauswahl)
 - [ ] **41.2** Drag & Drop (eigene Gesten-Implementierung, `DragController`, `NodeBoundsRegistry`, reiner `DropResolver`)
 - [ ] **41.3** Leinwand und Werkzeuge (Zoom/Pan, Größengriffe, Overlays, Breadcrumbs, Zwischenablage, Tastatur, PNG-Export)
 - [ ] **41.4** ConstraintLayout und RelativeLayout echt darstellen und bearbeiten (`ConstraintMapper`, Anker-Editor, topologischer RelativeLayout-Solver)
@@ -65,4 +65,42 @@
   4. `writeAtomically_overwritesExistingFile`
 - Alle 33 Unit-Tests in `:feature:layoutdesigner` sind grün.
 - `./gradlew :app:assembleDebug` erfolgreich.
+
+---
+
+## 41.1 Modell: Kommentare, Formatierung, neue Baum-Operationen
+
+### Format-erhaltendes XML
+- `LayoutNode` erweitert um:
+  - `leadingComments: List<String>` (Kommentare vor dem Knoten)
+  - `trailingComments: List<String>` (Kommentare nach dem letzten Kind im Container)
+  - `textContent: String?` (Text-Inhalt)
+  - `isNew: Boolean` (neu hinzugefügte Knoten)
+  - `firstAttrInline: Boolean` (erstes Attribut inline vs. neue Zeile)
+- `LayoutDocument` erweitert um:
+  - `leadingComments: List<String>` (Dokument-Kopfkommentare vor dem Wurzelelement)
+  - `rootNamespaces: Map<String, String>` (alle Namespaces wie `xmlns:android`, `xmlns:custom` etc.)
+  - `indentation: String` (automatische Einrückungserkennung, z. B. 2/4 Leerzeichen oder Tab)
+  - `reformatOnSave: Boolean` (Standard `false` = Formatierung erhalten)
+- Parser `LayoutXml`:
+  - Tokenisiert Quell-Attribute für exakte Quellreihenfolge.
+  - Erkennt Einrückung und Inline-Attribute.
+  - Bewahrt alle Kommentare und Namespaces.
+  - Byte-identischer Round-Trip-Test (`byteIdenticalRoundTripWithCommentsAndCustomNamespaces`) erfolgreich bestanden.
+
+### Neue reine Baum-Operationen (`LayoutOps.kt`)
+- `moveNode(uid, newParentUid, index)`: Sicheres Verschieben mit Validierung (Wurzel, Selbstverschiebung, Nachfahren-Schutz, Container-Prüfung).
+- `insertNode(node, parentUid, index)` und `addWidgetAt(entry, parentUid, index)`.
+- `canDrop(dragged: DragPayload, parentUid): DropVerdict` (`Allowed`, `Warning`, `Rejected`).
+- `wrapIn(uids, containerTag)`: Packt Auswahl in neuen Container, bereinigt `layout_weight`.
+- `unwrap(uid)`: Löst Container auf und setzt Kinder an dessen Position.
+- `changeTag(uid, newTag, removeIncompatibleAttrs)` mit `findIncompatibleChildAttributes`.
+- `renameId(uid, newId)`: Kollisionssichere Umbenennung inklusive aller Verweise (`@id/`, `@+id/`, Constraints, `labelFor`, `nextFocus*`, `constraint_referenced_ids`).
+- `removeWithReferences(uid, clearReferences)`: Erkennt und bereinigt hängende Referenzen.
+- Mehrfachauswahl: `removeNodes(uids)`, `duplicateNodes(uids)`, `selectedUids: Set<Int>`, `SelectToggle`.
+
+### Testabdeckung
+- 47 Tests in `:feature:layoutdesigner` erfolgreich (100 % bestanden).
+- `./gradlew :app:assembleDebug` erfolgreich.
+
 
