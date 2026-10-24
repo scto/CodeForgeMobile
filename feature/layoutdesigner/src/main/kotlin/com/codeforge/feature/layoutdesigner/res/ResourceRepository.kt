@@ -151,6 +151,29 @@ class ResourceRepository(
         return parseDimension(raw)
     }
 
+    /** Prüft, ob eine Ressource existiert */
+    fun hasResource(type: String, name: String): Boolean {
+        return when (type) {
+            "string" -> entriesByType[ResType.STRING]?.any { it.name == name } == true
+            "color" -> entriesByType[ResType.COLOR]?.any { it.name == name } == true
+            "dimen" -> entriesByType[ResType.DIMEN]?.any { it.name == name } == true
+            "integer" -> entriesByType[ResType.INTEGER]?.any { it.name == name } == true
+            "bool" -> entriesByType[ResType.BOOL]?.any { it.name == name } == true
+            "style" -> styles.containsKey(name)
+            "drawable", "mipmap" -> {
+                for (resDir in resDirs) {
+                    val subDirs = resDir.listFiles { f -> f.isDirectory && (f.name.startsWith("drawable") || f.name.startsWith("mipmap")) } ?: continue
+                    for (dir in subDirs) {
+                        val matches = dir.listFiles { f -> f.isFile && f.name.substringBeforeLast('.') == name }
+                        if (!matches.isNullOrEmpty()) return true
+                    }
+                }
+                false
+            }
+            else -> true
+        }
+    }
+
     /** Löst ein Attribut aus einem Style auf (inkl. Vererbung) */
     fun resolveStyleAttr(styleName: String, attrName: String, depth: Int = 0): String? {
         if (depth > 10) return null

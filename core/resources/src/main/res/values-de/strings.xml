@@ -862,7 +862,16 @@
     <string name="layout_tab_preview">Vorschau</string>
     <string name="layout_tab_tree">Struktur</string>
     <string name="layout_tab_props">Eigenschaften</string>
+    <string name="layout_tab_problems">Probleme</string>
     <string name="layout_tab_xml">XML</string>
+    <string name="layout_no_issues">Keine Layout-Probleme festgestellt</string>
+    <string name="layout_issues_count">%1$d Probleme</string>
+    <string name="layout_jump_to_element">Zum Element springen</string>
+    <string name="layout_quick_fix">Schnellkorrektur</string>
+    <string name="layout_filter_all_issues">Alle</string>
+    <string name="layout_filter_errors">Fehler</string>
+    <string name="layout_filter_warnings">Warnungen</string>
+    <string name="layout_filter_info">Hinweise</string>
     <string name="layout_undo">Rückgängig</string>
     <string name="layout_redo">Wiederholen</string>
     <string name="layout_add_widget">Widget hinzufügen</string>

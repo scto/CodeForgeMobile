@@ -27,6 +27,9 @@ import com.codeforge.feature.layoutdesigner.model.freshId
 import com.codeforge.feature.layoutdesigner.model.insertNode
 import com.codeforge.feature.layoutdesigner.model.DragPayload
 import com.codeforge.feature.layoutdesigner.model.DropVerdict
+import com.codeforge.feature.layoutdesigner.lint.LayoutIssue
+import com.codeforge.feature.layoutdesigner.lint.LayoutLinter
+import com.codeforge.feature.layoutdesigner.lint.QuickFix
 import com.codeforge.feature.layoutdesigner.model.LayoutClipboard
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.LayoutNode
@@ -52,7 +55,9 @@ import com.codeforge.feature.layoutdesigner.xml.LayoutParseException
 import com.codeforge.feature.layoutdesigner.xml.LayoutXml
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,6 +73,7 @@ class LayoutDesignerViewModel @Inject constructor(
 ) : ViewModel() {
 
     internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    internal var computeDispatcher: CoroutineDispatcher = Dispatchers.Default
 
     internal constructor(
         openFileBridge: OpenFileRequestBridge,
@@ -76,6 +82,7 @@ class LayoutDesignerViewModel @Inject constructor(
         ioDispatcher: CoroutineDispatcher,
     ) : this(openFileBridge, fileSyncBridge, fileStore) {
         this.ioDispatcher = ioDispatcher
+        this.computeDispatcher = ioDispatcher
     }
 
     private val _state = MutableStateFlow(LayoutDesignerUiState())
@@ -467,6 +474,19 @@ class LayoutDesignerViewModel @Inject constructor(
                     }
                 }
             }
+            is LayoutDesignerUiEvent.ApplyQuickFix -> {
+                val fixedDoc = LayoutLinter.applyQuickFix(_state.value.document, event.quickFix)
+                commit(fixedDoc, selectUid = _state.value.selectedUid)
+            }
+            is LayoutDesignerUiEvent.JumpToIssue -> {
+                _state.update {
+                    it.copy(
+                        selectedUid = event.issue.uid,
+                        selectedUids = setOf(event.issue.uid),
+                        tab = DesignerTab.PREVIEW
+                    )
+                }
+            }
         }
     }
 
@@ -504,6 +524,8 @@ class LayoutDesignerViewModel @Inject constructor(
                     Triple(r, inc, cvs)
                 }
 
+                val issues = LayoutLinter.lint(doc, repo)
+
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -517,6 +539,7 @@ class LayoutDesignerViewModel @Inject constructor(
                         resourceRepo = repo,
                         includeResolver = includeRes,
                         customViews = customViews,
+                        issues = issues,
                     )
                 }
             }.onFailure { e ->
@@ -555,6 +578,18 @@ class LayoutDesignerViewModel @Inject constructor(
                 canUndo = undoStack.isNotEmpty(),
                 canRedo = redoStack.isNotEmpty(),
             )
+        }
+        scheduleLint(doc, _state.value.resourceRepo)
+    }
+
+    private var lintJob: Job? = null
+
+    private fun scheduleLint(doc: LayoutDocument, repo: ResourceRepository?) {
+        lintJob?.cancel()
+        lintJob = viewModelScope.launch(computeDispatcher) {
+            delay(300)
+            val issues = LayoutLinter.lint(doc, repo)
+            _state.update { it.copy(issues = issues) }
         }
     }
 

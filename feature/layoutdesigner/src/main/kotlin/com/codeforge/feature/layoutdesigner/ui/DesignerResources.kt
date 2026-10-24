@@ -110,5 +110,6 @@ internal fun tabLabel(tab: DesignerTab): Int = when (tab) {
     DesignerTab.PREVIEW -> R.string.layout_tab_preview
     DesignerTab.TREE -> R.string.layout_tab_tree
     DesignerTab.PROPERTIES -> R.string.layout_tab_props
+    DesignerTab.PROBLEMS -> R.string.layout_tab_problems
     DesignerTab.XML -> R.string.layout_tab_xml
 }

@@ -10,7 +10,7 @@ import com.codeforge.feature.layoutdesigner.model.DragPayload
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.PaletteEntry
 
-enum class DesignerTab { PREVIEW, TREE, PROPERTIES, XML }
+enum class DesignerTab { PREVIEW, TREE, PROPERTIES, PROBLEMS, XML }
 
 /** Vorschau-Gerätegrößen in dp. Namen werden in der UI über Ressourcen aufgelöst. */
 enum class DevicePreset(val widthDp: Int, val heightDp: Int) {
@@ -65,6 +65,7 @@ data class LayoutDesignerUiState(
     val includeResolver: com.codeforge.feature.layoutdesigner.res.IncludeResolver? = null,
     val customViews: List<com.codeforge.feature.layoutdesigner.model.CustomViewInfo> = emptyList(),
     val inflatedViewStubs: Set<Int> = emptySet(),
+    val issues: List<com.codeforge.feature.layoutdesigner.lint.LayoutIssue> = emptyList(),
 ) {
     val fileName: String get() = filePath.substringAfterLast('/')
 
@@ -157,6 +158,10 @@ sealed interface LayoutDesignerUiEvent {
     // 41.6 include, merge, ViewStub & eigene Views
     data class ToggleInflateViewStub(val uid: Int) : LayoutDesignerUiEvent
     data class OpenIncludedLayout(val layoutRef: String) : LayoutDesignerUiEvent
+
+    // 41.8 Lint & Probleme
+    data class ApplyQuickFix(val quickFix: com.codeforge.feature.layoutdesigner.lint.QuickFix) : LayoutDesignerUiEvent
+    data class JumpToIssue(val issue: com.codeforge.feature.layoutdesigner.lint.LayoutIssue) : LayoutDesignerUiEvent
 }
 
 sealed interface LayoutDesignerUiEffect {

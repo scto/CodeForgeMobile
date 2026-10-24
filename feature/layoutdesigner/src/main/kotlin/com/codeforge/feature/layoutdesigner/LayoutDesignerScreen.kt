@@ -33,7 +33,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -86,6 +89,7 @@ import com.codeforge.core.ui.WidthClass
 import com.codeforge.core.ui.rememberWidthClass
 import com.codeforge.feature.layoutdesigner.dnd.DragController
 import com.codeforge.feature.layoutdesigner.files.LayoutDesignerFileProvider
+import com.codeforge.feature.layoutdesigner.lint.IssueSeverity
 import com.codeforge.feature.layoutdesigner.model.flatten
 import com.codeforge.feature.layoutdesigner.model.parentOf
 import com.codeforge.feature.layoutdesigner.preview.LayoutPreview
@@ -93,6 +97,7 @@ import com.codeforge.feature.layoutdesigner.preview.isApproximatedTag
 import com.codeforge.feature.layoutdesigner.ui.BreadcrumbBar
 import com.codeforge.feature.layoutdesigner.ui.CanvasConfigBar
 import com.codeforge.feature.layoutdesigner.ui.PalettePanel
+import com.codeforge.feature.layoutdesigner.ui.ProblemsPanel
 import com.codeforge.feature.layoutdesigner.ui.PropertiesPanel
 import com.codeforge.feature.layoutdesigner.ui.SelectionBar
 import com.codeforge.feature.layoutdesigner.ui.TreePanel
@@ -271,6 +276,22 @@ private fun LayoutDesignerScreen(
                     }
                     IconButton(onClick = { onEvent(LayoutDesignerUiEvent.PaletteVisible(true)) }, enabled = ready) {
                         Icon(Icons.Filled.Add, contentDescription = stringRes(R.string.layout_add_widget))
+                    }
+                    if (state.issues.isNotEmpty()) {
+                        IconButton(onClick = { onEvent(LayoutDesignerUiEvent.TabChanged(DesignerTab.PROBLEMS)) }) {
+                            BadgedBox(
+                                badge = {
+                                    val hasError = state.issues.any { it.severity == IssueSeverity.ERROR }
+                                    Badge(
+                                        containerColor = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
+                                    ) {
+                                        Text(state.issues.size.toString())
+                                    }
+                                }
+                            ) {
+                                Icon(Icons.Filled.Warning, contentDescription = stringRes(R.string.layout_tab_problems))
+                            }
+                        }
                     }
                     IconButton(onClick = { onEvent(LayoutDesignerUiEvent.Save) }, enabled = ready && !state.isSaving) {
                         Icon(Icons.Filled.Save, contentDescription = stringRes(R.string.common_speichern))
@@ -570,7 +591,7 @@ private fun DesignerContent(
             VerticalDivider()
             val sideTab = if (state.tab == DesignerTab.PREVIEW) DesignerTab.TREE else state.tab
             Column(Modifier.width(360.dp).fillMaxHeight()) {
-                DesignerTabs(sideTab, listOf(DesignerTab.TREE, DesignerTab.PROPERTIES, DesignerTab.XML), onEvent)
+                DesignerTabs(sideTab, listOf(DesignerTab.TREE, DesignerTab.PROPERTIES, DesignerTab.PROBLEMS, DesignerTab.XML), onEvent)
                 TabContent(sideTab, state, onEvent, graphicsLayer, onOpenContextMenu, Modifier.weight(1f))
             }
         }
@@ -613,6 +634,7 @@ private fun TabContent(
             DesignerTab.PREVIEW -> PreviewPane(state, onEvent, graphicsLayer, onOpenContextMenu, Modifier.fillMaxSize())
             DesignerTab.TREE -> TreePanel(state, onEvent)
             DesignerTab.PROPERTIES -> PropertiesPanel(state, onEvent)
+            DesignerTab.PROBLEMS -> ProblemsPanel(state, onEvent)
             DesignerTab.XML -> XmlPanel(state, onEvent)
         }
     }

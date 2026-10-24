@@ -852,6 +852,72 @@ class LayoutDesignerViewModelTest {
         }
     }
 
+    @Test
+    fun load_populatesLintIssues() = runTest {
+        val path = "/path/to/layout.xml"
+        // sampleValidXml has hardcoded android:text="Hello" and missing contentDescription on ImageView or similar
+        fileStore.files[path] = """
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hardcoded" />
+            </LinearLayout>
+        """.trimIndent()
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        val issues = viewModel.state.value.issues
+        assertTrue(issues.isNotEmpty())
+        assertTrue(issues.any { it.ruleId == "HardcodedText" })
+    }
+
+    @Test
+    fun applyQuickFix_updatesDocumentAndEnablesUndo() = runTest {
+        val path = "/path/to/layout.xml"
+        fileStore.files[path] = """
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/txt"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        """.trimIndent()
+        viewModel.onEvent(LayoutDesignerUiEvent.Load(path))
+        advanceUntilIdle()
+
+        val issue = viewModel.state.value.issues.firstOrNull { it.ruleId == "DeprecatedFillParent" }
+        assertNotNull(issue)
+        assertNotNull(issue!!.quickFix)
+
+        viewModel.onEvent(LayoutDesignerUiEvent.ApplyQuickFix(issue.quickFix!!))
+        advanceUntilIdle()
+
+        val targetNode = viewModel.state.value.document.find(issue.uid)
+        assertEquals("match_parent", targetNode?.attributes?.get("android:layout_width"))
+        assertTrue(viewModel.state.value.canUndo)
+    }
+
+    @Test
+    fun jumpToIssue_selectsNodeAndSwitchesTab() = runTest {
+        val issue = com.codeforge.feature.layoutdesigner.lint.LayoutIssue(
+            uid = 42,
+            severity = com.codeforge.feature.layoutdesigner.lint.IssueSeverity.ERROR,
+            ruleId = "DuplicateId",
+            message = "Duplicate ID"
+        )
+        viewModel.onEvent(LayoutDesignerUiEvent.TabChanged(DesignerTab.PROBLEMS))
+        viewModel.onEvent(LayoutDesignerUiEvent.JumpToIssue(issue))
+
+        assertEquals(42, viewModel.state.value.selectedUid)
+        assertEquals(DesignerTab.PREVIEW, viewModel.state.value.tab)
+    }
+
     // --- Fakes ---
 
     private class FakeLayoutFileStore : LayoutFileStore {

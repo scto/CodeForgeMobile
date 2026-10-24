@@ -16,7 +16,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.annotation.StringRes
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -38,18 +41,27 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
+import com.codeforge.feature.layoutdesigner.lint.IssueSeverity
+import com.codeforge.feature.layoutdesigner.lint.LayoutIssue
+import com.codeforge.feature.layoutdesigner.lint.QuickFix
 import com.codeforge.feature.layoutdesigner.res.ResType
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -265,6 +277,16 @@ internal fun TreePanel(
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
+                    }
+                    val nodeIssues = state.issues.filter { it.uid == node.uid }
+                    if (nodeIssues.isNotEmpty()) {
+                        val hasError = nodeIssues.any { it.severity == IssueSeverity.ERROR }
+                        Icon(
+                            imageVector = if (hasError) Icons.Filled.Error else Icons.Filled.Warning,
+                            contentDescription = "Issues",
+                            tint = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(16.dp),
+                        )
                     }
                 }
             }
@@ -759,6 +781,132 @@ internal fun XmlPanel(
             }
             OutlinedButton(onClick = { onEvent(LayoutDesignerUiEvent.RevertXml) }, enabled = state.xmlDraft != null) {
                 Text(stringRes(R.string.layout_revert_xml))
+            }
+        }
+    }
+}
+
+/** Probleme/Lint-Tab: Liste erkannter Probleme mit Schnellkorrekturen. */
+@Composable
+internal fun ProblemsPanel(
+    state: LayoutDesignerUiState,
+    onEvent: (LayoutDesignerUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var severityFilter by remember { mutableStateOf<IssueSeverity?>(null) }
+    val filteredIssues = remember(state.issues, severityFilter) {
+        if (severityFilter == null) state.issues else state.issues.filter { it.severity == severityFilter }
+    }
+
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            FilterChip(
+                selected = severityFilter == null,
+                onClick = { severityFilter = null },
+                label = { Text("${stringRes(R.string.layout_filter_all_issues)} (${state.issues.size})") },
+            )
+            val errorCount = state.issues.count { it.severity == IssueSeverity.ERROR }
+            FilterChip(
+                selected = severityFilter == IssueSeverity.ERROR,
+                onClick = { severityFilter = IssueSeverity.ERROR },
+                label = { Text("${stringRes(R.string.layout_filter_errors)} ($errorCount)") },
+            )
+            val warnCount = state.issues.count { it.severity == IssueSeverity.WARNING }
+            FilterChip(
+                selected = severityFilter == IssueSeverity.WARNING,
+                onClick = { severityFilter = IssueSeverity.WARNING },
+                label = { Text("${stringRes(R.string.layout_filter_warnings)} ($warnCount)") },
+            )
+            val infoCount = state.issues.count { it.severity == IssueSeverity.INFO }
+            FilterChip(
+                selected = severityFilter == IssueSeverity.INFO,
+                onClick = { severityFilter = IssueSeverity.INFO },
+                label = { Text("${stringRes(R.string.layout_filter_info)} ($infoCount)") },
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        if (filteredIssues.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        stringRes(R.string.layout_no_issues),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(filteredIssues) { issue ->
+                    val node = state.document.find(issue.uid)
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        ),
+                    ) {
+                        Column(Modifier.padding(12.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                val (icon, tint) = when (issue.severity) {
+                                    IssueSeverity.ERROR -> Icons.Filled.Error to MaterialTheme.colorScheme.error
+                                    IssueSeverity.WARNING -> Icons.Filled.Warning to MaterialTheme.colorScheme.tertiary
+                                    IssueSeverity.INFO -> Icons.Filled.Info to MaterialTheme.colorScheme.primary
+                                }
+                                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = issue.ruleId,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = tint,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                if (node != null) {
+                                    Text(
+                                        text = "<${node.tag.substringAfterLast('.')}>",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = issue.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                TextButton(onClick = { onEvent(LayoutDesignerUiEvent.JumpToIssue(issue)) }) {
+                                    Text(stringRes(R.string.layout_jump_to_element))
+                                }
+                                if (issue.quickFix != null) {
+                                    Spacer(Modifier.width(8.dp))
+                                    Button(onClick = { onEvent(LayoutDesignerUiEvent.ApplyQuickFix(issue.quickFix)) }) {
+                                        Text(issue.quickFix.title)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

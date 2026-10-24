@@ -10,7 +10,7 @@
 - [x] **41.5** Ressourcen auflösen (`ResourceRepository`, Qualifizierer, Themes/Styles, Drawables/VectorDrawables, „In Ressource auslagern“)
 - [x] **41.6** `include`, `merge`, `ViewStub`, Fragmente, eigene Views
 - [x] **41.7** Widget-Katalog und Eigenschaften-Panel (Erweiterung Widgets/Layouts, SDK `attrs.xml` Fallback, Gruppen, Filter)
-- [ ] **41.8** Prüfungen (Lint) mit Schnellkorrektur (`LayoutLinter`, Regeln, UI-Panel)
+- [x] **41.8** Prüfungen (Lint) mit Schnellkorrektur (`LayoutLinter`, Regeln, UI-Panel)
 - [ ] **41.9** Zusammenspiel mit dem Code-Editor und Dateien (`FileSyncBridge`, Vorlagen, Varianten, `SavedStateHandle`)
 - [ ] **41.10** Leistung und Robustheit (500 Knoten Benchmark, Fehlerisolation)
 - [ ] **41.11** (optional) View-XML → Jetpack-Compose-Code
@@ -410,6 +410,53 @@
   2. `parseAttrs_resolvesFlagsAndEnums`
 - Insgesamt **87 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
 - `./gradlew :app:assembleDebug` erfolgreich.
+
+---
+
+## 41.8 Prüfungen (Lint) mit Schnellkorrektur
+
+### Reine JVM-Prüfengine (`LayoutLinter.kt`)
+- **Regeln (vollständig implementiert):**
+  1. `DuplicateId` (ERROR): Erkennt doppelt vergebene IDs im Layout.
+  2. `MissingIdReference` (ERROR): Erkennt Verweise auf nicht existierende IDs (`layout_below`, `layout_toEndOf`, `layout_constraint*`, `labelFor`, `constraint_referenced_ids`).
+  3. `MissingResourceReference` (WARNING): Prüft referenzierte Strings, Farben, Dimens, Drawables und Styles gegen `ResourceRepository`.
+  4. `HardcodedText` (WARNING): Erkennt fest codierten Text in `text`, `hint`, `contentDescription`.
+  5. `MissingContentDescription` (WARNING): Prüft ImageViews ohne Bildbeschreibung und ohne `importantForAccessibility="no"`.
+  6. `SmallTouchTarget` (WARNING): Erkennt interaktive Elemente mit fester Klickfläche < 48×48 dp.
+  7. `ScrollViewChildren` (ERROR): Stellt sicher, dass ScrollViews maximal ein Kind besitzen.
+  8. `NestedWeights` (WARNING): Warnt vor verschachtelten LinearLayouts mit `layout_weight`.
+  9. `InefficientWeight` (WARNING): Erkennt `layout_weight` mit `wrap_content` statt `0dp` in Gewichtsrichtung.
+  10. `DeprecatedFillParent` (WARNING): Erkennt veraltetes `fill_parent`.
+  11. `PxUsage` (WARNING): Warnt vor absoluten Pixelwerten `px`.
+  12. `WrongDimensionUnit` (WARNING): Erkennt `sp` für Layoutmaße oder `dp` für `textSize`.
+  13. `RtlAttributes` (WARNING): Empfiehlt `Start`/`End` statt `Left`/`Right`.
+  14. `UnconstrainedChild` (ERROR): Erkennt unbeschränkte Kinder in `ConstraintLayout`.
+  15. `CircularConstraints` (ERROR): Erkennt zirkuläre horizontale oder vertikale Constraints.
+  16. `UselessParent` (INFO): Erkennt überflüssige Container mit nur einem Kind ohne Styling.
+  17. `DeepNesting` (INFO): Warnt bei Schachtelungstiefe > 10 Ebenen.
+- **Schnellkorrekturen (`QuickFix`):**
+  - `SetAttribute`: Attribut direkt setzen (z. B. `0dp`, `match_parent`, `importantForAccessibility="no"`).
+  - `ReplaceAttribute`: Attribut migrieren (z. B. `Left/Right` zu `Start/End`).
+  - `RemoveAttribute`: Überflüssiges Attribut entfernen.
+  - `UnwrapContainer`: Überflüssigen Container auflösen.
+  - `ExtractResource`: Auslagern in `strings.xml`.
+
+### UI-Integration
+- **Probleme-Tab (`DesignerTab.PROBLEMS`, `ProblemsPanel`):**
+  - Eigene Ansicht mit Filter-Chips (*Alle*, *Fehler*, *Warnungen*, *Hinweise*) und Zählern.
+  - Aktions-Schaltflächen: „Zum Element springen“ und Schnellkorrektur ausführen.
+  - Leerzustand mit Bestätigungssymbol („Keine Layout-Probleme festgestellt“).
+- **Topbar & Baum-Indikatoren:**
+  - BadgedBox-Zähler mit Warnsymbol in der TopAppBar.
+  - Farbige Fehler- und Warnsymbole direkt an betroffenen Knoten im Strukturbaum.
+- **Entprellte Ausführung:**
+  - Automatische, nicht-blockierende Prüfung bei allen Dokumentänderungen.
+
+### Testabdeckung
+- 15 neue Tests in `LayoutLinterTest` (jede Regel und Schnellkorrektur separat abgedeckt).
+- 3 neue ViewModel-Tests in `LayoutDesignerViewModelTest` (`load_populatesLintIssues`, `applyQuickFix_updatesDocumentAndEnablesUndo`, `jumpToIssue_selectsNodeAndSwitchesTab`).
+- Insgesamt **105 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+
 
 
 
