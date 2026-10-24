@@ -10,6 +10,7 @@ import com.codeforge.core.navigation.FileSyncBridge
 import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import com.codeforge.feature.layoutdesigner.files.LayoutFileStore
 import com.codeforge.feature.layoutdesigner.model.LayoutDocument
 import com.codeforge.feature.layoutdesigner.model.addWidget
 import com.codeforge.feature.layoutdesigner.model.duplicate
@@ -23,9 +24,7 @@ import com.codeforge.feature.layoutdesigner.model.setAttribute
 import com.codeforge.feature.layoutdesigner.xml.LayoutParseException
 import com.codeforge.feature.layoutdesigner.xml.LayoutXml
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.io.File
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,12 +32,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class LayoutDesignerViewModel @Inject constructor(
     private val openFileBridge: OpenFileRequestBridge,
     private val fileSyncBridge: FileSyncBridge,
+    private val fileStore: LayoutFileStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LayoutDesignerUiState())
@@ -115,9 +114,7 @@ class LayoutDesignerViewModel @Inject constructor(
         _state.update { LayoutDesignerUiState(filePath = path, isLoading = true) }
         viewModelScope.launch {
             fileSyncBridge.requestFlush(setOf(path))
-            val outcome = withContext(Dispatchers.IO) {
-                runCatching { File(path).readText() }.mapCatching { LayoutXml.parse(it) }
-            }
+            val outcome = runCatching { fileStore.readText(path) }.mapCatching { LayoutXml.parse(it) }
             outcome.onSuccess { doc ->
                 val xml = LayoutXml.write(doc)
                 savedXml = xml
@@ -202,16 +199,8 @@ class LayoutDesignerViewModel @Inject constructor(
         if (s.isSaving) return false
         _state.update { it.copy(isSaving = true) }
         val xml = s.xmlText
-        val result = withContext(Dispatchers.IO) {
-            runCatching {
-                val target = File(s.filePath)
-                val tmp = File(target.parentFile, target.name + ".tmp")
-                tmp.writeText(xml)
-                if (!tmp.renameTo(target)) {
-                    target.writeText(xml)
-                    tmp.delete()
-                }
-            }
+        val result = runCatching {
+            fileStore.writeAtomically(s.filePath, xml)
         }
         return result.fold(
             onSuccess = {

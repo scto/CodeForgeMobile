@@ -20,9 +20,10 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
-    implementation("androidx.compose.material:material-icons-extended:1.7.3")
+    implementation(libs.androidx.compose.material.icons.extended)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
