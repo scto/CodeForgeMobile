@@ -8,6 +8,7 @@ import com.codeforge.core.domain.model.CreateKeystoreRequest
 import com.codeforge.core.domain.model.GradleSigningSnippet
 import com.codeforge.core.domain.model.KeystoreEntryInfo
 import com.codeforge.core.domain.model.KeystoreInfo
+import com.codeforge.core.domain.model.ProjectSigningAssignment
 import com.codeforge.core.domain.model.SignApkRequest
 import com.codeforge.core.domain.parser.ApksignerOutputParser
 import com.codeforge.core.domain.parser.KeytoolOutputParser
@@ -21,11 +22,14 @@ import com.codeforge.shared.termux.shell.command.environment.TermuxDevEnvironmen
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedReader
 import java.io.File
+import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,6 +59,136 @@ open class SigningRepositoryImpl internal constructor(
 
     private val _activeBuildSigning = MutableStateFlow<Map<String, String>>(emptyMap())
     override val activeBuildSigning: StateFlow<Map<String, String>> = _activeBuildSigning.asStateFlow()
+
+    private val assignmentsFile = File(keystoresDir, "project_assignments.json")
+    private val _projectAssignments = MutableStateFlow<List<ProjectSigningAssignment>>(loadAssignments())
+
+    private fun loadAssignments(): List<ProjectSigningAssignment> {
+        return try {
+            if (assignmentsFile.exists() && assignmentsFile.isFile) {
+                ProjectSigningAssignmentJson.fromJson(assignmentsFile.readText(Charsets.UTF_8))
+            } else {
+                emptyList()
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun saveAssignments(assignments: List<ProjectSigningAssignment>) {
+        try {
+            assignmentsFile.parentFile?.mkdirs()
+            assignmentsFile.writeText(ProjectSigningAssignmentJson.toJson(assignments), Charsets.UTF_8)
+            _projectAssignments.value = assignments
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun normalizePath(path: String): String {
+        return try {
+            File(path).canonicalPath.trimEnd('/')
+        } catch (_: Exception) {
+            File(path).absolutePath.trimEnd('/')
+        }
+    }
+
+    override fun getProjectAssignments(): Flow<List<ProjectSigningAssignment>> = _projectAssignments.asStateFlow()
+
+    override suspend fun getAssignmentForProject(projectPath: String): ProjectSigningAssignment? = withContext(Dispatchers.IO) {
+        val norm = normalizePath(projectPath)
+        _projectAssignments.value.firstOrNull { normalizePath(it.projectPath) == norm }
+    }
+
+    override suspend fun assignKeyToProject(projectPath: String, keystoreId: String, alias: String): Result<Unit> = withContext(Dispatchers.IO) {
+        val norm = normalizePath(projectPath)
+        val current = _projectAssignments.value.filterNot { normalizePath(it.projectPath) == norm }
+        val updated = current + ProjectSigningAssignment(projectPath, keystoreId, alias)
+        saveAssignments(updated)
+        Result.success(Unit)
+    }
+
+    override suspend fun removeAssignmentForProject(projectPath: String): Result<Unit> = withContext(Dispatchers.IO) {
+        val norm = normalizePath(projectPath)
+        val updated = _projectAssignments.value.filterNot { normalizePath(it.projectPath) == norm }
+        saveAssignments(updated)
+        Result.success(Unit)
+    }
+
+    override suspend fun removeAssignmentsForKeystore(keystoreId: String): Result<Unit> = withContext(Dispatchers.IO) {
+        val updated = _projectAssignments.value.filterNot { it.keystoreId == keystoreId }
+        saveAssignments(updated)
+        Result.success(Unit)
+    }
+
+    override suspend fun removeAssignmentsForAlias(keystoreId: String, alias: String): Result<Unit> = withContext(Dispatchers.IO) {
+        val updated = _projectAssignments.value.filterNot { it.keystoreId == keystoreId && it.alias == alias }
+        saveAssignments(updated)
+        Result.success(Unit)
+    }
+
+    override suspend fun resolveBuildSigning(projectPath: String?): Result<Map<String, String>> = withContext(Dispatchers.IO) {
+        // 1. Zuweisung des Projekts
+        if (!projectPath.isNullOrBlank()) {
+            val assignment = getAssignmentForProject(projectPath)
+            if (assignment != null) {
+                val keystoreFile = File(keystoresDir, assignment.keystoreId).takeIf { it.exists() }
+                    ?: File(assignment.keystoreId).takeIf { it.exists() }
+                if (keystoreFile != null) {
+                    val storePass = secretStorage.getSecret("keystore_${keystoreFile.name}_storepass")
+                    if (storePass != null) {
+                        val keyPass = secretStorage.getSecret("keystore_${keystoreFile.name}_${assignment.alias}_keypass") ?: storePass
+                        val envMap = mapOf(
+                            GradleSigningSnippet.ENV_KEYSTORE_PATH to keystoreFile.absolutePath,
+                            GradleSigningSnippet.ENV_KEYSTORE_ALIAS to assignment.alias,
+                            GradleSigningSnippet.ENV_KEYSTORE_PASSWORD to storePass,
+                            GradleSigningSnippet.ENV_KEY_PASSWORD to keyPass
+                        )
+                        return@withContext Result.success(envMap)
+                    }
+                }
+            }
+        }
+
+        // 2. Bisherige globale Aktivierung ("Standardschlüssel", bleibt für Projekte ohne Zuweisung)
+        val global = _activeBuildSigning.value
+        if (global.isNotEmpty()) {
+            return@withContext Result.success(global)
+        }
+
+        // 3. Kein Signing
+        Result.success(emptyMap())
+    }
+
+    override suspend fun importKeystoreFromStream(
+        inputStream: InputStream,
+        originalFileName: String,
+        storePassword: String,
+        customName: String?
+    ): Result<KeystoreInfo> = withContext(Dispatchers.IO) {
+        val tempFile = File.createTempFile("import_saf_", ".tmp", keystoresDir)
+        try {
+            tempFile.outputStream().use { out ->
+                inputStream.copyTo(out)
+            }
+            importKeystore(tempFile, storePassword, customName ?: originalFileName)
+        } finally {
+            tempFile.delete()
+        }
+    }
+
+    override suspend fun exportKeystoreToStream(
+        id: String,
+        outputStream: OutputStream
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        val source = File(keystoresDir, id)
+        if (!source.exists() || !source.isFile) {
+            return@withContext Result.failure(IllegalStateException(Res.string(R.string.signing_keystore_nicht_gefunden, id)))
+        }
+        source.inputStream().use { input ->
+            input.copyTo(outputStream)
+        }
+        Result.success(Unit)
+    }
 
     // Testbarer Launcher
     internal var processLauncher: (command: List<String>, env: Map<String, String>, workingDir: File) -> Process = { cmd, env, dir ->
@@ -213,6 +347,8 @@ open class SigningRepositoryImpl internal constructor(
         if (_activeBuildSigning.value[GradleSigningSnippet.ENV_KEYSTORE_PATH] == file.absolutePath) {
             clearBuildSigning()
         }
+
+        removeAssignmentsForKeystore(id)
 
         Result.success(Unit)
     }

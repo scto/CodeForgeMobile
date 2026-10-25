@@ -5,12 +5,21 @@
 package com.codeforge.feature.settings
 
 import androidx.compose.runtime.Immutable
+import com.codeforge.core.designsystem.theme.TextMateThemeCatalog
+import com.codeforge.core.designsystem.theme.TextMateThemeItem
+
+enum class EditorSettingsSection {
+    DISPLAY,
+    INPUT,
+    LANGUAGE,
+    FORMAT_ON_SAVE
+}
 
 @Immutable
 data class EditorSettingsUiState(
     val tabSize: Int = 4,
     val useTreeSitter: Boolean = true,
-    val textmateTheme: String = "",
+    val textmateTheme: String = "auto",
     val lspServerPath: String = "",
     val fontSize: Int = 14,
     val fontFamily: String = "",
@@ -29,6 +38,9 @@ data class EditorSettingsUiState(
     val formatOnSaveJson: Boolean = false,
     val lspMaxConcurrentSessions: Int = 3,
     val lspIdleTimeoutMinutes: Int = 10,
+    val fileHeaderEnabled: Boolean = false,
+    val fileHeaderAuthor: String = "",
+    val availableThemes: List<TextMateThemeItem> = TextMateThemeCatalog.BUNDLED_THEMES,
     val isLoading: Boolean = true
 )
 
@@ -54,5 +66,7 @@ sealed interface EditorSettingsUiEvent {
     data object FormatOnSaveJavaToggled : EditorSettingsUiEvent
     data object FormatOnSaveXmlToggled : EditorSettingsUiEvent
     data object FormatOnSaveJsonToggled : EditorSettingsUiEvent
+    data object FileHeaderEnabledToggled : EditorSettingsUiEvent
+    data class FileHeaderAuthorChanged(val author: String) : EditorSettingsUiEvent
+    data class ResetSection(val section: EditorSettingsSection) : EditorSettingsUiEvent
 }
-

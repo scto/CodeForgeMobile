@@ -23,6 +23,7 @@ import java.io.InputStreamReader
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -109,7 +110,7 @@ class LogcatRepositoryImpl @Inject constructor(
                 emit(currentEntry)
             }
         } finally {
-            withContext(Dispatchers.IO) {
+            withContext(NonCancellable) {
                 runCatching { process.destroyForcibly() }
             }
         }

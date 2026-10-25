@@ -3,12 +3,15 @@ package com.codeforge.feature.welcome
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,18 +20,26 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Source
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -40,17 +51,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.designsystem.R as DesignSystemR
 import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.EmptyState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -60,10 +80,13 @@ private data class WelcomeAction(
     val onClick: (WelcomeViewModel) -> Unit
 )
 
-private val actions = listOf(
+private val primaryActions = listOf(
     WelcomeAction(R.string.welcome_action_new_project, Icons.Filled.Add) { it.onEvent(WelcomeUiEvent.CreateProjectClicked) },
     WelcomeAction(R.string.welcome_action_import, Icons.Filled.FolderOpen) { it.onEvent(WelcomeUiEvent.ImportProjectClicked) },
-    WelcomeAction(R.string.welcome_action_clone, Icons.Filled.CloudDownload) { it.onEvent(WelcomeUiEvent.CloneProjectClicked) },
+    WelcomeAction(R.string.welcome_action_clone, Icons.Filled.CloudDownload) { it.onEvent(WelcomeUiEvent.CloneProjectClicked) }
+)
+
+private val secondaryActions = listOf(
     WelcomeAction(R.string.settings_hub_terminal, Icons.Filled.Terminal) { it.onEvent(WelcomeUiEvent.TerminalClicked) },
     WelcomeAction(R.string.settings_hub_title, Icons.Filled.Settings) { it.onEvent(WelcomeUiEvent.SettingsClicked) }
 )
@@ -77,6 +100,7 @@ fun WelcomeRoute(
     onNavigateToTerminal: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onOpenProject: (path: String) -> Unit,
+    onOpenProjectSettings: (path: String) -> Unit = {},
     viewModel: WelcomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -90,6 +114,7 @@ fun WelcomeRoute(
                 WelcomeUiEffect.NavigateToTerminal -> onNavigateToTerminal()
                 WelcomeUiEffect.NavigateToSettings -> onNavigateToSettings()
                 is WelcomeUiEffect.NavigateToEditor -> onOpenProject(effect.projectPath)
+                is WelcomeUiEffect.NavigateToProjectSettings -> onOpenProjectSettings(effect.projectPath)
                 is WelcomeUiEffect.ShowSnackbar -> { /* an lokalen SnackbarHostState weiterreichen */ }
             }
         }
@@ -134,7 +159,10 @@ private fun WelcomeScreen(
                             scope.launch {
                                 navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, project.id)
                             }
-                        }
+                        },
+                        onOpenProject = { onEvent(WelcomeUiEvent.RecentProjectOpened(it.id)) },
+                        onOpenSettings = { onEvent(WelcomeUiEvent.RecentProjectSettingsClicked(it.id)) },
+                        onRemoveProject = { onEvent(WelcomeUiEvent.RecentProjectRemoved(it.id)) }
                     )
                 }
             }
@@ -147,7 +175,11 @@ private fun WelcomeScreen(
                     RecentProjectDetailPane(
                         project = selectedProject,
                         onOpen = { onEvent(WelcomeUiEvent.RecentProjectOpened(selectedProject.id)) },
-                        onRemove = { onEvent(WelcomeUiEvent.RecentProjectRemoved(selectedProject.id)) }
+                        onSettings = { onEvent(WelcomeUiEvent.RecentProjectSettingsClicked(selectedProject.id)) },
+                        onRemove = {
+                            onEvent(WelcomeUiEvent.RecentProjectRemoved(selectedProject.id))
+                            scope.launch { navigator.navigateBack() }
+                        }
                     )
                 }
             }
@@ -160,7 +192,10 @@ private fun WelcomeListContent(
     padding: PaddingValues,
     uiState: WelcomeUiState,
     onActionClick: (WelcomeAction) -> Unit,
-    onProjectClick: (RecentProject) -> Unit
+    onProjectClick: (RecentProject) -> Unit,
+    onOpenProject: (RecentProject) -> Unit,
+    onOpenSettings: (RecentProject) -> Unit,
+    onRemoveProject: (RecentProject) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 160.dp),
@@ -171,54 +206,250 @@ private fun WelcomeListContent(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Kopfbereich: Logo, Titel, Versionsnummer, Untertitel
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Image(
                     painter = painterResource(id = DesignSystemR.drawable.icon),
                     contentDescription = stringRes(R.string.welcome_codeforge_mobile),
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(64.dp)
                 )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(stringRes(R.string.welcome_codeforge_mobile), style = MaterialTheme.typography.headlineSmall)
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringRes(R.string.welcome_codeforge_mobile),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = "v1.0.0",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    stringRes(R.string.welcome_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 
-        items(actions) { action ->
+        // Hauptaktionen: Neu, Importieren, Klonen
+        items(primaryActions) { action ->
             ElevatedCard(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .height(96.dp),
+                    .fillMaxWidth()
+                    .height(104.dp),
                 onClick = { onActionClick(action) }
             ) {
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(imageVector = action.icon, contentDescription = stringRes(action.labelRes))
-                    Text(stringRes(action.labelRes))
+                    Icon(
+                        imageVector = action.icon,
+                        contentDescription = stringRes(action.labelRes),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        stringRes(action.labelRes),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
 
-        if (uiState.recentProjects.isNotEmpty()) {
+        // Sekundäre Aktionen: Terminal & Einstellungen
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                secondaryActions.forEach { action ->
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp),
+                        onClick = { onActionClick(action) }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = action.icon,
+                                contentDescription = stringRes(action.labelRes),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringRes(action.labelRes), style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Abschnitt Zuletzt geöffnet
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Text(
+                stringRes(R.string.welcome_zuletzt_geoeffnet),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 12.dp)
+            )
+        }
+
+        if (uiState.recentProjects.isEmpty()) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    stringRes(R.string.welcome_zuletzt_geoeffnet),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 8.dp)
+                EmptyState(
+                    message = stringRes(R.string.welcome_keine_projekte),
+                    icon = Icons.Filled.FolderOpen,
+                    actionLabel = stringRes(R.string.welcome_action_new_project),
+                    onAction = { onActionClick(primaryActions.first()) },
+                    modifier = Modifier.padding(vertical = 24.dp)
                 )
             }
+        } else {
             items(uiState.recentProjects, key = { it.id }) { project ->
-                ElevatedCard(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = { onProjectClick(project) }
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Icon(imageVector = Icons.Filled.Source, contentDescription = null)
-                        Text(project.name, style = MaterialTheme.typography.bodyLarge)
-                        Text(project.path, style = MaterialTheme.typography.bodySmall)
+                RecentProjectCard(
+                    project = project,
+                    onClick = { onProjectClick(project) },
+                    onOpen = { onOpenProject(project) },
+                    onSettings = { onOpenSettings(project) },
+                    onRemove = { onRemoveProject(project) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentProjectCard(
+    project: RecentProject,
+    onClick: () -> Unit,
+    onOpen: () -> Unit,
+    onSettings: () -> Unit,
+    onRemove: () -> Unit
+) {
+    var menuExpanded by remember { mutableStateOf(false) }
+    val initials = getProjectInitials(project.name)
+    val relativeTime = formatRelativeTime(project.lastOpenedEpochMillis)
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Projekt-Initialen Badge
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = initials,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = project.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = project.path,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (relativeTime.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = relativeTime,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringRes(R.string.welcome_module, project.moduleCount),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
                     }
+                }
+            }
+
+            // Kontextmenü
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(imageVector = Icons.Filled.MoreVert, contentDescription = null)
+                }
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringRes(R.string.welcome_oeffnen)) },
+                        onClick = {
+                            menuExpanded = false
+                            onOpen()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringRes(R.string.welcome_projekteinstellungen)) },
+                        onClick = {
+                            menuExpanded = false
+                            onSettings()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringRes(R.string.welcome_aus_liste_entfernen)) },
+                        onClick = {
+                            menuExpanded = false
+                            onRemove()
+                        }
+                    )
                 }
             }
         }
@@ -229,21 +460,132 @@ private fun WelcomeListContent(
 private fun RecentProjectDetailPane(
     project: RecentProject,
     onOpen: () -> Unit,
+    onSettings: () -> Unit,
     onRemove: () -> Unit
 ) {
+    val relativeTime = formatRelativeTime(project.lastOpenedEpochMillis)
+
     Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(24.dp)
         ) {
-            Text(project.name, style = MaterialTheme.typography.headlineSmall)
-            Text(project.path)
-            Text(stringRes(R.string.welcome_module, project.moduleCount))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = getProjectInitials(project.name),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(project.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    if (relativeTime.isNotBlank()) {
+                        Text(relativeTime, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onOpen) { Text(stringRes(R.string.welcome_oeffnen)) }
-            TextButton(onClick = onRemove) { Text(stringRes(R.string.welcome_aus_liste_entfernen)) }
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(project.path, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(stringRes(R.string.welcome_module, project.moduleCount), style = MaterialTheme.typography.bodySmall)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onOpen,
+                modifier = Modifier.fillMaxWidth().height(48.dp)
+            ) {
+                Text(stringRes(R.string.welcome_oeffnen))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = onSettings,
+                modifier = Modifier.fillMaxWidth().height(48.dp)
+            ) {
+                Text(stringRes(R.string.welcome_projekteinstellungen))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(
+                onClick = onRemove,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringRes(R.string.welcome_aus_liste_entfernen))
+            }
         }
+    }
+}
+
+fun getProjectInitials(name: String): String {
+    val clean = name.trim()
+    if (clean.isEmpty()) return "?"
+    val parts = clean.split('-', '_', ' ').filter { it.isNotBlank() }
+    return if (parts.size >= 2) {
+        "${parts[0].first().uppercase()}${parts[1].first().uppercase()}"
+    } else {
+        clean.take(2).uppercase()
+    }
+}
+
+fun formatRelativeTime(epochMillis: Long): String {
+    if (epochMillis <= 0L) return ""
+    val now = System.currentTimeMillis()
+    val diff = (now - epochMillis).coerceAtLeast(0L)
+    val minutes = diff / (1000 * 60)
+    val hours = minutes / 60
+    val days = hours / 24
+
+    return when {
+        minutes < 1 -> Res.string(R.string.welcome_relative_just_now)
+        hours < 1 -> Res.string(R.string.welcome_relative_minutes, minutes)
+        days < 1 -> Res.string(R.string.welcome_relative_hours, hours)
+        else -> Res.string(R.string.welcome_relative_days, days)
+    }
+}
+
+@Preview(name = "Kompakt Hell", showBackground = true)
+@Composable
+private fun WelcomeScreenPreviewLight() {
+    MaterialTheme {
+        WelcomeScreen(
+            uiState = WelcomeUiState(
+                recentProjects = listOf(
+                    RecentProject("1", "CodeForgeMobile", "/home/CodeForgeMobile", System.currentTimeMillis() - 3600000, 5),
+                    RecentProject("2", "KtorBackendService", "/home/KtorBackendService", System.currentTimeMillis() - 86400000, 2)
+                ),
+                isLoading = false
+            ),
+            onActionClick = {},
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(name = "Leerzustand Dunkel", showBackground = true)
+@Composable
+private fun WelcomeScreenPreviewEmptyDark() {
+    MaterialTheme {
+        WelcomeScreen(
+            uiState = WelcomeUiState(
+                recentProjects = emptyList(),
+                isLoading = false
+            ),
+            onActionClick = {},
+            onEvent = {}
+        )
     }
 }

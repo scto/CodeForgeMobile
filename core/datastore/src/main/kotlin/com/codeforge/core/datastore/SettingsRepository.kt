@@ -4,6 +4,7 @@ package com.codeforge.core.datastore
 import androidx.datastore.core.DataStore
 import com.codeforge.core.datastore.proto.AppSettings
 import com.codeforge.core.datastore.proto.EditorConfig
+import com.codeforge.core.datastore.proto.FileHeaderConfig
 import com.codeforge.core.datastore.proto.TerminalConfig
 import com.codeforge.core.datastore.proto.ThemeConfig
 import com.codeforge.core.datastore.proto.WizardConfig
@@ -49,6 +50,14 @@ class SettingsRepository @Inject constructor(
         dataStore.updateData { current ->
             current.toBuilder()
                 .setWizard(transform(current.wizard))
+                .build()
+        }
+    }
+
+    suspend fun updateFileHeader(transform: (FileHeaderConfig) -> FileHeaderConfig) {
+        dataStore.updateData { current ->
+            current.toBuilder()
+                .setFileHeader(transform(current.fileHeader))
                 .build()
         }
     }

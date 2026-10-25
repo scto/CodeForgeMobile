@@ -20,6 +20,7 @@ sealed interface WelcomeUiEvent {
     data class RecentProjectSelected(val projectId: String) : WelcomeUiEvent
     data class RecentProjectOpened(val projectId: String) : WelcomeUiEvent
     data class RecentProjectRemoved(val projectId: String) : WelcomeUiEvent
+    data class RecentProjectSettingsClicked(val projectId: String) : WelcomeUiEvent
 }
 
 sealed interface WelcomeUiEffect {
@@ -29,5 +30,6 @@ sealed interface WelcomeUiEffect {
     data object NavigateToTerminal : WelcomeUiEffect
     data object NavigateToSettings : WelcomeUiEffect
     data class NavigateToEditor(val projectPath: String) : WelcomeUiEffect
+    data class NavigateToProjectSettings(val projectPath: String) : WelcomeUiEffect
     data class ShowSnackbar(val message: String) : WelcomeUiEffect
 }

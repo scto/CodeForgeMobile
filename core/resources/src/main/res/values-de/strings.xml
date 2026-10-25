@@ -693,6 +693,14 @@
     <!-- welcome -->
     <string name="welcome_aus_liste_entfernen">Aus Liste entfernen</string>
     <string name="welcome_codeforge_mobile">CodeForge Mobile</string>
+    <string name="welcome_subtitle">Moderne mobile Entwicklungsumgebung für Android</string>
+    <string name="welcome_projekteinstellungen">Projekteinstellungen</string>
+    <string name="welcome_keine_projekte">Keine zuletzt geöffneten Projekte</string>
+    <string name="welcome_keine_projekte_desc">Erstelle ein neues Projekt oder importiere ein bestehendes Repository.</string>
+    <string name="welcome_relative_just_now">Gerade eben</string>
+    <string name="welcome_relative_minutes">vor %1$d Min.</string>
+    <string name="welcome_relative_hours">vor %1$d Std.</string>
+    <string name="welcome_relative_days">vor %1$d Tagen</string>
     <string name="welcome_module">Module: %1$s</string>
     <string name="welcome_oeffnen">Öffnen</string>
     <string name="welcome_projekt_nicht_gefunden">Projekt nicht gefunden.</string>
@@ -1220,6 +1228,24 @@
     <string name="settings_editor_snippets">Snippets &amp; Live-Templates</string>
     <string name="settings_editor_snippets_desc">Code-Kürzel, Vorlagen und Variablen verwalten</string>
 
+    <!-- Editor Settings Overhaul (Task 47.2) -->
+    <string name="settings_editor_section_display">Darstellung</string>
+    <string name="settings_editor_section_input">Eingabe</string>
+    <string name="settings_editor_section_language">Sprachfunktionen</string>
+    <string name="settings_editor_section_format">Format beim Speichern</string>
+    <string name="settings_editor_section_snippets">Snippets</string>
+    <string name="settings_editor_section_file_header">Dateikopf</string>
+    <string name="settings_editor_theme_auto">Automatisch (folgt dem App-Design)</string>
+    <string name="settings_editor_font_family">Schriftart</string>
+    <string name="settings_editor_font_system">System Monospace (Standard)</string>
+    <string name="settings_editor_font_jetbrains">JetBrains Mono</string>
+    <string name="settings_editor_font_size_slider">Schriftgröße</string>
+    <string name="settings_editor_font_size_preview_sample">fun helloWorld(): Int = 42\nval msg = \"CodeForge Mobile\"</string>
+    <string name="settings_editor_file_header_enabled">Dateikopf für neue Dateien aktivieren</string>
+    <string name="settings_editor_file_header_author">Autor</string>
+    <string name="settings_editor_file_header_preview">Vorschau</string>
+    <string name="settings_editor_reset_section">Abschnitt zurücksetzen</string>
+
     <!-- Keystore & Signing (Task 34) -->
     <string name="signing_title">Signierung &amp; Keystores</string>
     <string name="signing_tab_keystores">Keystores</string>
@@ -1294,6 +1320,18 @@
     <string name="signing_select_keystore">Schlüsselspeicher wählen</string>
     <string name="signing_select_alias">Alias wählen</string>
     <string name="signing_signed_apk_created">Signierte APK erstellt: %1$s (%2$s)</string>
+    <string name="signing_used_in_projects">Verwendet in Projekten</string>
+    <string name="signing_no_projects_assigned">Diesem Schlüssel sind keine Projekte zugewiesen.</string>
+    <string name="signing_assign_project_btn">Projekt zuweisen</string>
+    <string name="signing_assign_project_title">Schlüssel einem Projekt zuweisen</string>
+    <string name="signing_select_project">Projekt auswählen</string>
+    <string name="signing_remove_assignment">Zuweisung entfernen</string>
+    <string name="signing_delete_warning_projects">Achtung: Dieser Schlüssel wird aktuell von folgenden Projekten verwendet: %1$s. Nach dem Löschen werden diese Zuweisungen entfernt.</string>
+    <string name="signing_export_contains_private_key">Hinweis: Die exportierte Datei enthält den privaten Schlüssel. Schützen Sie diese sorgfältig.</string>
+    <string name="signing_saf_pick_file">Datei auswählen (SAF)</string>
+    <string name="signing_saf_choose_location">Speicherort wählen (SAF)</string>
+    <string name="signing_supported_formats">Unterstützte Formate: JKS, PKCS12 (.p12, .keystore)</string>
+    <string name="signing_advanced_options">Erweitert (manuelle Pfadeingabe)</string>
     <string name="settings_hub_signing">Signierung &amp; Keystores</string>
 
     <!-- APK Analyzer (Task 35) -->
@@ -1622,5 +1660,22 @@
     <string name="j2k_status_skipped">Übersprungen</string>
     <string name="j2k_status_failed">Fehlgeschlagen</string>
     <string name="j2k_result_summary">%1$d Java-Dateien umgewandelt (%2$d mit Hinweisen), %3$d übersprungen</string>
+
+    <!-- Project Settings (Task 47.4) -->
+    <string name="project_settings_title">Projekteinstellungen</string>
+    <string name="project_settings_build_type_release">Release</string>
+    <string name="project_settings_build_type_debug">Debug</string>
+    <string name="project_settings_minify">Code verkleinern (Minify)</string>
+    <string name="project_settings_minify_desc">Aktiviert Code-Verkleinerung und Obfuskation mit R8</string>
+    <string name="project_settings_shrink">Ressourcen verkleinern</string>
+    <string name="project_settings_shrink_desc">Entfernt ungenutzte Ressourcen aus dem APK (erfordert Minify)</string>
+    <string name="project_settings_crunch">PNG-Optimierung</string>
+    <string name="project_settings_crunch_desc">Optimiert PNG-Bilder während des Builds</string>
+    <string name="project_settings_debuggable">Debuggbar</string>
+    <string name="project_settings_debuggable_desc">Erlaubt Debugging und Profiling der App</string>
+    <string name="project_settings_signing">Build-Signierung aktivieren</string>
+    <string name="project_settings_signing_desc">Signiert die APK mit dem zugewiesenen Projektschlüssel</string>
+    <string name="project_settings_signing_manage">Projektschlüssel verwalten…</string>
+    <string name="project_settings_saved">Einstellungen gespeichert</string>
 </resources>
 

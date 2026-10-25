@@ -141,102 +141,18 @@ fun SoraCodeEditor(
                     )
                 )
 
-                // --- Code Block Indicators ---
+                // --- Code Block Indicators & Display Settings ---
                 isBlockLineEnabled = true
-
-                // --- Punctuation Pair Matching and Highlighting (Rainbow Brackets) ---
-                isHighlightBracketPair = settings.rainbowBracketsEnabled
-                props.boldMatchingDelimiters = settings.rainbowBracketsEnabled
-                runCatching {
-                    val bracketClass = Class.forName("io.github.rosemoe.sora.widget.component.BracketPairs")
-                    val component = getComponent(bracketClass.asSubclass(
-                        io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
-                    ))
-                    component.isEnabled = settings.rainbowBracketsEnabled
-                }
-
-                // --- Pinch-to-Zoom (Text-Skalierung per Geste) ---
-                val density = ctx.resources.displayMetrics.scaledDensity
-                if (settings.pinchToZoomEnabled) {
-                    setScaleTextSizes(8f * density, 40f * density)
-                    runCatching {
-                        val method = javaClass.getMethod("setScaleTextEnabled", Boolean::class.javaPrimitiveType)
-                        method.invoke(this, true)
-                    }
-                } else {
-                    val currentPx = settings.fontSizeSp * density
-                    setScaleTextSizes(currentPx, currentPx)
-                }
-
-                // --- PC-Navigation & Desktop-Tastaturkürzel ---
-                if (settings.desktopShortcutsEnabled) {
-                    runCatching {
-                        val field = props.javaClass.getDeclaredField("navigationMode")
-                        field.isAccessible = true
-                        field.setInt(props, 1) // NAVIGATION_MODE_PC
-                    }
-                }
-
-                // --- Word Wrap Display Mode ---
-                isWordwrap = settings.wordWrap
-
-                // --- Display Non-Printable Characters (Leerzeichen/Tabs/Zeilenumbrüche) ---
-                nonPrintablePaintingFlags = if (settings.showNonPrintableChars) {
-                    CodeEditor.FLAG_DRAW_WHITESPACE_LEADING or
-                        CodeEditor.FLAG_DRAW_WHITESPACE_INNER or
-                        CodeEditor.FLAG_DRAW_WHITESPACE_TRAILING or
-                        CodeEditor.FLAG_DRAW_LINE_SEPARATOR or
-                        CodeEditor.FLAG_DRAW_TAB_SAME_AS_SPACE
-                } else {
-                    0
-                }
-
-                // --- Text Magnifier (Lupe bei Long-Press-Cursorplatzierung) ---
-                getComponent(Magnifier::class.java).isEnabled = settings.magnifierEnabled
+                applyDisplaySettings(this, settings)
 
                 // --- Auto-Completion-Popup aktiv halten (Snippets kommen aus LspAwareLanguage) ---
                 getComponent(EditorAutoCompletion::class.java).isEnabled = true
-
-                // --- Sticky Scroll: zeigt den umschließenden Code-Block fixiert oben an.
-                runCatching {
-                    val stickyScrollClass = Class.forName(
-                        "io.github.rosemoe.sora.widget.component.EditorStickyScroll"
-                    )
-                    val component = getComponent(stickyScrollClass.asSubclass(
-                        io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
-                    ))
-                    component.isEnabled = settings.stickyScrollEnabled
-                }
-
-                // --- Minimap (Miniatur-Codeübersicht am rechten Rand) ---
-                runCatching {
-                    val minimapClass = Class.forName("io.github.rosemoe.sora.widget.component.EditorMinimap")
-                    val comp = getComponent(minimapClass.asSubclass(
-                        io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
-                    ))
-                    comp?.isEnabled = settings.minimapEnabled
-                }
 
                 // --- Diagnose-UI & Tooltips ---
                 runCatching {
                     val tooltipWindow = getComponent(io.github.rosemoe.sora.widget.component.EditorDiagnosticTooltipWindow::class.java)
                     tooltipWindow.isEnabled = true
                 }
-
-                // --- Tab-Größe ---
-                tabWidth = settings.tabSize.coerceAtLeast(1)
-
-                // --- Schriftgröße ---
-                setTextSize(settings.fontSizeSp.coerceIn(6f, 48f))
-
-                // --- Schriftart (optional, aus Assets geladen) ---
-                if (settings.fontFamilyAssetPath.isNotBlank()) {
-                    runCatching {
-                        typefaceText = Typeface.createFromAsset(ctx.assets, settings.fontFamilyAssetPath)
-                    }
-                }
-
-                TextMateAssetLoader.setActiveTheme(settings.textmateTheme)
 
                 this.diagnostics = diagnosticsContainer
 
@@ -315,38 +231,7 @@ fun SoraCodeEditor(
             if (editor.text.toString() != content) {
                 editor.setText(content)
             }
-            editor.isWordwrap = settings.wordWrap
-            editor.tabWidth = settings.tabSize.coerceAtLeast(1)
-            editor.setTextSize(settings.fontSizeSp.coerceIn(6f, 48f))
-            editor.getComponent(Magnifier::class.java).isEnabled = settings.magnifierEnabled
-
-            editor.isHighlightBracketPair = settings.rainbowBracketsEnabled
-            editor.props.boldMatchingDelimiters = settings.rainbowBracketsEnabled
-            runCatching {
-                val bracketClass = Class.forName("io.github.rosemoe.sora.widget.component.BracketPairs")
-                val component = editor.getComponent(bracketClass.asSubclass(
-                    io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
-                ))
-                component.isEnabled = settings.rainbowBracketsEnabled
-            }
-
-            val density = editor.context.resources.displayMetrics.scaledDensity
-            if (settings.pinchToZoomEnabled) {
-                editor.setScaleTextSizes(8f * density, 40f * density)
-            } else {
-                val currentPx = settings.fontSizeSp * density
-                editor.setScaleTextSizes(currentPx, currentPx)
-            }
-
-            runCatching {
-                val minimapClass = Class.forName("io.github.rosemoe.sora.widget.component.EditorMinimap")
-                val comp = editor.getComponent(minimapClass.asSubclass(
-                    io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
-                ))
-                comp?.isEnabled = settings.minimapEnabled
-            }
-
-            TextMateAssetLoader.setActiveTheme(settings.textmateTheme)
+            applyDisplaySettings(editor, settings)
             LspDiagnosticsBridge.apply(diagnosticsContainer, editor.text, diagnostics)
         }
     )
@@ -374,4 +259,97 @@ fun SoraCodeEditor(
     DisposableEffect(Unit) {
         onDispose { controller.detach() }
     }
+}
+
+/**
+ * Wendet [EditorDisplaySettings] einheitlich auf eine [CodeEditor]-Instanz an.
+ * Wird sowohl bei der Ersterzeugung (factory) als auch bei Recompositions (update)
+ * aufgerufen, damit Einstellungen garantiert synchron bleiben.
+ */
+fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
+    editor.isWordwrap = settings.wordWrap
+    editor.tabWidth = settings.tabSize.coerceAtLeast(1)
+    editor.setTextSize(settings.fontSizeSp.coerceIn(6f, 48f))
+
+    editor.nonPrintablePaintingFlags = if (settings.showNonPrintableChars) {
+        CodeEditor.FLAG_DRAW_WHITESPACE_LEADING or
+            CodeEditor.FLAG_DRAW_WHITESPACE_INNER or
+            CodeEditor.FLAG_DRAW_WHITESPACE_TRAILING or
+            CodeEditor.FLAG_DRAW_LINE_SEPARATOR or
+            CodeEditor.FLAG_DRAW_TAB_SAME_AS_SPACE
+    } else {
+        0
+    }
+
+    if (settings.fontFamilyAssetPath.isNotBlank()) {
+        runCatching {
+            editor.typefaceText = Typeface.createFromAsset(editor.context.assets, settings.fontFamilyAssetPath)
+        }
+    } else {
+        editor.typefaceText = Typeface.MONOSPACE
+    }
+
+    // Lupe
+    runCatching {
+        editor.getComponent(Magnifier::class.java).isEnabled = settings.magnifierEnabled
+    }
+
+    // Symbolpaare automatisch schließen
+    editor.props.symbolPairAutoCompletion = settings.symbolPairAutocompleteEnabled
+
+    // Rainbow Brackets / Klammerpaar-Hervorhebung
+    editor.isHighlightBracketPair = settings.rainbowBracketsEnabled
+    editor.props.boldMatchingDelimiters = settings.rainbowBracketsEnabled
+    runCatching {
+        val bracketClass = Class.forName("io.github.rosemoe.sora.widget.component.BracketPairs")
+        val component = editor.getComponent(bracketClass.asSubclass(
+            io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
+        ))
+        component.isEnabled = settings.rainbowBracketsEnabled
+    }
+
+    // Pinch-to-zoom
+    val density = editor.context.resources.displayMetrics.scaledDensity
+    if (settings.pinchToZoomEnabled) {
+        editor.setScaleTextSizes(8f * density, 40f * density)
+        runCatching {
+            val method = editor.javaClass.getMethod("setScaleTextEnabled", Boolean::class.javaPrimitiveType)
+            method.invoke(editor, true)
+        }
+    } else {
+        val currentPx = settings.fontSizeSp * density
+        editor.setScaleTextSizes(currentPx, currentPx)
+        runCatching {
+            val method = editor.javaClass.getMethod("setScaleTextEnabled", Boolean::class.javaPrimitiveType)
+            method.invoke(editor, false)
+        }
+    }
+
+    // Desktop shortcuts / PC Navigation
+    runCatching {
+        val field = editor.props.javaClass.getDeclaredField("navigationMode")
+        field.isAccessible = true
+        field.setInt(editor.props, if (settings.desktopShortcutsEnabled) 1 else 0)
+    }
+
+    // Sticky Scroll
+    runCatching {
+        val stickyScrollClass = Class.forName("io.github.rosemoe.sora.widget.component.EditorStickyScroll")
+        val component = editor.getComponent(stickyScrollClass.asSubclass(
+            io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
+        ))
+        component.isEnabled = settings.stickyScrollEnabled
+    }
+
+    // Minimap
+    runCatching {
+        val minimapClass = Class.forName("io.github.rosemoe.sora.widget.component.EditorMinimap")
+        val comp = editor.getComponent(minimapClass.asSubclass(
+            io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
+        ))
+        comp?.isEnabled = settings.minimapEnabled
+    }
+
+    // TextMate Theme
+    TextMateAssetLoader.setActiveTheme(settings.textmateTheme)
 }

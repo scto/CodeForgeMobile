@@ -33,6 +33,13 @@ import com.codeforge.feature.settings.TerminalSettingsRoute
 import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.settings.snippets.SnippetSettingsRoute
 import com.codeforge.feature.signing.SigningRoute
+import com.codeforge.feature.projectsettings.ProjectSettingsScreen
+import com.codeforge.feature.projectsettings.ProjectSettingsViewModel
+import com.codeforge.feature.projectsettings.ProjectSettingsIntent
+import com.codeforge.feature.projectsettings.ProjectSettingsEffect
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.codeforge.feature.terminal.TerminalRoute
 import com.codeforge.feature.themebuilder.ThemeBuilderRoute
 import com.codeforge.feature.welcome.WelcomeRoute
@@ -61,7 +68,9 @@ internal object Routes {
     const val APK_ANALYZER_PATTERN = "apk_analyzer?apkPath={apkPath}&comparePath={comparePath}"
     const val HARDCODED_STRINGS_PATTERN = "hardcoded_strings?targetPath={targetPath}&projectRoot={projectRoot}"
     const val DEPENDENCIES_PATTERN = "dependencies?rootPath={rootPath}"
+    const val PROJECT_SETTINGS_PATTERN = "project_settings/{projectPath}"
 
+    fun projectSettings(projectPath: String) = "project_settings/${Uri.encode(projectPath)}"
     fun projectWorkspace(rootPath: String) = "workspace/${Uri.encode(rootPath)}"
     fun terminalWith(command: String) = Res.string(R.string.app_terminal_initialcommand, Uri.encode(command))
     fun git(repoPath: String) = "git/${Uri.encode(repoPath)}"
@@ -131,7 +140,8 @@ fun CodeForgeNavHost(
                     }
                 },
                 onNavigateToSettings = { navController.navigate(Routes.SETTINGS) },
-                onOpenProject = { projectPath -> navController.navigate(Routes.projectWorkspace(projectPath)) }
+                onOpenProject = { projectPath -> navController.navigate(Routes.projectWorkspace(projectPath)) },
+                onOpenProjectSettings = { projectPath -> navController.navigate(Routes.projectSettings(projectPath)) }
             )
         }
         composable(Routes.PROJECT_WIZARD) {
@@ -326,6 +336,34 @@ fun CodeForgeNavHost(
                 onShowInCatalog = {
                     navController.popBackStack()
                 }
+            )
+        }
+        composable(
+            route = Routes.PROJECT_SETTINGS_PATTERN,
+            arguments = listOf(
+                navArgument("projectPath") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val projectPath = backStackEntry.arguments?.getString("projectPath").orEmpty()
+            val vm: ProjectSettingsViewModel = hiltViewModel()
+            LaunchedEffect(projectPath) {
+                vm.handleIntent(ProjectSettingsIntent.Load(projectPath))
+            }
+            val uiState by vm.uiState.collectAsState()
+            LaunchedEffect(vm) {
+                vm.effects.collect { effect ->
+                    when (effect) {
+                        is ProjectSettingsEffect.NavigateToSigning -> {
+                            navController.navigate(Routes.SETTINGS_SIGNING)
+                        }
+                        is ProjectSettingsEffect.ShowMessage -> {}
+                    }
+                }
+            }
+            ProjectSettingsScreen(
+                state = uiState,
+                onIntent = vm::handleIntent,
+                onNavigateBack = { navigateBackOrStart() }
             )
         }
     }

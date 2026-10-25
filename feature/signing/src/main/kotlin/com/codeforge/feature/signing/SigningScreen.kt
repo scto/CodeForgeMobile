@@ -4,6 +4,10 @@ package com.codeforge.feature.signing
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -28,12 +32,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
@@ -88,9 +95,12 @@ import com.codeforge.core.domain.model.KeyAlgorithm
 import com.codeforge.core.domain.model.KeystoreCertificateInfo
 import com.codeforge.core.domain.model.KeystoreInfo
 import com.codeforge.core.domain.model.PasswordStrength
+import com.codeforge.core.domain.model.ProjectSigningAssignment
+import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
+import java.io.File
 
 @Composable
 fun SigningRoute(
@@ -265,7 +275,28 @@ fun SigningScreen(
     }
 
     if (state.isDetailsDialogVisible && state.selectedKeystore != null) {
-        KeystoreDetailsDialog(keystore = state.selectedKeystore, onDismiss = { onIntent(SigningUiIntent.DismissDetails) })
+        val ks = state.selectedKeystore
+        val assignments = state.projectAssignments.filter { it.keystoreId == ks.id }
+        KeystoreDetailsDialog(
+            keystore = ks,
+            assignments = assignments,
+            onAssignClick = { onIntent(SigningUiIntent.OpenAssignProjectDialog(ks)) },
+            onRemoveAssignment = { path -> onIntent(SigningUiIntent.RemoveProjectAssignment(path)) },
+            onDismiss = { onIntent(SigningUiIntent.DismissDetails) }
+        )
+    }
+
+    if (state.isAssignProjectDialogVisible && state.assignProjectKeystore != null) {
+        AssignProjectDialog(
+            keystore = state.assignProjectKeystore,
+            recentProjects = state.recentProjects,
+            selectedProjectPath = state.assignSelectedProjectPath,
+            selectedAlias = state.assignSelectedAlias,
+            onProjectChange = { onIntent(SigningUiIntent.SelectAssignProject(it)) },
+            onAliasChange = { onIntent(SigningUiIntent.SelectAssignAlias(it)) },
+            onConfirm = { onIntent(SigningUiIntent.SubmitAssignProject) },
+            onDismiss = { onIntent(SigningUiIntent.DismissAssignProjectDialog) }
+        )
     }
 
     if (state.isExportConfirmDialogVisible && state.keystoreToExport != null) {
@@ -281,6 +312,7 @@ fun SigningScreen(
     if (state.isDeleteConfirmDialogVisible && state.keystoreToDelete != null) {
         DeleteConfirmDialog(
             keystore = state.keystoreToDelete,
+            warningProjects = state.deleteWarningProjects,
             onConfirm = { onIntent(SigningUiIntent.ConfirmDelete) },
             onDismiss = { onIntent(SigningUiIntent.DismissDeleteConfirm) }
         )
@@ -918,6 +950,31 @@ private fun ImportKeystoreDialog(
     state: ImportKeystoreFormState,
     onIntent: (SigningUiIntent) -> Unit
 ) {
+    val context = LocalContext.current
+    val openDocLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            var fileName = "imported.keystore"
+            try {
+                context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex != -1 && cursor.moveToFirst()) {
+                        fileName = cursor.getString(nameIndex) ?: fileName
+                    }
+                }
+                val cacheFile = File(context.cacheDir, fileName)
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    cacheFile.outputStream().use { output -> input.copyTo(output) }
+                }
+                onIntent(SigningUiIntent.UpdateImportFilePath(cacheFile.absolutePath))
+                if (state.customName.isBlank()) {
+                    onIntent(SigningUiIntent.UpdateImportCustomName(fileName))
+                }
+            } catch (_: Exception) {}
+        }
+    }
+
     AlertDialog(
         onDismissRequest = { onIntent(SigningUiIntent.DismissImportDialog) },
         title = { Text(stringRes(R.string.signing_import_keystore)) },
@@ -926,6 +983,21 @@ private fun ImportKeystoreDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                FilledTonalButton(
+                    onClick = { openDocLauncher.launch(arrayOf("*/*")) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.FolderOpen, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringRes(R.string.signing_saf_pick_file))
+                }
+
+                Text(
+                    text = stringRes(R.string.signing_supported_formats),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
                 OutlinedTextField(
                     value = state.filePath,
                     onValueChange = { onIntent(SigningUiIntent.UpdateImportFilePath(it)) },
@@ -980,6 +1052,9 @@ private fun ImportKeystoreDialog(
 @Composable
 private fun KeystoreDetailsDialog(
     keystore: KeystoreInfo,
+    assignments: List<ProjectSigningAssignment>,
+    onAssignClick: () -> Unit,
+    onRemoveAssignment: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -996,6 +1071,78 @@ private fun KeystoreDetailsDialog(
             ) {
                 Text("Format: ${keystore.type}", style = MaterialTheme.typography.bodySmall)
                 Text("Pfad: ${keystore.filePath}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+
+                // 47.5: Verwendet in Projekten
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringRes(R.string.signing_used_in_projects),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            FilledTonalButton(
+                                onClick = onAssignClick,
+                                contentPadding = ButtonDefaults.TextButtonContentPadding
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringRes(R.string.signing_assign_project_btn), fontSize = 12.sp)
+                            }
+                        }
+
+                        if (assignments.isEmpty()) {
+                            Text(
+                                text = stringRes(R.string.signing_no_projects_assigned),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            assignments.forEach { a ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = a.projectPath.substringAfterLast('/'),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Text(
+                                            text = "${a.projectPath} (Alias: ${a.alias})",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.outline,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = { onRemoveAssignment(a.projectPath) },
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Close,
+                                            contentDescription = stringRes(R.string.signing_remove_assignment),
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 keystore.entries.forEach { entry ->
                     Card(
@@ -1068,6 +1215,135 @@ private fun FingerprintRow(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AssignProjectDialog(
+    keystore: KeystoreInfo,
+    recentProjects: List<RecentProject>,
+    selectedProjectPath: String,
+    selectedAlias: String,
+    onProjectChange: (String) -> Unit,
+    onAliasChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    var expandedProject by remember { mutableStateOf(false) }
+    var expandedAlias by remember { mutableStateOf(false) }
+    val availableAliases = remember(keystore) { keystore.entries.map { it.alias }.ifEmpty { listOf(keystore.primaryAlias.orEmpty()).filter { it.isNotBlank() } } }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringRes(R.string.signing_assign_project_title)) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Projekt-Auswahl
+                if (recentProjects.isNotEmpty()) {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedProject,
+                        onExpandedChange = { expandedProject = it }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedProjectPath,
+                            onValueChange = onProjectChange,
+                            label = { Text(stringRes(R.string.signing_select_project)) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedProject) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                            singleLine = true
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedProject,
+                            onDismissRequest = { expandedProject = false }
+                        ) {
+                            recentProjects.forEach { project ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Column {
+                                            Text(project.name, fontWeight = FontWeight.Bold)
+                                            Text(project.path, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                                        }
+                                    },
+                                    onClick = {
+                                        onProjectChange(project.path)
+                                        expandedProject = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = selectedProjectPath,
+                        onValueChange = onProjectChange,
+                        label = { Text(stringRes(R.string.signing_select_project)) },
+                        placeholder = { Text("/data/data/com.termux/files/home/MyProject") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+
+                // Alias-Auswahl
+                if (availableAliases.size > 1) {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedAlias,
+                        onExpandedChange = { expandedAlias = it }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedAlias,
+                            onValueChange = onAliasChange,
+                            label = { Text(stringRes(R.string.signing_select_alias)) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAlias) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                            readOnly = true
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedAlias,
+                            onDismissRequest = { expandedAlias = false }
+                        ) {
+                            availableAliases.forEach { alias ->
+                                DropdownMenuItem(
+                                    text = { Text(alias) },
+                                    onClick = {
+                                        onAliasChange(alias)
+                                        expandedAlias = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = selectedAlias,
+                        onValueChange = onAliasChange,
+                        label = { Text(stringRes(R.string.signing_alias)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = selectedProjectPath.isNotBlank() && selectedAlias.isNotBlank()
+            ) {
+                Text(stringRes(R.string.pw_ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringRes(R.string.common_abbrechen))
+            }
+        }
+    )
+}
+
 @Composable
 private fun ExportConfirmDialog(
     keystore: KeystoreInfo,
@@ -1091,6 +1367,11 @@ private fun ExportConfirmDialog(
                     text = stringRes(R.string.signing_export_warning_text),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = stringRes(R.string.signing_export_contains_private_key),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 OutlinedTextField(
                     value = targetPath,
@@ -1120,6 +1401,7 @@ private fun ExportConfirmDialog(
 @Composable
 private fun DeleteConfirmDialog(
     keystore: KeystoreInfo,
+    warningProjects: List<String> = emptyList(),
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -1127,7 +1409,26 @@ private fun DeleteConfirmDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringRes(R.string.signing_delete_confirm_title)) },
         text = {
-            Text(stringRes(R.string.signing_delete_confirm_text, keystore.name))
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringRes(R.string.signing_delete_confirm_text, keystore.name))
+
+                if (warningProjects.isNotEmpty()) {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringRes(
+                                R.string.signing_delete_warning_projects,
+                                warningProjects.joinToString(", ") { it.substringAfterLast('/') }
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                }
+            }
         },
         confirmButton = {
             Button(

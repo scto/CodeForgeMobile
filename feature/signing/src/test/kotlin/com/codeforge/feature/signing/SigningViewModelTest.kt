@@ -9,13 +9,16 @@ import com.codeforge.core.domain.model.KeyAlgorithm
 import com.codeforge.core.domain.model.KeystoreEntryInfo
 import com.codeforge.core.domain.model.KeystoreInfo
 import com.codeforge.core.domain.model.PasswordStrength
+import com.codeforge.core.domain.model.ProjectSigningAssignment
 import com.codeforge.core.domain.model.SignApkRequest
 import com.codeforge.core.domain.repository.SigningRepository
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -40,6 +43,51 @@ class SigningViewModelTest {
         val keystores = mutableListOf<KeystoreInfo>()
         private val _activeBuildSigning = MutableStateFlow<Map<String, String>>(emptyMap())
         override val activeBuildSigning: StateFlow<Map<String, String>> = _activeBuildSigning
+
+        private val _assignments = MutableStateFlow<List<ProjectSigningAssignment>>(emptyList())
+        override fun getProjectAssignments(): Flow<List<ProjectSigningAssignment>> = _assignments.asStateFlow()
+
+        override suspend fun getAssignmentForProject(projectPath: String): ProjectSigningAssignment? =
+            _assignments.value.firstOrNull { it.projectPath == projectPath }
+
+        override suspend fun assignKeyToProject(projectPath: String, keystoreId: String, alias: String): Result<Unit> {
+            val updated = _assignments.value.filterNot { it.projectPath == projectPath } +
+                ProjectSigningAssignment(projectPath, keystoreId, alias)
+            _assignments.value = updated
+            return Result.success(Unit)
+        }
+
+        override suspend fun removeAssignmentForProject(projectPath: String): Result<Unit> {
+            _assignments.value = _assignments.value.filterNot { it.projectPath == projectPath }
+            return Result.success(Unit)
+        }
+
+        override suspend fun removeAssignmentsForKeystore(keystoreId: String): Result<Unit> {
+            _assignments.value = _assignments.value.filterNot { it.keystoreId == keystoreId }
+            return Result.success(Unit)
+        }
+
+        override suspend fun removeAssignmentsForAlias(keystoreId: String, alias: String): Result<Unit> {
+            _assignments.value = _assignments.value.filterNot { it.keystoreId == keystoreId && it.alias == alias }
+            return Result.success(Unit)
+        }
+
+        override suspend fun resolveBuildSigning(projectPath: String?): Result<Map<String, String>> {
+            if (projectPath != null) {
+                val a = getAssignmentForProject(projectPath)
+                if (a != null) {
+                    return Result.success(
+                        mapOf(
+                            GradleSigningSnippet.ENV_KEYSTORE_PATH to "/data/keystores/${a.keystoreId}",
+                            GradleSigningSnippet.ENV_KEYSTORE_ALIAS to a.alias,
+                            GradleSigningSnippet.ENV_KEYSTORE_PASSWORD to "pass",
+                            GradleSigningSnippet.ENV_KEY_PASSWORD to "pass"
+                        )
+                    )
+                }
+            }
+            return Result.success(_activeBuildSigning.value)
+        }
 
         override suspend fun getKeystores(): List<KeystoreInfo> = keystores.toList()
         override suspend fun getKeystore(id: String): KeystoreInfo? = keystores.firstOrNull { it.id == id }

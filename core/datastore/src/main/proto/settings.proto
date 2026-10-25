@@ -9,6 +9,7 @@ message AppSettings {
   EditorConfig editor = 3;
   bool onboarding_completed = 4;
   WizardConfig wizard = 5;
+  FileHeaderConfig file_header = 6;
 }
 
 message ThemeConfig {
@@ -69,4 +70,10 @@ message WizardConfig {
   int32 min_sdk = 3;        // 0 = Standard
   bool use_groovy_dsl = 4;  // false = Kotlin DSL
   bool skip_git_init = 5;   // false = neue Projekte mit git init anlegen
+}
+
+message FileHeaderConfig {
+  bool enabled = 1;
+  string author = 2;
+  map<string, string> custom_templates = 3;
 }

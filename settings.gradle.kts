@@ -54,6 +54,7 @@ include(
     ":feature:signing",
     ":feature:debug",
     ":feature:j2k",
+    ":feature:projectsettings",
 
     ":libs:terminal-engine",
     ":libs:gradle-tooling-bridge",

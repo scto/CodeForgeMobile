@@ -8,7 +8,11 @@ import com.codeforge.core.domain.model.GradleSigningSnippet
 import com.codeforge.core.domain.model.KeyAlgorithm
 import com.codeforge.core.domain.model.KeystoreInfo
 import com.codeforge.core.domain.model.PasswordStrength
+import com.codeforge.core.domain.model.ProjectSigningAssignment
+import com.codeforge.core.domain.model.RecentProject
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 
 enum class SigningTab {
     KEYSTORES,
@@ -96,6 +100,17 @@ data class SigningUiState(
 
     val isDeleteConfirmDialogVisible: Boolean = false,
     val keystoreToDelete: KeystoreInfo? = null,
+    val deleteWarningProjects: List<String> = emptyList(),
+
+    // 47.5: Projektzuweisung Dialog
+    val isAssignProjectDialogVisible: Boolean = false,
+    val assignProjectKeystore: KeystoreInfo? = null,
+    val assignSelectedProjectPath: String = "",
+    val assignSelectedAlias: String = "",
+
+    // 47.5: Zuweisungen & Kürzliche Projekte
+    val projectAssignments: List<ProjectSigningAssignment> = emptyList(),
+    val recentProjects: List<RecentProject> = emptyList(),
 
     // APK Signieren
     val signForm: SignApkFormState = SignApkFormState(),
@@ -138,6 +153,19 @@ sealed interface SigningUiIntent {
     // Details
     data class OpenDetails(val keystore: KeystoreInfo) : SigningUiIntent
     data object DismissDetails : SigningUiIntent
+
+    // 47.5: Zuweisung Projekt ↔ Schlüssel
+    data class OpenAssignProjectDialog(val keystore: KeystoreInfo) : SigningUiIntent
+    data object DismissAssignProjectDialog : SigningUiIntent
+    data class SelectAssignProject(val projectPath: String) : SigningUiIntent
+    data class SelectAssignAlias(val alias: String) : SigningUiIntent
+    data object SubmitAssignProject : SigningUiIntent
+    data class RemoveProjectAssignment(val projectPath: String) : SigningUiIntent
+    data class RemoveAliasAssignment(val keystoreId: String, val alias: String) : SigningUiIntent
+
+    // 47.5: SAF Import & Export
+    data class ImportKeystoreFromStreamData(val inputStream: InputStream, val fileName: String, val storePass: String, val customName: String? = null) : SigningUiIntent
+    data class ExportKeystoreToStreamData(val keystoreId: String, val outputStream: OutputStream) : SigningUiIntent
 
     // Exportieren
     data class OpenExportConfirm(val keystore: KeystoreInfo) : SigningUiIntent

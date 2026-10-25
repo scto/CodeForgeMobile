@@ -122,4 +122,10 @@ abstract class DataModule {
     abstract fun bindDependencyGraphRepository(
         impl: com.codeforge.core.data.repository.DependencyGraphRepositoryImpl
     ): com.codeforge.core.domain.repository.DependencyGraphRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProjectSettingsRepository(
+        impl: com.codeforge.core.data.repository.ProjectSettingsRepositoryImpl
+    ): com.codeforge.core.domain.repository.ProjectSettingsRepository
 }

@@ -68,6 +68,8 @@ dependencies {
     implementation(project(":feature:build"))
     implementation(project(":feature:signing"))
     implementation(project(":feature:debug"))
+    implementation(project(":feature:j2k"))
+    implementation(project(":feature:projectsettings"))
 
     implementation(project(":libs:termux-app"))
     implementation(project(":libs:terminal-engine"))

@@ -222,6 +222,16 @@ object PasswordStrengthEvaluator {
 }
 
 /**
+ * Zuweisung eines Schlüssels und Alias zu einem bestimmten Projektpfad.
+ * Wird IDE-intern ohne Passwörter gespeichert.
+ */
+data class ProjectSigningAssignment(
+    val projectPath: String,
+    val keystoreId: String,
+    val alias: String
+)
+
+/**
  * Hilfsfunktionen zum Generieren von Gradle-Code für Release-Signierung.
  */
 object GradleSigningSnippet {

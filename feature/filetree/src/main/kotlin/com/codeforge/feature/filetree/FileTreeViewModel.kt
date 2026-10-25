@@ -6,6 +6,10 @@ package com.codeforge.feature.filetree
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codeforge.core.common.FileHeaderContext
+import com.codeforge.core.common.FileHeaderRenderer
+import com.codeforge.core.datastore.SettingsRepository
+import com.codeforge.core.domain.model.SnippetVariableResolver
 import com.codeforge.core.domain.repository.FileSystemRepository
 import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.core.resources.R
@@ -17,14 +21,18 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class FileTreeViewModel @Inject constructor(
     private val fileSystemRepository: FileSystemRepository,
-    private val openFileRequestBridge: OpenFileRequestBridge
+    private val openFileRequestBridge: OpenFileRequestBridge,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FileTreeUiState())
@@ -124,8 +132,40 @@ class FileTreeViewModel @Inject constructor(
         _uiState.update { it.copy(pendingAction = null) }
 
         val result = when (action.type) {
-            FileTreeActionType.CREATE_FILE ->
-                fileSystemRepository.createFile("${action.targetPath}/$inputName")
+            FileTreeActionType.CREATE_FILE -> {
+                val filePath = "${action.targetPath}/$inputName"
+                val createRes = fileSystemRepository.createFile(filePath)
+                if (createRes.isSuccess) {
+                    runCatching {
+                        val headerConfig = settingsRepository.appSettings.first().fileHeader
+                        if (headerConfig.enabled) {
+                            val ext = inputName.substringAfterLast('.', "")
+                            if (ext.isNotBlank()) {
+                                val root = _uiState.value.rootPath
+                                val relative = filePath.removePrefix(root).trimStart('/')
+                                val module = if (relative.contains('/')) relative.substringBefore('/') else File(root).name
+                                val pkg = SnippetVariableResolver.derivePackageName(filePath)
+                                val customTemplate = headerConfig.customTemplatesMap[ext]
+                                val now = LocalDate.now()
+                                val ctx = FileHeaderContext(
+                                    filename = inputName,
+                                    moduleName = module,
+                                    packageName = pkg.takeIf { it.isNotBlank() },
+                                    author = headerConfig.author.takeIf { it.isNotBlank() },
+                                    date = now.toString(),
+                                    year = now.year.toString(),
+                                    projectName = File(root).name
+                                )
+                                val header = FileHeaderRenderer.render(ext, ctx, customTemplate)
+                                if (header != null) {
+                                    fileSystemRepository.writeFile(filePath, header + "\n")
+                                }
+                            }
+                        }
+                    }
+                }
+                createRes
+            }
 
             FileTreeActionType.CREATE_DIRECTORY ->
                 fileSystemRepository.createDirectory("${action.targetPath}/$inputName")

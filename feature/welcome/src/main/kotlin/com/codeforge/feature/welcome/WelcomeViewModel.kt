@@ -47,6 +47,16 @@ class WelcomeViewModel @Inject constructor(
                 _uiState.update { it.copy(selectedProjectId = event.projectId) }
             is WelcomeUiEvent.RecentProjectOpened -> openRecentProject(event.projectId)
             is WelcomeUiEvent.RecentProjectRemoved -> removeRecentProject(event.projectId)
+            is WelcomeUiEvent.RecentProjectSettingsClicked -> openProjectSettings(event.projectId)
+        }
+    }
+
+    private fun openProjectSettings(projectId: String) = viewModelScope.launch {
+        val project = _uiState.value.recentProjects.find { it.id == projectId }
+        if (project != null) {
+            _effect.emit(WelcomeUiEffect.NavigateToProjectSettings(project.path))
+        } else {
+            _effect.emit(WelcomeUiEffect.ShowSnackbar(Res.string(R.string.welcome_projekt_nicht_gefunden)))
         }
     }
 

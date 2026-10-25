@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.codeforge.core.domain.model.CreateKeystoreRequest
 import com.codeforge.core.domain.model.DistinguishedName
 import com.codeforge.core.domain.model.PasswordStrengthEvaluator
+import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.domain.model.SignApkRequest
+import com.codeforge.core.domain.repository.RecentProjectsRepository
 import com.codeforge.core.domain.repository.SigningRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -16,13 +18,24 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SigningViewModel @Inject constructor(
-    private val signingRepository: SigningRepository
+    private val signingRepository: SigningRepository,
+    private val recentProjectsRepository: RecentProjectsRepository
 ) : ViewModel() {
+
+    constructor(signingRepository: SigningRepository) : this(
+        signingRepository,
+        object : RecentProjectsRepository {
+            override val recentProjects = flowOf(emptyList<RecentProject>())
+            override suspend fun addOrUpdate(project: RecentProject) {}
+            override suspend fun remove(projectId: String) {}
+        }
+    )
 
     private val _uiState = MutableStateFlow(
         SigningUiState(
@@ -36,6 +49,16 @@ class SigningViewModel @Inject constructor(
         viewModelScope.launch {
             signingRepository.activeBuildSigning.collect { env ->
                 _uiState.update { it.copy(activeBuildSigning = env) }
+            }
+        }
+        viewModelScope.launch {
+            signingRepository.getProjectAssignments().collect { assignments ->
+                _uiState.update { it.copy(projectAssignments = assignments) }
+            }
+        }
+        viewModelScope.launch {
+            recentProjectsRepository.recentProjects.collect { projects ->
+                _uiState.update { it.copy(recentProjects = projects) }
             }
         }
         refreshKeystores()
@@ -143,12 +166,63 @@ class SigningViewModel @Inject constructor(
             }
 
             // Löschen
-            is SigningUiIntent.OpenDeleteConfirm -> _uiState.update {
-                it.copy(isDeleteConfirmDialogVisible = true, keystoreToDelete = intent.keystore)
+            is SigningUiIntent.OpenDeleteConfirm -> {
+                val warningProjects = _uiState.value.projectAssignments
+                    .filter { it.keystoreId == intent.keystore.id }
+                    .map { it.projectPath }
+                _uiState.update {
+                    it.copy(
+                        isDeleteConfirmDialogVisible = true,
+                        keystoreToDelete = intent.keystore,
+                        deleteWarningProjects = warningProjects
+                    )
+                }
             }
             SigningUiIntent.ConfirmDelete -> confirmDelete()
             SigningUiIntent.DismissDeleteConfirm -> _uiState.update {
-                it.copy(isDeleteConfirmDialogVisible = false, keystoreToDelete = null)
+                it.copy(isDeleteConfirmDialogVisible = false, keystoreToDelete = null, deleteWarningProjects = emptyList())
+            }
+
+            // 47.5: Zuweisung Projekt ↔ Schlüssel
+            is SigningUiIntent.OpenAssignProjectDialog -> {
+                val firstProject = _uiState.value.recentProjects.firstOrNull()?.path.orEmpty()
+                val firstAlias = intent.keystore.primaryAlias.orEmpty()
+                _uiState.update {
+                    it.copy(
+                        isAssignProjectDialogVisible = true,
+                        assignProjectKeystore = intent.keystore,
+                        assignSelectedProjectPath = firstProject,
+                        assignSelectedAlias = firstAlias
+                    )
+                }
+            }
+            SigningUiIntent.DismissAssignProjectDialog -> _uiState.update {
+                it.copy(isAssignProjectDialogVisible = false, assignProjectKeystore = null)
+            }
+            is SigningUiIntent.SelectAssignProject -> _uiState.update {
+                it.copy(assignSelectedProjectPath = intent.projectPath)
+            }
+            is SigningUiIntent.SelectAssignAlias -> _uiState.update {
+                it.copy(assignSelectedAlias = intent.alias)
+            }
+            SigningUiIntent.SubmitAssignProject -> submitAssignProject()
+            is SigningUiIntent.RemoveProjectAssignment -> {
+                viewModelScope.launch {
+                    signingRepository.removeAssignmentForProject(intent.projectPath)
+                }
+            }
+            is SigningUiIntent.RemoveAliasAssignment -> {
+                viewModelScope.launch {
+                    signingRepository.removeAssignmentsForAlias(intent.keystoreId, intent.alias)
+                }
+            }
+
+            // 47.5: SAF Import / Export
+            is SigningUiIntent.ImportKeystoreFromStreamData -> {
+                importFromStream(intent.inputStream, intent.fileName, intent.storePass, intent.customName)
+            }
+            is SigningUiIntent.ExportKeystoreToStreamData -> {
+                exportToStream(intent.keystoreId, intent.outputStream)
             }
 
             // Signieren
@@ -398,6 +472,73 @@ class SigningViewModel @Inject constructor(
             signingRepository.clearBuildSigning()
             _uiState.update { state ->
                 state.copy(userMessage = Res.string(R.string.signing_build_entfernt))
+            }
+        }
+    }
+
+    private fun submitAssignProject() {
+        val ks = _uiState.value.assignProjectKeystore ?: return
+        val path = _uiState.value.assignSelectedProjectPath.trim()
+        val alias = _uiState.value.assignSelectedAlias.trim()
+        if (path.isBlank() || alias.isBlank()) return
+
+        viewModelScope.launch {
+            val res = signingRepository.assignKeyToProject(path, ks.id, alias)
+            res.onSuccess {
+                _uiState.update {
+                    it.copy(
+                        isAssignProjectDialogVisible = false,
+                        assignProjectKeystore = null,
+                        userMessage = Res.string(R.string.signing_build_konfiguriert)
+                    )
+                }
+            }.onFailure { err ->
+                _uiState.update { it.copy(userMessage = err.message) }
+            }
+        }
+    }
+
+    private fun importFromStream(inputStream: java.io.InputStream, fileName: String, storePass: String, customName: String?) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(importForm = it.importForm.copy(isImporting = true, errorMessage = null)) }
+            val result = signingRepository.importKeystoreFromStream(
+                inputStream = inputStream,
+                originalFileName = fileName,
+                storePassword = storePass,
+                customName = customName?.takeIf { it.isNotBlank() }
+            )
+            result.onSuccess {
+                _uiState.update { state ->
+                    state.copy(
+                        isImportDialogVisible = false,
+                        importForm = ImportKeystoreFormState(),
+                        userMessage = Res.string(R.string.signing_keystore_erfolgreich_importiert)
+                    )
+                }
+                refreshKeystores()
+            }.onFailure { err ->
+                _uiState.update { state ->
+                    state.copy(importForm = state.importForm.copy(isImporting = false, errorMessage = err.message))
+                }
+            }
+        }
+    }
+
+    private fun exportToStream(keystoreId: String, outputStream: java.io.OutputStream) {
+        viewModelScope.launch {
+            val result = signingRepository.exportKeystoreToStream(keystoreId, outputStream)
+            result.onSuccess {
+                _uiState.update { state ->
+                    state.copy(
+                        isExportConfirmDialogVisible = false,
+                        keystoreToExport = null,
+                        userMessage = Res.string(R.string.signing_keystore_erfolgreich_exportiert, "SAF")
+                    )
+                }
+            }.onFailure { err ->
+                _uiState.update { state ->
+                    state.copy(userMessage = err.message)
+                }
             }
         }
     }
