@@ -198,6 +198,8 @@
     <string name="editor_formatieren_lsp">Format (LSP)</string>
     <string name="editor_formatiert">Formatted</string>
     <string name="editor_gehe_zu_zeile">Go to line</string>
+    <string name="editor_keine_datei_geoeffnet">No file open</string>
+    <string name="editor_hinweis_datei_oeffnen">Select a file in the file tree on the left to edit it.</string>
     <string name="editor_gespeichert">Saved</string>
     <string name="editor_grammar_registrierung_fehlgeschlagen_a">Grammar registration failed — assets under textmate/ probably missing (see ASSETS.md). Falling back to plain text highlighting.</string>
     <string name="editor_kommentar_umschalten">Toggle comment</string>

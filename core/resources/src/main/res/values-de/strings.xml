@@ -198,6 +198,8 @@
     <string name="editor_formatieren_lsp">Formatieren (LSP)</string>
     <string name="editor_formatiert">Formatiert</string>
     <string name="editor_gehe_zu_zeile">Gehe zu Zeile</string>
+    <string name="editor_keine_datei_geoeffnet">Keine Datei geöffnet</string>
+    <string name="editor_hinweis_datei_oeffnen">Wähle eine Datei im Dateibaum links aus, um sie zu bearbeiten.</string>
     <string name="editor_gespeichert">Gespeichert</string>
     <string name="editor_grammar_registrierung_fehlgeschlagen_a">Grammar-Registrierung fehlgeschlagen — Assets unter textmate/ fehlen vermutlich (siehe ASSETS.md). Fällt auf Plain-Text-Highlighting zurück.</string>
     <string name="editor_kommentar_umschalten">Kommentar umschalten</string>

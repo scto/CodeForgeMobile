@@ -1257,22 +1257,24 @@ class EditorViewModel @Inject constructor(
     }
 
     private fun closeTab(index: Int) {
-        val closedPath = _uiState.value.openFiles.getOrNull(index)?.path
+        val currentFiles = _uiState.value.openFiles
+        if (index !in currentFiles.indices) return
+        val closedPath = currentFiles[index].path
         var newActivePath: String? = null
         _uiState.update { s ->
+            if (index !in s.openFiles.indices) return@update s
             val updated = s.openFiles.toMutableList().apply { removeAt(index) }
             val newActive = when {
                 updated.isEmpty() -> 0
                 s.activeFileIndex >= updated.size -> updated.size - 1
+                s.activeFileIndex < 0 -> 0
                 else -> s.activeFileIndex
             }
             newActivePath = updated.getOrNull(newActive)?.path
             s.copy(openFiles = updated, activeFileIndex = newActive)
         }
-        if (closedPath != null) {
-            documentVersions.remove(closedPath)
-            viewModelScope.launch { lspClient.didClose(closedPath) }
-        }
+        documentVersions.remove(closedPath)
+        viewModelScope.launch { lspClient.didClose(closedPath) }
         if (newActivePath != null) {
             lspClient.setActiveDocument(newActivePath)
             val langId = languageIdFor(newActivePath!!)
@@ -1293,10 +1295,11 @@ class EditorViewModel @Inject constructor(
         _uiState.update { s ->
             if (s.openFiles.isEmpty()) return@update s
             val updated = s.openFiles.toMutableList()
-            val current = updated[s.activeFileIndex]
+            val safeIndex = s.activeFileIndex.coerceIn(0, updated.lastIndex)
+            val current = updated[safeIndex]
             if (current.content == text) return@update s
-            updated[s.activeFileIndex] = current.copy(content = text, isDirty = true)
-            s.copy(openFiles = updated)
+            updated[safeIndex] = current.copy(content = text, isDirty = true)
+            s.copy(openFiles = updated, activeFileIndex = safeIndex)
         }
         if (activePath != null) {
             val nextVersion = (documentVersions[activePath] ?: 1) + 1

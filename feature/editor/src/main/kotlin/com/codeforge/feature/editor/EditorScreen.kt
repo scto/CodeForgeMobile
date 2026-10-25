@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +50,7 @@ import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.ControlPointDuplicate
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.FindInPage
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -212,17 +214,20 @@ fun EditorRoute(
                 CircularProgressIndicator()
             }
 
-            ScrollableTabRow(selectedTabIndex = uiState.activeFileIndex) {
-                uiState.openFiles.forEachIndexed { index, file ->
-                    Tab(
-                        selected = index == uiState.activeFileIndex,
-                        onClick = { viewModel.onEvent(EditorUiEvent.SelectTab(index)) },
-                        text = {
-                            Text(
-                                (if (file.isDirty) "• " else "") + file.path.substringAfterLast('/')
-                            )
-                        }
-                    )
+            if (uiState.openFiles.isNotEmpty()) {
+                val safeTabIndex = uiState.activeFileIndex.coerceIn(0, uiState.openFiles.lastIndex)
+                ScrollableTabRow(selectedTabIndex = safeTabIndex) {
+                    uiState.openFiles.forEachIndexed { index, file ->
+                        Tab(
+                            selected = index == safeTabIndex,
+                            onClick = { viewModel.onEvent(EditorUiEvent.SelectTab(index)) },
+                            text = {
+                                Text(
+                                    (if (file.isDirty) "• " else "") + file.path.substringAfterLast('/')
+                                )
+                            }
+                        )
+                    }
                 }
             }
 
@@ -259,41 +264,45 @@ fun EditorRoute(
                 EditorSearchBar(uiState = uiState, onEvent = viewModel::onEvent, controller = controller)
             }
 
-            uiState.activeFile?.let { active ->
-                if (isImageFilePath(active.path)) {
-                    ImageFilePreview(
-                        filePath = active.path,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        SoraCodeEditor(
-                            modifier = Modifier.weight(1f).fillMaxWidth(),
-                            path = active.path,
-                            content = active.content,
-                            language = EditorLanguageType.fromPath(active.path),
-                            settings = uiState.displaySettings,
-                            diagnostics = uiState.activeDiagnostics,
-                            completionProvider = viewModel.completionProvider,
-                            updateAnnotations = uiState.activeUpdateAnnotations,
-                            breakpoints = uiState.activeBreakpoints,
-                            pausedLine = uiState.activePausedLine,
-                            onToggleBreakpoint = { viewModel.onEvent(EditorUiEvent.ToggleBreakpoint(it)) },
-                            onEditBreakpoint = { viewModel.onEvent(EditorUiEvent.EditBreakpoint(it)) },
-                            onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
-                            onTestTargetClick = { viewModel.onEvent(EditorUiEvent.RunTestTarget(it)) },
-                            onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
-                            onControllerReady = { controller = it }
+            if (uiState.openFiles.isEmpty()) {
+                EditorEmptyState(modifier = Modifier.weight(1f).fillMaxWidth())
+            } else {
+                uiState.activeFile?.let { active ->
+                    if (isImageFilePath(active.path)) {
+                        ImageFilePreview(
+                            filePath = active.path,
+                            modifier = Modifier.fillMaxSize()
                         )
-
-                        if (WindowInsets.isImeVisible) {
-                            EditorSymbolBar(
-                                filePath = active.path,
-                                onInsertText = { text ->
-                                    controller?.insertText(text)
-                                    viewModel.onEvent(EditorUiEvent.InsertText(text))
-                                }
+                    } else {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            SoraCodeEditor(
+                                modifier = Modifier.weight(1f).fillMaxWidth(),
+                                path = active.path,
+                                content = active.content,
+                                language = EditorLanguageType.fromPath(active.path),
+                                settings = uiState.displaySettings,
+                                diagnostics = uiState.activeDiagnostics,
+                                completionProvider = viewModel.completionProvider,
+                                updateAnnotations = uiState.activeUpdateAnnotations,
+                                breakpoints = uiState.activeBreakpoints,
+                                pausedLine = uiState.activePausedLine,
+                                onToggleBreakpoint = { viewModel.onEvent(EditorUiEvent.ToggleBreakpoint(it)) },
+                                onEditBreakpoint = { viewModel.onEvent(EditorUiEvent.EditBreakpoint(it)) },
+                                onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
+                                onTestTargetClick = { viewModel.onEvent(EditorUiEvent.RunTestTarget(it)) },
+                                onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
+                                onControllerReady = { controller = it }
                             )
+
+                            if (WindowInsets.isImeVisible) {
+                                EditorSymbolBar(
+                                    filePath = active.path,
+                                    onInsertText = { text ->
+                                        controller?.insertText(text)
+                                        viewModel.onEvent(EditorUiEvent.InsertText(text))
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -827,4 +836,35 @@ private fun LspSessionsDialog(
             }
         }
     )
+}
+
+@Composable
+private fun EditorEmptyState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Description,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringRes(R.string.editor_keine_datei_geoeffnet),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringRes(R.string.editor_hinweis_datei_oeffnen),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
 }
