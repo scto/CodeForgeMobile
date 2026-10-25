@@ -9,6 +9,7 @@ android {
 }
 
 dependencies {
+    api(project(":libs:j2k"))
     implementation(project(":core:resources"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(project(":core:common"))

@@ -53,6 +53,7 @@ include(
     ":feature:build",
     ":feature:signing",
     ":feature:debug",
+    ":feature:j2k",
 
     ":libs:terminal-engine",
     ":libs:gradle-tooling-bridge",
@@ -69,6 +70,7 @@ include(
     ":libs:code-tools",
     ":libs:hardcoded-strings",
     ":libs:ai-client",
+    ":libs:j2k",
 
     // Termux-Vendoring (siehe docs/sub/TERMUX-PORTING.md) — :libs:terminal-engine nutzt
     // diese jetzt statt PRoot für die interaktive :feature:terminal-Session
