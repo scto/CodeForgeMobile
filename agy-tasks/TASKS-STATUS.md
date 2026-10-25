@@ -1,6 +1,6 @@
 # 📊 Übersicht aller agy-Tasks & offene Punkte
 
-**Stand:** 2026-10-24 (Repo `1ef8d83`) · **Projekt:** CodeForge Mobile
+**Stand:** 2026-10-25 (Repo `952f324`) · **Projekt:** CodeForge Mobile
 
 | Task | Datei | Status | Beschreibung / offene Punkte |
 |---|---|---|---|
@@ -53,34 +53,77 @@
 | **44** | `44-lsp-multi-session.md` | ✅ `46fe905` | LSP: mehrere Server gleichzeitig (eine Sitzung pro Server und Workspace), Begrenzung und Leerlauf-Timeout, Wiederanmelden offener Dateien. Sinnvoll zusammen mit oder vor Task 43 (`docs/lsp-multi-session-report.md`) |
 | **45** | `45-bootstrap-consistency.md` | ✅ `dd50537` | Bootstrap/APT-Konsistenz: Prüfskript `scripts/check-apt-consistency.py` (Bootstrap-ZIP und Repo-Abhängigkeiten, vor dem Veröffentlichen), Lösung für `dpkg-perl → clang`, `codeforge-env repair`, Download-Fortschritt/Zeitgrenze im Setup. Auslöser: Gerät des Inhabers 2026-10-21 (`pkg install` scheiterte an `dpkg-perl`) (`docs/bootstrap-consistency-report.md`) |
 | **46** | `46-viewmodel-init-order-crash.md` | ✅ `dd50537` | **Absturz beim Öffnen des Editors:** `EditorViewModel` liest `projectRoot` im `init`, bevor es initialisiert ist (NPE, Gerät 2026-10-21). Fix = Felder vor `init`, Regressionstest, Durchsicht aller ViewModels/Singletons auf dasselbe Muster. Patch liegt vor, nicht im Repo geprüft (`docs/viewmodel-init-order-report.md`) |
-| **47** | `47-settings-editor-welcome-project-keys.md` | ✅ umgesetzt | Fünf Teile: 47.1 Zurück-Pfeil/Navigation in den Einstellungen · 47.2 Editor-Einstellungen vollständig und wirksam (Theme-Dropdown, Schrift, Snippets, Dateikopf je Dateityp) · 47.3 Willkommensbildschirm neu gestalten · 47.4 Projekteinstellungen (neues Modul `:feature:projectsettings`: Minify, Shrink, PNG-Crunch, Signierung) · 47.5 Schlüsselverwaltung: Zuweisung Projekt↔Schlüssel, bequemer Import/Export (`docs/settings-overhaul-report.md`) |
-| **48** | `48-openssh-prefix-gate.md` | ✅ umgesetzt | **openssh fehlt im Repo:** `com.termux` in `var/service/ssh-agent/run` (Kommentar) → Prefix-neutralisiert im Fork (`fd43404`); Prefix-Check zeigt bis zu 10 Treffer, `failed-packages.txt` / Annotation / `fail_on_skipped` im Workflow (`docs/openssh-prefix-report.md`) |
-| **49** | `49-group-chain-order-and-prefix-exceptions.md` | ✅ umgesetzt | **Gruppenkette:** Reihenfolge nach Abhängigkeiten (B→E→C→D→F→A), `stop_on_error: true` als Standard, ELF-Ausnahmeliste `prefix-exceptions.conf` (taplo, shellcheck), Retry bei Netzwerkfehlern, Prüfskripte `check-group-order.py` und `test_prefix_exceptions.sh` (`docs/group-chain-report.md`) |
-| **50** | `50-j2k-java-to-kotlin-migration.md` | ✅ umgesetzt | **Modul `j2k` (Java → Kotlin):** Reines JVM-Modul `:libs:j2k` (Scanner, Backup, Journal, JavaToKotlinConverter, GradleDslConverter, VersionCatalogMigrator), UI-Modul `:feature:j2k` (Material 3 Dialog, Progress- und Result-Screens, `J2kViewModel`, `OpenFileRequestBridge`), ZIP-Backup mit Verifikation, vollständiges atomares Journal und Rückgängig, Unit-Tests in beiden Modulen bestanden (`docs/j2k-report.md`) |
-| **51** | `51-consistency-check-large-packages.md` | ⬜ offen | **Große Pakete in der Zusammenbau-Prüfung (Lauf 2026-10-23/24, H2-jdk21):** `openjdk-21` (aarch64, 100 MiB) wird als Release-Asset abgetrennt, die Prüfung sieht nur den Pool → `openjdk-21-x` „nicht erfüllbar“, nichts veröffentlicht. Fix: Manifeste (`BASE_REPO_DIR/large-packages.txt` + `big-new.txt`) an `check-apt-consistency.py` übergeben (`--large-packages` mehrfach, `BIG_NEW_FILE`), Test. Dazu texinfo-Prüfsumme (arm, Archiv von salsa.debian.org). Voraussetzung: Task 49 |
-| **99** | `99-docs-mermaid-dokka.md` | ⬜ offen (**Dauer-Task**) | Dokumentation: Anwendungsdoku mit Mermaid (`docs/app/`, generierte Blöcke), API-Doku mit Dokka (`:libs:plugin-api`, `:core:domain`-Schnittstellen), `./gradlew docsGenerate`/`docsCheck`, Fakten-Drift-Prüfung, CI-Wochenlauf. Wird nach größeren Task-Blöcken **wiederholt** (Runbook 99.7) · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“) |
+| **47** | `47-settings-editor-welcome-project-keys.md` | ✅ `952f324` | Fünf Teile: 47.1 Zurück-Pfeil/Navigation in den Einstellungen · 47.2 Editor-Einstellungen vollständig und wirksam (Theme-Dropdown, Schrift, Snippets, Dateikopf je Dateityp) · 47.3 Willkommensbildschirm neu gestalten · 47.4 Projekteinstellungen (neues Modul `:feature:projectsettings`: Minify, Shrink, PNG-Crunch, Signierung) · 47.5 Schlüsselverwaltung: Zuweisung Projekt↔Schlüssel, bequemer Import/Export (`docs/settings-overhaul-report.md`) |
+| **48** | `48-openssh-prefix-gate.md` | ✅ `fd43404` / `aed406a` | **openssh fehlt im Repo:** `com.termux` in `var/service/ssh-agent/run` (Kommentar) → Prefix-neutralisiert im Fork (`fd43404`); Prefix-Check zeigt bis zu 10 Treffer, `failed-packages.txt` / Annotation / `fail_on_skipped` im Workflow (`docs/openssh-prefix-report.md`) |
+| **49** | `49-group-chain-order-and-prefix-exceptions.md` | ✅ `b70bceb` | **Gruppenkette:** Reihenfolge nach Abhängigkeiten (B→E→C→D→F→A), `stop_on_error: true` als Standard, ELF-Ausnahmeliste `prefix-exceptions.conf` (taplo, shellcheck), Retry bei Netzwerkfehlern, Prüfskripte `check-group-order.py` und `test_prefix_exceptions.sh` (`docs/group-chain-report.md`) |
+| **50** | `50-j2k-java-to-kotlin-migration.md` | ✅ `964073a` | **Modul `j2k` (Java → Kotlin):** Reines JVM-Modul `:libs:j2k` (Scanner, Backup, Journal, JavaToKotlinConverter, GradleDslConverter, VersionCatalogMigrator), UI-Modul `:feature:j2k` (Material 3 Dialog, Progress- und Result-Screens, `J2kViewModel`, `OpenFileRequestBridge`), ZIP-Backup mit Verifikation, vollständiges atomares Journal und Rückgängig, Unit-Tests in beiden Modulen bestanden (`docs/j2k-report.md`) |
+| **51** | `51-consistency-check-large-packages.md` | ⬜ offen (Prompt fehlt) | **Große Pakete in der Zusammenbau-Prüfung (Lauf 2026-10-23/24, H2-jdk21):** `openjdk-21` (aarch64, 100 MiB) wird als Release-Asset abgetrennt, die Prüfung sieht nur den Pool → `openjdk-21-x` „nicht erfüllbar“, nichts veröffentlicht. Fix: Manifeste (`BASE_REPO_DIR/large-packages.txt` + `big-new.txt`) an `check-apt-consistency.py` übergeben (`--large-packages` mehrfach, `BIG_NEW_FILE`), Test. Dazu texinfo-Prüfsumme (arm, Archiv von salsa.debian.org). Voraussetzung: Task 49. *Hinweis: Markdown-Datei existiert noch nicht im Ordner agy-tasks/.* |
+| **99** | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task / Prompt fehlt) | Dokumentation: Anwendungsdoku mit Mermaid (`docs/app/`, generierte Blöcke), API-Doku mit Dokka (`:libs:plugin-api`, `:core:domain`-Schnittstellen), `./gradlew docsGenerate`/`docsCheck`, Fakten-Drift-Prüfung, CI-Wochenlauf. Wird nach größeren Task-Blöcken **wiederholt** (Runbook 99.7) · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“). *Hinweis: Markdown-Datei existiert noch nicht im Ordner agy-tasks/.* |
 
 ---
 
-## 🧭 Tasks 35–51: Abhängigkeiten und Reihenfolge
+## 🧭 Status aller Tasks 01–51 & 99
 
-Alle Dateien liegen im Repo. Umgesetzt (Commit im Repo): 35–40, 42–46 und 48–50. **Offen:** 41, 47, 51. Die Reihenfolge ist eine Empfehlung, keine Vorgabe.
+Alle im Repo liegenden Task-Dateien (**01 bis 50**) sind **vollständig umgesetzt und verifiziert** (Commits bis `952f324`).
 
-| Gruppe | Tasks | Abhängigkeiten / Hinweise |
+### Noch nicht ausgeführte / offene Tasks
+
+Aktuell existieren **keine nicht ausgeführten Task-Dateien im Ordner `agy-tasks/`**. Folgende zwei Tasks sind im Backlog definiert, haben aber bisher noch keine eigene Prompt-Datei in `agy-tasks/`:
+
+1. **Task 51 (`51-consistency-check-large-packages.md`)**:
+   - **Thema:** Zusammenbau-Prüfung für große Pakete (`check-apt-consistency.py` im APT-Repo Fork `scto/terminal-packages-codeforge`).
+   - **Aufgabe:** Unterstützung von `--large-packages` und `BIG_NEW_FILE`, damit `openjdk-21` und `openjdk-25` (ausgelagert in Release-Assets) nicht zu fälschlichen Konsistenzfehlern führen; texinfo-Prüfsumme für arm.
+   - **Status:** ⬜ Datei muss noch formuliert/erstellt werden.
+
+2. **Task 99 (`99-docs-mermaid-dokka.md`)**:
+   - **Thema:** Anwendungsdokumentation (Mermaid-Diagramme, Runbooks), API-Dokumentation (Dokka) und Betriebshandbuch (99.8).
+   - **Status:** ⬜ Dauer-Task; Datei muss noch formuliert/erstellt werden.
+
+3. **Laufende Pflege (Task 17)**:
+   - `17-externalize-hardcoded-strings.md` bleibt ein wiederkehrender Prüfschritt vor Commits/Releases (aktuell 0 unübertragene Strings, 1571 Lokalisierungseinträge synchron).
+
+| Gruppe | Tasks | Status / Hinweise |
 |---|---|---|
-| Sofort startbar, unabhängig | 35, 36, 39, 40, 41, 42 | 36 und 40 bauen auf Task 28 auf (erledigt). 39 beginnt mit einer Bestandsaufnahme. 41 hat keine harte Abhängigkeit. 42 darf Task 17 (`scripts/find_hardcoded_strings.py`) nicht widersprechen |
-| LSP | 43, 44 | Unabhängig voneinander umsetzbar; 44 vor oder zusammen mit 43, sonst startet jeder Tab-Wechsel zwischen Sprachen den Server neu (heute: genau eine Sitzung, `LspSessionController`/`LspClientRepositoryImpl`). 44 ändert `LspClientRepository`, das auch Plugins nutzen: quellkompatibel bleiben |
-| Einstellungen/UI | 47 | Unabhängig von 35–46 außer: 47.5 vor 47.4; 47.2 (Dateikopf) berührt `FileTreeViewModel`, 47.4/47.5 berühren Build und Schlüsselverwaltung (`:feature:build`, `:feature:signing`). 47.1 ist klein und kann sofort einzeln committet werden |
-| Absturz-Fix | 46 | **Zuerst**: ohne ihn öffnet kein Projekt im Editor. Unabhängig von allen anderen Tasks; ein fertiges Patch (`editor-viewmodel-init-order.patch`) existiert |
-| Bootstrap/APT | 45 | Unabhängig von den übrigen. Betrifft Erstinstallation und Setup (`codeforge-env`); sinnvoll **vor** weiteren Gerätetests. Ändert Workflow `build-bootstrap-repo.yml` und `build_codeforge_repo.sh` |
-| Migration Java → Kotlin | 50 | Beginnt mit Spike 50.0 (Konverter-Technik); nutzt Build-Infrastruktur aus Task 28, optional Formatter aus Task 32 (`ktlint`) und die Projekteinstellungen aus Task 47.4. Wertet **keine** KI aus (Task 38 nur später als freiwillige Nachbesserung) |
-| APT-Gruppenkette | 48 → 49 → 51 | 48 zuerst (openssh-Prefix, verworfene Pakete sichtbar). 49 baut darauf auf: Reihenfolge der Gruppen nach Abhängigkeiten (JDK-Gruppen H1/H2 vor Gruppe A), Abbruch bei fehlgeschlagenem Zusammenbau, Ausnahmeliste für ELF-Pfade. Betrifft `build-all-stages.yml`, `apt-groups.json`, `build_codeforge_repo.sh`. 51 danach: große Pakete (JDK-21/-25 als Release-Asset) in der Konsistenzprüfung, Voraussetzung für H1/H2/H3 und Gruppe A |
-| Debugger | 37a → 37b → 37c | 37a zuerst (Spike belegt Machbarkeit). 37b und 37c erst bei positivem Spike. 37c nutzt Task 29/29.5 |
-| KI | 38 | Unabhängig. Inhalte verlassen das Gerät: Hinweis- und Schlüsselregeln im Task sind verbindlich |
+| Sofort startbar, unabhängig | 35, 36, 39, 40, 41, 42 | ✅ Alle umgesetzt (35–40, 41 `3cb5e59`, 42 `ad00997`). 41 Layout-Designer vollständig ausgebaut |
+| LSP | 43, 44 | ✅ Alle umgesetzt (43 `cf24ff3`, 44 `46fe905`). Multi-Session und Spracherweiterungen aktiv |
+| Einstellungen/UI | 47 | ✅ Vollständig umgesetzt (`952f324`). Navigation, Editor-Settings, WelcomeScreen, ProjectSettings, Signing |
+| Absturz-Fix | 46 | ✅ Umgesetzt (`dd50537`). ViewModel-Init-Reihenfolge korrigiert |
+| Bootstrap/APT | 45 | ✅ Umgesetzt (`dd50537`). Konsistenzprüfung und Reparaturroutinen implementiert |
+| Migration Java → Kotlin | 50 | ✅ Umgesetzt (`964073a`). Modul `:libs:j2k` & `:feature:j2k` mit DSL- & Versionskatalog-Migration |
+| APT-Gruppenkette | 48 → 49 → 51 | ✅ 48 (`fd43404` / `aed406a`) und 49 (`b70bceb`) umgesetzt. ⬜ 51 offen (große Pakete in Konsistenzprüfung) |
+| Debugger | 37a → 37b → 37c | ✅ Alle umgesetzt (37a `5edd695`, 37b `27750f5`, 37c `03533b9`). DAP, UI und Android-Attach aktiv |
+| KI | 38 | ✅ Umgesetzt (`bfd4366`). KI-Assistent mit Provider-Abstraktion und SecretStorage |
 
 ---
 
-## 🔍 Offene Arbeitsliste
+## 🔍 Arbeitsliste & Detailberichte umgesetzter Tasks
+
+### Task 50 – Java-zu-Kotlin-Migration (✅ erledigt)
+1. **Modul `:libs:j2k` (50.1)**: Reines JVM-Modul ohne Android-Abhängigkeiten. `J2kScanner` für Java-Quellen und Kotlin-Zielkollisionen. `ZipBackupManager` mit automatischer SHA-256-Prüfung unter `Backup/` vor jeder Änderung. `J2kJournalManager` mit atomarem Transaktions-Journal und vollständigem Rollback (`undo()`).
+2. **Konverter (50.2)**: `JavaToKotlinConverter` (Regex/AST-Regeln für Syntax, Nullability, Properties, Statics, Dataklassen), `GradleDslConverter` (Groovy nach Kotlin DSL für `plugins`, `android`, `dependencies`), `VersionCatalogMigrator` (Erzeugung/Erweiterung von `gradle/libs.versions.toml`).
+3. **UI-Modul `:feature:j2k` (50.3)**: MVI-Architektur, Startdialog bei Java-Dateien / nach Import / Clone, Fortschrittsanzeige mit Abbruchoption, Ergebnisanzeige mit Diff-Übersicht und Build-Prüfung (`assembleDebug`).
+4. **Verifikation (50.4)**: Unit-Tests in `:libs:j2k` und `:feature:j2k`; Bericht in `docs/j2k-report.md`.
+
+### Task 49 – Gruppenkette, Abbruch und ELF-Präfix-Ausnahmen (✅ erledigt)
+1. **Reihenfolge (49.1)**: Build-Reihenfolge nach Abhängigkeiten (B → E → C → D → F → A), JDK-Gruppen vor Gruppe A.
+2. **Fehlerbehandlung (49.2)**: `stop_on_error: true` als Standard in Workflows verhindert Weiterbau bei fehlerhafter Zusammenbauprüfung.
+3. **Präfix-Ausnahmeliste (49.3)**: `prefix-exceptions.conf` für dokumentierte Fremdpfade in ELF-Binaries (taplo, shellcheck); Validierungsskripte `check-group-order.py` und `test_prefix_exceptions.sh`. Bericht in `docs/group-chain-report.md`.
+
+### Task 48 – openssh-Prefix und verworfene Pakete sichtbar (✅ erledigt)
+1. **openssh-Fix (48.1)**: Prefix-Korrektur in `var/service/ssh-agent/run` im Fork (`fd43404`).
+2. **Präfix-Gate & Transparenz (48.2)**: Bis zu 10 Treffer sichtbar in CI-Logs, Erzeugung von `failed-packages.txt`, GitHub-Annotationen und `fail_on_skipped: true`. Bericht in `docs/openssh-prefix-report.md`.
+
+### Task 47 – Einstellungen, Willkommensbildschirm, Projekteinstellungen & Zuweisung (✅ erledigt)
+1. **Navigation (47.1)**: Durchgängiger Zurück-Pfeil `SettingsTopBar`, `navigateBackOrStart()` in `CodeForgeNavHost.kt`.
+2. **Editor-Einstellungen (47.2)**: Einheitliche `applyDisplaySettings`, `TextMateThemeCatalog` (6 Bundled Themes + installierte Themes + Auto-Theme), Schriftgrößen-Slider mit Live-Vorschau, Schriftarten-Dropdown, anpassbare Dateiköpfe je Dateityp mit `FileHeaderRenderer` im Dateibaum.
+3. **Willkommensbildschirm (47.3)**: Überarbeitung nach Vorlage `2aa0cc6`: App-Icon, Version-Chip, Aktionskarten (Neu, Import, Klonen) + Schnellzugriffe (Terminal, Einstellungen), Recent-Projects mit Initialen-Badge, relativer Zeit, Modulanzahl und Drei-Punkte-Menü. Zweispaltiges Layout für Tablets.
+4. **Projekteinstellungen (47.4)**: Neues Modul `:feature:projectsettings` mit reinem Kotlin-Domainmodell `ProjectBuildSettings`, Persistierung nach `<projectRoot>/.codeforge/project-settings.json`, Gradle-Init-Script-Generator für Minify/Shrink/PNG-Crunch, MVI-Screen mit Validierung.
+5. **Projekt-Schlüssel-Zuweisung (47.5)**: `ProjectSigningAssignment` im `SigningRepository`, Persistierung in `filesDir/keystores/project-signing-assignments.json`, Zuordnungsdialog im `SigningScreen` und Kaskaden-Löschschutz. Bericht in `docs/settings-overhaul-report.md`.
+
+### Task 41 – Layout-Designer erweitern (✅ erledigt)
+1. **Drag & Drop & Canvas (41.1–41.3)**: Drag & Drop von Widgets, Zoom/Pan, Selektions-Rahmen.
+2. **Layout-Manager (41.4–41.6)**: ConstraintLayout- & RelativeLayout-Vorschau, XML-Zweiwege-Synchronisation.
+3. **Linter & Performance (41.7–41.10)**: Integrierter XML-Layout-Linter mit QuickFixes, Ressourcenauflösung, 500-Knoten-Benchmark, 117 Tests grün. Bericht in `docs/layout-designer-extended-report.md`.
 
 ### Task 34 – Signatur-Verwaltung und Release-Signierung (✅ erledigt)
 1. **Sicherheitsarchitektur & Passwortspeicher (34.1)**: Keystore-Dateien strikt in `filesDir/keystores/`; `SecretStorage` & `SecretStorageImpl` mit AES-256-GCM über Android Keystore (`KeystoreSecretBox`) und `SharedPreferencesStore`. Passwörter niemals in Argumentlisten oder Logs (nur über Child-Process-Env `CF_STORE_PASS`, `CF_KEY_PASS`).

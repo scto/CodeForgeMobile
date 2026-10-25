@@ -21,9 +21,9 @@ agy --mode plan -i "Lies agy-tasks/23-fix-extensions-manager.md und führe den A
 
 Der Agent liest die Task-Datei selbst; so entfällt das Einfügen langer Texte in die Shell.
 
-## Übersicht (Stand 2026-10-24)
+## Übersicht (Stand 2026-10-25)
 
-Repo-Stand: `1ef8d83` (Code; danach nur Dokumentation). ✅ umgesetzt (Commit im Repo), 🟡 teilweise, ⬜ offen. Berichte zu den Verifikations-Tasks: `docs/*-verification.md`, `docs/apt-stages-verification.md`, `docs/restore-lost-editor-features.md`, `docs/verification-followups-report.md`. Der Build läuft laut Inhaber ohne Fehler; Gerätetests stehen aus (`docs/device-test-checklist.md`).
+Repo-Stand: `952f324`. Alle im Verzeichnis vorhandenen Prompts (**Tasks 01–50**) sind **vollständig umgesetzt und verifiziert** (Commits im Repo bzw. Fork). ✅ umgesetzt, 🟡 teilweise, ⬜ offen. Berichte zu den Verifikations-Tasks: `docs/*-verification.md`, `docs/apt-stages-verification.md`, `docs/restore-lost-editor-features.md`, `docs/verification-followups-report.md`, `docs/settings-overhaul-report.md`, `docs/openssh-prefix-report.md`, `docs/group-chain-report.md`, `docs/j2k-report.md`. Der Build läuft ohne Fehler; Gerätetests stehen aus (`docs/device-test-checklist.md`).
 
 | # | Datei | Status | Hinweis |
 |---|---|---|---|
@@ -76,12 +76,12 @@ Repo-Stand: `1ef8d83` (Code; danach nur Dokumentation). ✅ umgesetzt (Commit im
 | 44 | `44-lsp-multi-session.md` | ✅ `46fe905` | LSP: mehrere Server gleichzeitig (eine Sitzung pro Server und Workspace), Begrenzung und Leerlauf-Timeout, Wiederanmelden offener Dateien. Sinnvoll zusammen mit oder vor Task 43 (`docs/lsp-multi-session-report.md`) |
 | 45 | `45-bootstrap-consistency.md` | ✅ `dd50537` | Bootstrap/APT-Konsistenzprüfung (Bootstrap-ZIP und Repo-Abhängigkeiten vor dem Veröffentlichen), `dpkg-perl → clang`, `codeforge-env repair`, Download-Fortschritt im Setup (`docs/bootstrap-consistency-report.md`) |
 | 46 | `46-viewmodel-init-order-crash.md` | ✅ `dd50537` | Absturz beim Öffnen des Editors (NPE im `EditorViewModel`-`init`, Feld-Reihenfolge); Fix, Regressionstest, Durchsicht anderer ViewModels (`docs/viewmodel-init-order-report.md`) |
-| 47 | `47-settings-editor-welcome-project-keys.md` | ✅ umgesetzt | Einstellungen/UI in fünf Teilen: Zurück-Navigation, Editor-Einstellungen (Theme-Dropdown, Dateikopf), Willkommensbildschirm, Projekteinstellungen, Schlüssel↔Projekt-Zuweisung (`docs/settings-overhaul-report.md`) |
-| 48 | `48-openssh-prefix-gate.md` | ✅ umgesetzt | openssh-Prefix im Service-Skript (`fd43404`), Sichtbarkeit verworfener Pakete im APT-Lauf, `fail_on_skipped` (`docs/openssh-prefix-report.md`) |
-| 49 | `49-group-chain-order-and-prefix-exceptions.md` | ✅ umgesetzt | Gruppenkette: Reihenfolge (B→E→C→D→F→A), Abbruch bei Fehlern (`stop_on_error: true`), ELF-Ausnahmen (`prefix-exceptions.conf`), Download-Retry (`docs/group-chain-report.md`) |
-| 50 | `50-j2k-java-to-kotlin-migration.md` | ✅ umgesetzt | Neues Modul `j2k`: Java-Projekte nach Kotlin umwandeln (Dialog nach Import/Clone, optional Gradle Groovy → Kotlin DSL, optional Versionskatalog `libs.versions.toml`), ZIP-Backup unter `Backup/`, Rückgängig, Build-Prüfung und Bericht (`docs/j2k-report.md`) |
-| 51 | `51-consistency-check-large-packages.md` | ⬜ offen | Zusammenbau-Prüfung zählt große Pakete (Release-Asset `large-packages`) mit: `--large-packages` mehrfach, `BIG_NEW_FILE`, Test; texinfo-Prüfsumme (arm, salsa-Archiv) gezielt behandeln. Behebt den Abbruch von Gruppe H2-jdk21 (`openjdk-21-x`, Lauf 2026-10-23/24). Voraussetzung: Task 49 |
-| 99 | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task) | Anwendungsdoku (Mermaid) und API-Doku (Dokka), wiederholbar über `docsGenerate`/`docsCheck`, CI-Wochenlauf · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“) |
+| 47 | `47-settings-editor-welcome-project-keys.md` | ✅ `952f324` | Einstellungen/UI in fünf Teilen: Zurück-Navigation, Editor-Einstellungen (Theme-Dropdown, Dateikopf), Willkommensbildschirm, Projekteinstellungen, Schlüssel↔Projekt-Zuweisung (`docs/settings-overhaul-report.md`) |
+| 48 | `48-openssh-prefix-gate.md` | ✅ `fd43404` / `aed406a` | openssh-Prefix im Service-Skript (`fd43404`), Sichtbarkeit verworfener Pakete im APT-Lauf, `fail_on_skipped` (`docs/openssh-prefix-report.md`) |
+| 49 | `49-group-chain-order-and-prefix-exceptions.md` | ✅ `b70bceb` | Gruppenkette: Reihenfolge (B→E→C→D→F→A), Abbruch bei Fehlern (`stop_on_error: true`), ELF-Ausnahmen (`prefix-exceptions.conf`), Download-Retry (`docs/group-chain-report.md`) |
+| 50 | `50-j2k-java-to-kotlin-migration.md` | ✅ `964073a` | Neues Modul `j2k`: Java-Projekte nach Kotlin umwandeln (Dialog nach Import/Clone, optional Gradle Groovy → Kotlin DSL, optional Versionskatalog `libs.versions.toml`), ZIP-Backup unter `Backup/`, Rückgängig, Build-Prüfung und Bericht (`docs/j2k-report.md`) |
+| 51 | `51-consistency-check-large-packages.md` | ⬜ offen (Prompt fehlt) | Zusammenbau-Prüfung zählt große Pakete (Release-Asset `large-packages`) mit: `--large-packages` mehrfach, `BIG_NEW_FILE`, Test; texinfo-Prüfsumme (arm, salsa-Archiv) gezielt behandeln. Behebt den Abbruch von Gruppe H2-jdk21 (`openjdk-21-x`, Lauf 2026-10-23/24). Voraussetzung: Task 49. *Hinweis: Datei muss in agy-tasks/ noch angelegt werden.* |
+| 99 | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task / Prompt fehlt) | Anwendungsdoku (Mermaid) und API-Doku (Dokka), wiederholbar über `docsGenerate`/`docsCheck`, CI-Wochenlauf · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“). *Hinweis: Datei muss in agy-tasks/ noch angelegt werden.* |
 
 ## Nächste Schritte
 
@@ -90,7 +90,7 @@ Repo-Stand: `1ef8d83` (Code; danach nur Dokumentation). ✅ umgesetzt (Commit im
 | 1 | Fork `scto/terminal-packages-codeforge` | Alle Gruppen und `openjdk-17`/`-21`/`-25` sind laut Inhaber/Paketliste (2026-10-21) im APT-Repo (`-21`/`-25` als große Pakete). Offen: Vollständigkeit gegen `apt-groups.json` prüfen, Installation und LSP-Start auf dem Gerät testen |
 | 2 | Compiler-Runtime und `gradle` | Release `compiler-runtime-2025.09.00-k2.1.21` und Paket `gradle` existieren laut Inhaber. Offen: Prüfsumme/Manifest gegen die App und Gerätetest |
 | 3 | Gerätetests | `docs/device-test-checklist.md` + Punkte aus `docs/task-24-report.md` & `docs/task-25-report.md` (`codeforge-env setup --gradle`) + Folge-Task 27b |
-| 4 | Offene Tasks 41, 47–51 | Umgesetzt sind 35–40 und 42–46. Empfehlung APT: **48 → 49 → 51** (48: openssh, verworfene Pakete sichtbar; 49: Gruppenreihenfolge, Abbruch, Ausnahmen; 51: große Pakete in der Zusammenbau-Prüfung, danach H1/H2 und Gruppe A erneut laufen lassen). 41 und 47 sind App-Tasks ohne Abhängigkeit zur APT-Kette (47.5 vor 47.4); 50 beginnt mit Spike 50.0. Übersicht mit Abhängigkeiten in `TASKS-STATUS.md` |
+| 4 | Offene Backlog-Tasks 51, 99 | Alle vorhandenen Task-Dateien 01–50 sind umgesetzt. Im Backlog offen: **51** (große Pakete in der APT-Konsistenzprüfung) und **99** (Dokka/Mermaid Dokumentation & Betriebshandbuch). Beide Prompts existieren bisher nur als Backlog-Definition und müssen noch als Dateien formuliert werden. |
 | laufend | **17** | vor jedem Commit/PR; neue Texte in `values/` **und** `values-de/`. Task 42 ist die App-Variante für Nutzerprojekte, nicht ein Ersatz |
 
 Nicht Teil der Tasks: das Bauen von Bootstrap und APT-Paketen (GitHub-Actions im Fork). Weitere Backlog-Punkte: `STATUS.md` (Abschnitt „Noch offene Features"): Expressive ab stabiler material3 ≥ 1.4, ktlint-Umbenennung `template_engine`. (`:libs:gradle-tooling-bridge` ist seit Task 28 als `@Deprecated` markiert, die Layout-Designer-Erweiterungen sind Task 41.)
