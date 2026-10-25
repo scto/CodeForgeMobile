@@ -146,7 +146,11 @@ fun CodeForgeNavHost(
         }
         composable(Routes.PROJECT_WIZARD) {
             ProjectWizardRoute(
-                onNavigateToEditor = { projectPath -> navController.navigate(Routes.projectWorkspace(projectPath)) },
+                onNavigateToEditor = { projectPath ->
+                    navController.navigate(Routes.projectWorkspace(projectPath)) {
+                        popUpTo(Routes.PROJECT_WIZARD) { inclusive = true }
+                    }
+                },
                 onCancel = { navController.popBackStack() }
             )
         }

@@ -29,4 +29,8 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     implementation(project(":libs:template-engine"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(project(":core:testing"))
 }

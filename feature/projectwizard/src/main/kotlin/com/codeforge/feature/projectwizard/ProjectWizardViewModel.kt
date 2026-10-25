@@ -126,34 +126,40 @@ class ProjectWizardViewModel @Inject constructor(
         }
         _uiState.value = validated.copy(isGenerating = true, generationError = null, showErrors = true)
         viewModelScope.launch {
-            templateEngine.generate(request)
-                .onSuccess { handle ->
-                    runCatching {
-                        settings.updateWizard {
-                            it.toBuilder()
-                                .setLastSaveLocation(request.targetDir)
-                                .setLanguage(request.language.name)
-                                .setMinSdk(request.minSdk)
-                                .setUseGroovyDsl(!request.useKotlinDsl)
-                                .setSkipGitInit(!request.initGit)
-                                .build()
+            try {
+                templateEngine.generate(request)
+                    .onSuccess { handle ->
+                        runCatching {
+                            settings.updateWizard {
+                                it.toBuilder()
+                                    .setLastSaveLocation(request.targetDir)
+                                    .setLanguage(request.language.name)
+                                    .setMinSdk(request.minSdk)
+                                    .setUseGroovyDsl(!request.useKotlinDsl)
+                                    .setSkipGitInit(!request.initGit)
+                                    .build()
+                            }
                         }
+                        runCatching {
+                            recentProjects.addOrUpdate(
+                                RecentProject(
+                                    id = handle.rootPath,
+                                    name = handle.projectName,
+                                    path = handle.rootPath,
+                                    lastOpenedEpochMillis = System.currentTimeMillis(),
+                                    moduleCount = handle.moduleCount,
+                                )
+                            )
+                        }
+                        _uiState.update { it.copy(isGenerating = false) }
+                        _effects.send(ProjectWizardUiEffect.OpenProject(handle.rootPath))
                     }
-                    recentProjects.addOrUpdate(
-                        RecentProject(
-                            id = handle.rootPath,
-                            name = handle.projectName,
-                            path = handle.rootPath,
-                            lastOpenedEpochMillis = System.currentTimeMillis(),
-                            moduleCount = handle.moduleCount,
-                        )
-                    )
-                    _uiState.update { it.copy(isGenerating = false) }
-                    _effects.send(ProjectWizardUiEffect.OpenProject(handle.rootPath))
-                }
-                .onFailure { t ->
-                    _uiState.update { it.copy(isGenerating = false, generationError = t.message ?: t.javaClass.simpleName) }
-                }
+                    .onFailure { t ->
+                        _uiState.update { it.copy(isGenerating = false, generationError = t.message ?: t.javaClass.simpleName) }
+                    }
+            } catch (t: Throwable) {
+                _uiState.update { it.copy(isGenerating = false, generationError = t.message ?: t.javaClass.simpleName) }
+            }
         }
     }
 }
