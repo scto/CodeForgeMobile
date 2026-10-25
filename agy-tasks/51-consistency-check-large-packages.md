@@ -41,7 +41,6 @@ Referenzumsetzung des Agenten liegt dem Inhaber als `agy-fix-49-8.zip` vor (Patc
 ## 51.5 Nicht Teil dieses Tasks
 
 * Neuer Bootstrap (`mode=full`) mit der Hüllen-Korrektur (Task 45/Closure), `release_tag` neu setzen (alter Lauf: „a release with the same tag name already exists“).
-* Umstieg auf aptly.
 
 ## 51.6 Commit-Vorschlag
 ```
