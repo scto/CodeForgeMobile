@@ -80,7 +80,7 @@ Bereits installierte Apps entpacken den Bootstrap **nicht** erneut (`TermuxInsta
 ## 45.7 Abgrenzung
 
 * Nicht Teil des Tasks: fehlende Pakete der Gruppe D (`shellcheck`, `taplo`) und der `openssh`-Fehlschlag in `06-dev-core` (getrennte Fehlersuche über die Lauf-Logs). Fällt die Repo-Prüfung (45.3) wegen eines dieser Pakete durch, im Bericht vermerken und nicht stillschweigend ausnehmen.
-* Kein Umbau von aptly/Hosting. Die Frage, ob das Repo langfristig nicht mehr auf GitHub Pages liegen soll (100-MB-Grenze, `large-packages`), ist ein eigener Entscheid.
+* Kein Umbau des Hostings. Die Frage, ob das Repo langfristig nicht mehr auf GitHub Pages liegen soll (100-MB-Grenze, `large-packages`), ist ein eigener Entscheid.
 
 ## Abnahme
 * Bericht beantwortet, ob `dpkg-perl` im Bootstrap bleibt (Lösung A oder B) und warum.
