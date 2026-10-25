@@ -32,9 +32,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,10 +48,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 
 @Composable
 fun GitSettingsRoute(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
     viewModel: GitSettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -63,7 +65,13 @@ fun GitSettingsRoute(
             }
         }
     }
-    GitSettingsScreen(state = state, snackbar = snackbar, onEvent = viewModel::onEvent, modifier = modifier)
+    GitSettingsScreen(
+        state = state,
+        snackbar = snackbar,
+        onBack = onBack,
+        onEvent = viewModel::onEvent,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,12 +79,17 @@ fun GitSettingsRoute(
 private fun GitSettingsScreen(
     state: GitSettingsUiState,
     snackbar: SnackbarHostState,
+    onBack: () -> Unit = {},
     onEvent: (GitSettingsUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    BackHandler(enabled = state.credentialDialog != null) {
+        onEvent(GitSettingsUiEvent.DialogDismiss)
+    }
+
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringRes(R.string.common_git)) }) },
+        topBar = { SettingsTopBar(title = stringRes(R.string.common_git), onBack = onBack) },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Column(

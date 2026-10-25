@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 
 @Composable
 fun ExtensionsRoute(
@@ -88,16 +89,9 @@ fun ExtensionsScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(stringRes(R.string.extensions_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringRes(R.string.common_zurueck)
-                        )
-                    }
-                }
+            SettingsTopBar(
+                title = stringRes(R.string.extensions_title),
+                onBack = onBack
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

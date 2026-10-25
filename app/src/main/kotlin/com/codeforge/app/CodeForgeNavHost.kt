@@ -94,6 +94,14 @@ fun CodeForgeNavHost(
         context.startActivity(intent)
     }
 
+    fun navigateBackOrStart() {
+        if (!navController.popBackStack()) {
+            navController.navigate(startDestination) {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
+        }
+    }
+
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.ONBOARDING) {
             OnboardingRoute(
@@ -153,6 +161,7 @@ fun CodeForgeNavHost(
         }
         composable(Routes.SETTINGS) {
             SettingsHubRoute(
+                onBack = { navigateBackOrStart() },
                 onNavigateToTheme = { navController.navigate(Routes.SETTINGS_THEME) },
                 onNavigateToEditor = { navController.navigate(Routes.SETTINGS_EDITOR) },
                 onNavigateToTerminal = { navController.navigate(Routes.SETTINGS_TERMINAL) },
@@ -164,38 +173,49 @@ fun CodeForgeNavHost(
             )
         }
         composable(Routes.SETTINGS_THEME) {
-            ThemeBuilderRoute()
+            ThemeBuilderRoute(
+                onBack = { navigateBackOrStart() }
+            )
         }
         composable(Routes.SETTINGS_EDITOR) {
             EditorSettingsRoute(
+                onBack = { navigateBackOrStart() },
                 onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) }
             )
         }
         composable(Routes.SETTINGS_SNIPPETS) {
             SnippetSettingsRoute(
-                onBack = { navController.popBackStack() }
+                onBack = { navigateBackOrStart() }
             )
         }
         composable(Routes.SETTINGS_SIGNING) {
             SigningRoute(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navigateBackOrStart() }
             )
         }
         composable(Routes.SETTINGS_TERMINAL) {
-            TerminalSettingsRoute()
+            TerminalSettingsRoute(
+                onBack = { navigateBackOrStart() }
+            )
         }
         composable(Routes.SETTINGS_SDK_MANAGER) {
-            SdkManagerRoute()
+            SdkManagerRoute(
+                onBack = { navigateBackOrStart() }
+            )
         }
         composable(Routes.SETTINGS_GIT) {
-            GitSettingsRoute()
+            GitSettingsRoute(
+                onBack = { navigateBackOrStart() }
+            )
         }
         composable(Routes.SETTINGS_PLUGINS) {
-            PluginsRoute()
+            PluginsRoute(
+                onBack = { navigateBackOrStart() }
+            )
         }
         composable(Routes.EXTENSIONS) {
             ExtensionsRoute(
-                onBack = { navController.popBackStack() }
+                onBack = { navigateBackOrStart() }
             )
         }
         composable(

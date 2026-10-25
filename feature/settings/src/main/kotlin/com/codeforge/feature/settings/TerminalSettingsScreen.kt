@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,14 +29,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 
 @Composable
 fun TerminalSettingsRoute(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
     viewModel: TerminalSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    TerminalSettingsScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
+    TerminalSettingsScreen(modifier = modifier, uiState = uiState, onBack = onBack, onEvent = viewModel::onEvent)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,11 +46,12 @@ fun TerminalSettingsRoute(
 private fun TerminalSettingsScreen(
     modifier: Modifier = Modifier,
     uiState: TerminalSettingsUiState,
+    onBack: () -> Unit = {},
     onEvent: (TerminalSettingsUiEvent) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringRes(R.string.settings_terminal)) }) }
+        topBar = { SettingsTopBar(title = stringRes(R.string.settings_terminal), onBack = onBack) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
             Text(

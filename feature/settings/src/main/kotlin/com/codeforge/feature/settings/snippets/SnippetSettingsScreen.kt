@@ -75,6 +75,7 @@ import com.codeforge.core.domain.model.SnippetValidationResult
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 
 @Composable
 fun SnippetSettingsRoute(
@@ -113,16 +114,9 @@ fun SnippetSettingsScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringRes(R.string.snippets_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringRes(R.string.common_zurueck)
-                        )
-                    }
-                },
+            SettingsTopBar(
+                title = stringRes(R.string.snippets_title),
+                onBack = onBack,
                 actions = {
                     IconButton(onClick = { onEvent(SnippetSettingsUiEvent.ClickExport) }) {
                         Icon(Icons.Filled.FileUpload, contentDescription = stringRes(R.string.snippets_export))

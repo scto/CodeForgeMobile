@@ -21,7 +21,7 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation("androidx.compose.material:material-icons-extended:1.7.3")
+    implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)

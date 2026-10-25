@@ -20,7 +20,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,10 +33,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 
 @Composable
 fun EditorSettingsRoute(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
     onNavigateToSnippets: () -> Unit = {},
     viewModel: EditorSettingsViewModel = hiltViewModel()
 ) {
@@ -45,6 +46,7 @@ fun EditorSettingsRoute(
     EditorSettingsScreen(
         modifier = modifier,
         uiState = uiState,
+        onBack = onBack,
         onNavigateToSnippets = onNavigateToSnippets,
         onEvent = viewModel::onEvent
     )
@@ -55,12 +57,13 @@ fun EditorSettingsRoute(
 private fun EditorSettingsScreen(
     modifier: Modifier = Modifier,
     uiState: EditorSettingsUiState,
+    onBack: () -> Unit = {},
     onNavigateToSnippets: () -> Unit = {},
     onEvent: (EditorSettingsUiEvent) -> Unit
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringRes(R.string.common_editor)) }) }
+        topBar = { SettingsTopBar(title = stringRes(R.string.common_editor), onBack = onBack) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
             Card(

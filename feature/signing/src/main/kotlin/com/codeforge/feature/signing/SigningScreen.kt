@@ -90,6 +90,7 @@ import com.codeforge.core.domain.model.KeystoreInfo
 import com.codeforge.core.domain.model.PasswordStrength
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 
 @Composable
 fun SigningRoute(
@@ -128,13 +129,9 @@ fun SigningScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringRes(R.string.signing_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
-                },
+            SettingsTopBar(
+                title = stringRes(R.string.signing_title),
+                onBack = onNavigateBack,
                 actions = {
                     IconButton(onClick = { onIntent(SigningUiIntent.RefreshKeystores) }) {
                         Icon(Icons.Default.Refresh, contentDescription = null)

@@ -47,8 +47,8 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,28 +72,34 @@ import com.codeforge.core.designsystem.ThemePresets
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 
 @Composable
 fun ThemeBuilderRoute(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
     viewModel: ThemeBuilderViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    ThemeBuilderScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent)
+    ThemeBuilderScreen(modifier = modifier, uiState = uiState, onBack = onBack, onEvent = viewModel::onEvent)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ThemeBuilderScreen(
     modifier: Modifier = Modifier,
     uiState: ThemeBuilderUiState,
+    onBack: () -> Unit = {},
     onEvent: (ThemeBuilderUiEvent) -> Unit
 ) {
     var activePickerSlot by remember { mutableStateOf<PaletteSlot?>(null) }
 
+    BackHandler(enabled = activePickerSlot != null) {
+        activePickerSlot = null
+    }
+
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringRes(R.string.themebuilder_theme)) }) }
+        topBar = { SettingsTopBar(title = stringRes(R.string.themebuilder_theme), onBack = onBack) }
     ) { padding ->
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {

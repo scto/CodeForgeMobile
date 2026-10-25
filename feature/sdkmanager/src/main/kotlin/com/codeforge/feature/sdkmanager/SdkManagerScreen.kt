@@ -48,11 +48,13 @@ import com.codeforge.core.domain.model.ToolItem
 import com.codeforge.core.domain.model.ToolType
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SdkManagerRoute(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
     viewModel: SdkManagerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -70,18 +72,19 @@ fun SdkManagerRoute(
         modifier = modifier,
         uiState = uiState,
         snackbarHostState = snackbarHostState,
+        onBack = onBack,
         onEvent = viewModel::onEvent
     )
 }
 
 private data class CategoryEntry(@StringRes val labelRes: Int, val toolType: ToolType, val items: List<ToolItem>)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SdkManagerScreen(
     modifier: Modifier = Modifier,
     uiState: SdkManagerState,
     snackbarHostState: SnackbarHostState,
+    onBack: () -> Unit = {},
     onEvent: (SdkManagerEvent) -> Unit
 ) {
     val categories = listOf(
@@ -98,8 +101,9 @@ private fun SdkManagerScreen(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringRes(R.string.sdkmanager_title)) },
+            SettingsTopBar(
+                title = stringRes(R.string.sdkmanager_title),
+                onBack = onBack,
                 actions = {
                     IconButton(onClick = { onEvent(SdkManagerEvent.RefreshRemoteList) }) {
                         Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))

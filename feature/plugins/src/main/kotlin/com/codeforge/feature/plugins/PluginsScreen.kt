@@ -30,7 +30,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,12 +43,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
 
 @Composable
 fun PluginsRoute(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
     viewModel: PluginsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -76,6 +77,7 @@ fun PluginsRoute(
         modifier = modifier,
         uiState = uiState,
         snackbarHostState = snackbarHostState,
+        onBack = onBack,
         onEvent = viewModel::onEvent,
         onImportClicked = { filePickerLauncher.launch(arrayOf("application/zip", "application/octet-stream")) }
     )
@@ -93,12 +95,12 @@ private fun copyToCacheFile(context: android.content.Context, uri: Uri): File? =
     targetFile
 }.getOrNull()
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PluginsScreen(
     modifier: Modifier = Modifier,
     uiState: PluginsUiState,
     snackbarHostState: SnackbarHostState,
+    onBack: () -> Unit = {},
     onEvent: (PluginsUiEvent) -> Unit,
     onImportClicked: () -> Unit
 ) {
@@ -106,8 +108,9 @@ private fun PluginsScreen(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringRes(R.string.plugins_plugins)) },
+            SettingsTopBar(
+                title = stringRes(R.string.plugins_plugins),
+                onBack = onBack,
                 actions = {
                     IconButton(onClick = onImportClicked) {
                         Icon(Icons.Filled.Add, contentDescription = stringRes(R.string.plugins_plugin_installieren))

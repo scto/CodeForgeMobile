@@ -25,13 +25,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.SettingsTopBar
 
 private data class SettingsEntry(@StringRes val labelRes: Int, val icon: ImageVector, val onClick: () -> Unit)
 
@@ -39,6 +39,7 @@ private data class SettingsEntry(@StringRes val labelRes: Int, val icon: ImageVe
 @Composable
 fun SettingsHubRoute(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
     onNavigateToTheme: () -> Unit,
     onNavigateToEditor: () -> Unit,
     onNavigateToTerminal: () -> Unit,
@@ -61,7 +62,7 @@ fun SettingsHubRoute(
 
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringRes(R.string.settings_hub_title)) }) }
+        topBar = { SettingsTopBar(title = stringRes(R.string.settings_hub_title), onBack = onBack) }
     ) { padding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
             items(entries) { entry ->
