@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       preset:
-        description: "light = Gruppen A–E · heavy = JDKs, LLVM, Dart, rust-analyzer · all = beides"
+        description: "light = Gruppen A–F · heavy = JDKs, LLVM, Dart, rust-analyzer · all = beides"
         required: true
         default: "light"
         type: choice
