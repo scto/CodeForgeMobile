@@ -80,7 +80,7 @@ Repo-Stand: `952f324`. Alle im Verzeichnis vorhandenen Prompts (**Tasks 01–50*
 | 48 | `48-openssh-prefix-gate.md` | ✅ `fd43404` / `aed406a` | openssh-Prefix im Service-Skript (`fd43404`), Sichtbarkeit verworfener Pakete im APT-Lauf, `fail_on_skipped` (`docs/openssh-prefix-report.md`) |
 | 49 | `49-group-chain-order-and-prefix-exceptions.md` | ✅ `b70bceb` | Gruppenkette: Reihenfolge (B→E→C→D→F→A), Abbruch bei Fehlern (`stop_on_error: true`), ELF-Ausnahmen (`prefix-exceptions.conf`), Download-Retry (`docs/group-chain-report.md`) |
 | 50 | `50-j2k-java-to-kotlin-migration.md` | ✅ `964073a` | Neues Modul `j2k`: Java-Projekte nach Kotlin umwandeln (Dialog nach Import/Clone, optional Gradle Groovy → Kotlin DSL, optional Versionskatalog `libs.versions.toml`), ZIP-Backup unter `Backup/`, Rückgängig, Build-Prüfung und Bericht (`docs/j2k-report.md`) |
-| 51 | `51-consistency-check-large-packages.md` | ⬜ offen | Zusammenbau-Prüfung zählt große Pakete (Release-Asset `large-packages`) mit: `--large-packages` mehrfach, `BIG_NEW_FILE`, Test; texinfo-Prüfsumme (arm, salsa-Archiv) gezielt behandeln. Behebt den Abbruch von Gruppe H2-jdk21 (`openjdk-21-x`, Lauf 2026-10-23/24). Voraussetzung: Task 49 |
+| 51 | `51-consistency-check-large-packages.md` | ✅ umgesetzt | Zusammenbau-Prüfung zählt große Pakete (Release-Asset `large-packages`) mit: `--large-packages` mehrfach, `BIG_NEW_FILE`, Test; texinfo-Prüfsumme (arm, salsa-Archiv) gezielt analysiert (`docs/large-packages-check-report.md`) |
 | 99 | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task / Prompt fehlt) | Anwendungsdoku (Mermaid) und API-Doku (Dokka), wiederholbar über `docsGenerate`/`docsCheck`, CI-Wochenlauf · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“). *Hinweis: Datei muss in agy-tasks/ noch angelegt werden.* |
 
 ## Nächste Schritte
@@ -90,7 +90,7 @@ Repo-Stand: `952f324`. Alle im Verzeichnis vorhandenen Prompts (**Tasks 01–50*
 | 1 | Fork `scto/terminal-packages-codeforge` | Alle Gruppen und `openjdk-17`/`-21`/`-25` sind laut Inhaber/Paketliste (2026-10-21) im APT-Repo (`-21`/`-25` als große Pakete). Offen: Vollständigkeit gegen `apt-groups.json` prüfen, Installation und LSP-Start auf dem Gerät testen |
 | 2 | Compiler-Runtime und `gradle` | Release `compiler-runtime-2025.09.00-k2.1.21` und Paket `gradle` existieren laut Inhaber. Offen: Prüfsumme/Manifest gegen die App und Gerätetest |
 | 3 | Gerätetests | `docs/device-test-checklist.md` + Punkte aus `docs/task-24-report.md` & `docs/task-25-report.md` (`codeforge-env setup --gradle`) + Folge-Task 27b |
-| 4 | Offener Task 51 | Tasks 01–50 sind umgesetzt. Nächster auszuführender Auftrag: **Task 51** (`51-consistency-check-large-packages.md`), um das Abbrechen der Zusammenbau-Prüfung bei großen Paketen (Release-Assets) zu beheben. |
+| 4 | Offener Backlog-Task 99 | Tasks 01–51 sind umgesetzt. Im Backlog offen: **Task 99** (Dokka/Mermaid Dokumentation & Betriebshandbuch). |
 | laufend | **17** | vor jedem Commit/PR; neue Texte in `values/` **und** `values-de/`. Task 42 ist die App-Variante für Nutzerprojekte, nicht ein Ersatz |
 
 Nicht Teil der Tasks: das Bauen von Bootstrap und APT-Paketen (GitHub-Actions im Fork). Weitere Backlog-Punkte: `STATUS.md` (Abschnitt „Noch offene Features"): Expressive ab stabiler material3 ≥ 1.4, ktlint-Umbenennung `template_engine`. (`:libs:gradle-tooling-bridge` ist seit Task 28 als `@Deprecated` markiert, die Layout-Designer-Erweiterungen sind Task 41.)

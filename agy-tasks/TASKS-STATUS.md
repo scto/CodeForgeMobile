@@ -57,25 +57,23 @@
 | **48** | `48-openssh-prefix-gate.md` | ✅ `fd43404` / `aed406a` | **openssh fehlt im Repo:** `com.termux` in `var/service/ssh-agent/run` (Kommentar) → Prefix-neutralisiert im Fork (`fd43404`); Prefix-Check zeigt bis zu 10 Treffer, `failed-packages.txt` / Annotation / `fail_on_skipped` im Workflow (`docs/openssh-prefix-report.md`) |
 | **49** | `49-group-chain-order-and-prefix-exceptions.md` | ✅ `b70bceb` | **Gruppenkette:** Reihenfolge nach Abhängigkeiten (B→E→C→D→F→A), `stop_on_error: true` als Standard, ELF-Ausnahmeliste `prefix-exceptions.conf` (taplo, shellcheck), Retry bei Netzwerkfehlern, Prüfskripte `check-group-order.py` und `test_prefix_exceptions.sh` (`docs/group-chain-report.md`) |
 | **50** | `50-j2k-java-to-kotlin-migration.md` | ✅ `964073a` | **Modul `j2k` (Java → Kotlin):** Reines JVM-Modul `:libs:j2k` (Scanner, Backup, Journal, JavaToKotlinConverter, GradleDslConverter, VersionCatalogMigrator), UI-Modul `:feature:j2k` (Material 3 Dialog, Progress- und Result-Screens, `J2kViewModel`, `OpenFileRequestBridge`), ZIP-Backup mit Verifikation, vollständiges atomares Journal und Rückgängig, Unit-Tests in beiden Modulen bestanden (`docs/j2k-report.md`) |
-| **51** | `51-consistency-check-large-packages.md` | ⬜ offen | **Große Pakete in der Zusammenbau-Prüfung (Lauf 2026-10-23/24, H2-jdk21):** `openjdk-21` (aarch64, 100 MiB) wird als Release-Asset abgetrennt, die Prüfung sieht nur den Pool → `openjdk-21-x` „nicht erfüllbar“, nichts veröffentlicht. Fix: Manifeste (`BASE_REPO_DIR/large-packages.txt` + `big-new.txt`) an `check-apt-consistency.py` übergeben (`--large-packages` mehrfach, `BIG_NEW_FILE`), Test. Dazu texinfo-Prüfsumme (arm, Archiv von salsa.debian.org). Voraussetzung: Task 49 |
+| **51** | `51-consistency-check-large-packages.md` | ✅ umgesetzt | **Große Pakete in der Zusammenbau-Prüfung:** Manifeste (`BASE_REPO_DIR/large-packages.txt` + `BIG_NEW_FILE` `big-new.txt`) an `check-apt-consistency.py` übergeben (`--large-packages` mehrfach, spätere Einträge gewinnen), 15 Tests grün, Salsa Varnish PoW Challenge analysiert (`docs/large-packages-check-report.md`) |
 | **99** | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task / Prompt fehlt) | Dokumentation: Anwendungsdoku mit Mermaid (`docs/app/`, generierte Blöcke), API-Doku mit Dokka (`:libs:plugin-api`, `:core:domain`-Schnittstellen), `./gradlew docsGenerate`/`docsCheck`, Fakten-Drift-Prüfung, CI-Wochenlauf. Wird nach größeren Task-Blöcken **wiederholt** (Runbook 99.7) · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“). *Hinweis: Markdown-Datei existiert noch nicht im Ordner agy-tasks/.* |
 
 ---
 
 ## 🧭 Status aller Tasks 01–51 & 99
 
-Tasks **01 bis 50** sind **vollständig umgesetzt und verifiziert** (Commits bis `952f324`).
+Tasks **01 bis 51** sind **vollständig umgesetzt und verifiziert** (Commits bis Task 51).
 
-### Nächster offener Task in `agy-tasks/`
+### Noch nicht ausgeführte / offene Tasks im Backlog
 
-1. **Task 51 (`51-consistency-check-large-packages.md`) – ⬜ Offen (bereit zur Ausführung):**
-   - **Thema:** Zusammenbau-Prüfung für große Pakete (`check-apt-consistency.py` im APT-Repo Fork `scto/terminal-packages-codeforge`).
-   - **Aufgabe:** Unterstützung von `--large-packages` (mehrfach) und `BIG_NEW_FILE`, damit `openjdk-21` und `openjdk-25` (ausgelagert in Release-Assets) nicht zu fälschlichen Konsistenzfehlern führen; texinfo-Prüfsumme für arm.
-   - **Status:** Prompt-Datei liegt vor (`agy-tasks/51-consistency-check-large-packages.md`).
-
-2. **Task 99 (`99-docs-mermaid-dokka.md`) – ⬜ Offen (Dauer-Task / Prompt fehlt):**
+1. **Task 99 (`99-docs-mermaid-dokka.md`) – ⬜ Offen (Dauer-Task / Prompt fehlt):**
    - **Thema:** Anwendungsdokumentation (Mermaid-Diagramme, Runbooks), API-Dokumentation (Dokka) und Betriebshandbuch (99.8).
    - **Status:** ⬜ Dauer-Task; Datei muss noch formuliert/erstellt werden.
+
+2. **Laufende Pflege (Task 17)**:
+   - `17-externalize-hardcoded-strings.md` bleibt ein wiederkehrender Prüfschritt vor Commits/Releases (aktuell 0 unübertragene Strings, 1571 Lokalisierungseinträge synchron).
 
 3. **Laufende Pflege (Task 17)**:
    - `17-externalize-hardcoded-strings.md` bleibt ein wiederkehrender Prüfschritt vor Commits/Releases (aktuell 0 unübertragene Strings, 1571 Lokalisierungseinträge synchron).
@@ -95,6 +93,12 @@ Tasks **01 bis 50** sind **vollständig umgesetzt und verifiziert** (Commits bis
 ---
 
 ## 🔍 Arbeitsliste & Detailberichte umgesetzter Tasks
+
+### Task 51 – Konsistenzprüfung für große Pakete & texinfo (✅ erledigt)
+1. **Befund (51.1)**: Im Assemble-Job (`build-bootstrap-repo.yml`) werden große Pakete (> 95 MiB wie `openjdk-21`) nach `big-debs/` verschoben und in `big-new.txt` verzeichnet. Die Konsistenzprüfung in Schritt 8 von `build_codeforge_repo.sh` sah das große Paket nicht im Pool und scheiterte bei `openjdk-21-x`. Zweiter Befund (texinfo arm): Salsa.debian.org serviert bei wiederholten automatisierten curl-Anfragen sporadisch eine HTML-PoW-Challenge (`Varnish PoW`), was zum Checksummenfehler führte.
+2. **Mehrfache Manifeste (51.2)**: `scripts/check-apt-consistency.py` unterstützt `--large-packages` mehrfach (`action="append"`). `build_codeforge_repo.sh` übergibt `BASE_REPO_DIR/large-packages.txt` und `BIG_NEW_FILE` (`big-new.txt`), jeweils nur bei nicht-leeren Dateien. Aufruf erfolgt mit `python3 -I`.
+3. **texinfo-Lösung & Optionen (51.3)**: PoW-Verhalten dokumentiert; Rerun empfohlen; Fallback-Optionen (Debian Snapshot Archive bzw. codeforge-tools Mirror) dokumentiert.
+4. **Verifikation (51.4)**: 15 Unit-Tests grün (`test_check_apt_consistency.py`, inkl. Multi-Manifest- und Architektur-Mismatch-Tests); `shellcheck` und `actionlint` sauber. Bericht in `docs/large-packages-check-report.md`.
 
 ### Task 50 – Java-zu-Kotlin-Migration (✅ erledigt)
 1. **Modul `:libs:j2k` (50.1)**: Reines JVM-Modul ohne Android-Abhängigkeiten. `J2kScanner` für Java-Quellen und Kotlin-Zielkollisionen. `ZipBackupManager` mit automatischer SHA-256-Prüfung unter `Backup/` vor jeder Änderung. `J2kJournalManager` mit atomarem Transaktions-Journal und vollständigem Rollback (`undo()`).

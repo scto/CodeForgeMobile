@@ -249,6 +249,21 @@ Architecture: aarch64
             # ohne big-new.txt bleibt der Fehler sichtbar
             self.assertEqual(len(check_consistency.run_repo_check(tmpdir, large_packages_path=[base])), 1)
 
+    def test_repo_with_large_manifest_wrong_architecture_fails(self):
+        """Großes Paket in falscher Architektur (z. B. x86_64 statt aarch64): Fehler bleibt."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bin_dir = os.path.join(tmpdir, "dists/stable/main/binary-aarch64")
+            os.makedirs(bin_dir)
+            with open(os.path.join(bin_dir, "Packages"), "w", encoding="utf-8") as f:
+                f.write("Package: openjdk-21-x\nVersion: 21.0.12\nArchitecture: aarch64\n"
+                        "Depends: openjdk-21 (= 21.0.12)\n")
+            lp_file = os.path.join(tmpdir, "large-packages.txt")
+            with open(lp_file, "w", encoding="utf-8") as f:
+                f.write("openjdk-21|21.0.12|x86_64|openjdk-21_21.0.12_x86_64.deb|sha|1|url\n")
+            errors = check_consistency.run_repo_check(tmpdir, large_packages_path=[lp_file])
+            self.assertEqual(len(errors), 1)
+            self.assertIn("openjdk-21", errors[0])
+
     def test_repo_missing_dependency(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             bin_dir = os.path.join(tmpdir, "dists/stable/main/binary-aarch64")

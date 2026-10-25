@@ -972,6 +972,7 @@ for arch in "${ARCHS_LIST[@]}"; do
     # d) termux-bootstrap-second-stage.sh (keine unquotierte Variable in Zeile 290, TERMUX_PACKAGE_MANAGER/ARCH gesetzt)
     ss_file="${dest}/etc/termux/termux-bootstrap/second-stage/termux-bootstrap-second-stage.sh"
     if [ -f "${ss_file}" ]; then
+        # shellcheck disable=SC2016
         if grep -qF 'elif [ ${TERMUX_PACKAGE_MANAGER} = "pacman" ]; then' "${ss_file}"; then
             echo "[${arch}] second-stage enthält unquotierte TERMUX_PACKAGE_MANAGER in Zeile 290" >&2; verify_failed=1
         fi
@@ -983,7 +984,7 @@ for arch in "${ARCHS_LIST[@]}"; do
 
     if [ -f "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" ]; then
         echo "  [${arch}] Prüfe Abhängigkeits-Konsistenz (check-apt-consistency.py)..."
-        python3 "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" bootstrap "${CLONE_DIR}/output/bootstrap-${arch}.zip" || verify_failed=1
+        python3 -I "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" bootstrap "${CLONE_DIR}/output/bootstrap-${arch}.zip" || verify_failed=1
     fi
 done
 rm -rf "${VERIFY_DIR}"
@@ -1132,7 +1133,7 @@ if [ -f "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" ]; then
     if [ -n "${BIG_NEW_FILE:-}" ] && [ -s "${BIG_NEW_FILE}" ]; then
         large_args+=(--large-packages "${BIG_NEW_FILE}")
     fi
-    python3 "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" repo "${REPO_DIR}" ${large_args[@]+"${large_args[@]}"} --on-error "${CONSISTENCY_CHECK}" \
+    python3 -I "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" repo "${REPO_DIR}" ${large_args[@]+"${large_args[@]}"} --on-error "${CONSISTENCY_CHECK}" \
         || [ "${CONSISTENCY_CHECK}" = "warn" ] || die "Konsistenzprüfung des APT-Repositories fehlgeschlagen."
 fi
 
