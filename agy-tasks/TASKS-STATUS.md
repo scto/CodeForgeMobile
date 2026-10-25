@@ -57,25 +57,23 @@
 | **48** | `48-openssh-prefix-gate.md` | ✅ `fd43404` / `aed406a` | **openssh fehlt im Repo:** `com.termux` in `var/service/ssh-agent/run` (Kommentar) → Prefix-neutralisiert im Fork (`fd43404`); Prefix-Check zeigt bis zu 10 Treffer, `failed-packages.txt` / Annotation / `fail_on_skipped` im Workflow (`docs/openssh-prefix-report.md`) |
 | **49** | `49-group-chain-order-and-prefix-exceptions.md` | ✅ `b70bceb` | **Gruppenkette:** Reihenfolge nach Abhängigkeiten (B→E→C→D→F→A), `stop_on_error: true` als Standard, ELF-Ausnahmeliste `prefix-exceptions.conf` (taplo, shellcheck), Retry bei Netzwerkfehlern, Prüfskripte `check-group-order.py` und `test_prefix_exceptions.sh` (`docs/group-chain-report.md`) |
 | **50** | `50-j2k-java-to-kotlin-migration.md` | ✅ `964073a` | **Modul `j2k` (Java → Kotlin):** Reines JVM-Modul `:libs:j2k` (Scanner, Backup, Journal, JavaToKotlinConverter, GradleDslConverter, VersionCatalogMigrator), UI-Modul `:feature:j2k` (Material 3 Dialog, Progress- und Result-Screens, `J2kViewModel`, `OpenFileRequestBridge`), ZIP-Backup mit Verifikation, vollständiges atomares Journal und Rückgängig, Unit-Tests in beiden Modulen bestanden (`docs/j2k-report.md`) |
-| **51** | `51-consistency-check-large-packages.md` | ⬜ offen (Prompt fehlt) | **Große Pakete in der Zusammenbau-Prüfung (Lauf 2026-10-23/24, H2-jdk21):** `openjdk-21` (aarch64, 100 MiB) wird als Release-Asset abgetrennt, die Prüfung sieht nur den Pool → `openjdk-21-x` „nicht erfüllbar“, nichts veröffentlicht. Fix: Manifeste (`BASE_REPO_DIR/large-packages.txt` + `big-new.txt`) an `check-apt-consistency.py` übergeben (`--large-packages` mehrfach, `BIG_NEW_FILE`), Test. Dazu texinfo-Prüfsumme (arm, Archiv von salsa.debian.org). Voraussetzung: Task 49. *Hinweis: Markdown-Datei existiert noch nicht im Ordner agy-tasks/.* |
+| **51** | `51-consistency-check-large-packages.md` | ⬜ offen | **Große Pakete in der Zusammenbau-Prüfung (Lauf 2026-10-23/24, H2-jdk21):** `openjdk-21` (aarch64, 100 MiB) wird als Release-Asset abgetrennt, die Prüfung sieht nur den Pool → `openjdk-21-x` „nicht erfüllbar“, nichts veröffentlicht. Fix: Manifeste (`BASE_REPO_DIR/large-packages.txt` + `big-new.txt`) an `check-apt-consistency.py` übergeben (`--large-packages` mehrfach, `BIG_NEW_FILE`), Test. Dazu texinfo-Prüfsumme (arm, Archiv von salsa.debian.org). Voraussetzung: Task 49 |
 | **99** | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task / Prompt fehlt) | Dokumentation: Anwendungsdoku mit Mermaid (`docs/app/`, generierte Blöcke), API-Doku mit Dokka (`:libs:plugin-api`, `:core:domain`-Schnittstellen), `./gradlew docsGenerate`/`docsCheck`, Fakten-Drift-Prüfung, CI-Wochenlauf. Wird nach größeren Task-Blöcken **wiederholt** (Runbook 99.7) · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“). *Hinweis: Markdown-Datei existiert noch nicht im Ordner agy-tasks/.* |
 
 ---
 
 ## 🧭 Status aller Tasks 01–51 & 99
 
-Alle im Repo liegenden Task-Dateien (**01 bis 50**) sind **vollständig umgesetzt und verifiziert** (Commits bis `952f324`).
+Tasks **01 bis 50** sind **vollständig umgesetzt und verifiziert** (Commits bis `952f324`).
 
-### Noch nicht ausgeführte / offene Tasks
+### Nächster offener Task in `agy-tasks/`
 
-Aktuell existieren **keine nicht ausgeführten Task-Dateien im Ordner `agy-tasks/`**. Folgende zwei Tasks sind im Backlog definiert, haben aber bisher noch keine eigene Prompt-Datei in `agy-tasks/`:
-
-1. **Task 51 (`51-consistency-check-large-packages.md`)**:
+1. **Task 51 (`51-consistency-check-large-packages.md`) – ⬜ Offen (bereit zur Ausführung):**
    - **Thema:** Zusammenbau-Prüfung für große Pakete (`check-apt-consistency.py` im APT-Repo Fork `scto/terminal-packages-codeforge`).
-   - **Aufgabe:** Unterstützung von `--large-packages` und `BIG_NEW_FILE`, damit `openjdk-21` und `openjdk-25` (ausgelagert in Release-Assets) nicht zu fälschlichen Konsistenzfehlern führen; texinfo-Prüfsumme für arm.
-   - **Status:** ⬜ Datei muss noch formuliert/erstellt werden.
+   - **Aufgabe:** Unterstützung von `--large-packages` (mehrfach) und `BIG_NEW_FILE`, damit `openjdk-21` und `openjdk-25` (ausgelagert in Release-Assets) nicht zu fälschlichen Konsistenzfehlern führen; texinfo-Prüfsumme für arm.
+   - **Status:** Prompt-Datei liegt vor (`agy-tasks/51-consistency-check-large-packages.md`).
 
-2. **Task 99 (`99-docs-mermaid-dokka.md`)**:
+2. **Task 99 (`99-docs-mermaid-dokka.md`) – ⬜ Offen (Dauer-Task / Prompt fehlt):**
    - **Thema:** Anwendungsdokumentation (Mermaid-Diagramme, Runbooks), API-Dokumentation (Dokka) und Betriebshandbuch (99.8).
    - **Status:** ⬜ Dauer-Task; Datei muss noch formuliert/erstellt werden.
 
