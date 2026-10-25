@@ -749,6 +749,42 @@ if [ -n "${REPO_PACKAGES}" ]; then
             grep -rn 'pulseaudio' packages/libmpg123 packages/libmp3lame packages/libsndfile 2>/dev/null | sed 's/^/    /' || true
         fi
     }
+    is_prefix_exception() {
+        local target_pkg="$1"
+        local full_file="$2"
+        local chk_root="$3"
+        local exceptions_file="${WORKSPACE_DIR}/prefix-exceptions.conf"
+        [ -f "${exceptions_file}" ] || return 1
+
+        # 1. Muss ein reguläres ELF-Binary sein (ELF magic: \x7fELF)
+        [ -f "${full_file}" ] || return 1
+        [ "$(head -c 4 "${full_file}" 2>/dev/null)" = $'\x7fELF' ] || return 1
+
+        # 2. Relativer Pfad ermitteln
+        local rel_file="${full_file#"${chk_root}"/}"
+        local usr_rel="${rel_file#data/data/*/files/}"
+        usr_rel="${usr_rel#/}"
+
+        while IFS='|' read -r ex_pkg ex_glob ex_reason || [ -n "${ex_pkg}" ]; do
+            [[ "${ex_pkg}" =~ ^[[:space:]]*# ]] && continue
+            [ -n "${ex_pkg}" ] || continue
+            ex_pkg="$(echo "${ex_pkg}" | xargs)"
+            ex_glob="$(echo "${ex_glob}" | xargs)"
+            ex_reason="$(echo "${ex_reason}" | xargs)"
+
+            if [ "${ex_pkg}" = "${target_pkg}" ]; then
+                # Glob-Prüfung gegen usr_rel und rel_file
+                # shellcheck disable=SC2053
+                if [[ "${usr_rel}" == ${ex_glob} ]] || [[ "${rel_file}" == ${ex_glob} ]] || [[ "${usr_rel}" == *"${ex_glob}"* ]]; then
+                    echo "${ex_reason}"
+                    return 0
+                fi
+            fi
+        done < "${exceptions_file}"
+
+        return 1
+    }
+
     if [ -n "${PREBUILD_PACKAGES}" ]; then log_buildorder libsndfile; fi
     for arch in "${ARCHS_LIST[@]}"; do
         for pkg in "${REPO_PKG_LIST[@]}"; do
@@ -773,7 +809,18 @@ if [ -n "${REPO_PACKAGES}" ]; then
             [ "${arch}" = "${ARCHS_LIST[0]}" ] && log_buildorder "${build_pkg}"
             build_args=(-a "${arch}" -o output)
             case ",${SKIP_DEPS_PACKAGES}," in *,"${pkg}",*) build_args+=(-s); echo "     (ohne Abhängigkeiten: -s)" ;; esac
-            if ! ./scripts/run-docker.sh ./build-package.sh "${build_args[@]}" "${build_pkg}"; then
+            build_success=0
+            for attempt in 1 2 3; do
+                if ./scripts/run-docker.sh ./build-package.sh "${build_args[@]}" "${build_pkg}"; then
+                    build_success=1
+                    break
+                fi
+                if [ "${attempt}" -lt 3 ]; then
+                    echo "WARNUNG: build-package.sh ${build_pkg} (${arch}) fehlgeschlagen (Versuch ${attempt}/3). Wiederhole nach 15s..." >&2
+                    sleep 15
+                fi
+            done
+            if [ "${build_success}" -ne 1 ]; then
                 if [ "${KEEP_GOING}" = 1 ]; then
                     echo "FEHLGESCHLAGEN: ${pkg} (${arch}) – weiter mit dem nächsten Paket (KEEP_GOING=1)." >&2
                     FAILED_PKGS+=("${pkg} (${arch})"); continue
@@ -795,22 +842,37 @@ if [ -n "${REPO_PACKAGES}" ]; then
                 dpkg-deb -x "${deb}" "${chk}"
                 bad="$(grep -rla 'com\.termux' "${chk}" || true)"
                 if [ -n "${bad}" ]; then
-                    echo "FEHLER: ${deb} enthält 'com.termux':" >&2
-                    printf '%s\n' "${bad}" | head -10 >&2
-                    # Fundstellen mit Kontext zeigen, damit die Ursache im Log steht (Text: Zeile, Binärdatei: Umgebung).
-                    printf '%s\n' "${bad}" | head -10 | while IFS= read -r hit; do
-                        echo "--- Fundstelle in ${hit#"${chk}"}:" >&2
-                        grep -a -o '.\{0,60\}com\.termux.\{0,60\}' "${hit}" 2>/dev/null | head -10 >&2 || true
-                    done
-                    rm -rf "${chk}"
-                    if [ "${KEEP_GOING}" = 1 ]; then
-                        echo "FEHLGESCHLAGEN: ${pkg}: .deb enthält 'com.termux' (siehe oben)." >&2
-                        echo "::warning title=Prefix-Check fehlgeschlagen::${pkg} (${arch}): .deb enthält 'com.termux' und wurde verworfen."
-                        FAILED_PKGS+=("${pkg} (${arch})")
-                        rm -f "${deb}"   # kaputtes Paket nicht ins Repo übernehmen
-                        continue 2
+                    real_bad=()
+                    while IFS= read -r hit; do
+                        [ -n "${hit}" ] || continue
+                        if reason="$(is_prefix_exception "${pkg}" "${hit}" "${chk}")"; then
+                            echo "AUSNAHME: ${pkg}: ${hit#"${chk}"} enthält com.termux (siehe prefix-exceptions.conf: ${reason})"
+                            if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+                                echo "ℹ️ **AUSNAHME:** \`${pkg}\`: \`${hit#"${chk}"}\` enthält \`com.termux\` (Begründung: ${reason})" >> "${GITHUB_STEP_SUMMARY}"
+                            fi
+                        else
+                            real_bad+=("${hit}")
+                        fi
+                    done <<< "${bad}"
+
+                    if [ "${#real_bad[@]}" -gt 0 ]; then
+                        echo "FEHLER: ${deb} enthält 'com.termux':" >&2
+                        printf '%s\n' "${real_bad[@]}" | head -10 >&2
+                        # Fundstellen mit Kontext zeigen, damit die Ursache im Log steht (Text: Zeile, Binärdatei: Umgebung).
+                        printf '%s\n' "${real_bad[@]}" | head -10 | while IFS= read -r hit; do
+                            echo "--- Fundstelle in ${hit#"${chk}"}:" >&2
+                            grep -a -o '.\{0,60\}com\.termux.\{0,60\}' "${hit}" 2>/dev/null | head -10 >&2 || true
+                        done
+                        rm -rf "${chk}"
+                        if [ "${KEEP_GOING}" = 1 ]; then
+                            echo "FEHLGESCHLAGEN: ${pkg}: .deb enthält 'com.termux' (siehe oben)." >&2
+                            echo "::warning title=Prefix-Check fehlgeschlagen::${pkg} (${arch}): .deb enthält 'com.termux' und wurde verworfen."
+                            FAILED_PKGS+=("${pkg} (${arch})")
+                            rm -f "${deb}"   # kaputtes Paket nicht ins Repo übernehmen
+                            continue 2
+                        fi
+                        exit 1
                     fi
-                    exit 1
                 fi
                 rm -rf "${chk}"
             done

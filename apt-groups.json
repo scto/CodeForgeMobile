@@ -1,16 +1,16 @@
 {
   "groups": [
     {
-      "name": "A-leicht-jvm",
-      "heavy": false,
-      "stage": "04-jvm-tools",
-      "repo_packages": "m4,codeforge-env,yarn,autoconf,automake"
-    },
-    {
       "name": "B-leicht-dev",
       "heavy": false,
       "stage": "06-dev-core",
-      "repo_packages": "pkg-config,libtool,flex,bison,ccache,patchelf,strace"
+      "repo_packages": "m4,pkg-config,libtool,flex,bison,ccache,patchelf,strace"
+    },
+    {
+      "name": "E-leicht-py-node",
+      "heavy": false,
+      "stage": "08-python",
+      "repo_packages": "nodejs,npm"
     },
     {
       "name": "C-leicht-android",
@@ -25,16 +25,16 @@
       "repo_packages": "neocmakelsp,esbuild,pnpm,shellcheck"
     },
     {
-      "name": "E-leicht-py-node",
-      "heavy": false,
-      "stage": "08-python",
-      "repo_packages": "nodejs,npm"
-    },
-    {
       "name": "F-leicht-utils",
       "heavy": false,
       "stage": "07-utils",
       "repo_packages": ""
+    },
+    {
+      "name": "A-leicht-jvm",
+      "heavy": false,
+      "stage": "04-jvm-tools",
+      "repo_packages": "m4,codeforge-env,yarn,autoconf,automake"
     },
     {
       "name": "H1-jdk17",

@@ -151,14 +151,22 @@ teilen sich eine Concurrency-Gruppe (ein laufender, ein wartender Lauf); ein zus
 
 ### Gruppen (`apt-groups.json`)
 
+Die Gruppen sind nach ihren internen Abhängigkeiten geordnet (geprüft mit `scripts/check-group-order.py`):
+1. `B-leicht-dev` liefert `m4`, `make`, `jq` und Basis-Entwicklerwerkzeuge.
+2. `E-leicht-py-node` liefert `python` (für `gdb` in C) und `nodejs`/`npm` (für `yarn` in A und `pnpm` in D).
+3. `C-leicht-android` liefert Android-Tools und `gdb`.
+4. `D-leicht-lsp` liefert LSP-Tools, `pnpm`, `taplo` und `shellcheck`.
+5. `F-leicht-utils` liefert Hilfswerkzeuge (`vim`, `tmux`, etc.).
+6. `A-leicht-jvm` liefert `gradle`, `kotlin`, `maven`, `codeforge-env`, `yarn`, `autoconf`, `automake`.
+
 | Gruppe | Etappe | Zusatzpakete | Art |
 |---|---|---|---|
-| `A-leicht-jvm` | `04-jvm-tools` (gradle, kotlin, maven, libjansi, ant, apksigner, d8, dx, ecj) | codeforge-env, yarn, autoconf, automake | leicht |
-| `B-leicht-dev` | `06-dev-core` (git, git-lfs, zip, unzip, tar, libcurl, wget, liblzma, 7zip, jq, ninja, make, cmake, openssh) | pkg-config, libtool, flex, bison, ccache, patchelf, strace | leicht |
+| `B-leicht-dev` | `06-dev-core` (git, git-lfs, zip, unzip, tar, libcurl, wget, liblzma, 7zip, jq, ninja, make, cmake, openssh) | m4, pkg-config, libtool, flex, bison, ccache, patchelf, strace | leicht |
+| `E-leicht-py-node` | `08-python` (python, python-pip) | nodejs, npm | leicht |
 | `C-leicht-android` | `05-android-tools` (libprotobuf, aapt) | gdb, android-tools, gh, rsync, xmlstarlet | leicht |
 | `D-leicht-lsp` | `12-lsp-misc` (gopls, taplo, ruff) | neocmakelsp, esbuild, pnpm, shellcheck | leicht |
-| `E-leicht-py-node` | `08-python` (python, python-pip) | nodejs, npm | leicht |
 | `F-leicht-utils` | `07-utils` (vim, nano, ripgrep, fd, tmux, patch, diffutils, findutils, binutils, which, libmagic, libsqlite, bash-completion) | – | leicht |
+| `A-leicht-jvm` | `04-jvm-tools` (gradle, kotlin, maven, libjansi, ant, apksigner, d8, dx, ecj) | codeforge-env, yarn, autoconf, automake | leicht |
 | `H1-jdk17` | `01-jdk17` (openjdk-17) | – | schwer |
 | `H2-jdk21` | `02-jdk21` (openjdk-21) | – | schwer |
 | `H3-jdk25` | `03-jdk25` (openjdk-25) | – | schwer |
@@ -176,23 +184,24 @@ eingetragen; ihre Pakete sind in den Zusatzpaketen von A–E enthalten. Jedes Pa
 
 | Eingabe | Standard | Bedeutung |
 |---|---|---|
-| `preset` | `light` | `light` = Gruppen A–F · `heavy` = H1–H6 · `all` = beides (leichte zuerst) |
-| `only` | leer | Nur diese Gruppen, Komma getrennt (z. B. `E-leicht-py-node,A-leicht-jvm`); überschreibt `preset` |
+| `preset` | `light` | `light` = Gruppen B, E, C, D, F, A · `heavy` = H1–H6 · `all` = beides (leichte zuerst) |
+| `only` | leer | Nur diese Gruppen, Komma getrennt (z. B. `A-leicht-jvm`); überschreibt `preset` |
 | `mode` | `add` | `add` ergänzt das bestehende Repo |
 | `archs` | `aarch64,arm` | Architekturen; Gruppen mit eigenem `archs` im JSON nutzen dieses |
 | `publish` | aus | An: jede Gruppe wird nach ihrem Lauf veröffentlicht |
-| `stop_on_error` | aus | An: Kette bricht bei der ersten fehlgeschlagenen Gruppe ab |
+| `stop_on_error` | an (true) | An: Kette bricht bei der ersten fehlgeschlagenen Gruppe sofort ab (kein Veröffentlichen nach Abbruch) |
 | `keep_going` | an | Innerhalb einer Gruppe bei fehlgeschlagenem Paket weiterbauen |
+| `fail_on_skipped` | aus | An: bricht ab / schlägt fehl, wenn Pakete verworfen oder übersprungen wurden |
 | `target_repo` | `scto/terminal-packages-codeforge` | Ziel für `gh-pages` |
 
 Die Gruppen laufen **strikt nacheinander** (`max-parallel: 1`): `gh-pages` darf nicht parallel beschrieben werden. Artefakte heißen `debs-<Gruppe>-<Arch>` (tar-Archiv) und
 `codeforge-apt-repo-<Gruppe>`; `run_label` setzt der Aufrufer, damit sich die Gruppen nicht überschreiben.
 
-### Empfohlene Reihenfolge
-
-1. Zum Testen eine kleine Gruppe mit `publish` aus: `only=D-leicht-lsp`.
-2. `E-leicht-py-node` (liefert Python und `python-pip`), dann `A`, `C`, `B`, `D`, `F` mit `publish` an (oder `preset=light`).
-3. Danach die schweren Gruppen, zuerst `H1-jdk17` (Standard-JDK der App), dann `H2-jdk21` (das Paket `kotlin` hängt davon ab), danach nach Bedarf H3–H6. Ein Laufzeit-Risiko besteht bei `openjdk-*`, `libllvm` und `dart` (6-Stunden-Grenze je Job).
+### Nachhol-Lauf für einzelne Gruppen
+Sollte eine Gruppe fehlschlagen oder nachgeholt werden müssen (z.B. nach Fertigstellung der JDKs für Gruppe A):
+- Workflow `build-all-stages.yml` starten mit `only=A-leicht-jvm`, `mode=add`, `publish=true`.
+- Alternativ direkt `build-bootstrap-repo.yml` mit `stage=04-jvm-tools`, `repo_packages=codeforge-env,yarn,autoconf,automake`, `mode=add`, `publish=true`.
+- Der Modus `add` verändert die bereits vorhandenen und veröffentlichten Pakete im Pool nicht, sondern fügt nur die neu gebauten `.deb` hinzu und aktualisiert `Packages` und `Release`.
 
 ### Regeln beim Ändern von `apt-groups.json`
 

@@ -39,7 +39,7 @@ on:
       stop_on_error:
         description: "Kette abbrechen, sobald eine Gruppe fehlschlägt"
         required: true
-        default: false
+        default: true
         type: boolean
       keep_going:
         description: "Innerhalb einer Gruppe bei fehlgeschlagenem Paket weiterbauen"
