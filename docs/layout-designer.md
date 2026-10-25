@@ -1,30 +1,84 @@
 # Layout-Designer (`:feature:layoutdesigner`)
 
-Stand: 2026-10-08. Visueller Editor für **Android-View-Layout-XML** (`res/layout*/*.xml`). Die reine Logik ist per JVM-Test geprüft (14 Tests), die Compose-UI und die Einbindung sind **nicht gebaut** (kein Gradle/Android); Prüfauftrag: `agy-tasks/14`-Folge → `agy-tasks/15-verify-layout-designer.md`.
+Stand: Oktober 2026 (Task 41 abgeschlossen). Visueller Editor für **Android-View-Layout-XML** (`res/layout*/*.xml`) mit Gestensteuerung, Drag & Drop, Zoom/Pan, echter ConstraintLayout- und RelativeLayout-Darstellung, Ressourcen-Auflösung, Linter mit Schnellkorrekturen und Zwei-Wege-Synchronisation mit dem Code-Editor.
 
-## Bedienung
-- Drawer → Bereich **Layouts**: listet alle Layout-Dateien des Projekts, `+` legt eine neue an (Name `a–z0–9_`, Ziel-`res`-Ordner wählbar), Tippen öffnet den Designer (eigene Route `layout_designer/{filePath}`).
-- **Vorschau** (Gerätegrößen Phone/Phone groß/Tablet 7″/10″): Tippen wählt ein Element. Auswahl-Leiste: nach oben/unten, ein-/ausrücken (in vorherigen Container / heraus), duplizieren, löschen.
-- **+ (Palette):** Linear vertikal/horizontal, Frame, Scroll, Constraint, TextView, Button, EditText, CheckBox, Switch, ImageView, ProgressBar, View, Space. Das Widget landet im ausgewählten Container (oder im Elternteil eines ausgewählten Blatts) und bekommt eine freie `@+id/…`.
-- **Struktur** (Baum), **Eigenschaften** (Editor je Attributtyp: Text, Zahl, Dimension, Größe mit Schnellauswahl, Farbe mit Swatch, Enum; „Weitere Attribute“ für alles Übrige + Attribut hinzufügen), **XML** (bearbeitbar, wirkt erst nach „XML übernehmen“, Fehler werden angezeigt).
-- Undo/Redo (100 Schritte; Eingaben in dasselbe Feld teilen sich einen Schritt), Speichern (atomar über `.tmp`, danach `FileSyncBridge.notifyExternalChange`), „Im Editor öffnen“, Verwerfen-Dialog bei ungespeicherten Änderungen.
-- Layout: Compact = Tabs; ab 600 dp = Vorschau links, rechts Panel mit Struktur/Eigenschaften/XML.
+---
 
-## Aufbau
-| Paket | Inhalt |
-|---|---|
-| `model` | `LayoutNode`/`LayoutDocument` (immutable), `WidgetCatalog` (Widgets, Attribute je Eltern-Typ, Palette), `LayoutOps` (add/remove/duplicate/move/indent/outdent/setAttribute), `Units` (dp, Farben, Größen) |
-| `xml` | `LayoutXml.parse/write` (DOM ohne Namespace-Auflösung, DOCTYPE abgelehnt; Ausgabe mit `xmlns:android/app/tools`, `id`/`width`/`height` zuerst) |
-| `preview` | `LayoutPreview`: Compose-Näherung (Linear mit weight/gravity, Frame mit layout_gravity, Widgets) |
-| `ui`, Root | `LayoutDesignerContract` (MVI), `LayoutDesignerViewModel`, `LayoutDesignerScreen`, Panels |
-| `files` | `LayoutScanner` (JVM), `LayoutFilesViewModel`/`Panel` für den Drawer |
+## 1. Bedienung & Benutzeroberfläche
 
-Integration in `:app`: `Routes.LAYOUT_DESIGNER_PATTERN`/`Routes.layoutDesigner(path)`, `DrawerSection.LAYOUTS` in `WorkspaceDrawer`. Texte in `:core:resources` (`layout_*`, `drawer_layouts`).
+### Navigation & Einstieg
+- **Drawer → Bereich „Layouts“:** Listet alle Layout-Dateien des Projekts gruppiert nach Varianten.
+- **`+` (Neue Layout-Datei anlegen):** Dialog mit Namensprüfung (`a-z0-9_`), Zielordner-Auswahl (`res/layout*`) und 5 sofort einsatzbereiten, lint-sauberen Vorlagen (*Leeres ConstraintLayout*, *Leeres LinearLayout*, *Listen-Eintrag*, *Formular*, *Scrollbare Detailseite*).
+- **Routen-Integration:** `Routes.layoutDesigner(path)` öffnet den visuellen Designer.
 
-## Grenzen (ehrlich)
-- Die Vorschau ist eine **Näherung**, keine echte View-Inflation: ConstraintLayout/RelativeLayout und unbekannte Container werden gestapelt gezeichnet (Hinweis in der UI); Referenzen (`@string/…`, `@drawable/…`, `@color/…`) werden nicht aufgelöst; Styles/Themes/`include`/`merge` fehlen; Bilder sind Platzhalter.
-- Kein Drag-and-Drop – Einfügen per Palette, Umordnen per Leiste.
-- Speichern **normalisiert** die Formatierung der Datei (Einrückung, Attributreihenfolge `id/width/height` zuerst); Kommentare und Text zwischen Elementen gehen verloren.
-- Nur ein Dokument pro Sitzung; `tools:`-Attribute werden erhalten, aber nicht ausgewertet.
-- Material-Komponenten (`com.google.android.material.*`) erscheinen als Platzhalter-Kästen.
-- ViewModels sind nicht getestet (nur Modell, XML, Scanner).
+### Ansichten & Tabs
+- **Tabs im Compact-Modus (< 600 dp):**
+  - **Vorschau:** Interaktive Arbeitsfläche mit Canvas, Gesten, Größengriffen und Constraint-Ankern.
+  - **Struktur:** Hierarchischer DOM-Baum mit Einrückung, Typ-Icons, IDs, Linter-Badges und Reorder-Handles.
+  - **Eigenschaften:** Gruppiertes Attribut-Panel (*Häufig*, *Layout/Maße*, *Text/Typografie*, *Erscheinungsbild*, *Barrierefreiheit*, *Weitere Attribute*).
+  - **Probleme (Lint):** Echtzeit-Codeanalyse mit Schnellkorrekturen (*QuickFix*) und Filter-Chips (*Fehler*, *Warnungen*, *Hinweise*).
+  - **XML-Editor:** Direkte XML-Bearbeitung mit Syntax-Hervorhebung (Tags, Attribute, Werte, Kommentare), Tag-Range-Synchronisation und Vorab-Syntaxprüfung.
+- **Two-Pane-Modus (≥ 600 dp / Tablets / DeX):** Leinwand links permanent sichtbar, rechte Spalte mit Tabs für Struktur, Eigenschaften, Probleme und XML.
+
+### Gesten-Übersicht
+
+| Geste | Zielbereich | Auswirkung / Aktion |
+|---|---|---|
+| **Antippen (Tap)** | Leinwand-Element / Baum | Wählt das Element primär aus. Zweites Antippen wählt das Elternelement. |
+| **Langer Druck + Ziehen (Long Press Drag)** | Palette-Widget | Startet Drag & Drop eines neuen Widgets mit blauem Drop-Indikator auf der Leinwand. |
+| **Langer Druck + Ziehen (Long Press Drag)** | Leinwand-Element | Verschiebt ein bestehendes Element auf der Leinwand oder in einen anderen Container. |
+| **Ziehen am Reorder-Handle** | Strukturbaum | Ordnet Elemente hierarchisch um oder verschiebt sie in andere Container. |
+| **Zwei-Finger-Pinch (Pinch to Zoom)** | Leinwand | Stufenloses Hinein- und Herauszoomen (0.25× bis 4.0×). |
+| **Zwei-Finger-Verschieben (Pan)** | Leinwand | Verschiebt den sichtbaren Arbeitsbereich flüssig in alle Richtungen. |
+| **Ziehen an Größengriffen (Resize)** | Leinwand-Auswahl | Ändert `layout_width` und `layout_height` des gewählten Elements. |
+| **Ziehen an Kreis-Ankern (Constraints)** | Constraint-Auswahl | Erstellt oder verbindet Constraints magnetisch mit Nachbarelementen oder Elternrändern. |
+
+### Tastatur-Kürzel (Hardware-Tastatur / DeX)
+- `Strg + Z` / `Strg + Y`: Rückgängig / Wiederholen (Undo-Stack mit 100 Schritten und Coalescing aufeinanderfolgender Textänderungen).
+- `Strg + C` / `Strg + X` / `Strg + V`: Kopieren, Ausschneiden und Einfügen (mit automatischer Kollisionsbereinigung bei `@+id/`).
+- `Strg + D`: Gewähltes Element duplizieren.
+- `Entf` / `Backspace`: Gewählte Elemente löschen (inklusive Bereinigung abhängiger Constraints).
+- `Pfeiltasten`: Verschieben um 1 dp (`Shift + Pfeiltasten`: 8 dp Rasterschritt).
+
+---
+
+## 2. Architektur & Paketaufbau
+
+| Paket | Klassen & Komponenten | Verantwortung |
+|---|---|---|
+| `model` | `LayoutNode`, `LayoutDocument`, `LayoutOps`, `WidgetCatalog`, `Units`, `LayoutTemplates`, `LayoutClipboard` | Unveränderliches DOM, Baum-Operationen, Widget-Definitionen, Vorlagen und Maßeinheiten. |
+| `xml` | `LayoutXml`, `LayoutParseException` | DOM-Parser und Generator unter vollständigem Erhalt von Kommentaren, CRLF/LF-Zeilenenden, Einrückung, benutzerdefinierten Namespaces und XML-Entities. |
+| `dnd` | `DragController`, `DropResolver`, `NodeBoundsRegistry`, `DropTarget`, `DropVerdict` | Plattformunabhängige Gestenerkennung, Koordinatentransformation und treffsichere Einfüge- und Verdrängungs-Berechnung. |
+| `preview` | `LayoutPreview`, `ConstraintLayoutPreview`, `RelativeLayoutPreview`, `PreviewContext` | Echte Darstellung von ConstraintLayout (inkl. Guidelines/Barriers), RelativeLayout (topologischer Solver), LinearLayout, FrameLayout und ScrollViews. |
+| `res` | `ResourceRepository`, `IncludeResolver`, `SdkAttrsParser`, `ResourceConfig` | Auflösen von `@string/`, `@color/`, `@dimen/`, Themes/Styles, VectorDrawables, `include`, `merge`, `ViewStub` und SDK-Attributen. |
+| `lint` | `LayoutLinter`, `LayoutIssue`, `QuickFix`, `LintRules` | Statische Prüfung auf fehlende Constraints, RTL-Verletzungen, harte Texte, ungültige Einheiten, Zyklen und Barrierefreiheit. |
+| `ui` | `DesignerPanels`, `XmlVisualTransformation` | Compose-Panels für Palette, Strukturbaum, Eigenschaften, Linter und formatierter XML-Codeeditor. |
+| `files` | `LayoutScanner`, `LayoutFilesViewModel`, `LayoutFilesPanel`, `LayoutFileStore` | Scannen von Layoutdateien, Varianten-Handling (`layout-land`, `layout-sw600dp`) und atomare Datei-I/O (`.tmp` + rename). |
+| Root | `LayoutDesignerScreen`, `LayoutDesignerViewModel`, `LayoutDesignerContract` | MVI-Architektur, Event-Handling, Undo/Redo, Zwei-Wege-Sync (`FileSyncBridge`) und Prozess-Tod-Wiederherstellung (`SavedStateHandle`). |
+
+---
+
+## 3. Technische Schlüsselentscheidungen
+
+### Gestenerkennung & Drag & Drop
+- **Eigene Geste (`DragController` & `NodeBoundsRegistry`):** Statt fehleranfälliger Drittanbieter-Bibliotheken verwendet der Layout-Designer einen reinen Kotlin-Gestencontroller in Kombination mit `Modifier.onGloballyPositioned` und `detectDragGesturesAfterLongPress`.
+- **Reiner Drop-Resolver (`DropResolver`):** Pure JVM-Logik ohne Android-Abhängigkeiten berechnet Ankerzonen, Verdrängungspositionen in `LinearLayout`s (Drittel-Aufteilung), `layout_gravity` in `FrameLayout`s und relative Abstände in `ConstraintLayout`s.
+
+### XML-Roundtrip & Formatierungserhalt
+- **Erweiterter DOM-Parser (`LayoutXml`):**
+  - Behält Kommentare vor dem Wurzelelement und zwischen Knoten byte-genau bei.
+  - Erkennt Quell-Einrückung (2 Leerzeichen, 4 Leerzeichen, Tabs) und Zeilenenden (`\r\n` vs. `\n`).
+  - Behandelt benutzerdefinierte Tags (`<com.example.MyCustomView>`), XML-Entities (`&amp;`, `&lt;`) und Unicode ohne Datenverlust.
+  - Verhindert XXE-Angriffe durch Deaktivierung von Doctype-Deklarationen (`disallow-doctype-decl`).
+
+### Echte Container-Darstellung
+- **ConstraintLayout:** Nutzung von `androidx.constraintlayout.compose` mit dynamischem `ConstraintSet`. Guidelines (horizontal/vertikal, Prozent/dp) und Barrieren werden direkt berechnet.
+- **RelativeLayout:** Eigener topologischer Sortierungs-Solver (`RelativeSolver`) ermittelt die korrekte Messreihenfolge abhängiger Knoten und fängt zyklische Abhängigkeiten ab.
+
+---
+
+## 4. Ehrliche Grenzen & Bekannte Einschränkungen
+
+- **Keine native NDK/C++ Inflation:** Eigene Custom Views aus Drittbibliotheken, die auf NDK-Code oder systemspezifische Bytecode-Manipulation angewiesen sind, werden nicht im nativen Android-View-System instantiiert, sondern über den `CustomViewScanner` als informative, layout-konforme Platzhalter gerendert.
+- **Komplexe Shader / Renderscript:** Erweiterte Render-Effekte (z. B. BlurMaskFilter, RenderEffect-Pipelines) werden in der Vorschau vereinfacht dargestellt.
+- **Android Support-Library (Legacy):** Fokus liegt auf modernen AndroidX- und Material3-Komponenten. Veraltete Support-v4-Fragmente werden auf Standard-Fragment-Container gemappt.

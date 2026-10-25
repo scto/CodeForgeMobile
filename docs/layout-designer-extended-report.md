@@ -13,8 +13,8 @@
 - [x] **41.8** Prüfungen (Lint) mit Schnellkorrektur (`LayoutLinter`, Regeln, UI-Panel)
 - [x] **41.9** Zusammenspiel mit dem Code-Editor und Dateien (`FileSyncBridge`, Vorlagen, Varianten, `SavedStateHandle`)
 - [x] **41.10** Leistung und Robustheit (500 Knoten Benchmark, Fehlerisolation)
-- [ ] **41.11** (optional) View-XML → Jetpack-Compose-Code
-- [ ] **41.12** Tests, Doku, Abnahme (JVM-Tests, Checklist, Doku-Update)
+- [x] **41.11** (optional) View-XML → Jetpack-Compose-Code (übersprungen gemäß Optional-Klausel)
+- [x] **41.12** Tests, Doku, Abnahme (117 JVM-Tests grün, assembleDebugAndroidTest grün, assembleDebug grün, Doku-Update)
 
 ---
 
@@ -530,6 +530,54 @@ Messwerte auf dem Entwicklungsrechner (JVM / Android Runtime):
   6. `robustness_crlfLineEndings_preserved`
   7. `robustness_malformedXml_throwsLayoutParseException`
 - Insgesamt **117 Unit-Tests** in `:feature:layoutdesigner` bestanden (100 %).
+
+---
+
+## 41.11 (optional) View-XML → Jetpack-Compose-Code
+
+*Status:* **Übersprungen (optional)** gemäß Spezifikation. Die Kernfunktionalität des Layout-Designers für Android View XML (Bearbeitung, Drag & Drop, Vorschau, Linter, Res-Resolution) ist vollständig und autark ohne den Compose-Generator abgeschlossen.
+
+---
+
+## 41.12 Tests, Doku, Abnahme
+
+### Testabdeckung & Verifikation
+- **117 JVM Unit-Tests:** 100 % grün über alle Module (`LayoutModelTest`, `LayoutXml`, `LayoutOps`, `DropResolverTest`, `LayoutPerformanceAndRobustnessTest`, `ConstraintMapperTest`, `RelativeSolverTest`, `ResourceRepositoryTest`, `IncludeResolverTest`, `SdkAttrsParserTest`, `CustomViewScannerTest`, `LayoutLinterTest`, `LayoutTemplatesTest`, `LayoutDesignerViewModelTest`).
+- **Android-Test-Kompilierung:** `./gradlew :feature:layoutdesigner:assembleDebugAndroidTest` erfolgreich kompiliert (BUILD SUCCESSFUL).
+- **App-Gesamtbuild:** `./gradlew :app:assembleDebug` erfolgreich kompiliert und assembliert (BUILD SUCCESSFUL).
+- **Lokalisierung:** Alle UI-Texte in `:core:resources` auf Deutsch und Englisch gepflegt; String-Check ohne Fehler.
+
+### Aktualisierte Dokumentation
+1. `docs/layout-designer.md`: Vollständig überarbeitet mit Gesten-Übersicht, Tastenkürzeln, Architektur der neuen Pakete (`dnd`, `res`, `lint`, `files`), technischen Entscheidungen und ehrlichen Grenzen.
+2. `docs/device-test-checklist.md`: Ergänzt um Abschnitt `G. Layout-Designer (Visueller XML-Editor)` mit 10 detaillierten manuellen Testfällen (`DSG-01` bis `DSG-10`).
+3. `STATUS.md`, `agy-tasks/TASKS-STATUS.md`, `agy-tasks/README.md`: Aktualisiert auf den Stand von Task 41 (abgeschlossen).
+
+---
+
+## Zusammenfassung der Gesamtabnahme
+
+### Getestet
+- Vollständiger XML-Roundtrip mit Erhalt von Kommentaren, Doctype-Abweisung (XXE-Schutz), Namespaces, Einrückungen und CRLF-Zeilenenden.
+- Reine JVM-Logik für Drag & Drop, `DropResolver` und Koordinatenzuordnung.
+- Echte ConstraintLayout- und RelativeLayout-Auflösung inklusive Zykluserkennung.
+- Ressourcen-Auflösung von Strings, Farben, Maßen, Styles und Vector-Drawables.
+- 17 Lint-Regeln und 5 Schnellkorrektur-Typen.
+- Zwei-Wege-Synchronisation mit `FileSyncBridge`, Prozess-Tod-Wiederherstellung (`SavedStateHandle`).
+- 500-Knoten-Leistungsbenchmark (< 50 ms Zielvorgabe bei allen Operationen erreicht).
+
+### Nicht getestet
+- Manuelle Ausführung auf physischem Endgerät (in CI/Termux ohne ADB-Gerät; Testfälle in `docs/device-test-checklist.md` vorbereitet).
+
+### Offene Punkte
+- Keine blockierenden Punkte.
+
+### Gewählte Bibliotheksversionen mit Beleg
+| Bibliothek | Version | Herkunft / Beleg |
+|---|---|---|
+| `androidx.compose.material:material-icons-extended` | `1.7.3` | In `gradle/libs.versions.toml` als `libs.androidx.compose.material.icons.extended` gepflegt; ersetzt vormalig harte Versionsangabe. |
+| `androidx.constraintlayout:constraintlayout-compose` | `1.1.0` | Definiert in `gradle/libs.versions.toml` (`libs.androidx.constraintlayout.compose`). |
+| `org.jetbrains.kotlinx:kotlinx-coroutines-test` | `1.9.0` | Definiert in `gradle/libs.versions.toml` (`libs.kotlinx.coroutines.test`). |
+
 
 
 

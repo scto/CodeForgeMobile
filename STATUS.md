@@ -40,7 +40,7 @@ Legende: ✅ umgesetzt (gebaut) · 🧪 zusätzlich JVM-getestet · 🟡 teilwei
 | Indexierung, Dependency-Updater, Editor-Overlays (Versions-Hinweis, Farb-Kästchen) | ✅ | `docs/indexing-and-dependency-updater.md` |
 | LSP-Client (`LspClientRepositoryImpl`, JSON-RPC) | ✅ 🧪 | voll angebunden über `LspServerResolver` und `LspSessionController` im Editor, verifiziert (Task 23) |
 | Compose-Preview (Termux-`kotlinc`-Prozesscompiler, `packCompilerRuntime` 30 JARs, `CompilerRuntimeProviderImpl`, Android-Platform `android.jar`, Workflow) | ✅ 🧪 | `docs/compose-preview.md`, `docs/compose-preview-runtime-report.md`, `docs/compose-preview-kotlinc-report.md` |
-| **Layout-Designer** (Palette, Vorschau, Baum, Eigenschaften, XML, Undo/Redo, Speichern) | ✅ 🧪 (Logik) | `docs/layout-designer.md` |
+| **Layout-Designer** (Drag & Drop, Zoom/Pan, ConstraintLayout/RelativeLayout, Linter & QuickFixes, Ressourcen-Auflösung, Vorlagen, Varianten, XML-Syntaxhervorhebung, Undo/Redo) | ✅ 🧪 | `docs/layout-designer.md`, `docs/layout-designer-extended-report.md` |
 
 ### Projekt & Einstellungen
 | Bereich | Status | Details / Doku |

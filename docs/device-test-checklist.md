@@ -97,6 +97,23 @@ Diese Checkliste dient der manuellen Qualitätssicherung auf echten physischen A
 
 ---
 
+### G. Layout-Designer (Visueller XML-Editor)
+
+| ID | Testfall | Schritte & Szenario | Erwartetes Ergebnis | Testgerät / OS | Status |
+|---|---|---|---|---|---|
+| **DSG-01** | Drag aus Palette auf Leinwand | Palette öffnen, Widget per Long-Press anfassen und auf Leinwand / Container ziehen. | Blauer Drop-Indikator zeigt Einfügelinie oder Zielcontainer; Widget wird an Zielposition eingefügt; Undo verfügbar. | Pixel 8 (Android 14) | ungeprüft |
+| **DSG-02** | Drag im Strukturbaum | Knoten im Strukturbaum per Drag-Handle an neue Position oder in anderen Container ziehen. | Strukturbaum aktualisiert sich sofort; Eltern-/Kindbeziehungen und XML-Hierarchie passen sich an. | Pixel 8 (Android 14) | ungeprüft |
+| **DSG-03** | Größengriffe (Resize-Handles) | Element auf Leinwand auswählen und rechteckige Größengriffe an den Ecken/Kanten ziehen. | `layout_width`/`layout_height` passen sich in Pixel/dp an; Schnellauswahl für `match_parent`/`wrap_content`. | Galaxy Tab S9 (Android 14) | ungeprüft |
+| **DSG-04** | Constraint-Anker verbinden & lösen | Element in ConstraintLayout wählen; Kreis-Ankerpunkte zu Elternelement oder Nachbarknoten ziehen. | Verbindungslinien rasten magnetisch ein; `layout_constraintTop_toTopOf` etc. werden gesetzt; Lösch-Button entfernt Constraint. | Pixel 8 (Android 14) | ungeprüft |
+| **DSG-05** | Ressourcen-Auflösung im Designer | Layout mit `@string/appName`, `@color/primary`, `@dimen/margin` und VectorDrawables öffnen. | Texte, Farben, Abstände und Vector-Icons werden aus `res/` aufgelöst und in der Vorschau korrekt gerendert. | Pixel 8 (Android 14) | ungeprüft |
+| **DSG-06** | In Ressource auslagern | Hardcodierten Text oder Maße wählen; Aktion „In Ressource auslagern“ betätigen. | Dialog zur Eingabe des Ressourcenschlüssels; Eintrag landet in `strings.xml`/`dimens.xml`; Layout-Verweis wird aktualisiert. | Pixel 8 (Android 14) | ungeprüft |
+| **DSG-07** | Externe Dateiänderungen | Layoutdatei extern (im Sora-Editor oder via Git) ändern, während Designer geöffnet ist. | Bei unverändertem Designer wird automatisch neu geladen; bei ungespeicherten Änderungen erscheint Konfliktdialog (Übernehmen/Behalten/Vergleichen). | Pixel 8 (Android 14) | ungeprüft |
+| **DSG-08** | Querformat & Tablet-Ansicht | Designer auf Tablet (≥ 600dp) oder im Querformat öffnen. | Two-Pane-Modus: Leinwand mit Zoom/Pan links, Eigenschaften-/Struktur-/Lint-Panel rechts; flüssige Skalierung. | Galaxy Tab S9 (Android 14) | ungeprüft |
+| **DSG-09** | Hardware-Tastatur & Shortcuts | Bluetooth- oder USB-Tastatur anschließen; `Strg+Z`, `Strg+Y`, `Strg+C`, `Strg+V`, `Entf` betätigen. | Aktionen (Rückgängig, Wiederholen, Kopieren, Einfügen, Löschen) reagieren exakt wie in Desktop-IDEs. | Galaxy Tab S9 (Android 14) | ungeprüft |
+| **DSG-10** | TalkBack & Barrierefreiheit | TalkBack aktivieren; durch Designer-Elemente, Baum und Eigenschaften navigieren. | Alle Knoten haben lesbare Barrierefreiheits-Labels; Lint-Mängel (fehlendes `contentDescription`) werden gemeldet. | Pixel 8 (Android 14) | ungeprüft |
+
+---
+
 ## 3. Protokollierung
 
 Ergebnisse aus manuellen Testdurchläufen sind im Format:
