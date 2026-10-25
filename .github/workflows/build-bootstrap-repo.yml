@@ -80,6 +80,11 @@ on:
         default: "fail"
         type: choice
         options: [fail, warn]
+      fail_on_skipped:
+        description: "Lauf abbrechen/als fehlgeschlagen markieren, wenn Pakete übersprungen/verworfen wurden"
+        required: false
+        default: false
+        type: boolean
   workflow_call:
     inputs:
       mode:
@@ -111,6 +116,11 @@ on:
         description: "Modus add: bei einem fehlgeschlagenen Paket weiterbauen und es am Ende melden"
         required: false
         default: true
+        type: boolean
+      fail_on_skipped:
+        description: "Lauf abbrechen/als fehlgeschlagen markieren, wenn Pakete übersprungen/verworfen wurden"
+        required: false
+        default: false
         type: boolean
       publish:
         description: "Nach dem Build veröffentlichen (full: Release + gh-pages, add: gh-pages)"
@@ -215,6 +225,7 @@ jobs:
         env:
           CODEFORGE_GPG_PASSPHRASE: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
           CONSISTENCY_CHECK: ${{ inputs.consistency_check || 'fail' }}
+          FAIL_ON_SKIPPED: ${{ inputs.fail_on_skipped && 'true' || 'false' }}
         run: |
           set -euo pipefail
           chmod +x build_codeforge_repo.sh
@@ -316,6 +327,7 @@ jobs:
       REPO_PACKAGES: ${{ needs.plan.outputs.repo_packages }}
       SKIP_DEPS_PACKAGES: ${{ needs.plan.outputs.skip_deps }}
       KEEP_GOING: ${{ inputs.keep_going && '1' || '0' }}
+      FAIL_ON_SKIPPED: ${{ inputs.fail_on_skipped && 'true' || 'false' }}
       PHASE: build
     steps:
       - uses: actions/checkout@v4
@@ -346,7 +358,7 @@ jobs:
             echo "Gebaute .deb: $(find terminal-packages-codeforge/output -maxdepth 1 -name '*.deb' 2>/dev/null | wc -l)"
             if [ -s failed-packages-${{ matrix.arch }}.txt ]; then
               echo
-              echo "**Fehlgeschlagen:**"
+              echo "**Fehlgeschlagen / verworfen:**"
               sed 's/^/- /' failed-packages-${{ matrix.arch }}.txt
             fi
           } >> "$GITHUB_STEP_SUMMARY"
@@ -358,8 +370,8 @@ jobs:
         run: |
           set -euo pipefail
           out=terminal-packages-codeforge/output
-          ls "$out"/*.deb >/dev/null
-          (cd "$out" && ls -1 *.deb) > debs-list.txt
+          find "$out" -maxdepth 1 -name '*.deb' -exec basename {} + > debs-list.txt
+          [ -s debs-list.txt ] || { echo "Keine .deb in $out gefunden" >&2; exit 1; }
           tar -cf "debs-${{ matrix.arch }}.tar" -C "$out" --files-from=debs-list.txt
           ls -lh "debs-${{ matrix.arch }}.tar"
 
@@ -371,7 +383,8 @@ jobs:
           path: |
             debs-${{ matrix.arch }}.tar
             failed-packages-*.txt
-          if-no-files-found: error
+            failed-packages.txt
+          if-no-files-found: warn
           compression-level: 0
           retention-days: 3
 
@@ -452,6 +465,7 @@ jobs:
         run: |
           set -euo pipefail
           export BASE_REPO_DIR="$PWD/base-repo" EXTRA_DEBS_DIR="$PWD/extra-debs"
+          export BIG_NEW_FILE="$PWD/big-new.txt"
           chmod +x build_codeforge_repo.sh
           ./build_codeforge_repo.sh
 
@@ -497,10 +511,10 @@ jobs:
             if [ -d github_repo_ready ]; then
               echo "Pakete im Repo gesamt: $(find github_repo_ready/pool -name '*.deb' | wc -l) · Pool: $(du -sh github_repo_ready/pool | cut -f1)"
             fi
-            fails="$(cat extra-debs/*/failed-packages-*.txt extra-debs/failed-packages-*.txt 2>/dev/null || true)"
+            fails="$(cat extra-debs/*/failed-packages-*.txt extra-debs/*/failed-packages.txt extra-debs/failed-packages-*.txt extra-debs/failed-packages.txt 2>/dev/null | sort -u || true)"
             if [ -n "$fails" ]; then
               echo
-              echo "**Nicht gebaut (bitte Log der Architektur-Jobs ansehen):**"
+              echo "**Nicht gebaut / verworfen (bitte Log der Architektur-Jobs ansehen):**"
               printf '%s\n' "$fails" | sed 's/^/- /'
             fi
           } >> "$GITHUB_STEP_SUMMARY"

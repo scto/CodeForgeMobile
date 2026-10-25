@@ -70,6 +70,7 @@ BASE_REPO_DIR="${BASE_REPO_DIR:-}"
 EXTRA_DEBS_DIR="${EXTRA_DEBS_DIR:-}"
 SKIP_DEPS_PACKAGES="${SKIP_DEPS_PACKAGES:-}"
 KEEP_GOING="${KEEP_GOING:-0}"
+FAIL_ON_SKIPPED="${FAIL_ON_SKIPPED:-false}"
 FAILED_PKGS=()
 
 mkdir -p "${TMP_ROOT}"
@@ -795,15 +796,16 @@ if [ -n "${REPO_PACKAGES}" ]; then
                 bad="$(grep -rla 'com\.termux' "${chk}" || true)"
                 if [ -n "${bad}" ]; then
                     echo "FEHLER: ${deb} enthält 'com.termux':" >&2
-                    printf '%s\n' "${bad}" | head >&2
+                    printf '%s\n' "${bad}" | head -10 >&2
                     # Fundstellen mit Kontext zeigen, damit die Ursache im Log steht (Text: Zeile, Binärdatei: Umgebung).
-                    printf '%s\n' "${bad}" | head -3 | while IFS= read -r hit; do
+                    printf '%s\n' "${bad}" | head -10 | while IFS= read -r hit; do
                         echo "--- Fundstelle in ${hit#"${chk}"}:" >&2
-                        grep -a -o '.\{0,60\}com\.termux.\{0,60\}' "${hit}" 2>/dev/null | head -3 >&2 || true
+                        grep -a -o '.\{0,60\}com\.termux.\{0,60\}' "${hit}" 2>/dev/null | head -10 >&2 || true
                     done
                     rm -rf "${chk}"
                     if [ "${KEEP_GOING}" = 1 ]; then
                         echo "FEHLGESCHLAGEN: ${pkg}: .deb enthält 'com.termux' (siehe oben)." >&2
+                        echo "::warning title=Prefix-Check fehlgeschlagen::${pkg} (${arch}): .deb enthält 'com.termux' und wurde verworfen."
                         FAILED_PKGS+=("${pkg} (${arch})")
                         rm -f "${deb}"   # kaputtes Paket nicht ins Repo übernehmen
                         continue 2
@@ -829,8 +831,24 @@ if [ "${PHASE}" = build ]; then
     FAILED_FILE="${WORKSPACE_DIR}/failed-packages-${ARCHS_LIST[*]// /_}.txt"
     : > "${FAILED_FILE}"
     [ "${#FAILED_PKGS[@]}" -eq 0 ] || printf '%s\n' "${FAILED_PKGS[@]}" > "${FAILED_FILE}"
+    cp -f "${FAILED_FILE}" "${WORKSPACE_DIR}/failed-packages.txt" 2>/dev/null || true
     echo "PHASE=build fertig: $(find "${CLONE_DIR}/output" -maxdepth 1 -name '*.deb' 2>/dev/null | wc -l) .deb in ${CLONE_DIR}/output, Fehlgeschlagen: ${#FAILED_PKGS[@]}"
-    [ "${#FAILED_PKGS[@]}" -eq 0 ] || { echo "Fehlgeschlagene Pakete:"; printf '  %s\n' "${FAILED_PKGS[@]}"; }
+    if [ "${#FAILED_PKGS[@]}" -gt 0 ]; then
+        echo "Fehlgeschlagene Pakete:"
+        printf '  %s\n' "${FAILED_PKGS[@]}"
+        if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            {
+                echo "### ⚠️ Verworfene / fehlgeschlagene Pakete (${ARCHS_LIST[*]}):"
+                printf '* %s\n' "${FAILED_PKGS[@]}"
+            } >> "${GITHUB_STEP_SUMMARY}"
+        fi
+        for fp in "${FAILED_PKGS[@]}"; do
+            echo "::warning::Verworfenes/fehlgeschlagenes Paket: ${fp}"
+        done
+        if [ "${FAIL_ON_SKIPPED:-false}" = "true" ] || [ "${FAIL_ON_SKIPPED:-0}" = "1" ]; then
+            die "fail_on_skipped aktiv: ${#FAILED_PKGS[@]} Paket(e) fehlgeschlagen oder verworfen."
+        fi
+    fi
     exit 0
 fi
 fi   # Ende Step 5 (PHASE != assemble)
@@ -1043,7 +1061,16 @@ fi
 if [ -f "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" ]; then
     echo "Prüfe Abhängigkeits-Konsistenz des APT-Repositories..."
     CONSISTENCY_CHECK="${CONSISTENCY_CHECK:-fail}"
-    python3 "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" repo "${REPO_DIR}" --on-error "${CONSISTENCY_CHECK}" \
+    # Große Pakete (> 95 MiB) liegen als Release-Asset, nicht im Pool: bestehendes Manifest (gh-pages) und die
+    # in diesem Lauf abgetrennten (BIG_NEW_FILE) als verfügbare Pakete mitzählen.
+    large_args=()
+    if [ -n "${BASE_REPO_DIR}" ] && [ -s "${BASE_REPO_DIR}/large-packages.txt" ]; then
+        large_args+=(--large-packages "${BASE_REPO_DIR}/large-packages.txt")
+    fi
+    if [ -n "${BIG_NEW_FILE:-}" ] && [ -s "${BIG_NEW_FILE}" ]; then
+        large_args+=(--large-packages "${BIG_NEW_FILE}")
+    fi
+    python3 "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" repo "${REPO_DIR}" ${large_args[@]+"${large_args[@]}"} --on-error "${CONSISTENCY_CHECK}" \
         || [ "${CONSISTENCY_CHECK}" = "warn" ] || die "Konsistenzprüfung des APT-Repositories fehlgeschlagen."
 fi
 
@@ -1100,3 +1127,22 @@ echo "  GPG:            ${GPG_DIR}"
 echo "  Bootstraps:     ${BOOTSTRAP_DIR}"
 echo "  APT-Repository: ${REPO_DIR}"
 echo "===================================================="
+
+if [ "${#FAILED_PKGS[@]}" -gt 0 ]; then
+    FAILED_FILE="${WORKSPACE_DIR}/failed-packages.txt"
+    printf '%s\n' "${FAILED_PKGS[@]}" > "${FAILED_FILE}"
+    echo "Fehlgeschlagene/verworfene Pakete:"
+    printf '  %s\n' "${FAILED_PKGS[@]}"
+    if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+        {
+            echo "### ⚠️ Verworfene / fehlgeschlagene Pakete:"
+            printf '* %s\n' "${FAILED_PKGS[@]}"
+        } >> "${GITHUB_STEP_SUMMARY}"
+    fi
+    for fp in "${FAILED_PKGS[@]}"; do
+        echo "::warning::Verworfenes/fehlgeschlagenes Paket: ${fp}"
+    done
+    if [ "${FAIL_ON_SKIPPED:-false}" = "true" ] || [ "${FAIL_ON_SKIPPED:-0}" = "1" ]; then
+        die "fail_on_skipped aktiv: ${#FAILED_PKGS[@]} Paket(e) fehlgeschlagen oder verworfen."
+    fi
+fi

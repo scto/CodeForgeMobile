@@ -231,6 +231,24 @@ Architecture: aarch64
             errors = check_consistency.run_repo_check(tmpdir, large_packages_path=lp_file)
             self.assertEqual(len(errors), 0)
 
+    def test_repo_with_multiple_large_manifests_exact_version(self):
+        """Basis-Manifest (gh-pages) + big-new.txt: spätere Einträge gewinnen, '= Version' wird erfüllt."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bin_dir = os.path.join(tmpdir, "dists/stable/main/binary-aarch64")
+            os.makedirs(bin_dir)
+            with open(os.path.join(bin_dir, "Packages"), "w", encoding="utf-8") as f:
+                f.write("Package: openjdk-21-x\nVersion: 21.0.12\nArchitecture: aarch64\n"
+                        "Depends: openjdk-21 (= 21.0.12)\n")
+            base = os.path.join(tmpdir, "base-large.txt")
+            new = os.path.join(tmpdir, "big-new.txt")
+            with open(base, "w", encoding="utf-8") as f:
+                f.write("openjdk-21|21.0.11|aarch64|a.deb|sha|1|url\n")
+            with open(new, "w", encoding="utf-8") as f:
+                f.write("openjdk-21|21.0.12|aarch64|b.deb|sha|1|url\n")
+            self.assertEqual(check_consistency.run_repo_check(tmpdir, large_packages_path=[base, new]), [])
+            # ohne big-new.txt bleibt der Fehler sichtbar
+            self.assertEqual(len(check_consistency.run_repo_check(tmpdir, large_packages_path=[base])), 1)
+
     def test_repo_missing_dependency(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             bin_dir = os.path.join(tmpdir, "dists/stable/main/binary-aarch64")

@@ -46,6 +46,11 @@ on:
         required: true
         default: true
         type: boolean
+      fail_on_skipped:
+        description: "Lauf mit Fehler beenden, wenn ein Paket wegen Fehlern oder Prefix-Check übersprungen wurde"
+        required: false
+        default: false
+        type: boolean
       target_repo:
         description: "Ziel-Repo für gh-pages"
         required: false
@@ -88,6 +93,7 @@ jobs:
       repo_packages: ${{ matrix.repo_packages }}
       archs: ${{ matrix.archs || inputs.archs }}
       keep_going: ${{ inputs.keep_going }}
+      fail_on_skipped: ${{ inputs.fail_on_skipped }}
       publish: ${{ inputs.publish }}
       target_repo: ${{ inputs.target_repo }}
       run_label: ${{ matrix.name }}
@@ -99,14 +105,49 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: deb-Artefakte für Diagnose herunterladen
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: debs-*
+          path: all-debs
+          merge-multiple: false
+
       - name: Ergebnis
         env:
           RESULT: ${{ needs.build.result }}
           MATRIX: ${{ needs.groups.outputs.matrix }}
+          FAIL_ON_SKIPPED: ${{ inputs.fail_on_skipped }}
         run: |
+          has_skipped=false
           {
             echo "### Kette: $RESULT"
             echo "Gruppen: $(jq -r '[.include[].name]|join(" → ")' <<<"$MATRIX")"
-            echo "Einzelergebnisse stehen in den Jobs 'build / …' (Matrix-Einträge)."
+            echo
+            if [ -d all-debs ]; then
+              echo "### Status / verworfene Pakete pro Gruppe:"
+              for d in all-debs/*; do
+                [ -d "$d" ] || continue
+                grp="$(basename "$d")"
+                fails="$(cat "$d"/failed-packages-*.txt "$d"/failed-packages.txt 2>/dev/null | sort -u || true)"
+                if [ -n "$fails" ]; then
+                  has_skipped=true
+                  echo "#### ⚠️ $grp: Verworfene / fehlgeschlagene Pakete:"
+                  printf '%s\n' "$fails" | sed 's/^/- /'
+                  echo "::warning title=Verworfene Pakete in $grp::$(echo "$fails" | tr '\n' ', ')"
+                else
+                  echo "- **$grp**: alle Pakete gebaut / keine verworfen"
+                fi
+              done
+            else
+              echo "Einzelergebnisse stehen in den Jobs 'build / …' (Matrix-Einträge)."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
-          [ "$RESULT" = success ] || { echo "Kette nicht erfolgreich: $RESULT"; exit 1; }
+          if [ "$RESULT" != success ]; then
+            echo "Kette nicht erfolgreich: $RESULT"
+            exit 1
+          fi
+          if [ "$has_skipped" = true ] && [ "$FAIL_ON_SKIPPED" = true ]; then
+            echo "fail_on_skipped aktiv und es wurden Pakete verworfen!"
+            exit 1
+          fi

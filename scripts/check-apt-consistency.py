@@ -316,32 +316,40 @@ def run_repo_check(repo_path, large_packages_path=None):
     Prüft alle Pakete in einem APT-Repository auf Erfüllbarkeit ihrer Abhängigkeiten.
     """
     errors = []
-    # 1. Große Pakete aus large-packages.txt laden
+    # 1. Große Pakete aus large-packages.txt laden (liegen als Release-Asset, nicht im Pool).
+    #    Mehrere Manifeste möglich (bestehendes Manifest aus gh-pages + big-new.txt dieses Laufs);
+    #    bei gleichem Paket+Architektur gewinnt der spätere Eintrag.
     large_pkgs = {}
-    large_cand_paths = []
-    if large_packages_path:
-        large_cand_paths.append(large_packages_path)
-    large_cand_paths.extend([
-        os.path.join(repo_path, "large-packages.txt"),
-        os.path.join(repo_path, "../large-packages.txt"),
-    ])
+    if isinstance(large_packages_path, (list, tuple)):
+        large_cand_paths = [p for p in large_packages_path if p]
+    elif large_packages_path:
+        large_cand_paths = [large_packages_path]
+    else:
+        large_cand_paths = []
+    if not large_cand_paths:
+        # Fallback nur, wenn nichts übergeben wurde
+        large_cand_paths = [
+            os.path.join(repo_path, "large-packages.txt"),
+            os.path.join(repo_path, "../large-packages.txt"),
+        ]
+        large_cand_paths = [c for c in large_cand_paths if os.path.isfile(c)][:1]
 
     for lp_path in large_cand_paths:
-        if os.path.isfile(lp_path):
-            with open(lp_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith("#"):
-                        continue
-                    parts = line.split("|")
-                    if len(parts) >= 3:
-                        p_name, p_ver, p_arch = parts[0], parts[1], parts[2]
-                        large_pkgs.setdefault(p_arch, {})[p_name] = {
-                            "Package": p_name,
-                            "Version": p_ver,
-                            "Architecture": p_arch,
-                        }
-            break
+        if not os.path.isfile(lp_path):
+            continue
+        with open(lp_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split("|")
+                if len(parts) >= 3:
+                    p_name, p_ver, p_arch = parts[0], parts[1], parts[2]
+                    large_pkgs.setdefault(p_arch, {})[p_name] = {
+                        "Package": p_name,
+                        "Version": p_ver,
+                        "Architecture": p_arch,
+                    }
 
     # 2. Packages-Dateien suchen
     packages_files = {}  # arch -> list of packages
@@ -449,7 +457,8 @@ def main():
     # repo sub-command
     p_repo = subparsers.add_parser("repo", help="Prüft ein APT-Repository Verzeichnis.")
     p_repo.add_argument("target", help="Pfad zum Repository (Verzeichnis mit dists/).")
-    p_repo.add_argument("--large-packages", help="Pfad zur large-packages.txt.", default=None)
+    p_repo.add_argument("--large-packages", action="append", default=None,
+                        help="Pfad zu einer large-packages.txt bzw. big-new.txt (mehrfach angebbar, spätere gewinnen).")
     p_repo.add_argument("--on-error", choices=["fail", "warn"], default=None,
                         help="Verhalten bei Fehlern ('fail'=Exit 1, 'warn'=Exit 0).")
 
