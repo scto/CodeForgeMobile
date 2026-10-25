@@ -85,6 +85,11 @@ on:
         required: false
         default: false
         type: boolean
+      force_publish:
+        description: "Veröffentlichung trotz Überschreitung der Pool-Abbruchschwelle erzwingen"
+        required: false
+        default: false
+        type: boolean
   workflow_call:
     inputs:
       mode:
@@ -152,6 +157,11 @@ on:
         required: false
         default: ""
         type: string
+      force_publish:
+        description: "Veröffentlichung trotz Überschreitung der Pool-Abbruchschwelle erzwingen"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -296,6 +306,47 @@ jobs:
           url="${APT_URL_IN:-https://${TARGET_REPO%%/*}.github.io/${TARGET_REPO##*/}}"
           python3 .github/scripts/generate-apt-index.py github_repo_ready "$url"
 
+      - name: Größenwächter prüfen (Pool-Größe gegen GitHub Pages Limit)
+        if: success()
+        env:
+          FORCE_PUBLISH: ${{ inputs.force_publish }}
+        run: |
+          set -euo pipefail
+          LARGE_PKG_THRESHOLD_MIB=30
+          POOL_WARN_LIMIT_MB=800
+          POOL_MAX_LIMIT_MB=950
+          if [ -f apt-limits.conf ]; then
+            # shellcheck disable=SC1091
+            . ./apt-limits.conf
+          fi
+          repo_bytes=$(du -sb github_repo_ready 2>/dev/null | cut -f1 || du -sk github_repo_ready | awk '{print $1 * 1024}')
+          repo_mb=$((repo_bytes / 1000000))
+          repo_mib=$((repo_bytes / 1048576))
+          pct=$((repo_mb * 100 / 1000))
+          {
+            echo "### 📏 Größenwächter (GitHub Pages Limit: 1.000 MB)"
+            echo "- Repo-Größe (ohne .git): **${repo_mb} MB** (${repo_mib} MiB) · **${pct}%** des Limits"
+            echo "- Schwellen: Warnung ab ${POOL_WARN_LIMIT_MB} MB · Abbruch ab ${POOL_MAX_LIMIT_MB} MB"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$repo_mb" -ge "$POOL_WARN_LIMIT_MB" ]; then
+            echo "::warning title=APT-Pool nähert sich dem GitHub Pages Limit::Repo hat ${repo_mb} MB (${pct}% des 1 GB Limits). Warnschwelle: ${POOL_WARN_LIMIT_MB} MB."
+          fi
+          if [ "$repo_mb" -ge "$POOL_MAX_LIMIT_MB" ]; then
+            echo "::error title=APT-Pool überschreitet Abbruchschwelle::Repo hat ${repo_mb} MB (Abbruchschwelle: ${POOL_MAX_LIMIT_MB} MB)."
+            {
+              echo "#### ⚠️ Die 5 größten Dateien im Repo:"
+              find github_repo_ready/pool -type f -name '*.deb' -exec ls -lh {} + 2>/dev/null | sort -k5 -hr | head -n5 | awk '{print "- " $9 " (" $5 ")"}'
+              echo
+              echo "Hinweis: Bitte Workflow rehome-large ausführen, um große Pakete ins Release large-packages auszulagern."
+            } >> "$GITHUB_STEP_SUMMARY"
+            if [ "$FORCE_PUBLISH" != "true" ]; then
+              echo "Veröffentlichung verweigert: Pool-Größe ${repo_mb} MB >= ${POOL_MAX_LIMIT_MB} MB (force_publish=false)." >&2
+              exit 1
+            else
+              echo "Warnung: force_publish=true aktiv – Veröffentlichung wird trotz Überschreitung fortgesetzt." >&2
+            fi
+          fi
+
       - name: APT-Repo auf gh-pages veröffentlichen
         if: success() && inputs.publish
         uses: ./.github/actions/publish-pages
@@ -427,13 +478,19 @@ jobs:
           find extra-debs -name 'debs-*.tar' -print -exec tar -xf {} -C extra-debs \; -delete
           echo "Entpackte .deb: $(find extra-debs -name '*.deb' | wc -l)"
 
-      # GitHub lehnt Dateien über 100 MB im Git-Push ab (GH001). Große .deb (z. B. gradle) kommen deshalb nicht ins
-      # gh-pages-Repo, sondern als Release-Asset; large-packages.txt (im Repo-Root) verweist darauf.
-      - name: Große Pakete abtrennen (> 95 MiB)
+      # Große .deb kommen nicht ins gh-pages-Repo, sondern als Release-Asset;
+      # large-packages.txt (im Repo-Root) verweist darauf. Schwelle aus apt-limits.conf (Standard 30 MiB).
+      - name: Große Pakete abtrennen (nach apt-limits.conf)
         env:
           TARGET_REPO: ${{ inputs.target_repo }}
         run: |
           set -euo pipefail
+          LARGE_PKG_THRESHOLD_MIB=30
+          if [ -f apt-limits.conf ]; then
+            # shellcheck disable=SC1091
+            . ./apt-limits.conf
+          fi
+          echo "Auslagerungsgrenze: ${LARGE_PKG_THRESHOLD_MIB} MiB"
           mkdir -p big-debs
           : > big-new.txt
           while IFS= read -r -d '' f; do
@@ -443,7 +500,7 @@ jobs:
             mv "$f" "big-debs/$asset"
             echo "$name|$ver|$arch|$asset|$sha|$size|https://github.com/$TARGET_REPO/releases/download/large-packages/$asset" >> big-new.txt
             echo "Abgetrennt: $name $ver ($arch), $((size / 1048576)) MiB"
-          done < <(find extra-debs -name '*.deb' -size +95M -print0)
+          done < <(find extra-debs -name '*.deb' -size "+${LARGE_PKG_THRESHOLD_MIB}M" -print0)
           echo "Große Pakete: $(wc -l < big-new.txt)"
 
       - name: Bestehendes Repo laden (gh-pages)
@@ -519,6 +576,47 @@ jobs:
               printf '%s\n' "$fails" | sed 's/^/- /'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Größenwächter prüfen (Pool-Größe gegen GitHub Pages Limit)
+        if: success()
+        env:
+          FORCE_PUBLISH: ${{ inputs.force_publish }}
+        run: |
+          set -euo pipefail
+          LARGE_PKG_THRESHOLD_MIB=30
+          POOL_WARN_LIMIT_MB=800
+          POOL_MAX_LIMIT_MB=950
+          if [ -f apt-limits.conf ]; then
+            # shellcheck disable=SC1091
+            . ./apt-limits.conf
+          fi
+          repo_bytes=$(du -sb github_repo_ready 2>/dev/null | cut -f1 || du -sk github_repo_ready | awk '{print $1 * 1024}')
+          repo_mb=$((repo_bytes / 1000000))
+          repo_mib=$((repo_bytes / 1048576))
+          pct=$((repo_mb * 100 / 1000))
+          {
+            echo "### 📏 Größenwächter (GitHub Pages Limit: 1.000 MB)"
+            echo "- Repo-Größe (ohne .git): **${repo_mb} MB** (${repo_mib} MiB) · **${pct}%** des Limits"
+            echo "- Schwellen: Warnung ab ${POOL_WARN_LIMIT_MB} MB · Abbruch ab ${POOL_MAX_LIMIT_MB} MB"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$repo_mb" -ge "$POOL_WARN_LIMIT_MB" ]; then
+            echo "::warning title=APT-Pool nähert sich dem GitHub Pages Limit::Repo hat ${repo_mb} MB (${pct}% des 1 GB Limits). Warnschwelle: ${POOL_WARN_LIMIT_MB} MB."
+          fi
+          if [ "$repo_mb" -ge "$POOL_MAX_LIMIT_MB" ]; then
+            echo "::error title=APT-Pool überschreitet Abbruchschwelle::Repo hat ${repo_mb} MB (Abbruchschwelle: ${POOL_MAX_LIMIT_MB} MB)."
+            {
+              echo "#### ⚠️ Die 5 größten Dateien im Repo:"
+              find github_repo_ready/pool -type f -name '*.deb' -exec ls -lh {} + 2>/dev/null | sort -k5 -hr | head -n5 | awk '{print "- " $9 " (" $5 ")"}'
+              echo
+              echo "Hinweis: Bitte Workflow rehome-large ausführen, um große Pakete ins Release large-packages auszulagern."
+            } >> "$GITHUB_STEP_SUMMARY"
+            if [ "$FORCE_PUBLISH" != "true" ]; then
+              echo "Veröffentlichung verweigert: Pool-Größe ${repo_mb} MB >= ${POOL_MAX_LIMIT_MB} MB (force_publish=false)." >&2
+              exit 1
+            else
+              echo "Warnung: force_publish=true aktiv – Veröffentlichung wird trotz Überschreitung fortgesetzt." >&2
+            fi
+          fi
 
       - name: Repo als Artefakt ablegen
         if: success()

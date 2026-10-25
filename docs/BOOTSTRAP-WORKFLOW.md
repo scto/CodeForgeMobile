@@ -65,7 +65,7 @@ Zusätzlich im Ziel-Repo: *Settings → Pages* auf Branch `gh-pages` stellen.
 - **Laufzeit:** GitHub bricht Jobs nach 6 Stunden ab (Workflow: 350 Minuten). Ein Lauf mit vier Architekturen hat rund 3,5 Stunden gedauert. `openjdk-17` kann sehr lange dauern; ggf. nur eine Architektur pro Lauf.
 - **Repo wird ersetzt:** `publish` ersetzt den kompletten Inhalt von `gh-pages` durch das Ergebnis dieses Laufs (Pool eingeschlossen). Nicht mitgebaute Architekturen und Pakete fehlen danach. Für ein vollständiges Repo alle gewünschten Architekturen und Pakete im selben Lauf bauen.
 - **Pages:** Im Ziel-Repo muss *Settings → Pages* auf Branch `gh-pages`, Ordner `/` stehen, und das Repo muss öffentlich sein. APT-URL: `https://scto.github.io/terminal-packages-codeforge`.
-- **Dateigröße:** GitHub lehnt Einzeldateien über 100 MB ab (das Script warnt ab 95 MB). Pages-Seiten sind außerdem auf etwa 1 GB begrenzt.
+- **Dateigröße & Pool-Limit:** GitHub lehnt Einzeldateien über 100 MB ab. Pages-Seiten sind außerdem auf 1.000 MB (1 GB) begrenzt. Gemäß `apt-limits.conf` werden .deb-Dateien ab 30 MiB automatisch als Release-Assets ins Release `large-packages` ausgelagert. Der Größenwächter im Zusammenbau warnt ab 800 MB und verweigert die Veröffentlichung ab 950 MB (übersteuerbar nur per `force_publish=true`).
 - **`extra_packages` vs. `repo_packages`:** `extra_packages` geht an `--add` des Termux-Builders und landet vermutlich im Bootstrap (Verhalten von `build-bootstraps.sh` im Fork nicht geprüft). `repo_packages` werden danach einzeln pro Architektur mit `build-package.sh -a <arch> -o output <paket>` gebaut, also auch samt Abhängigkeiten aus dem Quellcode. Jedes so gebaute Paket wird auf `com.termux` geprüft; ein Treffer bricht den Lauf ab. Unterpakete (`protobuf`, `aapt2`) werden über ihr Elternpaket gebaut. Der Build dieser Pakete ist in einem Lauf mit `repo_packages` noch nicht getestet.
 
 ## Welche Pakete?
@@ -222,17 +222,23 @@ Sollte eine Gruppe fehlschlagen oder nachgeholt werden müssen (z.B. nach Fertig
 
 Die Läufe selbst sind nach den Korrekturen **nicht erneut ausgeführt** worden; der Stand „behoben“ bezieht sich auf die Änderungen im Repo, nicht auf einen erfolgreichen neuen Lauf.
 
-## Große Pakete (> 100 MB)
+## Große Pakete (> 30 MiB / Release-Assets & Seitenlimit)
 
-GitHub lehnt beim Push auf `gh-pages` Einzeldateien über 100 MB ab (`GH001`, z. B. `gradle_9.8.0_all.deb` mit ~142 MB; potenziell auch `openjdk-*` oder `libllvm`).
+GitHub lehnt beim Push auf `gh-pages` Einzeldateien über 100 MB ab (`GH001`, z. B. `gradle_9.8.0_all.deb` mit ~142 MB). Zudem ist die gesamte veröffentlichte GitHub-Pages-Seite auf 1.000 MB (1 GB) begrenzt. Um das Limit dauerhaft einzuhalten, werden Pakete ab **30 MiB** (definiert in `apt-limits.conf`) als Release-Assets ausgelagert.
 
 ### Lösung im Workflow (`build-bootstrap-repo.yml`, Modus `add`)
-1. **Abtrennen ab 95 MiB:** Vor dem Zusammenbau des APT-Pools verschiebt der `assemble`-Job alle `.deb`-Dateien über 95 MiB nach `big-debs/` (Doppelpunkte aus Epochen werden im Dateinamen durch `_` ersetzt).
+1. **Abtrennen ab 30 MiB:** Vor dem Zusammenbau des APT-Pools verschiebt der `assemble`-Job alle `.deb`-Dateien über `LARGE_PKG_THRESHOLD_MIB` (30 MiB aus `apt-limits.conf`) nach `big-debs/` (Doppelpunkte aus Epochen werden im Dateinamen durch `_` ersetzt).
 2. **Release-Asset:** Bei `publish = true` werden diese Dateien an das GitHub-Release `large-packages` des Ziel-Repos (`scto/terminal-packages-codeforge`) hochgeladen (`gh release upload large-packages big-debs/* --clobber`).
 3. **Manifest `large-packages.txt` (+ `large-packages.txt.asc`):** Im Root des APT-Repos (`<apt-url>/large-packages.txt`) wird ein Verzeichnis aller ausgelagerten Pakete gepflegt (je Paket + Architektur gewinnt der neueste Eintrag) und zusätzlich mit dem Repo-Schlüssel als detachte Signatur `large-packages.txt.asc` signiert:
    ```text
    name|version|arch|datei|sha256|bytes|url
    ```
+4. **Größenwächter im Zusammenbau:** Vor der Veröffentlichung misst der Assemble-Job die Größe des Repos (ohne `.git`). Erzeugt eine Warnung in `GITHUB_STEP_SUMMARY` ab 800 MB (`POOL_WARN_LIMIT_MB`) und verweigert die Veröffentlichung ab 950 MB (`POOL_MAX_LIMIT_MB`), sofern nicht `force_publish=true` übergeben wird.
+
+### Bestands-Umzug (`scripts/rehome-large-packages.sh` / Workflow `rehome-large`)
+Für Pakete, die vor der Absenkung der Schwelle bereits im Pool gelandet sind (z. B. `openjdk-17` aarch64/arm, `openjdk-*-source`), existiert das Werkzeug `rehome-large-packages.sh`:
+- Standardmäßig sicherer Trockenlauf (`--dry-run`), berechnet Ersparnis und geplante Pool-Größe.
+- Mit `--execute` wird jedes Asset hochgeladen, vor dem Löschen auf GitHub verifiziert, aus dem Pool entfernt, `Packages`/`Release` neu generiert, signiert und konsistenzgeprüft.
 
 ### Installation auf dem Gerät (`codeforge-env`)
 Da ausgelagerte Pakete nicht im `pool/` und damit nicht in `dists/stable/main/binary-*/Packages` stehen, kennt `apt`/`pkg` sie nicht direkt.
@@ -241,6 +247,7 @@ Da ausgelagerte Pakete nicht im `pool/` und damit nicht in `dists/stable/main/bi
 - Steht das Paket nicht in `large-packages.txt`, fällt `install_repo_pkg` auf `pkg install -y <name>` zurück.
 - Manuelle Installation im Terminal (auch für große Pakete):
   ```bash
+  codeforge-env pkg openjdk-17
   codeforge-env pkg gradle
   # oder:
   codeforge-env install gradle

@@ -51,6 +51,11 @@ on:
         required: false
         default: false
         type: boolean
+      force_publish:
+        description: "Veröffentlichung trotz Überschreitung der Pool-Abbruchschwelle erzwingen"
+        required: false
+        default: false
+        type: boolean
       target_repo:
         description: "Ziel-Repo für gh-pages"
         required: false
@@ -97,6 +102,7 @@ jobs:
       publish: ${{ inputs.publish }}
       target_repo: ${{ inputs.target_repo }}
       run_label: ${{ matrix.name }}
+      force_publish: ${{ inputs.force_publish }}
     secrets: inherit
 
   summary:

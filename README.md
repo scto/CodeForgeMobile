@@ -152,10 +152,10 @@ cd CodeForgeMobile
 ./gradlew ktlintCheck
 ```
 
-### Termux Bootstrap & Large Packages (`> 100 MB`)
+### Termux Bootstrap & Large Packages (`> 30 MiB`)
 The app needs a bootstrap built for `com.codeforge.app`. Build and publish it with `build_codeforge_repo.sh` ([guide](build_codeforge_repo.md)); the GPG passphrase is read from the `CODEFORGE_GPG_PASSPHRASE` environment variable.
 
-Packages exceeding GitHub Pages' 100 MB file limit (`> 95 MiB`, such as `gradle` and potentially `openjdk-*` or `libllvm`) are automatically split out by `.github/workflows/build-bootstrap-repo.yml` into the `large-packages` GitHub Release and listed in `<apt-url>/large-packages.txt` (with detached signature `large-packages.txt.asc`). On the device, `codeforge-env` (`install_repo_pkg` / `pkg_install`, e.g. `codeforge-env pkg gradle` or `codeforge-env setup --gradle`) transparently downloads these `.deb` assets from `https://github.com/`, verifies their SHA-256 checksum, and installs them via `apt install -y`. See [docs/BOOTSTRAP-WORKFLOW.md](docs/BOOTSTRAP-WORKFLOW.md#große-pakete--100-mb) for details.
+Packages exceeding the threshold defined in `apt-limits.conf` (`> 30 MiB`, such as `gradle`, `openjdk-*`, `*-source`, `libllvm`) are automatically split out by `.github/workflows/build-bootstrap-repo.yml` into the `large-packages` GitHub Release to stay well within GitHub Pages' 1 GB repository size limit and listed in `<apt-url>/large-packages.txt` (with detached signature `large-packages.txt.asc`). On the device, `codeforge-env` (`install_repo_pkg` / `pkg_install`, e.g. `codeforge-env pkg openjdk-17` or `codeforge-env setup --gradle`) transparently downloads these `.deb` assets from `https://github.com/`, verifies their SHA-256 checksum, and installs them via `apt install -y`. See [docs/BOOTSTRAP-WORKFLOW.md](docs/BOOTSTRAP-WORKFLOW.md#große-pakete--30-mib--release-assets--seitenlimit) for details.
 
 ---
 

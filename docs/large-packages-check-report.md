@@ -100,11 +100,27 @@ Das 7-spaltige Manifest `large-packages.txt` (`name|ver|arch|asset|sha|size|url`
   - `actionlint .github/workflows/build-bootstrap-repo.yml .github/workflows/build-all-stages.yml` fehlerfrei (Exit 0).
 - ✅ **Salsa PoW-Analyse:**
   - HTTP-Verhalten und Varnish-PoW-HTML-Rückgabe bei curl/urllib verifiziert.
+- ✅ **GitHub Actions Workflow-Lauf H2-jdk21 (51.4.1):**
+  - Lauf-ID: `40183247959` (`build-all-stages.yml`, `only=H2-jdk21`, `mode=add`, `archs=aarch64,arm`, `publish=true`, `consistency_check=fail`).
+  - Ergebnis: **`success`** (Laufzeit 2h 7m).
+  - Zusammenbau-Schritt *Repo ergänzen, signieren, prüfen* lief ohne Abhängigkeitsfehler durch.
+  - Release-Assets im Release `large-packages` vorhanden:
+    - `openjdk-21_21.0.12_aarch64.deb` (100.93 MiB, SHA-256 `58f9472002ad1663cb560e803...`)
+    - `openjdk-21_21.0.12_arm.deb` (96.82 MiB, SHA-256 `833c2914bab848d500fa93f1f...`)
+  - `large-packages.txt` auf `gh-pages` enthält beide Architekturen von `openjdk-21` und `openjdk-25`.
+- ✅ **GitHub Actions Workflow-Lauf H1-jdk17 (51.4.2 Teil 1):**
+  - Lauf-ID: `40187774149` (`build-all-stages.yml`, `only=H1-jdk17`, `mode=add`, `publish=true`).
+  - Ergebnis: **`success`** (Laufzeit 2h 18m).
+- ✅ **APT-Repository-Konsistenzprüfung des veröffentlichten Repos (51.4.3):**
+  - Ausgeführt gegen frische `dists/` und `large-packages.txt` von `gh-pages`:
+    ```bash
+    python3 -I scripts/check-apt-consistency.py repo <gh-pages-dists> --large-packages <large-packages.txt>
+    ```
+  - Ergebnis: `OK: Alle Paket-Abhängigkeiten im APT-Repository sind konsistent und erfüllbar.` (Exit 0, 0 Fehler).
 
 ### Nicht getestet
-- GitHub Actions Workflow-Lauf `build-all-stages.yml` mit `only=H2-jdk21` (wird nach Push durch den Inhaber auf GitHub gestartet).
-- Installation von `openjdk-21` auf physischem Android-Gerät über `codeforge-env`.
+- Installation von `openjdk-21` auf physischem Android-Gerät über `codeforge-env` (Punkt 51.4.4, Gerätetest durch Inhaber).
 
 ### Offene Punkte
-- Start des H2-Laufs auf GitHub Actions durch den Inhaber.
+- Gruppe A (`A-leicht-jvm`, 51.4.2 Teil 2): Vor dem Start von Gruppe A muss Task 53 (Pool-Größe unter Pages-Limit halten) umgesetzt werden, da der Pool mit 941 MB bereits nahe am GitHub-Pages-Limit (1 GB) liegt.
 - Ergänzung der Fehlersuch-Zeile in `08-fehlersuche.md`, sobald Task 99.8 begonnen wird.

@@ -10,7 +10,7 @@
 #   list                         alle bekannten Komponenten mit Installationsstatus
 #   install <id|paket>           z. B. jdk;21  ndk;r29  cmake;3.22.1  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36  gradle
 #   uninstall <id>
-#   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 95 MiB über large-packages.txt, sonst per pkg)
+#   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 30 MiB über large-packages.txt, sonst per pkg)
 #   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 3.22.1] [--no-ndk] [--no-cmake] [--gradle]
 #   repair [--yes]               repariert defekte Bootstrap-Pakete
 #   env                          schreibt/zeigt die Umgebungsdatei (ANDROID_HOME, JAVA_HOME …)
@@ -260,8 +260,8 @@ download() { # url ziel basis-prozent spanne
   wait "$pid" || { err "Download fehlgeschlagen: $url ($(head -c 200 "$TMP/.cfsdk-curl-err" 2>/dev/null))"; return 1; }
 }
 
-# Große Pakete (> 95 MiB, z. B. gradle, openjdk-*, libllvm) liegen wegen des
-# 100-MB-Limits von GitHub Pages nicht im APT-Pool, sondern als Asset am Release
+# Große Pakete (> 30 MiB, z. B. gradle, openjdk-*, libllvm) liegen wegen des
+# 100-MB-Dateilimits und des 1-GB-Seitenlimits von GitHub Pages nicht im APT-Pool, sondern als Asset am Release
 # 'large-packages'. Das Verzeichnis '<apt-url>/large-packages.txt' enthält Zeilen:
 #   name|version|arch|datei|sha256|bytes|url
 # Benötigt: say, err, download, $TMP, $PREFIX.

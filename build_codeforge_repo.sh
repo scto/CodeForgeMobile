@@ -62,6 +62,15 @@ PREFIX_PATH="/data/data/${APP_PACKAGE}/files/usr"
 KEY_NAME="Thomas Schmid"
 KEY_EMAIL="tschmid35@gmail.com"
 
+# Limits für APT-Pool und große Pakete einlesen (Task 53)
+LARGE_PKG_THRESHOLD_MIB=30
+POOL_WARN_LIMIT_MB=800
+POOL_MAX_LIMIT_MB=950
+if [ -f "${WORKSPACE_DIR}/apt-limits.conf" ]; then
+    # shellcheck disable=SC1091
+    . "${WORKSPACE_DIR}/apt-limits.conf"
+fi
+
 die() { echo "FEHLER: $*" >&2; exit 1; }
 
 PHASE="${PHASE:-all}"
@@ -1050,8 +1059,12 @@ deb_count="$(find "${REPO_DIR}/pool" -type f -name '*.deb' | wc -l)"
 [ "${deb_count}" -gt 0 ] || die "Pool ist leer."
 echo "  ${deb_count} Pakete im Pool."
 pool_mb="$(du -sm "${REPO_DIR}/pool" | cut -f1)"
-echo "  Pool-Größe: ${pool_mb} MB"
-[ "${pool_mb}" -lt 900 ] || echo "WARNUNG: Pool > 900 MB. GitHub Pages ist auf ca. 1 GB je Seite begrenzt – anderes Hosting einplanen." >&2
+echo "  Pool-Größe: ${pool_mb} MB (Warnschwelle: ${POOL_WARN_LIMIT_MB} MB, Abbruchschwelle: ${POOL_MAX_LIMIT_MB} MB)"
+if [ "${pool_mb}" -ge "${POOL_MAX_LIMIT_MB}" ]; then
+    echo "WARNUNG: Pool-Größe (${pool_mb} MB) überschreitet Abbruchschwelle (${POOL_MAX_LIMIT_MB} MB)!" >&2
+elif [ "${pool_mb}" -ge "${POOL_WARN_LIMIT_MB}" ]; then
+    echo "WARNUNG: Pool-Größe (${pool_mb} MB) erreicht Warnschwelle (${POOL_WARN_LIMIT_MB} MB). GitHub Pages ist auf 1 GB begrenzt." >&2
+fi
 
 DIST_DIR="${REPO_DIR}/dists/stable"
 cd "${REPO_DIR}"
@@ -1113,18 +1126,18 @@ cat > "${REPO_DIR}/index.html" <<EOF
 <p>Schlüssel: <a href="codeforge.gpg">codeforge.gpg</a> (binär), <a href="codeforge.asc">codeforge.asc</a> (armored). Fingerprint: <code>${KEY_FINGERPRINT}</code></p>
 EOF
 
-# GitHub: Einzeldateien > 100 MB werden abgelehnt.
-big_files="$(find "${REPO_DIR}" -type f -size +95M)"
+# GitHub Pages / Repo-Limits: Pakete > LARGE_PKG_THRESHOLD_MIB MiB gehören in Release large-packages
+big_files="$(find "${REPO_DIR}/pool" -type f -name '*.deb' -size "+${LARGE_PKG_THRESHOLD_MIB}M" 2>/dev/null || true)"
 if [ -n "${big_files}" ]; then
-    echo "WARNUNG: Dateien > 95 MB (GitHub-Limit 100 MB), z. B.:" >&2
-    find "${REPO_DIR}" -type f -size +95M -exec ls -l {} \; >&2
+    echo "WARNUNG: Pakete > ${LARGE_PKG_THRESHOLD_MIB} MiB im Pool gefunden (sollten als Release-Asset ausgelagert werden):" >&2
+    find "${REPO_DIR}/pool" -type f -name '*.deb' -size "+${LARGE_PKG_THRESHOLD_MIB}M" -exec ls -lh {} \; >&2
 fi
 
 # Konsistenzprüfung des APT-Repositories
 if [ -f "${WORKSPACE_DIR}/scripts/check-apt-consistency.py" ]; then
     echo "Prüfe Abhängigkeits-Konsistenz des APT-Repositories..."
     CONSISTENCY_CHECK="${CONSISTENCY_CHECK:-fail}"
-    # Große Pakete (> 95 MiB) liegen als Release-Asset, nicht im Pool: bestehendes Manifest (gh-pages) und die
+    # Große Pakete (> LARGE_PKG_THRESHOLD_MIB MiB) liegen als Release-Asset, nicht im Pool: bestehendes Manifest (gh-pages) und die
     # in diesem Lauf abgetrennten (BIG_NEW_FILE) als verfügbare Pakete mitzählen.
     large_args=()
     if [ -n "${BASE_REPO_DIR}" ] && [ -s "${BASE_REPO_DIR}/large-packages.txt" ]; then

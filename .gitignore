@@ -37,3 +37,5 @@ terminal-packages-codeforge/
 
 # Patches und temporäre Diffs
 *.patch
+__pycache__/
+*.py[cod]

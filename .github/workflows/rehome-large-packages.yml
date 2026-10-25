@@ -1,0 +1,103 @@
+name: Rehome Large Packages (Task 53)
+
+# Lagert Pakete über dem Schwellenwert (Standard: 30 MiB) aus dem APT-Pool
+# in das GitHub-Release 'large-packages' aus, um das 1-GB-Seitenlimit von GitHub Pages einzuhalten.
+#
+# Standardmäßig läuft der Workflow als sicherer Trockenlauf (dry_run: true).
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Trockenlauf: nur analysieren und Ersparnis berechnen (keine Änderungen)"
+        required: true
+        default: true
+        type: boolean
+      threshold_mib:
+        description: "Schwelle in MiB, ab der ein Paket ausgelagert wird (Standard: 30)"
+        required: true
+        default: "30"
+        type: string
+      target_repo:
+        description: "Ziel-Repository für APT-Repo (gh-pages) und Release (large-packages)"
+        required: false
+        default: "scto/terminal-packages-codeforge"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-all-stages
+  cancel-in-progress: false
+
+jobs:
+  rehome:
+    name: Rehome Large Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CodeForgeMobile
+        uses: actions/checkout@v4
+
+      - name: Runner vorbereiten (GPG & Werkzeuge)
+        uses: ./.github/actions/prepare-runner
+        with:
+          gpg_private_key_b64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          gpg_passphrase: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+
+      - name: gh-pages Zweig laden
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.target_repo }}
+          ref: gh-pages
+          path: gh-pages-repo
+          token: ${{ secrets.PACKAGES_REPO_TOKEN || github.token }}
+          fetch-depth: 1
+
+      - name: Git für Veröffentlichung konfigurieren
+        if: ${{ !inputs.dry_run }}
+        run: |
+          cd gh-pages-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${{ secrets.PACKAGES_REPO_TOKEN }}@github.com/${{ inputs.target_repo }}.git"
+
+      - name: Umzug durchführen (rehome-large-packages.sh)
+        id: run_rehome
+        env:
+          GH_TOKEN: ${{ secrets.PACKAGES_REPO_TOKEN }}
+          CODEFORGE_GPG_PASSPHRASE: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/rehome-large-packages.sh
+          
+          args=(
+            --repo-dir gh-pages-repo
+            --threshold-mib "${{ inputs.threshold_mib }}"
+            --target-repo "${{ inputs.target_repo }}"
+          )
+          
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            args+=(--dry-run)
+          else
+            args+=(--execute --publish)
+          fi
+          
+          ./scripts/rehome-large-packages.sh "${args[@]}" 2>&1 | tee rehome.log
+
+      - name: Zusammenfassung in GITHUB_STEP_SUMMARY
+        if: always()
+        run: |
+          {
+            echo "## 📦 Large Packages Rehoming (Task 53)"
+            echo "- **Modus:** $( [ "${{ inputs.dry_run }}" = "true" ] && echo "🔍 Trockenlauf (dry-run)" || echo "🚀 Ausgeführt (execute)" )"
+            echo "- **Schwelle:** \`${{ inputs.threshold_mib }} MiB\`"
+            echo "- **Ziel-Repo:** \`${{ inputs.target_repo }}\`"
+            echo
+            if [ -f rehome.log ]; then
+              echo "### Protokoll:"
+              echo '```text'
+              cat rehome.log
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

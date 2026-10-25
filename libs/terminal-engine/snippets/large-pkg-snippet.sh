@@ -1,5 +1,5 @@
-# Große Pakete (> 95 MiB, z. B. gradle, openjdk-*, libllvm) liegen wegen des
-# 100-MB-Limits von GitHub Pages nicht im APT-Pool, sondern als Asset am Release
+# Große Pakete (> 30 MiB, z. B. gradle, openjdk-*, libllvm) liegen wegen des
+# 100-MB-Dateilimits und des 1-GB-Seitenlimits von GitHub Pages nicht im APT-Pool, sondern als Asset am Release
 # 'large-packages'. Das Verzeichnis '<apt-url>/large-packages.txt' enthält Zeilen:
 #   name|version|arch|datei|sha256|bytes|url
 # Benötigt: say, err, download, $TMP, $PREFIX.
