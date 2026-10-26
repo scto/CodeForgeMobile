@@ -10,6 +10,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -159,23 +161,30 @@ private fun FileTreeScreen(
                     selfInclude = false
                 )
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .horizontalScroll(rememberScrollState())
-                ) {
-                    items(
-                        items = tree.nodes.filter { !it.content.segments.any { s -> s == ".cfm" } },
-                        key = { it.key }
-                    ) { node ->
-                        FileTreeNodeRow(
-                            node = node,
-                            tree = tree,
-                            onOpenFile = { onEvent(FileTreeUiEvent.FileOpened(it)) },
-                            onContextMenu = { path, isDir ->
-                                onEvent(FileTreeUiEvent.ContextMenuRequested(path, isDir))
-                            }
-                        )
+                // Unter horizontalScroll ist die Breite unbegrenzt: ein Kind mit weight(1f) bekommt dort
+                // Breite 0 (Text unsichtbar, nur Icons sichtbar). Deshalb: Zeilen ohne weight, mindestens
+                // so breit wie der sichtbare Bereich (viewportWidth), längere Namen scrollen horizontal.
+                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    val viewportWidth = maxWidth
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .horizontalScroll(rememberScrollState())
+                    ) {
+                        items(
+                            items = tree.nodes.filter { !it.content.segments.any { s -> s == ".cfm" } },
+                            key = { it.key }
+                        ) { node ->
+                            FileTreeNodeRow(
+                                node = node,
+                                tree = tree,
+                                onOpenFile = { onEvent(FileTreeUiEvent.FileOpened(it)) },
+                                onContextMenu = { path, isDir ->
+                                    onEvent(FileTreeUiEvent.ContextMenuRequested(path, isDir))
+                                },
+                                modifier = Modifier.widthIn(min = viewportWidth)
+                            )
+                        }
                     }
                 }
             }
@@ -319,9 +328,7 @@ private fun FileTreeNodeRow(
         )
 
         // 2-zeilige Dateiinfo: Zeile 1 Name, Zeile 2 Größe & Änderungsdatum
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
+        Column {
             Text(
                 text = node.name,
                 style = MaterialTheme.typography.bodyMedium,
