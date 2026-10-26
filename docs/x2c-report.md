@@ -259,3 +259,16 @@ Klassen (`:libs:x2c`, Paket `com.codeforge.libs.x2c.generator`): `LayoutToCompos
 
 **Getestet:** 16 neue Tests (`ComposeEntryWirerTest`), zusammen 89 Tests in `:libs:x2c` grün (kotlinc + JUnit, ohne Gradle).
 **Nicht getestet:** Kompilierung der umgestellten Dateien in einem echten Projekt, Gradle-Build, Gerät. Die Importreihenfolge wird nicht sortiert (neue Imports stehen am Ende des Importblocks).
+
+## 52.8 Theme aus XML-Farben und -Themes (Stand 2026-10-26)
+
+`ComposeThemeGenerator` (Domain) mit `ComposeThemeGeneratorImpl` und `ValuesXmlParser` (SAX, ohne DTD/Entities) in `:libs:x2c` (Paket `theme`). Reine Textumwandlung, erzeugt nur **neue** Dateien `ui/theme/Color.kt` und `ui/theme/Theme.kt`; `themes.xml` bleibt unberührt.
+
+* **Erkennung (`detect`):** Material-Theme = Parent-Kette (auch über projekteigene `Base.Theme.X`) endet in `Theme.Material3…` oder `Theme.MaterialComponents…`. Bevorzugt wird ein Theme ohne `NoActionBar/Splash/Overlay/Dialog` im Namen und ohne `Base.`-Präfix. Ohne Material-Theme wird nichts erzeugt (Grund im Ergebnis).
+* **Abbildung:** `colorPrimary/OnPrimary/…Container`, Secondary, Tertiary, Error, `android:colorBackground`, Surface(+Variant/Inverse), Outline(+Variant) → `lightColorScheme(...)`/`darkColorScheme(...)`. Werte werden über `@color/…`-Ketten aufgelöst (Tiefe begrenzt, Zyklen sicher), Quelle steht als Kommentar je Farbe. `colorPrimaryVariant/colorSecondaryVariant` haben kein Material-3-Gegenstück und werden gemeldet, nicht übernommen.
+* **Dunkel:** `values-night` überlagert die hellen Werte wie unter Android (Farben und Style-Items); ohne `values-night` gilt `darkColorScheme()` (Material-3-Vorgabe) mit `TODO(x2c)`.
+* **Name:** aus dem Stylenamen (`Theme.MyApp` → `MyAppTheme`), sonst `AppTheme`. Schrift (`Type.kt`) und Formen werden nicht erzeugt (Standard von Material 3).
+* **Schutz:** Existiert `Theme.kt` oder `Color.kt` im Zielpaket, wird nichts überschrieben, der Grund steht im Ergebnis; umgestellte Activities nutzen dann `MaterialTheme` (52.7).
+
+**Getestet:** 14 neue Tests (`ComposeThemeGeneratorTest`), zusammen 103 in `:libs:x2c` grün (kotlinc + JUnit, ohne Gradle); Beispielausgabe von Hand gelesen.
+**Nicht getestet:** Kompilierung der erzeugten Dateien (Compose fehlt im Klassenpfad), Gradle-Build, Gerät, echte Projekte mit mehreren Modulen/Flavors (Quellen werden vom Aufrufer geliefert, Auswahl in 52.9/52.11).

@@ -2,6 +2,9 @@ package com.codeforge.core.domain.repository
 
 import com.codeforge.core.domain.model.ComposeScanResult
 import com.codeforge.core.domain.model.ComposeWireResult
+import com.codeforge.core.domain.model.ThemeDetection
+import com.codeforge.core.domain.model.ThemeGenerationResult
+import com.codeforge.core.domain.model.ThemeSources
 import com.codeforge.core.domain.model.GeneratorContext
 import com.codeforge.core.domain.model.LayoutUsage
 import com.codeforge.core.domain.model.X2cOptions
@@ -99,4 +102,20 @@ interface X2cRepository {
  */
 interface ComposeEntryWirer {
     fun wire(fileName: String, content: String, target: WireTarget): ComposeWireResult
+}
+
+/** Task 52.8: erzeugt `ui/theme/Color.kt` und `Theme.kt` aus XML-Farben und -Themes; nur neue Dateien, nie `themes.xml`. */
+interface ComposeThemeGenerator {
+    fun detect(sources: ThemeSources): ThemeDetection
+
+    /**
+     * @param existingFiles bereits vorhandene Dateien (Pfade relativ zum Modul); existiert `Theme.kt` oder `Color.kt`
+     *   im Zielpaket, wird nichts erzeugt und ein Hinweis geliefert
+     */
+    fun generate(
+        sources: ThemeSources,
+        targetPackage: String,
+        existingFiles: Set<String> = emptySet(),
+        sourceRoot: String = "src/main/kotlin"
+    ): Result<ThemeGenerationResult>
 }

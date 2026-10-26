@@ -180,3 +180,32 @@ data class WireTarget(
     val themeName: String? = null,
     val themePackage: String = ""
 )
+
+/**
+ * Task 52.8: Inhalte der values-XML-Dateien eines Moduls (res/values, res/values-night) (Farben und Styles dürfen gemischt sein).
+ * [lightValues] = `values/`, [nightValues] = `values-night/` (überlagert die hellen Werte wie unter Android).
+ */
+data class ThemeSources(
+    val lightValues: List<String> = emptyList(),
+    val nightValues: List<String> = emptyList()
+)
+
+/** Erkanntes App-Theme; [isMaterial] = Parent ist `Theme.Material3…` oder `Theme.MaterialComponents…`. */
+data class ThemeDetection(
+    val styleName: String? = null,
+    val parent: String? = null,
+    val isMaterial: Boolean = false,
+    val family: String? = null
+)
+
+data class ThemeGenerationResult(
+    val files: List<com.codeforge.core.domain.repository.GeneratedComposeFile> = emptyList(),
+    /** Name der erzeugten Theme-Composable (z. B. `AppTheme`); null, wenn nichts erzeugt wurde. */
+    val themeName: String? = null,
+    val themePackage: String = "",
+    val sourceStyle: String? = null,
+    /** Gesetzt, wenn nichts erzeugt wurde (z. B. Theme.kt existiert schon, kein Material-Theme). */
+    val skippedReason: String? = null,
+    val notes: List<String> = emptyList(),
+    val todoCount: Int = 0
+)
