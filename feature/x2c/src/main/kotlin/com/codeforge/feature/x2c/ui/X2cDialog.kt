@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Transform
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
@@ -52,6 +55,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.feature.x2c.X2cIntent
 import com.codeforge.feature.x2c.X2cUiState
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun X2cDialog(
     state: X2cUiState,
@@ -72,7 +76,9 @@ fun X2cDialog(
 
     AlertDialog(
         onDismissRequest = { onIntent(X2cIntent.DismissDialog(dontAskAgain = false)) },
-        modifier = modifier.fillMaxWidth(),
+        // Plattform-Standardbreite (~280 dp) ist für die Layout-Liste und drei Buttons zu schmal.
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
         icon = {
             Icon(
                 imageVector = Icons.Default.Transform,
@@ -142,10 +148,10 @@ fun X2cDialog(
                 )
 
                 // Auswahlschaltflächen
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = stringResource(
@@ -291,21 +297,25 @@ fun X2cDialog(
                 }
             }
         },
+        // Alle Aktionen in einem umbrechenden Block: bei großer Schrift/schmalem Display
+        // wurden "Speichern"/"Später" sonst abgeschnitten.
         confirmButton = {
-            Button(
-                onClick = { onIntent(X2cIntent.StartMigration) },
-                enabled = state.selectedLayouts.isNotEmpty()
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(text = stringResource(R.string.x2c_action_convert))
-            }
-        },
-        dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TextButton(onClick = { onIntent(X2cIntent.DismissDialog(dontAskAgain = true)) }) {
                     Text(text = stringResource(R.string.x2c_action_dont_ask))
                 }
                 OutlinedButton(onClick = { onIntent(X2cIntent.DismissDialog(dontAskAgain = false)) }) {
                     Text(text = stringResource(R.string.x2c_action_later))
+                }
+                Button(
+                    onClick = { onIntent(X2cIntent.StartMigration) },
+                    enabled = state.selectedLayouts.isNotEmpty()
+                ) {
+                    Text(text = stringResource(R.string.x2c_action_convert))
                 }
             }
         }
