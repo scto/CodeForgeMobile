@@ -1853,5 +1853,23 @@
     <string name="ai_error_timeout">The server did not respond in time.</string>
     <string name="ai_error_tls">Secure connection failed (certificate or device time).</string>
     <string name="ai_error_connect">Connection to the server was refused or blocked.</string>
+    <string name="settings_txt_word_wrap">Wrap TXT files</string>
+    <string name="settings_txt_word_wrap_desc">Automatically wrap plain text files.</string>
+    <string name="settings_line_numbers">Show line numbers</string>
+    <string name="settings_line_numbers_desc">Show line numbers in the gutter.</string>
+    <string name="settings_pin_line_numbers">Pin line numbers</string>
+    <string name="settings_pin_line_numbers_desc">Keep line numbers visible while scrolling horizontally.</string>
+    <string name="settings_cursor_animation">Cursor animation</string>
+    <string name="settings_cursor_animation_desc">Smooth cursor movement animation.</string>
+    <string name="settings_color_previews">Color previews</string>
+    <string name="settings_color_previews_desc">Show color swatches next to color values (also without a language server).</string>
+    <string name="settings_read_only_default">Read-only mode</string>
+    <string name="settings_read_only_default_desc">Open files read-only by default.</string>
+    <string name="settings_line_spacing">Line spacing</string>
+    <string name="settings_line_spacing_desc">Height multiplier for every editor line.</string>
+    <string name="settings_keyboard_suggestions">Keyboard suggestions</string>
+    <string name="settings_keyboard_suggestions_desc">Allow suggestions and autocorrect of the on-screen keyboard.</string>
+    <string name="settings_disable_soft_keyboard">Disable on-screen keyboard</string>
+    <string name="settings_disable_soft_keyboard_desc">Hide the on-screen keyboard while a hardware keyboard is connected.</string>
 </resources>
 

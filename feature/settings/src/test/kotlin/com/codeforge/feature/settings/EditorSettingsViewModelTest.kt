@@ -105,6 +105,30 @@ class EditorSettingsViewModelTest {
     }
 
     @Test
+    fun `xed style display options have sane defaults and can be changed and reset`() = runTest(testDispatcher) {
+        val initial = viewModel.uiState.first { !it.isLoading }
+        assertTrue(initial.showLineNumbers)
+        assertTrue(initial.cursorAnimationEnabled)
+        assertTrue(initial.colorPreviewsEnabled)
+        assertFalse(initial.readOnlyDefault)
+        assertEquals(100, initial.lineSpacingPercent)
+
+        viewModel.onEvent(EditorSettingsUiEvent.LineNumbersToggled)
+        viewModel.onEvent(EditorSettingsUiEvent.LineSpacingChanged(140))
+        viewModel.onEvent(EditorSettingsUiEvent.ReadOnlyDefaultToggled)
+        advanceUntilIdle()
+        val changed = viewModel.uiState.first { it.lineSpacingPercent == 140 }
+        assertFalse(changed.showLineNumbers)
+        assertTrue(changed.readOnlyDefault)
+
+        viewModel.onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.DISPLAY))
+        advanceUntilIdle()
+        val reset = viewModel.uiState.first { it.lineSpacingPercent == 100 }
+        assertTrue(reset.showLineNumbers)
+        assertFalse(reset.readOnlyDefault)
+    }
+
+    @Test
     fun `changing options saves to repository and updates uiState`() = runTest(testDispatcher) {
         // Tab size
         viewModel.onEvent(EditorSettingsUiEvent.TabSizeChanged(8))

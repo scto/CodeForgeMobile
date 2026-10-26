@@ -184,6 +184,62 @@ private fun EditorSettingsScreen(
                 onToggle = { onEvent(EditorSettingsUiEvent.WordWrapToggled) }
             )
             EditorToggleRow(
+                title = Res.string(R.string.settings_txt_word_wrap),
+                description = Res.string(R.string.settings_txt_word_wrap_desc),
+                checked = uiState.txtWordWrap,
+                onToggle = { onEvent(EditorSettingsUiEvent.TxtWordWrapToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_line_numbers),
+                description = Res.string(R.string.settings_line_numbers_desc),
+                checked = uiState.showLineNumbers,
+                onToggle = { onEvent(EditorSettingsUiEvent.LineNumbersToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_pin_line_numbers),
+                description = Res.string(R.string.settings_pin_line_numbers_desc),
+                checked = uiState.pinLineNumbers,
+                onToggle = { onEvent(EditorSettingsUiEvent.PinLineNumbersToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_cursor_animation),
+                description = Res.string(R.string.settings_cursor_animation_desc),
+                checked = uiState.cursorAnimationEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.CursorAnimationToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_color_previews),
+                description = Res.string(R.string.settings_color_previews_desc),
+                checked = uiState.colorPreviewsEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.ColorPreviewsToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_read_only_default),
+                description = Res.string(R.string.settings_read_only_default_desc),
+                checked = uiState.readOnlyDefault,
+                onToggle = { onEvent(EditorSettingsUiEvent.ReadOnlyDefaultToggled) }
+            )
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringRes(R.string.settings_line_spacing), style = MaterialTheme.typography.titleSmall)
+                        Text("${uiState.lineSpacingPercent} %", style = MaterialTheme.typography.labelLarge)
+                    }
+                    Text(stringRes(R.string.settings_line_spacing_desc), style = MaterialTheme.typography.bodySmall)
+                    Slider(
+                        value = uiState.lineSpacingPercent.toFloat(),
+                        onValueChange = { onEvent(EditorSettingsUiEvent.LineSpacingChanged(it.toInt())) },
+                        valueRange = 80f..200f,
+                        steps = 11
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            EditorToggleRow(
                 title = Res.string(R.string.settings_nicht_druckbare_zeichen_anzeigen),
                 description = Res.string(R.string.settings_leerzeichen_tabs_und_zeilenumbrueche_a),
                 checked = uiState.showNonPrintableChars,
@@ -252,6 +308,18 @@ private fun EditorSettingsScreen(
                 title = Res.string(R.string.settings_klammern_anfuehrungszeichen_automatisc),
                 checked = uiState.symbolPairAutocompleteEnabled,
                 onToggle = { onEvent(EditorSettingsUiEvent.SymbolPairAutocompleteToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_keyboard_suggestions),
+                description = Res.string(R.string.settings_keyboard_suggestions_desc),
+                checked = uiState.keyboardSuggestions,
+                onToggle = { onEvent(EditorSettingsUiEvent.KeyboardSuggestionsToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_disable_soft_keyboard),
+                description = Res.string(R.string.settings_disable_soft_keyboard_desc),
+                checked = uiState.disableSoftKeyboardWithHardwareKeyboard,
+                onToggle = { onEvent(EditorSettingsUiEvent.DisableSoftKeyboardToggled) }
             )
             EditorToggleRow(
                 title = Res.string(R.string.settings_desktop_shortcuts),

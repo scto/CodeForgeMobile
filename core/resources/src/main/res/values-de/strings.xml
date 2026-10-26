@@ -1853,5 +1853,23 @@
     <string name="ai_error_timeout">Der Server hat nicht rechtzeitig geantwortet.</string>
     <string name="ai_error_tls">Sichere Verbindung fehlgeschlagen (Zertifikat oder Gerätezeit).</string>
     <string name="ai_error_connect">Verbindung zum Server wurde abgelehnt oder blockiert.</string>
+    <string name="settings_txt_word_wrap">TXT-Dateien umbrechen</string>
+    <string name="settings_txt_word_wrap_desc">Reine Textdateien automatisch umbrechen.</string>
+    <string name="settings_line_numbers">Zeilennummern anzeigen</string>
+    <string name="settings_line_numbers_desc">Zeilennummern am linken Rand anzeigen.</string>
+    <string name="settings_pin_line_numbers">Zeilennummern anheften</string>
+    <string name="settings_pin_line_numbers_desc">Zeilennummern beim horizontalen Scrollen sichtbar halten.</string>
+    <string name="settings_cursor_animation">Cursor-Animation</string>
+    <string name="settings_cursor_animation_desc">Flüssige Cursor-Animation aktivieren.</string>
+    <string name="settings_color_previews">Farbvorschauen</string>
+    <string name="settings_color_previews_desc">Farbkästchen neben Farbwerten anzeigen (auch ohne Sprachserver).</string>
+    <string name="settings_read_only_default">Lesemodus</string>
+    <string name="settings_read_only_default_desc">Dateien standardmäßig schreibgeschützt öffnen.</string>
+    <string name="settings_line_spacing">Zeilenabstand</string>
+    <string name="settings_line_spacing_desc">Höhenmultiplikator für jede Zeile im Editor.</string>
+    <string name="settings_keyboard_suggestions">Tastaturvorschläge</string>
+    <string name="settings_keyboard_suggestions_desc">Vorschläge und Autokorrektur der Bildschirmtastatur zulassen.</string>
+    <string name="settings_disable_soft_keyboard">Virtuelle Tastatur deaktivieren</string>
+    <string name="settings_disable_soft_keyboard_desc">Bildschirmtastatur ausblenden, wenn eine Hardware-Tastatur verbunden ist.</string>
 </resources>
 

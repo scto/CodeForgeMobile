@@ -40,6 +40,15 @@ data class EditorSettingsUiState(
     val lspMaxConcurrentSessions: Int = 3,
     val lspIdleTimeoutMinutes: Int = 10,
     val projectIndexingEnabled: Boolean = true,
+    val showLineNumbers: Boolean = true,
+    val pinLineNumbers: Boolean = false,
+    val cursorAnimationEnabled: Boolean = true,
+    val lineSpacingPercent: Int = 100,
+    val readOnlyDefault: Boolean = false,
+    val txtWordWrap: Boolean = false,
+    val colorPreviewsEnabled: Boolean = true,
+    val disableSoftKeyboardWithHardwareKeyboard: Boolean = false,
+    val keyboardSuggestions: Boolean = false,
     val fileHeaderEnabled: Boolean = false,
     val fileHeaderAuthor: String = "",
     val availableThemes: List<TextMateThemeItem> = TextMateThemeCatalog.BUNDLED_THEMES,
@@ -62,6 +71,15 @@ sealed interface EditorSettingsUiEvent {
     data object SymbolPairAutocompleteToggled : EditorSettingsUiEvent
     data object MinimapToggled : EditorSettingsUiEvent
     data object ProjectIndexingToggled : EditorSettingsUiEvent
+    data object LineNumbersToggled : EditorSettingsUiEvent
+    data object PinLineNumbersToggled : EditorSettingsUiEvent
+    data object CursorAnimationToggled : EditorSettingsUiEvent
+    data class LineSpacingChanged(val percent: Int) : EditorSettingsUiEvent
+    data object ReadOnlyDefaultToggled : EditorSettingsUiEvent
+    data object TxtWordWrapToggled : EditorSettingsUiEvent
+    data object ColorPreviewsToggled : EditorSettingsUiEvent
+    data object DisableSoftKeyboardToggled : EditorSettingsUiEvent
+    data object KeyboardSuggestionsToggled : EditorSettingsUiEvent
     data object RainbowBracketsToggled : EditorSettingsUiEvent
     data object PinchToZoomToggled : EditorSettingsUiEvent
     data object DesktopShortcutsToggled : EditorSettingsUiEvent

@@ -58,6 +58,15 @@ class EditorSettingsViewModel internal constructor(
                 lspMaxConcurrentSessions = settings.editor.lspMaxConcurrentSessions.takeIf { it > 0 } ?: 3,
                 lspIdleTimeoutMinutes = settings.editor.lspIdleTimeoutMinutes.takeIf { it > 0 } ?: 10,
                 projectIndexingEnabled = !settings.editor.projectIndexingDisabled,
+                showLineNumbers = !settings.editor.lineNumbersHidden,
+                pinLineNumbers = settings.editor.pinLineNumbers,
+                cursorAnimationEnabled = !settings.editor.cursorAnimationDisabled,
+                lineSpacingPercent = settings.editor.lineSpacingPercent.takeIf { it > 0 } ?: 100,
+                readOnlyDefault = settings.editor.readOnlyDefault,
+                txtWordWrap = settings.editor.txtWordWrap,
+                colorPreviewsEnabled = !settings.editor.colorPreviewsDisabled,
+                disableSoftKeyboardWithHardwareKeyboard = settings.editor.disableSoftKeyboardWithHardwareKeyboard,
+                keyboardSuggestions = settings.editor.keyboardSuggestions,
                 fileHeaderEnabled = settings.fileHeader.enabled,
                 fileHeaderAuthor = settings.fileHeader.author,
                 availableThemes = availableThemes,
@@ -149,6 +158,27 @@ class EditorSettingsViewModel internal constructor(
                         it.toBuilder().setFormatOnSaveJava(!it.formatOnSaveJava).build()
                     }
 
+                EditorSettingsUiEvent.LineNumbersToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setLineNumbersHidden(!it.lineNumbersHidden).build() }
+                EditorSettingsUiEvent.PinLineNumbersToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setPinLineNumbers(!it.pinLineNumbers).build() }
+                EditorSettingsUiEvent.CursorAnimationToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setCursorAnimationDisabled(!it.cursorAnimationDisabled).build() }
+                is EditorSettingsUiEvent.LineSpacingChanged ->
+                    settingsRepository.updateEditor { it.toBuilder().setLineSpacingPercent(event.percent.coerceIn(80, 200)).build() }
+                EditorSettingsUiEvent.ReadOnlyDefaultToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setReadOnlyDefault(!it.readOnlyDefault).build() }
+                EditorSettingsUiEvent.TxtWordWrapToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setTxtWordWrap(!it.txtWordWrap).build() }
+                EditorSettingsUiEvent.ColorPreviewsToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setColorPreviewsDisabled(!it.colorPreviewsDisabled).build() }
+                EditorSettingsUiEvent.DisableSoftKeyboardToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setDisableSoftKeyboardWithHardwareKeyboard(!it.disableSoftKeyboardWithHardwareKeyboard).build()
+                    }
+                EditorSettingsUiEvent.KeyboardSuggestionsToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setKeyboardSuggestions(!it.keyboardSuggestions).build() }
+
                 EditorSettingsUiEvent.FormatOnSaveXmlToggled ->
                     settingsRepository.updateEditor {
                         it.toBuilder().setFormatOnSaveXml(!it.formatOnSaveXml).build()
@@ -184,6 +214,13 @@ class EditorSettingsViewModel internal constructor(
                                     .setMinimapEnabled(true)
                                     .setRainbowBracketsEnabled(true)
                                     .setPinchToZoomEnabled(true)
+                                    .setLineNumbersHidden(false)
+                                    .setPinLineNumbers(false)
+                                    .setCursorAnimationDisabled(false)
+                                    .setLineSpacingPercent(0)
+                                    .setReadOnlyDefault(false)
+                                    .setTxtWordWrap(false)
+                                    .setColorPreviewsDisabled(false)
                                     .build()
                             }
                         }
@@ -193,6 +230,8 @@ class EditorSettingsViewModel internal constructor(
                                     .setTabSize(4)
                                     .setSymbolPairAutocompleteEnabled(true)
                                     .setDesktopShortcutsEnabled(true)
+                                    .setDisableSoftKeyboardWithHardwareKeyboard(false)
+                                    .setKeyboardSuggestions(false)
                                     .build()
                             }
                         }

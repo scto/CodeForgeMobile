@@ -81,7 +81,16 @@ data class EditorDisplaySettings(
     val minimapEnabled: Boolean = true,
     val rainbowBracketsEnabled: Boolean = true,
     val pinchToZoomEnabled: Boolean = true,
-    val desktopShortcutsEnabled: Boolean = true
+    val desktopShortcutsEnabled: Boolean = true,
+    val showLineNumbers: Boolean = true,
+    val pinLineNumbers: Boolean = false,
+    val cursorAnimationEnabled: Boolean = true,
+    val lineSpacingPercent: Int = 100,
+    val readOnlyDefault: Boolean = false,
+    val txtWordWrap: Boolean = false,
+    val colorPreviewsEnabled: Boolean = true,
+    val disableSoftKeyboardWithHardwareKeyboard: Boolean = false,
+    val keyboardSuggestions: Boolean = false
 )
 
 @Composable
@@ -107,7 +116,10 @@ fun SoraCodeEditor(
     // "auto"/leer folgt dem effektiven App-Theme (Hell/Dunkel/System aus den Einstellungen).
     val isDarkUi = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val themedSettings = remember(settings, isDarkUi) {
-        settings.copy(textmateTheme = resolveEditorTheme(settings.textmateTheme, isDarkUi))
+        settings.copy(
+            textmateTheme = resolveEditorTheme(settings.textmateTheme, isDarkUi),
+            wordWrap = settings.wordWrap || (settings.txtWordWrap && path.endsWith(".txt", ignoreCase = true))
+        )
     }
     val controller = remember(path) { EditorController() }
     val diagnosticsContainer = remember(path) { DiagnosticsContainer() }
@@ -115,7 +127,9 @@ fun SoraCodeEditor(
     // Overlay (Farbkästchen + Update-Chips + Test-Starter): Editor-Referenz und „Tick“ für Scroll/Text-Änderungen
     var overlayEditor by remember { mutableStateOf<CodeEditor?>(null) }
     var overlayTick by remember { mutableIntStateOf(0) }
-    val colorMatches = remember(path, content) { ColorLiteralScanner.scanForPath(path, content) }
+    val colorMatches = remember(path, content, settings.colorPreviewsEnabled) {
+        if (settings.colorPreviewsEnabled) ColorLiteralScanner.scanForPath(path, content) else emptyList()
+    }
     val testTargets = remember(path, content) { TestTargetScanner.scan(path, content) }
     val lineOverlays = remember(colorMatches, updateAnnotations, testTargets) {
         buildLineOverlays(colorMatches, updateAnnotations.map { it.line to it.update }, testTargets)
@@ -281,6 +295,15 @@ fun SoraCodeEditor(
  */
 fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
     editor.isWordwrap = settings.wordWrap
+    editor.isLineNumberEnabled = settings.showLineNumbers
+    editor.setPinLineNumber(settings.pinLineNumbers)
+    editor.isCursorAnimationEnabled = settings.cursorAnimationEnabled
+    editor.lineSpacingMultiplier = settings.lineSpacingPercent.coerceIn(80, 200) / 100f
+    editor.isEditable = !settings.readOnlyDefault
+    editor.isDisableSoftKbdIfHardKbdAvailable = settings.disableSoftKeyboardWithHardwareKeyboard
+    editor.inputType = android.text.InputType.TYPE_CLASS_TEXT or
+        android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+        (if (settings.keyboardSuggestions) 0 else android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS)
     editor.tabWidth = settings.tabSize.coerceAtLeast(1)
     editor.setTextSize(settings.fontSizeSp.coerceIn(6f, 48f))
 

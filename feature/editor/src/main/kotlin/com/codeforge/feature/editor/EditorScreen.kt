@@ -819,6 +819,8 @@ private fun LspStatusBadge(
             style = MaterialTheme.typography.labelSmall,
             color = textColor,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
     }
@@ -832,6 +834,9 @@ private fun LspSessionsDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
+        // Volle Breite: Der Standard-Dialog ist zu schmal, Badges und Buttons brachen zeichenweise um.
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
         onDismissRequest = onDismiss,
         title = { Text(stringRes(R.string.editor_lsp_sessions_title)) },
         text = {
@@ -846,17 +851,14 @@ private fun LspSessionsDialog(
                                 .padding(vertical = 4.dp)
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = session.serverId,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    LspStatusBadge(state = session.state)
-                                }
+                                Text(
+                                    text = session.serverId,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                LspStatusBadge(state = session.state)
                                 if (session.isHeavyweight) {
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Surface(
@@ -880,14 +882,13 @@ private fun LspSessionsDialog(
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                                 ) {
                                     TextButton(onClick = { onRestart(session.sessionId) }) {
-                                        Text(stringRes(R.string.editor_lsp_restart))
+                                        Text(stringRes(R.string.editor_lsp_restart), maxLines = 1, softWrap = false)
                                     }
-                                    Spacer(modifier = Modifier.width(8.dp))
                                     TextButton(onClick = { onStop(session.sessionId) }) {
-                                        Text(stringRes(R.string.editor_lsp_stop))
+                                        Text(stringRes(R.string.editor_lsp_stop), maxLines = 1, softWrap = false)
                                     }
                                 }
                             }

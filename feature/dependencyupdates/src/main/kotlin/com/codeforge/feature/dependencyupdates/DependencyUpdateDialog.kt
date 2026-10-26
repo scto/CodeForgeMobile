@@ -70,10 +70,14 @@ fun DependencyUpdateDialog(
     Dialog(
         // Zurück/Außen-Tippen = „Ask later“ (nicht destruktiv)
         onDismissRequest = { if (!isApplying) onEvent(DependencyUpdatesEvent.AskLater) },
-        properties = DialogProperties(dismissOnBackPress = !isApplying, dismissOnClickOutside = false)
+        properties = DialogProperties(
+            dismissOnBackPress = !isApplying,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        )
     ) {
         Surface(
-            modifier = modifier,
+            modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp),
             shape = AlertDialogDefaults.shape,
             tonalElevation = AlertDialogDefaults.TonalElevation
         ) {
@@ -124,19 +128,27 @@ fun DependencyUpdateDialog(
                 }
 
                 Spacer(Modifier.height(20.dp))
-                Row(
+                Button(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, androidx.compose.ui.Alignment.End)
+                    enabled = !isApplying,
+                    onClick = { onEvent(DependencyUpdatesEvent.Update) }
                 ) {
-                    TextButton(enabled = !isApplying, onClick = { onEvent(DependencyUpdatesEvent.Dismiss) }) {
-                        Text(stringRes(R.string.dependencyupdates_dismiss))
-                    }
-                    TextButton(enabled = !isApplying, onClick = { onEvent(DependencyUpdatesEvent.AskLater) }) {
-                        Text(stringRes(R.string.dependencyupdates_ask_later))
-                    }
-                    Button(enabled = !isApplying, onClick = { onEvent(DependencyUpdatesEvent.Update) }) {
-                        Text(stringRes(R.string.common_update))
-                    }
+                    Text(stringRes(R.string.common_update), maxLines = 1)
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        enabled = !isApplying,
+                        onClick = { onEvent(DependencyUpdatesEvent.Dismiss) }
+                    ) { Text(stringRes(R.string.dependencyupdates_dismiss), maxLines = 1) }
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        enabled = !isApplying,
+                        onClick = { onEvent(DependencyUpdatesEvent.AskLater) }
+                    ) { Text(stringRes(R.string.dependencyupdates_ask_later), maxLines = 1) }
                 }
             }
         }

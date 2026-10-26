@@ -65,6 +65,18 @@ message EditorConfig {
   int32 lsp_idle_timeout_minutes = 21;
   // Invertiert gespeichert, damit "an" (Standard) auch für bestehende Installationen gilt (Proto-Default false).
   bool project_indexing_disabled = 22;
+  // Invertiert gespeichert (Standard = an, auch für bestehende Installationen).
+  bool line_numbers_hidden = 23;
+  bool pin_line_numbers = 24;
+  bool cursor_animation_disabled = 25;
+  // Zeilenabstand in Prozent (0 = Standard 100).
+  int32 line_spacing_percent = 26;
+  bool read_only_default = 27;
+  bool txt_word_wrap = 28;
+  // Invertiert gespeichert (Standard = an).
+  bool color_previews_disabled = 29;
+  bool disable_soft_keyboard_with_hardware_keyboard = 30;
+  bool keyboard_suggestions = 31;
 }
 
 

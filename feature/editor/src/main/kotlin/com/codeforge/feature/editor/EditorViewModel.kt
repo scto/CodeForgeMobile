@@ -447,7 +447,16 @@ class EditorViewModel @Inject constructor(
                         minimapEnabled = settings.editor.minimapEnabled,
                         rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,
                         pinchToZoomEnabled = settings.editor.pinchToZoomEnabled,
-                        desktopShortcutsEnabled = settings.editor.desktopShortcutsEnabled
+                        desktopShortcutsEnabled = settings.editor.desktopShortcutsEnabled,
+                        showLineNumbers = !settings.editor.lineNumbersHidden,
+                        pinLineNumbers = settings.editor.pinLineNumbers,
+                        cursorAnimationEnabled = !settings.editor.cursorAnimationDisabled,
+                        lineSpacingPercent = settings.editor.lineSpacingPercent.takeIf { v -> v > 0 } ?: 100,
+                        readOnlyDefault = settings.editor.readOnlyDefault,
+                        txtWordWrap = settings.editor.txtWordWrap,
+                        colorPreviewsEnabled = !settings.editor.colorPreviewsDisabled,
+                        disableSoftKeyboardWithHardwareKeyboard = settings.editor.disableSoftKeyboardWithHardwareKeyboard,
+                        keyboardSuggestions = settings.editor.keyboardSuggestions
                     )
                 )
             }
