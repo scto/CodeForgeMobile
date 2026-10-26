@@ -136,6 +136,9 @@ fun SoraCodeEditor(
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { ctx ->
+            // Muss VOR TextMateLanguage.create laufen: die DisposableEffect oben läuft erst nach
+            // dem Erzeugen der View -> Grammatiken waren noch nicht registriert (kein Highlighting).
+            TextMateAssetLoader.ensureInitialized(ctx)
             CodeEditor(ctx).apply {
                 colorScheme = EditorColorScheme()
                 setText(content)
