@@ -55,7 +55,7 @@
 | **52.1** | Kern und Schnittstellen (`:core:domain`) | ✅ Abgeschlossen (`X2cModels.kt`, `X2cRepositories.kt`, `X2cModelsTest.kt`) |
 | **52.2** | Erkennung, Einstieg und Dialog (`:libs:x2c`, `:feature:x2c`, `:app`) | ✅ Abgeschlossen |
 | **52.3** | ZIP-Backup mit Verifikation (`X2cBackupRepository`) | ✅ Abgeschlossen |
-| **52.4** | Compose im Build ermöglichen (`ComposeBuildEnabler`) | ⬜ Offen |
+| **52.4** | Compose im Build ermöglichen (`ComposeBuildEnabler`) | ✅ Abgeschlossen |
 | **52.5** | Analyse: Layouts und Verwendung (`LayoutUsageAnalyzer`) | ⬜ Offen |
 | **52.6** | Generator: XML → `@Composable` (Golden-Tests) | ⬜ Offen |
 | **52.7** | Stufe 2: Activities & Fragments umstellen | ⬜ Offen |
@@ -148,7 +148,43 @@
 
 ---
 
-## 5. Getestet vs. Nicht getestet
+## 5. Abschnitt 52.4: Compose im Build ermöglichen (`ComposeBuildEnabler`)
+
+### 5.1 Voraussetzungen & Prüfungen
+- **`minSdk`:** Jetpack Compose erfordert mindestens `minSdk >= 21` (Offizielle Quelle: Android Developers, *Set up Jetpack Compose*, `https://developer.android.com/jetpack/compose/setup`, Stand: 2024-10-25).
+  - Falls `minSdk < 21` erkannt wird: Sofortiger Abbruch mit klarer Fehlermeldung, **kein Teilumbau**.
+- **Java-Zielversion:** Mindestens Java 8 (1.8) erforderlich; Java 6/7 führt zu Abbruch mit Begründung.
+- **AGP/Gradle:** Mindestens AGP 7.0+ bzw. 8.x.
+
+### 5.2 Kompatibilitätsmatrix (`x2c-compose-compat.json`)
+- Hinterlegt unter `libs/x2c/src/main/resources/com/codeforge/libs/x2c/x2c-compose-compat.json`.
+- Belegt mit Quellen und Abrufdatum (2024-10-25):
+  - Compose to Kotlin Compatibility Map (`https://developer.android.com/jetpack/androidx/releases/compose-kotlin`)
+  - Compose Bill of Materials (BOM) Release Notes (`https://developer.android.com/develop/ui/compose/bom/bom-mapping`)
+- Standard-BOM: `2024.10.01` (enthält Compose 1.7.4, Material3 1.3.0).
+- Kotlin >= 2.0.0: Verwendet das Compose-Compiler-Gradle-Plugin (`org.jetbrains.kotlin.plugin.compose`).
+- Kotlin < 2.0.0: Verwendet `composeOptions { kotlinCompilerExtensionVersion = "..." }` gemäß Kompatibilitätstabelle (z. B. Kotlin 1.9.24 → Compiler 1.5.14).
+- Unbekannte Kotlin-Versionen führen zu einer klaren Rückfrage/Fehlermeldung, es wird nichts geraten.
+
+### 5.3 DSL-Erhalt & Moduländerungen
+- **Groovy bleibt Groovy, Kotlin DSL bleibt Kotlin DSL:** Syntax und Zitierstile werden strikt beibehalten.
+- **Kotlin-Plugin ergänzen:** Falls noch nicht vorhanden, wird `org.jetbrains.kotlin.android` ergänzt.
+- **`buildFeatures { compose = true }`:** Sicher in `android { ... }` platziert oder in bestehende `buildFeatures` eingefügt.
+- **Abhängigkeiten:**
+  - `androidx.compose:compose-bom:2024.10.01` als Platform-Dependency.
+  - `androidx.compose.ui:ui`, `androidx.compose.ui:ui-tooling-preview`, `androidx.compose.material3:material3`.
+  - `debugImplementation` für `androidx.compose.ui:ui-tooling`.
+  - Bei `wireActivities = true`: `androidx.activity:activity-compose:1.9.3`.
+  - Bei `hasConstraintLayout = true`: `androidx.constraintlayout:constraintlayout-compose:1.1.0`.
+- **Versionskatalog (`gradle/libs.versions.toml`):**
+  - Werden bei `useVersionCatalog = true` angelegt oder aktualisiert.
+  - Bestehende Versionen, Bibliotheken, Plugins und Kommentare bleiben vollständig erhalten.
+  - In den Build-Skripten werden die Katalog-Aliasse (`libs.androidx.compose...`) referenziert.
+- **Idempotenz:** Bereits vorhandene Plugins, Schalter oder Abhängigkeiten werden nicht doppelt eingetragen.
+
+---
+
+## 6. Getestet vs. Nicht getestet
 
 ### Getestet
 - [x] Spike auf Pixel 9 Pro XL (Termux, JDK 21.0.12, kotlinc 2.4.20, Compose-Plugin): 2 Dateien mit Composables in 6 s erfolgreich kompiliert.
@@ -165,6 +201,13 @@
   - Zip-Slip-Schutz (`SecurityException` bei Pfadausbrüchen wie `../`).
   - Einzeldatei-Wiederherstellung (`restoreFile`).
   - Rollback per Journal (JSON- und Line-basiert).
+- [x] Unit-Tests `:libs:x2c:test` (`ComposeBuildEnablerTest`):
+  - `minSdk < 21` bricht mit klarer Fehlermeldung und Doku-Referenz ab, ohne Teilumbau.
+  - Kotlin DSL (`build.gradle.kts`) mit Kotlin 2.x (Compose-Compiler-Plugin, `compose = true`, Compose-Dependencies, Activity- & ConstraintLayout-Zusatz).
+  - Groovy DSL (`build.gradle`) mit Kotlin 1.9 (Erhalt von Groovy-Syntax, `composeOptions` mit passender Compiler-Extension, BOM).
+  - Versionskatalog (`gradle/libs.versions.toml`): Erhalt bestehender Einträge und Kommentare, Ergänzung von Versions/Libraries/Plugins, Verknüpfung im Modul.
+  - Idempotenz: Keine doppelten Plugins, Schalter oder Abhängigkeiten.
+  - Unbekannte Kotlin-Version führt zu kontrolliertem Fehlschlag ohne Raten.
 - [x] Unit-Tests `:feature:x2c:testDebugUnitTest` (`X2cViewModelTest`):
   - Scan-Ablauf, Vorselektion einzelner Layouts, manuelle Auslösung.
   - Unterdrückung bei „Nicht mehr fragen“ und Persistierung via DataStore.

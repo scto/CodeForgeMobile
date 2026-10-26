@@ -31,6 +31,19 @@ interface LayoutUsageAnalyzer {
     suspend fun findRemainingViewReferences(projectPath: String): List<String>
 }
 
+data class PrerequisitesCheckResult(
+    val isMinSdkSatisfied: Boolean,
+    val detectedMinSdk: Int?,
+    val requiredMinSdk: Int = 21,
+    val isJavaVersionSatisfied: Boolean = true,
+    val detectedJavaVersion: String? = null,
+    val detectedKotlinVersion: String? = null,
+    val detectedAgpVersion: String? = null,
+    val isAgpSatisfied: Boolean = true,
+    val errors: List<String> = emptyList(),
+    val warnings: List<String> = emptyList()
+)
+
 data class BuildEnableResult(
     val modifiedFiles: List<String>,
     val notes: List<String>,
@@ -40,11 +53,13 @@ data class BuildEnableResult(
 )
 
 interface ComposeBuildEnabler {
+    suspend fun checkPrerequisites(projectPath: String): Result<PrerequisitesCheckResult>
     suspend fun enableComposeInProject(
         projectPath: String,
         useVersionCatalog: Boolean,
         wireActivities: Boolean,
-        hasConstraintLayout: Boolean
+        hasConstraintLayout: Boolean,
+        kotlinVersionOverride: String? = null
     ): Result<BuildEnableResult>
 }
 

@@ -1,0 +1,49 @@
+{
+  "_metadata": {
+    "description": "Kompatibilitätsmatrix zwischen Kotlin, Compose-Compiler, AGP und Compose-BOM",
+    "sources": [
+      {
+        "url": "https://developer.android.com/jetpack/androidx/releases/compose-kotlin",
+        "description": "Android Developers Compose to Kotlin Compatibility Map",
+        "retrievedDate": "2024-10-25"
+      },
+      {
+        "url": "https://developer.android.com/develop/ui/compose/bom/bom-mapping",
+        "description": "Android Developers Compose Bill of Materials (BOM) Release Notes",
+        "retrievedDate": "2024-10-25"
+      },
+      {
+        "url": "https://developer.android.com/jetpack/compose/setup",
+        "description": "Set up Jetpack Compose requirements (minSdk >= 21)",
+        "retrievedDate": "2024-10-25"
+      }
+    ],
+    "minSdkRequirement": 21
+  },
+  "defaultComposeBom": "2024.10.01",
+  "defaultActivityComposeVersion": "1.9.3",
+  "defaultConstraintLayoutComposeVersion": "1.1.0",
+  "defaultLifecycleComposeVersion": "2.8.7",
+  "defaultKotlinVersion": "2.0.21",
+  "kotlinToCompiler": {
+    "2.1.20": { "plugin": "org.jetbrains.kotlin.plugin.compose", "version": "2.1.20" },
+    "2.1.10": { "plugin": "org.jetbrains.kotlin.plugin.compose", "version": "2.1.10" },
+    "2.1.0":  { "plugin": "org.jetbrains.kotlin.plugin.compose", "version": "2.1.0" },
+    "2.0.21": { "plugin": "org.jetbrains.kotlin.plugin.compose", "version": "2.0.21" },
+    "2.0.20": { "plugin": "org.jetbrains.kotlin.plugin.compose", "version": "2.0.20" },
+    "2.0.10": { "plugin": "org.jetbrains.kotlin.plugin.compose", "version": "2.0.10" },
+    "2.0.0":  { "plugin": "org.jetbrains.kotlin.plugin.compose", "version": "2.0.0" },
+    "1.9.24": { "extensionVersion": "1.5.14" },
+    "1.9.23": { "extensionVersion": "1.5.11" },
+    "1.9.22": { "extensionVersion": "1.5.10" },
+    "1.9.21": { "extensionVersion": "1.5.7" },
+    "1.9.20": { "extensionVersion": "1.5.4" },
+    "1.9.10": { "extensionVersion": "1.5.3" },
+    "1.9.0":  { "extensionVersion": "1.5.1" },
+    "1.8.22": { "extensionVersion": "1.4.8" },
+    "1.8.21": { "extensionVersion": "1.4.7" },
+    "1.8.20": { "extensionVersion": "1.4.6" },
+    "1.8.10": { "extensionVersion": "1.4.2" },
+    "1.8.0":  { "extensionVersion": "1.4.0" }
+  }
+}

@@ -4,10 +4,12 @@ import com.codeforge.core.domain.model.X2cOptions
 import com.codeforge.core.domain.model.X2cPlan
 import com.codeforge.core.domain.model.X2cProgress
 import com.codeforge.core.domain.model.X2cReport
+import com.codeforge.core.domain.repository.ComposeBuildEnabler
 import com.codeforge.core.domain.repository.ComposeMigrationScanner
 import com.codeforge.core.domain.repository.X2cBackupRepository
 import com.codeforge.core.domain.repository.X2cRepository
 import com.codeforge.libs.x2c.backup.X2cBackupRepositoryImpl
+import com.codeforge.libs.x2c.build.ComposeBuildEnablerImpl
 import com.codeforge.libs.x2c.scanner.ComposeMigrationScannerImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class X2cRepositoryImpl(
     private val scanner: ComposeMigrationScanner = ComposeMigrationScannerImpl(),
-    private val backupRepo: X2cBackupRepository = X2cBackupRepositoryImpl()
+    private val backupRepo: X2cBackupRepository = X2cBackupRepositoryImpl(),
+    private val buildEnabler: ComposeBuildEnabler = ComposeBuildEnablerImpl()
 ) : X2cRepository {
 
     private val _progress = MutableStateFlow<X2cProgress>(X2cProgress.Idle)
@@ -41,6 +44,23 @@ class X2cRepositoryImpl(
             backupZipPath = backupRepo.createBackup(projectPath, options.includeGitInBackup)
         }
 
+        // Build für Compose vorbereiten
+        _progress.value = X2cProgress.PreparingBuild("Compose-Unterstützung im Build wird eingerichtet...")
+        val hasConstraintLayout = plan.layouts.any {
+            it.rootTag == "ConstraintLayout" || it.rootTag.endsWith(".ConstraintLayout")
+        }
+        val buildResult = buildEnabler.enableComposeInProject(
+            projectPath = projectPath,
+            useVersionCatalog = options.useVersionCatalog,
+            wireActivities = options.wireActivities,
+            hasConstraintLayout = hasConstraintLayout
+        )
+        if (buildResult.isFailure) {
+            val error = buildResult.exceptionOrNull()?.message ?: "Build-Vorbereitung fehlgeschlagen"
+            _progress.value = X2cProgress.Failed(error)
+            throw IllegalStateException(error)
+        }
+
         val report = X2cReport(
             projectPath = projectPath,
             timestampEpochMillis = System.currentTimeMillis(),
@@ -56,7 +76,7 @@ class X2cRepositoryImpl(
             backupPath = backupZipPath,
             journalPath = "$projectPath/Backup/x2c-journal.json",
             fileResults = emptyList(),
-            markdownSummary = "Migration vorbereitet (Task 52.3)"
+            markdownSummary = "Migration vorbereitet (Task 52.4)"
         )
         _progress.value = X2cProgress.Completed(report)
         return report
