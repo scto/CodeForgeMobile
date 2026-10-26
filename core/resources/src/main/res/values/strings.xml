@@ -1024,6 +1024,12 @@
     <string name="settings_editor_section_indexing">Project indexing</string>
     <string name="settings_project_indexing">Index projects automatically</string>
     <string name="settings_project_indexing_desc">When a project opens, scan it in the background (Java→Kotlin and XML→Compose suggestions). Turn off for large projects or to save battery; manual actions still work.</string>
+    <string name="extensions_notification_channel">Extension installs</string>
+    <string name="extensions_notification_title">Installing extensions</string>
+    <string name="extensions_notification_working">Working …</string>
+    <string name="extensions_notification_cancel">Cancel</string>
+    <string name="extensions_notification_done">%1$s installed</string>
+    <string name="extensions_notification_failed">%1$s: installation failed</string>
     <string name="settings_minimap">Show Minimap</string>
     <string name="settings_minimap_desc">Display miniature code overview on the right edge.</string>
     <string name="settings_rainbow_brackets">Rainbow Brackets</string>

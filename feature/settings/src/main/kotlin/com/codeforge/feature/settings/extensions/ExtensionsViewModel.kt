@@ -16,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExtensionsViewModel @Inject constructor(
-    private val extensionsManager: ExtensionsManager
+    private val extensionsManager: ExtensionsManager,
+    private val coordinator: ExtensionInstallCoordinator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExtensionsUiState())
@@ -24,6 +25,7 @@ class ExtensionsViewModel @Inject constructor(
 
     init {
         loadExtensions()
+        observeInstalls()
     }
 
     fun onEvent(event: ExtensionsUiEvent) {
@@ -52,53 +54,65 @@ class ExtensionsViewModel @Inject constructor(
                 missingOptionalRequirements = missingOptional
             )
         }
-        _uiState.update { it.copy(extensions = items, isRefreshing = false) }
+        _uiState.update { it.copy(extensions = applyActive(items, coordinator.active.value), isRefreshing = false) }
     }
 
     private fun installPackage(pkg: LspExtensionPackage) {
-        viewModelScope.launch {
-            updateItemStatus(pkg.id, ExtensionStatus.DOWNLOADING, 0f)
+        // Läuft im Coordinator + Vordergrunddienst: der Download überlebt Hintergrund und Screen-Wechsel.
+        coordinator.install(pkg)
+    }
 
-            extensionsManager.install(pkg) { progress, status ->
-                updateItemStatus(pkg.id, status, progress)
-            }.fold(
-                onSuccess = { executable ->
-                    _uiState.update { state ->
-                        val updated = state.extensions.map { item ->
-                            if (item.pkg.id == pkg.id) {
-                                item.copy(
-                                    isInstalled = true,
-                                    installedPath = executable.absolutePath,
-                                    status = ExtensionStatus.INSTALLED,
-                                    progress = 1f,
-                                    missingRequirements = extensionsManager.checkMissingRequirements(pkg),
-                                    missingOptionalRequirements = extensionsManager.checkMissingOptionalRequirements(pkg)
-                                )
-                            } else item
+    private fun observeInstalls() {
+        viewModelScope.launch {
+            coordinator.active.collect { active ->
+                _uiState.update { state -> state.copy(extensions = applyActive(state.extensions, active)) }
+            }
+        }
+        viewModelScope.launch {
+            coordinator.outcomes.collect { outcome ->
+                val pkg = outcome.pkg
+                outcome.result.fold(
+                    onSuccess = {
+                        loadExtensions()
+                        _uiState.update {
+                            it.copy(snackbarMessage = UiText.of(R.string.extensions_install_success, Res.string(pkg.nameRes)))
                         }
-                        state.copy(
-                            extensions = updated,
-                            snackbarMessage = UiText.of(R.string.extensions_install_success, Res.string(pkg.nameRes))
-                        )
-                    }
-                },
-                onFailure = { error ->
-                    _uiState.update { state ->
-                        val updated = state.extensions.map { item ->
-                            if (item.pkg.id == pkg.id) {
-                                item.copy(status = ExtensionStatus.ERROR, progress = 0f)
-                            } else item
-                        }
+                    },
+                    onFailure = { error ->
                         val errorText = error.localizedMessage ?: Res.string(R.string.common_fehler)
-                        state.copy(
-                            extensions = updated,
-                            snackbarMessage = UiText.of(R.string.extensions_error, errorText)
-                        )
+                        _uiState.update { state ->
+                            state.copy(
+                                extensions = state.extensions.map { item ->
+                                    if (item.pkg.id == pkg.id) item.copy(status = ExtensionStatus.ERROR, progress = 0f) else item
+                                },
+                                snackbarMessage = UiText.of(R.string.extensions_error, errorText)
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
+
+    /** Legt laufende Installationen über die aus dem Dateisystem gelesene Liste (z. B. nach „Aktualisieren“). */
+    private fun applyActive(
+        items: List<ExtensionUiItem>,
+        active: Map<String, ExtensionInstallProgress>
+    ): List<ExtensionUiItem> = items.map { item ->
+        val running = active[item.pkg.id]
+        when {
+            running != null -> item.copy(status = running.status, progress = running.progress)
+            item.status.isBusy() -> item.copy(
+                status = if (item.isInstalled) ExtensionStatus.INSTALLED else ExtensionStatus.NOT_INSTALLED,
+                progress = 0f
+            )
+            else -> item
+        }
+    }
+
+    private fun ExtensionStatus.isBusy(): Boolean =
+        this == ExtensionStatus.DOWNLOADING || this == ExtensionStatus.VERIFYING ||
+            this == ExtensionStatus.EXTRACTING || this == ExtensionStatus.INSTALLING_DEPENDENCIES
 
     private fun uninstallPackage(pkg: LspExtensionPackage) {
         viewModelScope.launch {
@@ -128,17 +142,6 @@ class ExtensionsViewModel @Inject constructor(
                     }
                 }
             )
-        }
-    }
-
-    private fun updateItemStatus(packageId: String, status: ExtensionStatus, progress: Float) {
-        _uiState.update { state ->
-            val updated = state.extensions.map { item ->
-                if (item.pkg.id == packageId) {
-                    item.copy(status = status, progress = progress)
-                } else item
-            }
-            state.copy(extensions = updated)
         }
     }
 }

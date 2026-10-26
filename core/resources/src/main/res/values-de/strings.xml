@@ -1024,6 +1024,12 @@
     <string name="settings_editor_section_indexing">Projekt-Indexierung</string>
     <string name="settings_project_indexing">Projekte automatisch indizieren</string>
     <string name="settings_project_indexing_desc">Beim Öffnen eines Projekts im Hintergrund scannen (Vorschläge für Java→Kotlin und XML→Compose). Bei großen Projekten oder zum Akkusparen ausschalten; manuelle Aktionen funktionieren weiterhin.</string>
+    <string name="extensions_notification_channel">Installation von Erweiterungen</string>
+    <string name="extensions_notification_title">Erweiterungen werden installiert</string>
+    <string name="extensions_notification_working">Läuft …</string>
+    <string name="extensions_notification_cancel">Abbrechen</string>
+    <string name="extensions_notification_done">%1$s installiert</string>
+    <string name="extensions_notification_failed">%1$s: Installation fehlgeschlagen</string>
     <string name="settings_minimap">Minimap anzeigen</string>
     <string name="settings_minimap_desc">Miniatur-Codeübersicht am rechten Bildschirmrand einblenden.</string>
     <string name="settings_rainbow_brackets">Regenbogen-Klammern (Rainbow Brackets)</string>
