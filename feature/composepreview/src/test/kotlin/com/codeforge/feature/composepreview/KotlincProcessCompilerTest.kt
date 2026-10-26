@@ -78,6 +78,48 @@ class KotlincProcessCompilerTest {
     }
 
     @Test
+    fun `buildCommandLine constructs expected argument list with multiple source files`() {
+        val compiler = KotlincProcessCompiler()
+        val kotlincBin = File("/opt/kotlin/bin/kotlinc")
+        val pluginJar = File("/opt/kotlin/lib/compose-compiler-plugin.jar")
+        val files = listOf(File("/workspace/Main.kt"), File("/workspace/Theme.kt"), File("/workspace/Color.kt"))
+        val outputDir = File("/workspace/classes")
+        val classpath = "/lib/stdlib.jar:/lib/compose.jar"
+
+        val cmd = compiler.buildCommandLine(
+            kotlincBin = kotlincBin,
+            pluginJar = pluginJar,
+            classpath = classpath,
+            sourceFiles = files,
+            outputDir = outputDir
+        )
+
+        val expected = listOf(
+            kotlincBin.absolutePath,
+            "-no-stdlib",
+            "-no-reflect",
+            "-Xplugin=${pluginJar.absolutePath}",
+            "-classpath",
+            classpath,
+            "/workspace/Main.kt",
+            "/workspace/Theme.kt",
+            "/workspace/Color.kt",
+            "-d",
+            outputDir.absolutePath
+        )
+        assertEquals(expected, cmd)
+    }
+
+    @Test
+    fun `output parser attaches resource note on R reference errors`() {
+        val raw = "/data/cache/PreviewTarget.kt:18:22: error: unresolved reference: R\n"
+        val errors = KotlincOutputParser.parseErrors(raw)
+        assertEquals(1, errors.size)
+        assertTrue(errors[0].contains("PreviewTarget.kt:18:22 unresolved reference: R"))
+        assertTrue(errors[0].contains("R.*"))
+    }
+
+    @Test
     fun `compile returns failure when kotlinc or plugin jar is missing`() = runBlocking {
         val compiler = object : KotlincProcessCompiler() {
             override fun resolveKotlincBinary(): File? = null

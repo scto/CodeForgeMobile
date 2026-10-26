@@ -8,25 +8,6 @@
  *   3. classes.dex laden (dalvik.system.DexClassLoader)
  *   4. Zielfunktion reflektiv in eine echte Composition einhängen (ReflectiveComposableHost)
  *   5. Ergebnis in ein Bitmap rendern (ComposeViewBitmapRenderer) und als PNG kodieren
- *
- * STATUS DIESER IMPLEMENTIERUNG: Schritte 2-3 nutzen Standard-Android-Framework-APIs
- * (ProcessBuilder, DexClassLoader) — hohe Zuversicht, dass sie wie geschrieben
- * funktionieren. Schritt 1 (Kotlin-Compiler-Embeddable-API) und Schritte 4-5
- * (reflektive Composer-Injektion, ComposeView außerhalb einer Activity) sind nach
- * bestem Wissen korrekt geschrieben, konnten aber in der Umgebung, in der dieser Code
- * entstand, mangels Netzwerkzugriff (Dependency-Auflösung) und fehlender
- * Android-Laufzeit NICHT kompiliert oder ausgeführt werden. Vor Produktiveinsatz:
- * auf einem echten Gerät/Emulator verifizieren.
- *
- * ECHTE, UNGELÖSTE EINSCHRÄNKUNG (kein Implementierungsdetail, sondern ein
- * grundsätzliches Problem): Der Kotlin-Compiler braucht zum Typchecken der
- * @Composable-Funktion Classpath-Jars für Kotlin-Stdlib und die Compose-Runtime/-UI-
- * Bibliotheken. Auf einem Android-Gerät liegen App-Abhängigkeiten aber nur als bereits
- * gedexter, in die APK gemergter Code vor — NICHT als einzelne .jar-Dateien. Diese
- * Implementierung erwartet daher, dass die nötigen Jars unter
- * assets/compiler-runtime/ (alle .jar-Dateien) mitgeliefert werden (spürbare APK-Größenzunahme).
- * Fehlen sie, schlägt render() mit einer klaren Fehlermeldung fehl, statt stillschweigend
- * nichts zu tun.
  */
 package com.codeforge.feature.composepreview
 
@@ -79,15 +60,80 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                         Res.string(R.string.composepreview_d8_nicht_gefunden_build_tools)
                     )
 
-                val sourceFile = File(workDir, "PreviewTarget.kt").apply { writeText(PreviewSourcePreparer.prepare(sourceCode)) }
-                val classesDir = File(workDir, "classes")
+                val targetFile = File(filePath)
+                val resolvedSources = PreviewDependencyResolver.resolve(
+                    targetFile = targetFile,
+                    targetSourceOverride = sourceCode
+                )
 
-                val compileResult = compiler.compile(
-                    sourceFile = sourceFile,
+                val classesDir = File(workDir, "classes")
+                val targetFileName = targetFile.name.ifEmpty { "PreviewTarget.kt" }
+
+                val preparedTargetFile = File(workDir, targetFileName).apply {
+                    val prepared = PreviewSourcePreparer.prepare(
+                        source = sourceCode,
+                        keepPackage = true,
+                        stubProjectThemes = resolvedSources.siblingFiles.isEmpty(),
+                        stripThemeSideEffects = true
+                    )
+                    writeText(prepared)
+                }
+
+                val preparedSiblingFiles = resolvedSources.siblingFiles.mapIndexed { idx, sFile ->
+                    val siblingTargetName = if (sFile.name == targetFileName) "sibling_${idx}_${sFile.name}" else sFile.name
+                    File(workDir, siblingTargetName).apply {
+                        val originalText = try { sFile.readText() } catch (_: Exception) { "" }
+                        val prepared = PreviewSourcePreparer.prepare(
+                            source = originalText,
+                            keepPackage = true,
+                            stubProjectThemes = false,
+                            stripThemeSideEffects = true
+                        )
+                        writeText(prepared)
+                    }
+                }
+
+                val primaryFiles = listOf(preparedTargetFile) + preparedSiblingFiles
+                var compileResult = compiler.compile(
+                    sourceFiles = primaryFiles,
                     outputDir = classesDir,
                     runtimeClasspathJars = runtimeJars,
                     androidPlatformJar = androidPlatformJar
                 )
+
+                var isFallbackTheme = false
+                var fallbackReason: String? = null
+                var compiledFiles = primaryFiles.map { it.name }
+
+                // Rückfall: Falls die Mehr-Datei-Kompilierung scheitert, auf Ein-Datei-Stub zurückfallen
+                if (!compileResult.success && preparedSiblingFiles.isNotEmpty()) {
+                    val fallback = PreviewCompileStep.determineFallback(
+                        primaryResult = compileResult,
+                        targetSourceCode = sourceCode,
+                        siblingFiles = preparedSiblingFiles
+                    )
+                    if (fallback != null) {
+                        val (reason, stubSource) = fallback
+                        classesDir.deleteRecursively()
+                        classesDir.mkdirs()
+                        preparedTargetFile.writeText(stubSource)
+
+                        val fallbackResult = compiler.compile(
+                            sourceFiles = listOf(preparedTargetFile),
+                            outputDir = classesDir,
+                            runtimeClasspathJars = runtimeJars,
+                            androidPlatformJar = androidPlatformJar
+                        )
+
+                        if (fallbackResult.success) {
+                            compileResult = fallbackResult
+                            isFallbackTheme = true
+                            fallbackReason = reason
+                            compiledFiles = listOf(preparedTargetFile.name)
+                        }
+                    }
+                }
+
                 if (!compileResult.success) {
                     error(
                         Res.string(R.string.composepreview_kompilierung_fehlgeschlagen, compileResult.errorMessages.joinToString("\n"))
@@ -112,9 +158,13 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     context.classLoader
                 )
 
-                // Top-Level-Funktionen landen im Kotlin-Bytecode in einer synthetischen
-                // Klasse "<DateinameKt>" — hier "PreviewTargetKt".
-                val hostClass = classLoader.loadClass("PreviewTargetKt")
+                // Top-Level-Funktionen laden: zuerst via aufgelöstem Klassennamen, sonst Fallback
+                val hostClass = try {
+                    classLoader.loadClass(resolvedSources.targetClassName)
+                } catch (_: ClassNotFoundException) {
+                    classLoader.loadClass("PreviewTargetKt")
+                }
+
                 val targetMethod = hostClass.methods.firstOrNull { it.name == functionName }
                     ?: error(Res.string(R.string.composepreview_funktion_nicht_in_kompiliertem_code, functionName))
 
@@ -125,7 +175,13 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     ReflectiveComposableHost(targetMethod, onError = onError)
                 }
 
-                PreviewRenderResult(functionName = functionName, imageBytes = bitmap.toPngBytes())
+                PreviewRenderResult(
+                    functionName = functionName,
+                    imageBytes = bitmap.toPngBytes(),
+                    compiledFiles = compiledFiles,
+                    isFallbackTheme = isFallbackTheme,
+                    fallbackReason = fallbackReason
+                )
             } finally {
                 workDir.deleteRecursively()
             }
@@ -151,11 +207,6 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         return androidJar.takeIf { it.isFile }
     }
 
-    /**
-     * Nutzt jetzt echte, verifizierte Installationspfade aus SdkRepository (ToolItem.path
-     * wird dort gegen das Dateisystem geprüft, kein bloßes String-Zusammensetzen mehr).
-     * Unter den installierten build-tools-Paketen wird die höchste Version gewählt.
-     */
     private suspend fun resolveD8BinaryPath(): String? {
         val packages = sdkRepository.listAvailablePackages().getOrNull() ?: return null
 
@@ -189,5 +240,26 @@ class ComposePreviewRendererImpl @Inject internal constructor(
             ?.sortedBy { it.name }
             ?.toList()
             .orEmpty()
+    }
+}
+
+internal object PreviewCompileStep {
+    fun determineFallback(
+        primaryResult: CompileResult,
+        targetSourceCode: String,
+        siblingFiles: List<File>
+    ): Pair<String, String>? {
+        if (primaryResult.success || siblingFiles.isEmpty()) return null
+        val firstSiblingError = primaryResult.errorMessages.firstOrNull { err ->
+            siblingFiles.any { sibling -> err.contains(sibling.name) }
+        } ?: primaryResult.errorMessages.firstOrNull() ?: "Theme compilation error"
+
+        val fallbackSource = PreviewSourcePreparer.prepare(
+            source = targetSourceCode,
+            keepPackage = true,
+            stubProjectThemes = true,
+            stripThemeSideEffects = true
+        )
+        return firstSiblingError to fallbackSource
     }
 }

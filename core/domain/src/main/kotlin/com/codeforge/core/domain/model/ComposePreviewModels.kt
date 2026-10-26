@@ -12,5 +12,8 @@ data class ComposableCandidate(
 
 data class PreviewRenderResult(
     val functionName: String,
-    val imageBytes: ByteArray?
+    val imageBytes: ByteArray?,
+    val compiledFiles: List<String> = emptyList(),
+    val isFallbackTheme: Boolean = false,
+    val fallbackReason: String? = null
 )

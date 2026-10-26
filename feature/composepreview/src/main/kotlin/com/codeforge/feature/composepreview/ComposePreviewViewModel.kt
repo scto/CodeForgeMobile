@@ -100,7 +100,15 @@ class ComposePreviewViewModel @Inject constructor(
             )
                 .onSuccess { result ->
                     _uiState.update {
-                        it.copy(renderState = PreviewRenderState.Rendered(result.functionName, result.imageBytes))
+                        it.copy(
+                            renderState = PreviewRenderState.Rendered(
+                                functionName = result.functionName,
+                                imageBytes = result.imageBytes,
+                                compiledFiles = result.compiledFiles,
+                                isFallbackTheme = result.isFallbackTheme,
+                                fallbackReason = result.fallbackReason
+                            )
+                        )
                     }
                 }
                 .onFailure { throwable ->

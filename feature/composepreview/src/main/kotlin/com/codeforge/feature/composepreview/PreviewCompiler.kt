@@ -12,5 +12,17 @@ internal data class CompileResult(val success: Boolean, val outputDir: File, val
  * Schnittstelle für den On-Device-Kotlin-Compiler der Compose-Vorschau.
  */
 internal interface PreviewCompiling {
-    suspend fun compile(sourceFile: File, outputDir: File, runtimeClasspathJars: List<File>, androidPlatformJar: File): CompileResult
+    suspend fun compile(
+        sourceFiles: List<File>,
+        outputDir: File,
+        runtimeClasspathJars: List<File>,
+        androidPlatformJar: File
+    ): CompileResult
+
+    suspend fun compile(
+        sourceFile: File,
+        outputDir: File,
+        runtimeClasspathJars: List<File>,
+        androidPlatformJar: File
+    ): CompileResult = compile(listOf(sourceFile), outputDir, runtimeClasspathJars, androidPlatformJar)
 }

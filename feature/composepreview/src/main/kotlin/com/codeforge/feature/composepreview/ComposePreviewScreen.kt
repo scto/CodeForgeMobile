@@ -144,21 +144,24 @@ private fun RenderStateContent(state: PreviewRenderState, onRetry: () -> Unit) {
         }
 
         is PreviewRenderState.Rendered -> {
-            if (state.imageBytes != null) {
-                val bitmap = remember(state.imageBytes) {
-                    android.graphics.BitmapFactory.decodeByteArray(state.imageBytes, 0, state.imageBytes.size)
-                }
-                if (bitmap != null) {
-                    androidx.compose.foundation.Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = state.functionName,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (state.imageBytes != null) {
+                    val bitmap = remember(state.imageBytes) {
+                        android.graphics.BitmapFactory.decodeByteArray(state.imageBytes, 0, state.imageBytes.size)
+                    }
+                    if (bitmap != null) {
+                        androidx.compose.foundation.Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = state.functionName,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Text(stringRes(R.string.composepreview_bild_konnte_nicht_dekodiert_werden), color = MaterialTheme.colorScheme.error)
+                    }
                 } else {
-                    Text(stringRes(R.string.composepreview_bild_konnte_nicht_dekodiert_werden), color = MaterialTheme.colorScheme.error)
-                }
-            } else {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         stringRes(R.string.common_erkannt, state.functionName),
                         style = MaterialTheme.typography.titleMedium
@@ -167,6 +170,22 @@ private fun RenderStateContent(state: PreviewRenderState, onRetry: () -> Unit) {
                         stringRes(R.string.composepreview_die_grafische_rendering_pipeline_ist),
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+
+                if (state.compiledFiles.size > 1) {
+                    Text(
+                        text = stringRes(R.string.composepreview_mitkompilierte_quellen, state.compiledFiles.joinToString(", ")),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (state.isFallbackTheme) {
+                    Text(
+                        text = stringRes(R.string.composepreview_rueckfall_standard_theme, state.fallbackReason ?: ""),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }

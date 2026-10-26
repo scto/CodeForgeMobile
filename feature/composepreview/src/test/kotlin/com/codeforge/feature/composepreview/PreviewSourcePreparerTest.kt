@@ -83,4 +83,98 @@ class PreviewSourcePreparerTest {
         assertTrue(out.contains("import androidx.compose.material3.Text"))
         assertTrue(out.contains("fun P()"))
     }
+
+    @Test
+    fun `behaelt package wenn keepPackage wahr ist`() {
+        val out = PreviewSourcePreparer.prepare(
+            source = mainActivity,
+            keepPackage = true,
+            stubProjectThemes = false,
+            stripThemeSideEffects = true
+        )
+        assertTrue(out.contains("package com.compose.myapp"))
+        assertFalse(out.contains("class MainActivity"))
+        assertTrue(out.contains("import com.compose.myapp.ui.theme.MyComposeApplicationTheme"))
+        assertFalse(out.contains("fun MyComposeApplicationTheme(content:"))
+    }
+
+    @Test
+    fun `entfernt WindowCompat und SideEffect aus Theme`() {
+        val themeSrc = """
+            package com.example.ui.theme
+
+            import android.app.Activity
+            import androidx.compose.material3.MaterialTheme
+            import androidx.compose.runtime.Composable
+            import androidx.compose.runtime.SideEffect
+            import androidx.compose.ui.platform.LocalView
+            import androidx.core.view.WindowCompat
+
+            @Composable
+            fun AppTheme(content: @Composable () -> Unit) {
+                val view = LocalView.current
+                if (!view.isInEditMode) {
+                    SideEffect {
+                        val window = (view.context as Activity).window
+                        WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+                    }
+                }
+                MaterialTheme(content = content)
+            }
+        """.trimIndent()
+
+        val out = PreviewSourcePreparer.prepare(
+            source = themeSrc,
+            keepPackage = true,
+            stubProjectThemes = false,
+            stripThemeSideEffects = true
+        )
+
+        assertFalse(out.contains("WindowCompat"))
+        assertFalse(out.contains("SideEffect"))
+        assertFalse(out.contains("LocalView"))
+        assertFalse(out.contains("isInEditMode"))
+        assertTrue(out.contains("package com.example.ui.theme"))
+        assertTrue(out.contains("MaterialTheme(content = content)"))
+    }
+
+    @Test
+    fun `determineFallback aktiviert sich bei Fehler in Nachbardatei und liefert Stub-Quelltext`() {
+        val themeFile = java.io.File("/tmp/Theme.kt")
+        val failedResult = CompileResult(
+            success = false,
+            outputDir = java.io.File("/tmp/out"),
+            errorMessages = listOf("Theme.kt:14:5 error: unresolved reference 'UnknownType'")
+        )
+
+        val fallback = PreviewCompileStep.determineFallback(
+            primaryResult = failedResult,
+            targetSourceCode = mainActivity,
+            siblingFiles = listOf(themeFile)
+        )
+
+        org.junit.Assert.assertNotNull(fallback)
+        val (reason, stubSource) = fallback!!
+        assertTrue(reason.contains("Theme.kt:14:5"))
+        assertTrue(stubSource.contains("package com.compose.myapp"))
+        assertTrue(stubSource.contains("fun MyComposeApplicationTheme(content:"))
+    }
+
+    @Test
+    fun `determineFallback ist inaktiv wenn primaere Kompilierung erfolgreich war`() {
+        val themeFile = java.io.File("/tmp/Theme.kt")
+        val successResult = CompileResult(
+            success = true,
+            outputDir = java.io.File("/tmp/out"),
+            errorMessages = emptyList()
+        )
+
+        val fallback = PreviewCompileStep.determineFallback(
+            primaryResult = successResult,
+            targetSourceCode = mainActivity,
+            siblingFiles = listOf(themeFile)
+        )
+
+        org.junit.Assert.assertNull(fallback)
+    }
 }

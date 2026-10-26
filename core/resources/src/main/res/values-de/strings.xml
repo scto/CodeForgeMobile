@@ -93,10 +93,14 @@
     <string name="composepreview_kompilierung_lieferte_keine_class_date">Kompilierung lieferte keine .class-Dateien.</string>
     <string name="composepreview_kotlin_compiler_fehlt">Kotlin-Compiler fehlt – im Terminal \'pkg install kotlin\' ausführen (große Pakete werden automatisch aus dem Release geladen).</string>
     <string name="composepreview_laufzeit_wird_vorbereitet">Compiler-Laufzeit wird vorbereitet (%1$d%%)…</string>
+    <string name="composepreview_mitkompilierte_quellen">Quellen: %1$s</string>
     <string name="composepreview_neu_rendern">Neu rendern</string>
     <string name="composepreview_oeffne_eine_datei_mit_composable">Öffne eine Datei mit @Composable-Funktionen im Editor.</string>
     <string name="composepreview_rendering_fehlgeschlagen">Rendering fehlgeschlagen.</string>
+    <string name="composepreview_ressource_nicht_verfuegbar">Ressource \'%1$s\' steht in der Vorschau nicht zur Verfügung.</string>
+    <string name="composepreview_rueckfall_standard_theme">Standard-Theme aktiv (Rückfall: %1$s)</string>
     <string name="composepreview_waehle_eine_funktion_fuer_die">Wähle eine Funktion für die Vorschau.</string>
+    <string name="composepreview_warnung_dateilimit">Modul enthält viele Quelldateien (%1$d Dateien); nur die minimale Abhängigkeitshülle wurde geladen.</string>
     <string name="composepreview_zeitlimit_ueberschritten">Zeitlimit beim Rendern überschritten (Limit: 5 Sekunden).</string>
 
     <!-- data -->

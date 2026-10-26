@@ -11,7 +11,13 @@ sealed interface PreviewRenderState {
     data object Idle : PreviewRenderState
     data class PreparingRuntime(val progress: Int) : PreviewRenderState
     data object Rendering : PreviewRenderState
-    data class Rendered(val functionName: String, val imageBytes: ByteArray?) : PreviewRenderState
+    data class Rendered(
+        val functionName: String,
+        val imageBytes: ByteArray?,
+        val compiledFiles: List<String> = emptyList(),
+        val isFallbackTheme: Boolean = false,
+        val fallbackReason: String? = null
+    ) : PreviewRenderState
     data class Failed(val message: String) : PreviewRenderState
 }
 

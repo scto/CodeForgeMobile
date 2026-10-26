@@ -21,7 +21,7 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
     var maxHeapMemory: String = "768m"
 
     override suspend fun compile(
-        sourceFile: File,
+        sourceFiles: List<File>,
         outputDir: File,
         runtimeClasspathJars: List<File>,
         androidPlatformJar: File
@@ -52,17 +52,18 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
             kotlincBin = kotlincBin,
             pluginJar = pluginJar,
             classpath = fullClasspath,
-            sourceFile = sourceFile,
+            sourceFiles = sourceFiles,
             outputDir = outputDir
         )
 
+        val workingDirectory = sourceFiles.firstOrNull()?.parentFile ?: File(TermuxEnvironment.home)
         val env = TermuxEnvironment.environment().toMutableMap().apply {
             put("JAVA_OPTS", "-Xmx$maxHeapMemory -Djansi.passthrough=true")
             put("JAVA_TOOL_OPTIONS", "")
         }
 
         val processBuilder = ProcessBuilder(command)
-            .directory(sourceFile.parentFile ?: File(TermuxEnvironment.home))
+            .directory(workingDirectory)
             .redirectErrorStream(true)
 
         processBuilder.environment().clear()
@@ -115,18 +116,49 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
         )
     }
 
-    internal fun buildCommandLine(kotlincBin: File, pluginJar: File, classpath: String, sourceFile: File, outputDir: File): List<String> =
-        listOf(
-            kotlincBin.absolutePath,
-            "-no-stdlib",
-            "-no-reflect",
-            "-Xplugin=${pluginJar.absolutePath}",
-            "-classpath",
-            classpath,
-            sourceFile.absolutePath,
-            "-d",
-            outputDir.absolutePath
-        )
+    override suspend fun compile(
+        sourceFile: File,
+        outputDir: File,
+        runtimeClasspathJars: List<File>,
+        androidPlatformJar: File
+    ): CompileResult = compile(
+        sourceFiles = listOf(sourceFile),
+        outputDir = outputDir,
+        runtimeClasspathJars = runtimeClasspathJars,
+        androidPlatformJar = androidPlatformJar
+    )
+
+    internal fun buildCommandLine(
+        kotlincBin: File,
+        pluginJar: File,
+        classpath: String,
+        sourceFiles: List<File>,
+        outputDir: File
+    ): List<String> = buildList {
+        add(kotlincBin.absolutePath)
+        add("-no-stdlib")
+        add("-no-reflect")
+        add("-Xplugin=${pluginJar.absolutePath}")
+        add("-classpath")
+        add(classpath)
+        sourceFiles.forEach { add(it.absolutePath) }
+        add("-d")
+        add(outputDir.absolutePath)
+    }
+
+    internal fun buildCommandLine(
+        kotlincBin: File,
+        pluginJar: File,
+        classpath: String,
+        sourceFile: File,
+        outputDir: File
+    ): List<String> = buildCommandLine(
+        kotlincBin = kotlincBin,
+        pluginJar = pluginJar,
+        classpath = classpath,
+        sourceFiles = listOf(sourceFile),
+        outputDir = outputDir
+    )
 
     internal open fun resolveKotlincBinary(): File? {
         val candidates = listOf(
@@ -155,12 +187,21 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
 
 internal object KotlincOutputParser {
     private val LINE_ERROR_REGEX = Regex("""^(.*?\.kt):(\d+):(\d+):\s*error:\s*(.*)$""", RegexOption.MULTILINE)
+    private val R_REFERENCE_REGEX = Regex("""\bunresolved reference:?\s*['"]?R['"]?|\bunresolved reference:?\s*['"]?(?:string|drawable|color|layout|id)['"]?""")
 
     fun parseErrors(output: String): List<String> {
         val lineErrors = LINE_ERROR_REGEX.findAll(output).map { match ->
             val (file, line, col, msg) = match.destructured
             val fileName = File(file).name
-            "$fileName:$line:$col $msg"
+            val resourceNote = if (R_REFERENCE_REGEX.containsMatchIn(msg)) {
+                val str = try {
+                    Res.string(R.string.composepreview_ressource_nicht_verfuegbar, "R.*")
+                } catch (_: Exception) {
+                    null
+                }
+                if (str != null && !str.startsWith("@string/")) " ($str)" else " (R.*: Resource is not available in isolated preview)"
+            } else ""
+            "$fileName:$line:$col $msg$resourceNote"
         }.toList()
 
         if (lineErrors.isNotEmpty()) return lineErrors

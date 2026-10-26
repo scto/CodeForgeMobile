@@ -86,7 +86,7 @@ Repo-Stand: `952f324`. Alle im Verzeichnis vorhandenen Prompts (**Tasks 01–50*
 | 54 | `54-editor-tabrow-empty-crash.md` | ✅ `be3c65f` | Absturz im Editor bei leerer Tab-Liste (`ScrollableTabRow`, `IndexOutOfBoundsException`): Tab-Zeile nur bei Dateien, Leerzustand, Index begrenzen, Regressionstest (`docs/editor-tabrow-crash-report.md`) |
 | 55 | `55-projects-root-cfm-workspace.md` | ⬜ offen | Projekt-Stammverzeichnis im externen Speicher (`CodeForgeMobileProjects/`), `.cfm/log` und `.cfm/crash`, `cfm.json` je Projekt (Workspace), Speichern-beim-Schließen-Dialog, Migration |
 | 56 | `56-compiler-runtime-icons-extended-check.md` | ⬜ offen | Compiler-Runtime: braucht die Vorschau `material-icons-extended` (≈ 35,7 MiB) oder reicht `core`? Messung, Entscheidung, optionales Zusatzpaket |
-| 57 | `57-compose-preview-project-sources.md` | ⬜ offen | Compose-Vorschau: Projekt-Theme und Nachbardateien mitkompilieren (statt Material3-Stub), dateibezogene Fehler, Rückfall |
+| 57 | `57-compose-preview-project-sources.md` | ✅ erledigt | Compose-Vorschau: Projekt-Theme und Nachbardateien mitkompilieren (statt Material3-Stub), dateibezogene Fehler, Rückfall |
 | 99 | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task / Prompt fehlt) | Anwendungsdoku (Mermaid) und API-Doku (Dokka), wiederholbar über `docsGenerate`/`docsCheck`, CI-Wochenlauf · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“). *Hinweis: Datei muss in agy-tasks/ noch angelegt werden.* |
 
 ## Nächste Schritte
