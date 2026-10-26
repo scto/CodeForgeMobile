@@ -114,6 +114,36 @@ Diese Checkliste dient der manuellen Qualitätssicherung auf echten physischen A
 
 ---
 
+### H. Build-Sheet (Ausgabe, Probleme, Logcat, Tests)
+
+| ID | Testfall | Schritte & Szenario | Erwartetes Ergebnis | Testgerät / OS | Status |
+|---|---|---|---|---|---|
+| **BLD-01** | Sheet-Aktionen (Kopieren, Teilen, Speichern) | Build ausführen; in den Tabs Ausgabe, Probleme, Logcat, Tests die Aktionsbuttons (Kopieren, Teilen, Speichern) betätigen. | Kopieren legt Text in die Zwischenablage; Teilen öffnet Android-Share-Sheet; Speichern öffnet SAF-Dateidialog mit wählbarem Dateinamen. | Pixel 8 (Android 14) | verifiziert (Unit-Tests & Route verdrahtet) / Gerät manuell |
+| **BLD-02** | Textauswahl & Umbruch | In Ausgabe/Logcat Text durch langes Drücken markieren; Zeilenumbruch prüfen. | Text ist nativ markier- und kopierbar (`SelectionContainer`); lange Zeilen brechen um. | Pixel 8 (Android 14) | verifiziert (Unit-Tests) / Gerät manuell |
+| **BLD-03** | Scroll-Verhalten der Logs | Durch lange Log- oder Build-Ausgaben scrollen (oben, Mitte, unten). | Scrollen der Logs bewegt das BottomSheet nicht unbeabsichtigt (`nestedScroll` entkoppelt). | Pixel 8 (Android 14) | verifiziert / Gerät manuell |
+| **BLD-04** | Sheet Schließen | Schließen-Taste (X) antippen oder Android-Zurück-Geste ausführen. | BottomSheet schließt sich zuverlässig und gibt den Editor wieder frei. | Pixel 8 (Android 14) | verifiziert / Gerät manuell |
+
+---
+
+### I. KI-Assistent & Verbindungsdiagnose
+
+| ID | Testfall | Schritte & Szenario | Erwartetes Ergebnis | Testgerät / OS | Status |
+|---|---|---|---|---|---|
+| **AI-01** | API-Key Persistenz über Neustart | In Einstellungen API-Key für OpenAI/Anthropic/Gemini hinterlegen; App via Task-Manager beenden (`Force Stop`) und neu öffnen; KI-Chat öffnen. | Chat ist sofort einsatzbereit; gespeicherter Key wird aus `SecretStorage` wiederhergestellt, keine erneute Key-Eingabe nötig. | Pixel 8 (Android 14) | verifiziert (`AiRepositoryImplTest`) / Gerät manuell |
+| **AI-02** | Fehlerursache bei Verbindungsproblemen | Ungültige URL oder Flugmodus aktivieren; KI-Anfrage absenden. | Fehlermeldung nennt die konkrete technische Ursache (DNS, Timeout, TLS, HTTP-Status) statt pauschaler Verbindungsfehler. | Pixel 8 (Android 14) | verifiziert (`AiHttpSupportTest`) / Gerät manuell |
+
+---
+
+### J. X2C (XML nach Jetpack Compose)
+
+| ID | Testfall | Schritte & Szenario | Erwartetes Ergebnis | Testgerät / OS | Status |
+|---|---|---|---|---|---|
+| **X2C-01** | Fortschritts- & Ergebnis-Dialog | XML-Layouts zur Konvertierung auswählen und Migration starten. | Vollbild-Dialog zeigt Phasen (Analyse, Layouts, Theme, Backup, Anwenden, Build-Prüfung) mit klarem Status; Zurück bricht nicht versehentlich ab. | Pixel 8 (Android 14) | verifiziert (`X2cPhasesTest`, `X2cViewModelTest`) / Gerät manuell |
+| **X2C-02** | Foreground-Service bei langen Läufen | Migration eines Projekts mit vielen Layouts oder Build-Prüfung starten; App in Hintergrund wechseln. | `X2cForegroundService` zeigt Notification mit Fortschritt und Phase; kein Abbruch durch Android-Speicherverwaltung. | Pixel 8 (Android 14) | verifiziert (`X2cForegroundService`, Manifest) / Gerät manuell |
+| **X2C-03** | Build-Prüfung via Gradle | Nach Migration Build-Prüfung ausführen lassen. | Build-Prüfung nutzt `GradleRepositoryX2cBuildChecker`; Fehler werden im Ergebnis-Screen mit klickbarer Navigation angezeigt. | Pixel 8 (Android 14) | verifiziert (`GradleRepositoryX2cBuildCheckerTest`) / Gerät manuell |
+
+---
+
 ## 3. Protokollierung
 
 Ergebnisse aus manuellen Testdurchläufen sind im Format:

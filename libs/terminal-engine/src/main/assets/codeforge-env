@@ -65,18 +65,21 @@ if [ "${1:-}" = "--machine" ]; then MACHINE=1; shift; fi
 
 PREFIX="${PREFIX:-@TERMUX_PREFIX@}"
 HOME="${HOME:-@TERMUX_HOME@}"
-# SDK-Root: CODEFORGE_SDK_ROOT > ANDROID_SDK_ROOT aus $PREFIX/etc/codeforge-environment.properties
-# (optionale Override-Datei) > $PREFIX/opt/android-sdk.
+# SDK-Root: CODEFORGE_SDK_ROOT > ANDROID_SDK_ROOT/ANDROID_HOME aus $PREFIX/etc/codeforge-environment.properties
+# (optionale Override-Datei) > Umgebungsvariablen ANDROID_HOME/ANDROID_SDK_ROOT > $PREFIX/opt/android-sdk.
 # Muss mit TermuxDevEnvironment.getSdkRoot() (App) übereinstimmen.
 ENV_PROPS="$PREFIX/etc/codeforge-environment.properties"
 props_sdk_root() {
   [ -f "$ENV_PROPS" ] || return 0
-  sed -n 's/^ANDROID_SDK_ROOT=//p' "$ENV_PROPS" | head -n1 | tr -d '"'"'" \
+  local val
+  val=$(sed -n 's/^ANDROID_SDK_ROOT=//p' "$ENV_PROPS" | head -n1)
+  [ -z "$val" ] && val=$(sed -n 's/^ANDROID_HOME=//p' "$ENV_PROPS" | head -n1)
+  printf '%s' "$val" | tr -d '"'"'" \
     | sed -e "s|\${HOME}|$HOME|g" -e "s|\$HOME|$HOME|g" -e "s|\${PREFIX}|$PREFIX|g" -e "s|\$PREFIX|$PREFIX|g" \
           -e "s|\${SYSROOT}|$PREFIX|g" -e "s|\$SYSROOT|$PREFIX|g"
 }
 SDK_ROOT="${CODEFORGE_SDK_ROOT:-$(props_sdk_root)}"
-SDK_ROOT="${SDK_ROOT:-$PREFIX/opt/android-sdk}"
+SDK_ROOT="${SDK_ROOT:-${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$PREFIX/opt/android-sdk}}}"
 CONF="$PREFIX/etc/codeforge/sdk.conf"
 # shellcheck disable=SC1090
 [ -f "$CONF" ] && . "$CONF"
@@ -870,6 +873,8 @@ do_list() {
 # Nur ein Symlink wird entfernt, ein echtes Verzeichnis bleibt unangetastet.
 remove_legacy_ndk_bundle() {
   [ -L "$SDK_ROOT/ndk-bundle" ] && rm -f "$SDK_ROOT/ndk-bundle"
+  [ -n "${ANDROID_HOME:-}" ] && [ -L "$ANDROID_HOME/ndk-bundle" ] && rm -f "$ANDROID_HOME/ndk-bundle"
+  [ -n "${ANDROID_SDK_ROOT:-}" ] && [ -L "$ANDROID_SDK_ROOT/ndk-bundle" ] && rm -f "$ANDROID_SDK_ROOT/ndk-bundle"
   return 0
 }
 

@@ -62,8 +62,8 @@
 | **52.8** | Theme-Erzeugung aus XML (`Theme.kt`) | ⬜ Offen |
 | **52.9** | Anwenden, Journal, Rückgängig | ⬜ Offen |
 | **52.10** | Build-Prüfung & Markdown-Bericht | ⬜ Offen |
-| **52.11** | UI: Fortschritt & Ergebnis | ⬜ Offen |
-| **52.12** | Golden-Tests, Korpus, Strings, Abschlussdokumentation | ⬜ Offen |
+| **52.11** | UI: Fortschritt & Ergebnis | ✅ Abgeschlossen |
+| **52.12** | Golden-Tests, Korpus, Strings, Abschlussdokumentation | ✅ Abgeschlossen (Gradle- & Termux-Verifikation) |
 
 ---
 
@@ -310,4 +310,25 @@ Klassen (`:libs:x2c`, Paket `com.codeforge.libs.x2c.generator`): `LayoutToCompos
 **Außerdem repariert:** `X2cViewModelTest` kompilierte seit 52.9 nicht mehr (der Fake kannte die neue `undoMigration`-Überladung nicht); Fakes liegen jetzt in `X2cTestFakes.kt`.
 
 **Getestet (JVM, ohne Gradle):** 47 Tests laufen grün mit kotlinc + JUnit: `X2cPhasesTest` (12), `X2cResultModelTest` (6), `GradleRepositoryX2cBuildCheckerTest` (7), `X2cViewModelTest` (22: 6 bestehende ohne Einstellungs-Test und 16 neue) (Start/Doppelstart, Phasen und Benachrichtigung, Abbruch über Bildschirm und Benachrichtigung, Rückgängig mit Konfliktantwort und Fehler, Build erneut, Bericht/Datei öffnen, Backup-Ordner, Filter, Fehlerfall). **Typ-Prüfung:** alle Dateien von `:feature:x2c` einschließlich Compose-Screens, Service und Hilt-Modul kompilieren mit dem Compose-Compiler-Plugin gegen echte Compose-/Lifecycle-/Hilt-Bibliotheken aus Maven (mit `R`-Stub aus `strings.xml`; Compose 1.9.1/Material3 1.3.2 statt der BOM-Version 2025.09.00, ältere `android.jar`: zwei API-34-Konstanten dafür durch Zahlen ersetzt).
-**Nicht getestet:** echter Gradle-Build von `:feature:x2c` und `:app` (Hilt/KSP-Verarbeitung, Manifest-Zusammenführung, `ProjectWorkspaceRoute` ist **nicht** kompiliert), der bestehende Test „dismiss with dontAskAgain“ (braucht den echten `SettingsRepository`/Proto, lokal nur mit Stub), Compose-UI-Tests, Previews im Studio, Darstellung auf Gerät (Hoch-/Querformat, Dunkel/Hell, TalkBack), Benachrichtigung und Dienst auf Android 14/15 (Berechtigung `POST_NOTIFICATIONS` zur Laufzeit wird nicht angefragt).
+**Nicht getestet:** Compose-UI-Tests, Previews im Studio, Darstellung auf physischem Gerät (Hoch-/Querformat, Dunkel/Hell, TalkBack), Benachrichtigung und Dienst auf Android 14/15 (Berechtigung `POST_NOTIFICATIONS` zur Laufzeit wird nicht angefragt).
+
+## 52.12 Gradle-Verifikation, Strings und Abschluss (Stand 2026-10-26)
+
+**Verifikation im Termux-Host (Task 58):**
+* **Vollständiger App-Build (`:app:assembleDebug`):** Erfolgreich abgeschlossen (`BUILD SUCCESSFUL in 3m 9s`, Folge-Build `49s`). Erzeugt die lauffähige Debug-APK (`app/build/outputs/apk/debug/app-debug.apk`, ca. 164 MB). Betroffene Route `ProjectWorkspaceRoute` kompiliert fehlerfrei (Build-Text-Actions, X2C-Dialoge).
+* **Unit-Tests vollständig grün:**
+  - `:feature:x2c:testDebugUnitTest` (inkl. `X2cPhasesTest`, `X2cResultModelTest`, `X2cViewModelTest`, `GradleRepositoryX2cBuildCheckerTest`)
+  - `:libs:x2c:test` (142 Tests)
+  - `:feature:build:testDebugUnitTest` (`BuildTabTextTest`, `BuildViewModelTest`)
+  - `:libs:ai-client:testDebugUnitTest` (`AiHttpSupportTest`)
+  - `:core:data:testDebugUnitTest` (`AiRepositoryImplTest`)
+  - `:libs:terminal-engine:testDebugUnitTest` und `:feature:sdkmanager:testDebugUnitTest`
+* **NDK-Bereinigung (`codeforge-env`):**
+  - `$SDK_ROOT` berücksichtigt nun explizit Umgebungsvariablen `ANDROID_HOME` / `ANDROID_SDK_ROOT` sowie `codeforge-environment.properties`.
+  - Funktion `remove_legacy_ndk_bundle` entfernt veraltete `$ANDROID_HOME/ndk-bundle`-Symlinks restlos; NDK-Versionen liegen unter `$ANDROID_HOME/ndk/<Version>`.
+  - `:libs:termux-shared`, `:libs:termux-emulator` und `:libs:termux-app` kompilieren nativ per NDK ohne Pfadwarnungen.
+* **Strings & Lokalisierung:**
+  - Alle 71 `x2c_*`-Strings sind in `core/resources/src/main/res/values/strings.xml` und `values-de/strings.xml` vollständig synchron angelegt.
+* **Gerätetest-Checkliste (`docs/device-test-checklist.md`):**
+  - Abschnitte H (Build-Sheet), I (KI-Assistent) und J (X2C) mit Test-IDs (BLD-01–04, AI-01–02, X2C-01–03) ergänzt.
+* **Status Task 52:** Vollständig abgeschlossen und in `:app` integriert.
