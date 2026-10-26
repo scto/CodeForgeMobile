@@ -92,7 +92,7 @@ fun LogcatTab(
     // Automatisches Scrollen ans Ende, wenn nicht pausiert und autoScroll aktiv ist
     LaunchedEffect(state.filteredLogcatEntries.size, state.autoScroll, state.isLogcatPaused) {
         if (state.autoScroll && !state.isLogcatPaused && state.filteredLogcatEntries.isNotEmpty()) {
-            listState.animateScrollToItem(state.filteredLogcatEntries.size - 1)
+            listState.scrollToItem(state.filteredLogcatEntries.size - 1)
         }
     }
 

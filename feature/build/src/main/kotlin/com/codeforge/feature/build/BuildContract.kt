@@ -69,15 +69,17 @@ data class BuildUiState(
     val availableModules: List<String> = emptyList(),
     val didBuildFailBeforeTests: Boolean = false
 ) {
-    val filteredProblems: List<BuildProblem> get() = when (problemFilter) {
+    val filteredProblems: List<BuildProblem> by lazy {
+        when (problemFilter) {
         ProblemFilter.ALL -> problems
         ProblemFilter.ERRORS_ONLY -> problems.filter { it.severity == ProblemSeverity.ERROR }
         ProblemFilter.WARNINGS_ONLY -> problems.filter { it.severity == ProblemSeverity.WARNING }
+        }
     }
 
-    val errorCount: Int get() = problems.count { it.severity == ProblemSeverity.ERROR }
-    val warningCount: Int get() = problems.count { it.severity == ProblemSeverity.WARNING }
-    val crashCount: Int get() = logcatEntries.count { it.isCrash }
+    val errorCount: Int by lazy { problems.count { it.severity == ProblemSeverity.ERROR } }
+    val warningCount: Int by lazy { problems.count { it.severity == ProblemSeverity.WARNING } }
+    val crashCount: Int by lazy { logcatEntries.count { it.isCrash } }
 
     val testPassedCount: Int get() = testRunResult?.passedCount ?: 0
     val testFailedCount: Int get() = testRunResult?.failedCount ?: 0
@@ -85,12 +87,15 @@ data class BuildUiState(
     val testTotalCount: Int get() = testRunResult?.totalCount ?: 0
     val testDurationSeconds: Double get() = testRunResult?.durationSeconds ?: 0.0
 
-    val filteredLines: List<String> get() {
-        if (searchQuery.isBlank()) return outputLines
-        return outputLines.filter { it.contains(searchQuery, ignoreCase = true) }
+    // Einmal je State-Instanz berechnet (Zugriff mehrfach pro Recomposition, Listen bis 20.000 Zeilen).
+    val filteredLines: List<String> by lazy {
+        if (searchQuery.isBlank()) outputLines
+        else outputLines.filter { it.contains(searchQuery, ignoreCase = true) }
     }
 
-    val filteredLogcatEntries: List<LogEntry> get() = logcatEntries.filter { logcatFilter.matches(it) }
+    val filteredLogcatEntries: List<LogEntry> by lazy {
+        logcatEntries.filter { logcatFilter.matches(it) }
+    }
 
     val filteredModuleSuites: List<TestModuleSuite> get() {
         val result = testRunResult ?: return emptyList()

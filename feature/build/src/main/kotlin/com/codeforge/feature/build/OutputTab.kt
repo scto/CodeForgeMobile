@@ -50,7 +50,7 @@ fun OutputTab(
 
     LaunchedEffect(state.outputLines.size, state.autoScroll) {
         if (state.autoScroll && state.filteredLines.isNotEmpty()) {
-            listState.animateScrollToItem(state.filteredLines.size - 1)
+            listState.scrollToItem(state.filteredLines.size - 1)
         }
     }
 
