@@ -1742,5 +1742,15 @@
     <string name="editor_tab_close_others">Close others</string>
     <string name="editor_tab_close_all">Close all</string>
     <string name="editor_tabs_ungespeichert_offen">Tabs with unsaved changes stay open.</string>
+    <string name="settings_hub_debug">Debug</string>
+    <string name="debug_settings_title">Debug settings</string>
+    <string name="debug_log_enabled">Log enabled</string>
+    <string name="debug_log_enabled_beschreibung">Writes log files to .cfm/log in the projects folder (app and system log of this app).</string>
+    <string name="debug_log_verzeichnis">Log directory</string>
+    <string name="debug_log_verzeichnis_nicht_verfuegbar">Not available</string>
+    <string name="debug_log_dateien">%1$d files, %2$s</string>
+    <string name="debug_logs_loeschen">Delete logs</string>
+    <string name="debug_logs_geloescht">%1$d log files deleted</string>
+    <string name="debug_crash_hinweis">Crash reports are always written to .cfm/crash, independent of this switch.</string>
 </resources>
 

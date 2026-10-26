@@ -11,6 +11,7 @@ message AppSettings {
   WizardConfig wizard = 5;
   FileHeaderConfig file_header = 6;
   MigrationConfig migration = 7;
+  DebugConfig debug = 8;
 }
 
 message ThemeConfig {
@@ -82,4 +83,10 @@ message FileHeaderConfig {
 message MigrationConfig {
   repeated string j2k_dismissed_projects = 1;
   repeated string x2c_dismissed_projects = 2;
+}
+
+message DebugConfig {
+  // Standard (false) = Protokollierung AN. Negiert gespeichert, damit der Proto-Default (false)
+  // ohne Migration "an" bedeutet.
+  bool log_disabled = 1;
 }

@@ -3,6 +3,7 @@ package com.codeforge.core.datastore
 
 import androidx.datastore.core.DataStore
 import com.codeforge.core.datastore.proto.AppSettings
+import com.codeforge.core.datastore.proto.DebugConfig
 import com.codeforge.core.datastore.proto.EditorConfig
 import com.codeforge.core.datastore.proto.FileHeaderConfig
 import com.codeforge.core.datastore.proto.MigrationConfig
@@ -36,6 +37,14 @@ class SettingsRepository @Inject constructor(
         dataStore.updateData { current ->
             current.toBuilder()
                 .setEditor(transform(current.editor))
+                .build()
+        }
+    }
+
+    suspend fun updateDebug(transform: (DebugConfig) -> DebugConfig) {
+        dataStore.updateData { current ->
+            current.toBuilder()
+                .setDebug(transform(current.debug))
                 .build()
         }
     }

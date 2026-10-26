@@ -26,6 +26,7 @@ import com.codeforge.feature.onboarding.OnboardingRoute
 import com.codeforge.feature.plugins.PluginsRoute
 import com.codeforge.feature.projectwizard.ProjectWizardRoute
 import com.codeforge.feature.sdkmanager.SdkManagerRoute
+import com.codeforge.feature.settings.DebugSettingsRoute
 import com.codeforge.feature.settings.EditorSettingsRoute
 import com.codeforge.feature.settings.GitSettingsRoute
 import com.codeforge.feature.settings.SettingsHubRoute
@@ -59,6 +60,7 @@ internal object Routes {
     const val SETTINGS_SDK_MANAGER = "settings_sdk_manager"
     const val SETTINGS_PLUGINS = "settings_plugins"
     const val SETTINGS_GIT = "settings_git"
+    const val SETTINGS_DEBUG = "settings_debug"
     const val EXTENSIONS = "extensions"
     const val TERMINAL = "terminal"
     const val TERMINAL_PATTERN = "terminal?initialCommand={initialCommand}"
@@ -183,7 +185,8 @@ fun CodeForgeNavHost(
                 onNavigateToPlugins = { navController.navigate(Routes.SETTINGS_PLUGINS) },
                 onNavigateToGit = { navController.navigate(Routes.SETTINGS_GIT) },
                 onNavigateToExtensions = { navController.navigate(Routes.EXTENSIONS) },
-                onNavigateToSigning = { navController.navigate(Routes.SETTINGS_SIGNING) }
+                onNavigateToSigning = { navController.navigate(Routes.SETTINGS_SIGNING) },
+                onNavigateToDebug = { navController.navigate(Routes.SETTINGS_DEBUG) }
             )
         }
         composable(Routes.SETTINGS_THEME) {
@@ -205,6 +208,11 @@ fun CodeForgeNavHost(
         composable(Routes.SETTINGS_SIGNING) {
             SigningRoute(
                 onNavigateBack = { navigateBackOrStart() }
+            )
+        }
+        composable(Routes.SETTINGS_DEBUG) {
+            DebugSettingsRoute(
+                onBack = { navigateBackOrStart() }
             )
         }
         composable(Routes.SETTINGS_TERMINAL) {
