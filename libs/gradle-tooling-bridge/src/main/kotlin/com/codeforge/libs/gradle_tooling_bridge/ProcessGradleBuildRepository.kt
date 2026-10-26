@@ -99,6 +99,8 @@ class ProcessGradleBuildRepository @Inject constructor(
             return@flow
         }
 
+        // Auf externem Speicher (/storage/emulated/0) gibt es kein Exec-Bit (noexec/FUSE):
+        // gradlew wird daher immer über die Shell gestartet, nicht direkt (sonst error=13).
         if (!gradlewFile.canExecute()) {
             gradlewFile.setExecutable(true, false)
         }
@@ -129,6 +131,7 @@ class ProcessGradleBuildRepository @Inject constructor(
 
         val taskArgs = taskName.trim().split("\\s+".toRegex()).filter { it.isNotEmpty() }
         val command = buildList {
+            add(TermuxEnvironment.bashPath)
             add(gradlewFile.absolutePath)
             addAll(taskArgs)
             add("--console=plain")
