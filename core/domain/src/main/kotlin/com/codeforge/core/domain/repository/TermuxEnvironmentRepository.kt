@@ -13,9 +13,9 @@ import com.codeforge.core.resources.Res
  * weil sie als Shell-Argumente ins Terminal geschrieben werden.
  */
 data class SdkSetupOptions(
-    val jdk: String = "17",
+    val jdk: String = "21",
     val ndk: String = "r29",
-    val cmake: String = "3.22.1",
+    val cmake: String = "4.1.2",
     val installNdk: Boolean = true,
     val installCmake: Boolean = true,
 ) {
@@ -34,7 +34,7 @@ data class SdkSetupOptions(
         private val SAFE = Regex("^[0-9A-Za-z.]{1,16}$")
         val JDK_CHOICES = listOf("17", "21")
         val NDK_CHOICES = listOf("r29", "r28c", "r27d")
-        const val DEFAULT_CMAKE = "3.22.1"
+        const val DEFAULT_CMAKE = "4.1.2"
     }
 }
 

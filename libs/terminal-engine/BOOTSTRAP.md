@@ -15,7 +15,7 @@ entfernt. Es gibt genau eine Umgebung: den Termux-Bootstrap unter
    `$PREFIX/bin`, falls es nicht als Paket im Bootstrap liegt (Platzhalter `@TERMUX_PREFIX@` etc.
    werden ersetzt).
 3. **Terminal öffnet sich** (Route `terminal?initialCommand=…`) und führt
-   `codeforge-env setup --jdk 17|21 --ndk r29 --cmake 3.22.1` sichtbar aus (gibt es eine Version nicht, nimmt das Skript das NDK gleicher Hauptversion bzw. das Termux-CMake).
+   `codeforge-env setup --jdk 17|21 --ndk r29 --cmake 4.1.2` (Standard: JDK 21, CMake 4.1.2) sichtbar aus (gibt es eine Version nicht, nimmt das Skript das NDK gleicher Hauptversion bzw. das Termux-CMake).
 4. **SDK-Manager** (`:feature:sdkmanager`) ist nur noch die grafische Oberfläche über
    `codeforge-env --machine list|install|uninstall` (`TermuxScriptSdkRepository`).
 

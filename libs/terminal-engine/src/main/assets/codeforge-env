@@ -11,7 +11,7 @@
 #   install <id|paket>           z. B. jdk;21  ndk;r29  cmake;3.22.1  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36  gradle
 #   uninstall <id>
 #   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 30 MiB über large-packages.txt, sonst per pkg)
-#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 3.22.1]
+#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 4.1.2]   (Standard: JDK 21, CMake 4.1.2)
 #         [--no-ndk] [--no-cmake] [--no-gradle] [--no-kotlin] [--no-extras] [--minimal]
 #                                Basis-Setup für Android-Entwicklung (ohne Optionen alles):
 #                                JDK, cmdline-tools, build-tools, platform-tools, Plattform, NDK, CMake/Ninja,
@@ -1079,7 +1079,7 @@ do_setup() {
   local setup_args="$*"
   local retry_cmd="codeforge-env setup${setup_args:+ $setup_args}"
   CURRENT_SETUP_RETRY_CMD="$retry_cmd"
-  local jdk=17 ndk=r29 cmake=3.22.1 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=1 want_kotlin=1 want_extras=1
+  local jdk=21 ndk=r29 cmake=4.1.2 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=1 want_kotlin=1 want_extras=1
   while [ $# -gt 0 ]; do
     case "$1" in
       --jdk) jdk=$2; shift 2 ;; --ndk) ndk=$2; shift 2 ;; --cmake) cmake=$2; shift 2 ;;
