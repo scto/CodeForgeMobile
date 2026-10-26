@@ -78,6 +78,7 @@ CONF="$PREFIX/etc/codeforge/sdk.conf"
 REPO_URL="${CODEFORGE_SDK_REPO:-@CODEFORGE_SDK_REPO@}"
 MANIFEST_URL="${CODEFORGE_SDK_MANIFEST:-$REPO_URL/manifest.txt}"
 TMP="${TMPDIR:-$PREFIX/tmp}"
+mkdir -p "$TMP" 2>/dev/null || true   # $PREFIX/tmp fehlt in frischen Bootstraps (JVM/Gradle brauchen es)
 ENV_FILE="$PREFIX/etc/profile.d/codeforge-android.sh"
 JVM_DIR="$PREFIX/lib/jvm"
 LOG_DIR="$HOME/.codeforge/logs"
