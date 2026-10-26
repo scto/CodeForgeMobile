@@ -53,6 +53,7 @@
 |---|---|---|
 | **52.0** | Entscheidungen & On-Device Spike | ✅ Abgeschlossen (Spike positiv) |
 | **52.1** | Kern und Schnittstellen (`:core:domain`) | ✅ Abgeschlossen (`X2cModels.kt`, `X2cRepositories.kt`, `X2cModelsTest.kt`) |
+| **52.2** | Erkennung, Einstieg und Dialog (`:libs:x2c`, `:feature:x2c`, `:app`) | ✅ Abgeschlossen |
 | **52.3** | ZIP-Backup mit Verifikation | ⬜ Offen |
 | **52.4** | Compose im Build ermöglichen (`ComposeBuildEnabler`) | ⬜ Offen |
 | **52.5** | Analyse: Layouts und Verwendung (`LayoutUsageAnalyzer`) | ⬜ Offen |
@@ -61,16 +62,79 @@
 | **52.8** | Theme-Erzeugung aus XML (`Theme.kt`) | ⬜ Offen |
 | **52.9** | Anwenden, Journal, Rückgängig | ⬜ Offen |
 | **52.10** | Build-Prüfung & Markdown-Bericht | ⬜ Offen |
-| **52.2 / 52.11** | UI: Erkennung, Einstiegsdialog, Fortschritt, Ergebnis | ⬜ Offen |
+| **52.11** | UI: Fortschritt & Ergebnis | ⬜ Offen |
 | **52.12** | Golden-Tests, Korpus, Strings, Abschlussdokumentation | ⬜ Offen |
 
 ---
 
-## 3. Getestet vs. Nicht getestet
+## 3. Abschnitt 52.2: Erkennung, Einstieg und Dialog
+
+### 3.1 Implementierte Einstiegspunkte
+1. **Automatischer Scan nach SAF-Import / Git-Klon / Projektöffnung:**
+   - In `ProjectWorkspaceRoute` integriert.
+   - Sequenzielle Dialogkoordination: Falls Task 50 (Java → Kotlin Migration) aktiv ist oder seinen Dialog anzeigt, wartet der X2C-Scan, bis J2K geschlossen oder abgeschlossen ist.
+   - Wenn unmigrierte Layouts gefunden werden und das Projekt nicht als „Nicht mehr fragen“ markiert ist, öffnet sich der `X2cDialog`.
+2. **Manuelle Projektmenü-Aktion:**
+   - TopAppBar-Menüpunkt „Layouts nach Compose umwandeln …“ in `ProjectWorkspaceRoute`.
+   - Workspace-Drawer / `LayoutFilesPanel`: Aktionsbutton im Header zum manuellen Starten der Konvertierung für alle Layouts.
+3. **Dateibaum-Kontextmenü (`FileTreeContextMenuDialog`):**
+   - Auf `.xml`-Layout-Dateien erscheint der Kontextmenüpunkt „Layout nach Compose umwandeln …“.
+   - Öffnet den Dialog mit Vorselektion der ausgewählten Datei.
+
+### 3.2 Erkennungsscanner (`ComposeMigrationScanner`)
+- Reines Kotlin/JVM in `:libs:x2c` (`ComposeMigrationScannerImpl`).
+- Prüft Projektstruktur: Android AGP-Projekt (`build.gradle`, `build.gradle.kts`, `AndroidManifest.xml`).
+- Sucht Layouts unter `src/*/res/layout*/*.xml` (inkl. `layout-land/`, `layout-sw600dp/` usw.).
+- Ignoriert strikt temporäre Verzeichnisse wie `build/`, `.gradle/`, `.git/`, `Backup/`.
+- Prüft, ob Compose bereits im Build aktiviert ist (`buildFeatures.compose`, Compose-Compiler-Plugin, `androidx.compose`-Dependencies).
+- Klassifiziert Layouts in Standard (View-basiert), bereits Compose-basiert (`ComposeView` als Root) oder Databinding/Viewbinding.
+- Enthält sicheren XXE-Schutz (`XMLConstants.FEATURE_SECURE_PROCESSING`, Deaktivierung externer DTDs).
+
+### 3.3 Material 3 Migrationsdialog (`X2cDialog`)
+- **Header:** Titel und Zusammenfassung („Gefunden: X Layouts …“).
+- **Backup-Hinweis:** Information über die Erstellung eines Vorab-ZIP-Backups.
+- **Layout-Liste:**
+  - Checkboxen zur individuellen Auswahl / Gesamtauswahl.
+  - Such- und Filterleiste (Textsuche, Filter nach Status/Typ).
+  - Status-Badges (z. B. `land`, `sw600dp`, `Compose-basiert`).
+  - Klick auf Layout öffnet die Datei im Editor (`OpenFileRequestBridge`).
+- **Optionen & Schalter:**
+  - Activities/Fragments umstellen (`setContent { ... }`).
+  - Theme aus XML-Farben/Styles ableiten (`Theme.kt`).
+  - XML-Layouts nach erfolgreicher Migration löschen.
+  - Versionskatalog (`libs.versions.toml`) nutzen.
+  - Build-Prüfung im Hintergrund ausführen.
+  - Git-Branch anlegen (`migration/x2c-<ts>`).
+  - Vorab-ZIP-Backup erstellen (Standard: aktiv).
+- **Hinweisbox:** Wenn Compose noch nicht im Build aktiv ist, wird transparent darauf hingewiesen, dass die Build-Dateien angepasst werden.
+- **Aktionen:**
+  - „Umwandeln“: Startet Migration mit den gewählten Optionen.
+  - „Später“: Schließt den Dialog für die aktuelle Sitzung.
+  - „Nicht mehr fragen“: Speichert die Projekt-Abwahl persistent via DataStore.
+
+### 3.4 Persistenz via DataStore Proto
+- `core/datastore/src/main/proto/settings.proto`: Erweiterung um `MigrationConfig` (Feld 7) mit `repeated string x2c_dismissed_projects = 2`.
+- `SettingsRepository`: `isX2cDismissed(projectPath)` und `setX2cDismissed(projectPath, Boolean)`.
+
+---
+
+## 4. Getestet vs. Nicht getestet
 
 ### Getestet
 - [x] Spike auf Pixel 9 Pro XL (Termux, JDK 21.0.12, kotlinc 2.4.20, Compose-Plugin): 2 Dateien mit Composables in 6 s erfolgreich kompiliert.
+- [x] Unit-Tests `:libs:x2c:test` (`ComposeMigrationScannerTest`):
+  - Erkennung in Nicht-Android-Projekten (leeres Ergebnis).
+  - Erkennung von Layouts, Varianten (`layout-land`), Compose-Aktivität und Ausschlüsse (`build/`, `Backup/`).
+  - XXE-Sicherheitsverifikation.
+- [x] Unit-Tests `:feature:x2c:testDebugUnitTest` (`X2cViewModelTest`):
+  - Scan-Ablauf, Vorselektion einzelner Layouts, manuelle Auslösung.
+  - Unterdrückung bei „Nicht mehr fragen“ und Persistierung via DataStore.
+  - Selektions-Toggles (Einzelauswahl, Alle abwählen, Suche/Filterung).
+  - Klick auf Layout sendet `OpenFileRequestBridge`-Event.
+- [x] Unit-Tests `:feature:filetree:testDebugUnitTest`:
+  - Kontextmenü-Aktion für XML-Layouts.
+- [x] Lokalisierungsprüfung `scripts/check_string_locales.py`: Alle 1626 Strings in `values/` und `values-de/` synchronisiert.
 
 ### Nicht getestet
 - [ ] Plugin-Wirkung per `javap` (ausstehend laut Spike-Befund).
-- [ ] End-to-End-XML-Umwandlung auf dem Gerät (folgt mit den Implementierungsschritten).
+- [ ] End-to-End-Ausführung der Konvertierung (folgt in 52.3 bis 52.10).

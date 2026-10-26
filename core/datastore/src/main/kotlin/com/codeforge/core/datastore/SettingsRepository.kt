@@ -5,10 +5,12 @@ import androidx.datastore.core.DataStore
 import com.codeforge.core.datastore.proto.AppSettings
 import com.codeforge.core.datastore.proto.EditorConfig
 import com.codeforge.core.datastore.proto.FileHeaderConfig
+import com.codeforge.core.datastore.proto.MigrationConfig
 import com.codeforge.core.datastore.proto.TerminalConfig
 import com.codeforge.core.datastore.proto.ThemeConfig
 import com.codeforge.core.datastore.proto.WizardConfig
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -66,6 +68,50 @@ class SettingsRepository @Inject constructor(
         dataStore.updateData { current ->
             current.toBuilder()
                 .setOnboardingCompleted(completed)
+                .build()
+        }
+    }
+
+    fun isX2cDismissed(projectPath: String): Flow<Boolean> = appSettings.map { settings ->
+        settings.migration.x2CDismissedProjectsList.contains(projectPath)
+    }
+
+    suspend fun setX2cDismissed(projectPath: String, dismissed: Boolean) {
+        dataStore.updateData { current ->
+            val existing = current.migration.x2CDismissedProjectsList.toMutableSet()
+            if (dismissed) {
+                existing.add(projectPath)
+            } else {
+                existing.remove(projectPath)
+            }
+            val newMigration = current.migration.toBuilder()
+                .clearX2CDismissedProjects()
+                .addAllX2CDismissedProjects(existing)
+                .build()
+            current.toBuilder()
+                .setMigration(newMigration)
+                .build()
+        }
+    }
+
+    fun isJ2kDismissed(projectPath: String): Flow<Boolean> = appSettings.map { settings ->
+        settings.migration.j2KDismissedProjectsList.contains(projectPath)
+    }
+
+    suspend fun setJ2kDismissed(projectPath: String, dismissed: Boolean) {
+        dataStore.updateData { current ->
+            val existing = current.migration.j2KDismissedProjectsList.toMutableSet()
+            if (dismissed) {
+                existing.add(projectPath)
+            } else {
+                existing.remove(projectPath)
+            }
+            val newMigration = current.migration.toBuilder()
+                .clearJ2KDismissedProjects()
+                .addAllJ2KDismissedProjects(existing)
+                .build()
+            current.toBuilder()
+                .setMigration(newMigration)
                 .build()
         }
     }

@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Transform
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -89,6 +90,7 @@ fun FileTreeRoute(
     onOpenFile: (path: String) -> Unit,
     onOpenApkAnalyzer: (path: String) -> Unit = {},
     onScanHardcodedStrings: (path: String) -> Unit = {},
+    onConvertLayoutToCompose: (path: String) -> Unit = {},
     viewModel: FileTreeViewModel = hiltViewModel()
 ) {
     LaunchedEffect(rootPath) { viewModel.initialize(rootPath) }
@@ -102,6 +104,7 @@ fun FileTreeRoute(
                 is FileTreeUiEffect.FileOpenedInEditor -> onOpenFile(effect.path)
                 is FileTreeUiEffect.OpenApkAnalyzer -> onOpenApkAnalyzer(effect.path)
                 is FileTreeUiEffect.ScanHardcodedStrings -> onScanHardcodedStrings(effect.path)
+                is FileTreeUiEffect.ConvertLayoutToCompose -> onConvertLayoutToCompose(effect.path)
                 is FileTreeUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
             }
         }
@@ -189,6 +192,7 @@ private fun FileTreeScreen(
             onDelete = { onEvent(FileTreeUiEvent.DeleteClicked) },
             onAnalyzeApk = { onEvent(FileTreeUiEvent.AnalyzeApkClicked) },
             onScanHardcodedStrings = { onEvent(FileTreeUiEvent.ScanHardcodedStringsClicked) },
+            onConvertLayoutToCompose = { onEvent(FileTreeUiEvent.ConvertLayoutToComposeClicked) },
             onDismiss = { onEvent(FileTreeUiEvent.DismissContextMenu) }
         )
     }
@@ -368,6 +372,7 @@ private fun FileTreeContextMenuDialog(
     onDelete: () -> Unit,
     onAnalyzeApk: () -> Unit,
     onScanHardcodedStrings: () -> Unit,
+    onConvertLayoutToCompose: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -386,6 +391,13 @@ private fun FileTreeContextMenuDialog(
                         headlineContent = { Text(stringRes(R.string.apk_analyzer_kontextmenue)) },
                         leadingContent = { Icon(Icons.Default.Analytics, contentDescription = null) },
                         modifier = Modifier.clickable(onClick = onAnalyzeApk)
+                    )
+                }
+                if (!target.isDirectory && target.path.endsWith(".xml", ignoreCase = true) && target.path.contains("/res/layout")) {
+                    ListItem(
+                        headlineContent = { Text(stringRes(R.string.x2c_context_convert_layout)) },
+                        leadingContent = { Icon(Icons.Default.Transform, contentDescription = null) },
+                        modifier = Modifier.clickable(onClick = onConvertLayoutToCompose)
                     )
                 }
                 ListItem(

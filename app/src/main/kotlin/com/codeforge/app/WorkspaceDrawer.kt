@@ -88,6 +88,7 @@ fun WorkspaceDrawer(
     onNavigate: (route: String) -> Unit,
     onOpenGitSettings: () -> Unit,
     modifier: Modifier = Modifier,
+    onConvertLayout: (path: String?) -> Unit = {},
     /** true = dauerhaft sichtbar (Expanded-Breite): feste Breite, keine runden Ecken. */
     permanent: Boolean = false,
 ) {
@@ -150,6 +151,10 @@ fun WorkspaceDrawer(
                             onScanHardcodedStrings = { path ->
                                 onCloseDrawer()
                                 onNavigate(Routes.hardcodedStrings(path, rootPath))
+                            },
+                            onConvertLayoutToCompose = { path ->
+                                onCloseDrawer()
+                                onConvertLayout(path)
                             }
                         )
                         DrawerSection.SEARCH -> SearchRoute(
@@ -176,6 +181,10 @@ fun WorkspaceDrawer(
                                 onCloseDrawer()
                                 onNavigate(Routes.layoutDesigner(path))
                             },
+                            onConvertLayoutsToCompose = {
+                                onCloseDrawer()
+                                onConvertLayout(null)
+                            }
                         )
                         DrawerSection.TERMINAL, DrawerSection.SETTINGS, DrawerSection.DEPENDENCIES -> Unit
                     }

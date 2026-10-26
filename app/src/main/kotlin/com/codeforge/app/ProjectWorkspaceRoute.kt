@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Transform
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,6 +66,13 @@ import com.codeforge.feature.dependencyupdates.DependencyUpdatesHost
 import androidx.activity.compose.BackHandler
 import com.codeforge.feature.editor.EditorRoute
 import com.codeforge.feature.editor.EditorViewModel
+import com.codeforge.feature.j2k.J2kIntent
+import com.codeforge.feature.j2k.J2kViewModel
+import com.codeforge.feature.j2k.ui.J2kDialog
+import com.codeforge.feature.x2c.X2cEffect
+import com.codeforge.feature.x2c.X2cIntent
+import com.codeforge.feature.x2c.X2cViewModel
+import com.codeforge.feature.x2c.ui.X2cDialog
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +92,14 @@ fun ProjectWorkspaceRoute(
 
     val buildViewModel: BuildViewModel = hiltViewModel()
     val editorViewModel: EditorViewModel = hiltViewModel()
+    val j2kViewModel: J2kViewModel = hiltViewModel()
+    val x2cViewModel: X2cViewModel = hiltViewModel()
+
     val buildState by buildViewModel.uiState.collectAsState()
+    val j2kState by j2kViewModel.uiState.collectAsState()
+    val x2cState by x2cViewModel.uiState.collectAsState()
+
+    var x2cScannedForProject by remember(rootPath) { mutableStateOf(false) }
     var showBuildSheet by remember { mutableStateOf(false) }
     var showDebugSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -106,6 +121,26 @@ fun ProjectWorkspaceRoute(
 
     LaunchedEffect(rootPath) {
         buildViewModel.connectProject(rootPath)
+        x2cScannedForProject = false
+        j2kViewModel.handleIntent(J2kIntent.ScanProject(rootPath, manualTrigger = false))
+    }
+
+    // Task 52.2.3: Sequenziertes Prompting: Nur ein Dialog zur Zeit.
+    // Fragt Task 50 (Java -> Kotlin) gerade, kommt dieser Dialog erst danach.
+    LaunchedEffect(rootPath, j2kState.isScanning, j2kState.showDialog) {
+        if (!j2kState.isScanning && !j2kState.showDialog && !x2cScannedForProject) {
+            x2cScannedForProject = true
+            x2cViewModel.handleIntent(X2cIntent.ScanProject(rootPath, manualTrigger = false))
+        }
+    }
+
+    LaunchedEffect(x2cViewModel) {
+        x2cViewModel.effects.collect { effect ->
+            when (effect) {
+                is X2cEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+                is X2cEffect.NavigateToFile -> {}
+            }
+        }
     }
 
     LaunchedEffect(buildViewModel) {
@@ -159,6 +194,19 @@ fun ProjectWorkspaceRoute(
                         }
                     },
                     actions = {
+                        IconButton(onClick = {
+                            x2cViewModel.handleIntent(
+                                X2cIntent.ScanProject(
+                                    projectPath = rootPath,
+                                    manualTrigger = true
+                                )
+                            )
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Transform,
+                                contentDescription = stringRes(R.string.x2c_menu_convert_layouts)
+                            )
+                        }
                         IconButton(onClick = { showDebugSheet = true }) {
                             Icon(
                                 imageVector = Icons.Default.BugReport,
@@ -204,6 +252,15 @@ fun ProjectWorkspaceRoute(
                 onCloseDrawer = {},
                 onNavigate = safeNavigate,
                 onOpenGitSettings = onOpenGitSettings,
+                onConvertLayout = { layoutPath ->
+                    x2cViewModel.handleIntent(
+                        X2cIntent.ScanProject(
+                            projectPath = rootPath,
+                            manualTrigger = true,
+                            preselectedLayout = layoutPath
+                        )
+                    )
+                },
                 permanent = true
             )
             workspaceContent(
@@ -222,7 +279,16 @@ fun ProjectWorkspaceRoute(
                     rootPath = rootPath,
                     onCloseDrawer = { coroutineScope.launch { drawerState.close() } },
                     onNavigate = safeNavigate,
-                    onOpenGitSettings = onOpenGitSettings
+                    onOpenGitSettings = onOpenGitSettings,
+                    onConvertLayout = { layoutPath ->
+                        x2cViewModel.handleIntent(
+                            X2cIntent.ScanProject(
+                                projectPath = rootPath,
+                                manualTrigger = true,
+                                preselectedLayout = layoutPath
+                            )
+                        )
+                    }
                 )
             }
         ) {
@@ -246,4 +312,14 @@ fun ProjectWorkspaceRoute(
             }
         )
     }
+
+    J2kDialog(
+        state = j2kState,
+        onIntent = j2kViewModel::handleIntent
+    )
+
+    X2cDialog(
+        state = x2cState,
+        onIntent = x2cViewModel::handleIntent
+    )
 }

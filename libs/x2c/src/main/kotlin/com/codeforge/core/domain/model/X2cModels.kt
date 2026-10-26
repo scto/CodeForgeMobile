@@ -66,6 +66,19 @@ data class X2cPlan(
     val warnings: List<String> = emptyList()
 )
 
+/**
+ * Schneller Erkennungsbefund durch [ComposeMigrationScanner].
+ */
+data class ComposeScanResult(
+    val projectPath: String,
+    val isAndroidProject: Boolean,
+    val layoutCount: Int,
+    val moduleCount: Int,
+    val layoutFiles: List<String> = emptyList(),
+    val hasExistingCompose: Boolean = false,
+    val qualifiesForAutoPrompt: Boolean = false
+)
+
 enum class X2cFileStatus {
     GENERATED,
     GENERATED_WITH_NOTES,

@@ -45,6 +45,7 @@ sealed interface FileTreeUiEvent {
     data object PropertiesClicked : FileTreeUiEvent
     data object AnalyzeApkClicked : FileTreeUiEvent
     data object ScanHardcodedStringsClicked : FileTreeUiEvent
+    data object ConvertLayoutToComposeClicked : FileTreeUiEvent
     data object DismissProperties : FileTreeUiEvent
     data object DeleteClicked : FileTreeUiEvent
     data object ConfirmDelete : FileTreeUiEvent
@@ -59,5 +60,6 @@ sealed interface FileTreeUiEffect {
     data class FileOpenedInEditor(val path: String) : FileTreeUiEffect
     data class OpenApkAnalyzer(val path: String) : FileTreeUiEffect
     data class ScanHardcodedStrings(val path: String) : FileTreeUiEffect
+    data class ConvertLayoutToCompose(val path: String) : FileTreeUiEffect
     data class ShowSnackbar(val message: String) : FileTreeUiEffect
 }

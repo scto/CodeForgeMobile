@@ -81,4 +81,20 @@ class X2cModelsTest {
         assertEquals(3, generating.total)
         assertEquals("Speicherplatz reicht nicht", (failed as X2cProgress.Failed).error)
     }
+
+    @Test
+    fun `ComposeScanResult qualifies for auto prompt only if android and layouts exist and no compose`() {
+        val scan = ComposeScanResult(
+            projectPath = "/project",
+            isAndroidProject = true,
+            layoutCount = 5,
+            moduleCount = 1,
+            layoutFiles = listOf("app/src/main/res/layout/activity_main.xml"),
+            hasExistingCompose = false,
+            qualifiesForAutoPrompt = true
+        )
+        assertTrue(scan.qualifiesForAutoPrompt)
+        assertEquals(5, scan.layoutCount)
+        assertEquals(1, scan.moduleCount)
+    }
 }

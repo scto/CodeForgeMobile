@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Transform
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -47,6 +48,7 @@ fun LayoutFilesPanel(
     rootPath: String,
     onOpenDesigner: (path: String) -> Unit,
     modifier: Modifier = Modifier,
+    onConvertLayoutsToCompose: () -> Unit = {},
     viewModel: LayoutFilesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -60,7 +62,12 @@ fun LayoutFilesPanel(
         }
     }
 
-    LayoutFilesContent(modifier = modifier, state = state, onEvent = viewModel::onEvent)
+    LayoutFilesContent(
+        modifier = modifier,
+        state = state,
+        onEvent = viewModel::onEvent,
+        onConvertLayoutsToCompose = onConvertLayoutsToCompose
+    )
 }
 
 @Composable
@@ -68,6 +75,7 @@ private fun LayoutFilesContent(
     state: LayoutFilesUiState,
     onEvent: (LayoutFilesUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    onConvertLayoutsToCompose: () -> Unit = {},
 ) {
     Column(modifier.fillMaxSize()) {
         Row(
@@ -75,6 +83,13 @@ private fun LayoutFilesContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringRes(R.string.layout_files_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            IconButton(onClick = onConvertLayoutsToCompose) {
+                Icon(
+                    Icons.Filled.Transform,
+                    contentDescription = stringRes(R.string.x2c_menu_convert_layouts),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
             IconButton(onClick = { onEvent(LayoutFilesUiEvent.Refresh) }) {
                 Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))
             }

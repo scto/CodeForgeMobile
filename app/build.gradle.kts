@@ -71,6 +71,8 @@ dependencies {
     implementation(project(":feature:debug"))
     implementation(project(":feature:j2k"))
     implementation(project(":feature:projectsettings"))
+    implementation(project(":feature:x2c"))
+    implementation(project(":libs:x2c"))
 
     implementation(project(":libs:termux-app"))
     implementation(project(":libs:terminal-engine"))

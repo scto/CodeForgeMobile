@@ -1704,5 +1704,39 @@
     <string name="migration_decline">Nicht jetzt</string>
     <string name="migration_success">%1$d Projekt(e) erfolgreich verschoben. Backup: %2$s</string>
     <string name="migration_failed">Migration fehlgeschlagen: %1$s</string>
+
+    <!-- X2C XML to Compose Migration (Task 52) -->
+    <string name="x2c_title">Layouts nach Compose migrieren</string>
+    <string name="x2c_subtitle">Android XML-Layouts in Jetpack Compose umwandeln</string>
+    <string name="x2c_summary">%1$d Layouts in %2$d Modulen (%3$d automatisch, %4$d mit Hinweisen, %5$d nicht umwandelbar)</string>
+    <string name="x2c_backup_note">Vor der Umwandlung wird automatisch ein verifiziertes ZIP-Backup unter Backup/ im Projektordner angelegt.</string>
+    <string name="x2c_search_placeholder">Layouts suchen…</string>
+    <string name="x2c_status_automatic">Automatisch</string>
+    <string name="x2c_status_with_notes">Mit Hinweisen</string>
+    <string name="x2c_status_not_convertible">Nicht umwandelbar</string>
+    <string name="x2c_option_wire_activities">Activities/Fragments auf Compose umstellen (nur einfache Fälle)</string>
+    <string name="x2c_option_wire_activities_desc">%1$d Kandidaten gefunden. Komplexe Fälle bleiben unverändert und stehen im Bericht.</string>
+    <string name="x2c_option_generate_theme">Theme aus XML-Farben und -Themes erzeugen</string>
+    <string name="x2c_option_generate_theme_desc">Erzeugt ui/theme/Theme.kt aus bestehenden XML-Farbwerten und Material-Themes.</string>
+    <string name="x2c_option_remove_xml">XML-Layouts nach erfolgreicher Umstellung entfernen</string>
+    <string name="x2c_option_remove_xml_desc">Entfernt nur Layouts, die nach der Umstellung nirgends mehr im Quellcode verwendet werden.</string>
+    <string name="x2c_option_version_catalog">Versionskatalog verwenden (gradle/libs.versions.toml)</string>
+    <string name="x2c_option_version_catalog_desc">Compose-Abhängigkeiten im Versionskatalog eintragen.</string>
+    <string name="x2c_option_build_check">Nach dem Umwandeln bauen und prüfen</string>
+    <string name="x2c_option_build_check_desc">Führt Gradle-Build-Tasks aus, um die Kompatibilität zu verifizieren.</string>
+    <string name="x2c_option_git_branch">Git-Zweig anlegen</string>
+    <string name="x2c_option_git_branch_desc">Erstellt einen neuen Zweig vor den Änderungen.</string>
+    <string name="x2c_option_backup_git">.git ins Backup einschließen</string>
+    <string name="x2c_compose_build_notice">Compose-Unterstützung (Plugins und Bibliotheken) wird in den Build-Dateien immer automatisch ergänzt.</string>
+    <string name="x2c_disclaimer">Layout automatisch übertragen, Verhalten bitte manuell prüfen.</string>
+    <string name="x2c_action_convert">Umwandeln</string>
+    <string name="x2c_action_later">Später</string>
+    <string name="x2c_action_dont_ask">Nicht mehr fragen</string>
+    <string name="x2c_menu_convert_layouts">Layouts nach Compose umwandeln …</string>
+    <string name="x2c_context_convert_layout">Layout nach Compose umwandeln …</string>
+    <string name="x2c_select_all">Alle auswählen</string>
+    <string name="x2c_deselect_all">Alle abwählen</string>
+    <string name="x2c_selected_count">%1$d von %2$d ausgewählt</string>
+    <string name="x2c_no_layouts_found">Keine XML-Layouts gefunden</string>
 </resources>
 

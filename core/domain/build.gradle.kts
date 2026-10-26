@@ -11,6 +11,7 @@ android {
 
 dependencies {
     api(project(":libs:j2k"))
+    api(project(":libs:x2c"))
     implementation(project(":core:resources"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(project(":core:common"))

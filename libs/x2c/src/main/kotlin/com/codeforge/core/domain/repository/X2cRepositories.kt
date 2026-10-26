@@ -1,5 +1,6 @@
 package com.codeforge.core.domain.repository
 
+import com.codeforge.core.domain.model.ComposeScanResult
 import com.codeforge.core.domain.model.LayoutUsage
 import com.codeforge.core.domain.model.X2cOptions
 import com.codeforge.core.domain.model.X2cPlan
@@ -45,6 +46,11 @@ interface ComposeBuildEnabler {
         wireActivities: Boolean,
         hasConstraintLayout: Boolean
     ): Result<BuildEnableResult>
+}
+
+interface ComposeMigrationScanner {
+    suspend fun scanProject(projectPath: String): ComposeScanResult
+    suspend fun createPlan(projectPath: String, preselectedLayout: String? = null): X2cPlan
 }
 
 interface X2cRepository {

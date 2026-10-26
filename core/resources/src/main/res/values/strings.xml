@@ -1704,5 +1704,39 @@
     <string name="migration_decline">Not Now</string>
     <string name="migration_success">%1$d project(s) moved successfully. Backup: %2$s</string>
     <string name="migration_failed">Migration failed: %1$s</string>
+
+    <!-- X2C XML to Compose Migration (Task 52) -->
+    <string name="x2c_title">Migrate Layouts to Compose</string>
+    <string name="x2c_subtitle">Convert Android XML layouts to Jetpack Compose</string>
+    <string name="x2c_summary">%1$d layouts in %2$d modules (%3$d automatic, %4$d with notes, %5$d not convertible)</string>
+    <string name="x2c_backup_note">A verified ZIP backup will automatically be created under Backup/ in the project folder before conversion.</string>
+    <string name="x2c_search_placeholder">Search layouts…</string>
+    <string name="x2c_status_automatic">Automatic</string>
+    <string name="x2c_status_with_notes">With notes</string>
+    <string name="x2c_status_not_convertible">Not convertible</string>
+    <string name="x2c_option_wire_activities">Convert Activities/Fragments to Compose (simple cases only)</string>
+    <string name="x2c_option_wire_activities_desc">%1$d candidates found. Complex cases remain unchanged and will be listed in the report.</string>
+    <string name="x2c_option_generate_theme">Generate theme from XML colors and themes</string>
+    <string name="x2c_option_generate_theme_desc">Generates ui/theme/Theme.kt from existing XML color values and Material themes.</string>
+    <string name="x2c_option_remove_xml">Remove XML layouts after successful migration</string>
+    <string name="x2c_option_remove_xml_desc">Removes only layouts that are no longer referenced anywhere in code after migration.</string>
+    <string name="x2c_option_version_catalog">Use version catalog (gradle/libs.versions.toml)</string>
+    <string name="x2c_option_version_catalog_desc">Register Compose dependencies in the version catalog.</string>
+    <string name="x2c_option_build_check">Build and verify after conversion</string>
+    <string name="x2c_option_build_check_desc">Executes Gradle build tasks to verify compatibility.</string>
+    <string name="x2c_option_git_branch">Create Git branch</string>
+    <string name="x2c_option_git_branch_desc">Create branch before applying changes</string>
+    <string name="x2c_option_backup_git">Include .git in backup</string>
+    <string name="x2c_compose_build_notice">Compose build support (plugins and libraries) is always added automatically to build files.</string>
+    <string name="x2c_disclaimer">Layouts are transferred automatically; please verify behavior and logic manually.</string>
+    <string name="x2c_action_convert">Convert</string>
+    <string name="x2c_action_later">Later</string>
+    <string name="x2c_action_dont_ask">Do not ask again</string>
+    <string name="x2c_menu_convert_layouts">Convert layouts to Compose…</string>
+    <string name="x2c_context_convert_layout">Convert layout to Compose…</string>
+    <string name="x2c_select_all">Select all</string>
+    <string name="x2c_deselect_all">Deselect all</string>
+    <string name="x2c_selected_count">%1$d of %2$d selected</string>
+    <string name="x2c_no_layouts_found">No XML layouts found</string>
 </resources>
 

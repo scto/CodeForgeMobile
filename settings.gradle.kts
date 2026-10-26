@@ -55,6 +55,7 @@ include(
     ":feature:debug",
     ":feature:j2k",
     ":feature:projectsettings",
+    ":feature:x2c",
 
     ":libs:terminal-engine",
     ":libs:gradle-tooling-bridge",
@@ -72,6 +73,7 @@ include(
     ":libs:hardcoded-strings",
     ":libs:ai-client",
     ":libs:j2k",
+    ":libs:x2c",
 
     // Termux-Vendoring (siehe docs/sub/TERMUX-PORTING.md) — :libs:terminal-engine nutzt
     // diese jetzt statt PRoot für die interaktive :feature:terminal-Session

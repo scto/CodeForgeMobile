@@ -10,6 +10,7 @@ message AppSettings {
   bool onboarding_completed = 4;
   WizardConfig wizard = 5;
   FileHeaderConfig file_header = 6;
+  MigrationConfig migration = 7;
 }
 
 message ThemeConfig {
@@ -76,4 +77,9 @@ message FileHeaderConfig {
   bool enabled = 1;
   string author = 2;
   map<string, string> custom_templates = 3;
+}
+
+message MigrationConfig {
+  repeated string j2k_dismissed_projects = 1;
+  repeated string x2c_dismissed_projects = 2;
 }
