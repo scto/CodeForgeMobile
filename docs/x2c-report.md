@@ -217,6 +217,20 @@
   - Kontextmenü-Aktion für XML-Layouts.
 - [x] Lokalisierungsprüfung `scripts/check_string_locales.py`: Alle 1626 Strings in `values/` und `values-de/` synchronisiert.
 
+## 52.5 Analyse: Verwendung der Layouts im Code (Stand 2026-10-26)
+
+**Umgesetzt** (`LayoutUsageAnalyzerImpl`, `ComposeMigrationScannerImpl.enrichWithUsages`):
+- Erkannt werden `R.layout.x` (`setContentView`, `inflate`, `Fragment(R.layout.x)`, `RemoteViews`, `DataBindingUtil`), ViewBinding-Klassen (`XBinding`), Kotlin Synthetics sowie in XML `@layout/x` (`<include>`, `tools:layout`, `android:initialLayout`, Manifest).
+- Je Verwendung: Datei, Zeile, Typ, vom Code angefasste IDs (`R.id.y`, bei Binding `binding.yZ`), Hinweise, Stufe-2-Kandidat.
+- Einstufung: RemoteViews/App-Widget und Data Binding im Code machen ein Layout **nicht umwandelbar**. `touchedViewIds` sind jetzt die IDs, die der **Code** anfasst; die im XML deklarierten stehen in `declaredViewIds`.
+- Stufe 2 (52.7): Kandidat nur bei Kotlin-Activity (`setContentView`) bzw. Kotlin-Fragment (`onCreateView`) **ohne** View-Zugriffe; Java-Klassen werden nie als Kandidat gemeldet (Hinweis „Task 50 zuerst"); Layout-Varianten sind keine Kandidaten.
+- `findRemainingViewReferences` listet verbleibende klassische View-Zugriffe (`Datei:Zeile`) für den Bericht nach der Umwandlung.
+
+**Grenzen (Heuristik):** textbasiert, kein Compiler. Dynamische Namen (`getIdentifier`, Reflection), generierter Code, Verwendungen in nicht durchsuchten Verzeichnissen (`build/`, `Backup/`, `.git/` u. a.) und Dateien über 2 MiB werden nicht gefunden. Ein `binding.<name>`-Treffer kann bei gleichnamigen Properties anderer Klassen falsch positiv sein. Die UI darf das Ergebnis nur als Hinweis darstellen.
+
+**Getestet:** 11 neue Unit-Tests (`LayoutUsageAnalyzerTest`) plus die bestehenden Tests von `:libs:x2c` (31 Tests gesamt, grün) – ausgeführt mit `kotlinc` 2.2.10 und JUnit 4.13.2 außerhalb von Gradle.
+**Nicht getestet:** Gradle-Lauf (`./gradlew :libs:x2c:test`, ktlint/detekt), `:feature:x2c` (Dialog zeigt Verwendungen noch nicht an), Gerätelauf.
+
 ### Nicht getestet
 - [ ] Plugin-Wirkung per `javap` (ausstehend laut Spike-Befund).
 - [ ] End-to-End-Ausführung der Konvertierung (folgt in 52.3 bis 52.10).

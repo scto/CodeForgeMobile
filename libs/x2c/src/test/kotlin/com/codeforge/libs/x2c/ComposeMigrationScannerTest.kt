@@ -247,6 +247,24 @@ class ComposeMigrationScannerTest {
             """.trimIndent()
         )
 
+        // Task 52.5: Stufe 2 hängt an der Verwendung im Code, nicht am Dateinamen
+        val srcDir = File(appDir, "src/main/java/com/example")
+        srcDir.mkdirs()
+        File(srcDir, "MainActivity.kt").writeText(
+            """
+            package com.example
+
+            import androidx.appcompat.app.AppCompatActivity
+
+            class MainActivity : AppCompatActivity() {
+                override fun onCreate(savedInstanceState: android.os.Bundle?) {
+                    super.onCreate(savedInstanceState)
+                    setContentView(R.layout.activity_main)
+                }
+            }
+            """.trimIndent()
+        )
+
         val plan = scanner.createPlan(projectDir.absolutePath)
 
         assertEquals(5, plan.totalLayouts)
@@ -260,7 +278,9 @@ class ComposeMigrationScannerTest {
         val mainEntry = plan.layouts.first { it.layoutName == "activity_main" && !it.isVariant }
         assertEquals(LayoutClassification.AUTOMATIC, mainEntry.classification)
         assertTrue(mainEntry.stage2Eligible)
-        assertEquals(listOf("title", "btn_submit"), mainEntry.touchedViewIds)
+        assertEquals(listOf("title", "btn_submit"), mainEntry.declaredViewIds)
+        assertTrue("Code fasst keine Views an", mainEntry.touchedViewIds.isEmpty())
+        assertEquals("setContentView", mainEntry.usages.single().usageType)
 
         val dbEntry = plan.layouts.first { it.layoutName == "activity_databinding" }
         assertEquals(LayoutClassification.NOT_CONVERTIBLE, dbEntry.classification)

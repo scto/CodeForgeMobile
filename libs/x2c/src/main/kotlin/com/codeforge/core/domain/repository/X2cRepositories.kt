@@ -28,6 +28,12 @@ interface LayoutToComposeGenerator {
 
 interface LayoutUsageAnalyzer {
     suspend fun findUsages(projectPath: String, layoutName: String): List<LayoutUsage>
+
+    /**
+     * Wie [findUsages] für viele Layouts in einem Durchlauf (Projekt wird nur einmal gelesen).
+     * [layoutIds]: Layoutname -> IDs, die das Layout deklariert (für `referencedViewIds`).
+     */
+    suspend fun findAllUsages(projectPath: String, layoutIds: Map<String, Set<String>>): Map<String, List<LayoutUsage>>
     suspend fun findRemainingViewReferences(projectPath: String): List<String>
 }
 

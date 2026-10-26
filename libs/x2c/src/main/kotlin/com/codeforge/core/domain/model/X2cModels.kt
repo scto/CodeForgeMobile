@@ -38,6 +38,9 @@ data class LayoutPlanEntry(
     val reason: String,
     val rootTag: String,
     val childCount: Int = 0,
+    /** IDs, die das Layout im XML deklariert (`@+id/…`). */
+    val declaredViewIds: List<String> = emptyList(),
+    /** IDs, die der Code tatsächlich anfasst (Heuristik, Task 52.5); werden im Generator zu Parametern. */
     val touchedViewIds: List<String> = emptyList(),
     val usages: List<LayoutUsage> = emptyList(),
     val isVariant: Boolean = false,

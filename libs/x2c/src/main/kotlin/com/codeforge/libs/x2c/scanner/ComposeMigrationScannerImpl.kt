@@ -3,8 +3,11 @@ package com.codeforge.libs.x2c.scanner
 import com.codeforge.core.domain.model.ComposeScanResult
 import com.codeforge.core.domain.model.LayoutClassification
 import com.codeforge.core.domain.model.LayoutPlanEntry
+import com.codeforge.core.domain.model.LayoutUsage
 import com.codeforge.core.domain.model.X2cPlan
 import com.codeforge.core.domain.repository.ComposeMigrationScanner
+import com.codeforge.core.domain.repository.LayoutUsageAnalyzer
+import com.codeforge.libs.x2c.analysis.LayoutUsageAnalyzerImpl
 import org.xml.sax.Attributes
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.DefaultHandler
@@ -13,7 +16,9 @@ import java.io.StringReader
 import javax.xml.XMLConstants
 import javax.xml.parsers.SAXParserFactory
 
-class ComposeMigrationScannerImpl : ComposeMigrationScanner {
+class ComposeMigrationScannerImpl(
+    private val usageAnalyzer: LayoutUsageAnalyzer = LayoutUsageAnalyzerImpl()
+) : ComposeMigrationScanner {
 
     companion object {
         val EXCLUDED_DIRS = setOf(
@@ -154,28 +159,30 @@ class ComposeMigrationScannerImpl : ComposeMigrationScanner {
         }
 
         val scan = scanProject(projectPath)
-        val layoutEntries = mutableListOf<LayoutPlanEntry>()
+        val rawEntries = mutableListOf<LayoutPlanEntry>()
+        for (relPath in scan.layoutFiles) {
+            val file = File(root, relPath)
+            if (!file.exists()) continue
+            rawEntries.add(analyzeLayoutFile(file, relPath))
+        }
+
+        // Task 52.5: Verwendung im Code (ein Durchlauf über das Projekt)
+        val idsByLayout = rawEntries.groupBy { it.layoutName }
+            .mapValues { (_, list) -> list.flatMap { it.declaredViewIds }.toSet() }
+        val usagesByLayout = usageAnalyzer.findAllUsages(projectPath, idsByLayout)
+        val layoutEntries = rawEntries.map { enrichWithUsages(it, usagesByLayout[it.layoutName].orEmpty()) }
 
         var automatic = 0
         var withNotes = 0
         var notConvertible = 0
         var stage2Candidates = 0
-
-        for (relPath in scan.layoutFiles) {
-            val file = File(root, relPath)
-            if (!file.exists()) continue
-
-            val entry = analyzeLayoutFile(file, relPath)
-            layoutEntries.add(entry)
-
+        for (entry in layoutEntries) {
             when (entry.classification) {
                 LayoutClassification.AUTOMATIC -> automatic++
                 LayoutClassification.WITH_NOTES -> withNotes++
                 LayoutClassification.NOT_CONVERTIBLE -> notConvertible++
             }
-            if (entry.stage2Eligible) {
-                stage2Candidates++
-            }
+            if (entry.stage2Eligible) stage2Candidates++
         }
 
         val versionCatalogFile = File(root, "gradle/libs.versions.toml")
@@ -285,9 +292,6 @@ class ComposeMigrationScannerImpl : ComposeMigrationScanner {
             }
         }
 
-        val stage2Eligible = classification == LayoutClassification.AUTOMATIC &&
-            (layoutName.startsWith("activity_") || layoutName.endsWith("_activity"))
-
         return LayoutPlanEntry(
             relativePath = relPath,
             layoutName = layoutName,
@@ -295,13 +299,51 @@ class ComposeMigrationScannerImpl : ComposeMigrationScanner {
             reason = reason,
             rootTag = xmlInfo.rootTag,
             childCount = xmlInfo.directChildCount,
-            touchedViewIds = xmlInfo.viewIds,
+            declaredViewIds = xmlInfo.viewIds,
             isVariant = isVariant,
-            variantQualifier = variantQualifier,
-            stage2Eligible = stage2Eligible,
-            stage2Obstacle = if (!stage2Eligible && (layoutName.startsWith("activity_") || layoutName.endsWith("_activity"))) {
-                "Layout enthält Hinweise oder nicht umwandelbare Elemente"
-            } else null
+            variantQualifier = variantQualifier
+        )
+    }
+
+    /**
+     * Ergänzt Verwendungen aus dem Code, passt die Einstufung an (RemoteViews, Data Binding) und
+     * bestimmt die Eignung für Stufe 2 (52.7). Der Analyzer ist eine Textheuristik.
+     */
+    private fun enrichWithUsages(entry: LayoutPlanEntry, usages: List<LayoutUsage>): LayoutPlanEntry {
+        val remote = usages.firstOrNull { it.usageType == "RemoteViews" || it.usageType == "appwidget" }
+        val dataBinding = usages.firstOrNull { it.usageType == "DataBinding" }
+        var classification = entry.classification
+        var reason = entry.reason
+        when {
+            remote != null && classification != LayoutClassification.NOT_CONVERTIBLE -> {
+                classification = LayoutClassification.NOT_CONVERTIBLE
+                reason = "RemoteViews/App-Widget verwendet dieses Layout (${remote.filePath}:${remote.lineNumber})"
+            }
+            dataBinding != null && classification != LayoutClassification.NOT_CONVERTIBLE -> {
+                classification = LayoutClassification.NOT_CONVERTIBLE
+                reason = "Data Binding im Code (${dataBinding.filePath}:${dataBinding.lineNumber})"
+            }
+        }
+
+        val touched = usages.flatMap { it.referencedViewIds }.distinct()
+        val eligible = !entry.isVariant &&
+            classification != LayoutClassification.NOT_CONVERTIBLE &&
+            usages.any { it.isStage2Candidate }
+        val obstacle = when {
+            eligible -> null
+            entry.isVariant -> "Layout-Variante: manuell lösen"
+            classification == LayoutClassification.NOT_CONVERTIBLE -> "Layout nicht umwandelbar"
+            usages.isEmpty() -> "Keine Verwendung im Code gefunden"
+            else -> usages.flatMap { it.notes }.firstOrNull()
+                ?: "Keine Activity/Fragment-Verwendung, die sich einfach umstellen lässt"
+        }
+        return entry.copy(
+            classification = classification,
+            reason = reason,
+            touchedViewIds = touched,
+            usages = usages,
+            stage2Eligible = eligible,
+            stage2Obstacle = obstacle
         )
     }
 
