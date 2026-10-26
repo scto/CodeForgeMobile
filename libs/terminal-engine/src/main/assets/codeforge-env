@@ -266,6 +266,17 @@ download() { # url ziel basis-prozent spanne
   wait "$pid" || { err "Download fehlgeschlagen: $url ($(head -c 200 "$TMP/.cfsdk-curl-err" 2>/dev/null))"; return 1; }
 }
 
+# file_sha256 <datei>: setzt GOT_SHA. Bei Fehler (Datei fehlt/leer, sha256sum scheitert) kommt der GRUND als Meldung,
+# statt einer leeren "erhalten"-Summe, die wie ein Prüfsummenfehler aussieht.
+file_sha256() {
+  local f=$1 out
+  GOT_SHA=""
+  [ -s "$f" ] || { err "Heruntergeladene Datei fehlt oder ist leer: $f"; return 1; }
+  out=$(sha256sum "$f" 2>&1) || { err "sha256sum fehlgeschlagen: $(printf '%s' "$out" | head -c 200)"; return 1; }
+  GOT_SHA=${out%% *}
+  printf '%s' "$GOT_SHA" | grep -Eq '^[0-9a-f]{64}$' || { err "sha256sum lieferte keine gültige Summe: $(printf '%s' "$out" | head -c 200)"; return 1; }
+}
+
 # Große Pakete (> 30 MiB, z. B. gradle, openjdk-*, libllvm) liegen wegen des
 # 100-MB-Dateilimits und des 1-GB-Seitenlimits von GitHub Pages nicht im APT-Pool, sondern als Asset am Release
 # 'large-packages'. Das Verzeichnis '<apt-url>/large-packages.txt' enthält Zeilen:
@@ -574,7 +585,7 @@ build_manifest() {
 
 # gh_fetch_extract <zielordner>: lädt GH_URL, prüft ggf. die Prüfsumme, entpackt nach <zielordner>; setzt GH_ROOT
 gh_fetch_extract() {
-  local out=$1 file="$TMP/cfsdk-$GH_ASSET" got d
+  local out=$1 file="$TMP/cfsdk-$$-$GH_ASSET" got d
   progress 8 "Lade $GH_ASSET …"
   if [ -z "$GH_SHA" ] && [ -n "${GH_SHA_URL:-}" ]; then
     GH_SHA=$(curl -fsSL -m 25 "$GH_SHA_URL" 2>/dev/null | awk 'NR==1{print $1}')
@@ -583,7 +594,8 @@ gh_fetch_extract() {
   download "$GH_URL" "$file" 8 62 || { rm -f "$file"; return 1; }
   if [ -n "$GH_SHA" ]; then
     progress 72 "Prüfe Prüfsumme …"
-    got=$(sha256sum "$file" | awk '{print $1}')
+    file_sha256 "$file" || { rm -f "$file"; return 1; }
+    got=$GOT_SHA
     [ "$got" = "$GH_SHA" ] || { rm -f "$file"; err "Prüfsumme stimmt nicht für $GH_ASSET (erwartet $GH_SHA, erhalten $got)"; return 1; }
   else
     say "Warnung: GitHub liefert keine Prüfsumme für $GH_ASSET – Download ist nicht verifiziert"
@@ -658,7 +670,7 @@ do_install() { # id
     archive)
       need_tools
       case "$src" in *://*) url=$src ;; *) url="$REPO_URL/$src" ;; esac
-      file="$TMP/cfsdk-$(printf '%s' "$id" | tr -c 'A-Za-z0-9.' '_')-${src##*/}"
+      file="$TMP/cfsdk-$$-$(printf '%s' "$id" | tr -c 'A-Za-z0-9.' '_')-${src##*/}"
       progress 2 "Starte Download $(format_component_id "$id")"
       if ! download "$url" "$file" 2 78; then
         rm -f "$file"
@@ -675,7 +687,8 @@ do_install() { # id
       fi
       if [ -n "$sha" ]; then
         progress 82 "Prüfe Prüfsumme …"
-        local got; got=$(sha256sum "$file" | awk '{print $1}')
+        local got; file_sha256 "$file" || { rm -f "$file"; exit 1; }
+        got=$GOT_SHA
         [ "$got" = "$sha" ] || { rm -f "$file"; die "Prüfsumme stimmt nicht für $id (erwartet $sha, erhalten $got)"; }
       elif [ "$id" = 'cmdline-tools;latest' ]; then
         rm -f "$file"; die "Keine SHA-256 für cmdline-tools (weder CMDLINE_TOOLS_SHA256 in $CONF noch $url.sha256)"
