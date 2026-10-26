@@ -38,7 +38,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.codeforge.feature.editor.lsp.LspAwareLanguage
 import com.codeforge.feature.editor.lsp.LspCompletionProvider
 import com.codeforge.feature.editor.lsp.LspDiagnosticsBridge
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.luminance
 import com.codeforge.feature.editor.textmate.TextMateAssetLoader
+import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
+import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import com.codeforge.core.domain.model.Breakpoint
 import com.codeforge.core.domain.model.LspDiagnostic
 import com.codeforge.feature.editor.overlay.BreakpointOverlayLayer
@@ -100,6 +104,11 @@ fun SoraCodeEditor(
     onControllerReady: (EditorController) -> Unit = {}
 ) {
     val context = LocalContext.current
+    // "auto"/leer folgt dem effektiven App-Theme (Hell/Dunkel/System aus den Einstellungen).
+    val isDarkUi = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val themedSettings = remember(settings, isDarkUi) {
+        settings.copy(textmateTheme = resolveEditorTheme(settings.textmateTheme, isDarkUi))
+    }
     val controller = remember(path) { EditorController() }
     val diagnosticsContainer = remember(path) { DiagnosticsContainer() }
 
@@ -143,7 +152,7 @@ fun SoraCodeEditor(
 
                 // --- Code Block Indicators & Display Settings ---
                 isBlockLineEnabled = true
-                applyDisplaySettings(this, settings)
+                applyDisplaySettings(this, themedSettings)
 
                 // --- Auto-Completion-Popup aktiv halten (Snippets kommen aus LspAwareLanguage) ---
                 getComponent(EditorAutoCompletion::class.java).isEnabled = true
@@ -231,7 +240,7 @@ fun SoraCodeEditor(
             if (editor.text.toString() != content) {
                 editor.setText(content)
             }
-            applyDisplaySettings(editor, settings)
+            applyDisplaySettings(editor, themedSettings)
             LspDiagnosticsBridge.apply(diagnosticsContainer, editor.text, diagnostics)
         }
     )
@@ -350,6 +359,25 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
         comp?.isEnabled = settings.minimapEnabled
     }
 
-    // TextMate Theme
-    TextMateAssetLoader.setActiveTheme(settings.textmateTheme)
+    // TextMate Theme: Registry setzen UND als ColorScheme auf den Editor anwenden
+    // (ohne das bleibt der Editor beim hellen Standard-EditorColorScheme).
+    applyTextMateTheme(editor, settings.textmateTheme)
 }
+
+private val appliedThemes = java.util.WeakHashMap<CodeEditor, String>()
+
+private fun applyTextMateTheme(editor: CodeEditor, themeName: String) {
+    if (themeName.isBlank() || appliedThemes[editor] == themeName) return
+    TextMateAssetLoader.ensureInitialized(editor.context)
+    TextMateAssetLoader.setActiveTheme(themeName)
+    runCatching {
+        editor.colorScheme = TextMateColorScheme.create(ThemeRegistry.getInstance())
+        appliedThemes[editor] = themeName
+    }.onFailure { android.util.Log.w("SoraCodeEditor", "TextMate-ColorScheme nicht anwendbar: $themeName", it) }
+}
+
+/** "auto"/leer -> dark_plus bzw. light_plus je nach effektivem App-Theme; sonst unverändert. */
+internal fun resolveEditorTheme(stored: String, isDarkUi: Boolean): String =
+    if (stored.isBlank() || stored.equals("auto", ignoreCase = true)) {
+        if (isDarkUi) TextMateAssetLoader.DEFAULT_DARK_THEME else TextMateAssetLoader.DEFAULT_LIGHT_THEME
+    } else stored
