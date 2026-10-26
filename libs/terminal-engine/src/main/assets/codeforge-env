@@ -11,7 +11,12 @@
 #   install <id|paket>           z. B. jdk;21  ndk;r29  cmake;3.22.1  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36  gradle
 #   uninstall <id>
 #   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 30 MiB über large-packages.txt, sonst per pkg)
-#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 3.22.1] [--no-ndk] [--no-cmake] [--gradle]
+#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 3.22.1]
+#         [--no-ndk] [--no-cmake] [--no-gradle] [--no-kotlin] [--no-extras] [--minimal]
+#                                Basis-Setup für Android-Entwicklung (ohne Optionen alles):
+#                                JDK, cmdline-tools, build-tools, platform-tools, Plattform, NDK, CMake/Ninja,
+#                                Gradle, Kotlin-Compiler (kotlinc, für die Compose-Vorschau) und git/zip/unzip.
+#                                --minimal: nur JDK + SDK (wie früher), Gradle/Kotlin/Extras mit --gradle/--kotlin/--extras zuschalten.
 #   repair [--yes]               repariert defekte Bootstrap-Pakete
 #   env                          schreibt/zeigt die Umgebungsdatei (ANDROID_HOME, JAVA_HOME …)
 #   doctor                       prüft die Umgebung
@@ -1074,13 +1079,16 @@ do_setup() {
   local setup_args="$*"
   local retry_cmd="codeforge-env setup${setup_args:+ $setup_args}"
   CURRENT_SETUP_RETRY_CMD="$retry_cmd"
-  local jdk=17 ndk=r29 cmake=3.22.1 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=0
+  local jdk=17 ndk=r29 cmake=3.22.1 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=1 want_kotlin=1 want_extras=1
   while [ $# -gt 0 ]; do
     case "$1" in
       --jdk) jdk=$2; shift 2 ;; --ndk) ndk=$2; shift 2 ;; --cmake) cmake=$2; shift 2 ;;
       --sdk) sdk=$2; shift 2 ;; --platform) platform=$2; shift 2 ;;
       --no-ndk) want_ndk=0; shift ;; --no-cmake) want_cmake=0; shift ;;
-      --gradle) want_gradle=1; shift ;;
+      --gradle) want_gradle=1; shift ;; --no-gradle) want_gradle=0; shift ;;
+      --kotlin) want_kotlin=1; shift ;; --no-kotlin) want_kotlin=0; shift ;;
+      --extras) want_extras=1; shift ;; --no-extras) want_extras=0; shift ;;
+      --minimal) want_gradle=0; want_kotlin=0; want_extras=0; shift ;;
       *) die "Unbekannte Option: $1" ;;
     esac
   done
@@ -1114,18 +1122,25 @@ do_setup() {
       exit 1
     fi
   done
-  if [ "$want_gradle" = 1 ]; then
-    if command -v gradle >/dev/null 2>&1; then
-      say "Gradle bereits installiert"
-    else
-      say "== Gradle =="
-      if ! ( CURRENT_SETUP_RETRY_CMD="" do_install gradle ); then
-        err "Einrichtung abgebrochen bei Gradle"
-        say "Logdatei: $LOG_FILE"
-        say "Erneut versuchen: $retry_cmd"
-        exit 1
-      fi
+  # Basis-Werkzeuge außerhalb des SDK: Gradle, Kotlin-Compiler, git/zip/unzip.
+  # Jedes Werkzeug einzeln: bereits vorhandene werden übersprungen, Fehler brechen mit Hinweis ab.
+  setup_tool() { # <befehl> <anzeigename> <paket…>
+    local bin=$1 label=$2; shift 2
+    if command -v "$bin" >/dev/null 2>&1; then say "$label bereits installiert"; return 0; fi
+    say "== $label =="
+    if ! ( CURRENT_SETUP_RETRY_CMD="" pkg_install "$@" ); then
+      err "Einrichtung abgebrochen bei $label"
+      say "Logdatei: $LOG_FILE"
+      say "Erneut versuchen: $retry_cmd"
+      exit 1
     fi
+  }
+  [ "$want_gradle" = 1 ] && setup_tool gradle "Gradle" gradle
+  [ "$want_kotlin" = 1 ] && setup_tool kotlinc "Kotlin-Compiler" kotlin
+  if [ "$want_extras" = 1 ]; then
+    setup_tool git "git" git
+    setup_tool zip "zip" zip
+    setup_tool unzip "unzip" unzip
   fi
   write_env "$jdk" "$( [ "$want_ndk" = 1 ] && echo "ndk;$ndk")" "$( [ "$want_cmake" = 1 ] && echo "cmake;$cmake")"
   progress 100 "Umgebung eingerichtet"

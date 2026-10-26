@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert
+* `codeforge-env setup` ist jetzt das **Basis-Setup** für Android-Entwicklung: ohne Optionen werden JDK, cmdline-tools, build-tools, platform-tools, Plattform, NDK, CMake/Ninja, **Gradle**, **Kotlin-Compiler** (`kotlinc`, für die Compose-Vorschau) sowie **git/zip/unzip** installiert. Neue Optionen: `--no-gradle`, `--no-kotlin`, `--no-extras`, `--minimal` (altes Verhalten); `--gradle`/`--kotlin`/`--extras` schalten einzelne Teile wieder zu. Bereits vorhandene Werkzeuge werden übersprungen. Ungebaut/auf Gerät nicht getestet (nur `bash -n` und `scripts/test_codeforge_env_repair.sh`).
+
 ### 📦 APK-Analyse & APK-Vergleich (Task 35)
 
 * **Reine JVM-Größenanalyse ohne Zusatzwerkzeuge (`:core:domain`, `ApkZipAnalyzer`)**:
