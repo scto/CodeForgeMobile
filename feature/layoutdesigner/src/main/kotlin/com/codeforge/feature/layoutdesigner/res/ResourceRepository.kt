@@ -49,7 +49,10 @@ class ResourceRepository(
     private fun parseValuesXml(file: File, qualifier: String) {
         val factory = DocumentBuilderFactory.newInstance().apply {
             isNamespaceAware = false
-            setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
+            // Android-DOM-Parser (Harmony) kennt dieses Feature nicht und wirft ParserConfigurationException.
+            runCatching { setFeature("http://apache.org/xml/features/disallow-doctype-decl", true) }
+            runCatching { setFeature("http://xml.org/sax/features/external-general-entities", false) }
+            runCatching { setFeature("http://xml.org/sax/features/external-parameter-entities", false) }
         }
         val doc = try {
             factory.newDocumentBuilder().parse(file)
