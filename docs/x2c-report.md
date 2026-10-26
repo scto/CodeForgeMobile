@@ -52,7 +52,7 @@
 | Abschnitt | Inhalt | Status |
 |---|---|---|
 | **52.0** | Entscheidungen & On-Device Spike | ✅ Abgeschlossen (Spike positiv) |
-| **52.1** | Kern und Schnittstellen (`:core:domain`) | ⏳ In Bearbeitung |
+| **52.1** | Kern und Schnittstellen (`:core:domain`) | ✅ Abgeschlossen (`X2cModels.kt`, `X2cRepositories.kt`, `X2cModelsTest.kt`) |
 | **52.3** | ZIP-Backup mit Verifikation | ⬜ Offen |
 | **52.4** | Compose im Build ermöglichen (`ComposeBuildEnabler`) | ⬜ Offen |
 | **52.5** | Analyse: Layouts und Verwendung (`LayoutUsageAnalyzer`) | ⬜ Offen |
