@@ -1,6 +1,10 @@
 package com.codeforge.core.domain.repository
 
+import com.codeforge.core.domain.model.ApplyResult
 import com.codeforge.core.domain.model.ComposeScanResult
+import com.codeforge.core.domain.model.PlannedChange
+import com.codeforge.core.domain.model.UndoConflictPolicy
+import com.codeforge.core.domain.model.UndoResult
 import com.codeforge.core.domain.model.ComposeWireResult
 import com.codeforge.core.domain.model.ThemeDetection
 import com.codeforge.core.domain.model.ThemeGenerationResult
@@ -118,4 +122,39 @@ interface ComposeThemeGenerator {
         existingFiles: Set<String> = emptySet(),
         sourceRoot: String = "src/main/kotlin"
     ): Result<ThemeGenerationResult>
+}
+
+/**
+ * Task 52.9: Änderungen in einem Durchgang anwenden, mit Journal (Hashes vorher/nachher), automatischer Rücknahme bei
+ * Fehlern und Rückgängig. Reine Dateioperationen, keine Android-Abhängigkeit.
+ */
+interface ChangeRecorder {
+    /** Meldet eine Datei, die der Schritt ändert (`alreadyChanged = false`) oder schon geändert hat. */
+    fun touch(relativePath: String, alreadyChanged: Boolean = false)
+}
+
+interface X2cChangeApplier {
+    /**
+     * Ablauf: Pfade und Voraussetzungen prüfen (nichts geändert) → Journal schreiben → Änderungen atomar je Datei →
+     * [afterWrites] → Journal abschließen. Jeder Fehler (auch Abbruch über [isCancelled]) nimmt alles zurück.
+     *
+     * @param afterWrites optionaler Schritt, der weitere Dateien ändert (Build-Dateien, XML entfernen). Er meldet jede
+     *   Datei vorher über [ChangeRecorder.touch] (Datei muss seit dem Backup unverändert und im Backup sein) oder
+     *   nachträglich mit `alreadyChanged = true`; sie werden ins Journal aufgenommen und bei Fehlern aus dem Backup-ZIP
+     *   wiederhergestellt. Nicht gemeldete Änderungen werden **nicht** zurückgenommen.
+     */
+    suspend fun apply(
+        projectPath: String,
+        backupZipPath: String,
+        changes: List<PlannedChange>,
+        isCancelled: () -> Boolean = { false },
+        afterWrites: (suspend (ChangeRecorder) -> Unit)? = null
+    ): Result<ApplyResult>
+
+    /** Nimmt den Lauf zurück; Dateien, die der Benutzer danach geändert hat, werden über [onConflict] entschieden. */
+    suspend fun undo(
+        projectPath: String,
+        journalPath: String,
+        onConflict: suspend (relativePath: String) -> UndoConflictPolicy = { UndoConflictPolicy.KEEP }
+    ): Result<UndoResult>
 }

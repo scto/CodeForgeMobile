@@ -209,3 +209,55 @@ data class ThemeGenerationResult(
     val notes: List<String> = emptyList(),
     val todoCount: Int = 0
 )
+
+/** Task 52.9: Eine geplante Dateiänderung (Pfade relativ zum Projekt, `/`-getrennt). */
+sealed interface PlannedChange {
+    val relativePath: String
+
+    /** Neue Datei; existiert sie schon, wird sie übersprungen (außer `overwrite` ist bestätigt). */
+    data class Create(override val relativePath: String, val content: String, val overwrite: Boolean = false) : PlannedChange
+
+    /** Bestehende Datei ersetzen; sie muss seit dem Backup unverändert sein. */
+    data class Replace(override val relativePath: String, val content: String) : PlannedChange
+
+    /** Bestehende Datei entfernen (muss seit dem Backup unverändert sein). */
+    data class Delete(override val relativePath: String) : PlannedChange
+}
+
+enum class JournalAction { CREATED, MODIFIED, DELETED }
+
+enum class JournalStatus { IN_PROGRESS, COMPLETE, ROLLED_BACK, ROLLBACK_FAILED, UNDONE }
+
+data class JournalEntry(
+    val action: JournalAction,
+    val relativePath: String,
+    val hashBefore: String? = null,
+    val hashAfter: String? = null
+)
+
+data class X2cJournal(
+    val version: Int = 1,
+    val timestampEpochMillis: Long,
+    val backupZipPath: String,
+    val status: JournalStatus,
+    val entries: List<JournalEntry>,
+    /** Verzeichnisse, die erst durch diesen Lauf entstanden sind (werden beim Zurücknehmen leer entfernt). */
+    val createdDirs: List<String> = emptyList()
+)
+
+data class ApplyResult(
+    val journalPath: String,
+    val journal: X2cJournal,
+    /** Pfade, die schon existierten und deshalb nicht angelegt wurden. */
+    val skippedExisting: List<String> = emptyList()
+)
+
+enum class UndoConflictPolicy { KEEP, OVERWRITE, SAVE_AS_ORIG }
+
+data class UndoResult(
+    val restored: List<String> = emptyList(),
+    val deleted: List<String> = emptyList(),
+    val keptByUser: List<String> = emptyList(),
+    val savedAsOrig: List<String> = emptyList(),
+    val alreadyOriginal: List<String> = emptyList()
+)
