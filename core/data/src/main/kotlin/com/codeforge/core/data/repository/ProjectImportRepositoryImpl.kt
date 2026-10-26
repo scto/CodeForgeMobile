@@ -10,6 +10,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.codeforge.core.domain.model.ImportedProject
 import com.codeforge.core.domain.repository.ImportProgress
 import com.codeforge.core.domain.repository.ProjectImportRepository
+import com.codeforge.core.domain.repository.ProjectsDirectoryProvider
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,7 +22,8 @@ import java.io.File
 import javax.inject.Inject
 
 class ProjectImportRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val projectsDirectoryProvider: ProjectsDirectoryProvider
 ) : ProjectImportRepository {
 
     override fun importFromTree(treeUriString: String): Flow<ImportProgress> = flow {
@@ -92,8 +94,8 @@ class ProjectImportRepositoryImpl @Inject constructor(
     }
 
     private fun uniqueTargetDirectory(projectName: String): File {
-        val projectsRoot = File(context.filesDir, "projects").apply { mkdirs() }
-        val sanitized = projectName.replace(Regex("[^A-Za-z0-9._-]"), "_")
+        val projectsRoot = projectsDirectoryProvider.getProjectsRoot().apply { mkdirs() }
+        val sanitized = projectsDirectoryProvider.sanitizeProjectName(projectName)
         var candidate = File(projectsRoot, sanitized)
         var suffix = 1
         while (candidate.exists()) {

@@ -52,9 +52,12 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.codeforge.core.datastore.proto.AppSettings
 import com.codeforge.core.domain.model.UnifiedFormatOptions
+import com.codeforge.core.domain.model.CfmOpenFile
 import com.codeforge.core.domain.repository.BreakpointRepository
 import com.codeforge.core.domain.repository.CodeFormatterRepository
 import com.codeforge.core.domain.repository.DebugRepository
+import com.codeforge.core.domain.repository.WorkspaceRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -80,7 +83,8 @@ class EditorViewModel @Inject constructor(
     private val breakpointRepository: BreakpointRepository? = null,
     private val debugRepository: DebugRepository? = null,
     private val aiRepository: com.codeforge.core.domain.repository.AiRepository? = null,
-    private val aiProvider: com.codeforge.core.domain.ai.AiProvider? = null
+    private val aiProvider: com.codeforge.core.domain.ai.AiProvider? = null,
+    private val workspaceRepository: WorkspaceRepository? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -88,6 +92,9 @@ class EditorViewModel @Inject constructor(
 
     private val _effect = MutableSharedFlow<EditorUiEffect>()
     val effect: SharedFlow<EditorUiEffect> = _effect.asSharedFlow()
+
+    private var syncWorkspaceJob: Job? = null
+    private var pendingCloseAction: (() -> Unit)? = null
 
     /** Dokumentversion je Pfad, für LSP `textDocument/didChange` (versionierte Syncs). */
     private val documentVersions = mutableMapOf<String, Int>()
@@ -312,6 +319,9 @@ class EditorViewModel @Inject constructor(
                     _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_speichern_fehlgeschlagen, it.message.orEmpty())))
                 }
         }
+        if (ok) {
+            scheduleWorkspaceSync()
+        }
         return ok
     }
 
@@ -469,13 +479,52 @@ class EditorViewModel @Inject constructor(
                 projectRoot.value = event.rootPath
                 if (event.rootPath == null && oldRoot != null) {
                     viewModelScope.launch { lspSessionController.onProjectClosed() }
-                } else {
-                    val active = _uiState.value.activeFile
-                    if (active != null && event.rootPath != null) {
-                        val langId = languageIdFor(active.path)
-                        viewModelScope.launch {
-                            lspSessionController.onFileOpened(langId, event.rootPath, active.path)
+                } else if (event.rootPath != null) {
+                    val rootDir = File(event.rootPath)
+                    viewModelScope.launch {
+                        val workspace = workspaceRepository?.loadWorkspace(rootDir)
+                        if (workspace != null && _uiState.value.openFiles.isEmpty()) {
+                            val restoredFiles = mutableListOf<OpenFile>()
+                            var activeIndex = 0
+                            for (openFile in workspace.openFiles) {
+                                val target = File(rootDir, openFile.path)
+                                if (target.exists() && target.isFile) {
+                                    fileSystemRepository.readFile(target.absolutePath).onSuccess { handle ->
+                                        restoredFiles.add(OpenFile(path = handle.path, content = handle.content, isDirty = false))
+                                        if (openFile.active) {
+                                            activeIndex = restoredFiles.size - 1
+                                        }
+                                    }
+                                }
+                            }
+                            if (restoredFiles.isNotEmpty()) {
+                                val safeActive = activeIndex.coerceIn(0, restoredFiles.size - 1)
+                                _uiState.update { s ->
+                                    s.copy(openFiles = restoredFiles, activeFileIndex = safeActive)
+                                }
+                                val active = restoredFiles.getOrNull(safeActive)
+                                if (active != null) {
+                                    lspClient.setActiveDocument(active.path)
+                                    val langId = languageIdFor(active.path)
+                                    lspSessionController.onFileOpened(langId, event.rootPath, active.path)
+                                    lspClient.didOpen(active.path, langId, active.content)
+                                    publishActiveFileToBridge()
+                                }
+                            }
+                            if (workspace.modifiedFiles.isNotEmpty()) {
+                                _uiState.update { it.copy(recoveredUnsavedFilesNotice = true) }
+                                _effect.emit(EditorUiEffect.ShowSnackbar(
+                                    Res.string(R.string.save_on_close_dirty_recovered_notice)
+                                ))
+                            }
+                        } else {
+                            val active = _uiState.value.activeFile
+                            if (active != null) {
+                                val langId = languageIdFor(active.path)
+                                lspSessionController.onFileOpened(langId, event.rootPath, active.path)
+                            }
                         }
+                        workspaceRepository?.scanProjectFiles(rootDir)
                     }
                 }
             }
@@ -654,6 +703,13 @@ class EditorViewModel @Inject constructor(
             is EditorUiEvent.AcceptAiProposedChange -> acceptAiProposedChange(event.change, event.forceOverwrite)
             EditorUiEvent.DismissAiDiff -> _uiState.update { it.copy(aiProposedDiff = null) }
             EditorUiEvent.DismissAiFileConflict -> _uiState.update { it.copy(aiFileConflictChange = null) }
+
+            // Task 55 Speichern beim Schließen
+            is EditorUiEvent.RequestClose -> requestClose(event.onProceed)
+            EditorUiEvent.SaveAllAndClose -> executeSaveAllAndClose()
+            EditorUiEvent.DiscardAllAndClose -> executeDiscardAllAndClose()
+            EditorUiEvent.DismissSaveOnCloseDialog -> dismissSaveOnCloseDialog()
+            EditorUiEvent.DismissRecoveredNotice -> _uiState.update { it.copy(recoveredUnsavedFilesNotice = false) }
         }
     }
 
@@ -1223,6 +1279,7 @@ class EditorViewModel @Inject constructor(
         } else {
             lspClient.setActiveDocument(null)
         }
+        scheduleWorkspaceSync()
     }
 
     private fun openFile(path: String) = viewModelScope.launch {
@@ -1249,6 +1306,7 @@ class EditorViewModel @Inject constructor(
                 lspSessionController.onFileOpened(langId, workspaceRoot, file.path)
                 lspClient.didOpen(file.path, langId, file.content)
                 publishActiveFileToBridge()
+                scheduleWorkspaceSync()
             }
             .onFailure {
                 _uiState.update { it.copy(isLoading = false) }
@@ -1284,6 +1342,7 @@ class EditorViewModel @Inject constructor(
             lspClient.setActiveDocument(null)
         }
         publishActiveFileToBridge()
+        scheduleWorkspaceSync()
     }
 
     private fun updateBuffer(text: String) {
@@ -1319,6 +1378,7 @@ class EditorViewModel @Inject constructor(
             }
         }
         publishActiveFileToBridge()
+        scheduleWorkspaceSync()
     }
 
     private fun findFirstDifferenceLine(oldText: String, newText: String): Int {
@@ -1444,5 +1504,116 @@ class EditorViewModel @Inject constructor(
                 )
             }
         )
+    }
+
+    fun requestClose(onProceed: () -> Unit) {
+        val dirty = _uiState.value.openFiles.filter { it.isDirty }
+        if (dirty.isEmpty()) {
+            onProceed()
+        } else {
+            pendingCloseAction = onProceed
+            _uiState.update { it.copy(isSaveOnCloseDialogVisible = true, saveOnCloseErrors = emptyMap()) }
+        }
+    }
+
+    private fun executeSaveAllAndClose() = viewModelScope.launch {
+        val dirty = _uiState.value.openFiles.filter { it.isDirty }
+        val errors = mutableMapOf<String, String>()
+        val succeededPaths = mutableSetOf<String>()
+
+        for (file in dirty) {
+            fileSystemRepository.writeFile(file.path, file.content).fold(
+                onSuccess = { succeededPaths.add(file.path) },
+                onFailure = { errors[file.path] = it.message ?: "Speichern fehlgeschlagen" }
+            )
+        }
+
+        _uiState.update { s ->
+            s.copy(
+                openFiles = s.openFiles.map { f ->
+                    if (f.path in succeededPaths) f.copy(isDirty = false) else f
+                },
+                saveOnCloseErrors = errors
+            )
+        }
+
+        val root = projectRoot.value
+        if (root != null && workspaceRepository != null) {
+            val remainingDirty = _uiState.value.openFiles
+                .filter { it.isDirty }
+                .map { toRelativePath(it.path, root) }
+            workspaceRepository.updateModifiedFiles(File(root), remainingDirty)
+        }
+
+        if (errors.isEmpty()) {
+            _uiState.update { it.copy(isSaveOnCloseDialogVisible = false) }
+            val action = pendingCloseAction
+            pendingCloseAction = null
+            action?.invoke()
+        }
+    }
+
+    private fun executeDiscardAllAndClose() = viewModelScope.launch {
+        val dirty = _uiState.value.openFiles.filter { it.isDirty }
+        for (file in dirty) {
+            fileSystemRepository.readFile(file.path).onSuccess { handle ->
+                _uiState.update { s ->
+                    s.copy(
+                        openFiles = s.openFiles.map { f ->
+                            if (f.path == file.path) f.copy(content = handle.content, isDirty = false) else f
+                        }
+                    )
+                }
+            }
+        }
+        val root = projectRoot.value
+        if (root != null && workspaceRepository != null) {
+            workspaceRepository.updateModifiedFiles(File(root), emptyList())
+        }
+        _uiState.update { it.copy(isSaveOnCloseDialogVisible = false, saveOnCloseErrors = emptyMap()) }
+        val action = pendingCloseAction
+        pendingCloseAction = null
+        action?.invoke()
+    }
+
+    private fun dismissSaveOnCloseDialog() {
+        pendingCloseAction = null
+        _uiState.update { it.copy(isSaveOnCloseDialogVisible = false, saveOnCloseErrors = emptyMap()) }
+    }
+
+    private fun scheduleWorkspaceSync() {
+        val root = projectRoot.value ?: return
+        val repo = workspaceRepository ?: return
+        syncWorkspaceJob?.cancel()
+        syncWorkspaceJob = viewModelScope.launch {
+            delay(500)
+            val state = _uiState.value
+            val rootDir = File(root)
+            val openCfmFiles = state.openFiles.mapIndexed { idx, f ->
+                CfmOpenFile(
+                    path = toRelativePath(f.path, root),
+                    active = idx == state.activeFileIndex,
+                    cursor = null
+                )
+            }
+            val modifiedRelPaths = state.openFiles
+                .filter { it.isDirty }
+                .map { toRelativePath(it.path, root) }
+
+            repo.updateOpenFiles(rootDir, openCfmFiles)
+            repo.updateModifiedFiles(rootDir, modifiedRelPaths)
+        }
+    }
+
+    private fun toRelativePath(absolutePath: String, projectRootPath: String): String {
+        return try {
+            val rootCanonical = File(projectRootPath).canonicalPath
+            val fileCanonical = File(absolutePath).canonicalPath
+            fileCanonical.removePrefix(rootCanonical)
+                .trimStart(File.separatorChar)
+                .replace(File.separatorChar, '/')
+        } catch (_: Exception) {
+            absolutePath.substringAfterLast('/')
+        }
     }
 }

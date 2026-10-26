@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.codeforge.android.library)
     alias(libs.plugins.codeforge.android.hilt)
     alias(libs.plugins.codeforge.quality)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -28,4 +29,5 @@ dependencies {
 
     testImplementation(project(":core:testing"))
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

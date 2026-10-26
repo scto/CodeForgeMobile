@@ -65,6 +65,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import com.codeforge.core.common.fileprovider.CfmFileProvider
 import com.codeforge.core.designsystem.R as DesignSystemR
 import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.resources.R
@@ -104,6 +111,7 @@ fun WelcomeRoute(
     viewModel: WelcomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
@@ -116,6 +124,9 @@ fun WelcomeRoute(
                 is WelcomeUiEffect.NavigateToEditor -> onOpenProject(effect.projectPath)
                 is WelcomeUiEffect.NavigateToProjectSettings -> onOpenProjectSettings(effect.projectPath)
                 is WelcomeUiEffect.ShowSnackbar -> { /* an lokalen SnackbarHostState weiterreichen */ }
+                is WelcomeUiEffect.ShareCrashFile -> {
+                    context.startActivity(CfmFileProvider.buildShareIntent(context, effect.file))
+                }
             }
         }
     }
@@ -185,6 +196,88 @@ private fun WelcomeScreen(
             }
         }
     )
+
+    if (uiState.pendingCrashLog != null) {
+        AlertDialog(
+            onDismissRequest = { onEvent(WelcomeUiEvent.DismissCrashLogClicked) },
+            title = { Text(stringRes(R.string.crash_report_dialog_title)) },
+            text = {
+                Column {
+                    Text(stringRes(R.string.crash_report_dialog_message))
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = uiState.pendingCrashLog.name,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onEvent(WelcomeUiEvent.ViewCrashLogClicked) }) {
+                    Text(stringRes(R.string.crash_report_view))
+                }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = { onEvent(WelcomeUiEvent.ShareCrashLogClicked) }) {
+                        Text(stringRes(R.string.crash_report_share))
+                    }
+                    TextButton(onClick = { onEvent(WelcomeUiEvent.DeleteCrashLogClicked) }) {
+                        Text(stringRes(R.string.crash_report_delete))
+                    }
+                    TextButton(onClick = { onEvent(WelcomeUiEvent.DismissCrashLogClicked) }) {
+                        Text(stringRes(R.string.crash_report_dismiss))
+                    }
+                }
+            }
+        )
+    }
+
+    if (uiState.showCrashDetails) {
+        AlertDialog(
+            onDismissRequest = { onEvent(WelcomeUiEvent.DismissCrashDetails) },
+            title = { Text(stringRes(R.string.crash_report_details_title)) },
+            text = {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = uiState.crashDetailsText,
+                        fontFamily = FontFamily.Monospace,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onEvent(WelcomeUiEvent.DismissCrashDetails) }) {
+                    Text(stringRes(R.string.crash_report_dismiss))
+                }
+            }
+        )
+    }
+
+    if (uiState.showMigrationDialog) {
+        AlertDialog(
+            onDismissRequest = { onEvent(WelcomeUiEvent.DeclineMigrationClicked) },
+            title = { Text(stringRes(R.string.migration_dialog_title)) },
+            text = {
+                Text(stringRes(R.string.migration_dialog_message, uiState.legacyProjectsCount))
+            },
+            confirmButton = {
+                Button(onClick = { onEvent(WelcomeUiEvent.ConfirmMigrationClicked) }) {
+                    Text(stringRes(R.string.migration_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onEvent(WelcomeUiEvent.DeclineMigrationClicked) }) {
+                    Text(stringRes(R.string.migration_decline))
+                }
+            }
+        )
+    }
 }
 
 @Composable

@@ -1679,5 +1679,30 @@
     <string name="project_settings_signing_desc">Signs APK with the assigned project key</string>
     <string name="project_settings_signing_manage">Manage Project Keys…</string>
     <string name="project_settings_saved">Settings saved</string>
+
+    <!-- Task 55: Projects Root, CFM, Save on Close, Migration -->
+    <string name="save_on_close_title">Save changes?</string>
+    <string name="save_on_close_message">The following files have unsaved changes:</string>
+    <string name="save_on_close_save">Save</string>
+    <string name="save_on_close_discard">Discard</string>
+    <string name="save_on_close_cancel">Cancel</string>
+    <string name="save_on_close_failed">Failed to save %1$s: %2$s</string>
+    <string name="save_on_close_dirty_recovered_notice">Unsaved changes from previous session detected.</string>
+
+    <string name="crash_report_dialog_title">Crash Report</string>
+    <string name="crash_report_dialog_message">The application crashed unexpectedly during the previous run.</string>
+    <string name="crash_report_view">View</string>
+    <string name="crash_report_share">Share</string>
+    <string name="crash_report_delete">Delete</string>
+    <string name="crash_report_dismiss">Dismiss</string>
+    <string name="crash_report_deleted">Crash report deleted</string>
+    <string name="crash_report_details_title">Crash Report Details</string>
+
+    <string name="migration_dialog_title">Migrate Projects</string>
+    <string name="migration_dialog_message">%1$d legacy project(s) found in internal storage. Move them to the public projects directory?</string>
+    <string name="migration_confirm">Move</string>
+    <string name="migration_decline">Not Now</string>
+    <string name="migration_success">%1$d project(s) moved successfully. Backup: %2$s</string>
+    <string name="migration_failed">Migration failed: %1$s</string>
 </resources>
 

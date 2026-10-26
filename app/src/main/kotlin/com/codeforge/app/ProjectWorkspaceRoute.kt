@@ -62,7 +62,9 @@ import com.codeforge.feature.build.BuildViewModel
 import com.codeforge.feature.composepreview.ComposePreviewRoute
 import com.codeforge.feature.debug.DebugBottomSheet
 import com.codeforge.feature.dependencyupdates.DependencyUpdatesHost
+import androidx.activity.compose.BackHandler
 import com.codeforge.feature.editor.EditorRoute
+import com.codeforge.feature.editor.EditorViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,11 +83,26 @@ fun ProjectWorkspaceRoute(
     val activeFile by bridgeViewModel.activeFile.collectAsState()
 
     val buildViewModel: BuildViewModel = hiltViewModel()
+    val editorViewModel: EditorViewModel = hiltViewModel()
     val buildState by buildViewModel.uiState.collectAsState()
     var showBuildSheet by remember { mutableStateOf(false) }
     var showDebugSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    val safeNavigate: (String) -> Unit = { targetRoute ->
+        if (targetRoute == Routes.WELCOME) {
+            editorViewModel.requestClose { onNavigate(targetRoute) }
+        } else {
+            onNavigate(targetRoute)
+        }
+    }
+
+    BackHandler {
+        editorViewModel.requestClose {
+            onNavigate(Routes.WELCOME)
+        }
+    }
 
     LaunchedEffect(rootPath) {
         buildViewModel.connectProject(rootPath)
@@ -173,7 +190,7 @@ fun ProjectWorkspaceRoute(
                     .consumeWindowInsets(padding)
                     .imePadding(),
                 hasComposables = activeFile?.composableFunctionNames?.isNotEmpty() == true,
-                editorContent = { EditorRoute(projectRootPath = rootPath, onNavigate = onNavigate) },
+                editorContent = { EditorRoute(projectRootPath = rootPath, onNavigate = safeNavigate) },
                 previewContent = { ComposePreviewRoute() }
             )
         }
@@ -185,7 +202,7 @@ fun ProjectWorkspaceRoute(
             WorkspaceDrawer(
                 rootPath = rootPath,
                 onCloseDrawer = {},
-                onNavigate = onNavigate,
+                onNavigate = safeNavigate,
                 onOpenGitSettings = onOpenGitSettings,
                 permanent = true
             )
@@ -204,7 +221,7 @@ fun ProjectWorkspaceRoute(
                 WorkspaceDrawer(
                     rootPath = rootPath,
                     onCloseDrawer = { coroutineScope.launch { drawerState.close() } },
-                    onNavigate = onNavigate,
+                    onNavigate = safeNavigate,
                     onOpenGitSettings = onOpenGitSettings
                 )
             }

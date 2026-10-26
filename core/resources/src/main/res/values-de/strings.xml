@@ -1679,5 +1679,30 @@
     <string name="project_settings_signing_desc">Signiert die APK mit dem zugewiesenen Projektschlüssel</string>
     <string name="project_settings_signing_manage">Projektschlüssel verwalten…</string>
     <string name="project_settings_saved">Einstellungen gespeichert</string>
+
+    <!-- Task 55: Projects Root, CFM, Save on Close, Migration -->
+    <string name="save_on_close_title">Änderungen speichern?</string>
+    <string name="save_on_close_message">Folgende Dateien enthalten ungespeicherte Änderungen:</string>
+    <string name="save_on_close_save">Speichern</string>
+    <string name="save_on_close_discard">Verwerfen</string>
+    <string name="save_on_close_cancel">Abbrechen</string>
+    <string name="save_on_close_failed">Fehler beim Speichern von %1$s: %2$s</string>
+    <string name="save_on_close_dirty_recovered_notice">Ungespeicherte Änderungen aus der vorherigen Sitzung vorhanden.</string>
+
+    <string name="crash_report_dialog_title">Absturzbericht</string>
+    <string name="crash_report_dialog_message">Beim letzten Ausführen ist ein unerwarteter Fehler aufgetreten.</string>
+    <string name="crash_report_view">Ansehen</string>
+    <string name="crash_report_share">Teilen</string>
+    <string name="crash_report_delete">Löschen</string>
+    <string name="crash_report_dismiss">Schließen</string>
+    <string name="crash_report_deleted">Absturzbericht gelöscht</string>
+    <string name="crash_report_details_title">Absturz-Details</string>
+
+    <string name="migration_dialog_title">Projekte verschieben</string>
+    <string name="migration_dialog_message">%1$d Projekt(e) im internen Speicher gefunden. In den öffentlichen Projektordner verschieben?</string>
+    <string name="migration_confirm">Verschieben</string>
+    <string name="migration_decline">Nicht jetzt</string>
+    <string name="migration_success">%1$d Projekt(e) erfolgreich verschoben. Backup: %2$s</string>
+    <string name="migration_failed">Migration fehlgeschlagen: %1$s</string>
 </resources>
 

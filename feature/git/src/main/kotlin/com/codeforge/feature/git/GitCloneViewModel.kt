@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.codeforge.core.domain.model.GitCloneProgress
 import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.domain.repository.GitRepository
+import com.codeforge.core.domain.repository.ProjectsDirectoryProvider
 import com.codeforge.core.domain.repository.RecentProjectsRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -24,10 +25,13 @@ import javax.inject.Inject
 @HiltViewModel
 class GitCloneViewModel @Inject constructor(
     private val gitRepository: GitRepository,
-    private val recentProjectsRepository: RecentProjectsRepository
+    private val recentProjectsRepository: RecentProjectsRepository,
+    private val projectsDirectoryProvider: ProjectsDirectoryProvider
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(GitCloneUiState())
+    private val _uiState = MutableStateFlow(
+        GitCloneUiState(targetDirectory = projectsDirectoryProvider.getProjectsRoot().absolutePath)
+    )
     val uiState: StateFlow<GitCloneUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<GitCloneUiEffect>()

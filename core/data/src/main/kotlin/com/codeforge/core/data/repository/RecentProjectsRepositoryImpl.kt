@@ -29,11 +29,13 @@ class RecentProjectsRepositoryImpl @Inject constructor(
         preferencesDataStore.data.map { prefs ->
             prefs[RECENT_PROJECTS_KEY]
                 ?.mapNotNull(::decode)
+                ?.filterNot { it.name == ".cfm" || it.path.endsWith("/.cfm") }
                 ?.sortedByDescending { it.lastOpenedEpochMillis }
                 ?: emptyList()
         }
 
     override suspend fun addOrUpdate(project: RecentProject) {
+        if (project.name == ".cfm" || project.path.endsWith("/.cfm")) return
         preferencesDataStore.edit { prefs ->
             val current = prefs[RECENT_PROJECTS_KEY].orEmpty()
                 .mapNotNull(::decode)

@@ -3,12 +3,22 @@ package com.codeforge.feature.welcome
 
 import androidx.compose.runtime.Immutable
 import com.codeforge.core.domain.model.RecentProject
+import java.io.File
 
 @Immutable
 data class WelcomeUiState(
     val recentProjects: List<RecentProject> = emptyList(),
     val selectedProjectId: String? = null,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+
+    // Task 55: Crash-Bericht Dialog
+    val pendingCrashLog: File? = null,
+    val showCrashDetails: Boolean = false,
+    val crashDetailsText: String = "",
+
+    // Task 55: Migration Dialog
+    val showMigrationDialog: Boolean = false,
+    val legacyProjectsCount: Int = 0
 )
 
 sealed interface WelcomeUiEvent {
@@ -21,6 +31,16 @@ sealed interface WelcomeUiEvent {
     data class RecentProjectOpened(val projectId: String) : WelcomeUiEvent
     data class RecentProjectRemoved(val projectId: String) : WelcomeUiEvent
     data class RecentProjectSettingsClicked(val projectId: String) : WelcomeUiEvent
+
+    // Task 55 Events
+    data object ViewCrashLogClicked : WelcomeUiEvent
+    data object ShareCrashLogClicked : WelcomeUiEvent
+    data object DeleteCrashLogClicked : WelcomeUiEvent
+    data object DismissCrashLogClicked : WelcomeUiEvent
+    data object DismissCrashDetails : WelcomeUiEvent
+
+    data object ConfirmMigrationClicked : WelcomeUiEvent
+    data object DeclineMigrationClicked : WelcomeUiEvent
 }
 
 sealed interface WelcomeUiEffect {
@@ -32,4 +52,5 @@ sealed interface WelcomeUiEffect {
     data class NavigateToEditor(val projectPath: String) : WelcomeUiEffect
     data class NavigateToProjectSettings(val projectPath: String) : WelcomeUiEffect
     data class ShowSnackbar(val message: String) : WelcomeUiEffect
+    data class ShareCrashFile(val file: File) : WelcomeUiEffect
 }

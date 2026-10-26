@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.codeforge.android.library)
     alias(libs.plugins.ksp)
     alias(libs.plugins.codeforge.quality)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {

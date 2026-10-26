@@ -10,6 +10,8 @@ import com.codeforge.core.data.repository.FileSystemRepositoryImpl
 import com.codeforge.core.data.repository.GitRepositoryImpl
 import com.codeforge.core.data.repository.GitSettingsRepositoryImpl
 import com.codeforge.core.data.repository.ProjectImportRepositoryImpl
+import com.codeforge.core.data.repository.ProjectsDirectoryProviderImpl
+import com.codeforge.core.domain.repository.ProjectsDirectoryProvider
 import com.codeforge.core.data.repository.RecentProjectsRepositoryImpl
 import com.codeforge.core.domain.repository.ComposeSourceAnalyzer
 import com.codeforge.core.domain.repository.FileSystemRepository
@@ -17,6 +19,13 @@ import com.codeforge.core.domain.repository.GitRepository
 import com.codeforge.core.domain.repository.GitSettingsRepository
 import com.codeforge.core.domain.repository.ProjectImportRepository
 import com.codeforge.core.domain.repository.RecentProjectsRepository
+import com.codeforge.core.common.log.CfmLogger
+import com.codeforge.core.common.log.FileCfmLogger
+import com.codeforge.core.data.repository.LegacyProjectMigratorImpl
+import com.codeforge.core.data.repository.WorkspaceRepositoryImpl
+import com.codeforge.core.domain.repository.LegacyProjectMigrator
+import com.codeforge.core.domain.repository.WorkspaceRepository
+import java.io.File
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -34,6 +43,15 @@ object DataStoreProviderModule {
     @Singleton
     fun providePreferencesDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
         context.preferencesDataStore
+
+    @Provides
+    @Singleton
+    fun provideCfmLogger(projectsDirectoryProvider: ProjectsDirectoryProvider): CfmLogger =
+        FileCfmLogger(
+            logDirectoryProvider = {
+                File(projectsDirectoryProvider.getProjectsRoot(), ".cfm/log")
+            }
+        )
 }
 
 @Module
@@ -74,6 +92,12 @@ abstract class DataModule {
     abstract fun bindProjectImportRepository(
         impl: ProjectImportRepositoryImpl
     ): ProjectImportRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProjectsDirectoryProvider(
+        impl: ProjectsDirectoryProviderImpl
+    ): ProjectsDirectoryProvider
 
     @Binds
     @Singleton
@@ -128,4 +152,16 @@ abstract class DataModule {
     abstract fun bindProjectSettingsRepository(
         impl: com.codeforge.core.data.repository.ProjectSettingsRepositoryImpl
     ): com.codeforge.core.domain.repository.ProjectSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWorkspaceRepository(
+        impl: WorkspaceRepositoryImpl
+    ): WorkspaceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLegacyProjectMigrator(
+        impl: LegacyProjectMigratorImpl
+    ): LegacyProjectMigrator
 }

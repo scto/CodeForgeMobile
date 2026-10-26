@@ -162,7 +162,7 @@ private fun FileTreeScreen(
                         .horizontalScroll(rememberScrollState())
                 ) {
                     items(
-                        items = tree.nodes,
+                        items = tree.nodes.filter { !it.content.segments.any { s -> s == ".cfm" } },
                         key = { it.key }
                     ) { node ->
                         FileTreeNodeRow(

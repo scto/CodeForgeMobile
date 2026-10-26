@@ -6,6 +6,7 @@ import com.codeforge.core.domain.model.ProjectRequest
 import com.codeforge.core.domain.model.ProjectTemplateDescriptor
 import com.codeforge.core.domain.model.ProjectTemplateKind
 import com.codeforge.core.domain.repository.GitRepository
+import com.codeforge.core.domain.repository.ProjectsDirectoryProvider
 import com.codeforge.core.domain.repository.TemplateEngineRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 class TemplateEngineRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val git: GitRepository,
+    private val projectsDirectoryProvider: ProjectsDirectoryProvider,
 ) : TemplateEngineRepository {
 
     private val generator by lazy { ProjectGenerator(AndroidAssetSource(context.assets)) }
@@ -27,7 +29,7 @@ class TemplateEngineRepositoryImpl @Inject constructor(
     override suspend fun listTemplates(): List<ProjectTemplateDescriptor> = DESCRIPTORS
 
     override fun defaultProjectsDirectory(): String =
-        File(context.filesDir, "projects").absolutePath
+        projectsDirectoryProvider.getProjectsRoot().absolutePath
 
     override suspend fun generate(request: ProjectRequest): Result<ProjectHandle> =
         withContext(Dispatchers.IO) {

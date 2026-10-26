@@ -106,8 +106,15 @@ data class EditorUiState(
     ),
     val aiPrivacyPolicy: com.codeforge.core.domain.ai.AiPrivacyPolicy = com.codeforge.core.domain.ai.AiPrivacyPolicy.ALWAYS_ASK,
     val aiDailyLimit: Int = 50,
-    val aiTodayRequestCount: Int = 0
+    val aiTodayRequestCount: Int = 0,
+
+    // Task 55 Speichern beim Schließen & CFM-Workspace
+    val isSaveOnCloseDialogVisible: Boolean = false,
+    val saveOnCloseErrors: Map<String, String> = emptyMap(),
+    val recoveredUnsavedFilesNotice: Boolean = false
 ) {
+    val dirtyFiles: List<OpenFile> get() = openFiles.filter { it.isDirty }
+    val hasDirtyFiles: Boolean get() = dirtyFiles.isNotEmpty()
     val isLspConnected: Boolean get() = lspServerState == LspServerState.RUNNING
 
     val activeUpdateAnnotations: List<FileUpdateAnnotation>
@@ -219,6 +226,13 @@ sealed interface EditorUiEvent {
     data class AcceptAiProposedChange(val change: com.codeforge.core.domain.ai.AiProposedChange, val forceOverwrite: Boolean = false) : EditorUiEvent
     data object DismissAiDiff : EditorUiEvent
     data object DismissAiFileConflict : EditorUiEvent
+
+    // Task 55 Speichern beim Schließen
+    data class RequestClose(val onProceed: () -> Unit) : EditorUiEvent
+    data object SaveAllAndClose : EditorUiEvent
+    data object DiscardAllAndClose : EditorUiEvent
+    data object DismissSaveOnCloseDialog : EditorUiEvent
+    data object DismissRecoveredNotice : EditorUiEvent
 }
 
 sealed interface EditorUiEffect {

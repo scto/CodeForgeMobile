@@ -52,8 +52,9 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 * 👁️ Compose live preview for `@Composable` functions 🟡 (Compilation via Termux `kotlinc` process, runtime package via `packCompilerRuntime` as GitHub Release asset, offscreen frame recording via `GraphicsLayer`, see [docs/compose-preview-runtime-report.md](docs/compose-preview-runtime-report.md), [docs/compose-preview-kotlinc-report.md](docs/compose-preview-kotlinc-report.md), and [docs/compose-preview-render-report.md](docs/compose-preview-render-report.md)).
 * ✏️ **Layout designer** ✅🧪: visual editor for Android layout XML with palette, preview (4 device sizes), structure tree, properties, XML tab, undo/redo, and a “Layouts” drawer section. Approximate preview, no drag-and-drop – see [docs/layout-designer.md](docs/layout-designer.md).
 
-### 🚀 4. Project Wizard & Template Engine (`:feature:projectwizard`, `:libs:template-engine`) ✅
+### 🚀 4. Project Wizard, Workspace & Template Engine (`:feature:projectwizard`, `:libs:template-engine`, `:core:domain`, `:core:data`) ✅
 * 🧙 2-step wizard with 9 templates (Compose app, empty activity, multi-module, …), typed validation, SAF import; `git init` on project creation.
+* 📁 Standard projects directory on external storage (`/storage/emulated/0/CodeForgeMobileProjects/`), `.cfm/` IDE directory for rotating logs (`cfm-YYYY-MM-DD.log`) & synchronous crash logs (`crash/`), and `<project>/.cfm/cfm.json` workspace persistence with Save-on-Close dialog (see [docs/projects-root-cfm-report.md](docs/projects-root-cfm-report.md)).
 
 ### 🌿 5. Git (`:feature:git`, `:feature:settings`) ✅🧪
 * 🐙 JGit panel: diff, merge, commit, push/pull, graph, stash, tags, rebase, cherry-pick, revert, reset, amend, blame, hunk-wise staging, conflict editor; settings for name/email/token.

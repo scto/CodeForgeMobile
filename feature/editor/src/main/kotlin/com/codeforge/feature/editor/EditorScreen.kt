@@ -519,6 +519,16 @@ fun EditorRoute(
             }
         )
     }
+
+    if (uiState.isSaveOnCloseDialogVisible) {
+        com.codeforge.feature.editor.ui.SaveOnCloseDialog(
+            dirtyFiles = uiState.dirtyFiles,
+            saveErrors = uiState.saveOnCloseErrors,
+            onSaveAll = { viewModel.onEvent(EditorUiEvent.SaveAllAndClose) },
+            onDiscardAll = { viewModel.onEvent(EditorUiEvent.DiscardAllAndClose) },
+            onCancel = { viewModel.onEvent(EditorUiEvent.DismissSaveOnCloseDialog) }
+        )
+    }
 }
 
 @Composable
