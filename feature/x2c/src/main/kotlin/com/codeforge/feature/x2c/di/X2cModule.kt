@@ -1,8 +1,10 @@
 package com.codeforge.feature.x2c.di
 
 import com.codeforge.core.domain.repository.ComposeMigrationScanner
+import com.codeforge.core.domain.repository.X2cBackupRepository
 import com.codeforge.core.domain.repository.X2cRepository
 import com.codeforge.libs.x2c.X2cRepositoryImpl
+import com.codeforge.libs.x2c.backup.X2cBackupRepositoryImpl
 import com.codeforge.libs.x2c.scanner.ComposeMigrationScannerImpl
 import dagger.Module
 import dagger.Provides
@@ -20,5 +22,12 @@ object X2cModule {
 
     @Provides
     @Singleton
-    fun provideX2cRepository(scanner: ComposeMigrationScanner): X2cRepository = X2cRepositoryImpl(scanner)
+    fun provideX2cBackupRepository(): X2cBackupRepository = X2cBackupRepositoryImpl()
+
+    @Provides
+    @Singleton
+    fun provideX2cRepository(
+        scanner: ComposeMigrationScanner,
+        backupRepo: X2cBackupRepository
+    ): X2cRepository = X2cRepositoryImpl(scanner, backupRepo)
 }

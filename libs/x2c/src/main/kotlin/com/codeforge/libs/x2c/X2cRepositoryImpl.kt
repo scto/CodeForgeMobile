@@ -5,14 +5,17 @@ import com.codeforge.core.domain.model.X2cPlan
 import com.codeforge.core.domain.model.X2cProgress
 import com.codeforge.core.domain.model.X2cReport
 import com.codeforge.core.domain.repository.ComposeMigrationScanner
+import com.codeforge.core.domain.repository.X2cBackupRepository
 import com.codeforge.core.domain.repository.X2cRepository
+import com.codeforge.libs.x2c.backup.X2cBackupRepositoryImpl
 import com.codeforge.libs.x2c.scanner.ComposeMigrationScannerImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class X2cRepositoryImpl(
-    private val scanner: ComposeMigrationScanner = ComposeMigrationScannerImpl()
+    private val scanner: ComposeMigrationScanner = ComposeMigrationScannerImpl(),
+    private val backupRepo: X2cBackupRepository = X2cBackupRepositoryImpl()
 ) : X2cRepository {
 
     private val _progress = MutableStateFlow<X2cProgress>(X2cProgress.Idle)
@@ -31,6 +34,13 @@ class X2cRepositoryImpl(
     override suspend fun executeMigration(projectPath: String, options: X2cOptions): X2cReport {
         isCancelled = false
         val plan = scanner.createPlan(projectPath)
+
+        var backupZipPath = "$projectPath/Backup"
+        if (options.createBackup) {
+            _progress.value = X2cProgress.CreatingBackup(projectPath)
+            backupZipPath = backupRepo.createBackup(projectPath, options.includeGitInBackup)
+        }
+
         val report = X2cReport(
             projectPath = projectPath,
             timestampEpochMillis = System.currentTimeMillis(),
@@ -43,17 +53,20 @@ class X2cRepositoryImpl(
             stage2SkippedCount = 0,
             themeGenerated = options.generateTheme,
             removedXmlCount = 0,
-            backupPath = "$projectPath/Backup",
+            backupPath = backupZipPath,
             journalPath = "$projectPath/Backup/x2c-journal.json",
             fileResults = emptyList(),
-            markdownSummary = "Migration vorbereitet (Task 52.2)"
+            markdownSummary = "Migration vorbereitet (Task 52.3)"
         )
         _progress.value = X2cProgress.Completed(report)
         return report
     }
 
     override suspend fun undoMigration(projectPath: String, journalPath: String): Boolean {
-        return true
+        _progress.value = X2cProgress.RollingBack("Migration wird zurückgerollt...")
+        val result = backupRepo.rollbackWithJournal(projectPath, journalPath)
+        _progress.value = X2cProgress.Idle
+        return result
     }
 
     override fun cancelMigration() {

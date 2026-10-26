@@ -53,6 +53,13 @@ interface ComposeMigrationScanner {
     suspend fun createPlan(projectPath: String, preselectedLayout: String? = null): X2cPlan
 }
 
+interface X2cBackupRepository {
+    suspend fun createBackup(projectPath: String, includeGit: Boolean = true): String
+    suspend fun restoreBackup(projectPath: String, backupZipPath: String): Boolean
+    suspend fun restoreFile(projectPath: String, backupZipPath: String, relativeFilePath: String): Boolean
+    suspend fun rollbackWithJournal(projectPath: String, journalPath: String): Boolean
+}
+
 interface X2cRepository {
     val progress: StateFlow<X2cProgress>
     suspend fun analyzeProject(projectPath: String): X2cPlan

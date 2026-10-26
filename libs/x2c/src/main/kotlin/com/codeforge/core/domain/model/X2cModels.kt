@@ -11,6 +11,7 @@ data class X2cOptions(
     val runBuildCheck: Boolean = true,
     val createGitBranch: Boolean = false,
     val includeGitInBackup: Boolean = true,
+    val createBackup: Boolean = true,
     val selectedLayouts: Set<String> = emptySet(),
     val dontAskAgain: Boolean = false
 )
@@ -104,6 +105,7 @@ sealed interface X2cProgress {
     data class WiringActivities(val current: Int, val total: Int, val currentClass: String) : X2cProgress
     data class GeneratingTheme(val message: String) : X2cProgress
     data class ApplyingChanges(val message: String) : X2cProgress
+    data class RollingBack(val message: String) : X2cProgress
     data class VerifyingBuild(val task: String) : X2cProgress
     data class Completed(val report: X2cReport) : X2cProgress
     data class Failed(val error: String) : X2cProgress

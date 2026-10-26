@@ -54,7 +54,7 @@
 | **52.0** | Entscheidungen & On-Device Spike | ✅ Abgeschlossen (Spike positiv) |
 | **52.1** | Kern und Schnittstellen (`:core:domain`) | ✅ Abgeschlossen (`X2cModels.kt`, `X2cRepositories.kt`, `X2cModelsTest.kt`) |
 | **52.2** | Erkennung, Einstieg und Dialog (`:libs:x2c`, `:feature:x2c`, `:app`) | ✅ Abgeschlossen |
-| **52.3** | ZIP-Backup mit Verifikation | ⬜ Offen |
+| **52.3** | ZIP-Backup mit Verifikation (`X2cBackupRepository`) | ✅ Abgeschlossen |
 | **52.4** | Compose im Build ermöglichen (`ComposeBuildEnabler`) | ⬜ Offen |
 | **52.5** | Analyse: Layouts und Verwendung (`LayoutUsageAnalyzer`) | ⬜ Offen |
 | **52.6** | Generator: XML → `@Composable` (Golden-Tests) | ⬜ Offen |
@@ -118,7 +118,37 @@
 
 ---
 
-## 4. Getestet vs. Nicht getestet
+## 4. Abschnitt 52.3: Vorab-Sicherung als ZIP (`X2cBackupRepository`)
+
+### 4.1 Namenskonvention & Speicherort
+- Speichert im Projektordner: `<Projekt>/Backup/<projektname>-xml-<JJJJMMTT-HHMMSS>.zip`.
+- Das Verzeichnis `Backup/` wird bei Bedarf automatisch erstellt.
+- Backups werden **nie automatisch gelöscht**.
+
+### 4.2 Ausschlussregeln & Git-Behandlung
+- Strikte Ausschlüsse: `Backup/`, `**/build/`, `.gradle/`, `.cxx/`, `node_modules/`, `out/`.
+- `.git/`-Ordner ist standardmäßig (`includeGit = true`) im Backup enthalten, kann aber über `includeGit = false` optional ausgelassen werden.
+
+### 4.3 Speicherplatz-Vorprüfung
+- Vor dem Schreiben wird der freie Speicherplatz auf dem Ziel-Dateisystem geprüft.
+- Erforderlich: mindestens das Doppelte (`totalBytes * 2`) der unkomprimierten Quellgröße.
+- Bei unzureichendem Speicher bricht der Vorgang mit einer `IllegalStateException` ab; es wird keine unvollständige Datei hinterlassen.
+
+### 4.4 Verifikation nach dem Schreiben
+- Nach Fertigstellung des ZIPs wird die Datei erneut geöffnet (`ZipFile`):
+  - Anzahl der Einträge stimmt exakt mit der Quellliste überein.
+  - Dateigröße und CRC32-Prüfsumme jedes Eintrags werden validiert.
+- Bei geringster Abweichung oder Fehler: Das ZIP wird sofort gelöscht und eine Exception geworfen („Schlägt die Prüfung fehl, wird nichts verändert“).
+
+### 4.5 Wiederherstellung & Sicherheitsprüfungen
+- `restoreBackup(projectPath, backupZipPath)`: Vollständiges Entpacken mit Zeitstempel-Erhalt (`lastModified`).
+- `restoreFile(projectPath, backupZipPath, relativeFilePath)`: Gezielte Wiederherstellung einzelner Dateien (z. B. versehentlich entfernte XML-Layouts).
+- **Zip-Slip-Schutz:** Jede extrahierte Datei wird kanonisch gegen das Projektverzeichnis validiert; bei Ausbruchsversuchen (`../`) wird sofort eine `SecurityException` geworfen.
+- `rollbackWithJournal(projectPath, journalPath)`: Verarbeitet JSON- und Zeilen-Journale; löscht neu angelegte Dateien (`CREATED`/`CONVERTED`) und stellt modifizierte bzw. gelöschte Dateien aus dem Backup wieder her.
+
+---
+
+## 5. Getestet vs. Nicht getestet
 
 ### Getestet
 - [x] Spike auf Pixel 9 Pro XL (Termux, JDK 21.0.12, kotlinc 2.4.20, Compose-Plugin): 2 Dateien mit Composables in 6 s erfolgreich kompiliert.
@@ -126,6 +156,15 @@
   - Erkennung in Nicht-Android-Projekten (leeres Ergebnis).
   - Erkennung von Layouts, Varianten (`layout-land`), Compose-Aktivität und Ausschlüsse (`build/`, `Backup/`).
   - XXE-Sicherheitsverifikation.
+- [x] Unit-Tests `:libs:x2c:test` (`X2cBackupRepositoryTest`):
+  - Backup & Restore mit Zeitstempeln und Inhaltsvergleich.
+  - Namenskonvention `<Projektname>-xml-<JJJJMMTT-HHMMSS>.zip`.
+  - Exklusionen (`build/`, `Backup/`, `.gradle/`, `.cxx/`, `node_modules/`).
+  - `.git/` Inklusion (`includeGit = true`) und Exklusion (`includeGit = false`).
+  - Vorab-Prüfung auf doppelten freien Speicherplatz und Abbruch bei Speichermangel.
+  - Zip-Slip-Schutz (`SecurityException` bei Pfadausbrüchen wie `../`).
+  - Einzeldatei-Wiederherstellung (`restoreFile`).
+  - Rollback per Journal (JSON- und Line-basiert).
 - [x] Unit-Tests `:feature:x2c:testDebugUnitTest` (`X2cViewModelTest`):
   - Scan-Ablauf, Vorselektion einzelner Layouts, manuelle Auslösung.
   - Unterdrückung bei „Nicht mehr fragen“ und Persistierung via DataStore.
