@@ -83,6 +83,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -287,6 +288,10 @@ fun EditorRoute(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
+                        // key(path): jede Datei bekommt eigenen CodeEditor + EditorController + Undo-Stack.
+                        // Ohne key wurde die AndroidView beim Tab-Wechsel wiederverwendet, der neue Controller
+                        // nie attached und der alte detached -> Undo/Redo/Format tot.
+                        key(active.path) {
                         Column(modifier = Modifier.fillMaxSize()) {
                             SoraCodeEditor(
                                 modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -316,6 +321,7 @@ fun EditorRoute(
                                     }
                                 )
                             }
+                        }
                         }
                     }
                 }
@@ -650,10 +656,10 @@ private fun EditorToolbar(
             }
         }
 
-        IconButton(onClick = { controller?.undo() }, enabled = !isImage && (controller?.canUndo() ?: false)) {
+        IconButton(onClick = { controller?.undo() }, enabled = !isImage && (controller?.canUndoState ?: false)) {
             Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringRes(R.string.editor_rueckgaengig))
         }
-        IconButton(onClick = { controller?.redo() }, enabled = !isImage && (controller?.canRedo() ?: false)) {
+        IconButton(onClick = { controller?.redo() }, enabled = !isImage && (controller?.canRedoState ?: false)) {
             Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = stringRes(R.string.editor_wiederholen))
         }
         IconButton(onClick = { controller?.selectAll() }, enabled = !isImage) {

@@ -14,14 +14,31 @@ import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspRange
 import com.codeforge.libs.code_tools.edit.TextEdit
 import io.github.rosemoe.sora.widget.CodeEditor
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import java.lang.ref.WeakReference
 
 class EditorController {
 
     private var editorRef: WeakReference<CodeEditor>? = null
 
+    /** Compose-beobachtbar, damit die Toolbar-Buttons nach jeder Änderung neu bewertet werden. */
+    var canUndoState by mutableStateOf(false)
+        private set
+    var canRedoState by mutableStateOf(false)
+        private set
+
     internal fun attach(editor: CodeEditor) {
         editorRef = WeakReference(editor)
+        refreshUndoRedo()
+    }
+
+    /** Nach Text-/Undo-/Redo-Änderungen aufrufen. */
+    internal fun refreshUndoRedo() {
+        val editor = editorRef?.get()
+        canUndoState = editor?.canUndo() ?: false
+        canRedoState = editor?.canRedo() ?: false
     }
 
     internal fun detach() {
@@ -34,8 +51,8 @@ class EditorController {
     }
 
     // --- Undo / Redo (sora-editors Content-Klasse führt den Undo-Stack intern unbegrenzt) ---
-    fun undo() = withEditor { if (it.canUndo()) it.undo() }
-    fun redo() = withEditor { if (it.canRedo()) it.redo() }
+    fun undo() { withEditor { if (it.canUndo()) it.undo() }; refreshUndoRedo() }
+    fun redo() { withEditor { if (it.canRedo()) it.redo() }; refreshUndoRedo() }
     fun canUndo(): Boolean = editorRef?.get()?.canUndo() ?: false
     fun canRedo(): Boolean = editorRef?.get()?.canRedo() ?: false
 

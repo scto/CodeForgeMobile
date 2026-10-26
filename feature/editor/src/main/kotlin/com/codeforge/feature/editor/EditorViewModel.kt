@@ -337,7 +337,12 @@ class EditorViewModel @Inject constructor(
             else -> false
         }
         if (shouldFormat) {
-            formatCodeInternal(range = null, silentIfUnchanged = true)
+            // Formatierung darf das Speichern nie blockieren (Timeout/Fehler -> trotzdem speichern).
+            runCatching {
+                kotlinx.coroutines.withTimeoutOrNull(5_000) {
+                    formatCodeInternal(range = null, silentIfUnchanged = true)
+                }
+            }
         }
         val currentActive = _uiState.value.activeFile ?: return@launch
         if (persistDirty(setOf(normalize(currentActive.path)))) {

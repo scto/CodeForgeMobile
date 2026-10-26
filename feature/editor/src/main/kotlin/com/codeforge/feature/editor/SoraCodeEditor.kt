@@ -167,6 +167,7 @@ fun SoraCodeEditor(
 
                 subscribeEvent<ContentChangeEvent> { event, _ ->
                     onContentChanged(event.editor.text.toString())
+                    controller.refreshUndoRedo()
                     overlayTick++
                 }
                 subscribeEvent<ScrollEvent> { _, _ -> overlayTick++ }
