@@ -209,7 +209,8 @@ installed_path() { # id
         && printf '%s' "$SDK_ROOT/platform-tools" ;;
     ghndk)
       local mk="$SDK_ROOT/ndk/.cf-$ver" rev
-      if [ -f "$mk" ]; then rev=$(cat "$mk"); [ -d "$SDK_ROOT/ndk/$rev" ] && printf '%s' "$SDK_ROOT/ndk/$rev"; fi ;;
+      # Nur mit source.properties als installiert werten (AGP: "[CXX1101] NDK … did not have a source.properties file").
+      if [ -f "$mk" ]; then rev=$(cat "$mk"); [ -f "$SDK_ROOT/ndk/$rev/source.properties" ] && printf '%s' "$SDK_ROOT/ndk/$rev"; fi ;;
     archive)
       [ -n "$dest" ] && [ -d "$SDK_ROOT/$dest" ] && printf '%s' "$SDK_ROOT/$dest" ;;
     sdkmanager)
@@ -1172,6 +1173,19 @@ do_doctor() {
   local rc=0 t
   for t in bash curl tar unzip java jq; do command -v "$t" >/dev/null 2>&1 && say "ok   $t" || { say "FEHLT $t"; rc=1; }; done
   [ -d "$SDK_ROOT" ] && say "ok   SDK_ROOT=$SDK_ROOT" || { say "FEHLT SDK_ROOT"; rc=1; }
+  local nd inner
+  for nd in "$SDK_ROOT"/ndk/*/; do
+    [ -d "$nd" ] || continue
+    nd=${nd%/}
+    if [ -f "$nd/source.properties" ]; then say "ok   NDK ${nd##*/}"; continue; fi
+    inner=$(find "$nd" -maxdepth 2 -name source.properties 2>/dev/null | head -n1)
+    if [ -n "$inner" ]; then
+      say "WARN  NDK ${nd##*/} ist verschachtelt ($(dirname "$inner")): Inhalt eine Ebene nach oben verschieben oder neu installieren"
+    else
+      say "WARN  NDK ${nd##*/} unvollständig (kein source.properties): rm -rf '$nd' && codeforge-env install ndk;r29"
+    fi
+    rc=1
+  done
   [ -f "$ENV_FILE" ] && say "ok   $ENV_FILE" || { say "FEHLT $ENV_FILE (codeforge-env setup)"; rc=1; }
   # Das eigene Manifest ($CODEFORGE_SDK_REPO/manifest.txt) ist optional; SDK/NDK/CMake kommen aus dem Mirror.
   case "$MANIFEST_URL" in
