@@ -1,6 +1,6 @@
 # 📊 Übersicht aller agy-Tasks & offene Punkte
 
-**Stand:** 2026-10-25 (Repo `952f324`) · **Projekt:** CodeForge Mobile
+**Stand:** 2026-10-26 (Repo `ac897c5`) · **Projekt:** CodeForge Mobile
 
 | Task | Datei | Status | Beschreibung / offene Punkte |
 |---|---|---|---|
@@ -61,11 +61,9 @@
 | **52** | `52-xml-layouts-to-compose-migration.md` | 🟡 in Arbeit (52.0–52.4 fertig) | **Modul `x2c` (XML → Compose):** Dialog nach Import/`git clone` bei Projekten mit Layouts und ohne aktives Compose (nie parallel zum Task-50-Dialog), Layoutauswahl mit Einstufung, ZIP-Backup `Backup/<projekt>-xml-<ts>.zip`, Compose im Build ergänzen (Compiler-Plugin je Kotlin-Version, BOM, `minSdk`-Prüfung, optional Versionskatalog), Generator (LinearLayout/ConstraintLayout/TextView/Button/EditText/RecyclerView-Gerüst u. a., Unbekanntes als `TODO(x2c)`), Stufe 2 optional: einfache Activities/Fragments auf `setContent`, Theme aus XML, XML nur entfernen wenn nirgends verwendet, Journal und Rückgängig, Build-Prüfung (Task 28), Bericht. **Verhalten (Listener, Adapter, Data Binding) wird nicht umgeschrieben**, nur gemeldet. Gemeinsame Infrastruktur mit Task 50; Generator auch für Task 41.11 |
 | **53** | `53-apt-pool-size-large-threshold.md` | ✅ `b6f4982` | **APT-Pool unter Pages-Limit:** Grenze auf 30 MiB gesenkt (`apt-limits.conf`), `scripts/rehome-large-packages.sh` & Workflow `rehome-large-packages.yml` implementiert (5 Dateien, Ersparnis 317 MiB), Größenwächter (Warnung 800 MB, Abbruch 950 MB) im Assemble, Tests & Bericht (`docs/apt-pool-size-report.md`) |
 | **54** | `54-editor-tabrow-empty-crash.md` | ✅ `be3c65f` | **Absturz im Editor:** `ScrollableTabRow` ohne Tabs (`IndexOutOfBoundsException`, TabRow.kt:503) bei leerer `openFiles`-Liste; Tab-Zeile nur bei Dateien, Leerzustand, `selectedTabIndex` begrenzen, Regressionstest, Bericht `docs/editor-tabrow-crash-report.md` |
-| **54** | `54-editor-tabrow-empty-crash.md` | ✅ `be3c65f` | **Absturz im Editor:** `ScrollableTabRow` ohne Tabs (`IndexOutOfBoundsException`, TabRow.kt:503) bei leerer `openFiles`-Liste; Tab-Zeile nur bei Dateien, Leerzustand, `selectedTabIndex` begrenzen, Regressionstest, Bericht `docs/editor-tabrow-crash-report.md` |
 | **55** | `55-projects-root-cfm-workspace.md` | ✅ `f73401b` | **Projekt-Stammverzeichnis extern + `.cfm/`:** `CodeForgeMobileProjects/` im externen Speicher (Rückfall `getExternalFilesDir`), `.cfm/log/` (14 Tage Rotation, 10 MiB) und `.cfm/crash/` (synchroner Crash-Handler, Header, FileProvider), `<Projekt>/.cfm/cfm.json` (Dateien, offene und geänderte Dateien, atomares Schreiben, Git-Exclude), Dialog „Speichern beim Schließen“ (Save, Discard, Cancel), Migration des Bestands mit ZIP-Backup und Byte-Prüfung, Bericht `docs/projects-root-cfm-report.md` |
 | **56** | `56-compiler-runtime-icons-extended-check.md` | ⬜ offen | **Compiler-Runtime schlank halten:** prüfen, ob `material-icons-core` statt `material-icons-extended` (≈ 35,7 MiB von 53,8 MiB) reicht; Messungen (Icon-Anzahl, Projekt-Scan, Download/Kompilierzeit), Entscheidung A/B/C (optionales Icons-Zusatzpaket), Bericht `docs/compiler-runtime-icons-report.md` |
 | **57** | `57-compose-preview-project-sources.md` | ✅ erledigt | **Compose-Vorschau mit Projektquellen:** Quellauswahl (Theme-Kette), mehrdateiige Aufbereitung mit `package`, `PreviewCompiling` mit Dateiliste, dateibezogene Fehler, Rückfall auf Standard-Theme, Bericht `docs/compose-preview-project-sources-report.md` |
-| **99** | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task / Prompt fehlt) | Dokumentation: Anwendungsdoku mit Mermaid (`docs/app/`, generierte Blöcke), API-Doku mit Dokka (`:libs:plugin-api`, `:core:domain`-Schnittstellen), `./gradlew docsGenerate`/`docsCheck`, Fakten-Drift-Prüfung, CI-Wochenlauf. Wird nach größeren Task-Blöcken **wiederholt** (Runbook 99.7) · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“). *Hinweis: Markdown-Datei existiert noch nicht im Ordner agy-tasks/.* |
 | **99** | `99-docs-mermaid-dokka.md` | ⬜ offen (Dauer-Task / Prompt fehlt) | Dokumentation: Anwendungsdoku mit Mermaid (`docs/app/`, generierte Blöcke), API-Doku mit Dokka (`:libs:plugin-api`, `:core:domain`-Schnittstellen), `./gradlew docsGenerate`/`docsCheck`, Fakten-Drift-Prüfung, CI-Wochenlauf. Wird nach größeren Task-Blöcken **wiederholt** (Runbook 99.7) · **+ 99.8 Betriebshandbuch** für Einsteiger (GPG-Schlüssel erzeugen/sichern, GitHub-Token, Pflege nach Auslöser, „neuer Schlüssel = Bootstrap `full` + alle Stages“). *Hinweis: Markdown-Datei existiert noch nicht im Ordner agy-tasks/.* |
 
 ---
@@ -76,14 +74,17 @@ Tasks **01 bis 51** sind **vollständig umgesetzt und verifiziert** (Commits bis
 
 ### Noch nicht ausgeführte / offene Tasks im Backlog
 
-1. **Task 99 (`99-docs-mermaid-dokka.md`) – ⬜ Offen (Dauer-Task / Prompt fehlt):**
+Weitere offene Punkte außerhalb der Tasks (APT-Repo, Gerätetests) stehen unten unter „Außerhalb der Tasks".
+
+1. **Task 52 (`52-xml-layouts-to-compose-migration.md`) – 🟡 in Arbeit:** 52.0–52.4 fertig; offen 52.5–52.12 (Analyse, Generator, Stufe 2, Theme, Anwenden/Journal/Rückgängig, Build-Prüfung, UI, Tests/Doku).
+
+2. **Task 56 (`56-compiler-runtime-icons-extended-check.md`) – ⬜ offen:** Messungen 56.1–56.2 durch den Agenten, Gerätetest 56.3 durch den Inhaber.
+
+3. **Task 99 (`99-docs-mermaid-dokka.md`) – ⬜ Offen (Dauer-Task / Prompt fehlt):**
    - **Thema:** Anwendungsdokumentation (Mermaid-Diagramme, Runbooks), API-Dokumentation (Dokka) und Betriebshandbuch (99.8).
    - **Status:** ⬜ Dauer-Task; Datei muss noch formuliert/erstellt werden.
 
-2. **Laufende Pflege (Task 17)**:
-   - `17-externalize-hardcoded-strings.md` bleibt ein wiederkehrender Prüfschritt vor Commits/Releases (aktuell 0 unübertragene Strings, 1571 Lokalisierungseinträge synchron).
-
-3. **Laufende Pflege (Task 17)**:
+4. **Laufende Pflege (Task 17)**:
    - `17-externalize-hardcoded-strings.md` bleibt ein wiederkehrender Prüfschritt vor Commits/Releases (aktuell 0 unübertragene Strings, 1571 Lokalisierungseinträge synchron).
 
 | Gruppe | Tasks | Status / Hinweise |
