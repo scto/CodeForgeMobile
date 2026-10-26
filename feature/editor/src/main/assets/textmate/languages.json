@@ -1,6 +1,6 @@
 {
-  "_comment": "Registry-Manifest fuer GrammarRegistry.loadGrammars(). Siehe ASSETS.md fuer die vollstaendigen Grammar-Dateien (grammars/*.tmLanguage.json), die hier referenziert, aber aus Lizenz-/Groessen-Gruenden nicht inline generiert wurden.",
-  "grammars": [
+  "_comment": "Manifest fuer GrammarRegistry.loadGrammars(); sora liest den Schluessel 'languages'. Pfade relativ zum Asset-Root.",
+  "languages": [
     {
       "name": "Kotlin",
       "scopeName": "source.kotlin",
@@ -18,12 +18,6 @@
       "scopeName": "text.xml",
       "grammar": "textmate/grammars/xml.tmLanguage.json",
       "languageConfiguration": "textmate/languages/xml-language-configuration.json"
-    },
-    {
-      "name": "Gradle Kotlin DSL",
-      "scopeName": "source.kotlin",
-      "grammar": "textmate/grammars/kotlin.tmLanguage.json",
-      "languageConfiguration": "textmate/languages/kotlin-language-configuration.json"
     },
     {
       "name": "JSON",
