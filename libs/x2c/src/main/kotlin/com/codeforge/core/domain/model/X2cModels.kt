@@ -151,3 +151,32 @@ data class GeneratorContext(
     val knownLayouts: Map<String, String> = emptyMap(),
     val visibilityIds: Set<String> = emptySet()
 )
+
+/** Task 52.7: Ergebnis der Stufe-2-Umstellung einer Kotlin-Datei (Activity/Fragment). */
+enum class WireStatus { WIRED, SKIPPED }
+
+/** Stelle, die der Benutzer nach der Umstellung prüfen soll (Zeile bezieht sich auf die Originaldatei). */
+data class WireReviewHint(val line: Int, val message: String)
+
+/**
+ * @property newContent neuer Dateiinhalt; nur bei [WireStatus.WIRED]
+ * @property reason Begründung, warum nicht umgestellt wurde (bei [WireStatus.SKIPPED])
+ */
+data class ComposeWireResult(
+    val status: WireStatus,
+    val newContent: String? = null,
+    val reason: String? = null,
+    val reviewHints: List<WireReviewHint> = emptyList(),
+    val addedImports: List<String> = emptyList()
+)
+
+/** Zielangaben für die Umstellung: welche Composable (und welches Theme) die Datei aufrufen soll. */
+data class WireTarget(
+    val layoutName: String,
+    val composableName: String,
+    /** Paket der Composable; leer = gleiches Paket wie die Datei. */
+    val composablePackage: String = "",
+    /** Name der Theme-Composable aus 52.8 (z. B. `AppTheme`); null = `MaterialTheme`. */
+    val themeName: String? = null,
+    val themePackage: String = ""
+)

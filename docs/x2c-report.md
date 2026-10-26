@@ -246,3 +246,16 @@ Klassen (`:libs:x2c`, Paket `com.codeforge.libs.x2c.generator`): `LayoutToCompos
 **Getestet:** 42 Tests (`LayoutToComposeGeneratorTest`: je Abbildungsregel, Querschnittsregeln, XXE-Ablehnung, Determinismus, drei vollständige Beispiele mit Klammerprüfung); zusammen mit den übrigen `:libs:x2c`-Tests 73 grün (kotlinc 2.2.10 + JUnit, ohne Gradle).
 **Nicht getestet:** Kompilierung des *erzeugten* Codes (braucht Compose/ConstraintLayout im Klassenpfad), Gradle-Build des Moduls, Verhalten auf dem Gerät. Die erzeugten Dateien wurden von Hand gelesen, nicht übersetzt.
 **Bekannte Grenzen:** `style=`-Auflösung, `tint`, `shapeAppearance`, Divider-Attribute, RelativeLayout-Beziehungen und `layout_constraintCircle` werden als `TODO`/Hinweis gemeldet statt umgesetzt.
+
+## 52.7 Stufe 2: Activities und Fragments auf Compose umstellen (Stand 2026-10-26)
+
+`ComposeEntryWirer` (Schnittstelle in `:core:domain`) mit `ComposeEntryWirerImpl` in `:libs:x2c` (Paket `wiring`): reine Textumwandlung (Datei rein, Datei raus, `WireTarget` bestimmt Composable und Theme), schreibt nichts; Anwenden und Journal folgen in 52.9.
+
+* **Activity:** `setContentView(R.layout.x)` → `setContent { <Theme> { XScreen() } }`; Imports (`androidx.activity.compose.setContent`, Theme/`MaterialTheme`, Composable bei abweichendem Paket) werden ergänzt, nichts doppelt. Basisklasse bleibt unverändert (AppCompatActivity, FragmentActivity und ComponentActivity erlauben `setContent`).
+* **Fragment:** `inflater.inflate(R.layout.x, …)` → `ComposeView(requireContext()).apply { setViewCompositionStrategy(DisposeOnViewTreeLifecycleDestroyed); setContent { … } }`.
+* **Kriterien** (Konstante `Stage2Criteria.RULES`, für Dialog und Bericht): Kotlin; genau eine Klasse mit bekannter Basisklasse; genau ein passender Aufruf; kein `findViewById`, kein ViewBinding/Data Binding/Synthetics, keine weitere `R.layout`-Verwendung, kein `LayoutInflater.from`, kein `Fragment(R.layout…)`-Konstruktor, kein `setSupportActionBar`. Kommentare und Strings werden bei der Prüfung ausgeblendet (keine falschen Treffer).
+* **Nicht umgestellt** wird mit Begründung (und Zeile) gemeldet: Java (Task 50 zuerst, wird nie angefasst), unbekannte Basisklasse (z. B. eigene `BaseActivity`, bewusst konservativ), mehrere Aufrufe.
+* **Bitte-prüfen-Liste** (Zeilen der Originaldatei): Optionsmenü, ActionBar-Zugriff, `setTheme`, `requestWindowFeature`, Methoden der Form `fun x(View)` (früher evtl. `android:onClick`). Listener und Adapter werden nicht umgeschrieben.
+
+**Getestet:** 16 neue Tests (`ComposeEntryWirerTest`), zusammen 89 Tests in `:libs:x2c` grün (kotlinc + JUnit, ohne Gradle).
+**Nicht getestet:** Kompilierung der umgestellten Dateien in einem echten Projekt, Gradle-Build, Gerät. Die Importreihenfolge wird nicht sortiert (neue Imports stehen am Ende des Importblocks).

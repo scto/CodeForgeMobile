@@ -1,11 +1,13 @@
 package com.codeforge.core.domain.repository
 
 import com.codeforge.core.domain.model.ComposeScanResult
+import com.codeforge.core.domain.model.ComposeWireResult
 import com.codeforge.core.domain.model.GeneratorContext
 import com.codeforge.core.domain.model.LayoutUsage
 import com.codeforge.core.domain.model.X2cOptions
 import com.codeforge.core.domain.model.X2cPlan
 import com.codeforge.core.domain.model.X2cProgress
+import com.codeforge.core.domain.model.WireTarget
 import com.codeforge.core.domain.model.X2cReport
 import kotlinx.coroutines.flow.StateFlow
 
@@ -89,4 +91,12 @@ interface X2cRepository {
     suspend fun executeMigration(projectPath: String, options: X2cOptions): X2cReport
     suspend fun undoMigration(projectPath: String, journalPath: String): Boolean
     fun cancelMigration()
+}
+
+/**
+ * Task 52.7 (Stufe 2): stellt eine einfache Kotlin-Activity/-Fragment von `setContentView`/`inflate` auf Compose um.
+ * Rein (Text rein, Text raus), schreibt nichts; Anwenden und Journal macht 52.9.
+ */
+interface ComposeEntryWirer {
+    fun wire(fileName: String, content: String, target: WireTarget): ComposeWireResult
 }
