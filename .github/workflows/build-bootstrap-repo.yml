@@ -347,6 +347,35 @@ jobs:
             fi
           fi
 
+      - name: Schrumpfwächter (full darf das bestehende Repo nicht stark verkleinern)
+        if: success() && inputs.publish
+        env:
+          TARGET_REPO: ${{ inputs.target_repo }}
+          APT_URL_IN: ${{ inputs.apt_url }}
+          FORCE_PUBLISH: ${{ inputs.force_publish }}
+        run: |
+          set -euo pipefail
+          url="${APT_URL_IN:-https://${TARGET_REPO%%/*}.github.io/${TARGET_REPO##*/}}"
+          count() { grep -c '^Package: ' "$1" 2>/dev/null || true; }
+          old_n=0; new_n=0; old_big=0; new_big=0
+          for a in aarch64 arm x86_64; do
+            if curl -fsSL "$url/dists/stable/main/binary-$a/Packages" -o "old-$a" 2>/dev/null; then
+              o=$(count "old-$a"); old_n=$((old_n + o))
+              n=$(count "github_repo_ready/dists/stable/main/binary-$a/Packages"); new_n=$((new_n + n))
+            fi
+          done
+          if curl -fsSL "$url/large-packages.txt" -o old-large.txt 2>/dev/null; then old_big=$(wc -l < old-large.txt); fi
+          [ -f github_repo_ready/large-packages.txt ] && new_big=$(wc -l < github_repo_ready/large-packages.txt)
+          echo "Bestehend: $old_n Paketeinträge, $old_big große Pakete · Neu: $new_n Paketeinträge, $new_big große Pakete"
+          if [ "$new_n" -lt $((old_n * 8 / 10)) ] || [ "$new_big" -lt "$old_big" ]; then
+            echo "::error title=Modus full würde das Repo verkleinern::Bestehend $old_n Pakete / $old_big große – neu $new_n / $new_big. Für einzelne Pakete oder Etappen den Modus add (oder auto) verwenden."
+            if [ "$FORCE_PUBLISH" != "true" ]; then
+              echo "Veröffentlichung verweigert (force_publish=false)." >&2
+              exit 1
+            fi
+            echo "Warnung: force_publish=true – Veröffentlichung trotz Verkleinerung." >&2
+          fi
+
       - name: APT-Repo auf gh-pages veröffentlichen
         if: success() && inputs.publish
         uses: ./.github/actions/publish-pages
