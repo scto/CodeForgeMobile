@@ -2,6 +2,7 @@ package com.codeforge.core.domain.repository
 
 import com.codeforge.core.domain.model.ApplyResult
 import com.codeforge.core.domain.model.ComposeScanResult
+import com.codeforge.core.domain.model.GitBranchInfo
 import com.codeforge.core.domain.model.PlannedChange
 import com.codeforge.core.domain.model.UndoConflictPolicy
 import com.codeforge.core.domain.model.UndoResult
@@ -97,6 +98,13 @@ interface X2cRepository {
     suspend fun analyzeProject(projectPath: String): X2cPlan
     suspend fun executeMigration(projectPath: String, options: X2cOptions): X2cReport
     suspend fun undoMigration(projectPath: String, journalPath: String): Boolean
+
+    /** Wie [undoMigration], aber mit Entscheidung bei Dateien, die der Benutzer danach geändert hat. */
+    suspend fun undoMigration(
+        projectPath: String,
+        journalPath: String,
+        onConflict: suspend (relativePath: String) -> UndoConflictPolicy
+    ): Result<UndoResult>
     fun cancelMigration()
 }
 
@@ -157,4 +165,16 @@ interface X2cChangeApplier {
         journalPath: String,
         onConflict: suspend (relativePath: String) -> UndoConflictPolicy = { UndoConflictPolicy.KEEP }
     ): Result<UndoResult>
+}
+
+/**
+ * Task 52.9: Git-Zweig `x2c/<Datum>` anlegen und das Ergebnis committen. Kein Push, keine Geheimnisse in der Nachricht.
+ * Die App verdrahtet hier ihre Git-Anbindung; [com.codeforge.libs.x2c.apply.ProcessGitBranchCommitter] nutzt das `git`-Programm.
+ */
+interface GitBranchCommitter {
+    /** Nur bei Git-Projekt mit sauberem Arbeitsverzeichnis; legt den Zweig an und wechselt dorthin. */
+    suspend fun prepare(projectPath: String): Result<GitBranchInfo>
+
+    /** Stellt genau die genannten Pfade (auch gelöschte) ein und committet; liefert den Commit-Hash. */
+    suspend fun commit(projectPath: String, relativePaths: List<String>, message: String): Result<String>
 }

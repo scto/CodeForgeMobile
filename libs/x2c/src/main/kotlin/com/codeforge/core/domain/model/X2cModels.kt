@@ -13,7 +13,9 @@ data class X2cOptions(
     val includeGitInBackup: Boolean = true,
     val createBackup: Boolean = true,
     val selectedLayouts: Set<String> = emptySet(),
-    val dontAskAgain: Boolean = false
+    val dontAskAgain: Boolean = false,
+    /** Task 52.9: bereits erzeugte Composables überschreiben (nur nach ausdrücklicher Bestätigung). */
+    val overwriteExisting: Boolean = false
 )
 
 enum class LayoutClassification {
@@ -261,3 +263,13 @@ data class UndoResult(
     val savedAsOrig: List<String> = emptyList(),
     val alreadyOriginal: List<String> = emptyList()
 )
+
+/** Task 52.9: Ergebnis der Prüfung, welche XML-Layouts nach der Umstellung entfernt werden dürfen. */
+data class XmlRemovalSelection(
+    /** Projektpfade (relativ) der Dateien, die entfernt werden dürfen (Basis und Varianten). */
+    val removablePaths: List<String>,
+    /** Layoutname -> Grund, warum es bleibt (erste gefundene Verwendung). */
+    val kept: Map<String, String>
+)
+
+data class GitBranchInfo(val branch: String, val previousBranch: String?)
