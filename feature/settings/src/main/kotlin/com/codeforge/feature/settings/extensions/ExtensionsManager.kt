@@ -210,10 +210,11 @@ class ExtensionsManager internal constructor(
             ?: findBinaryOnPath("npm")
             ?: throw IllegalStateException("npm binary not found in Termux. Please install nodejs via 'pkg install nodejs'.")
 
-        val process = ProcessBuilder(npmBin.absolutePath, "install", "--omit=dev")
+        val builder = ProcessBuilder(npmBin.absolutePath, "install", "--omit=dev")
             .directory(packageDir)
             .redirectErrorStream(true)
-            .start()
+        applyTermuxEnvironment(builder.environment())
+        val process = builder.start()
 
         val output = process.inputStream.bufferedReader().use { it.readText() }
         val exitCode = process.waitFor()
@@ -240,6 +241,22 @@ class ExtensionsManager internal constructor(
                     cachedFile.delete()
                 }
             }
+        }
+    }
+
+    /**
+     * npm ist ein Skript mit Shebang `#!/usr/bin/env node`; `env` sucht `node` im PATH des Prozesses.
+     * Der App-Prozess hat den Termux-bin-Ordner nicht im PATH, daher wird er hier vorangestellt.
+     */
+    internal fun applyTermuxEnvironment(env: MutableMap<String, String>) {
+        val prefix = termuxBinDir.parentFile
+        val currentPath = env["PATH"].orEmpty()
+        env["PATH"] = if (currentPath.isBlank()) termuxBinDir.absolutePath else "${termuxBinDir.absolutePath}:$currentPath"
+        if (prefix != null) {
+            env["PREFIX"] = prefix.absolutePath
+            val tmp = File(prefix, "tmp").apply { mkdirs() }
+            env["TMPDIR"] = tmp.absolutePath
+            if (env["HOME"].isNullOrBlank()) env["HOME"] = File(prefix.parentFile, "home").absolutePath
         }
     }
 
