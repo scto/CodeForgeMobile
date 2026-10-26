@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.FindInPage
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.OpenInNew
@@ -114,7 +115,9 @@ import com.codeforge.feature.editor.fileprovider.EditorFileProvider
 import com.codeforge.feature.editor.overlay.UpdateChipDialog
 import com.codeforge.feature.editor.ui.DocumentOutlineSheet
 import com.codeforge.feature.editor.ui.EditorSymbolBar
+import com.codeforge.feature.editor.ui.HoverSheet
 import com.codeforge.feature.editor.ui.ImageFilePreview
+import com.codeforge.feature.editor.ui.SignatureHelpBar
 import com.codeforge.feature.editor.ui.QuickFixSheet
 import com.codeforge.feature.editor.ui.ReferencesSheet
 import com.codeforge.feature.editor.ui.RenameDialog
@@ -183,6 +186,22 @@ fun EditorRoute(
         val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
         val word = controller?.getWordAtCursor() ?: ""
         viewModel.onEvent(EditorUiEvent.FindReferences(pos.first, pos.second, word))
+    }
+
+    fun cursorPos() = controller?.getCursorLineAndColumn() ?: (0 to 0)
+
+    // Signaturhilfe automatisch bei „(“ und „,“ anzeigen, bei „)“ ausblenden.
+    LaunchedEffect(activeContent, controller) {
+        val c = controller ?: return@LaunchedEffect
+        val text = activeContent ?: return@LaunchedEffect
+        delay(200)
+        val (line, col) = c.getCursorLineAndColumn() ?: return@LaunchedEffect
+        val typed = text.lineSequence().elementAtOrNull(line)?.getOrNull(col - 1)
+        when (typed) {
+            '(', ',' -> viewModel.onEvent(EditorUiEvent.RequestSignatureHelp(line, col))
+            ')' -> viewModel.onEvent(EditorUiEvent.DismissSignatureHelp)
+            else -> Unit
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -304,6 +323,16 @@ fun EditorRoute(
                 onOutline = { viewModel.onEvent(EditorUiEvent.ToggleOutline) },
                 onDefinition = ::triggerDefinition,
                 onReferences = ::triggerReferences,
+                onHover = { cursorPos().let { (l, c) -> viewModel.onEvent(EditorUiEvent.ShowHover(l, c)) } },
+                onTypeDefinition = { cursorPos().let { (l, c) -> viewModel.onEvent(EditorUiEvent.GoToTypeDefinition(l, c)) } },
+                onImplementation = {
+                    cursorPos().let { (l, c) ->
+                        viewModel.onEvent(
+                            EditorUiEvent.GoToImplementation(l, c, controller?.getWordAtCursor().orEmpty())
+                        )
+                    }
+                },
+                onSignatureHelp = { cursorPos().let { (l, c) -> viewModel.onEvent(EditorUiEvent.RequestSignatureHelp(l, c)) } },
                 onToggleLspSessions = { viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog) },
                 hasBreakpoints = uiState.activeBreakpoints.isNotEmpty(),
                 onBreakpoints = { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(true)) },
@@ -330,6 +359,7 @@ fun EditorRoute(
                         // nie attached und der alte detached -> Undo/Redo/Format tot.
                         key(active.path) {
                         Column(modifier = Modifier.fillMaxSize()) {
+                            uiState.signatureHelp?.let { SignatureHelpBar(help = it) }
                             SoraCodeEditor(
                                 modifier = Modifier.weight(1f).fillMaxWidth(),
                                 path = active.path,
@@ -413,6 +443,10 @@ fun EditorRoute(
             onSelectSymbol = { viewModel.onEvent(EditorUiEvent.SelectOutlineSymbol(it)) },
             onDismiss = { viewModel.onEvent(EditorUiEvent.ToggleOutline) }
         )
+    }
+
+    uiState.hoverText?.let { text ->
+        HoverSheet(text = text, onDismiss = { viewModel.onEvent(EditorUiEvent.DismissHover) })
     }
 
     if (uiState.isReferencesSheetVisible) {
@@ -607,6 +641,10 @@ private fun EditorToolbar(
     onOutline: () -> Unit,
     onDefinition: () -> Unit,
     onReferences: () -> Unit,
+    onHover: () -> Unit,
+    onTypeDefinition: () -> Unit,
+    onImplementation: () -> Unit,
+    onSignatureHelp: () -> Unit,
     onToggleLspSessions: () -> Unit,
     hasBreakpoints: Boolean,
     onBreakpoints: () -> Unit,
@@ -690,6 +728,42 @@ private fun EditorToolbar(
         if (allowReferences && !isImage) {
             IconButton(onClick = onReferences) {
                 Icon(Icons.Default.FindInPage, contentDescription = stringRes(R.string.lsp_references))
+            }
+        }
+
+        // Weitere Sprachserver-Aktionen: Dokumentation (Hover), Typ-Definition, Implementierungen, Parameter-Info
+        if (isLspConnected && !isImage) {
+            var lspMenuOpen by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { lspMenuOpen = true }) {
+                    Icon(Icons.Default.Info, contentDescription = stringRes(R.string.lsp_more_actions))
+                }
+                DropdownMenu(expanded = lspMenuOpen, onDismissRequest = { lspMenuOpen = false }) {
+                    if (capabilities == null || capabilities.hoverProvider) {
+                        DropdownMenuItem(
+                            text = { Text(stringRes(R.string.lsp_hover)) },
+                            onClick = { lspMenuOpen = false; onHover() }
+                        )
+                    }
+                    if (capabilities == null || capabilities.typeDefinitionProvider) {
+                        DropdownMenuItem(
+                            text = { Text(stringRes(R.string.lsp_type_definition)) },
+                            onClick = { lspMenuOpen = false; onTypeDefinition() }
+                        )
+                    }
+                    if (capabilities == null || capabilities.implementationProvider) {
+                        DropdownMenuItem(
+                            text = { Text(stringRes(R.string.lsp_implementation)) },
+                            onClick = { lspMenuOpen = false; onImplementation() }
+                        )
+                    }
+                    if (capabilities == null || capabilities.signatureHelpProvider) {
+                        DropdownMenuItem(
+                            text = { Text(stringRes(R.string.lsp_signature_help)) },
+                            onClick = { lspMenuOpen = false; onSignatureHelp() }
+                        )
+                    }
+                }
             }
         }
 

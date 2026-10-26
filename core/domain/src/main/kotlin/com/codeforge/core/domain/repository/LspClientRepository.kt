@@ -8,6 +8,7 @@ import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspSignatureHelp
 import com.codeforge.core.domain.model.LspPrepareRenameResult
 import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspServerCapabilities
@@ -133,6 +134,18 @@ interface LspClientRepository {
     suspend fun requestDocumentSymbols(path: String): Result<List<LspDocumentSymbol>>
 
     suspend fun requestDefinition(path: String, position: LspPosition): Result<List<LspLocation>>
+
+    /** `textDocument/typeDefinition` — Standard: nicht unterstützt (leere Liste). */
+    suspend fun requestTypeDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
+        Result.success(emptyList())
+
+    /** `textDocument/implementation` — Standard: nicht unterstützt (leere Liste). */
+    suspend fun requestImplementation(path: String, position: LspPosition): Result<List<LspLocation>> =
+        Result.success(emptyList())
+
+    /** `textDocument/signatureHelp` — Standard: nicht unterstützt (null). */
+    suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> =
+        Result.success(null)
 
     suspend fun requestReferences(
         path: String,

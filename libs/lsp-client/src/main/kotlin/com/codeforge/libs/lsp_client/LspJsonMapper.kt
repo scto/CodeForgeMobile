@@ -12,6 +12,8 @@ import com.codeforge.core.domain.model.LspFileOperation
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspSignatureHelp
+import com.codeforge.core.domain.model.LspSignature
 import com.codeforge.core.domain.model.LspPrepareRenameResult
 import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspServerCapabilities
@@ -109,6 +111,39 @@ internal fun parseHoverResult(result: JsonElement?): LspHoverInfo? {
     val contents = obj["contents"] ?: return null
     val range = parseRange(obj["range"])
     return LspHoverInfo(contents = extractHoverText(contents), range = range)
+}
+
+internal fun parseSignatureHelp(result: JsonElement?): LspSignatureHelp? {
+    val obj = result as? JsonObject ?: return null
+    val signatures = (obj["signatures"] as? JsonArray)?.mapNotNull { element ->
+        val sig = element as? JsonObject ?: return@mapNotNull null
+        val label = (sig["label"] as? JsonPrimitive)?.contentOrNull ?: return@mapNotNull null
+        val params = (sig["parameters"] as? JsonArray)?.map { p ->
+            val pl = (p as? JsonObject)?.get("label")
+            when (pl) {
+                is JsonPrimitive -> pl.contentOrNull.orEmpty()
+                // [start, end] Offsets in die Signatur-Label
+                is JsonArray -> {
+                    val start = (pl.getOrNull(0) as? JsonPrimitive)?.intOrNull
+                    val end = (pl.getOrNull(1) as? JsonPrimitive)?.intOrNull
+                    if (start != null && end != null && start in 0..end && end <= label.length) label.substring(start, end) else ""
+                }
+                else -> ""
+            }
+        }.orEmpty()
+        LspSignature(
+            label = label,
+            documentation = sig["documentation"]?.let { extractHoverText(it) }.orEmpty(),
+            parameters = params,
+            activeParameter = (sig["activeParameter"] as? JsonPrimitive)?.intOrNull
+        )
+    }.orEmpty()
+    if (signatures.isEmpty()) return null
+    return LspSignatureHelp(
+        signatures = signatures,
+        activeSignature = ((obj["activeSignature"] as? JsonPrimitive)?.intOrNull ?: 0).coerceIn(0, signatures.lastIndex),
+        activeParameter = (obj["activeParameter"] as? JsonPrimitive)?.intOrNull ?: 0
+    )
 }
 
 private fun extractHoverText(element: JsonElement): String = when (element) {
@@ -365,7 +400,10 @@ internal fun parseServerCapabilities(result: JsonElement?): LspServerCapabilitie
         formattingProvider = isEnabled("documentFormattingProvider"),
         rangeFormattingProvider = isEnabled("documentRangeFormattingProvider"),
         hoverProvider = isEnabled("hoverProvider"),
-        completionProvider = capabilities["completionProvider"] is JsonObject
+        completionProvider = capabilities["completionProvider"] is JsonObject,
+        typeDefinitionProvider = isEnabled("typeDefinitionProvider"),
+        implementationProvider = isEnabled("implementationProvider"),
+        signatureHelpProvider = capabilities["signatureHelpProvider"] is JsonObject
     )
 }
 

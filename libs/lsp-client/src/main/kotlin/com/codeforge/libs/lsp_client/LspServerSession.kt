@@ -8,6 +8,7 @@ import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspSignatureHelp
 import com.codeforge.core.domain.model.LspPrepareRenameResult
 import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspServerCapabilities
@@ -382,6 +383,40 @@ class LspServerSession(
             }
             val response = activeConnection.sendRequest("textDocument/definition", params)
             parseLocations(response["result"])
+        }
+
+    suspend fun requestTypeDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
+        requestLocations("textDocument/typeDefinition", path, position)
+
+    suspend fun requestImplementation(path: String, position: LspPosition): Result<List<LspLocation>> =
+        requestLocations("textDocument/implementation", path, position)
+
+    private suspend fun requestLocations(method: String, path: String, position: LspPosition): Result<List<LspLocation>> =
+        runCatching {
+            touch()
+            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+            val response = activeConnection.sendRequest(
+                method,
+                buildJsonObject {
+                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
+                    put("position", positionToJson(position))
+                }
+            )
+            parseLocations(response["result"])
+        }
+
+    suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> =
+        runCatching {
+            touch()
+            val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+            val response = activeConnection.sendRequest(
+                "textDocument/signatureHelp",
+                buildJsonObject {
+                    put("textDocument", buildJsonObject { put("uri", "file://$path") })
+                    put("position", positionToJson(position))
+                }
+            )
+            parseSignatureHelp(response["result"])
         }
 
     suspend fun requestReferences(

@@ -1871,5 +1871,15 @@
     <string name="settings_keyboard_suggestions_desc">Vorschläge und Autokorrektur der Bildschirmtastatur zulassen.</string>
     <string name="settings_disable_soft_keyboard">Virtuelle Tastatur deaktivieren</string>
     <string name="settings_disable_soft_keyboard_desc">Bildschirmtastatur ausblenden, wenn eine Hardware-Tastatur verbunden ist.</string>
+    <string name="lsp_hover">Dokumentation</string>
+    <string name="lsp_hover_none">Keine Dokumentation verfügbar</string>
+    <string name="lsp_hover_title">Dokumentation</string>
+    <string name="lsp_type_definition">Gehe zu Typ-Definition</string>
+    <string name="lsp_type_definition_not_found">Keine Typ-Definition gefunden</string>
+    <string name="lsp_implementation">Gehe zu Implementierungen</string>
+    <string name="lsp_implementation_not_found">Keine Implementierungen gefunden</string>
+    <string name="lsp_implementations_title">Implementierungen</string>
+    <string name="lsp_signature_help">Parameter-Info</string>
+    <string name="lsp_more_actions">Weitere Sprachserver-Aktionen</string>
 </resources>
 

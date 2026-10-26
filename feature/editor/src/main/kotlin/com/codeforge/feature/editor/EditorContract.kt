@@ -72,6 +72,10 @@ data class EditorUiState(
     val isReferencesSheetVisible: Boolean = false,
     val referencesList: List<LspLocation> = emptyList(),
     val referencesSymbol: String = "",
+    /** Hover-Dokumentation des Symbols unter dem Cursor (null = Sheet geschlossen). */
+    val hoverText: String? = null,
+    /** Aktive Signaturhilfe (Parameter-Hinweis) oder null. */
+    val signatureHelp: com.codeforge.core.domain.model.LspSignatureHelp? = null,
     val runningLspSessions: List<com.codeforge.core.domain.model.LspSessionInfo> = emptyList(),
     val isLspSessionsDialogVisible: Boolean = false,
 
@@ -189,6 +193,12 @@ sealed interface EditorUiEvent {
     data class GoToDefinition(val line: Int, val col: Int) : EditorUiEvent
     data class FindReferences(val line: Int, val col: Int, val symbolName: String) : EditorUiEvent
     data object DismissReferences : EditorUiEvent
+    data class ShowHover(val line: Int, val col: Int) : EditorUiEvent
+    data object DismissHover : EditorUiEvent
+    data class GoToTypeDefinition(val line: Int, val col: Int) : EditorUiEvent
+    data class GoToImplementation(val line: Int, val col: Int, val symbolName: String) : EditorUiEvent
+    data class RequestSignatureHelp(val line: Int, val col: Int) : EditorUiEvent
+    data object DismissSignatureHelp : EditorUiEvent
     data class SelectLocation(val location: LspLocation) : EditorUiEvent
     data class RunTestTarget(val target: com.codeforge.feature.editor.overlay.TestTarget) : EditorUiEvent
     data object ToggleLspSessionsDialog : EditorUiEvent

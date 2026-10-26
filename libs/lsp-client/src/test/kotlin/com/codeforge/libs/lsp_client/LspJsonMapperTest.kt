@@ -237,4 +237,36 @@ class LspJsonMapperTest {
         assertTrue(caps.referencesProvider)
         assertTrue(caps.executeCommandProvider)
     }
+
+    @Test
+    fun `parseSignatureHelp liest Signaturen, Parameter-Offsets und aktiven Parameter`() {
+        val json = Json.parseToJsonElement(
+            """{"signatures":[{"label":"foo(a: Int, b: String)","documentation":{"kind":"markdown","value":"Doku"},
+              "parameters":[{"label":[4,10]},{"label":"b: String"}]}],"activeSignature":0,"activeParameter":1}"""
+        )
+        val help = parseSignatureHelp(json)
+        assertNotNull(help)
+        assertEquals(1, help!!.activeParameter)
+        assertEquals("foo(a: Int, b: String)", help.signatures.single().label)
+        assertEquals(listOf("a: Int", "b: String"), help.signatures.single().parameters)
+        assertEquals("Doku", help.signatures.single().documentation)
+    }
+
+    @Test
+    fun `parseSignatureHelp liefert null ohne Signaturen`() {
+        assertNull(parseSignatureHelp(Json.parseToJsonElement("""{"signatures":[]}""")))
+        assertNull(parseSignatureHelp(Json.parseToJsonElement("null")))
+    }
+
+    @Test
+    fun `parseServerCapabilities erkennt typeDefinition, implementation und signatureHelp`() {
+        val caps = parseServerCapabilities(
+            Json.parseToJsonElement(
+                """{"capabilities":{"typeDefinitionProvider":true,"implementationProvider":{},"signatureHelpProvider":{"triggerCharacters":["("]}}}"""
+            )
+        )
+        assertTrue(caps.typeDefinitionProvider)
+        assertTrue(caps.implementationProvider)
+        assertTrue(caps.signatureHelpProvider)
+    }
 }

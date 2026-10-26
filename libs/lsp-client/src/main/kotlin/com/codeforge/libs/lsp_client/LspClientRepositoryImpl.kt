@@ -8,6 +8,7 @@ import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspSignatureHelp
 import com.codeforge.core.domain.model.LspPrepareRenameResult
 import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspServerCapabilities
@@ -250,6 +251,24 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
         return session.requestDefinition(path, position)
+    }
+
+    override suspend fun requestTypeDefinition(path: String, position: LspPosition): Result<List<LspLocation>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestTypeDefinition(path, position)
+    }
+
+    override suspend fun requestImplementation(path: String, position: LspPosition): Result<List<LspLocation>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestImplementation(path, position)
+    }
+
+    override suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestSignatureHelp(path, position)
     }
 
     override suspend fun requestReferences(

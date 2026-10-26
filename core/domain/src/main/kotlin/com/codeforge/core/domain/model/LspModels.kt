@@ -22,6 +22,20 @@ data class LspCompletionItem(
 
 data class LspHoverInfo(val contents: String, val range: LspRange? = null)
 
+/** Eine Signatur aus `textDocument/signatureHelp`; [parameters] sind die Parameter-Labels in Reihenfolge. */
+data class LspSignature(
+    val label: String,
+    val documentation: String = "",
+    val parameters: List<String> = emptyList(),
+    val activeParameter: Int? = null
+)
+
+data class LspSignatureHelp(
+    val signatures: List<LspSignature>,
+    val activeSignature: Int = 0,
+    val activeParameter: Int = 0
+)
+
 enum class LspServerState { STOPPED, STARTING, RUNNING, FAILED, ERROR }
 
 enum class LspSymbolKind(val value: Int) {
@@ -155,5 +169,8 @@ data class LspServerCapabilities(
     val formattingProvider: Boolean = false,
     val rangeFormattingProvider: Boolean = false,
     val hoverProvider: Boolean = false,
-    val completionProvider: Boolean = false
+    val completionProvider: Boolean = false,
+    val typeDefinitionProvider: Boolean = false,
+    val implementationProvider: Boolean = false,
+    val signatureHelpProvider: Boolean = false
 )

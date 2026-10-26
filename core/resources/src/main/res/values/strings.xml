@@ -1871,5 +1871,15 @@
     <string name="settings_keyboard_suggestions_desc">Allow suggestions and autocorrect of the on-screen keyboard.</string>
     <string name="settings_disable_soft_keyboard">Disable on-screen keyboard</string>
     <string name="settings_disable_soft_keyboard_desc">Hide the on-screen keyboard while a hardware keyboard is connected.</string>
+    <string name="lsp_hover">Documentation</string>
+    <string name="lsp_hover_none">No documentation available</string>
+    <string name="lsp_hover_title">Documentation</string>
+    <string name="lsp_type_definition">Go to type definition</string>
+    <string name="lsp_type_definition_not_found">No type definition found</string>
+    <string name="lsp_implementation">Go to implementations</string>
+    <string name="lsp_implementation_not_found">No implementations found</string>
+    <string name="lsp_implementations_title">Implementations</string>
+    <string name="lsp_signature_help">Parameter info</string>
+    <string name="lsp_more_actions">More language server actions</string>
 </resources>
 

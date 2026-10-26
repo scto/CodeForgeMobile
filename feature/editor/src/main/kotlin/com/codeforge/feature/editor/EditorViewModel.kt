@@ -597,6 +597,16 @@ class EditorViewModel @Inject constructor(
             is EditorUiEvent.GoToDefinition -> goToDefinition(event.line, event.col)
             is EditorUiEvent.FindReferences -> findReferences(event.line, event.col, event.symbolName)
             EditorUiEvent.DismissReferences -> _uiState.update { it.copy(isReferencesSheetVisible = false) }
+            is EditorUiEvent.ShowHover -> showHover(event.line, event.col)
+            EditorUiEvent.DismissHover -> _uiState.update { it.copy(hoverText = null) }
+            is EditorUiEvent.GoToTypeDefinition -> goToLocations(event.line, event.col, null, R.string.lsp_type_definition_not_found) { path, pos ->
+                lspClient.requestTypeDefinition(path, pos)
+            }
+            is EditorUiEvent.GoToImplementation -> goToLocations(event.line, event.col, event.symbolName, R.string.lsp_implementation_not_found) { path, pos ->
+                lspClient.requestImplementation(path, pos)
+            }
+            is EditorUiEvent.RequestSignatureHelp -> requestSignatureHelp(event.line, event.col)
+            EditorUiEvent.DismissSignatureHelp -> _uiState.update { it.copy(signatureHelp = null) }
             is EditorUiEvent.SelectLocation -> {
                 _uiState.update { it.copy(isReferencesSheetVisible = false) }
                 val path = event.location.uri.removePrefix("file://")
@@ -1261,6 +1271,65 @@ class EditorViewModel @Inject constructor(
             .onFailure {
                 _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_definition_not_found)))
             }
+    }
+
+    private fun showHover(line: Int, col: Int) = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        lspClient.requestHover(active.path, LspPosition(line, col))
+            .onSuccess { info ->
+                val text = info?.contents?.trim().orEmpty()
+                if (text.isEmpty()) {
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_hover_none)))
+                } else {
+                    _uiState.update { it.copy(hoverText = text) }
+                }
+            }
+            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_hover_none))) }
+    }
+
+    /**
+     * Gemeinsamer Sprung für Typ-Definition und Implementierungen: ein Treffer öffnet direkt,
+     * mehrere erscheinen in der Verwendungen-Liste (mit [symbolName] als Titel).
+     */
+    private fun goToLocations(
+        line: Int,
+        col: Int,
+        symbolName: String?,
+        notFoundRes: Int,
+        request: suspend (String, LspPosition) -> Result<List<com.codeforge.core.domain.model.LspLocation>>
+    ) = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        request(active.path, LspPosition(line, col))
+            .onSuccess { locations ->
+                when {
+                    locations.isEmpty() -> _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(notFoundRes)))
+                    locations.size == 1 || symbolName == null -> {
+                        val first = locations.first()
+                        openFileRequestBridge.requestOpenAt(
+                            first.uri.removePrefix("file://"),
+                            first.range.start.line + 1,
+                            first.range.start.character + 1
+                        )
+                    }
+                    else -> _uiState.update {
+                        it.copy(referencesList = locations, referencesSymbol = symbolName, isReferencesSheetVisible = true)
+                    }
+                }
+            }
+            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(notFoundRes))) }
+    }
+
+    private var signatureJob: kotlinx.coroutines.Job? = null
+
+    private fun requestSignatureHelp(line: Int, col: Int) {
+        val active = _uiState.value.activeFile ?: return
+        if (lspClient.capabilitiesFor(active.path)?.signatureHelpProvider == false) return
+        signatureJob?.cancel()
+        signatureJob = viewModelScope.launch {
+            lspClient.requestSignatureHelp(active.path, LspPosition(line, col))
+                .onSuccess { help -> _uiState.update { it.copy(signatureHelp = help) } }
+                .onFailure { _uiState.update { s -> s.copy(signatureHelp = null) } }
+        }
     }
 
     private fun findReferences(line: Int, col: Int, symbolName: String) = viewModelScope.launch {
