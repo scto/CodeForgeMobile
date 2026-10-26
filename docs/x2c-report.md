@@ -234,3 +234,15 @@
 ### Nicht getestet
 - [ ] Plugin-Wirkung per `javap` (ausstehend laut Spike-Befund).
 - [ ] End-to-End-Ausführung der Konvertierung (folgt in 52.3 bis 52.10).
+
+## 52.6 Generator: Layout-XML → `@Composable` (Stand 2026-10-26)
+
+Klassen (`:libs:x2c`, Paket `com.codeforge.libs.x2c.generator`): `LayoutToComposeGeneratorImpl` (Einstieg, `Result`), `ComposeSession` (eine Generierung), `LayoutXmlParser` (SAX, ohne DTD/Entities, Zeilennummern), `LayoutValues` (dp/sp/Farben/Strings), `LayoutNames` (Benennung, Kollisionen). Zusatzwissen über `GeneratorContext` (R-Paket, Quellpfad, bekannte Layouts, per Code gesteuerte Sichtbarkeit).
+
+**Abbildung:** LinearLayout → Column/Row (gravity, weight), FrameLayout/RelativeLayout → Box (RelativeLayout-Regeln teils als `TODO`), ConstraintLayout → `constrainAs` (Margins an den Links, Bias, `0dp` → `fillToConstraints`, Guideline, Barrier, Ketten, Seitenverhältnis), ScrollView → `verticalScroll`/`horizontalScroll`, CardView/MaterialCardView → Card, TextView/Button/EditText/TextInputLayout/ImageView/ImageButton/CheckBox/Switch/RadioGroup/ProgressBar/Slider/SeekBar, View → Divider/Spacer/Box, RecyclerView → LazyColumn/LazyRow/LazyVerticalGrid (Adapter-Logik als `TODO`), `<include>` → Aufruf, eigene Views → `AndroidView`.
+
+**Querschnitt:** Zustand wird hochgezogen (`xValue`/`onXValueChange`, `onXClick`, `xChecked` usw.), aber nur für Views, die der Code anfasst (`touchedViewIds` aus 52.5); `visibility=gone` → weggelassen, per Code gesteuert → `Boolean`-Parameter; `invisible` → `alpha(0f)`; `contentDescription`/`importantForAccessibility` werden übernommen; Ressourcen über `stringResource`/`colorResource`/`dimensionResource`/`painterResource`; harte Texte bleiben im Code mit Hinweis. Nicht Abbildbares wird nie still verworfen: `// TODO(x2c): … (Quelle: datei:zeile)` und `todoCount`. Jede Datei bekommt KDoc mit `@param` und eine `@Preview`.
+
+**Getestet:** 42 Tests (`LayoutToComposeGeneratorTest`: je Abbildungsregel, Querschnittsregeln, XXE-Ablehnung, Determinismus, drei vollständige Beispiele mit Klammerprüfung); zusammen mit den übrigen `:libs:x2c`-Tests 73 grün (kotlinc 2.2.10 + JUnit, ohne Gradle).
+**Nicht getestet:** Kompilierung des *erzeugten* Codes (braucht Compose/ConstraintLayout im Klassenpfad), Gradle-Build des Moduls, Verhalten auf dem Gerät. Die erzeugten Dateien wurden von Hand gelesen, nicht übersetzt.
+**Bekannte Grenzen:** `style=`-Auflösung, `tint`, `shapeAppearance`, Divider-Attribute, RelativeLayout-Beziehungen und `layout_constraintCircle` werden als `TODO`/Hinweis gemeldet statt umgesetzt.

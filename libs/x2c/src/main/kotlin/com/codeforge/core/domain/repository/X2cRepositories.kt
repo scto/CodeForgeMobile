@@ -1,6 +1,7 @@
 package com.codeforge.core.domain.repository
 
 import com.codeforge.core.domain.model.ComposeScanResult
+import com.codeforge.core.domain.model.GeneratorContext
 import com.codeforge.core.domain.model.LayoutUsage
 import com.codeforge.core.domain.model.X2cOptions
 import com.codeforge.core.domain.model.X2cPlan
@@ -22,7 +23,8 @@ interface LayoutToComposeGenerator {
         xmlContent: String,
         layoutName: String,
         targetPackage: String,
-        touchedViewIds: List<String> = emptyList()
+        touchedViewIds: List<String> = emptyList(),
+        context: GeneratorContext = GeneratorContext()
     ): Result<GeneratedComposeFile>
 }
 

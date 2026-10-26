@@ -134,3 +134,20 @@ data class X2cReport(
     val buildOutput: String? = null,
     val markdownSummary: String = ""
 )
+
+/**
+ * Task 52.6: Zusatzwissen für den Generator (alles optional, damit Einzel-Aufrufe wie 41.11 funktionieren).
+ *
+ * @property rPackage Paket der `R`-Klasse des Zielmoduls (namespace); ohne Angabe fehlt der `R`-Import und es gibt einen Hinweis.
+ * @property sourcePath Pfad des XML relativ zum Modul, nur für KDoc und `TODO(x2c)`-Quellen.
+ * @property sourceRoot Quellverzeichnis für den Zielpfad (`src/main/kotlin` oder `src/main/java`).
+ * @property knownLayouts Layoutname -> Name der erzeugten Composable (für `<include>` und `tools:listitem`).
+ * @property visibilityIds IDs, auf die der Code `setVisibility` aufruft (werden zu `visible`-Parametern).
+ */
+data class GeneratorContext(
+    val rPackage: String? = null,
+    val sourcePath: String? = null,
+    val sourceRoot: String = "src/main/kotlin",
+    val knownLayouts: Map<String, String> = emptyMap(),
+    val visibilityIds: Set<String> = emptySet()
+)
