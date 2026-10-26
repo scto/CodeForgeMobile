@@ -75,6 +75,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -216,7 +218,18 @@ fun EditorRoute(
 
             if (uiState.openFiles.isNotEmpty()) {
                 val safeTabIndex = uiState.activeFileIndex.coerceIn(0, uiState.openFiles.lastIndex)
-                ScrollableTabRow(selectedTabIndex = safeTabIndex) {
+                // Beim Öffnen einer neuen Datei ist tabPositions im selben Frame noch veraltet
+                // (Länge n, Index n) -> Standard-Indikator crasht. Eigener Indikator mit Bounds-Check.
+                ScrollableTabRow(
+                    selectedTabIndex = safeTabIndex,
+                    indicator = { tabPositions ->
+                        tabPositions.getOrNull(safeTabIndex)?.let { position ->
+                            TabRowDefaults.SecondaryIndicator(
+                                Modifier.tabIndicatorOffset(position)
+                            )
+                        }
+                    }
+                ) {
                     uiState.openFiles.forEachIndexed { index, file ->
                         Tab(
                             selected = index == safeTabIndex,
