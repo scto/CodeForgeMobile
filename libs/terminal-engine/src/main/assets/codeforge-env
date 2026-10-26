@@ -1173,7 +1173,20 @@ do_doctor() {
   for t in bash curl tar unzip java jq; do command -v "$t" >/dev/null 2>&1 && say "ok   $t" || { say "FEHLT $t"; rc=1; }; done
   [ -d "$SDK_ROOT" ] && say "ok   SDK_ROOT=$SDK_ROOT" || { say "FEHLT SDK_ROOT"; rc=1; }
   [ -f "$ENV_FILE" ] && say "ok   $ENV_FILE" || { say "FEHLT $ENV_FILE (codeforge-env setup)"; rc=1; }
-  case "$MANIFEST_URL" in *@*) say "WARN  CODEFORGE_SDK_REPO ist nicht konfiguriert ($CONF)"; rc=1 ;; esac
+  # Das eigene Manifest ($CODEFORGE_SDK_REPO/manifest.txt) ist optional; SDK/NDK/CMake kommen aus dem Mirror.
+  case "$MANIFEST_URL" in
+    *@*) say "info kein eigenes Manifest konfiguriert (optional, siehe $CONF)" ;;
+    *) say "ok   Manifest: $MANIFEST_URL" ;;
+  esac
+  if [ -n "$TOOLS_REPO" ]; then
+    if curl -fsS --max-time 15 -o /dev/null "https://api.github.com/repos/$TOOLS_REPO/releases?per_page=1" 2>/dev/null; then
+      say "ok   Mirror $TOOLS_REPO erreichbar"
+    else
+      say "WARN  Mirror $TOOLS_REPO nicht erreichbar (Netz? GITHUB_TOKEN bei Rate-Limit setzen)"; rc=1
+    fi
+  else
+    say "info Mirror abgeschaltet (TOOLS_REPO leer): Upstream-Repos HomuHomu833/* werden verwendet"
+  fi
   exit $rc
 }
 
