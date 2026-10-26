@@ -27,13 +27,15 @@ internal data class CompilerRuntimeFileEntry(val name: String, val sha256: Strin
 
 internal data class CompilerRuntimeManifest(val bom: String, val kotlin: String, val files: List<CompilerRuntimeFileEntry>) {
     companion object {
-        private val BOM_REGEX = Regex(""""bom"\s*:\s*"([^"]+)"""")
-        private val KOTLIN_REGEX = Regex(""""kotlin"\s*:\s*"([^"]+)"""")
-        private val FILES_BLOCK_REGEX = Regex(""""files"\s*:\s*\[([\s\S]*?)]""")
-        private val OBJECT_REGEX = Regex("""\{([^{}]*)}""")
-        private val NAME_REGEX = Regex(""""name"\s*:\s*"([^"]+)"""")
-        private val SHA_REGEX = Regex(""""sha256"\s*:\s*"([0-9a-fA-F]{64})"""")
-        private val SIZE_REGEX = Regex(""""size"\s*:\s*(\d+)""")
+        // lazy: ein Regex-Syntaxfehler (ICU/Android) soll nicht die ganze Klasse unbenutzbar machen
+        //  (ExceptionInInitializerError -> später nur noch der Klassenname als Meldung).
+        private val BOM_REGEX by lazy { Regex(""""bom"\s*:\s*"([^"]+)"""") }
+        private val KOTLIN_REGEX by lazy { Regex(""""kotlin"\s*:\s*"([^"]+)"""") }
+        private val FILES_BLOCK_REGEX by lazy { Regex(""""files"\s*:\s*\[([\s\S]*?)\]""") }
+        private val OBJECT_REGEX by lazy { Regex("""\{([^{}]*)\}""") }
+        private val NAME_REGEX by lazy { Regex(""""name"\s*:\s*"([^"]+)"""") }
+        private val SHA_REGEX by lazy { Regex(""""sha256"\s*:\s*"([0-9a-fA-F]{64})"""") }
+        private val SIZE_REGEX by lazy { Regex(""""size"\s*:\s*(\d+)""") }
 
         fun parse(json: String): CompilerRuntimeManifest {
             val bom = BOM_REGEX.find(json)?.groupValues?.get(1)?.trim()
