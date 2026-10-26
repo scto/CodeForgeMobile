@@ -257,6 +257,15 @@ fun X2cDialog(
                     onCheckedChange = { onIntent(X2cIntent.SetRunBuildCheck(it)) }
                 )
 
+                // Schalter 5b: vorher auch bauen (nur sinnvoll mit Build-Prüfung)
+                X2cSwitchRow(
+                    title = stringResource(R.string.x2c_option_baseline),
+                    description = stringResource(R.string.x2c_option_baseline_desc),
+                    checked = state.buildBaselineFirst,
+                    enabled = state.runBuildCheck,
+                    onCheckedChange = { onIntent(X2cIntent.SetBuildBaselineFirst(it)) }
+                )
+
                 // Schalter 6: Git-Zweig
                 X2cSwitchRow(
                     title = stringResource(R.string.x2c_option_git_branch),

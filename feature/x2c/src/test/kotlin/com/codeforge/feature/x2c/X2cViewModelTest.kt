@@ -6,25 +6,23 @@ import com.codeforge.core.datastore.proto.AppSettings
 import com.codeforge.core.domain.model.ComposeScanResult
 import com.codeforge.core.domain.model.LayoutClassification
 import com.codeforge.core.domain.model.LayoutPlanEntry
-import com.codeforge.core.domain.model.X2cFileResult
-import com.codeforge.core.domain.model.X2cFileStatus
-import com.codeforge.core.domain.model.X2cOptions
+import com.codeforge.core.domain.model.UndoConflictPolicy
+import com.codeforge.core.domain.model.X2cBuildStepResult
+import com.codeforge.core.domain.model.X2cBuildStepStatus
 import com.codeforge.core.domain.model.X2cPlan
 import com.codeforge.core.domain.model.X2cProgress
-import com.codeforge.core.domain.model.X2cReport
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.UiText
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import com.codeforge.core.domain.repository.ComposeMigrationScanner
-import com.codeforge.core.domain.repository.X2cRepository
-import com.codeforge.core.navigation.JumpTarget
-import com.codeforge.core.navigation.OpenFileRequestBridge
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -32,6 +30,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -46,6 +45,8 @@ class X2cViewModelTest {
     private lateinit var fakeDataStore: FakeDataStore
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var fakeBridge: FakeOpenFileRequestBridge
+    private lateinit var fakeChecker: FakeBuildChecker
+    private lateinit var fakeNotifier: FakeRunNotifier
     private lateinit var viewModel: X2cViewModel
 
     private class FakeDataStore : DataStore<AppSettings> {
@@ -114,55 +115,6 @@ class X2cViewModelTest {
         override suspend fun createPlan(projectPath: String, preselectedLayout: String?): X2cPlan = plan
     }
 
-    private class FakeX2cRepository : X2cRepository {
-        private val _progress = MutableStateFlow<X2cProgress>(X2cProgress.Idle)
-        override val progress: StateFlow<X2cProgress> = _progress.asStateFlow()
-
-        var reportToReturn = X2cReport(
-            projectPath = "/project",
-            timestampEpochMillis = 123456789L,
-            generatedCount = 2,
-            generatedWithNotesCount = 1,
-            skippedCount = 1,
-            failedCount = 0,
-            totalTodos = 1,
-            stage2WiredCount = 0,
-            stage2SkippedCount = 0,
-            themeGenerated = true,
-            removedXmlCount = 0,
-            backupPath = "/project/Backup/backup.zip",
-            journalPath = "/project/Backup/journal.json",
-            fileResults = listOf(
-                X2cFileResult("res/layout/activity_main.xml", "MainScreen.kt", X2cFileStatus.GENERATED),
-                X2cFileResult("res/layout/item_user.xml", "UserItem.kt", X2cFileStatus.GENERATED_WITH_NOTES, todoCount = 1)
-            )
-        )
-
-        override suspend fun analyzeProject(projectPath: String): X2cPlan = error("Not used in fake")
-
-        override suspend fun executeMigration(projectPath: String, options: X2cOptions): X2cReport = reportToReturn
-
-        override suspend fun undoMigration(projectPath: String, journalPath: String): Boolean = true
-
-        override fun cancelMigration() {}
-    }
-
-    private class FakeOpenFileRequestBridge : OpenFileRequestBridge {
-        var lastOpenedPath: String? = null
-        private val _openRequests = MutableSharedFlow<String>()
-        override val openRequests: SharedFlow<String> = _openRequests
-        private val _jumpRequests = MutableSharedFlow<JumpTarget>()
-        override val jumpRequests: SharedFlow<JumpTarget> = _jumpRequests
-
-        override suspend fun requestOpen(path: String) {
-            lastOpenedPath = path
-        }
-
-        override suspend fun requestOpenAt(path: String, line: Int, column: Int, length: Int) {
-            lastOpenedPath = path
-        }
-    }
-
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -171,7 +123,9 @@ class X2cViewModelTest {
         fakeDataStore = FakeDataStore()
         settingsRepository = SettingsRepository(fakeDataStore)
         fakeBridge = FakeOpenFileRequestBridge()
-        viewModel = X2cViewModel(fakeScanner, fakeRepository, settingsRepository, fakeBridge)
+        fakeChecker = FakeBuildChecker()
+        fakeNotifier = FakeRunNotifier()
+        viewModel = X2cViewModel(fakeScanner, fakeRepository, settingsRepository, fakeBridge, fakeChecker, fakeNotifier)
     }
 
     @After
@@ -294,5 +248,267 @@ class X2cViewModelTest {
         advanceUntilIdle()
 
         assertEquals("app/src/main/res/layout/activity_main.xml", fakeBridge.lastOpenedPath)
+    }
+
+    // --- Task 52.11 ---
+
+    private fun kotlinx.coroutines.test.TestScope.collectEffects(): MutableList<X2cEffect> {
+        val effects = mutableListOf<X2cEffect>()
+        // Sofort abonnieren (Unconfined): `effects` ist ein SharedFlow ohne Puffer, Emissionen ohne Abonnent gingen verloren.
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effects.collect { effects += it } }
+        return effects
+    }
+
+    private fun kotlinx.coroutines.test.TestScope.scanAndStart() {
+        viewModel.handleIntent(X2cIntent.ScanProject("/project"))
+        advanceUntilIdle()
+        viewModel.handleIntent(X2cIntent.StartMigration)
+    }
+
+    @Test
+    fun `startMigration runs, reports and keeps the notifier in sync`() = runTest {
+        viewModel.handleIntent(X2cIntent.ScanProject("/project"))
+        advanceUntilIdle()
+        viewModel.handleIntent(X2cIntent.SetBuildBaselineFirst(true))
+        viewModel.handleIntent(X2cIntent.StartMigration)
+        assertTrue(viewModel.uiState.value.isConverting)
+        assertFalse(viewModel.uiState.value.showDialog)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isConverting)
+        assertTrue(state.showResultScreen)
+        assertNotNull(state.report)
+        assertEquals(1, fakeNotifier.startedCount)
+        assertEquals(1, fakeNotifier.finishedCount)
+        assertTrue("baseline option is passed on", fakeRepository.lastOptions!!.buildBaselineFirst)
+    }
+
+    @Test
+    fun `second start while running is ignored`() = runTest {
+        fakeRepository.gate = CompletableDeferred()
+        scanAndStart()
+        advanceUntilIdle()
+        viewModel.handleIntent(X2cIntent.StartMigration)
+        advanceUntilIdle()
+        assertEquals(1, fakeNotifier.startedCount)
+        fakeRepository.gate!!.complete(Unit)
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `progress drives phase tracker and notification`() = runTest {
+        fakeRepository.gate = CompletableDeferred()
+        scanAndStart()
+        advanceUntilIdle()
+
+        fakeRepository.emit(X2cProgress.GeneratingComposables(current = 1, total = 2, currentLayout = "activity_main"))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(X2cPhase.LAYOUTS, state.phaseTracker.active)
+        assertEquals(X2cPhase.LAYOUTS, fakeNotifier.lastPhase)
+        assertNotNull(fakeNotifier.lastPercent)
+
+        fakeRepository.gate!!.complete(Unit)
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `cancel informs repository, waits for rollback and then ends the run`() = runTest {
+        fakeRepository.gate = CompletableDeferred()
+        val effects = collectEffects()
+        scanAndStart()
+        advanceUntilIdle()
+
+        viewModel.handleIntent(X2cIntent.CancelMigration)
+        assertEquals(1, fakeRepository.cancelCalls)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isConverting)
+        assertFalse(state.showResultScreen)
+        assertNull(state.report)
+        assertEquals(1, fakeNotifier.finishedCount)
+        assertTrue(effects.contains(X2cEffect.ShowMessage(UiText.of(R.string.x2c_msg_cancelled))))
+    }
+
+    @Test
+    fun `cancel from the notification behaves like cancel in the screen`() = runTest {
+        fakeRepository.gate = CompletableDeferred()
+        scanAndStart()
+        advanceUntilIdle()
+
+        fakeNotifier.onCancel!!.invoke()
+        advanceUntilIdle()
+
+        assertEquals(1, fakeRepository.cancelCalls)
+        assertFalse(viewModel.uiState.value.isConverting)
+    }
+
+    @Test
+    fun `cancel without a run does nothing`() = runTest {
+        viewModel.handleIntent(X2cIntent.CancelMigration)
+        advanceUntilIdle()
+        assertEquals(0, fakeRepository.cancelCalls)
+    }
+
+    @Test
+    fun `baseline option needs the build check`() = runTest {
+        viewModel.handleIntent(X2cIntent.ScanProject("/project"))
+        advanceUntilIdle()
+        viewModel.handleIntent(X2cIntent.SetBuildBaselineFirst(true))
+        assertTrue(viewModel.uiState.value.buildBaselineFirst)
+        viewModel.handleIntent(X2cIntent.SetRunBuildCheck(false))
+        assertFalse(viewModel.uiState.value.buildBaselineFirst)
+        viewModel.handleIntent(X2cIntent.SetBuildBaselineFirst(true))
+        assertFalse(viewModel.uiState.value.buildBaselineFirst)
+    }
+
+    @Test
+    fun `undo asks about changed files and passes the answer on`() = runTest {
+        fakeRepository.conflictPaths = listOf("app/src/main/kotlin/Foo.kt")
+        val effects = collectEffects()
+        scanAndStart()
+        advanceUntilIdle()
+
+        viewModel.handleIntent(X2cIntent.RestoreBackup)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isUndoing)
+        assertEquals("app/src/main/kotlin/Foo.kt", viewModel.uiState.value.undoConflictPath)
+
+        viewModel.handleIntent(X2cIntent.ResolveUndoConflict(UndoConflictPolicy.SAVE_AS_ORIG))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(listOf(UndoConflictPolicy.SAVE_AS_ORIG), fakeRepository.conflictAnswers)
+        assertFalse(state.isUndoing)
+        assertNull(state.undoConflictPath)
+        assertEquals(2, state.undoResult!!.restored.size)
+        assertTrue(effects.contains(X2cEffect.ShowMessage(UiText.of(R.string.x2c_undo_done, 2, 1))))
+        assertEquals(2, fakeNotifier.finishedCount)
+    }
+
+    @Test
+    fun `undo failure is reported and ends the run`() = runTest {
+        fakeRepository.undoResult = Result.failure(IllegalStateException("Journal fehlt"))
+        val effects = collectEffects()
+        scanAndStart()
+        advanceUntilIdle()
+
+        viewModel.handleIntent(X2cIntent.RestoreBackup)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isUndoing)
+        assertNull(viewModel.uiState.value.undoResult)
+        assertTrue(effects.contains(X2cEffect.ShowMessage(UiText.of(R.string.x2c_undo_failed, "Journal fehlt"))))
+    }
+
+    @Test
+    fun `run build again uses the tasks of the first real build step`() = runTest {
+        fakeRepository.reportToReturn = testReport(
+            buildSteps = listOf(
+                X2cBuildStepResult(listOf(":app:compileDebugKotlin"), X2cBuildStepStatus.SUCCESS),
+                X2cBuildStepResult(listOf(":app:assembleDebug"), X2cBuildStepStatus.SKIPPED)
+            )
+        )
+        fakeChecker.result = X2cBuildStepResult(listOf(":app:compileDebugKotlin"), X2cBuildStepStatus.FAILED)
+        val effects = collectEffects()
+        scanAndStart()
+        advanceUntilIdle()
+
+        viewModel.handleIntent(X2cIntent.RunBuildAgain)
+        advanceUntilIdle()
+
+        assertEquals(listOf(":app:compileDebugKotlin"), fakeChecker.lastTasks)
+        assertEquals("/project", fakeChecker.lastProject)
+        assertEquals(X2cBuildStepStatus.FAILED, viewModel.uiState.value.rerunBuildResult?.status)
+        assertFalse(viewModel.uiState.value.isRerunningBuild)
+        assertTrue(effects.contains(X2cEffect.ShowMessage(UiText.of(R.string.x2c_msg_build_failed))))
+    }
+
+    @Test
+    fun `run build again falls back to assembleDebug without earlier steps`() = runTest {
+        scanAndStart()
+        advanceUntilIdle()
+        viewModel.handleIntent(X2cIntent.RunBuildAgain)
+        advanceUntilIdle()
+        assertEquals(listOf("assembleDebug"), fakeChecker.lastTasks)
+    }
+
+    @Test
+    fun `open report without report file shows a message`() = runTest {
+        fakeRepository.reportToReturn = testReport(reportPath = null)
+        val effects = collectEffects()
+        scanAndStart()
+        advanceUntilIdle()
+
+        viewModel.handleIntent(X2cIntent.OpenReport)
+        advanceUntilIdle()
+
+        assertNull(fakeBridge.lastOpenedPath)
+        assertTrue(effects.contains(X2cEffect.ShowMessage(UiText.of(R.string.x2c_msg_no_report))))
+    }
+
+    @Test
+    fun `open report and compose file resolve paths against the project`() = runTest {
+        scanAndStart()
+        advanceUntilIdle()
+
+        viewModel.handleIntent(X2cIntent.OpenReport)
+        advanceUntilIdle()
+        assertEquals("/project/Backup/x2c-report.md", fakeBridge.lastOpenedPath)
+
+        viewModel.handleIntent(X2cIntent.OpenFirstComposeFile)
+        advanceUntilIdle()
+        assertEquals("/project/MainScreen.kt", fakeBridge.lastOpenedPath)
+    }
+
+    @Test
+    fun `backup folder message names the folder, not the zip`() = runTest {
+        val effects = collectEffects()
+        scanAndStart()
+        advanceUntilIdle()
+        viewModel.handleIntent(X2cIntent.ShowBackupFolder)
+        advanceUntilIdle()
+        assertTrue(effects.contains(X2cEffect.ShowMessage(UiText.of(R.string.x2c_msg_backup_folder, "/project/Backup"))))
+    }
+
+    @Test
+    fun `result can be closed and shown again, filters apply`() = runTest {
+        scanAndStart()
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.showResultScreen)
+
+        viewModel.handleIntent(X2cIntent.DismissResult)
+        assertFalse(viewModel.uiState.value.showResultScreen)
+        assertNotNull(viewModel.uiState.value.report)
+
+        viewModel.handleIntent(X2cIntent.ShowResult)
+        assertTrue(viewModel.uiState.value.showResultScreen)
+
+        assertEquals(2, viewModel.uiState.value.filteredResults.size)
+        viewModel.handleIntent(X2cIntent.SetResultFilter(X2cResultFilter.TODOS))
+        assertEquals(listOf("UserItem.kt"), viewModel.uiState.value.filteredResults.map { it.outputComposePath })
+        viewModel.handleIntent(X2cIntent.SetResultFilter(X2cResultFilter.PROBLEMS))
+        assertTrue(viewModel.uiState.value.filteredResults.isEmpty())
+    }
+
+    @Test
+    fun `failed migration reports error and ends the run`() = runTest {
+        val failing = object : com.codeforge.core.domain.repository.X2cRepository by fakeRepository {
+            override suspend fun executeMigration(projectPath: String, options: com.codeforge.core.domain.model.X2cOptions) =
+                throw IllegalStateException("kaputt")
+        }
+        viewModel = X2cViewModel(fakeScanner, failing, settingsRepository, fakeBridge, fakeChecker, fakeNotifier)
+        val effects = collectEffects()
+        scanAndStart()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isConverting)
+        assertEquals("kaputt", state.errorMessage)
+        assertEquals(1, fakeNotifier.finishedCount)
+        assertTrue(effects.contains(X2cEffect.ShowMessage(UiText.of(R.string.x2c_msg_failed, "kaputt"))))
     }
 }

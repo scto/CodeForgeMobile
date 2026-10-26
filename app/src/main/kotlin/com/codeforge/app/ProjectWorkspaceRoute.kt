@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Transform
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,6 +51,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -73,6 +76,8 @@ import com.codeforge.feature.x2c.X2cEffect
 import com.codeforge.feature.x2c.X2cIntent
 import com.codeforge.feature.x2c.X2cViewModel
 import com.codeforge.feature.x2c.ui.X2cDialog
+import com.codeforge.feature.x2c.ui.X2cProgressScreen
+import com.codeforge.feature.x2c.ui.X2cResultScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,8 +142,9 @@ fun ProjectWorkspaceRoute(
     LaunchedEffect(x2cViewModel) {
         x2cViewModel.effects.collect { effect ->
             when (effect) {
-                is X2cEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-                is X2cEffect.NavigateToFile -> {}
+                is X2cEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message.resolve())
+                // Das Ergebnis liegt über dem Editor; zum Anzeigen der Datei zuerst schließen (über die Symbolleiste wieder aufrufbar).
+                is X2cEffect.NavigateToFile -> x2cViewModel.handleIntent(X2cIntent.DismissResult)
             }
         }
     }
@@ -206,6 +212,14 @@ fun ProjectWorkspaceRoute(
                                 imageVector = Icons.Default.Transform,
                                 contentDescription = stringRes(R.string.x2c_menu_convert_layouts)
                             )
+                        }
+                        if (x2cState.report != null && !x2cState.showResultScreen && !x2cState.isConverting) {
+                            IconButton(onClick = { x2cViewModel.handleIntent(X2cIntent.ShowResult) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Description,
+                                    contentDescription = stringRes(R.string.x2c_result_title)
+                                )
+                            }
                         }
                         IconButton(onClick = { showDebugSheet = true }) {
                             Icon(
@@ -322,4 +336,30 @@ fun ProjectWorkspaceRoute(
         state = x2cState,
         onIntent = x2cViewModel::handleIntent
     )
+
+    // Task 52.11: Fortschritt und Ergebnis als Vollbild über dem Editor. Während des Laufs gilt Zurück nicht als Abbruch.
+    if (x2cState.isConverting) {
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+                usePlatformDefaultWidth = false
+            )
+        ) {
+            X2cProgressScreen(state = x2cState, onIntent = x2cViewModel::handleIntent)
+        }
+    }
+    if (x2cState.showResultScreen && x2cState.report != null) {
+        Dialog(
+            onDismissRequest = { x2cViewModel.handleIntent(X2cIntent.DismissResult) },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = false,
+                usePlatformDefaultWidth = false
+            )
+        ) {
+            X2cResultScreen(state = x2cState, onIntent = x2cViewModel::handleIntent)
+        }
+    }
 }
