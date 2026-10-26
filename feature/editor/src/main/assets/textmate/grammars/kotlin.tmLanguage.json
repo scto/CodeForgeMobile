@@ -575,6 +575,14 @@
         "self-reference": {
             "match": "\\b(this|super)(@\\w+)?\\b",
             "name": "variable.language.this.kotlin"
+        },
+        "type-constraint": {
+            "patterns": [
+                {
+                    "match": "\\bwhere\\b",
+                    "name": "keyword.soft.kotlin"
+                }
+            ]
         }
     }
 }

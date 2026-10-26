@@ -60,6 +60,7 @@ dependencies {
     implementation(project(":libs:dependency-updater-api"))
 
     testImplementation(libs.junit)
+    testImplementation("com.google.code.gson:gson:2.11.0")
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(project(":core:testing"))
 
