@@ -15,7 +15,9 @@ data class X2cOptions(
     val selectedLayouts: Set<String> = emptySet(),
     val dontAskAgain: Boolean = false,
     /** Task 52.9: bereits erzeugte Composables überschreiben (nur nach ausdrücklicher Bestätigung). */
-    val overwriteExisting: Boolean = false
+    val overwriteExisting: Boolean = false,
+    /** Task 52.10: vor der Umwandlung auch bauen, damit klar ist, welche Fehler schon vorher bestanden. */
+    val buildBaselineFirst: Boolean = false
 )
 
 enum class LayoutClassification {
@@ -134,7 +136,16 @@ data class X2cReport(
     val remainingViewAccesses: List<String> = emptyList(),
     val buildVerificationSuccess: Boolean? = null,
     val buildOutput: String? = null,
-    val markdownSummary: String = ""
+    val markdownSummary: String = "",
+    /** Task 52.10 */
+    val notes: List<String> = emptyList(),
+    val buildSteps: List<X2cBuildStepResult> = emptyList(),
+    val kotlinVersion: String? = null,
+    val composeBom: String? = null,
+    val buildChangedFiles: List<String> = emptyList(),
+    val buildNotes: List<String> = emptyList(),
+    val addedDependencies: List<String> = emptyList(),
+    val reportPath: String? = null
 )
 
 /**
@@ -273,3 +284,25 @@ data class XmlRemovalSelection(
 )
 
 data class GitBranchInfo(val branch: String, val previousBranch: String?)
+
+/** Task 52.10 */
+enum class X2cBuildStepStatus { SUCCESS, FAILED, SKIPPED }
+
+data class X2cBuildProblem(
+    val severity: String,
+    val path: String?,
+    val line: Int?,
+    val column: Int?,
+    val message: String,
+    val task: String? = null,
+    /** Fehler bestand schon vor der Umwandlung (nur mit „Vorher auch bauen“). */
+    val preExisting: Boolean = false
+)
+
+data class X2cBuildStepResult(
+    val tasks: List<String>,
+    val status: X2cBuildStepStatus,
+    val problems: List<X2cBuildProblem> = emptyList(),
+    val outputTail: String = "",
+    val message: String? = null
+)

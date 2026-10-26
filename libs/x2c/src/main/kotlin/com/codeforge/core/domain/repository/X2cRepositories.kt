@@ -5,6 +5,7 @@ import com.codeforge.core.domain.model.ComposeScanResult
 import com.codeforge.core.domain.model.GitBranchInfo
 import com.codeforge.core.domain.model.PlannedChange
 import com.codeforge.core.domain.model.UndoConflictPolicy
+import com.codeforge.core.domain.model.X2cBuildStepResult
 import com.codeforge.core.domain.model.UndoResult
 import com.codeforge.core.domain.model.ComposeWireResult
 import com.codeforge.core.domain.model.ThemeDetection
@@ -177,4 +178,17 @@ interface GitBranchCommitter {
 
     /** Stellt genau die genannten Pfade (auch gelöschte) ein und committet; liefert den Commit-Hash. */
     suspend fun commit(projectPath: String, relativePaths: List<String>, message: String): Result<String>
+}
+
+/**
+ * Task 52.10: führt Gradle-Aufgaben aus und liefert Fehler mit Datei und Zeile. Die App verdrahtet hier die Build-Infrastruktur
+ * aus Task 28; [com.codeforge.libs.x2c.verify.ProcessX2cBuildChecker] startet `./gradlew` direkt (JVM, Termux).
+ */
+interface X2cBuildChecker {
+    suspend fun runTasks(
+        projectPath: String,
+        tasks: List<String>,
+        onOutput: (String) -> Unit = {},
+        isCancelled: () -> Boolean = { false }
+    ): X2cBuildStepResult
 }

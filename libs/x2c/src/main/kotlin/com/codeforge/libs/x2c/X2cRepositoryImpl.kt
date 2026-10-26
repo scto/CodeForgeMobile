@@ -9,12 +9,16 @@ import com.codeforge.core.domain.model.UndoConflictPolicy
 import com.codeforge.core.domain.model.UndoResult
 import com.codeforge.core.domain.model.WireStatus
 import com.codeforge.core.domain.model.WireTarget
+import com.codeforge.core.domain.model.X2cBuildProblem
+import com.codeforge.core.domain.model.X2cBuildStepResult
+import com.codeforge.core.domain.model.X2cBuildStepStatus
 import com.codeforge.core.domain.model.X2cFileResult
 import com.codeforge.core.domain.model.X2cFileStatus
 import com.codeforge.core.domain.model.X2cOptions
 import com.codeforge.core.domain.model.X2cPlan
 import com.codeforge.core.domain.model.X2cProgress
 import com.codeforge.core.domain.model.X2cReport
+import com.codeforge.core.domain.repository.BuildEnableResult
 import com.codeforge.core.domain.repository.ComposeBuildEnabler
 import com.codeforge.core.domain.repository.ComposeEntryWirer
 import com.codeforge.core.domain.repository.ComposeMigrationScanner
@@ -23,6 +27,7 @@ import com.codeforge.core.domain.repository.GitBranchCommitter
 import com.codeforge.core.domain.repository.LayoutToComposeGenerator
 import com.codeforge.core.domain.repository.LayoutUsageAnalyzer
 import com.codeforge.core.domain.repository.X2cBackupRepository
+import com.codeforge.core.domain.repository.X2cBuildChecker
 import com.codeforge.core.domain.repository.X2cChangeApplier
 import com.codeforge.core.domain.repository.X2cRepository
 import com.codeforge.libs.x2c.analysis.LayoutUsageAnalyzerImpl
@@ -33,8 +38,11 @@ import com.codeforge.libs.x2c.backup.X2cBackupRepositoryImpl
 import com.codeforge.libs.x2c.build.ComposeBuildEnablerImpl
 import com.codeforge.libs.x2c.generator.LayoutNames
 import com.codeforge.libs.x2c.generator.LayoutToComposeGeneratorImpl
+import com.codeforge.libs.x2c.report.X2cReportWriter
 import com.codeforge.libs.x2c.scanner.ComposeMigrationScannerImpl
 import com.codeforge.libs.x2c.theme.ComposeThemeGeneratorImpl
+import com.codeforge.libs.x2c.verify.ProcessX2cBuildChecker
+import com.codeforge.libs.x2c.verify.SecretScrubber
 import com.codeforge.libs.x2c.wiring.ComposeEntryWirerImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,7 +65,8 @@ class X2cRepositoryImpl(
     private val applier: X2cChangeApplier = X2cChangeApplierImpl(),
     private val removalSelector: XmlRemovalSelector = XmlRemovalSelector(),
     private val git: GitBranchCommitter = ProcessGitBranchCommitter(),
-    private val usageAnalyzer: LayoutUsageAnalyzer = LayoutUsageAnalyzerImpl()
+    private val usageAnalyzer: LayoutUsageAnalyzer = LayoutUsageAnalyzerImpl(),
+    private val buildChecker: X2cBuildChecker = ProcessX2cBuildChecker()
 ) : X2cRepository {
 
     private val _progress = MutableStateFlow<X2cProgress>(X2cProgress.Idle)
@@ -212,12 +221,39 @@ class X2cRepositoryImpl(
 
         // ---- nichts zu tun: kein Backup, keine Änderung
         val effective = changes.values.toList()
-        fun report(backup: String, journal: String, removed: Int, remaining: List<String>) = buildReport(
-            projectPath, results, wired, wireSkipped, themeGenerated, themeTodos, removed, backup, journal, remaining, notes
-        )
+        var buildInfo: BuildEnableResult? = null
+        var buildSteps: List<X2cBuildStepResult> = emptyList()
+        var buildOutput: String? = null
+        var reportPath: String? = null
+        fun report(backup: String, journal: String, removed: Int, remaining: List<String>): X2cReport {
+            val base = buildReport(projectPath, results, wired, wireSkipped, themeGenerated, themeTodos, removed, backup, journal, remaining, notes)
+            val steps = buildSteps
+            val ran = steps.filter { it.status != X2cBuildStepStatus.SKIPPED }
+            return base.copy(
+                buildSteps = steps,
+                buildVerificationSuccess = if (ran.isEmpty()) null else ran.all { it.status == X2cBuildStepStatus.SUCCESS },
+                buildOutput = buildOutput,
+                kotlinVersion = buildInfo?.kotlinVersionUsed,
+                composeBom = buildInfo?.composeBomUsed,
+                buildChangedFiles = buildInfo?.modifiedFiles.orEmpty(),
+                buildNotes = buildInfo?.notes.orEmpty(),
+                addedDependencies = buildInfo?.addedDependencies.orEmpty(),
+                reportPath = reportPath
+            )
+        }
+        fun finish(r: X2cReport, write: Boolean): X2cReport {
+            var rp: String? = null
+            if (write) rp = runCatching {
+                val f = File(project, "Backup/" + X2cReportWriter.fileName(r.timestampEpochMillis)).also { it.parentFile.mkdirs() }
+                f.writeText(X2cReportWriter.render(r.copy(reportPath = f.path)))
+                f.path
+            }.getOrNull()
+            val withPath = r.copy(reportPath = rp)
+            return withPath.copy(markdownSummary = X2cReportWriter.render(withPath))
+        }
         if (effective.isEmpty()) {
             notes += "Keine Änderungen nötig (alles existiert bereits oder nichts ausgewählt); kein Backup angelegt"
-            val r = report("", "", 0, emptyList())
+            val r = finish(report("", "", 0, emptyList()), write = false)
             _progress.value = X2cProgress.Completed(r)
             return r
         }
@@ -235,6 +271,16 @@ class X2cRepositoryImpl(
         val zip = try { backupRepo.createBackup(projectPath, options.includeGitInBackup) } catch (t: Throwable) { fail("Backup fehlgeschlagen: ${t.message}") }
         checkCancelled()
 
+        val moduleRoots = generated.values.map { moduleRoot(it.first.relativePath) }.distinct()
+        val baseline = HashSet<String>()
+        if (options.runBuildCheck && options.buildBaselineFirst) {
+            _progress.value = X2cProgress.VerifyingBuild("Vorher bauen (Ausgangszustand)")
+            val b = buildChecker.runTasks(projectPath, moduleRoots.map { gradleTask(it, "compileDebugKotlin") }, {}, { isCancelled })
+            b.problems.filter { it.severity == "error" }.forEach { baseline += problemKey(it) }
+            if (b.status == X2cBuildStepStatus.FAILED) notes += "Ausgangszustand ließ sich schon vor der Umwandlung nicht fehlerfrei bauen (${baseline.size} Fehler)"
+        }
+        checkCancelled()
+
         val removedPaths = mutableListOf<String>()
         val hasConstraintLayout = selected.any { it.rootTag == "ConstraintLayout" || it.rootTag.endsWith(".ConstraintLayout") }
         _progress.value = X2cProgress.ApplyingChanges("Änderungen werden übernommen...")
@@ -243,6 +289,7 @@ class X2cRepositoryImpl(
             buildFileCandidates(project).forEach { rec.touch(it) }
             val b = buildEnabler.enableComposeInProject(projectPath, options.useVersionCatalog, options.wireActivities, hasConstraintLayout)
             if (b.isFailure) throw IllegalStateException(b.exceptionOrNull()?.message ?: "Build-Vorbereitung fehlgeschlagen")
+            buildInfo = b.getOrThrow()
             b.getOrThrow().modifiedFiles.forEach { rec.touch(it, alreadyChanged = true) }
             if (options.removeXmlAfterSuccess) {
                 val sel = removalSelector.select(projectPath, plan, generated.keys)
@@ -271,7 +318,37 @@ class X2cRepositoryImpl(
             )
         }
         val remaining = runCatching { usageAnalyzer.findRemainingViewReferences(projectPath) }.getOrDefault(emptyList())
-        val r = report(zip, ap.journalPath, removedPaths.size, remaining)
+
+        if (options.runBuildCheck) {
+            val steps = mutableListOf<X2cBuildStepResult>()
+            val phases = mutableListOf(moduleRoots.map { gradleTask(it, "compileDebugKotlin") }, moduleRoots.map { gradleTask(it, "assembleDebug") })
+            moduleRoots.filter { hasUnitTests(project, it) }.map { gradleTask(it, "testDebugUnitTest") }.takeIf { it.isNotEmpty() }?.let { phases += listOf(it) }
+            var failed = false
+            var skipMessage = "übersprungen, weil ein vorheriger Schritt fehlschlug"
+            for (tasks in phases) {
+                if (failed || isCancelled) {
+                    steps += X2cBuildStepResult(tasks, X2cBuildStepStatus.SKIPPED, message = if (isCancelled) "abgebrochen" else skipMessage)
+                    continue
+                }
+                _progress.value = X2cProgress.VerifyingBuild(tasks.joinToString(" "))
+                val raw = buildChecker.runTasks(projectPath, tasks, {}, { isCancelled })
+                val step = raw.copy(
+                    problems = raw.problems.map { it.copy(preExisting = it.severity == "error" && problemKey(it) in baseline) },
+                    outputTail = SecretScrubber.scrub(raw.outputTail)
+                )
+                steps += step
+                if (step.outputTail.isNotEmpty()) buildOutput = step.outputTail
+                if (step.status == X2cBuildStepStatus.FAILED) {
+                    failed = true
+                    val errs = step.problems.filter { it.severity == "error" }
+                    if (errs.isNotEmpty() && errs.all { it.preExisting }) notes += "Build-Fehler bestanden schon vor der Umwandlung"
+                    else notes += "Build-Prüfung fehlgeschlagen: Änderungen bleiben erhalten; über Rückgängig lässt sich alles zurücknehmen"
+                }
+                if (step.status == X2cBuildStepStatus.SKIPPED) { step.message?.let { notes += it; skipMessage = it }; failed = true }
+            }
+            buildSteps = steps
+        }
+        val r = finish(report(zip, ap.journalPath, removedPaths.size, remaining), write = true)
         _progress.value = X2cProgress.Completed(r)
         return r
     }
@@ -297,11 +374,20 @@ class X2cRepositoryImpl(
             journalPath = journal,
             fileResults = list,
             remainingViewAccesses = remaining,
-            markdownSummary = notes.joinToString("\n") { "- $it" }
+            markdownSummary = notes.joinToString("\n") { "- $it" },
+            notes = notes.toList()
         )
     }
 
     // ------------------------------------------------------------------ Projektwissen
+
+    private fun gradleTask(moduleRoot: String, task: String) =
+        if (moduleRoot.isEmpty()) task else ":" + moduleRoot.replace('/', ':') + ":" + task
+
+    private fun problemKey(p: X2cBuildProblem) = "${p.path}|${p.message}"
+
+    private fun hasUnitTests(project: File, root: String): Boolean =
+        File(if (root.isEmpty()) project else File(project, root), "src/test").walkTopDown().any { it.isFile && (it.extension == "kt" || it.extension == "java") }
 
     private fun moduleRoot(rel: String): String = if (rel.startsWith("src/")) "" else rel.substringBefore("/src/", "")
 
