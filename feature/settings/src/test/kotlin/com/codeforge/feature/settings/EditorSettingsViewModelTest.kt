@@ -91,6 +91,20 @@ class EditorSettingsViewModelTest {
     }
 
     @Test
+    fun `project indexing is on by default and can be toggled and reset`() = runTest(testDispatcher) {
+        assertTrue(viewModel.uiState.first { !it.isLoading }.projectIndexingEnabled)
+
+        viewModel.onEvent(EditorSettingsUiEvent.ProjectIndexingToggled)
+        advanceUntilIdle()
+        assertTrue(fakeDataStore.data.first().editor.projectIndexingDisabled)
+        assertFalse(viewModel.uiState.first { !it.projectIndexingEnabled }.projectIndexingEnabled)
+
+        viewModel.onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.INDEXING))
+        advanceUntilIdle()
+        assertFalse(fakeDataStore.data.first().editor.projectIndexingDisabled)
+    }
+
+    @Test
     fun `changing options saves to repository and updates uiState`() = runTest(testDispatcher) {
         // Tab size
         viewModel.onEvent(EditorSettingsUiEvent.TabSizeChanged(8))

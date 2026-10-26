@@ -63,6 +63,8 @@ message EditorConfig {
   bool format_on_save_json = 19;
   int32 lsp_max_concurrent_sessions = 20;
   int32 lsp_idle_timeout_minutes = 21;
+  // Invertiert gespeichert, damit "an" (Standard) auch für bestehende Installationen gilt (Proto-Default false).
+  bool project_indexing_disabled = 22;
 }
 
 

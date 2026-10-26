@@ -39,6 +39,7 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
@@ -422,6 +423,10 @@ class EditorViewModel @Inject constructor(
             _uiState.update { it.copy(pendingJump = target) }
         }
     }
+
+    /** `false`, wenn der Nutzer die automatische Projekt-Indexierung abgeschaltet hat (Editor-Einstellungen). */
+    suspend fun isProjectIndexingEnabled(): Boolean =
+        !settingsRepository.appSettings.first().editor.projectIndexingDisabled
 
     private fun observeSettings() = viewModelScope.launch {
         settingsRepository.appSettings.collect { settings ->

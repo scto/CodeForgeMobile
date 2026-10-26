@@ -12,7 +12,8 @@ enum class EditorSettingsSection {
     DISPLAY,
     INPUT,
     LANGUAGE,
-    FORMAT_ON_SAVE
+    FORMAT_ON_SAVE,
+    INDEXING
 }
 
 @Immutable
@@ -38,6 +39,7 @@ data class EditorSettingsUiState(
     val formatOnSaveJson: Boolean = false,
     val lspMaxConcurrentSessions: Int = 3,
     val lspIdleTimeoutMinutes: Int = 10,
+    val projectIndexingEnabled: Boolean = true,
     val fileHeaderEnabled: Boolean = false,
     val fileHeaderAuthor: String = "",
     val availableThemes: List<TextMateThemeItem> = TextMateThemeCatalog.BUNDLED_THEMES,
@@ -59,6 +61,7 @@ sealed interface EditorSettingsUiEvent {
     data object MagnifierToggled : EditorSettingsUiEvent
     data object SymbolPairAutocompleteToggled : EditorSettingsUiEvent
     data object MinimapToggled : EditorSettingsUiEvent
+    data object ProjectIndexingToggled : EditorSettingsUiEvent
     data object RainbowBracketsToggled : EditorSettingsUiEvent
     data object PinchToZoomToggled : EditorSettingsUiEvent
     data object DesktopShortcutsToggled : EditorSettingsUiEvent

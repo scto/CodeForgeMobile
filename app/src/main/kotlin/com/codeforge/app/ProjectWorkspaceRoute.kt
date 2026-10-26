@@ -105,7 +105,8 @@ fun ProjectWorkspaceRoute(
     val j2kState by j2kViewModel.uiState.collectAsState()
     val x2cState by x2cViewModel.uiState.collectAsState()
 
-    var x2cScannedForProject by remember(rootPath) { mutableStateOf(false) }
+    // Erst nach der Indexierungs-Entscheidung (LaunchedEffect unten) für den Auto-Scan freigegeben.
+    var x2cScannedForProject by remember(rootPath) { mutableStateOf(true) }
     var showBuildSheet by remember { mutableStateOf(false) }
     var showDebugSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -127,8 +128,11 @@ fun ProjectWorkspaceRoute(
 
     LaunchedEffect(rootPath) {
         buildViewModel.connectProject(rootPath)
-        x2cScannedForProject = false
-        j2kViewModel.handleIntent(J2kIntent.ScanProject(rootPath, manualTrigger = false))
+        // Automatische Indexierung aus: weder Java→Kotlin- noch XML→Compose-Scan beim Öffnen.
+        if (editorViewModel.isProjectIndexingEnabled()) {
+            x2cScannedForProject = false
+            j2kViewModel.handleIntent(J2kIntent.ScanProject(rootPath, manualTrigger = false))
+        }
     }
 
     // Task 52.2.3: Sequenziertes Prompting: Nur ein Dialog zur Zeit.

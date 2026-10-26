@@ -317,6 +317,21 @@ private fun EditorSettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // --- PROJEKT-INDEXIERUNG ---
+            SectionHeader(
+                title = stringRes(R.string.settings_editor_section_indexing),
+                onReset = { onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.INDEXING)) }
+            )
+
+            EditorToggleRow(
+                title = Res.string(R.string.settings_project_indexing),
+                description = Res.string(R.string.settings_project_indexing_desc),
+                checked = uiState.projectIndexingEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.ProjectIndexingToggled) }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // --- FORMAT BEIM SPEICHERN ---
             SectionHeader(
                 title = stringRes(R.string.settings_editor_section_format),

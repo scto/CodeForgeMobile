@@ -57,6 +57,7 @@ class EditorSettingsViewModel internal constructor(
                 formatOnSaveJson = settings.editor.formatOnSaveJson,
                 lspMaxConcurrentSessions = settings.editor.lspMaxConcurrentSessions.takeIf { it > 0 } ?: 3,
                 lspIdleTimeoutMinutes = settings.editor.lspIdleTimeoutMinutes.takeIf { it > 0 } ?: 10,
+                projectIndexingEnabled = !settings.editor.projectIndexingDisabled,
                 fileHeaderEnabled = settings.fileHeader.enabled,
                 fileHeaderAuthor = settings.fileHeader.author,
                 availableThemes = availableThemes,
@@ -113,6 +114,11 @@ class EditorSettingsViewModel internal constructor(
                         it.toBuilder()
                             .setSymbolPairAutocompleteEnabled(!it.symbolPairAutocompleteEnabled)
                             .build()
+                    }
+
+                EditorSettingsUiEvent.ProjectIndexingToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setProjectIndexingDisabled(!it.projectIndexingDisabled).build()
                     }
 
                 EditorSettingsUiEvent.MinimapToggled ->
@@ -197,6 +203,11 @@ class EditorSettingsViewModel internal constructor(
                                     .setLspMaxConcurrentSessions(3)
                                     .setLspIdleTimeoutMinutes(10)
                                     .build()
+                            }
+                        }
+                        EditorSettingsSection.INDEXING -> {
+                            settingsRepository.updateEditor {
+                                it.toBuilder().setProjectIndexingDisabled(false).build()
                             }
                         }
                         EditorSettingsSection.FORMAT_ON_SAVE -> {
