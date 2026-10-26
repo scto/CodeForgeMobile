@@ -36,6 +36,9 @@ object TermuxEnvironment {
 
     /** Basis-Umgebung der Termux-Shell; [extraPath] wird dem PATH vorangestellt. */
     fun environment(extraPath: List<String> = emptyList(), systemPath: String = System.getenv("PATH").orEmpty()): Map<String, String> {
+        // $PREFIX/tmp fehlt in frischen Bootstraps; Gradle/JVM brechen sonst ab
+        // ("java.io.tmpdir is set to a directory that doesn't exist").
+        runCatching { File(TermuxConstants.TERMUX_TMP_PREFIX_DIR_PATH).mkdirs() }
         val path = (extraPath + TermuxConstants.TERMUX_BIN_PREFIX_DIR_PATH + systemPath + TermuxDevEnvironment.getSdkPathEntries())
             .filter { it.isNotEmpty() }.joinToString(":")
         val env = linkedMapOf<String, String>(

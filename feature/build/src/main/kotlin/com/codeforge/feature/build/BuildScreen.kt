@@ -277,16 +277,17 @@ private fun BuildStatusBar(
     onIntent: (BuildUiIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    // Column statt Row: bei schmalen Displays/großer Schrift bekam der Status 0 dp Breite
+    // und der Text brach Buchstabe für Buchstabe um.
+    Column(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        // Statusanzeige links
+        // Statusanzeige
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxWidth()
         ) {
             when {
                 state.isBuilding -> {
@@ -354,10 +355,11 @@ private fun BuildStatusBar(
             }
         }
 
-        // Aktionsschaltflächen rechts
+        // Aktionsschaltflächen
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End)
         ) {
             if (state.isBuilding) {
                 OutlinedButton(
