@@ -146,6 +146,8 @@ data class EditorUiState(
 sealed interface EditorUiEvent {
     data class OpenFile(val path: String) : EditorUiEvent
     data class CloseTab(val index: Int) : EditorUiEvent
+    data class CloseOtherTabs(val keepIndex: Int) : EditorUiEvent
+    data object CloseAllTabs : EditorUiEvent
     data class SelectTab(val index: Int) : EditorUiEvent
     data class TextChanged(val text: String) : EditorUiEvent
     data object RunLspFormat : EditorUiEvent

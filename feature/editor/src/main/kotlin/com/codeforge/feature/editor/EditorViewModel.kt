@@ -474,6 +474,8 @@ class EditorViewModel @Inject constructor(
         when (event) {
             is EditorUiEvent.OpenFile -> openFile(event.path)
             is EditorUiEvent.CloseTab -> closeTab(event.index)
+            is EditorUiEvent.CloseOtherTabs -> closeTabs(keepIndex = event.keepIndex)
+            EditorUiEvent.CloseAllTabs -> closeTabs(keepIndex = null)
             is EditorUiEvent.SelectTab -> selectTab(event.index)
             is EditorUiEvent.TextChanged -> updateBuffer(event.text)
             is EditorUiEvent.FormatCode -> formatCode(event.range)
@@ -1317,6 +1319,29 @@ class EditorViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false) }
                 _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_fehler_beim_oeffnen, it.message.orEmpty())))
             }
+    }
+
+    /**
+     * Schließt alle Tabs außer [keepIndex] (null = alle). Tabs mit ungespeicherten Änderungen bleiben
+     * offen, damit nichts stillschweigend verloren geht.
+     */
+    private fun closeTabs(keepIndex: Int?) {
+        val files = _uiState.value.openFiles
+        val keepPath = keepIndex?.let { files.getOrNull(it)?.path }
+        val victims = files.withIndex()
+            .filter { (_, f) -> f.path != keepPath && !f.isDirty }
+            .map { it.value.path }
+        victims.forEach { path ->
+            val idx = _uiState.value.openFiles.indexOfFirst { it.path == path }
+            if (idx >= 0) closeTab(idx)
+        }
+        keepPath?.let { kp ->
+            val idx = _uiState.value.openFiles.indexOfFirst { it.path == kp }
+            if (idx >= 0) onEvent(EditorUiEvent.SelectTab(idx))
+        }
+        if (_uiState.value.openFiles.any { it.isDirty } && victims.size < files.size - (if (keepPath != null) 1 else 0)) {
+            viewModelScope.launch { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_tabs_ungespeichert_offen))) }
+        }
     }
 
     private fun closeTab(index: Int) {

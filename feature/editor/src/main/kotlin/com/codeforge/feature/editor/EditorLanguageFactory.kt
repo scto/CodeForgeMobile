@@ -58,7 +58,10 @@ object EditorLanguageFactory {
         useTreeSitter: Boolean,
         completionProvider: LspCompletionProvider?
     ): Language {
-        if (useTreeSitter) {
+        // Tree-sitter nur, wenn die Sprache ein Farbschema bekommt: TsLanguage wird unten mit leerem
+        // Theme-Block erzeugt -> alle Token in Standardfarbe (kein Highlighting). Bis ein tsTheme-Mapping
+        // existiert, übernimmt TextMate (TextMateColorScheme) das Highlighting.
+        if (useTreeSitter && TREE_SITTER_THEMED) {
             TreeSitterGrammar.fromPath(path)?.let { grammar ->
                 TreeSitterLanguageSupport.createLanguage(context, grammar)?.let { return it }
             }
@@ -90,3 +93,6 @@ object EditorLanguageFactory {
         return if (completionProvider != null) LspAwareLanguage(base, completionProvider, languageId) else base
     }
 }
+
+/** `true`, sobald TreeSitterLanguageSupport ein tsTheme-Mapping (Farben je Capture) setzt. */
+private const val TREE_SITTER_THEMED = false

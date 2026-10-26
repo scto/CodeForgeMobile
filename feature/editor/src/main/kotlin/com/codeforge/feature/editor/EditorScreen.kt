@@ -6,7 +6,10 @@ package com.codeforge.feature.editor
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -69,6 +72,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -121,7 +126,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalLayoutApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun EditorRoute(
     modifier: Modifier = Modifier,
@@ -217,6 +222,7 @@ fun EditorRoute(
                 CircularProgressIndicator()
             }
 
+            var tabMenuIndex by remember { mutableStateOf<Int?>(null) }
             if (uiState.openFiles.isNotEmpty()) {
                 val safeTabIndex = uiState.activeFileIndex.coerceIn(0, uiState.openFiles.lastIndex)
                 // Beim Öffnen einer neuen Datei ist tabPositions im selben Frame noch veraltet
@@ -232,15 +238,46 @@ fun EditorRoute(
                     }
                 ) {
                     uiState.openFiles.forEachIndexed { index, file ->
-                        Tab(
-                            selected = index == safeTabIndex,
-                            onClick = { viewModel.onEvent(EditorUiEvent.SelectTab(index)) },
-                            text = {
+                        // Eigener Tab statt Material-Tab: Long-Click (Kontextmenü) geht mit
+                        // Tab/selectable nicht zuverlässig neben onClick.
+                        Box {
+                            val selected = index == safeTabIndex
+                            Box(
+                                modifier = Modifier
+                                    .heightIn(min = 48.dp)
+                                    .combinedClickable(
+                                        onClick = { viewModel.onEvent(EditorUiEvent.SelectTab(index)) },
+                                        onLongClick = { tabMenuIndex = index }
+                                    )
+                                    .padding(horizontal = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Text(
-                                    (if (file.isDirty) "• " else "") + file.path.substringAfterLast('/')
+                                    (if (file.isDirty) "• " else "") + file.path.substringAfterLast('/'),
+                                    color = if (selected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
                                 )
                             }
-                        )
+                            DropdownMenu(
+                                expanded = tabMenuIndex == index,
+                                onDismissRequest = { tabMenuIndex = null }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringRes(R.string.editor_tab_close)) },
+                                    onClick = { tabMenuIndex = null; viewModel.onEvent(EditorUiEvent.CloseTab(index)) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringRes(R.string.editor_tab_close_others)) },
+                                    enabled = uiState.openFiles.size > 1,
+                                    onClick = { tabMenuIndex = null; viewModel.onEvent(EditorUiEvent.CloseOtherTabs(index)) }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringRes(R.string.editor_tab_close_all)) },
+                                    onClick = { tabMenuIndex = null; viewModel.onEvent(EditorUiEvent.CloseAllTabs) }
+                                )
+                            }
+                        }
                     }
                 }
             }
