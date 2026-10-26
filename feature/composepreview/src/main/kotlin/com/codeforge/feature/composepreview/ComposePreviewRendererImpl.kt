@@ -79,7 +79,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                         Res.string(R.string.composepreview_d8_nicht_gefunden_build_tools)
                     )
 
-                val sourceFile = File(workDir, "PreviewTarget.kt").apply { writeText(sourceCode) }
+                val sourceFile = File(workDir, "PreviewTarget.kt").apply { writeText(PreviewSourcePreparer.prepare(sourceCode)) }
                 val classesDir = File(workDir, "classes")
 
                 val compileResult = compiler.compile(
