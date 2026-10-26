@@ -1038,7 +1038,15 @@ if [ "${PHASE}" = assemble ]; then
         echo "Hinweis: BASE_REPO_DIR leer oder ohne pool/ – es entsteht ein neues Repo nur aus den neuen Paketen."
     fi
     while IFS= read -r -d '' f; do DEB_FILES+=("${f}"); done < <(find "${EXTRA_DEBS_DIR}" -type f -name '*.deb' -print0)
-    [ "${#DEB_FILES[@]}" -gt 0 ] || die "Keine neuen .deb in ${EXTRA_DEBS_DIR} gefunden."
+    # Sind alle neuen Pakete groß (> LARGE_PKG_THRESHOLD_MIB, z. B. dart), hat der Workflow sie bereits als Release-Asset
+    # ausgelagert (BIG_NEW_FILE): extra-debs ist dann leer, das Repo wird nur neu signiert und das Manifest ergänzt.
+    if [ "${#DEB_FILES[@]}" -eq 0 ]; then
+        if [ -n "${BIG_NEW_FILE:-}" ] && [ -s "${BIG_NEW_FILE}" ]; then
+            echo "  Keine Pakete für den Pool: alle neuen Pakete sind ausgelagert ($(wc -l < "${BIG_NEW_FILE}") Einträge in ${BIG_NEW_FILE##*/})."
+        else
+            die "Keine neuen .deb in ${EXTRA_DEBS_DIR} gefunden."
+        fi
+    fi
     echo "  Neue/aktualisierte Pakete: ${#DEB_FILES[@]} · Architekturen im Repo: ${ARCHS_LIST[*]}"
 else
     DEB_FILES=("${CLONE_DIR}"/output/*.deb)
