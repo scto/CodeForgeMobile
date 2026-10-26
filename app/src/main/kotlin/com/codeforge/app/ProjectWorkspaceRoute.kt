@@ -296,6 +296,9 @@ fun ProjectWorkspaceRoute(
         ModalNavigationDrawer(
             modifier = modifier.fillMaxSize(),
             drawerState = drawerState,
+            // Geschlossen öffnet nur die Menü-Taste den Dateibaum: ein Wisch im Editor (Scrollen, Text markieren)
+            // zog sonst ständig den Drawer herein. Offen lässt er sich weiter per Wischen oder Tippen daneben schließen.
+            gesturesEnabled = drawerState.isOpen,
             drawerContent = {
                 WorkspaceDrawer(
                     rootPath = rootPath,
