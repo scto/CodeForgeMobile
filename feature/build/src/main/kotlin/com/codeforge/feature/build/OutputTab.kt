@@ -5,7 +5,6 @@
 package com.codeforge.feature.build
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,13 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VerticalAlignBottom
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
@@ -106,15 +104,6 @@ fun OutputTab(
                 )
             }
 
-            // Kopieren
-            IconButton(onClick = { onIntent(BuildUiIntent.CopyOutput) }) {
-                Icon(
-                    imageVector = Icons.Default.ContentCopy,
-                    contentDescription = stringRes(R.string.build_log_kopieren),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
             // Löschen
             IconButton(onClick = { onIntent(BuildUiIntent.ClearOutput) }) {
                 Icon(
@@ -140,15 +129,18 @@ fun OutputTab(
                 )
             }
         } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                itemsIndexed(state.filteredLines) { _, line ->
-                    OutputLineItem(line = line)
+            // Auswahl über Zeilen hinweg (lang drücken); Zeilen umbrechen, damit nur noch vertikal gescrollt wird.
+            SelectionContainer {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    itemsIndexed(state.filteredLines) { _, line ->
+                        OutputLineItem(line = line)
+                    }
                 }
             }
         }
@@ -160,8 +152,6 @@ private fun OutputLineItem(
     line: String,
     modifier: Modifier = Modifier
 ) {
-    val hScroll = rememberScrollState()
-
     val textColor = when {
         line.startsWith("> Task") -> MaterialTheme.colorScheme.primary
         line.contains("error:", ignoreCase = true) || line.startsWith("e:") || line.startsWith("ERROR:") || line.contains("BUILD FAILED") -> MaterialTheme.colorScheme.error
@@ -175,7 +165,6 @@ private fun OutputLineItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .horizontalScroll(hScroll)
             .padding(vertical = 1.dp)
     ) {
         Text(

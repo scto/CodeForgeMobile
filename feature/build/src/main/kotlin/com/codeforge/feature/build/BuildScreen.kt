@@ -18,10 +18,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.automirrored.filled.Launch
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -43,7 +47,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,41 +72,42 @@ fun BuildBottomSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val state by viewModel.uiState.collectAsState()
-    val context = androidx.compose.ui.platform.LocalContext.current
-
-    androidx.compose.runtime.LaunchedEffect(viewModel) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is BuildUiEffect.LaunchIntent -> {
-                    context.startActivity(effect.intent)
-                }
-                is BuildUiEffect.ShareText -> {
-                    val sendIntent = android.content.Intent().apply {
-                        action = android.content.Intent.ACTION_SEND
-                        putExtra(android.content.Intent.EXTRA_TEXT, effect.text)
-                        type = "text/plain"
-                    }
-                    val shareIntent = android.content.Intent.createChooser(sendIntent, effect.title)
-                    context.startActivity(shareIntent)
-                }
-                else -> {}
-            }
-        }
-    }
+    // Effekte (Kopieren, Teilen, Speichern, Snackbar, Intents) verarbeitet der Host an genau einer Stelle:
+    // `effects` ist ein Channel, zwei Sammler würden sich die Effekte gegenseitig wegnehmen.
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         modifier = modifier
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(end = 4.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            IconButton(onClick = onDismissRequest) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringRes(R.string.build_sheet_schliessen)
+                )
+            }
+        }
         BuildPanel(
             state = state,
             onIntent = viewModel::handleIntent,
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
+                // Restscroll der Logs (Listenanfang/-ende) darf das Sheet nicht verschieben;
+                // geschlossen wird über Schließen-Taste, Zurück, Griff oder Tippen neben das Sheet.
+                .nestedScroll(ConsumeRemainingScroll)
         )
     }
+}
+
+private val ConsumeRemainingScroll = object : NestedScrollConnection {
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset = available
+
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity = available
 }
 
 @Composable
@@ -232,6 +242,13 @@ fun BuildPanel(
                 }
             )
         }
+
+        TabActionsBar(
+            hasContent = state.textFor(state.activeTab).isNotBlank(),
+            onCopy = { onIntent(BuildUiIntent.CopyTab(state.activeTab)) },
+            onShare = { onIntent(BuildUiIntent.ShareTab(state.activeTab)) },
+            onSave = { onIntent(BuildUiIntent.SaveTab(state.activeTab)) }
+        )
 
         // Tab Content
         Box(
@@ -412,6 +429,34 @@ private fun BuildStatusBar(
                     )
                 }
             }
+        }
+    }
+}
+
+/** Kopieren, Teilen, Speichern für den aktiven Reiter (gefilterter Inhalt). */
+@Composable
+private fun TabActionsBar(
+    hasContent: Boolean,
+    onCopy: () -> Unit,
+    onShare: () -> Unit,
+    onSave: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onCopy, enabled = hasContent) {
+            Icon(Icons.Default.ContentCopy, contentDescription = stringRes(R.string.build_tab_kopieren))
+        }
+        IconButton(onClick = onShare, enabled = hasContent) {
+            Icon(Icons.Default.Share, contentDescription = stringRes(R.string.build_tab_teilen))
+        }
+        IconButton(onClick = onSave, enabled = hasContent) {
+            Icon(Icons.Default.Save, contentDescription = stringRes(R.string.build_tab_speichern))
         }
     }
 }

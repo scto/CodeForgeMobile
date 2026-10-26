@@ -732,7 +732,7 @@ do_install() { # id
       rm -rf "$nx"
       nd="$SDK_ROOT/ndk/$rev"
       printf '%s' "$rev" > "$SDK_ROOT/ndk/.cf-$ver"
-      ln -sfn "$nd" "$SDK_ROOT/ndk-bundle"
+      # Kein `ndk-bundle`: AGP verlangt das NDK unter $ANDROID_HOME/ndk/<Version> und meldet den alten Ordner als Fehler.
       find "$nd/toolchains" -path '*/bin/*' -type f -exec chmod +x {} + 2>/dev/null
       local clang; clang=$(find "$nd/toolchains/llvm/prebuilt" -path '*/bin/clang' 2>/dev/null | head -n1)
       if [ -n "$clang" ] && "$clang" --version >/dev/null 2>&1; then say "NDK-clang: $("$clang" --version | head -n1)"
@@ -863,6 +863,13 @@ do_list() {
     if [ "$MACHINE" = 1 ]; then printf 'CFSDK|ITEM|%s|%s|%s|%s\n' "$id" "$ver" "$inst" "$p"
     else printf '%-28s %-12s %s\n' "$id" "$ver" "$([ "$inst" = 1 ] && echo "installiert ($p)" || echo '-')"; fi
   done < <(manifest | awk -F'|' '!seen[$1]++{print $1}')
+}
+
+# Frühere Versionen legten $SDK_ROOT/ndk-bundle als Symlink an; AGP lehnt den alten Ordner ab (NDK gehört nach ndk/<Version>).
+# Nur ein Symlink wird entfernt, ein echtes Verzeichnis bleibt unangetastet.
+remove_legacy_ndk_bundle() {
+  [ -L "$SDK_ROOT/ndk-bundle" ] && rm -f "$SDK_ROOT/ndk-bundle"
+  return 0
 }
 
 # ---------- env ----------
@@ -1170,6 +1177,7 @@ do_doctor() {
   exit $rc
 }
 
+remove_legacy_ndk_bundle
 cmd=${1:-help}; [ $# -gt 0 ] && shift
 case "$cmd" in
   list|install|uninstall|setup)

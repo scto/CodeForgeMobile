@@ -191,6 +191,14 @@ class BuildViewModel internal constructor(
                 }
                 _uiState.update { it.copy(outputLines = emptyList()) }
             }
+            is BuildUiIntent.CopyTab -> sendTabText(intent.tab) { text, _ -> BuildUiEffect.CopyToClipboard(text) }
+            is BuildUiIntent.ShareTab -> sendTabText(intent.tab) { text, _ ->
+                BuildUiEffect.ShareText(text, Res.string(R.string.build_tab_teilen_titel))
+            }
+            is BuildUiIntent.SaveTab -> sendTabText(intent.tab) { text, tab ->
+                val stamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss", java.util.Locale.ROOT).format(java.util.Date())
+                BuildUiEffect.SaveText(text, suggestedFileName(tab, stamp))
+            }
             is BuildUiIntent.CopyOutput -> {
                 val fullText = _uiState.value.outputLines.joinToString("\n")
                 scope.launch {
@@ -540,6 +548,18 @@ class BuildViewModel internal constructor(
         } ?: return
 
         apkInstallerRepository.uninstallApp(packageName)
+    }
+
+    /** Baut den Text des Reiters und sendet den Effekt; bei leerem Inhalt nur ein Hinweis. */
+    private fun sendTabText(tab: BuildTab, effect: (String, BuildTab) -> BuildUiEffect) {
+        val text = _uiState.value.textFor(tab)
+        scope.launch {
+            if (text.isBlank()) {
+                _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_tab_nichts)))
+            } else {
+                _effects.send(effect(text, tab))
+            }
+        }
     }
 
     fun cancelBuild() {

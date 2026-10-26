@@ -1827,5 +1827,22 @@
     <string name="debug_logs_loeschen">Delete logs</string>
     <string name="debug_logs_geloescht">%1$d log files deleted</string>
     <string name="debug_crash_hinweis">Crash reports are always written to .cfm/crash, independent of this switch.</string>
+    <string name="build_tab_kopieren">Copy</string>
+    <string name="build_tab_teilen">Share</string>
+    <string name="build_tab_speichern">Save to file</string>
+    <string name="build_tab_kopiert">Copied to clipboard.</string>
+    <string name="build_tab_kopiert_gekuerzt">Copied (only the end, text was too long).</string>
+    <string name="build_tab_zu_gross">Text is too large for the clipboard or sharing. Use Save to file.</string>
+    <string name="build_tab_teilen_gekuerzt">Only the end was shared (text was too long). Use Save to file for everything.</string>
+    <string name="build_tab_teilen_titel">Share</string>
+    <string name="build_tab_gespeichert">Saved.</string>
+    <string name="build_tab_speichern_fehlgeschlagen">Saving failed: %1$s</string>
+    <string name="build_tab_nichts">Nothing to copy in this tab.</string>
+    <string name="build_sheet_schliessen">Close</string>
+    <string name="ai_error_bad_url">Invalid server address. Please check the base URL in the AI settings.</string>
+    <string name="ai_error_dns">Server name could not be resolved (DNS/Internet).</string>
+    <string name="ai_error_timeout">The server did not respond in time.</string>
+    <string name="ai_error_tls">Secure connection failed (certificate or device time).</string>
+    <string name="ai_error_connect">Connection to the server was refused or blocked.</string>
 </resources>
 

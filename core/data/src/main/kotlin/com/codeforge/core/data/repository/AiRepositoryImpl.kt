@@ -19,10 +19,14 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -59,6 +63,28 @@ class AiRepositoryImpl internal constructor(
     private val lock = Mutex()
 
     private val _optionsFlow = MutableStateFlow(readOptionsSync())
+
+    init {
+        // Der API-Schlüssel liegt im SecretStorage und wurde nie zurückgelesen: nach jedem Neustart war `apiKey` leer,
+        // obwohl die Einstellungen einen Schlüssel zeigten bzw. gespeichert hatten.
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch { restoreStoredKey() }
+    }
+
+    private suspend fun restoreStoredKey() {
+        val provider = _optionsFlow.value.provider
+        val key = try {
+            secretStorage.getSecret(SECRET_KEY_PREFIX + provider.id)
+        } catch (_: Exception) {
+            null
+        }
+        if (key.isNullOrBlank()) return
+        lock.withLock {
+            // Nur ergänzen, wenn der Benutzer inzwischen nichts anderes gespeichert hat.
+            _optionsFlow.update { current ->
+                if (current.provider == provider && current.apiKey.isBlank()) current.copy(apiKey = key) else current
+            }
+        }
+    }
     private val _privacyFlow = MutableStateFlow(readPrivacyPolicySync())
     private val _dailyLimitFlow = MutableStateFlow(store.get(KEY_DAILY_LIMIT)?.toIntOrNull() ?: 50)
     private val _requestCountFlow = MutableStateFlow(readRequestCountSync())

@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -109,6 +110,57 @@ class BuildViewModelTest {
         assertEquals(problem, state.problems[0])
         assertEquals(1, state.errorCount)
         assertFalse(state.isBuilding)
+    }
+
+    @Test
+    fun copyTabSendsTheFilteredTextAsEffect() = runBlocking {
+        com.codeforge.core.testing.TestRes.install()
+        fakeRepository.taskFlow = flowOf(
+            BuildEvent.Output("> Task :app:compileDebugKotlin"),
+            BuildEvent.Output("BUILD FAILED"),
+            BuildEvent.BuildFinished(success = false)
+        )
+        viewModel.handleIntent(BuildUiIntent.StartBuild("assembleDebug"))
+        delay(300)
+
+        viewModel.handleIntent(BuildUiIntent.CopyTab(BuildTab.OUTPUT))
+        val effect = kotlinx.coroutines.withTimeout(2_000) {
+            viewModel.effects.first { it is BuildUiEffect.CopyToClipboard }
+        }
+
+        assertTrue(effect is BuildUiEffect.CopyToClipboard)
+        assertTrue((effect as BuildUiEffect.CopyToClipboard).text.contains("BUILD FAILED"))
+    }
+
+    @Test
+    fun shareAndSaveUseTheSameTextAndFileNameHasTheTab() = runBlocking {
+        com.codeforge.core.testing.TestRes.install()
+        fakeRepository.taskFlow = flowOf(BuildEvent.Output("hello"), BuildEvent.BuildFinished(success = true))
+        viewModel.handleIntent(BuildUiIntent.StartBuild("assembleDebug"))
+        delay(300)
+
+        viewModel.handleIntent(BuildUiIntent.ShareTab(BuildTab.OUTPUT))
+        viewModel.handleIntent(BuildUiIntent.SaveTab(BuildTab.OUTPUT))
+        val share = kotlinx.coroutines.withTimeout(2_000) {
+            viewModel.effects.first { it is BuildUiEffect.ShareText }
+        }
+        val save = kotlinx.coroutines.withTimeout(2_000) {
+            viewModel.effects.first { it is BuildUiEffect.SaveText }
+        }
+
+        assertTrue(share is BuildUiEffect.ShareText)
+        assertEquals("hello", (share as BuildUiEffect.ShareText).text)
+        assertTrue(save is BuildUiEffect.SaveText)
+        assertTrue((save as BuildUiEffect.SaveText).fileName.startsWith("build-output-"))
+        assertTrue(save.fileName.endsWith(".txt"))
+    }
+
+    @Test
+    fun copyOfAnEmptyTabOnlyShowsAHint() = runBlocking {
+        com.codeforge.core.testing.TestRes.install()
+        viewModel.handleIntent(BuildUiIntent.CopyTab(BuildTab.PROBLEMS))
+        val effect = kotlinx.coroutines.withTimeout(2_000) { viewModel.effects.first() }
+        assertTrue(effect is BuildUiEffect.ShowSnackbar)
     }
 
     @Test

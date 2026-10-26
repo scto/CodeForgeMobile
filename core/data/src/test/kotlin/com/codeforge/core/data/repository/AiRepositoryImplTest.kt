@@ -11,6 +11,7 @@ import com.codeforge.core.domain.security.SecretStorage
 import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -63,6 +64,20 @@ class AiRepositoryImplTest {
         val loaded = repository.getAiOptions().first()
         assertEquals(AiProviderType.ANTHROPIC, loaded.provider)
         assertEquals("claude-3-7-sonnet-latest", loaded.model)
+    }
+
+    @Test
+    fun storedApiKeyIsRestoredAfterRestart() = runBlocking {
+        // Zustand nach Neustart: Anbieter und Schlüssel liegen im Speicher, das Repository ist neu.
+        mapStore.put("ai_provider", AiProviderType.GEMINI.id)
+        fakeSecretStorage.secrets["ai_key_gemini"] = "AIza-test"
+        val historyDir = File(tempFolder.root, "ai_history2").apply { mkdirs() }
+        val restarted = AiRepositoryImpl(mapStore, historyDir, fakeSecretStorage)
+
+        val options = withTimeout(5_000) { restarted.getAiOptions().first { it.apiKey.isNotBlank() } }
+
+        assertEquals(AiProviderType.GEMINI, options.provider)
+        assertEquals("AIza-test", options.apiKey)
     }
 
     @Test

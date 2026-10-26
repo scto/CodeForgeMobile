@@ -1827,5 +1827,22 @@
     <string name="debug_logs_loeschen">Logs löschen</string>
     <string name="debug_logs_geloescht">%1$d Log-Dateien gelöscht</string>
     <string name="debug_crash_hinweis">Crash-Berichte werden immer nach .cfm/crash geschrieben, unabhängig von diesem Schalter.</string>
+    <string name="build_tab_kopieren">Kopieren</string>
+    <string name="build_tab_teilen">Teilen</string>
+    <string name="build_tab_speichern">Als Datei speichern</string>
+    <string name="build_tab_kopiert">In die Zwischenablage kopiert.</string>
+    <string name="build_tab_kopiert_gekuerzt">Kopiert (nur das Ende, der Text war zu lang).</string>
+    <string name="build_tab_zu_gross">Der Text ist zu groß für Zwischenablage oder Teilen. Bitte „Als Datei speichern“ nutzen.</string>
+    <string name="build_tab_teilen_gekuerzt">Nur das Ende wurde geteilt (Text zu lang). Alles gibt es über „Als Datei speichern“.</string>
+    <string name="build_tab_teilen_titel">Teilen</string>
+    <string name="build_tab_gespeichert">Gespeichert.</string>
+    <string name="build_tab_speichern_fehlgeschlagen">Speichern fehlgeschlagen: %1$s</string>
+    <string name="build_tab_nichts">In diesem Reiter gibt es nichts zu kopieren.</string>
+    <string name="build_sheet_schliessen">Schließen</string>
+    <string name="ai_error_bad_url">Ungültige Serveradresse. Bitte die Basis-URL in den KI-Einstellungen prüfen.</string>
+    <string name="ai_error_dns">Servername konnte nicht aufgelöst werden (DNS/Internet).</string>
+    <string name="ai_error_timeout">Der Server hat nicht rechtzeitig geantwortet.</string>
+    <string name="ai_error_tls">Sichere Verbindung fehlgeschlagen (Zertifikat oder Gerätezeit).</string>
+    <string name="ai_error_connect">Verbindung zum Server wurde abgelehnt oder blockiert.</string>
 </resources>
 

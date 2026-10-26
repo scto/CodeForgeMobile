@@ -37,7 +37,7 @@ class OpenAiClient @Inject constructor() {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun stream(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent> = flow {
-        val baseUrl = (options.baseUrl ?: "https://api.openai.com/v1").trimEnd('/')
+        val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://api.openai.com/v1")
         val url = if (baseUrl.endsWith("/chat/completions")) {
             URL(baseUrl)
         } else {
@@ -91,7 +91,7 @@ class OpenAiClient @Inject constructor() {
                     requestMethod = "POST"
                     doOutput = true
                     if (options.apiKey.isNotBlank()) {
-                        setRequestProperty("Authorization", "Bearer ${options.apiKey}")
+                        setRequestProperty("Authorization", "Bearer ${AiHttpSupport.cleanKey(options.apiKey)}")
                     }
                     setRequestProperty("Content-Type", "application/json")
                     setRequestProperty("Accept", "text/event-stream")
@@ -174,7 +174,7 @@ class OpenAiClient @Inject constructor() {
                     delayMs *= 2
                     continue
                 }
-                emit(AiEvent.Error(Res.string(R.string.ai_error_offline), e))
+                emit(AiEvent.Error(AiHttpSupport.describe(e), e))
                 emit(AiEvent.Done)
                 return@flow
             } catch (e: Exception) {
@@ -213,7 +213,7 @@ class OpenAiClient @Inject constructor() {
     }
 
     suspend fun fetchModels(options: AiChatOptions): Result<List<String>> = withContext(Dispatchers.IO) {
-        val baseUrl = (options.baseUrl ?: "https://api.openai.com/v1").trimEnd('/')
+        val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://api.openai.com/v1")
         val url = if (baseUrl.endsWith("/models")) {
             URL(baseUrl)
         } else {
@@ -227,7 +227,7 @@ class OpenAiClient @Inject constructor() {
                 readTimeout = 15_000
                 requestMethod = "GET"
                 if (options.apiKey.isNotBlank()) {
-                    setRequestProperty("Authorization", "Bearer ${options.apiKey}")
+                    setRequestProperty("Authorization", "Bearer ${AiHttpSupport.cleanKey(options.apiKey)}")
                 }
                 setRequestProperty("Accept", "application/json")
             }

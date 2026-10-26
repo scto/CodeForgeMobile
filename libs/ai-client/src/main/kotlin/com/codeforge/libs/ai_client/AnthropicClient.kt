@@ -36,7 +36,8 @@ class AnthropicClient @Inject constructor() {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun stream(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent> = flow {
-        val baseUrl = (options.baseUrl ?: "https://api.anthropic.com").trimEnd('/')
+        val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://api.anthropic.com", listOf("/v1/messages", "/v1"))
+        val apiKey = AiHttpSupport.cleanKey(options.apiKey)
         val url = URL("$baseUrl/v1/messages")
 
         val systemMessages = messages.filter { it.role == AiRole.SYSTEM }.joinToString("\n\n") { it.content }
@@ -78,7 +79,7 @@ class AnthropicClient @Inject constructor() {
                     readTimeout = 60_000
                     requestMethod = "POST"
                     doOutput = true
-                    setRequestProperty("x-api-key", options.apiKey)
+                    setRequestProperty("x-api-key", apiKey)
                     setRequestProperty("anthropic-version", "2023-06-01")
                     setRequestProperty("Content-Type", "application/json")
                     setRequestProperty("Accept", "text/event-stream")
@@ -177,7 +178,7 @@ class AnthropicClient @Inject constructor() {
                     delayMs *= 2
                     continue
                 }
-                emit(AiEvent.Error(Res.string(R.string.ai_error_offline), e))
+                emit(AiEvent.Error(AiHttpSupport.describe(e), e))
                 emit(AiEvent.Done)
                 return@flow
             } catch (e: Exception) {

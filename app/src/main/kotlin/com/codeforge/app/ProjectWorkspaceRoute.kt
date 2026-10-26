@@ -63,6 +63,7 @@ import com.codeforge.feature.build.BuildTab
 import com.codeforge.feature.build.BuildUiEffect
 import com.codeforge.feature.build.BuildUiIntent
 import com.codeforge.feature.build.BuildViewModel
+import com.codeforge.feature.build.rememberBuildTextActions
 import com.codeforge.feature.composepreview.ComposePreviewRoute
 import com.codeforge.feature.debug.DebugBottomSheet
 import com.codeforge.feature.dependencyupdates.DependencyUpdatesHost
@@ -149,9 +150,16 @@ fun ProjectWorkspaceRoute(
         }
     }
 
+    val buildTextActions = rememberBuildTextActions { message ->
+        coroutineScope.launch { snackbarHostState.showSnackbar(message) }
+    }
+
     LaunchedEffect(buildViewModel) {
         buildViewModel.effects.collect { effect ->
             when (effect) {
+                is BuildUiEffect.CopyToClipboard -> buildTextActions.copy(effect.text)
+                is BuildUiEffect.ShareText -> buildTextActions.share(effect.text, effect.title)
+                is BuildUiEffect.SaveText -> buildTextActions.save(effect.text, effect.fileName)
                 is BuildUiEffect.ShowSnackbar -> {
                     val isFailure = effect.message == Res.string(R.string.build_fehlgeschlagen)
                     val actionLabel = if (isFailure) Res.string(R.string.build_probleme_anzeigen) else null

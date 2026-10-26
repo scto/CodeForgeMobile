@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -129,23 +130,25 @@ fun LogcatTab(
                 )
             }
         } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                items(
-                    items = state.filteredLogcatEntries,
-                    key = { it.id }
-                ) { entry ->
-                    LogcatEntryItem(
-                        entry = entry,
-                        onCopy = { onIntent(BuildUiIntent.CopyLogcatEntry(entry)) },
-                        onStackFrameClick = { onIntent(BuildUiIntent.ClickStackFrame(it)) }
-                    )
+            SelectionContainer {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(
+                        items = state.filteredLogcatEntries,
+                        key = { it.id }
+                    ) { entry ->
+                        LogcatEntryItem(
+                            entry = entry,
+                            onCopy = { onIntent(BuildUiIntent.CopyLogcatEntry(entry)) },
+                            onStackFrameClick = { onIntent(BuildUiIntent.ClickStackFrame(it)) }
+                        )
+                    }
                 }
             }
         }

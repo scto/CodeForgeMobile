@@ -135,6 +135,11 @@ sealed interface BuildUiIntent {
     data object CancelBuild : BuildUiIntent
     data object ClearOutput : BuildUiIntent
     data object CopyOutput : BuildUiIntent
+
+    /** Kopieren, Teilen und Speichern des gerade (gefiltert) angezeigten Reiterinhalts. */
+    data class CopyTab(val tab: BuildTab) : BuildUiIntent
+    data class ShareTab(val tab: BuildTab) : BuildUiIntent
+    data class SaveTab(val tab: BuildTab) : BuildUiIntent
     data object ToggleAutoScroll : BuildUiIntent
     data class UpdateSearchQuery(val query: String) : BuildUiIntent
     data class SelectProblemFilter(val filter: ProblemFilter) : BuildUiIntent
@@ -180,5 +185,6 @@ sealed interface BuildUiEffect {
     data class OpenEditorAt(val path: String, val line: Int, val column: Int) : BuildUiEffect
     data class LaunchIntent(val intent: android.content.Intent) : BuildUiEffect
     data class ShareText(val text: String, val title: String) : BuildUiEffect
+    data class SaveText(val text: String, val fileName: String) : BuildUiEffect
     data class OpenApkAnalyzer(val apkPath: String) : BuildUiEffect
 }

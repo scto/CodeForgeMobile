@@ -37,8 +37,9 @@ class GeminiClient @Inject constructor() {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun stream(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent> = flow {
-        val baseUrl = (options.baseUrl ?: "https://generativelanguage.googleapis.com").trimEnd('/')
-        val url = URL("$baseUrl/v1beta/models/${options.model}:streamGenerateContent?alt=sse&key=${options.apiKey}")
+        val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://generativelanguage.googleapis.com", listOf("/v1beta", "/v1"))
+        val apiKey = AiHttpSupport.cleanKey(options.apiKey)
+        val url = URL("$baseUrl/v1beta/models/${options.model.trim()}:streamGenerateContent?alt=sse&key=$apiKey")
 
         val systemMessages = messages.filter { it.role == AiRole.SYSTEM }.joinToString("\n\n") { it.content }
         val dialogMessages = messages.filter { it.role != AiRole.SYSTEM }
@@ -178,7 +179,7 @@ class GeminiClient @Inject constructor() {
                     delayMs *= 2
                     continue
                 }
-                emit(AiEvent.Error(Res.string(R.string.ai_error_offline), e))
+                emit(AiEvent.Error(AiHttpSupport.describe(e), e))
                 emit(AiEvent.Done)
                 return@flow
             } catch (e: Exception) {
@@ -217,8 +218,8 @@ class GeminiClient @Inject constructor() {
     }
 
     suspend fun fetchModels(options: AiChatOptions): Result<List<String>> = withContext(Dispatchers.IO) {
-        val baseUrl = (options.baseUrl ?: "https://generativelanguage.googleapis.com").trimEnd('/')
-        val url = URL("$baseUrl/v1beta/models?key=${options.apiKey}")
+        val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://generativelanguage.googleapis.com", listOf("/v1beta", "/v1"))
+        val url = URL("$baseUrl/v1beta/models?key=${AiHttpSupport.cleanKey(options.apiKey)}")
 
         var connection: HttpURLConnection? = null
         try {
