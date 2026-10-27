@@ -436,6 +436,7 @@ class EditorViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     gitGutterEnabled = !settings.git.gutterMarkersDisabled,
+                    conflictDetectionEnabled = !settings.git.conflictDetectionDisabled,
                     displaySettings = EditorDisplaySettings(
                         tabSize = settings.editor.tabSize.takeIf { v -> v > 0 } ?: 4,
                         useTreeSitter = settings.editor.useTreeSitter,

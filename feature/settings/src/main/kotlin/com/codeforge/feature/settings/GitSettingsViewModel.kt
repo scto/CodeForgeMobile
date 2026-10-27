@@ -42,7 +42,10 @@ class GitSettingsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             settingsRepository.appSettings.collect { s ->
-                _uiState.update { it.copy(gutterMarkersEnabled = !s.git.gutterMarkersDisabled) }
+                _uiState.update { it.copy(
+                    gutterMarkersEnabled = !s.git.gutterMarkersDisabled,
+                    conflictDetectionEnabled = !s.git.conflictDetectionDisabled
+                ) }
             }
         }
         viewModelScope.launch {
@@ -55,6 +58,9 @@ class GitSettingsViewModel @Inject constructor(
             is GitSettingsUiEvent.NameChanged -> _uiState.update { it.copy(name = event.value) }
             is GitSettingsUiEvent.EmailChanged -> _uiState.update { it.copy(email = event.value) }
             GitSettingsUiEvent.SaveIdentity -> saveIdentity()
+            GitSettingsUiEvent.ConflictDetectionToggled -> viewModelScope.launch {
+                settingsRepository.updateGit { it.toBuilder().setConflictDetectionDisabled(!it.conflictDetectionDisabled).build() }
+            }
             GitSettingsUiEvent.GutterMarkersToggled -> viewModelScope.launch {
                 settingsRepository.updateGit { it.toBuilder().setGutterMarkersDisabled(!it.gutterMarkersDisabled).build() }
             }

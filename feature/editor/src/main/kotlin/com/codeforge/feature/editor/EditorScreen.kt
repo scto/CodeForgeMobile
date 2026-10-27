@@ -115,6 +115,9 @@ import com.codeforge.feature.editor.fileprovider.EditorFileProvider
 import com.codeforge.feature.editor.overlay.UpdateChipDialog
 import com.codeforge.feature.editor.ui.DocumentOutlineSheet
 import com.codeforge.feature.editor.ui.EditorSymbolBar
+import com.codeforge.feature.editor.overlay.ConflictChoice
+import com.codeforge.feature.editor.overlay.MergeConflicts
+import com.codeforge.feature.editor.ui.ConflictBar
 import com.codeforge.feature.editor.ui.HoverSheet
 import com.codeforge.feature.editor.ui.ImageFilePreview
 import com.codeforge.feature.editor.ui.SignatureHelpBar
@@ -359,6 +362,27 @@ fun EditorRoute(
                         // nie attached und der alte detached -> Undo/Redo/Format tot.
                         key(active.path) {
                         Column(modifier = Modifier.fillMaxSize()) {
+                            val conflicts = remember(active.content, uiState.conflictDetectionEnabled) {
+                                if (uiState.conflictDetectionEnabled) MergeConflicts.scan(active.content) else emptyList()
+                            }
+                            var conflictIndex by remember(active.path) { mutableStateOf(0) }
+                            val safeIndex = conflictIndex.coerceIn(0, (conflicts.size - 1).coerceAtLeast(0))
+                            fun resolveCurrent(choice: ConflictChoice) {
+                                val block = conflicts.getOrNull(safeIndex) ?: return
+                                controller?.applyTextChange(MergeConflicts.resolve(active.content, block, choice))
+                            }
+                            ConflictBar(
+                                conflicts = conflicts,
+                                index = safeIndex,
+                                onKeepOurs = { resolveCurrent(ConflictChoice.OURS) },
+                                onKeepTheirs = { resolveCurrent(ConflictChoice.THEIRS) },
+                                onKeepBoth = { resolveCurrent(ConflictChoice.BOTH) },
+                                onNext = {
+                                    val next = (safeIndex + 1) % conflicts.size
+                                    conflictIndex = next
+                                    controller?.jumpToLine(conflicts[next].startLine)
+                                }
+                            )
                             uiState.signatureHelp?.let { SignatureHelpBar(help = it) }
                             SoraCodeEditor(
                                 modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -371,6 +395,7 @@ fun EditorRoute(
                                 updateAnnotations = uiState.activeUpdateAnnotations,
                                 breakpoints = uiState.activeBreakpoints,
                                 gitChanges = uiState.activeGitChanges,
+                                conflicts = conflicts,
                                 pausedLine = uiState.activePausedLine,
                                 onToggleBreakpoint = { viewModel.onEvent(EditorUiEvent.ToggleBreakpoint(it)) },
                                 onEditBreakpoint = { viewModel.onEvent(EditorUiEvent.EditBreakpoint(it)) },

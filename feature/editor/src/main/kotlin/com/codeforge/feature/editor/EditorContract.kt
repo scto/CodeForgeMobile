@@ -75,6 +75,7 @@ data class EditorUiState(
     /** Git-Gutter: Änderungen gegenüber HEAD je Dateipfad (nur gespeicherter Stand). */
     val gitChangesByPath: Map<String, List<com.codeforge.core.domain.model.GitLineChange>> = emptyMap(),
     val gitGutterEnabled: Boolean = true,
+    val conflictDetectionEnabled: Boolean = true,
     /** Hover-Dokumentation des Symbols unter dem Cursor (null = Sheet geschlossen). */
     val hoverText: String? = null,
     /** Aktive Signaturhilfe (Parameter-Hinweis) oder null. */

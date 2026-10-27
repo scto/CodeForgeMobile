@@ -1883,5 +1883,12 @@
     <string name="lsp_more_actions">Weitere Sprachserver-Aktionen</string>
     <string name="settings_git_gutter_markers">Gutter-Markierungen</string>
     <string name="settings_git_gutter_markers_desc">Hinzugefügte, geänderte und gelöschte Zeilen neben den Zeilennummern anzeigen (Vergleich mit dem letzten Commit).</string>
+    <string name="editor_conflict_title">Merge-Konflikt %1$d von %2$d: %3$s ⟷ %4$s</string>
+    <string name="editor_conflict_ours">Eigene übernehmen</string>
+    <string name="editor_conflict_theirs">Fremde übernehmen</string>
+    <string name="editor_conflict_both">Beide behalten</string>
+    <string name="editor_conflict_next">Nächster Konflikt</string>
+    <string name="settings_git_conflict_detection">Konflikterkennung</string>
+    <string name="settings_git_conflict_detection_desc">Merge-Konfliktmarker im Editor hervorheben und Auflösungsoptionen anzeigen.</string>
 </resources>
 

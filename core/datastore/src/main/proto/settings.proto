@@ -18,6 +18,7 @@ message AppSettings {
 message GitConfig {
   // Alle Schalter invertiert gespeichert: Standard (false) = Funktion AN, auch für bestehende Installationen.
   bool gutter_markers_disabled = 1;
+  bool conflict_detection_disabled = 2;
 }
 
 message ThemeConfig {

@@ -16,7 +16,7 @@ Noch NICHT vorhanden und größer als eine Einstellung — je ein eigenes Featur
 - Dateinamen im Dateibaum nach Git-Status einfärben (modified/added/untracked/conflict) — Quelle: `GitRepository` Status.
 - ~~Gutter-Markierungen im Editor~~ — umgesetzt (`GitLineDiff`, `GitGutterOverlayLayer`, Schalter in den Git-Einstellungen).
   Aktualisierung beim Tab-Wechsel und nach dem Speichern (gespeicherter Stand gegen HEAD, nicht live beim Tippen). Gerätetest offen.
-- Konfliktkennung: `<<<<<<<`/`=======`/`>>>>>>>` im Editor hervorheben + „Eigene/Fremde übernehmen“.
+- ~~Konfliktkennung~~ — umgesetzt (`MergeConflicts`, `ConflictOverlayLayer`, `ConflictBar`: Eigene/Fremde/Beide übernehmen, nächster Konflikt; Schalter in den Git-Einstellungen). Gerätetest offen.
 - Je ein Schalter in `GitSettingsScreen` (Proto `GitConfig`, Standard „an“ invertiert speichern).
 
 ## C. Terminal-Einstellungen (Vorbild Xed: Scrollback-Größe, Cursorstil, Sitzungen beim Schließen beenden, Projekt als Arbeitsverzeichnis, Tasten für Zwischenablage)

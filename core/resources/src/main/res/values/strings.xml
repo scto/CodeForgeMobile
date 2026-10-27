@@ -1883,5 +1883,12 @@
     <string name="lsp_more_actions">More language server actions</string>
     <string name="settings_git_gutter_markers">Gutter markers</string>
     <string name="settings_git_gutter_markers_desc">Show added, changed and deleted lines next to the line numbers (compared to the last commit).</string>
+    <string name="editor_conflict_title">Merge conflict %1$d of %2$d: %3$s ⟷ %4$s</string>
+    <string name="editor_conflict_ours">Keep mine</string>
+    <string name="editor_conflict_theirs">Keep theirs</string>
+    <string name="editor_conflict_both">Keep both</string>
+    <string name="editor_conflict_next">Next conflict</string>
+    <string name="settings_git_conflict_detection">Conflict detection</string>
+    <string name="settings_git_conflict_detection_desc">Highlight merge conflict markers in the editor and offer resolution actions.</string>
 </resources>
 

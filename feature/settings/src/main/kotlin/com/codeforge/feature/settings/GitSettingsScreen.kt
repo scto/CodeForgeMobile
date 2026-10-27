@@ -117,6 +117,26 @@ private fun GitSettingsScreen(
                     )
                 }
             }
+            Card(Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringRes(R.string.settings_git_conflict_detection), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringRes(R.string.settings_git_conflict_detection_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    androidx.compose.material3.Switch(
+                        checked = state.conflictDetectionEnabled,
+                        onCheckedChange = { onEvent(GitSettingsUiEvent.ConflictDetectionToggled) },
+                    )
+                }
+            }
             CredentialsCard(state, onEvent)
             Text(
                 stringRes(R.string.settings_tokens_werden_verschluesselt_im_androi),

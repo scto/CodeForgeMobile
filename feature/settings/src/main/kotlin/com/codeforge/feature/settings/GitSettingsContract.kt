@@ -27,6 +27,7 @@ data class GitSettingsUiState(
     val credentialDialog: CredentialDialogState? = null,
     val credentialToDelete: GitCredentialInfo? = null,
     val gutterMarkersEnabled: Boolean = true,
+    val conflictDetectionEnabled: Boolean = true,
     val isLoading: Boolean = true,
 ) {
     val emailValid: Boolean get() = email.isBlank() || EMAIL.matches(email.trim())
@@ -43,6 +44,7 @@ sealed interface GitSettingsUiEvent {
     data class EmailChanged(val value: String) : GitSettingsUiEvent
     data object SaveIdentity : GitSettingsUiEvent
     data object GutterMarkersToggled : GitSettingsUiEvent
+    data object ConflictDetectionToggled : GitSettingsUiEvent
 
     data class AddCredentialRequested(val prefillHost: String? = null) : GitSettingsUiEvent
     data class DialogHostChanged(val value: String) : GitSettingsUiEvent

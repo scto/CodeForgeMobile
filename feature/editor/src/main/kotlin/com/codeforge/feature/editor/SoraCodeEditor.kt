@@ -105,6 +105,7 @@ fun SoraCodeEditor(
     updateAnnotations: List<FileUpdateAnnotation> = emptyList(),
     breakpoints: List<Breakpoint> = emptyList(),
     gitChanges: List<com.codeforge.core.domain.model.GitLineChange> = emptyList(),
+    conflicts: List<com.codeforge.feature.editor.overlay.ConflictBlock> = emptyList(),
     pausedLine: Int? = null,
     onToggleBreakpoint: (Int) -> Unit = {},
     onEditBreakpoint: (Int) -> Unit = {},
@@ -271,6 +272,13 @@ fun SoraCodeEditor(
         overlays = lineOverlays,
         onUpdateChipClick = onUpdateChipClick,
         onTestTargetClick = onTestTargetClick
+    )
+
+    com.codeforge.feature.editor.overlay.ConflictOverlayLayer(
+        modifier = Modifier.fillMaxSize(),
+        editor = overlayEditor,
+        tick = overlayTick,
+        conflicts = conflicts
     )
 
     com.codeforge.feature.editor.overlay.GitGutterOverlayLayer(
