@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.notepad-plus-plus.theme",
+  "name": "Notepad++ (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „Notepad++“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "notepad-plus-plus-dark",
+        "label": "Notepad++ Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "notepad-plus-plus-light",
+        "label": "Notepad++ Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

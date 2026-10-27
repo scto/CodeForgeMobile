@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.vscode-dark-plus.theme",
+  "name": "VS Code Dark+ (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „VS Code Dark+“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "vscode-dark-plus-dark",
+        "label": "VS Code Dark+ Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "vscode-dark-plus-light",
+        "label": "VS Code Dark+ Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

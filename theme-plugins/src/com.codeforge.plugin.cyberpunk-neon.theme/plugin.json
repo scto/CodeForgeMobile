@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.cyberpunk-neon.theme",
+  "name": "Cyberpunk Neon (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „Cyberpunk Neon“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "cyberpunk-neon-dark",
+        "label": "Cyberpunk Neon Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "cyberpunk-neon-light",
+        "label": "Cyberpunk Neon Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

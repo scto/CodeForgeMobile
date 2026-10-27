@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.violet.theme",
+  "name": "Violet (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „Violet“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "violet-dark",
+        "label": "Violet Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "violet-light",
+        "label": "Violet Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.ayu-dark.theme",
+  "name": "Ayu Dark (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „Ayu Dark“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "ayu-dark-dark",
+        "label": "Ayu Dark Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "ayu-dark-light",
+        "label": "Ayu Dark Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

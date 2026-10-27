@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.eclipse.theme",
+  "name": "Eclipse (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „Eclipse“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "eclipse-dark",
+        "label": "Eclipse Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "eclipse-light",
+        "label": "Eclipse Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

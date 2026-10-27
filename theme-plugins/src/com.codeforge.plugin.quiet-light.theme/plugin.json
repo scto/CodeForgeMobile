@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.quiet-light.theme",
+  "name": "Quiet Light (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „Quiet Light“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "quiet-light-dark",
+        "label": "Quiet Light Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "quiet-light-light",
+        "label": "Quiet Light Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

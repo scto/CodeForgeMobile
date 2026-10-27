@@ -40,3 +40,4 @@ terminal-packages-codeforge/
 __pycache__/
 *.py[cod]
 templates/build/
+theme-plugins/build/

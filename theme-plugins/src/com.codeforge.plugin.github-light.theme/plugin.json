@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.github-light.theme",
+  "name": "GitHub Light (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „GitHub Light“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "github-light-dark",
+        "label": "GitHub Light Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "github-light-light",
+        "label": "GitHub Light Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

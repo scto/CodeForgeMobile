@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.solarized-dark.theme",
+  "name": "Solarized Dark (Farbschema)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Farbschema „Solarized Dark“ aus CodeForge, als Dunkel- und Hell-Variante.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "solarized-dark-dark",
+        "label": "Solarized Dark Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "solarized-dark-light",
+        "label": "Solarized Dark Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}
