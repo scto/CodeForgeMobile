@@ -18,7 +18,8 @@ interface ProcessExecutor {
     suspend fun execute(
         command: List<String>,
         stdin: String? = null,
-        timeoutSeconds: Long = 10
+        timeoutSeconds: Long = 10,
+        environment: Map<String, String> = emptyMap()
     ): ProcessExecutionResult
 
     fun findExecutable(name: String, extraPaths: List<String> = emptyList()): String?
@@ -30,9 +31,11 @@ class DefaultProcessExecutor @Inject constructor() : ProcessExecutor {
     override suspend fun execute(
         command: List<String>,
         stdin: String?,
-        timeoutSeconds: Long
+        timeoutSeconds: Long,
+        environment: Map<String, String>
     ): ProcessExecutionResult = withContext(Dispatchers.IO) {
         val processBuilder = ProcessBuilder(command)
+        processBuilder.environment().putAll(environment)
         processBuilder.redirectErrorStream(false)
 
         val process = processBuilder.start()

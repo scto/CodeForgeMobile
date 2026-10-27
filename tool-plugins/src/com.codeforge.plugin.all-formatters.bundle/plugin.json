@@ -1,0 +1,19 @@
+{
+  "id": "com.codeforge.plugin.all-formatters.bundle",
+  "name": "Alle Formatierer (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Alle Formatierer von CodeForge als Bundle. Die Programme selbst müssen installiert werden.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.prettier.formatter",
+      "com.codeforge.plugin.shfmt.formatter",
+      "com.codeforge.plugin.ruff-format.formatter",
+      "com.codeforge.plugin.gofmt.formatter",
+      "com.codeforge.plugin.rustfmt.formatter",
+      "com.codeforge.plugin.taplo-format.formatter"
+    ]
+  }
+}

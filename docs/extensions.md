@@ -32,6 +32,7 @@ Vorlagen: `templates/`, Anleitung zum Selbermachen: `docs/extension-authoring.md
     "grammars":      [{ "languageId": "zig", "scopeName": "source.zig", "path": "g/zig.tmLanguage.json", "extensions": ["zig"] }],
     "snippets":      [{ "languageId": "kotlin", "path": "snippets/kotlin.json" }],
     "lspServers":    [{ "id": "zls", "label": "ZLS", "languages": ["zig"], "command": ["${pluginDir}/zls"] }],
+    "formatters":    [{ "id": "prettier", "label": "Prettier", "extensions": ["js", "ts"], "command": ["prettier", "--stdin-filepath", "${file}"] }],
     "extensionPack": ["com.example.icons"]
   }
 }
@@ -109,6 +110,20 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 
 `command` darf `${pluginDir}` und `${home}` enthalten. Ein eingebauter, installierter Server hat Vorrang; sonst wird der Plugin-Server für die angegebenen `languages` verwendet. Existiert die ausführbare Datei bei absolutem Pfad nicht, gibt es keinen Server.
 
+## Formatierer (`formatters`)
+
+```json
+{ "id": "shfmt", "label": "shfmt", "extensions": ["sh", "bash"], "fileNames": ["Justfile"],
+  "command": ["shfmt", "-filename", "${file}"], "timeoutSeconds": 15 }
+```
+
+* Der Editor startet `command`, schreibt den Dateiinhalt auf **stdin** und ersetzt ihn durch **stdout**. Exit-Code ≠ 0 gilt als Fehler (erste Zeile von stderr wird angezeigt).
+* Zuordnung über `extensions` (ohne Punkt, case-insensitiv) oder exakte `fileNames`; mindestens eines von beiden ist Pflicht. `timeoutSeconds` 1..120 (Standard 15).
+* Platzhalter: `${file}` (absoluter Pfad der Datei), `${fileName}`, `${pluginDir}`, `${home}`.
+* Das Programm muss **bereits installiert** sein (z. B. `pkg install shfmt` oder `npm i -g prettier` im Terminal); die App installiert nichts. Fehlt es, greift die nächste Strategie.
+* Reihenfolge beim Formatieren: **Plugin-Formatierer** → LSP → ktlint/google-java-format → eingebauter Formatierer. Bereichsformatierung (Auswahl) unterstützen Plugin-Formatierer nicht.
+* Läuft mit dem Termux-Prefix im `PATH` (`$PREFIX/bin`). Wie `lspServers` startet das Programme auf dem Gerät: Pakete mit Formatierern nur aus vertrauenswürdiger Quelle installieren.
+
 ## Code-Plugins: Befehle, Menüs, Ereignisse (API v2)
 
 ```kotlin
@@ -151,6 +166,7 @@ class MyPlugin : CodeForgePlugin {
 | `languagePacks` | umgesetzt (Phase 4), nicht abgedeckt: Plurals/`Context.getString` |
 | `grammars` | umgesetzt (Phase 5), nur Dateien ohne eingebaute Grammatik |
 | `snippets` | umgesetzt (Phase 5), schreibgeschützt |
+| `formatters` | umgesetzt: stdin→stdout über externes Programm, nicht auf Gerät getestet |
 | `extensionPack` | umgesetzt (Phase 5/7): Store installiert fehlende Mitglieder aus dem Katalog (Tiefe ≤ 4) |
 | Store-Policy | umgesetzt (Phase 7): nur deklarative Kategorien (`theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `bundle`); `installFromFile(declarativeOnly = true)` lehnt Archive mit `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge ab; Code-Plugins nur per Sideload |
 | Code-Plugin-Hooks | umgesetzt (Phase 6): Befehle, Menüs, Datei-/Git-Ereignisse, Berechtigungen |

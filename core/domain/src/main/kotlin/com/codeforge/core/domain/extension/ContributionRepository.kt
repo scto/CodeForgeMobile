@@ -20,7 +20,8 @@ data class ActiveContributions(
     val languagePacks: List<Resolved<LanguagePackContribution>> = emptyList(),
     val grammars: List<Resolved<GrammarContribution>> = emptyList(),
     val snippets: List<Resolved<SnippetContribution>> = emptyList(),
-    val lspServers: List<Resolved<LspServerContribution>> = emptyList()
+    val lspServers: List<Resolved<LspServerContribution>> = emptyList(),
+    val formatters: List<Resolved<FormatterContribution>> = emptyList()
 ) {
     companion object {
         val EMPTY = ActiveContributions()
@@ -37,7 +38,8 @@ data class ActiveContributions(
                 languagePacks = collect({ it.languagePacks }, { it.locale }),
                 grammars = collect({ it.grammars }, { it.scopeName }),
                 snippets = collect({ it.snippets }, { it.languageId + "|" + it.path }),
-                lspServers = collect({ it.lspServers }, { it.id })
+                lspServers = collect({ it.lspServers }, { it.id }),
+                formatters = collect({ it.formatters }, { it.id })
             )
         }
     }
@@ -57,6 +59,25 @@ fun ActiveContributions.grammarForPath(path: String): Resolved<GrammarContributi
         }
     }
 }
+
+/** Formatierer für [path] (Endung oder exakter Dateiname, case-insensitiv); der erste aktivierte passende gewinnt. */
+fun ActiveContributions.formatterForPath(path: String): Resolved<FormatterContribution>? {
+    val name = path.substringAfterLast('/').lowercase()
+    val ext = name.substringAfterLast('.', "")
+    return formatters.firstOrNull { f ->
+        f.item.fileNames.any { it.lowercase() == name } ||
+            (ext.isNotEmpty() && f.item.extensions.any { it.lowercase() == ext })
+    }
+}
+
+/** Ersetzt die Platzhalter im Formatierer-Kommando; Datei- und Verzeichnisangaben kommen ausschließlich von der App. */
+fun FormatterContribution.expandCommand(file: String, pluginDir: String, home: String): List<String> =
+    command.map {
+        it.replace("${'$'}{file}", file)
+            .replace("${'$'}{fileName}", file.substringAfterLast('/'))
+            .replace("${'$'}{pluginDir}", pluginDir)
+            .replace("${'$'}{home}", home)
+    }
 
 /** Lesezugriff der App-Module (Theme, Filetree, Editor, Git, …) auf die Contributions installierter Plugins. */
 interface ContributionRepository {

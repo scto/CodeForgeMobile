@@ -1,0 +1,26 @@
+{
+  "id": "com.codeforge.plugin.rustfmt.formatter",
+  "name": "rustfmt (Formatierer)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Formatiert rs mit rustfmt. Voraussetzung (Terminal): pkg install rust",
+  "permissions": [],
+  "contributes": {
+    "formatters": [
+      {
+        "id": "rustfmt",
+        "label": "rustfmt",
+        "extensions": [
+          "rs"
+        ],
+        "command": [
+          "rustfmt",
+          "--edition",
+          "2021"
+        ],
+        "timeoutSeconds": 20
+      }
+    ]
+  }
+}

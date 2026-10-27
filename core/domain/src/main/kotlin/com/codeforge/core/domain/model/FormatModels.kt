@@ -4,6 +4,7 @@ enum class UnifiedFormatSource {
     LSP,
     KTLINT,
     GOOGLE_JAVA_FORMAT,
+    PLUGIN,
     BUILTIN_SIMPLIFIED
 }
 

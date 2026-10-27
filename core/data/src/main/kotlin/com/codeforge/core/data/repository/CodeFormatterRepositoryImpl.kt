@@ -1,5 +1,8 @@
 package com.codeforge.core.data.repository
 
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.expandCommand
+import com.codeforge.core.domain.extension.formatterForPath
 import com.codeforge.core.domain.model.EditorConfigResolver
 import com.codeforge.core.domain.model.FormattedCode
 import com.codeforge.core.domain.model.LspRange
@@ -23,7 +26,8 @@ import javax.inject.Singleton
 @Singleton
 class CodeFormatterRepositoryImpl @Inject constructor(
     private val lspClient: LspClientRepository,
-    private val processExecutor: ProcessExecutor
+    private val processExecutor: ProcessExecutor,
+    private val contributionRepository: ContributionRepository
 ) : CodeFormatterRepository {
 
     override suspend fun formatFile(
@@ -33,6 +37,12 @@ class CodeFormatterRepositoryImpl @Inject constructor(
         fallbackOptions: UnifiedFormatOptions
     ): Result<FormattedCode> = withContext(Dispatchers.Default) {
         val options = resolveOptions(path, projectRoot, fallbackOptions)
+
+        // 0. Von einem Plugin beigesteuerter Formatierer (explizit installiert → hat Vorrang)
+        val pluginResult = tryPluginFormat(path, content)
+        if (pluginResult != null) {
+            return@withContext pluginResult
+        }
 
         // 1. LSP-Formatierung, wenn Server läuft und Capability vorhanden
         val lspResult = tryLspFormatFile(path, content)
@@ -137,6 +147,59 @@ class CodeFormatterRepositoryImpl @Inject constructor(
                 isUnchanged = (formatted == content)
             )
         }
+    }
+
+    /**
+     * Plugin-Formatierer (`contributes.formatters`): Inhalt über stdin, Ergebnis von stdout. `null`, wenn kein Formatierer
+     * passt oder das Programm nicht installiert ist (dann geht es mit den nächsten Strategien weiter).
+     */
+    private suspend fun tryPluginFormat(path: String, content: String): Result<FormattedCode>? {
+        val hit = contributionRepository.contributions.value.formatterForPath(path) ?: return null
+        val expanded = hit.item.expandCommand(path, hit.pluginDir, TERMUX_HOME)
+        val program = expanded.first()
+        val executable = if (program.startsWith("/")) {
+            program.takeIf { File(it).canExecute() }
+        } else {
+            processExecutor.findExecutable(program, listOf("$TERMUX_BIN/$program"))
+        } ?: return null
+
+        val result = runCatching {
+            processExecutor.execute(
+                command = listOf(executable) + expanded.drop(1),
+                stdin = content,
+                timeoutSeconds = hit.item.timeoutSeconds.toLong(),
+                environment = termuxEnvironment()
+            )
+        }.getOrElse { return Result.failure(it) }
+
+        if (result.timedOut) {
+            return Result.failure(TimeoutException(Res.string(R.string.editor_format_process_timeout, hit.item.timeoutSeconds)))
+        }
+        if (result.exitCode != 0) {
+            val msg = result.stderr.lines().firstOrNull { it.isNotBlank() } ?: "Formatting error"
+            return Result.failure(IllegalStateException(Res.string(R.string.editor_format_syntax_error, msg)))
+        }
+        if (result.stdout.isEmpty() && content.isNotEmpty()) return null
+        return Result.success(
+            FormattedCode(
+                text = result.stdout,
+                source = UnifiedFormatSource.PLUGIN,
+                sourceName = hit.item.label,
+                isUnchanged = (result.stdout == content)
+            )
+        )
+    }
+
+    private fun termuxEnvironment(): Map<String, String> {
+        val systemPath = System.getenv("PATH").orEmpty()
+        return mapOf(
+            "PREFIX" to TERMUX_PREFIX,
+            "HOME" to TERMUX_HOME,
+            "PATH" to listOf(TERMUX_BIN, systemPath).filter { it.isNotEmpty() }.joinToString(":"),
+            "LD_LIBRARY_PATH" to "$TERMUX_PREFIX/lib",
+            "TMPDIR" to "$TERMUX_PREFIX/tmp",
+            "LANG" to "en_US.UTF-8"
+        )
     }
 
     private suspend fun tryProcessFormat(path: String, content: String): Result<FormattedCode>? {
@@ -278,5 +341,11 @@ class CodeFormatterRepositoryImpl @Inject constructor(
             sourceName = Res.string(R.string.editor_format_builtin_notice),
             isUnchanged = (newContent == content)
         )
+    }
+
+    private companion object {
+        const val TERMUX_PREFIX = "/data/data/com.codeforge.app/files/usr"
+        const val TERMUX_BIN = "$TERMUX_PREFIX/bin"
+        const val TERMUX_HOME = "/data/data/com.codeforge.app/files/home"
     }
 }

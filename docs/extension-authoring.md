@@ -12,11 +12,14 @@ Referenz aller Felder: `docs/extensions.md`. Lauffähige Vorlagen: `templates/` 
 | Syntaxfarben für eigene Dateitypen | `grammar` | deklarativ | `grammar` |
 | Code-Bausteine | `snippets` | deklarativ | `snippets` |
 | Language Server anbinden | `lsp-server` | deklarativ | `lsp` |
+| Externen Formatierer anbinden | `formatter` | deklarativ | `formatter` |
 | Mehrere Plugins bündeln | `extension-pack` | deklarativ | `bundle` |
 | Befehle, Menüs, Ereignisse, eigene Logik | `code-plugin` | Code | nur Sideload (`plugin`) |
 
 Deklarativ = nur Dateien, kein ausführbarer Code. Der Store installiert ausschließlich solche Pakete; Archive mit
 `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge werden abgelehnt.
+
+Fertige Formatierer- und Language-Server-Plugins: `tool-plugins/` (Generator + Quellen).
 
 ## 2. Schnellstart (deklarativ)
 
@@ -59,7 +62,7 @@ Deklarativ = nur Dateien, kein ausführbarer Code. Der Store installiert ausschl
   "sha256": "<64 Hex-Zeichen>", "homepage": "https://github.com/example/nord" }
 ```
 
-`id` muss der Plugin-`id` aus `plugin.json` entsprechen. Kategorien: `theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `bundle`.
+`id` muss der Plugin-`id` aus `plugin.json` entsprechen. Kategorien: `theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `formatter`, `bundle`.
 Bundle-Mitglieder müssen ebenfalls im Katalog stehen, damit sie automatisch mitinstalliert werden.
 
 ## 6. Prüfen

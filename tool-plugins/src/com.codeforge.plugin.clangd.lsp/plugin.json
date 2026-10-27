@@ -1,0 +1,24 @@
+{
+  "id": "com.codeforge.plugin.clangd.lsp",
+  "name": "clangd (C/C++) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet clangd (C/C++) ein. Voraussetzung (Terminal): pkg install clang",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "clangd",
+        "label": "clangd (C/C++)",
+        "languages": [
+          "c",
+          "cpp"
+        ],
+        "command": [
+          "clangd"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "id": "com.codeforge.plugin.web-langservers.lsp",
+  "name": "HTML/CSS/JSON Language Servers (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet HTML/CSS/JSON Language Servers ein. Voraussetzung (Terminal): npm install -g vscode-langservers-extracted",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "vscode-html-language-server",
+        "label": "HTML/CSS/JSON Language Servers",
+        "languages": [
+          "html"
+        ],
+        "command": [
+          "vscode-html-language-server",
+          "--stdio"
+        ]
+      },
+      {
+        "id": "vscode-css-language-server",
+        "label": "HTML/CSS/JSON Language Servers",
+        "languages": [
+          "css"
+        ],
+        "command": [
+          "vscode-css-language-server",
+          "--stdio"
+        ]
+      },
+      {
+        "id": "vscode-json-language-server",
+        "label": "HTML/CSS/JSON Language Servers",
+        "languages": [
+          "json"
+        ],
+        "command": [
+          "vscode-json-language-server",
+          "--stdio"
+        ]
+      }
+    ]
+  }
+}

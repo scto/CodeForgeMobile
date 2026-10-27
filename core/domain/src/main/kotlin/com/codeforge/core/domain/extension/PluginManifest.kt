@@ -44,11 +44,13 @@ data class Contributes(
     val snippets: List<SnippetContribution> = emptyList(),
     val lspServers: List<LspServerContribution> = emptyList(),
     /** IDs weiterer Plugins, die zusammen mit diesem Bundle installiert werden sollen. */
-    val extensionPack: List<String> = emptyList()
+    val extensionPack: List<String> = emptyList(),
+    val formatters: List<FormatterContribution> = emptyList()
 ) {
     val isEmpty: Boolean
         get() = colorThemes.isEmpty() && iconThemes.isEmpty() && languagePacks.isEmpty() &&
-            grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty()
+            grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty() &&
+            formatters.isEmpty()
 }
 
 /** Farbschema: [path] zeigt auf eine JSON-Datei (siehe docs/extensions.md) relativ zum Plugin-Verzeichnis. */
@@ -87,7 +89,7 @@ data class SnippetContribution(
 
 /**
  * Deklarativer Language Server. [command] darf die Platzhalter `${pluginDir}` und `${home}` enthalten.
- * [installScript] (optional) wird bei Aktivierung über die Termux-Umgebung ausgeführt, wenn [command] nicht vorhanden ist.
+ * [installScript] ist reserviert und wird **noch nicht ausgeführt**; benötigte Programme müssen vorab installiert sein.
  */
 data class LspServerContribution(
     val id: String,
@@ -95,6 +97,20 @@ data class LspServerContribution(
     val languages: List<String>,
     val command: List<String>,
     val installScript: String? = null
+)
+
+/**
+ * Externer Code-Formatierer: Der Editor startet [command], schreibt den Dateiinhalt auf stdin und ersetzt ihn durch stdout.
+ * Zuordnung über [extensions] (ohne Punkt, case-insensitiv) oder exakte [fileNames]. Platzhalter im Kommando:
+ * `${file}` (absoluter Pfad der Datei), `${fileName}`, `${pluginDir}`, `${home}`. Das Programm muss bereits installiert sein.
+ */
+data class FormatterContribution(
+    val id: String,
+    val label: String,
+    val extensions: List<String>,
+    val fileNames: List<String> = emptyList(),
+    val command: List<String>,
+    val timeoutSeconds: Int = 15
 )
 
 /** Namen der nicht leeren Contribution-Arten, wie sie in `contributes` heißen. */
@@ -106,4 +122,5 @@ fun Contributes.kinds(): List<String> = buildList {
     if (snippets.isNotEmpty()) add("snippets")
     if (lspServers.isNotEmpty()) add("lspServers")
     if (extensionPack.isNotEmpty()) add("extensionPack")
+    if (formatters.isNotEmpty()) add("formatters")
 }

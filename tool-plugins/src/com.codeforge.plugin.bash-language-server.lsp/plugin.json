@@ -1,0 +1,24 @@
+{
+  "id": "com.codeforge.plugin.bash-language-server.lsp",
+  "name": "Bash Language Server (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet Bash Language Server ein. Voraussetzung (Terminal): npm install -g bash-language-server (optional: pkg install shellcheck shfmt)",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "bash-language-server",
+        "label": "Bash Language Server",
+        "languages": [
+          "shellscript"
+        ],
+        "command": [
+          "bash-language-server",
+          "start"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "id": "com.codeforge.plugin.prettier.formatter",
+  "name": "Prettier (Formatierer)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Formatiert js, jsx, mjs, cjs, ts, tsx … mit Prettier. Voraussetzung (Terminal): npm install -g prettier",
+  "permissions": [],
+  "contributes": {
+    "formatters": [
+      {
+        "id": "prettier",
+        "label": "Prettier",
+        "extensions": [
+          "js",
+          "jsx",
+          "mjs",
+          "cjs",
+          "ts",
+          "tsx",
+          "json",
+          "css",
+          "scss",
+          "less",
+          "html",
+          "md",
+          "yaml",
+          "yml",
+          "vue"
+        ],
+        "command": [
+          "prettier",
+          "--stdin-filepath",
+          "${file}"
+        ],
+        "timeoutSeconds": 20
+      }
+    ]
+  }
+}

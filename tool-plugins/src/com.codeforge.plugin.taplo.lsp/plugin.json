@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.taplo.lsp",
+  "name": "Taplo (TOML) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet Taplo (TOML) ein. Voraussetzung (Terminal): pkg install taplo",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "taplo",
+        "label": "Taplo (TOML)",
+        "languages": [
+          "toml"
+        ],
+        "command": [
+          "taplo",
+          "lsp",
+          "stdio"
+        ]
+      }
+    ]
+  }
+}

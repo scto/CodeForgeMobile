@@ -93,7 +93,24 @@ object PluginManifestParser {
                     installScript = it.string("installScript")
                 )
             },
-            extensionPack = obj.stringList("extensionPack")
+            extensionPack = obj.stringList("extensionPack"),
+            formatters = obj.objects("formatters").map {
+                val command = it.stringList("command")
+                require(command.isNotEmpty()) { "formatters: 'command' darf nicht leer sein" }
+                val extensions = it.stringList("extensions").map { e -> e.removePrefix(".") }.filter { e -> e.isNotBlank() }
+                val fileNames = it.stringList("fileNames").filter { n -> n.isNotBlank() }
+                require(extensions.isNotEmpty() || fileNames.isNotEmpty()) { "formatters: 'extensions' oder 'fileNames' fehlt" }
+                val timeout = (it["timeoutSeconds"] as? JsonPrimitive)?.intOrNull ?: 15
+                require(timeout in 1..120) { "formatters: 'timeoutSeconds' muss 1..120 sein" }
+                FormatterContribution(
+                    id = it.req("id"),
+                    label = it.string("label") ?: it.req("id"),
+                    extensions = extensions,
+                    fileNames = fileNames,
+                    command = command,
+                    timeoutSeconds = timeout
+                )
+            }
         )
     }
 

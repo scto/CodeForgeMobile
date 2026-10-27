@@ -42,3 +42,4 @@ __pycache__/
 templates/build/
 theme-plugins/build/
 textmate-plugins/build/
+tool-plugins/build/

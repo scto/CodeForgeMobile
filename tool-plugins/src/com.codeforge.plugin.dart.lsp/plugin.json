@@ -1,0 +1,24 @@
+{
+  "id": "com.codeforge.plugin.dart.lsp",
+  "name": "Dart Analysis Server (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet Dart Analysis Server ein. Voraussetzung (Terminal): pkg install dart",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "dart",
+        "label": "Dart Analysis Server",
+        "languages": [
+          "dart"
+        ],
+        "command": [
+          "dart",
+          "language-server"
+        ]
+      }
+    ]
+  }
+}

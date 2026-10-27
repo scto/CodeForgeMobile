@@ -1,0 +1,24 @@
+{
+  "id": "com.codeforge.plugin.pyright.lsp",
+  "name": "Pyright (Python) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet Pyright (Python) ein. Voraussetzung (Terminal): npm install -g pyright",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "pyright",
+        "label": "Pyright (Python)",
+        "languages": [
+          "python"
+        ],
+        "command": [
+          "pyright-langserver",
+          "--stdio"
+        ]
+      }
+    ]
+  }
+}

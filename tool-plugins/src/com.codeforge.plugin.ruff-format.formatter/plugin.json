@@ -1,0 +1,29 @@
+{
+  "id": "com.codeforge.plugin.ruff-format.formatter",
+  "name": "Ruff Format (Formatierer)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Formatiert py, pyi mit Ruff Format. Voraussetzung (Terminal): pkg install ruff",
+  "permissions": [],
+  "contributes": {
+    "formatters": [
+      {
+        "id": "ruff-format",
+        "label": "Ruff Format",
+        "extensions": [
+          "py",
+          "pyi"
+        ],
+        "command": [
+          "ruff",
+          "format",
+          "--stdin-filename",
+          "${file}",
+          "-"
+        ],
+        "timeoutSeconds": 20
+      }
+    ]
+  }
+}

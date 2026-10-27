@@ -18,7 +18,7 @@ class TemplatesValidTest {
     @Test
     fun `alle Vorlagen haben gueltige Manifeste`() {
         val folders = dir.listFiles { f -> File(f, "plugin.json").isFile }.orEmpty()
-        assertTrue(folders.size >= 8)
+        assertTrue(folders.size >= 9)
         folders.forEach { assertEquals(it.name, 2, manifest(it.name).apiVersion) }
     }
 
@@ -35,7 +35,7 @@ class TemplatesValidTest {
 
     @Test
     fun `deklarative Vorlagen bestehen die Store-Pruefung, Code-Plugin nicht`() {
-        val decl = listOf("color-theme", "icon-theme", "language-pack", "grammar", "snippets", "lsp-server", "extension-pack")
+        val decl = listOf("color-theme", "icon-theme", "language-pack", "grammar", "snippets", "lsp-server", "formatter", "extension-pack")
         decl.forEach { n ->
             val files = File(dir, n).walkTopDown().filter { it.isFile }.map { it.relativeTo(File(dir, n)).path }.toList()
             assertEquals(n, null, DeclarativeOnly.violation(files, manifest(n)))

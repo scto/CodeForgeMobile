@@ -1627,9 +1627,16 @@ class EditorViewModel @Inject constructor(
                 "yaml", "yml" -> "yaml"
                 "toml" -> "toml"
                 "sh", "bash", "zsh" -> "shellscript"
+                "go" -> "go"
+                "ts", "tsx", "mts", "cts" -> "typescript"
+                "js", "jsx", "mjs", "cjs" -> "javascript"
+                "dart" -> "dart"
+                "cmake" -> "cmake"
                 "gradle" -> "plaintext"
                 else -> {
-                    if (hasShellShebang(path)) {
+                    if (path.substringAfterLast('/').equals("CMakeLists.txt", ignoreCase = true)) {
+                        "cmake"
+                    } else if (hasShellShebang(path)) {
                         "shellscript"
                     } else {
                         when (EditorLanguageType.fromPath(path)) {

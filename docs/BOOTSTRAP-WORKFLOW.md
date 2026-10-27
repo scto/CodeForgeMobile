@@ -164,7 +164,7 @@ Die Gruppen sind nach ihren internen Abhängigkeiten geordnet (geprüft mit `scr
 | `B-leicht-dev` | `06-dev-core` (git, git-lfs, zip, unzip, tar, libcurl, wget, liblzma, 7zip, jq, ninja, make, cmake, openssh) | m4, pkg-config, libtool, flex, bison, ccache, patchelf, strace | leicht |
 | `E-leicht-py-node` | `08-python` (python, python-pip) | nodejs, npm | leicht |
 | `C-leicht-android` | `05-android-tools` (libprotobuf, aapt) | gdb, android-tools, gh, rsync, xmlstarlet | leicht |
-| `D-leicht-lsp` | `12-lsp-misc` (gopls, taplo, ruff) | neocmakelsp, esbuild, pnpm, shellcheck | leicht |
+| `D-leicht-lsp` | `12-lsp-misc` (gopls, taplo, ruff) | neocmakelsp, esbuild, pnpm, shellcheck, shfmt | leicht |
 | `F-leicht-utils` | `07-utils` (vim, nano, ripgrep, fd, tmux, patch, diffutils, findutils, binutils, which, libmagic, libsqlite, bash-completion) | – | leicht |
 | `A0-leicht-libjansi` | `04a-libjansi` (libjansi, nativ, alle Architekturen; muss **vor** `A-leicht-jvm` laufen, weil `maven` davon abhängt) | – | leicht |
 | `A-leicht-jvm` | `04-jvm-tools` (gradle, kotlin, maven, ant, apksigner, d8, dx, ecj) | codeforge-env, yarn, autoconf, automake | leicht |

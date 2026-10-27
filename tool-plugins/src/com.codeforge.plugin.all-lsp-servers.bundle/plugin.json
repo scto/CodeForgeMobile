@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.all-lsp-servers.bundle",
+  "name": "Alle Language Server (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Alle Language Server von CodeForge als Bundle. Die Programme selbst müssen installiert werden.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.clangd.lsp",
+      "com.codeforge.plugin.rust-analyzer.lsp",
+      "com.codeforge.plugin.taplo.lsp",
+      "com.codeforge.plugin.gopls.lsp",
+      "com.codeforge.plugin.ruff.lsp",
+      "com.codeforge.plugin.neocmakelsp.lsp",
+      "com.codeforge.plugin.dart.lsp",
+      "com.codeforge.plugin.bash-language-server.lsp",
+      "com.codeforge.plugin.typescript-language-server.lsp",
+      "com.codeforge.plugin.pyright.lsp",
+      "com.codeforge.plugin.web-langservers.lsp",
+      "com.codeforge.plugin.yaml-language-server.lsp"
+    ]
+  }
+}

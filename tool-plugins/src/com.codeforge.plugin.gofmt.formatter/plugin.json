@@ -1,0 +1,24 @@
+{
+  "id": "com.codeforge.plugin.gofmt.formatter",
+  "name": "gofmt (Formatierer)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Formatiert go mit gofmt. Voraussetzung (Terminal): pkg install golang",
+  "permissions": [],
+  "contributes": {
+    "formatters": [
+      {
+        "id": "gofmt",
+        "label": "gofmt",
+        "extensions": [
+          "go"
+        ],
+        "command": [
+          "gofmt"
+        ],
+        "timeoutSeconds": 20
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "com.codeforge.plugin.shfmt.formatter",
+  "name": "shfmt (Formatierer)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Formatiert sh, bash, zsh mit shfmt. Voraussetzung (Terminal): pkg install shfmt",
+  "permissions": [],
+  "contributes": {
+    "formatters": [
+      {
+        "id": "shfmt",
+        "label": "shfmt",
+        "extensions": [
+          "sh",
+          "bash",
+          "zsh"
+        ],
+        "command": [
+          "shfmt",
+          "-filename",
+          "${file}"
+        ],
+        "timeoutSeconds": 20
+      }
+    ]
+  }
+}

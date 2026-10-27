@@ -1,0 +1,24 @@
+{
+  "id": "com.codeforge.plugin.yaml-language-server.lsp",
+  "name": "YAML Language Server (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet YAML Language Server ein. Voraussetzung (Terminal): npm install -g yaml-language-server",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "yaml-language-server",
+        "label": "YAML Language Server",
+        "languages": [
+          "yaml"
+        ],
+        "command": [
+          "yaml-language-server",
+          "--stdio"
+        ]
+      }
+    ]
+  }
+}

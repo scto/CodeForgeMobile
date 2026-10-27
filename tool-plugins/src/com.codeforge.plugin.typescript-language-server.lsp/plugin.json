@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.typescript-language-server.lsp",
+  "name": "TypeScript/JavaScript Language Server (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet TypeScript/JavaScript Language Server ein. Voraussetzung (Terminal): npm install -g typescript typescript-language-server",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "typescript-language-server",
+        "label": "TypeScript/JavaScript Language Server",
+        "languages": [
+          "typescript",
+          "javascript"
+        ],
+        "command": [
+          "typescript-language-server",
+          "--stdio"
+        ]
+      }
+    ]
+  }
+}

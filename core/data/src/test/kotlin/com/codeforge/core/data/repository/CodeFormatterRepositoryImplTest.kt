@@ -1,5 +1,9 @@
 package com.codeforge.core.data.repository
 
+import com.codeforge.core.domain.extension.ActiveContributions
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.FormatterContribution
+import com.codeforge.core.domain.extension.Resolved
 import com.codeforge.core.domain.model.LspDiagnostic
 import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspRange
@@ -25,12 +29,13 @@ class CodeFormatterRepositoryImplTest {
     private lateinit var fakeLspClient: FakeLspClient
     private lateinit var fakeProcessExecutor: FakeProcessExecutor
     private lateinit var repository: CodeFormatterRepositoryImpl
+    private val contributions = FakeContributions()
 
     @Before
     fun setup() {
         fakeLspClient = FakeLspClient()
         fakeProcessExecutor = FakeProcessExecutor()
-        repository = CodeFormatterRepositoryImpl(fakeLspClient, fakeProcessExecutor)
+        repository = CodeFormatterRepositoryImpl(fakeLspClient, fakeProcessExecutor, contributions)
     }
 
     @Test
@@ -241,12 +246,59 @@ class CodeFormatterRepositoryImplTest {
         val availableExecutables = mutableMapOf<String, String>()
         var mockResult = ProcessExecutionResult(0, "", "")
 
-        override suspend fun execute(command: List<String>, stdin: String?, timeoutSeconds: Long): ProcessExecutionResult {
+        var lastCommand: List<String>? = null
+        var lastEnvironment: Map<String, String> = emptyMap()
+
+        override suspend fun execute(command: List<String>, stdin: String?, timeoutSeconds: Long, environment: Map<String, String>): ProcessExecutionResult {
+            lastCommand = command
+            lastEnvironment = environment
             return mockResult
         }
 
         override fun findExecutable(name: String, extraPaths: List<String>): String? {
             return availableExecutables[name]
         }
+    }
+
+    private class FakeContributions : ContributionRepository {
+        private val state = MutableStateFlow(ActiveContributions.EMPTY)
+        override val contributions: StateFlow<ActiveContributions> = state
+        fun set(vararg f: FormatterContribution) {
+            state.value = ActiveContributions(formatters = f.map { Resolved("p", "/plugins/p", it) })
+        }
+    }
+
+    private val prettier = FormatterContribution(
+        id = "prettier", label = "Prettier", extensions = listOf("js", "ts"),
+        command = listOf("prettier", "--stdin-filepath", "${'$'}{file}")
+    )
+
+    @Test
+    fun `plugin formatter wins over LSP and builtin and gets file placeholder plus env`() = runTest {
+        contributions.set(prettier)
+        fakeProcessExecutor.availableExecutables["prettier"] = "/usr/bin/prettier"
+        fakeProcessExecutor.mockResult = ProcessExecutionResult(0, "const a = 1;\n", "")
+        fakeLspClient.setServerState(LspServerState.RUNNING)
+        fakeLspClient.setCapabilities(LspServerCapabilities(formattingProvider = true))
+        fakeLspClient.formatResult = "from lsp"
+
+        val result = repository.formatFile("/work/app.js", "const a=1").getOrThrow()
+        assertEquals(UnifiedFormatSource.PLUGIN, result.source)
+        assertEquals("Prettier", result.sourceName)
+        assertEquals("const a = 1;\n", result.text)
+        assertEquals(listOf("/usr/bin/prettier", "--stdin-filepath", "/work/app.js"), fakeProcessExecutor.lastCommand)
+        assertTrue(fakeProcessExecutor.lastEnvironment["PATH"].orEmpty().contains("/files/usr/bin"))
+    }
+
+    @Test
+    fun `plugin formatter failure is reported and tool missing falls through`() = runTest {
+        contributions.set(prettier)
+        fakeProcessExecutor.mockResult = ProcessExecutionResult(2, "", "SyntaxError: boom")
+        fakeProcessExecutor.availableExecutables["prettier"] = "/usr/bin/prettier"
+        assertTrue(repository.formatFile("/w/a.ts", "x ="). isFailure)
+
+        fakeProcessExecutor.availableExecutables.clear()
+        val fallback = repository.formatFile("/w/a.ts", "x = 1").getOrThrow()
+        assertEquals(UnifiedFormatSource.BUILTIN_SIMPLIFIED, fallback.source)
     }
 }

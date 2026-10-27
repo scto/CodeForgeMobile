@@ -22,7 +22,7 @@
       "name": "D-leicht-lsp",
       "heavy": false,
       "stage": "12-lsp-misc",
-      "repo_packages": "neocmakelsp,esbuild,pnpm,shellcheck"
+      "repo_packages": "neocmakelsp,esbuild,pnpm,shellcheck,shfmt"
     },
     {
       "name": "F-leicht-utils",

@@ -1,0 +1,23 @@
+{
+  "id": "com.codeforge.plugin.rust-analyzer.lsp",
+  "name": "rust-analyzer (Rust) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet rust-analyzer (Rust) ein. Voraussetzung (Terminal): pkg install rust-analyzer",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "rust-analyzer",
+        "label": "rust-analyzer (Rust)",
+        "languages": [
+          "rust"
+        ],
+        "command": [
+          "rust-analyzer"
+        ]
+      }
+    ]
+  }
+}

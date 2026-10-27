@@ -52,6 +52,13 @@
       }
     },
     {
+      "id": "formatter",
+      "title": {
+        "de": "Formatierer",
+        "en": "Formatters"
+      }
+    },
+    {
       "id": "bundle",
       "title": {
         "de": "Bundles",

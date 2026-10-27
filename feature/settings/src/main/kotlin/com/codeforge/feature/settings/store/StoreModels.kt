@@ -34,7 +34,7 @@ data class StoreItem(
 
     companion object {
         const val PLUGIN_CATEGORY = "plugin"
-        val DECLARATIVE_CATEGORIES = setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "bundle")
+        val DECLARATIVE_CATEGORIES = setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle")
     }
 }
 

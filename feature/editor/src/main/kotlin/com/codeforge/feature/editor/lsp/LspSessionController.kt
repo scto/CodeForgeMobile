@@ -178,6 +178,7 @@ class LspSessionController @Inject constructor(
 
         val languageSet = when (languageId.lowercase()) {
             "c", "cpp", "c_cpp" -> setOf("c", "cpp")
+            "typescript", "javascript" -> setOf("typescript", "javascript")
             else -> setOf(languageId.lowercase())
         }
 
@@ -299,6 +300,11 @@ class LspSessionController @Inject constructor(
         "yaml", "yml" -> "yaml"
         "toml" -> "toml"
         "sh", "bash", "zsh" -> "shellscript"
-        else -> "plaintext"
+        "go" -> "go"
+        "ts", "tsx", "mts", "cts" -> "typescript"
+        "js", "jsx", "mjs", "cjs" -> "javascript"
+        "dart" -> "dart"
+        "cmake" -> "cmake"
+        else -> if (path.substringAfterLast('/').equals("CMakeLists.txt", ignoreCase = true)) "cmake" else "plaintext"
     }
 }

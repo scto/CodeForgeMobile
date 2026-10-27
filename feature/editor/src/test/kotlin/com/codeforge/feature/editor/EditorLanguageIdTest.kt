@@ -59,6 +59,14 @@ class EditorLanguageIdTest {
             "index.html" to "html",
             "page.htm" to "html",
             "styles.css" to "css",
+            "main.go" to "go",
+            "app.ts" to "typescript",
+            "view.tsx" to "typescript",
+            "index.js" to "javascript",
+            "lib.mjs" to "javascript",
+            "main.dart" to "dart",
+            "CMakeLists.txt" to "cmake",
+            "toolchain.cmake" to "cmake",
             "notes.txt" to "plaintext",
             "unknown.xyz" to "plaintext"
         )

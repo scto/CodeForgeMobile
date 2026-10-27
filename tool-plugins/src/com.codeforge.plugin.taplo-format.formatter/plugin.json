@@ -1,0 +1,26 @@
+{
+  "id": "com.codeforge.plugin.taplo-format.formatter",
+  "name": "Taplo Format (Formatierer)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Formatiert toml mit Taplo Format. Voraussetzung (Terminal): pkg install taplo",
+  "permissions": [],
+  "contributes": {
+    "formatters": [
+      {
+        "id": "taplo-format",
+        "label": "Taplo Format",
+        "extensions": [
+          "toml"
+        ],
+        "command": [
+          "taplo",
+          "format",
+          "-"
+        ],
+        "timeoutSeconds": 20
+      }
+    ]
+  }
+}

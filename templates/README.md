@@ -10,6 +10,7 @@ Je Ordner eine lauffähige Minimalvorlage. Ausführliche Anleitung: `docs/extens
 | `grammar` | deklarativ | Syntaxfarben für eigene Dateitypen |
 | `snippets` | deklarativ | Code-Bausteine |
 | `lsp-server` | deklarativ | Language-Server-Anbindung |
+| `formatter` | deklarativ | Externer Formatierer (stdin → stdout) |
 | `extension-pack` | deklarativ | Bundle aus mehreren Plugins |
 | `code-plugin` | Code (Gradle) | Befehle, Menüs, Ereignisse |
 

@@ -1,0 +1,24 @@
+{
+  "id": "com.codeforge.plugin.neocmakelsp.lsp",
+  "name": "neocmakelsp (CMake) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet neocmakelsp (CMake) ein. Voraussetzung (Terminal): pkg install neocmakelsp",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "neocmakelsp",
+        "label": "neocmakelsp (CMake)",
+        "languages": [
+          "cmake"
+        ],
+        "command": [
+          "neocmakelsp",
+          "stdio"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "com.codeforge.plugin.ruff.lsp",
+  "name": "Ruff (Python-Linting) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet Ruff (Python-Linting) ein. Voraussetzung (Terminal): pkg install ruff",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "ruff",
+        "label": "Ruff (Python-Linting)",
+        "languages": [
+          "python"
+        ],
+        "command": [
+          "ruff",
+          "server"
+        ]
+      }
+    ]
+  }
+}
