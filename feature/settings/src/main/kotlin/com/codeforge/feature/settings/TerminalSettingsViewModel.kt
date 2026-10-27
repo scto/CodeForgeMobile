@@ -18,8 +18,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TerminalSettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
+
+    private val density: Float get() = context.resources.displayMetrics.density
+
+    /** Termux-Einstellungen des Terminals (Schriftgröße liegt dort in SharedPreferences, nicht im DataStore). */
+    private val termuxPrefs by lazy {
+        runCatching { com.codeforge.shared.termux.settings.preferences.TermuxAppSharedPreferences.build(context, false) }.getOrNull()
+    }
+
+    private fun readTermuxFontSp(): Int? = runCatching { termuxPrefs?.fontSize }.getOrNull()
+        ?.let { TerminalFontSize.pxToSp(it, density) }
+    private val termuxFontSp = MutableStateFlow(readTermuxFontSp())
 
     private val properties = TermuxPropertiesStore()
     private val termuxState = MutableStateFlow(readTermuxState())
@@ -32,9 +44,9 @@ class TerminalSettingsViewModel @Inject constructor(
         return rows to style
     }
 
-    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState) { settings, termux ->
+    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp) { settings, termux, fontSp ->
             TerminalSettingsUiState(
-                fontSize = settings.terminal.fontSize.takeIf { it > 0 } ?: 14,
+                fontSize = fontSp ?: settings.terminal.fontSize.takeIf { it > 0 } ?: 14,
                 useCompactTerminal = settings.terminal.useCompactTerminal,
                 scrollbackRows = termux.first,
                 cursorStyle = termux.second,
@@ -46,8 +58,13 @@ class TerminalSettingsViewModel @Inject constructor(
     fun onEvent(event: TerminalSettingsUiEvent) {
         viewModelScope.launch {
             when (event) {
-                is TerminalSettingsUiEvent.FontSizeChanged ->
-                    settingsRepository.updateTerminal { it.toBuilder().setFontSize(event.size).build() }
+                is TerminalSettingsUiEvent.FontSizeChanged -> {
+                    val sp = event.size.coerceIn(TerminalFontSize.MIN_SP, TerminalFontSize.MAX_SP)
+                    settingsRepository.updateTerminal { it.toBuilder().setFontSize(sp).build() }
+                    // Wirkt im Terminal beim nächsten Öffnen/Neuzeichnen (Termux liest die Größe aus seinen Preferences).
+                    runCatching { termuxPrefs?.setFontSize(TerminalFontSize.spToPx(sp, density)) }
+                    termuxFontSp.value = readTermuxFontSp()
+                }
                 is TerminalSettingsUiEvent.UseCompactTerminalChanged ->
                     settingsRepository.updateTerminal { it.toBuilder().setUseCompactTerminal(event.compact).build() }
                 is TerminalSettingsUiEvent.ScrollbackChanged -> {

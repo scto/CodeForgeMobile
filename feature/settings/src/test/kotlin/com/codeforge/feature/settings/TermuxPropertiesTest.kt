@@ -44,3 +44,14 @@ class TermuxPropertiesTest {
         assertEquals("5000", store.read("terminal-transcript-rows"))
     }
 }
+
+class TerminalFontSizeTest {
+    @Test
+    fun `sp zu px ist gerade und rechnet zurueck`() {
+        assertEquals(0, TerminalFontSize.spToPx(14, 2.625f) % 2)
+        assertEquals(36, TerminalFontSize.spToPx(14, 2.625f)) // 36,75 → 37 → 36
+        assertEquals(14, TerminalFontSize.pxToSp(36, 2.625f))
+        assertEquals(TerminalFontSize.MAX_SP, TerminalFontSize.pxToSp(1000, 2f))
+        assertEquals(TerminalFontSize.MIN_SP, TerminalFontSize.pxToSp(2, 2f))
+    }
+}

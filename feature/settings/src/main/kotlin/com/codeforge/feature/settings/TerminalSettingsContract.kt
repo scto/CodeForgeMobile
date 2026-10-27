@@ -24,6 +24,20 @@ sealed interface TerminalSettingsUiEvent {
     data class CursorStyleChanged(val style: String) : TerminalSettingsUiEvent
 }
 
+/** Umrechnung zwischen Einstellungs-sp (8–32) und der Pixel-Schriftgröße des Termux-Terminals. */
+object TerminalFontSize {
+    const val MIN_SP = 8
+    const val MAX_SP = 32
+
+    fun spToPx(sp: Int, density: Float): Int {
+        val px = Math.round(sp * density)
+        return if (px % 2 == 1) px - 1 else px // Termux ändert in 2er-Schritten
+    }
+
+    fun pxToSp(px: Int, density: Float): Int =
+        Math.round(px / density).coerceIn(MIN_SP, MAX_SP)
+}
+
 object TerminalScrollback {
     const val DEFAULT = 2000
     /** Auswahlstufen für den Regler; Termux erlaubt 100–50000. */

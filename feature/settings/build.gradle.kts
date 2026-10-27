@@ -9,6 +9,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":libs:termux-shared"))
     implementation(project(":core:resources"))
     implementation(project(":core:domain"))
     implementation(project(":core:common"))
