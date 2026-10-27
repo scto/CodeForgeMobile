@@ -24,7 +24,7 @@ Das Terminal ist der Termux-Fork (`libs:termux-app`); Optionen laufen über `ter
 (`terminal-transcript-rows`, `terminal-cursor-style`, `extra-keys`). `TerminalConfig.font_size` wird dort derzeit nicht ausgewertet.
 - ~~Scrollback-Größe und Cursorstil~~ — umgesetzt (`TermuxPropertiesStore` schreibt `terminal-transcript-rows`/`terminal-cursor-style` in `~/.termux/termux.properties`; wirkt für NEUE Sitzungen). Gerätetest offen: wirkt es wirklich nach Neustart des Terminals? Falls nicht, Reload-Broadcast ergänzen.
 - Noch offen: „Alle Sitzungen beim Schließen beenden“, Zwischenablage-Tastenkombinationen, ~~Schriftgröße~~ jetzt an die Termux-Preferences gebunden (`TerminalSettingsViewModel`, sp↔px). Gerätetest offen: Größe ändern → Terminal neu öffnen → stimmt die Größe, bleibt Pinch-Zoom konsistent? ~~Terminal-Schriftart~~: Dateiauswahl (TTF/OTF) → `~/.termux/font.ttf`, Zurücksetzen auf Systemstandard (`TerminalFontInstaller`). Gerätetest offen.
-- BUG (vorhanden, nicht neu): Editor-Option „JetBrains Mono“ verweist auf `assets/fonts/jetbrainsmono_regular.ttf`, die Datei existiert im Repo nicht → Fallback Monospace. Schrift (OFL) als Asset ergänzen oder Option entfernen.
+- JetBrains Mono (OFL, v2.304) liegt jetzt als Asset `feature/editor/src/main/assets/fonts/` (Editor-Option + Terminal-Button „JetBrains Mono“). Gerätetest offen.
 - „Projekt als Arbeitsverzeichnis“: beim Öffnen einer Terminal-Sitzung aus dem Workspace `cwd = rootPath`.
 - Zusatztasten bearbeiten (Extra-Keys-Layout), Terminal-Backup/Wiederherstellen (`$HOME` + `usr` als tar.gz).
 

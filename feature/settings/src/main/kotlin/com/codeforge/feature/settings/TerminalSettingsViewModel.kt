@@ -81,6 +81,9 @@ class TerminalSettingsViewModel @Inject constructor(
                 is TerminalSettingsUiEvent.FontFileChosen -> installFont {
                     context.contentResolver.openInputStream(event.uri)
                 }
+                TerminalSettingsUiEvent.BundledFontChosen -> installFont {
+                    context.assets.open("fonts/jetbrainsmono_regular.ttf")
+                }
                 TerminalSettingsUiEvent.FontReset -> {
                     fontInstaller.reset()
                     fontState.value = fontInstaller.isInstalled to null

@@ -1905,5 +1905,6 @@
     <string name="settings_terminal_font_pick">Choose font file…</string>
     <string name="settings_terminal_font_invalid">Not a valid font file (TTF/OTF).</string>
     <string name="settings_terminal_font_installed">Terminal font installed.</string>
+    <string name="settings_terminal_font_jetbrains">JetBrains Mono</string>
 </resources>
 

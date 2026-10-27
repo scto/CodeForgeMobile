@@ -210,6 +210,9 @@ private fun TerminalSettingsScreen(
                         androidx.compose.material3.TextButton(onClick = {
                             fontPicker.launch(arrayOf("font/ttf", "font/otf", "application/x-font-ttf", "application/octet-stream"))
                         }) { Text(stringRes(R.string.settings_terminal_font_pick), maxLines = 1) }
+                        androidx.compose.material3.TextButton(onClick = { onEvent(TerminalSettingsUiEvent.BundledFontChosen) }) {
+                            Text(stringRes(R.string.settings_terminal_font_jetbrains), maxLines = 1)
+                        }
                         if (uiState.customFontInstalled) {
                             androidx.compose.material3.TextButton(onClick = { onEvent(TerminalSettingsUiEvent.FontReset) }) {
                                 Text(stringRes(R.string.settings_terminal_font_system), maxLines = 1)

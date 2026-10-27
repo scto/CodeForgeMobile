@@ -27,6 +27,7 @@ sealed interface TerminalSettingsUiEvent {
     data class ScrollbackChanged(val rows: Int) : TerminalSettingsUiEvent
     data class CursorStyleChanged(val style: String) : TerminalSettingsUiEvent
     data class FontFileChosen(val uri: android.net.Uri) : TerminalSettingsUiEvent
+    data object BundledFontChosen : TerminalSettingsUiEvent
     data object FontReset : TerminalSettingsUiEvent
     data object FontMessageShown : TerminalSettingsUiEvent
 }
