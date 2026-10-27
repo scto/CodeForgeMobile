@@ -1,6 +1,7 @@
 // Modul: :feature:settings
 package com.codeforge.feature.settings.extensions
 
+import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.model.LspServerLaunch
 import com.codeforge.core.domain.repository.LspServerResolver
 import com.codeforge.libs.terminal_engine.TermuxEnvironment
@@ -10,12 +11,13 @@ import javax.inject.Singleton
 
 @Singleton
 class LspServerResolverImpl @Inject constructor(
-    private val extensionsManager: ExtensionsManager
+    private val extensionsManager: ExtensionsManager,
+    private val contributionRepository: ContributionRepository
 ) : LspServerResolver {
 
     override suspend fun resolve(languageId: String): LspServerLaunch? {
-        val pkg = findPackageForLanguage(languageId) ?: return null
-        if (!extensionsManager.isInstalled(pkg)) return null
+        val pkg = findPackageForLanguage(languageId)
+        if (pkg == null || !extensionsManager.isInstalled(pkg)) return resolveContributed(languageId)
 
         val env = TermuxEnvironment.environment()
         val extensionDir = extensionsManager.getExtensionDirectory(pkg)
@@ -100,6 +102,24 @@ class LspServerResolverImpl @Inject constructor(
         }
 
         return LspServerLaunch(command = command, env = env, serverId = serverId)
+    }
+
+    /**
+     * Language Server, den ein aktiviertes Plugin deklarativ beisteuert (`contributes.lspServers`).
+     * Platzhalter `${pluginDir}` und `${home}` im Kommando werden ersetzt; existiert die ausführbare
+     * Datei nicht (und ist es ein absoluter Pfad), gibt es keinen Server.
+     */
+    private fun resolveContributed(languageId: String): LspServerLaunch? {
+        val wanted = languageId.lowercase()
+        val hit = contributionRepository.contributions.value.lspServers
+            .firstOrNull { r -> r.item.languages.any { it.equals(wanted, ignoreCase = true) } }
+            ?: return null
+        val command = hit.item.command.map {
+            it.replace("${'$'}{pluginDir}", hit.pluginDir).replace("${'$'}{home}", TermuxEnvironment.home)
+        }
+        val exe = command.first()
+        if (exe.startsWith("/") && !File(exe).exists()) return null
+        return LspServerLaunch(command = command, env = TermuxEnvironment.environment(), serverId = hit.item.id)
     }
 
     private fun findPackageForLanguage(languageId: String): LspExtensionPackage? = when (languageId.lowercase()) {

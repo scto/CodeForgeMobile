@@ -1,8 +1,8 @@
 /**
- * Modul: :libs:plugin-api
+ * Modul: :libs:plugin-impl
  * @author Thomas Schmid
  */
-package com.codeforge.libs.plugin_api
+package com.codeforge.libs.plugin_impl
 
 import com.codeforge.core.domain.model.InstalledPlugin
 import org.json.JSONArray
@@ -28,7 +28,13 @@ internal class PluginRegistry(private val registryFile: File) {
                     version = obj.getString("version"),
                     description = obj.optString("description", ""),
                     isEnabled = obj.optBoolean("isEnabled", true),
-                    entryPointClass = if (obj.has("entryPointClass")) obj.getString("entryPointClass") else null
+                    entryPointClass = if (obj.has("entryPointClass")) obj.getString("entryPointClass") else null,
+                    apiVersion = obj.optInt("apiVersion", 1),
+                    publisher = obj.optString("publisher", ""),
+                    permissions = obj.optJSONArray("permissions")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() }
+                        ?: emptySet(),
+                    contributionKinds = obj.optJSONArray("contributionKinds")?.let { a -> (0 until a.length()).map { a.getString(it) } }
+                        ?: emptyList()
                 )
             }
         }.getOrDefault(emptyList())
@@ -45,6 +51,10 @@ internal class PluginRegistry(private val registryFile: File) {
                     put("description", plugin.description)
                     put("isEnabled", plugin.isEnabled)
                     plugin.entryPointClass?.let { put("entryPointClass", it) }
+                    put("apiVersion", plugin.apiVersion)
+                    put("publisher", plugin.publisher)
+                    put("permissions", JSONArray(plugin.permissions.toList()))
+                    put("contributionKinds", JSONArray(plugin.contributionKinds))
                 }
             )
         }

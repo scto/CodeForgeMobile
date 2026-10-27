@@ -1,0 +1,109 @@
+/**
+ * Modul: :core:domain
+ * @author Thomas Schmid
+ */
+package com.codeforge.core.domain.extension
+
+/** Versionen des Manifest-/SDK-Vertrags. v1 = nur id/name/version/entryPointClass, v2 = + contributes/permissions. */
+object PluginApiVersion {
+    const val CURRENT: Int = 2
+}
+
+/** Berechtigungen, die ein Code-Plugin im Manifest anfordern muss (rein deklarative Plugins brauchen keine). */
+object PluginPermissions {
+    const val COMMANDS = "commands"
+    const val MENUS = "menus"
+    const val FILE_EVENTS = "file-events"
+    const val GIT_EVENTS = "git-events"
+    const val SHELL = "shell"
+    const val LSP = "lsp"
+
+    val ALL: Set<String> = setOf(COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP)
+}
+
+data class PluginManifest(
+    val id: String,
+    val name: String,
+    val version: String,
+    val description: String = "",
+    val publisher: String = "",
+    val apiVersion: Int = 1,
+    val entryPointClass: String? = null,
+    val permissions: Set<String> = emptySet(),
+    val contributes: Contributes = Contributes()
+) {
+    /** true, wenn das Plugin keinen ausführbaren Code mitbringt (im Store erlaubt). */
+    val isDeclarativeOnly: Boolean get() = entryPointClass == null
+}
+
+data class Contributes(
+    val colorThemes: List<ColorThemeContribution> = emptyList(),
+    val iconThemes: List<IconThemeContribution> = emptyList(),
+    val languagePacks: List<LanguagePackContribution> = emptyList(),
+    val grammars: List<GrammarContribution> = emptyList(),
+    val snippets: List<SnippetContribution> = emptyList(),
+    val lspServers: List<LspServerContribution> = emptyList(),
+    /** IDs weiterer Plugins, die zusammen mit diesem Bundle installiert werden sollen. */
+    val extensionPack: List<String> = emptyList()
+) {
+    val isEmpty: Boolean
+        get() = colorThemes.isEmpty() && iconThemes.isEmpty() && languagePacks.isEmpty() &&
+            grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty()
+}
+
+/** Farbschema: [path] zeigt auf eine JSON-Datei (siehe docs/extensions.md) relativ zum Plugin-Verzeichnis. */
+data class ColorThemeContribution(
+    val id: String,
+    val label: String,
+    val isDark: Boolean,
+    val path: String
+)
+
+/** Icon-Theme: [path] zeigt auf eine JSON-Datei, die Dateiendungen/Dateinamen/Ordner auf Icon-Dateien abbildet. */
+data class IconThemeContribution(
+    val id: String,
+    val label: String,
+    val path: String
+)
+
+/** Sprachpaket: [path] zeigt auf eine JSON-Datei mit Schlüssel → übersetzter Text. [locale] als BCP-47-Tag (z. B. "fr", "pt-BR"). */
+data class LanguagePackContribution(
+    val locale: String,
+    val label: String,
+    val path: String
+)
+
+data class GrammarContribution(
+    val languageId: String,
+    val scopeName: String,
+    val path: String,
+    val extensions: List<String> = emptyList()
+)
+
+data class SnippetContribution(
+    val languageId: String,
+    val path: String
+)
+
+/**
+ * Deklarativer Language Server. [command] darf die Platzhalter `${pluginDir}` und `${home}` enthalten.
+ * [installScript] (optional) wird bei Aktivierung über die Termux-Umgebung ausgeführt, wenn [command] nicht vorhanden ist.
+ */
+data class LspServerContribution(
+    val id: String,
+    val label: String,
+    val languages: List<String>,
+    val command: List<String>,
+    val installScript: String? = null
+)
+
+/** Namen der nicht leeren Contribution-Arten, wie sie in `contributes` heißen. */
+fun Contributes.kinds(): List<String> = buildList {
+    if (colorThemes.isNotEmpty()) add("colorThemes")
+    if (iconThemes.isNotEmpty()) add("iconThemes")
+    if (languagePacks.isNotEmpty()) add("languagePacks")
+    if (grammars.isNotEmpty()) add("grammars")
+    if (snippets.isNotEmpty()) add("snippets")
+    if (lspServers.isNotEmpty()) add("lspServers")
+    if (extensionPack.isNotEmpty()) add("extensionPack")
+}

@@ -1,12 +1,15 @@
 /**
- * Modul: :libs:plugin-api
+ * Modul: :libs:plugin-impl
  * @author Thomas Schmid
  */
-package com.codeforge.libs.plugin_api
+package com.codeforge.libs.plugin_impl
 
 import android.content.Context
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.domain.repository.LspClientRepository
+import com.codeforge.libs.plugin_api.CodeForgePlugin
+import com.codeforge.libs.plugin_api.PluginContext
+import com.codeforge.libs.plugin_api.PluginHostServices
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.libs.terminal_engine.ShellLaunchSpec
@@ -67,6 +70,12 @@ internal class PluginRuntime(
         val dexSource = File(pluginDir, "classes.dex").takeIf { it.isFile }
             ?: pluginDir.listFiles { file -> file.extension == "jar" || file.extension == "dex" }?.firstOrNull()
             ?: error(Res.string(R.string.plugin_kein_classes_dex_oder_jar))
+
+        // Android 14+: dynamisch geladener Code muss schreibgeschützt sein, sonst wirft der
+        // DexClassLoader eine SecurityException. Wir härten die Datei unmittelbar vor dem Laden.
+        if (dexSource.canWrite() && !dexSource.setReadOnly()) {
+            error("Plugin-Code konnte nicht schreibgeschützt werden: ${dexSource.name}")
+        }
 
         val optimizedDir = File(hostContext.codeCacheDir, "plugin_dex_${plugin.id}").apply { mkdirs() }
 

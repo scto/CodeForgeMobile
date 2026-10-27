@@ -1,6 +1,12 @@
 // Modul: :feature:settings
 package com.codeforge.feature.settings.extensions
 
+import com.codeforge.core.domain.extension.ActiveContributions
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.LspServerContribution
+import com.codeforge.core.domain.extension.Resolved
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -11,7 +17,54 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 
+internal object NoContributions : ContributionRepository {
+    override val contributions: StateFlow<ActiveContributions> = MutableStateFlow(ActiveContributions.EMPTY)
+}
+
 class LspServerResolverTest {
+
+    @Test
+    fun `resolve nutzt von Plugin beigesteuerten Language Server mit Platzhaltern`() = runBlocking {
+        val manager = ExtensionsManager(
+            baseDir = tempFolder.newFolder("ext_contrib"),
+            downloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
+        )
+        val pluginDir = tempFolder.newFolder("plugin_zig")
+        val exe = File(pluginDir, "zls").apply { writeText("#!/bin/sh") }
+        val repo = object : ContributionRepository {
+            override val contributions = MutableStateFlow(
+                ActiveContributions(
+                    lspServers = listOf(
+                        Resolved("p.zig", pluginDir.absolutePath, LspServerContribution("zls", "ZLS", listOf("zig"), listOf("${'$'}{pluginDir}/zls", "--stdio")))
+                    )
+                )
+            )
+        }
+        val launch = LspServerResolverImpl(manager, repo).resolve("zig")
+        assertNotNull(launch)
+        assertEquals(listOf(exe.absolutePath, "--stdio"), launch!!.command)
+        assertEquals("zls", launch.serverId)
+        assertNull("andere Sprache", LspServerResolverImpl(manager, repo).resolve("pascal"))
+    }
+
+    @Test
+    fun `beigesteuerter Server mit fehlender Datei liefert null`() = runBlocking {
+        val manager = ExtensionsManager(
+            baseDir = tempFolder.newFolder("ext_contrib2"),
+            downloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
+        )
+        val repo = object : ContributionRepository {
+            override val contributions = MutableStateFlow(
+                ActiveContributions(
+                    lspServers = listOf(
+                        Resolved("p", "/nonexistent", LspServerContribution("x", "X", listOf("zig"), listOf("${'$'}{pluginDir}/missing")))
+                    )
+                )
+            )
+        }
+        assertNull(LspServerResolverImpl(manager, repo).resolve("zig"))
+    }
+
 
     @get:Rule
     val tempFolder = TemporaryFolder()
@@ -21,7 +74,7 @@ class LspServerResolverTest {
         val baseDir = tempFolder.newFolder("extensions_root")
         val dummyDownloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
         val manager = ExtensionsManager(baseDir = baseDir, downloader = dummyDownloader)
-        val resolver = LspServerResolverImpl(manager)
+        val resolver = LspServerResolverImpl(manager, NoContributions)
 
         val result = resolver.resolve("unknown-language-xyz")
         assertNull(result)
@@ -32,7 +85,7 @@ class LspServerResolverTest {
         val baseDir = tempFolder.newFolder("extensions_root_empty")
         val dummyDownloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
         val manager = ExtensionsManager(baseDir = baseDir, downloader = dummyDownloader)
-        val resolver = LspServerResolverImpl(manager)
+        val resolver = LspServerResolverImpl(manager, NoContributions)
 
         assertNull("Uninstalled lemminx should return null", resolver.resolve("xml"))
         assertNull("Uninstalled yaml-ls should return null", resolver.resolve("yaml"))
@@ -75,7 +128,7 @@ class LspServerResolverTest {
             downloader = dummyDownloader,
             customTermuxBinDir = fakeBin
         )
-        val resolver = LspServerResolverImpl(manager)
+        val resolver = LspServerResolverImpl(manager, NoContributions)
 
         // XML -> lemminx
         val xmlLaunch = resolver.resolve("xml")

@@ -1,9 +1,10 @@
 /**
- * Modul: :libs:plugin-api
+ * Modul: :libs:plugin-impl
  * @author Thomas Schmid
  */
-package com.codeforge.libs.plugin_api
+package com.codeforge.libs.plugin_impl
 
+import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.repository.PluginRepository
 import dagger.Binds
 import dagger.Module
@@ -19,4 +20,10 @@ abstract class PluginApiModule {
     abstract fun bindPluginRepository(
         impl: PluginRepositoryImpl
     ): PluginRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindContributionRepository(
+        impl: PluginRepositoryImpl
+    ): ContributionRepository
 }

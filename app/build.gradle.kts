@@ -80,6 +80,7 @@ dependencies {
     implementation(project(":libs:gradle-tooling-bridge"))
     implementation(project(":libs:lsp-client"))
     implementation(project(":libs:plugin-api"))
+    implementation(project(":libs:plugin-impl"))
     // Hilt-Bindings für Indexierung + Dependency-Updater (Features sehen nur die -api-Module)
     implementation(project(":libs:ai-client"))
     implementation(project(":libs:indexing-api"))

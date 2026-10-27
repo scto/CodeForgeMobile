@@ -1,10 +1,14 @@
 /**
- * Modul: :libs:plugin-api
+ * Modul: :libs:plugin-impl
  * @author Thomas Schmid
  */
-package com.codeforge.libs.plugin_api
+package com.codeforge.libs.plugin_impl
 
 import android.content.Context
+import com.codeforge.core.domain.extension.ActiveContributions
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.PluginManifestParser
+import com.codeforge.core.domain.extension.kinds
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.domain.model.PluginInstallEvent
 import com.codeforge.core.domain.repository.LspClientRepository
@@ -21,7 +25,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -44,7 +47,7 @@ import javax.inject.Singleton
 class PluginRepositoryImpl @Inject constructor(
     @ApplicationContext context: Context,
     lspClientRepository: LspClientRepository
-) : PluginRepository {
+) : PluginRepository, ContributionRepository {
 
     private val pluginsDir = File(context.filesDir, "plugins")
     private val registry = PluginRegistry(File(pluginsDir, "registry.json"))
@@ -56,10 +59,24 @@ class PluginRepositoryImpl @Inject constructor(
     private val _loadedPluginIds = MutableStateFlow<Set<String>>(emptySet())
     override val loadedPluginIds: StateFlow<Set<String>> = _loadedPluginIds.asStateFlow()
 
+    private val _contributions = MutableStateFlow(ActiveContributions.EMPTY)
+    override val contributions: StateFlow<ActiveContributions> = _contributions.asStateFlow()
+
+    /** Liest die Manifeste aller aktivierten Plugins neu ein (deklarativ, unabhängig davon, ob Plugin-Code lädt). */
+    private fun refreshContributions() {
+        val entries = _installedPlugins.value.filter { it.isEnabled }.mapNotNull { plugin ->
+            val dir = File(pluginsDir, plugin.id)
+            val manifestFile = File(dir, "plugin.json").takeIf { it.isFile } ?: return@mapNotNull null
+            PluginManifestParser.parse(manifestFile.readText()).getOrNull()?.let { it to dir.absolutePath }
+        }
+        _contributions.value = ActiveContributions.of(entries)
+    }
+
     init {
         pluginsDir.mkdirs()
         val plugins = registry.loadAll()
         _installedPlugins.value = plugins
+        refreshContributions()
 
         // Best-effort: Plugins, die in einer vorherigen Sitzung aktiviert waren, werden
         // beim Neustart erneut geladen. Ein einzelnes defektes Plugin (z.B. fehlendes
@@ -70,6 +87,7 @@ class PluginRepositoryImpl @Inject constructor(
     }
 
     private fun attemptLoad(plugin: InstalledPlugin) {
+        if (plugin.isDeclarativeOnly) return // nichts zu laden, Contributions werden deklarativ gelesen
         runtime.load(plugin, File(pluginsDir, plugin.id))
             .onSuccess { _loadedPluginIds.update { it + plugin.id } }
     }
@@ -114,12 +132,9 @@ class PluginRepositoryImpl @Inject constructor(
             val manifestFile = File(tempDir, "plugin.json")
             if (!manifestFile.isFile) error(Res.string(R.string.plugin_plugin_json_fehlt_im_archiv))
 
-            val manifest = JSONObject(manifestFile.readText())
-            val id = manifest.getString("id")
-            // Die ID wird zum Verzeichnisnamen: keine Pfadtrenner, kein "..".
-            if (!Regex("[A-Za-z0-9][A-Za-z0-9._-]*").matches(id) || id.contains("..")) {
-                error("Ungültige Plugin-ID: $id")
-            }
+            // Validiert u. a. die ID (wird zum Verzeichnisnamen), API-Version, Berechtigungen und Contribution-Pfade.
+            val manifest = PluginManifestParser.parse(manifestFile.readText()).getOrThrow()
+            val id = manifest.id
 
             val finalDir = File(pluginsDir, id)
             if (finalDir.exists()) {
@@ -131,16 +146,21 @@ class PluginRepositoryImpl @Inject constructor(
 
             val plugin = InstalledPlugin(
                 id = id,
-                name = manifest.getString("name"),
-                version = manifest.getString("version"),
-                description = manifest.optString("description", ""),
+                name = manifest.name,
+                version = manifest.version,
+                description = manifest.description,
                 isEnabled = true,
-                entryPointClass = if (manifest.has("entryPointClass")) manifest.getString("entryPointClass") else null
+                entryPointClass = manifest.entryPointClass,
+                apiVersion = manifest.apiVersion,
+                publisher = manifest.publisher,
+                permissions = manifest.permissions,
+                contributionKinds = manifest.contributes.kinds()
             )
 
             val updated = _installedPlugins.value.filterNot { it.id == id } + plugin
             registry.saveAll(updated)
             _installedPlugins.value = updated
+            refreshContributions()
 
             // Direkt laden, da isEnabled per Default true ist. Schlägt das Laden fehl
             // (z.B. weil kein classes.dex mitgeliefert wurde), bleibt das Plugin
@@ -160,8 +180,10 @@ class PluginRepositoryImpl @Inject constructor(
                 ?: error(Res.string(R.string.plugin_plugin_nicht_gefunden, pluginId))
 
             if (enabled) {
-                runtime.load(plugin, File(pluginsDir, pluginId)).getOrThrow()
-                _loadedPluginIds.update { it + pluginId }
+                if (!plugin.isDeclarativeOnly) {
+                    runtime.load(plugin, File(pluginsDir, pluginId)).getOrThrow()
+                    _loadedPluginIds.update { it + pluginId }
+                }
             } else {
                 runtime.unload(pluginId)
                 _loadedPluginIds.update { it - pluginId }
@@ -170,6 +192,7 @@ class PluginRepositoryImpl @Inject constructor(
             val updated = _installedPlugins.value.map { if (it.id == pluginId) it.copy(isEnabled = enabled) else it }
             registry.saveAll(updated)
             _installedPlugins.value = updated
+            refreshContributions()
         }
     }
 
@@ -181,7 +204,7 @@ class PluginRepositoryImpl @Inject constructor(
             // damit onUninstall() eine echte Instanz zum Aufrufen hat — best-effort: schlägt
             // das Nachladen fehl (z.B. defektes classes.dex), wird trotzdem regulär
             // deinstalliert, nur ohne die Möglichkeit, externe Ressourcen aufzuräumen.
-            if (plugin != null && !runtime.isLoaded(pluginId)) {
+            if (plugin != null && !plugin.isDeclarativeOnly && !runtime.isLoaded(pluginId)) {
                 runtime.load(plugin, File(pluginsDir, pluginId))
             }
 
@@ -191,6 +214,7 @@ class PluginRepositoryImpl @Inject constructor(
             val updated = _installedPlugins.value.filterNot { it.id == pluginId }
             registry.saveAll(updated)
             _installedPlugins.value = updated
+            refreshContributions()
         }
     }
 
