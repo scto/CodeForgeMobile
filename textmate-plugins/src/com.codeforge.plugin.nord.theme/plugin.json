@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.nord.theme",
+  "name": "Nord (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Nord als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "nord-dark",
+        "label": "Nord Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "nord-light",
+        "label": "Nord Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

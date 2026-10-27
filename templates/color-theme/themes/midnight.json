@@ -15,5 +15,5 @@
     "onSurfaceVariant": "#B4BBD0",
     "outline": "#6B7390"
   },
-  "textmateTheme": "syntax/midnight-tm.json"
+  "textmateTheme": "themes/syntax/midnight-tm.json"
 }

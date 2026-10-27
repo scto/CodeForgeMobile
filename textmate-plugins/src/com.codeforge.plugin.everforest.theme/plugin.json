@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.everforest.theme",
+  "name": "Everforest (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Everforest als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "everforest-dark",
+        "label": "Everforest Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "everforest-light",
+        "label": "Everforest Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

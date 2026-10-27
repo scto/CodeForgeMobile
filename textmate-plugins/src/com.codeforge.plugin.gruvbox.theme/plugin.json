@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.gruvbox.theme",
+  "name": "Gruvbox (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Gruvbox als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "gruvbox-dark",
+        "label": "Gruvbox Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "gruvbox-light",
+        "label": "Gruvbox Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.ayu.theme",
+  "name": "Ayu (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Ayu als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "ayu-dark",
+        "label": "Ayu Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "ayu-light",
+        "label": "Ayu Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

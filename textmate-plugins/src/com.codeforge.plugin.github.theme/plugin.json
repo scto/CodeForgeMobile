@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.github.theme",
+  "name": "GitHub (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "GitHub als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "github-dark",
+        "label": "GitHub Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "github-light",
+        "label": "GitHub Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

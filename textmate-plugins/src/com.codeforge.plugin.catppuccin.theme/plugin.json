@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.catppuccin.theme",
+  "name": "Catppuccin (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Catppuccin als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "catppuccin-dark",
+        "label": "Catppuccin Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "catppuccin-light",
+        "label": "Catppuccin Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

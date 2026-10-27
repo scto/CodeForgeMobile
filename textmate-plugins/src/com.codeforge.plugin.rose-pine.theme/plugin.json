@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.rose-pine.theme",
+  "name": "Rosé Pine (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Rosé Pine als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "rose-pine-dark",
+        "label": "Rosé Pine Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "rose-pine-light",
+        "label": "Rosé Pine Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

@@ -55,7 +55,7 @@ Datei (`path`):
 
 * Schlüssel sind Material-3-Rollen (`primary`, `onPrimary`, `primaryContainer`, `secondary`, `tertiary`, `error`, `background`, `surface`, `surfaceVariant`, `outline`, `surfaceContainer*`, …; Liste in `ColorThemeFileParser.ROLES`). Nicht angegebene Rollen kommen aus dem Standardschema der Helligkeit (`uiTheme`: `dark`/`light`). Unbekannte Rollen werden ignoriert.
 * Farben als `#RGB`, `#RRGGBB` oder `#AARRGGBB`.
-* `textmateTheme` (optional): VS-Code/TextMate-Theme-JSON für den Editor. Gilt, wenn in den Editor-Einstellungen „auto“ gewählt ist.
+* `textmateTheme` (optional): VS-Code/TextMate-Theme-JSON für den Editor; Pfad **relativ zum Plugin-Verzeichnis** (nicht zur Theme-Datei), z. B. `syntax/dark.json`. Gilt, wenn in den Editor-Einstellungen „auto“ gewählt ist.
 * Auswahl: Einstellungen → Design → „Aus Erweiterungen“. Gespeichert wird `ThemeConfig.color_scheme_id = "ext:<pluginId>/<themeId>"`; ist das Plugin weg oder deaktiviert, fällt die App auf das Standardschema zurück. Dynamic Color hat Vorrang, wenn aktiviert.
 
 ## Icon-Pakete (`iconThemes`)

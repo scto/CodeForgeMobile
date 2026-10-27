@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.kanagawa.theme",
+  "name": "Kanagawa (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Kanagawa als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "kanagawa-dark",
+        "label": "Kanagawa Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "kanagawa-light",
+        "label": "Kanagawa Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}

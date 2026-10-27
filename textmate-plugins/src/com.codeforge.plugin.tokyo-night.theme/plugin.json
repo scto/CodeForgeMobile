@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.tokyo-night.theme",
+  "name": "Tokyo Night (Editor-Theme)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Tokyo Night als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      {
+        "id": "tokyo-night-dark",
+        "label": "Tokyo Night Dark",
+        "uiTheme": "dark",
+        "path": "themes/dark.json"
+      },
+      {
+        "id": "tokyo-night-light",
+        "label": "Tokyo Night Light",
+        "uiTheme": "light",
+        "path": "themes/light.json"
+      }
+    ]
+  }
+}
