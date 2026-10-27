@@ -95,6 +95,7 @@ class TerminalSettingsViewModel @Inject constructor(
                     // Wirkt im Terminal beim nächsten Öffnen/Neuzeichnen (Termux liest die Größe aus seinen Preferences).
                     runCatching { termuxPrefs?.setFontSize(TerminalFontSize.spToPx(sp, density)) }
                     termuxFontSp.value = readTermuxFontSp()
+                    notifyTermuxStylingReload()
                 }
                 is TerminalSettingsUiEvent.UseCompactTerminalChanged ->
                     settingsRepository.updateTerminal { it.toBuilder().setUseCompactTerminal(event.compact).build() }
@@ -103,6 +104,7 @@ class TerminalSettingsViewModel @Inject constructor(
                     val value = event.rows.coerceIn(100, 50_000).takeIf { it != TerminalScrollback.DEFAULT }?.toString()
                     properties.write(TermuxPropertiesStore.KEY_TRANSCRIPT_ROWS, value)
                     termuxState.value = readTermuxState()
+                    notifyTermuxStylingReload()
                 }
                 is TerminalSettingsUiEvent.FontFileChosen -> installFont {
                     context.contentResolver.openInputStream(event.uri)
@@ -138,21 +140,25 @@ class TerminalSettingsViewModel @Inject constructor(
                         // Standard nicht festschreiben
                         properties.write(TermuxPropertiesStore.KEY_EXTRA_KEYS, text.takeIf { it != ExtraKeysConfig.DEFAULT })
                         extraKeysState.value = readExtraKeys()
+                        notifyTermuxStylingReload()
                     }
                 }
                 TerminalSettingsUiEvent.ExtraKeysReset -> {
                     properties.write(TermuxPropertiesStore.KEY_EXTRA_KEYS, null)
                     extraKeysState.value = readExtraKeys()
+                    notifyTermuxStylingReload()
                 }
                 TerminalSettingsUiEvent.FontReset -> {
                     fontInstaller.reset()
                     fontState.value = fontInstaller.isInstalled to null
+                    notifyTermuxStylingReload()
                 }
                 TerminalSettingsUiEvent.FontMessageShown ->
                     fontState.value = fontState.value.first to null
                 is TerminalSettingsUiEvent.CursorStyleChanged -> {
                     properties.write(TermuxPropertiesStore.KEY_CURSOR_STYLE, event.style.takeIf { it != "block" })
                     termuxState.value = readTermuxState()
+                    notifyTermuxStylingReload()
                 }
             }
         }
@@ -187,5 +193,25 @@ class TerminalSettingsViewModel @Inject constructor(
         fontState.value = fontInstaller.isInstalled to
             (if (ok) com.codeforge.core.resources.R.string.settings_terminal_font_installed
             else com.codeforge.core.resources.R.string.settings_terminal_font_invalid)
+        if (ok) notifyTermuxStylingReload()
+    }
+
+    /**
+     * Sendet den Termux-Reload-Broadcast, damit das laufende Terminal geänderte
+     * Einstellungen (Cursorstil, Schriftart, Zusatztasten) ohne Neustart übernimmt.
+     */
+    private fun notifyTermuxStylingReload() {
+        runCatching {
+            val intent = android.content.Intent(
+                com.codeforge.shared.termux.TermuxConstants.TERMUX_APP.TERMUX_ACTIVITY.ACTION_RELOAD_STYLE
+            ).apply {
+                setPackage(context.packageName)
+                putExtra(
+                    com.codeforge.shared.termux.TermuxConstants.TERMUX_APP.TERMUX_ACTIVITY.EXTRA_RECREATE_ACTIVITY,
+                    false
+                )
+            }
+            context.sendBroadcast(intent)
+        }
     }
 }
