@@ -299,6 +299,10 @@ private fun TerminalSettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            BackupCard(uiState = uiState, onEvent = onEvent)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             ExtraKeysCard(uiState = uiState, onEvent = onEvent)
         }
     }
@@ -362,5 +366,70 @@ private fun ExtraKeysCard(
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
+    }
+}
+
+@Composable
+private fun BackupCard(
+    modifier: Modifier = Modifier,
+    uiState: TerminalSettingsUiState,
+    onEvent: (TerminalSettingsUiEvent) -> Unit
+) {
+    var pendingRestore by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<android.net.Uri?>(null) }
+    val createLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/gzip")
+    ) { uri -> if (uri != null) onEvent(TerminalSettingsUiEvent.BackupRequested(uri)) }
+    val openLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri -> pendingRestore = uri }
+
+    Card(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(stringRes(R.string.settings_terminal_backup), style = MaterialTheme.typography.titleSmall)
+            Text(
+                stringRes(R.string.settings_terminal_backup_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (uiState.backupBusy) {
+                androidx.compose.material3.LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                androidx.compose.material3.TextButton(onClick = { onEvent(TerminalSettingsUiEvent.BackupCancelled) }) {
+                    Text(stringRes(R.string.settings_terminal_backup_cancel))
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.Button(onClick = {
+                        val stamp = java.text.SimpleDateFormat("yyyyMMdd-HHmm", java.util.Locale.ROOT).format(java.util.Date())
+                        createLauncher.launch("codeforge-terminal-$stamp.tar.gz")
+                    }) { Text(stringRes(R.string.settings_terminal_backup_create)) }
+                    androidx.compose.material3.OutlinedButton(onClick = { openLauncher.launch(arrayOf("*/*")) }) {
+                        Text(stringRes(R.string.settings_terminal_backup_restore))
+                    }
+                }
+            }
+            uiState.backupMessage?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp))
+            }
+        }
+    }
+
+    pendingRestore?.let { uri ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pendingRestore = null },
+            title = { Text(stringRes(R.string.settings_terminal_backup_restore)) },
+            text = { Text(stringRes(R.string.settings_terminal_restore_confirm)) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    pendingRestore = null
+                    onEvent(TerminalSettingsUiEvent.RestoreRequested(uri))
+                }) { Text(stringRes(R.string.settings_terminal_backup_restore)) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { pendingRestore = null }) {
+                    Text(stringRes(android.R.string.cancel))
+                }
+            }
+        )
     }
 }

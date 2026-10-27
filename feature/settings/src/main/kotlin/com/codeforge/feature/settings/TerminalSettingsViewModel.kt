@@ -42,6 +42,14 @@ class TerminalSettingsViewModel @Inject constructor(
     private fun readExtraKeys(): String? = properties.read(TermuxPropertiesStore.KEY_EXTRA_KEYS)?.takeIf { it.isNotBlank() }
     private val extraKeysState = MutableStateFlow(readExtraKeys())
     private val killOnExitState = MutableStateFlow(readKillOnExit())
+    private val backupState = MutableStateFlow(false to (null as String?))
+    private var backupJob: kotlinx.coroutines.Job? = null
+    private val terminalBackup by lazy {
+        com.codeforge.libs.terminal_engine.TerminalBackup(
+            java.io.File(com.codeforge.shared.termux.TermuxConstants.TERMUX_HOME_DIR_PATH),
+            java.io.File(com.codeforge.shared.termux.TermuxConstants.TERMUX_PREFIX_DIR_PATH)
+        )
+    }
     private val clipboardState = MutableStateFlow(readClipboardShortcuts())
     private fun readClipboardShortcuts(): Boolean = runCatching { termuxPrefs?.areClipboardShortcutsEnabled() }.getOrNull() == true
     private fun readKillOnExit(): Boolean = runCatching { termuxPrefs?.shouldKillSessionsOnExit() }.getOrNull() == true
@@ -54,8 +62,12 @@ class TerminalSettingsViewModel @Inject constructor(
         return rows to style
     }
 
-    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState) { e, k, c -> Triple(e, k, c) }) { settings, termux, fontSp, font, extra ->
-            val (extraKeys, killOnExit, clipboard) = extra
+    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState, backupState) { e, k, c, b -> listOf(e, k, c, b) }) { settings, termux, fontSp, font, extra ->
+            @Suppress("UNCHECKED_CAST")
+            val extraKeys = extra[0] as String?
+            val killOnExit = extra[1] as Boolean
+            val clipboard = extra[2] as Boolean
+            val backup = extra[3] as Pair<Boolean, String?>
             TerminalSettingsUiState(
                 fontSize = fontSp ?: settings.terminal.fontSize.takeIf { it > 0 } ?: 14,
                 useCompactTerminal = settings.terminal.useCompactTerminal,
@@ -64,6 +76,8 @@ class TerminalSettingsViewModel @Inject constructor(
                 customFontInstalled = font.first,
                 killSessionsOnExit = killOnExit,
                 clipboardShortcuts = clipboard,
+                backupBusy = backup.first,
+                backupMessage = backup.second,
                 extraKeys = extraKeys ?: ExtraKeysConfig.DEFAULT,
                 extraKeysCustom = extraKeys != null,
                 fontMessageRes = font.second,
@@ -104,6 +118,20 @@ class TerminalSettingsViewModel @Inject constructor(
                     runCatching { termuxPrefs?.setClipboardShortcutsEnabled(event.enabled) }
                     clipboardState.value = readClipboardShortcuts()
                 }
+                is TerminalSettingsUiEvent.BackupRequested -> runBackup { cancelled ->
+                    val summary = context.contentResolver.openOutputStream(event.uri, "wt")?.use { terminalBackup.backup(it, cancelled) }
+                        ?: error("no stream")
+                    context.getString(com.codeforge.core.resources.R.string.settings_terminal_backup_done, summary.files, summary.links)
+                }
+                is TerminalSettingsUiEvent.RestoreRequested -> runBackup { cancelled ->
+                    // Erst vollständig prüfen (nichts wird geschrieben), dann wiederherstellen.
+                    context.contentResolver.openInputStream(event.uri)?.use { terminalBackup.validate(it) } ?: error("no stream")
+                    val summary = context.contentResolver.openInputStream(event.uri)?.use { terminalBackup.restore(it, cancelled) }
+                        ?: error("no stream")
+                    context.getString(com.codeforge.core.resources.R.string.settings_terminal_restore_done, summary.files, summary.links)
+                }
+                TerminalSettingsUiEvent.BackupCancelled -> backupJob?.cancel()
+                TerminalSettingsUiEvent.BackupMessageShown -> backupState.value = backupState.value.first to null
                 is TerminalSettingsUiEvent.ExtraKeysSaved -> {
                     val text = ExtraKeysConfig.normalize(event.text)
                     if (ExtraKeysConfig.isValid(text)) {
@@ -127,6 +155,28 @@ class TerminalSettingsViewModel @Inject constructor(
                     termuxState.value = readTermuxState()
                 }
             }
+        }
+    }
+
+    /** Führt Sicherung/Wiederherstellung im Hintergrund aus; jeder Fehler wird als Text gemeldet. */
+    private fun runBackup(block: (isCancelled: () -> Boolean) -> String) {
+        if (backupState.value.first) return
+        backupState.value = true to null
+        backupJob = viewModelScope.launch {
+            val res = com.codeforge.core.resources.R.string.settings_terminal_backup_failed
+            val message = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                val job = kotlinx.coroutines.currentCoroutineContext()[kotlinx.coroutines.Job]
+                try {
+                    block { job?.isActive == false }
+                } catch (e: com.codeforge.libs.terminal_engine.BackupCancelledException) {
+                    context.getString(com.codeforge.core.resources.R.string.settings_terminal_backup_cancelled)
+                } catch (e: com.codeforge.libs.terminal_engine.InvalidBackupException) {
+                    context.getString(com.codeforge.core.resources.R.string.settings_terminal_backup_invalid, e.message.orEmpty())
+                } catch (e: Exception) {
+                    context.getString(res, e.message ?: e.javaClass.simpleName)
+                }
+            }
+            backupState.value = false to message
         }
     }
 

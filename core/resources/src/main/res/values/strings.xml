@@ -1919,5 +1919,16 @@
     <string name="settings_terminal_extra_keys_hint">Applies to new terminal sessions or after reloading the terminal settings.</string>
     <string name="settings_terminal_clipboard_shortcuts">Clipboard shortcuts</string>
     <string name="settings_terminal_clipboard_shortcuts_desc">Ctrl+Shift+C copies the selection, Ctrl+Shift+V pastes (hardware keyboard). Ctrl+C stays an interrupt.</string>
+    <string name="settings_terminal_backup">Terminal backup</string>
+    <string name="settings_terminal_backup_desc">Saves the home folder and installed packages (usr) as a .tar.gz file and restores them from one.</string>
+    <string name="settings_terminal_backup_create">Back up…</string>
+    <string name="settings_terminal_backup_restore">Restore…</string>
+    <string name="settings_terminal_backup_cancel">Cancel</string>
+    <string name="settings_terminal_backup_done">Backup saved: %1$d files, %2$d links.</string>
+    <string name="settings_terminal_restore_done">Restored: %1$d files, %2$d links. Restart the terminal.</string>
+    <string name="settings_terminal_backup_cancelled">Cancelled.</string>
+    <string name="settings_terminal_backup_failed">Failed: %1$s</string>
+    <string name="settings_terminal_backup_invalid">Not a valid CodeForge backup: %1$s</string>
+    <string name="settings_terminal_restore_confirm">Existing files in the home folder and in usr are overwritten. Close running terminal sessions first. Continue?</string>
 </resources>
 

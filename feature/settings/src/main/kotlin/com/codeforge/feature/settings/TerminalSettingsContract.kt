@@ -20,6 +20,10 @@ data class TerminalSettingsUiState(
     val killSessionsOnExit: Boolean = false,
     /** Strg+Umschalt+C / V kopiert bzw. fügt ein (Hardware-Tastatur). */
     val clipboardShortcuts: Boolean = false,
+    /** Sicherung/Wiederherstellung läuft. */
+    val backupBusy: Boolean = false,
+    /** Ergebnis der letzten Sicherung/Wiederherstellung (fertiger Text) oder null. */
+    val backupMessage: String? = null,
     /** Aktuelle `extra-keys` (Einzeiler) – eigene Belegung oder Termux-Standard. */
     val extraKeys: String = ExtraKeysConfig.DEFAULT,
     val extraKeysCustom: Boolean = false,
@@ -37,6 +41,10 @@ sealed interface TerminalSettingsUiEvent {
     data object BundledFontChosen : TerminalSettingsUiEvent
     data class KillSessionsOnExitChanged(val enabled: Boolean) : TerminalSettingsUiEvent
     data class ClipboardShortcutsChanged(val enabled: Boolean) : TerminalSettingsUiEvent
+    data class BackupRequested(val uri: android.net.Uri) : TerminalSettingsUiEvent
+    data class RestoreRequested(val uri: android.net.Uri) : TerminalSettingsUiEvent
+    data object BackupCancelled : TerminalSettingsUiEvent
+    data object BackupMessageShown : TerminalSettingsUiEvent
     data class ExtraKeysSaved(val text: String) : TerminalSettingsUiEvent
     data object ExtraKeysReset : TerminalSettingsUiEvent
     data object FontReset : TerminalSettingsUiEvent

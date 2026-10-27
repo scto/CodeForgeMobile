@@ -1919,5 +1919,16 @@
     <string name="settings_terminal_extra_keys_hint">Gilt für neue Terminal-Sitzungen bzw. nach dem Neuladen der Terminal-Einstellungen.</string>
     <string name="settings_terminal_clipboard_shortcuts">Zwischenablage-Tastenkombinationen</string>
     <string name="settings_terminal_clipboard_shortcuts_desc">Strg+Umschalt+C kopiert die Auswahl, Strg+Umschalt+V fügt ein (Hardware-Tastatur). Strg+C bleibt Abbruch.</string>
+    <string name="settings_terminal_backup">Terminal-Sicherung</string>
+    <string name="settings_terminal_backup_desc">Sichert den Home-Ordner und die installierten Pakete (usr) als .tar.gz und stellt sie daraus wieder her.</string>
+    <string name="settings_terminal_backup_create">Sichern…</string>
+    <string name="settings_terminal_backup_restore">Wiederherstellen…</string>
+    <string name="settings_terminal_backup_cancel">Abbrechen</string>
+    <string name="settings_terminal_backup_done">Sicherung gespeichert: %1$d Dateien, %2$d Links.</string>
+    <string name="settings_terminal_restore_done">Wiederhergestellt: %1$d Dateien, %2$d Links. Terminal neu starten.</string>
+    <string name="settings_terminal_backup_cancelled">Abgebrochen.</string>
+    <string name="settings_terminal_backup_failed">Fehlgeschlagen: %1$s</string>
+    <string name="settings_terminal_backup_invalid">Keine gültige CodeForge-Sicherung: %1$s</string>
+    <string name="settings_terminal_restore_confirm">Vorhandene Dateien im Home-Ordner und in usr werden überschrieben. Laufende Terminal-Sitzungen vorher schließen. Fortfahren?</string>
 </resources>
 
