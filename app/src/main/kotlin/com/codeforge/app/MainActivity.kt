@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.designsystem.CodeForgeTheme
 import com.codeforge.core.designsystem.findExtensionTheme
+import com.codeforge.core.designsystem.findIconTheme
 import com.codeforge.core.domain.extension.ExtensionThemeRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -39,6 +40,8 @@ class MainActivity : ComponentActivity() {
             val systemDark = isSystemInDarkTheme()
             val extensionThemes by extensionThemeRepository.themes.collectAsStateWithLifecycle()
             val extensionTheme = settings.theme.findExtensionTheme(extensionThemes)
+            val iconThemes by extensionThemeRepository.iconThemes.collectAsStateWithLifecycle()
+            val iconTheme = settings.theme.findIconTheme(iconThemes)
             val isDark = settings.theme.resolveIsDark(systemDark, extensionTheme)
             LaunchedEffect(isDark) {
                 enableEdgeToEdge(
@@ -47,7 +50,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme) {
+            CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme, iconTheme = iconTheme) {
                 CodeForgeNavHost(
                     startOnboarding = !settings.onboardingCompleted,
                     useCompactTerminal = settings.terminal.useCompactTerminal

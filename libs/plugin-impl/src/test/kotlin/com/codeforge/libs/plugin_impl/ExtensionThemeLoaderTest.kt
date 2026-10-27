@@ -2,6 +2,7 @@ package com.codeforge.libs.plugin_impl
 
 import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ColorThemeContribution
+import com.codeforge.core.domain.extension.IconThemeContribution
 import com.codeforge.core.domain.extension.Resolved
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -44,5 +45,24 @@ class ExtensionThemeLoaderTest {
         File(dir, "t.json").writeText("""{"colors":{"primary":"#112233"},"textmateTheme":"gone.json"}""")
         val r = ExtensionThemeLoader.load(ActiveContributions(colorThemes = listOf(contrib(dir, "t", "t.json"))))
         assertNull(r.single().textMateThemePath)
+    }
+
+    @Test
+    fun `Icon-Theme wird geladen, Pfade ausserhalb des Plugins verwerfen das Theme`() {
+        val dir = tmp.newFolder("icons")
+        File(dir, "icons").mkdirs()
+        File(dir, "icons/theme.json").writeText("""{"file":"f.png","fileExtensions":{"kt":"kt.png"}}""")
+        File(dir, "icons/bad.json").writeText("""{"file":"../../x.png"}""")
+        val r = ExtensionThemeLoader.loadIcons(
+            ActiveContributions(
+                iconThemes = listOf(
+                    Resolved("p", dir.absolutePath, IconThemeContribution("ok", "OK", "icons/theme.json")),
+                    Resolved("p", dir.absolutePath, IconThemeContribution("bad", "Bad", "icons/bad.json"))
+                )
+            )
+        )
+        assertEquals(listOf("ok"), r.map { it.themeId })
+        assertEquals(File(dir, "icons").absolutePath, r.single().baseDir)
+        assertEquals("kt.png", r.single().icons.forFile("A.kt"))
     }
 }

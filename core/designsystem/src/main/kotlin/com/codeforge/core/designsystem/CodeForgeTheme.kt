@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.codeforge.core.datastore.proto.ThemeConfig
 import com.codeforge.core.datastore.proto.ThemeMode
 import com.codeforge.core.domain.extension.ExtensionColorTheme
+import com.codeforge.core.domain.extension.ExtensionIconTheme
 
 fun supportsDynamicColor(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
@@ -27,6 +28,10 @@ fun ThemeConfig.resolveIsDark(systemDark: Boolean): Boolean = when (mode) {
 fun ThemeConfig.resolveIsDark(systemDark: Boolean, extensionTheme: ExtensionColorTheme?): Boolean =
     extensionTheme?.isDark ?: resolveIsDark(systemDark)
 
+/** Findet das in [ThemeConfig.getIconThemeId] gewählte Plugin-Icon-Theme. */
+fun ThemeConfig.findIconTheme(available: List<ExtensionIconTheme>): ExtensionIconTheme? =
+    if (ExtensionColorTheme.isExtensionKey(iconThemeId)) available.firstOrNull { it.key == iconThemeId } else null
+
 /** Findet das in [ThemeConfig.getColorSchemeId] gewählte Plugin-Farbschema (Schlüssel `ext:<plugin>/<theme>`). */
 fun ThemeConfig.findExtensionTheme(available: List<ExtensionColorTheme>): ExtensionColorTheme? =
     if (!(useDynamicColor && supportsDynamicColor()) && ExtensionColorTheme.isExtensionKey(colorSchemeId)) {
@@ -39,6 +44,7 @@ fun ThemeConfig.findExtensionTheme(available: List<ExtensionColorTheme>): Extens
 fun CodeForgeTheme(
     themeState: ThemeConfig,
     extensionTheme: ExtensionColorTheme? = null,
+    iconTheme: ExtensionIconTheme? = null,
     content: @Composable () -> Unit
 ) {
     val isDark = themeState.resolveIsDark(isSystemInDarkTheme(), extensionTheme)
@@ -59,6 +65,10 @@ fun CodeForgeTheme(
         colorScheme = colorScheme,
         typography = CodeForgeTypography
     ) {
-        CompositionLocalProvider(LocalEditorThemeOverride provides editorOverride, content = content)
+        CompositionLocalProvider(
+            LocalEditorThemeOverride provides editorOverride,
+            LocalIconTheme provides iconTheme,
+            content = content
+        )
     }
 }

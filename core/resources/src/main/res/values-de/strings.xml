@@ -2090,5 +2090,7 @@
     <string name="themebuilder_aus_erweiterungen">Aus Erweiterungen</string>
     <string name="themebuilder_erweiterung_hell">Hell</string>
     <string name="themebuilder_erweiterung_dunkel">Dunkel</string>
+    <string name="themebuilder_icon_pakete">Icon-Pakete</string>
+    <string name="themebuilder_icon_standard">Standard</string>
 </resources>
 

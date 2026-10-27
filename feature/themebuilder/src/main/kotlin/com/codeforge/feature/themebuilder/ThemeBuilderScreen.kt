@@ -71,6 +71,8 @@ import com.codeforge.core.designsystem.CodeForgeTheme
 import com.codeforge.core.designsystem.ThemePreset
 import com.codeforge.core.designsystem.ThemePresets
 import com.codeforge.core.domain.extension.ExtensionColorTheme
+import com.codeforge.core.domain.extension.ExtensionIconTheme
+import androidx.compose.material3.FilterChip
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
@@ -147,6 +149,19 @@ private fun ThemeBuilderScreen(
                         themes = uiState.extensionThemes,
                         selectedKey = uiState.colorSchemeId,
                         onSelected = { key -> onEvent(ThemeBuilderUiEvent.PresetSelected(key)) }
+                    )
+                }
+            }
+
+            if (uiState.iconThemes.isNotEmpty()) {
+                item {
+                    Text(stringRes(R.string.themebuilder_icon_pakete), style = MaterialTheme.typography.titleMedium)
+                }
+                item {
+                    IconThemeRow(
+                        themes = uiState.iconThemes,
+                        selectedKey = uiState.iconThemeId,
+                        onSelected = { key -> onEvent(ThemeBuilderUiEvent.IconThemeSelected(key)) }
                     )
                 }
             }
@@ -293,6 +308,34 @@ private fun PresetRow(
                 preset = preset,
                 isSelected = !dynamicColorActive && preset.id == selectedId,
                 onClick = { onPresetSelected(preset.id) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun IconThemeRow(
+    themes: List<ExtensionIconTheme>,
+    selectedKey: String,
+    onSelected: (String) -> Unit
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
+    ) {
+        item(key = "default") {
+            FilterChip(
+                selected = selectedKey.isBlank(),
+                onClick = { onSelected("") },
+                label = { Text(stringRes(R.string.themebuilder_icon_standard)) }
+            )
+        }
+        items(themes, key = { it.key }) { theme ->
+            FilterChip(
+                selected = theme.key == selectedKey,
+                onClick = { onSelected(theme.key) },
+                label = { Text(theme.label, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             )
         }
     }

@@ -8,7 +8,9 @@ import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ColorThemeFileParser
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.ExtensionColorTheme
+import com.codeforge.core.domain.extension.ExtensionIconTheme
 import com.codeforge.core.domain.extension.ExtensionThemeRepository
+import com.codeforge.core.domain.extension.IconThemeFileParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -41,6 +43,20 @@ internal object ExtensionThemeLoader {
             )
         }
 
+    /** Icon-Themes: Theme-Datei lesen, validieren und prüfen, dass alle referenzierten Bilder im Plugin liegen und existieren. */
+    fun loadIcons(contributions: ActiveContributions): List<ExtensionIconTheme> =
+        contributions.iconThemes.mapNotNull { resolved ->
+            val item = resolved.item
+            val pluginDir = File(resolved.pluginDir)
+            val themeFile = File(pluginDir, item.path)
+            if (!themeFile.isFile || !isInside(pluginDir, themeFile)) return@mapNotNull null
+            val parsed = IconThemeFileParser.parse(themeFile.readText()).getOrNull() ?: return@mapNotNull null
+            val baseDir = themeFile.parentFile ?: return@mapNotNull null
+            // Fehlende Bilder machen das Theme nicht ungültig, werden aber nie gezeichnet (Rückfall auf Standardicon).
+            if (parsed.allPaths().any { !isInside(pluginDir, File(baseDir, it)) }) return@mapNotNull null
+            ExtensionIconTheme(resolved.pluginId, item.id, item.label, baseDir.absolutePath, parsed)
+        }
+
     private fun isInside(dir: File, file: File): Boolean =
         file.canonicalPath.startsWith(dir.canonicalPath + File.separator)
 }
@@ -54,5 +70,9 @@ class ExtensionThemeRepositoryImpl @Inject constructor(
 
     override val themes: StateFlow<List<ExtensionColorTheme>> = contributionRepository.contributions
         .map { ExtensionThemeLoader.load(it) }
+        .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    override val iconThemes: StateFlow<List<ExtensionIconTheme>> = contributionRepository.contributions
+        .map { ExtensionThemeLoader.loadIcons(it) }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 }

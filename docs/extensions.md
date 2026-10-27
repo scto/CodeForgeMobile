@@ -57,6 +57,22 @@ Datei (`path`):
 * `textmateTheme` (optional): VS-Code/TextMate-Theme-JSON für den Editor. Gilt, wenn in den Editor-Einstellungen „auto“ gewählt ist.
 * Auswahl: Einstellungen → Design → „Aus Erweiterungen“. Gespeichert wird `ThemeConfig.color_scheme_id = "ext:<pluginId>/<themeId>"`; ist das Plugin weg oder deaktiviert, fällt die App auf das Standardschema zurück. Dynamic Color hat Vorrang, wenn aktiviert.
 
+## Icon-Pakete (`iconThemes`)
+
+Datei (`path`); alle Werte sind Bilddateien (PNG, WebP oder JPEG — **kein SVG**) relativ zur Theme-Datei:
+
+```json
+{ "file": "file.png", "folder": "folder.png", "folderOpen": "folder-open.png",
+  "fileExtensions": { "kt": "kotlin.png", "tar.gz": "archive.png" },
+  "fileNames": { "build.gradle.kts": "gradle.png" },
+  "folderNames": { "src": "folder-src.png" }, "folderNamesOpen": { "src": "folder-src-open.png" } }
+```
+
+* Auflösung Datei: exakter Name → längste passende Endung (`tar.gz` vor `gz`) → `file` → App-Standardicon. Ordner: Name (offen/zu) → `folderOpen`/`folder`. Groß-/Kleinschreibung egal.
+* Bilder werden auf ~96 px verkleinert geladen und gecacht; fehlende/defekte Bilder fallen auf das Standardicon zurück. Plugin-Icons werden nicht eingefärbt.
+* Gilt in: Dateibaum, Editor-Tabs, Suchergebnissen, Git-Änderungen.
+* Auswahl: Einstellungen → Design → „Icon-Pakete“ (`ThemeConfig.icon_theme_id`, leer = Standard).
+
 ## Language Server (`lspServers`)
 
 `command` darf `${pluginDir}` und `${home}` enthalten. Ein eingebauter, installierter Server hat Vorrang; sonst wird der Plugin-Server für die angegebenen `languages` verwendet. Existiert die ausführbare Datei bei absolutem Pfad nicht, gibt es keinen Server.
@@ -72,5 +88,6 @@ Datei (`path`):
 | Beitrag | Stand |
 |---|---|
 | `colorThemes` | umgesetzt (Phase 2) |
+| `iconThemes` | umgesetzt (Phase 3): Dateibaum, Tabs, Suche, Git |
 | `lspServers` | umgesetzt (Resolver) |
 | weitere | siehe `agy-tasks/61-erweiterungssystem-geraetepruefung.md` (wird mit den Phasen gefüllt) |

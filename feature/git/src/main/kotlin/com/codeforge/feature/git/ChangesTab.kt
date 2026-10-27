@@ -1,6 +1,7 @@
 // Modul: :feature:git
 package com.codeforge.feature.git
 
+import com.codeforge.core.designsystem.OptionalThemedFileIcon
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -188,6 +189,7 @@ private fun ChangeRow(entry: GitStatusEntry, onEvent: (GitUiEvent) -> Unit, acti
         verticalAlignment = Alignment.CenterVertically,
     ) {
         StatusBadge(entry.status)
+        OptionalThemedFileIcon(name, Modifier.padding(start = 8.dp).size(18.dp))
         Column(Modifier.weight(1f).padding(start = 10.dp)) {
             Text(name, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (dir.isNotEmpty()) Text(dir, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)

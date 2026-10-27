@@ -79,6 +79,7 @@ import cafe.adriel.bonsai.filesystem.FileSystemTree
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.designsystem.ThemedFileIcon
 import com.codeforge.core.ui.TooltipIconButton
 import java.io.File
 import java.util.Locale
@@ -335,14 +336,21 @@ private fun FileTreeNodeRow(
             getFileIconTint(file.name, MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
+        ThemedFileIcon(
+            fileName = file.name,
+            isDirectory = isDirectory,
+            isExpanded = isExpanded,
             modifier = Modifier
                 .padding(start = 2.dp, end = 8.dp)
-                .size(20.dp),
-            tint = iconTint
-        )
+                .size(20.dp)
+        ) { iconModifier ->
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = iconModifier,
+                tint = iconTint
+            )
+        }
 
         // 2-zeilige Dateiinfo: Zeile 1 Name, Zeile 2 Größe & Änderungsdatum
         Column {

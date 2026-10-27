@@ -27,6 +27,8 @@ message ThemeConfig {
   string color_scheme_id = 2;
   bool use_dynamic_color = 3;
   CustomPalette custom_palette = 4;
+  // Schlüssel eines Icon-Themes aus einem Plugin ("ext:<pluginId>/<themeId>"); leer = App-Standardicons.
+  string icon_theme_id = 5;
 }
 
 message CustomPalette {

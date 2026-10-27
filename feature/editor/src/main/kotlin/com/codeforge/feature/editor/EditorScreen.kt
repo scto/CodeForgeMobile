@@ -4,6 +4,7 @@
  */
 package com.codeforge.feature.editor
 
+import com.codeforge.core.designsystem.OptionalThemedFileIcon
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -274,12 +275,18 @@ fun EditorRoute(
                                     .padding(horizontal = 16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    (if (file.isDirty) "• " else "") + file.path.substringAfterLast('/'),
-                                    color = if (selected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    OptionalThemedFileIcon(
+                                        file.path.substringAfterLast('/'),
+                                        Modifier.padding(end = 6.dp).size(16.dp)
+                                    )
+                                    Text(
+                                        (if (file.isDirty) "• " else "") + file.path.substringAfterLast('/'),
+                                        color = if (selected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1
+                                    )
+                                }
                             }
                             DropdownMenu(
                                 expanded = tabMenuIndex == index,

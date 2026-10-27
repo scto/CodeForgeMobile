@@ -94,4 +94,5 @@ object ColorThemeFileParser {
 /** Alle Farbschemata aktivierter Plugins (Dateien bereits gelesen/validiert; defekte werden übersprungen). */
 interface ExtensionThemeRepository {
     val themes: kotlinx.coroutines.flow.StateFlow<List<ExtensionColorTheme>>
+    val iconThemes: kotlinx.coroutines.flow.StateFlow<List<ExtensionIconTheme>>
 }
