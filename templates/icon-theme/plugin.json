@@ -1,0 +1,18 @@
+{
+  "id": "com.example.template.icon-theme",
+  "name": "Template: Icon-Paket",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Beispiel für Datei- und Ordner-Icons (PNG).",
+  "permissions": [],
+  "contributes": {
+    "iconThemes": [
+      {
+        "id": "simple",
+        "label": "Simple",
+        "path": "icons/theme.json"
+      }
+    ]
+  }
+}

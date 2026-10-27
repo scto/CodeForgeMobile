@@ -1,5 +1,7 @@
 # Beispiel-Plugins
 
+> Kleine, buildbare Vorlagen für jede Plugin-Art: `templates/` (Anleitung: `docs/extension-authoring.md`).
+
 Zwei Referenz-Plugins für die CodeForge-Plugin-API (`:libs:plugin-api`):
 
 - **`kotlin-lsp-plugin`** — installiert und startet [kotlin-language-server](https://github.com/fwcd/kotlin-language-server)

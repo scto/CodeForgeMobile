@@ -233,3 +233,4 @@ Weitere offene Punkte außerhalb der Tasks (APT-Repo, Gerätetests) stehen unten
 * Artefakte `gradle` (APT-Repo) und Release `compiler-runtime-2025.09.00-k2.1.21` (`scto/codeforge-tools`) existieren laut Inhaber (2026-10-21). Nicht geprüft: SHA-256 der Runtime gegen `CompilerRuntimeProviderImpl`/`manifest.json`, Installation auf dem Gerät.
 * Gerätetests: `docs/device-test-checklist.md` auf einem physischen Android-Gerät mit ADB ausführen; zusätzlich LSP-Start mit den nun verfügbaren JDKs (`jdtls`, Kotlin-Server).
 * Erweiterungssystem (Phasen 1–7) umgesetzt, nur per Unit-Test/Kompilierung geprüft; Geräteprüfung: `agy-tasks/61-erweiterungssystem-geraetepruefung.md`.
+* Vorlagen `templates/` + `docs/extension-authoring.md`: Parser-/Build-Test grün, Code-Plugin kompiliert (ohne d8-Dex, ohne Gerät).

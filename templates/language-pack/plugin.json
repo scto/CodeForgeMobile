@@ -1,0 +1,18 @@
+{
+  "id": "com.example.template.language-pack",
+  "name": "Template: Sprachpaket",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Beispiel für Übersetzungen einzelner UI-Texte.",
+  "permissions": [],
+  "contributes": {
+    "languagePacks": [
+      {
+        "locale": "fr",
+        "label": "Français (Beispiel)",
+        "path": "l10n/fr.json"
+      }
+    ]
+  }
+}

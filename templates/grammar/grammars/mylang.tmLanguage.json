@@ -1,0 +1,23 @@
+{
+  "scopeName": "source.mylang",
+  "name": "MyLang",
+  "patterns": [
+    {
+      "name": "comment.line.double-slash.mylang",
+      "match": "//.*$"
+    },
+    {
+      "name": "string.quoted.double.mylang",
+      "begin": "\"",
+      "end": "\""
+    },
+    {
+      "name": "constant.numeric.mylang",
+      "match": "\\b[0-9]+(\\.[0-9]+)?\\b"
+    },
+    {
+      "name": "keyword.control.mylang",
+      "match": "\\b(if|else|while|return|fun|val)\\b"
+    }
+  ]
+}

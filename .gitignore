@@ -39,3 +39,4 @@ terminal-packages-codeforge/
 *.patch
 __pycache__/
 *.py[cod]
+templates/build/

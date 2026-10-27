@@ -1,0 +1,19 @@
+{
+  "colors": {
+    "primary": "#7AA2F7",
+    "onPrimary": "#10131C",
+    "primaryContainer": "#2A3550",
+    "onPrimaryContainer": "#D6E3FF",
+    "secondary": "#9ECE6A",
+    "tertiary": "#BB9AF7",
+    "error": "#F7768E",
+    "background": "#10131C",
+    "onBackground": "#E3E6F0",
+    "surface": "#161A26",
+    "onSurface": "#E3E6F0",
+    "surfaceVariant": "#252B3B",
+    "onSurfaceVariant": "#B4BBD0",
+    "outline": "#6B7390"
+  },
+  "textmateTheme": "syntax/midnight-tm.json"
+}

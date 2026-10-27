@@ -1,0 +1,17 @@
+{
+  "id": "com.example.template.snippets",
+  "name": "Template: Snippets",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Beispiel für Code-Bausteine im VS-Code-Format.",
+  "permissions": [],
+  "contributes": {
+    "snippets": [
+      {
+        "languageId": "kotlin",
+        "path": "snippets/kotlin.json"
+      }
+    ]
+  }
+}

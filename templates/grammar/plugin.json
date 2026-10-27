@@ -1,0 +1,21 @@
+{
+  "id": "com.example.template.grammar",
+  "name": "Template: Grammatik",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Beispiel für Syntaxfarben einer eigenen Sprache (TextMate).",
+  "permissions": [],
+  "contributes": {
+    "grammars": [
+      {
+        "languageId": "mylang",
+        "scopeName": "source.mylang",
+        "path": "grammars/mylang.tmLanguage.json",
+        "extensions": [
+          "myl"
+        ]
+      }
+    ]
+  }
+}

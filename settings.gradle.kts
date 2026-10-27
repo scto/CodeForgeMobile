@@ -89,4 +89,5 @@ include(
     ":examples:lsp-plugin-common",
     ":examples:kotlin-lsp-plugin",
     ":examples:java-lsp-plugin",
+    ":templates:code-plugin",
 )

@@ -3,6 +3,7 @@
 Ein Plugin ist ein ZIP mit `plugin.json` im Wurzelverzeichnis. Es kann **deklarative Beiträge** (`contributes`)
 und/oder **Code** (`entryPointClass`, `classes.dex`) enthalten. Der Store listet nur rein deklarative Plugins;
 Code-Plugins gibt es nur per manuellem Sideload (Einstellungen → Plugins).
+Vorlagen: `templates/`, Anleitung zum Selbermachen: `docs/extension-authoring.md`.
 
 ## Module
 
