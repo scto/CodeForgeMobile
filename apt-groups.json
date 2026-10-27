@@ -73,6 +73,12 @@
       "repo_packages": ""
     },
     {
+      "name": "H5a-rust-src",
+      "heavy": true,
+      "stage": "15a-rust-src",
+      "repo_packages": ""
+    },
+    {
       "name": "H6-rust-analyzer",
       "heavy": true,
       "stage": "15-rust-analyzer",

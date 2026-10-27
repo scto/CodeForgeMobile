@@ -37,6 +37,7 @@ declare -a CODEFORGE_PACKAGES__STAGE_11_dart=("dart")
 declare -a CODEFORGE_PACKAGES__STAGE_12_lsp_misc=("gopls" "taplo" "ruff")  # Flags: nodeps=gopls
 declare -a CODEFORGE_PACKAGES__STAGE_13_pure_tools=("yarn" "autoconf" "automake")  # Flags: single-arch nodeps=all
 declare -a CODEFORGE_PACKAGES__STAGE_14_ide_tools=("neocmakelsp" "esbuild" "pnpm" "shellcheck")
+declare -a CODEFORGE_PACKAGES__STAGE_15a_rust_src=("rust-src")  # Flags: single-arch
 declare -a CODEFORGE_PACKAGES__STAGE_15_rust_analyzer=("rust-analyzer")
 declare -a CODEFORGE_PACKAGES__STAGE_16_native_dev=("pkg-config" "libtool" "flex" "bison" "ccache" "patchelf" "strace")
 declare -a CODEFORGE_PACKAGES__STAGE_17_debug_misc=("gdb" "android-tools" "gh" "rsync" "xmlstarlet")
@@ -59,6 +60,7 @@ declare -a CODEFORGE_STAGE_NAMES=(
     "12-lsp-misc"
     "13-pure-tools"
     "14-ide-tools"
+    "15a-rust-src"
     "15-rust-analyzer"
     "16-native-dev"
     "17-debug-misc"
@@ -80,6 +82,7 @@ declare -a CODEFORGE_STAGE_VARS=(
     "CODEFORGE_PACKAGES__STAGE_12_lsp_misc"
     "CODEFORGE_PACKAGES__STAGE_13_pure_tools"
     "CODEFORGE_PACKAGES__STAGE_14_ide_tools"
+    "CODEFORGE_PACKAGES__STAGE_15a_rust_src"
     "CODEFORGE_PACKAGES__STAGE_15_rust_analyzer"
     "CODEFORGE_PACKAGES__STAGE_16_native_dev"
     "CODEFORGE_PACKAGES__STAGE_17_debug_misc"

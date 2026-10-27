@@ -173,6 +173,7 @@ Die Gruppen sind nach ihren internen Abhängigkeiten geordnet (geprüft mit `scr
 | `H3-jdk25` | `03-jdk25` (openjdk-25) | – | schwer |
 | `H4-llvm-clang` | `10-llvm-clang` (libllvm) | – | schwer |
 | `H5-dart` | `11-dart` (dart) | – | schwer |
+| `H5a-rust-src` | `15a-rust-src` (rust-src; Unterpaket von `rust`, gebaut wird `rust`, nur eine Architektur) – **vor** H6 | – | sehr schwer |
 | `H6-rust-analyzer` | `15-rust-analyzer` (rust-analyzer) | – | schwer |
 
 Die Etappen `00-codeforge`, `09-nodejs`, `13-pure-tools`, `14-ide-tools`, `16-native-dev` und `17-debug-misc` in `apt-stages.conf` sind **nicht** einzeln als Gruppe
