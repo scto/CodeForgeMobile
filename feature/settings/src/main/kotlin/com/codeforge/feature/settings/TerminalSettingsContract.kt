@@ -18,6 +18,8 @@ data class TerminalSettingsUiState(
     val customFontInstalled: Boolean = false,
     /** Alle Sitzungen beenden, wenn das Terminal geschlossen wird. */
     val killSessionsOnExit: Boolean = false,
+    /** Strg+Umschalt+C / V kopiert bzw. fügt ein (Hardware-Tastatur). */
+    val clipboardShortcuts: Boolean = false,
     /** Aktuelle `extra-keys` (Einzeiler) – eigene Belegung oder Termux-Standard. */
     val extraKeys: String = ExtraKeysConfig.DEFAULT,
     val extraKeysCustom: Boolean = false,
@@ -34,6 +36,7 @@ sealed interface TerminalSettingsUiEvent {
     data class FontFileChosen(val uri: android.net.Uri) : TerminalSettingsUiEvent
     data object BundledFontChosen : TerminalSettingsUiEvent
     data class KillSessionsOnExitChanged(val enabled: Boolean) : TerminalSettingsUiEvent
+    data class ClipboardShortcutsChanged(val enabled: Boolean) : TerminalSettingsUiEvent
     data class ExtraKeysSaved(val text: String) : TerminalSettingsUiEvent
     data object ExtraKeysReset : TerminalSettingsUiEvent
     data object FontReset : TerminalSettingsUiEvent

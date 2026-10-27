@@ -1917,5 +1917,7 @@
     <string name="settings_terminal_extra_keys_save">Speichern</string>
     <string name="settings_terminal_extra_keys_reset">Auf Standard zurücksetzen</string>
     <string name="settings_terminal_extra_keys_hint">Gilt für neue Terminal-Sitzungen bzw. nach dem Neuladen der Terminal-Einstellungen.</string>
+    <string name="settings_terminal_clipboard_shortcuts">Zwischenablage-Tastenkombinationen</string>
+    <string name="settings_terminal_clipboard_shortcuts_desc">Strg+Umschalt+C kopiert die Auswahl, Strg+Umschalt+V fügt ein (Hardware-Tastatur). Strg+C bleibt Abbruch.</string>
 </resources>
 

@@ -277,6 +277,28 @@ private fun TerminalSettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringRes(R.string.settings_terminal_clipboard_shortcuts), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringRes(R.string.settings_terminal_clipboard_shortcuts_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    androidx.compose.material3.Switch(
+                        checked = uiState.clipboardShortcuts,
+                        onCheckedChange = { onEvent(TerminalSettingsUiEvent.ClipboardShortcutsChanged(it)) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             ExtraKeysCard(uiState = uiState, onEvent = onEvent)
         }
     }

@@ -124,6 +124,14 @@ public class TermuxAppSharedPreferences extends AppSharedPreferences {
         return SharedPreferenceUtils.getBoolean(mSharedPreferences, TERMUX_APP.KEY_KILL_SESSIONS_ON_EXIT, TERMUX_APP.DEFAULT_VALUE_KILL_SESSIONS_ON_EXIT);
     }
 
+    public boolean areClipboardShortcutsEnabled() {
+        return SharedPreferenceUtils.getBoolean(mSharedPreferences, TERMUX_APP.KEY_CLIPBOARD_SHORTCUTS, TERMUX_APP.DEFAULT_VALUE_CLIPBOARD_SHORTCUTS);
+    }
+
+    public void setClipboardShortcutsEnabled(boolean value) {
+        SharedPreferenceUtils.setBoolean(mSharedPreferences, TERMUX_APP.KEY_CLIPBOARD_SHORTCUTS, value, false);
+    }
+
     public void setKillSessionsOnExit(boolean value) {
         SharedPreferenceUtils.setBoolean(mSharedPreferences, TERMUX_APP.KEY_KILL_SESSIONS_ON_EXIT, value, false);
     }

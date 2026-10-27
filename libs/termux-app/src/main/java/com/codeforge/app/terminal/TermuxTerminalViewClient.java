@@ -234,6 +234,19 @@ public class TermuxTerminalViewClient extends TermuxTerminalViewClientBase {
     public boolean onKeyDown(int keyCode, KeyEvent e, TerminalSession currentSession) {
         if (handleVirtualKeys(keyCode, e, true)) return true;
 
+        // Optional: Strg+Umschalt+C / Strg+Umschalt+V (Einstellung "Zwischenablage-Tastenkombinationen").
+        int clipboardAction = com.codeforge.shared.termux.terminal.io.ClipboardShortcuts.resolve(
+            mActivity.getPreferences().areClipboardShortcutsEnabled(),
+            keyCode, e.isCtrlPressed(), e.isShiftPressed(), e.isAltPressed());
+        if (clipboardAction == com.codeforge.shared.termux.terminal.io.ClipboardShortcuts.COPY) {
+            String selected = mActivity.getTerminalView().getStoredSelectedText();
+            if (!DataUtils.isNullOrEmpty(selected)) ShareUtils.copyTextToClipboard(mActivity, selected);
+            return true;
+        } else if (clipboardAction == com.codeforge.shared.termux.terminal.io.ClipboardShortcuts.PASTE) {
+            doPaste();
+            return true;
+        }
+
         if (keyCode == KeyEvent.KEYCODE_ENTER && !currentSession.isRunning()) {
             mTermuxTerminalSessionActivityClient.removeFinishedSession(currentSession);
             return true;

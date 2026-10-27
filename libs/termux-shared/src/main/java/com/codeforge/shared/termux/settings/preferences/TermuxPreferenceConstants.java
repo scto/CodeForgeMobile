@@ -130,6 +130,12 @@ public final class TermuxPreferenceConstants {
     public static final String KEY_KILL_SESSIONS_ON_EXIT = "kill_sessions_on_exit";
     public static final boolean DEFAULT_VALUE_KILL_SESSIONS_ON_EXIT = false;
 
+    /**
+     * Defines the key for whether Ctrl+Shift+C / Ctrl+Shift+V copy and paste with a hardware keyboard.
+     */
+    public static final String KEY_CLIPBOARD_SHORTCUTS = "clipboard_shortcuts";
+    public static final boolean DEFAULT_VALUE_CLIPBOARD_SHORTCUTS = false;
+
 
     /**
      * Defines the key for font size of termux terminal view.

@@ -42,6 +42,8 @@ class TerminalSettingsViewModel @Inject constructor(
     private fun readExtraKeys(): String? = properties.read(TermuxPropertiesStore.KEY_EXTRA_KEYS)?.takeIf { it.isNotBlank() }
     private val extraKeysState = MutableStateFlow(readExtraKeys())
     private val killOnExitState = MutableStateFlow(readKillOnExit())
+    private val clipboardState = MutableStateFlow(readClipboardShortcuts())
+    private fun readClipboardShortcuts(): Boolean = runCatching { termuxPrefs?.areClipboardShortcutsEnabled() }.getOrNull() == true
     private fun readKillOnExit(): Boolean = runCatching { termuxPrefs?.shouldKillSessionsOnExit() }.getOrNull() == true
 
     private fun readTermuxState(): Pair<Int, String> {
@@ -52,8 +54,8 @@ class TerminalSettingsViewModel @Inject constructor(
         return rows to style
     }
 
-    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState) { e, k -> e to k }) { settings, termux, fontSp, font, extra ->
-            val (extraKeys, killOnExit) = extra
+    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState) { e, k, c -> Triple(e, k, c) }) { settings, termux, fontSp, font, extra ->
+            val (extraKeys, killOnExit, clipboard) = extra
             TerminalSettingsUiState(
                 fontSize = fontSp ?: settings.terminal.fontSize.takeIf { it > 0 } ?: 14,
                 useCompactTerminal = settings.terminal.useCompactTerminal,
@@ -61,6 +63,7 @@ class TerminalSettingsViewModel @Inject constructor(
                 cursorStyle = termux.second,
                 customFontInstalled = font.first,
                 killSessionsOnExit = killOnExit,
+                clipboardShortcuts = clipboard,
                 extraKeys = extraKeys ?: ExtraKeysConfig.DEFAULT,
                 extraKeysCustom = extraKeys != null,
                 fontMessageRes = font.second,
@@ -96,6 +99,10 @@ class TerminalSettingsViewModel @Inject constructor(
                 is TerminalSettingsUiEvent.KillSessionsOnExitChanged -> {
                     runCatching { termuxPrefs?.setKillSessionsOnExit(event.enabled) }
                     killOnExitState.value = readKillOnExit()
+                }
+                is TerminalSettingsUiEvent.ClipboardShortcutsChanged -> {
+                    runCatching { termuxPrefs?.setClipboardShortcutsEnabled(event.enabled) }
+                    clipboardState.value = readClipboardShortcuts()
                 }
                 is TerminalSettingsUiEvent.ExtraKeysSaved -> {
                     val text = ExtraKeysConfig.normalize(event.text)

@@ -1917,5 +1917,7 @@
     <string name="settings_terminal_extra_keys_save">Save</string>
     <string name="settings_terminal_extra_keys_reset">Reset to default</string>
     <string name="settings_terminal_extra_keys_hint">Applies to new terminal sessions or after reloading the terminal settings.</string>
+    <string name="settings_terminal_clipboard_shortcuts">Clipboard shortcuts</string>
+    <string name="settings_terminal_clipboard_shortcuts_desc">Ctrl+Shift+C copies the selection, Ctrl+Shift+V pastes (hardware keyboard). Ctrl+C stays an interrupt.</string>
 </resources>
 
