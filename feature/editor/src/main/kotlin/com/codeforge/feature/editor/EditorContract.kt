@@ -164,6 +164,9 @@ sealed interface EditorUiEvent {
     data class FormatCode(val range: LspRange? = null) : EditorUiEvent
     data object Save : EditorUiEvent
 
+    /** Führt einen von einem Code-Plugin registrierten Befehl mit der aktiven Datei aus. */
+    data class RunPluginCommand(val pluginId: String, val commandId: String) : EditorUiEvent
+
     /** Projektwurzel des Workspaces (für Dependency-Update-Chips); `null` = kein Projektkontext. */
     data class SetProjectRoot(val rootPath: String?) : EditorUiEvent
     data class UpdateChipClicked(val update: DependencyUpdate) : EditorUiEvent

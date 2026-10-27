@@ -86,7 +86,9 @@ class EditorViewModel @Inject constructor(
     private val aiRepository: com.codeforge.core.domain.repository.AiRepository? = null,
     private val aiProvider: com.codeforge.core.domain.ai.AiProvider? = null,
     private val workspaceRepository: WorkspaceRepository? = null,
-    private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null
+    private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null,
+    private val pluginEvents: com.codeforge.core.domain.extension.PluginEventSink = com.codeforge.core.domain.extension.NoOpPluginEventSink,
+    private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -94,6 +96,17 @@ class EditorViewModel @Inject constructor(
 
     private val _effect = MutableSharedFlow<EditorUiEffect>()
     val effect: SharedFlow<EditorUiEffect> = _effect.asSharedFlow()
+
+    /** Von Code-Plugins registrierte Befehle bzw. Menüeinträge (leer ohne Plugin-System). */
+    val pluginCommands: StateFlow<List<com.codeforge.core.domain.extension.PluginCommandInfo>> =
+        pluginUi?.commands ?: MutableStateFlow(emptyList())
+    val pluginMenuEntries: StateFlow<List<com.codeforge.core.domain.extension.PluginMenuEntry>> =
+        pluginUi?.menuEntries ?: MutableStateFlow(emptyList())
+
+    init {
+        // Nachrichten von Plugins (showMessage) als Snackbar zeigen.
+        pluginUi?.let { ui -> viewModelScope.launch { ui.messages.collect { _effect.emit(EditorUiEffect.ShowSnackbar(it)) } } }
+    }
 
     private var syncWorkspaceJob: Job? = null
     private var pendingCloseAction: (() -> Unit)? = null
@@ -317,6 +330,7 @@ class EditorViewModel @Inject constructor(
                             if (f.path == file.path && f.content == file.content) f.copy(isDirty = false) else f
                         })
                     }
+                    pluginEvents.publish(com.codeforge.core.domain.extension.HostEvent.FileSaved(file.path))
                 }
                 .onFailure {
                     ok = false
@@ -526,6 +540,12 @@ class EditorViewModel @Inject constructor(
     fun onEvent(event: EditorUiEvent) {
         when (event) {
             is EditorUiEvent.OpenFile -> openFile(event.path)
+            is EditorUiEvent.RunPluginCommand -> viewModelScope.launch {
+                pluginUi?.runCommand(event.pluginId, event.commandId, _uiState.value.activeFile?.path)
+                    ?.onFailure {
+                        _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_plugin_befehl_fehlgeschlagen, it.message.orEmpty())))
+                    }
+            }
             is EditorUiEvent.CloseTab -> closeTab(event.index)
             is EditorUiEvent.CloseOtherTabs -> closeTabs(keepIndex = event.keepIndex)
             EditorUiEvent.CloseAllTabs -> closeTabs(keepIndex = null)
@@ -1429,6 +1449,7 @@ class EditorViewModel @Inject constructor(
                     )
                 }
                 documentVersions[file.path] = 1
+                pluginEvents.publish(com.codeforge.core.domain.extension.HostEvent.FileOpened(file.path))
                 lspClient.setActiveDocument(file.path)
                 val langId = languageIdFor(file.path)
                 val workspaceRoot = projectRoot.value ?: File(file.path).parentFile?.absolutePath
@@ -1484,6 +1505,7 @@ class EditorViewModel @Inject constructor(
             s.copy(openFiles = updated, activeFileIndex = newActive)
         }
         documentVersions.remove(closedPath)
+        pluginEvents.publish(com.codeforge.core.domain.extension.HostEvent.FileClosed(closedPath))
         viewModelScope.launch { lspClient.didClose(closedPath) }
         if (newActivePath != null) {
             lspClient.setActiveDocument(newActivePath)

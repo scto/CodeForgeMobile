@@ -39,6 +39,7 @@ import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Adjust
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
@@ -143,6 +144,11 @@ fun EditorRoute(
     viewModel: EditorViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val pluginCommands by viewModel.pluginCommands.collectAsState()
+    val pluginMenuEntries by viewModel.pluginMenuEntries.collectAsState()
+    val pluginToolbarItems = remember(pluginCommands, pluginMenuEntries) {
+        buildPluginToolbarItems(pluginCommands, pluginMenuEntries)
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     var controller by remember { mutableStateOf<EditorController?>(null) }
@@ -347,7 +353,9 @@ fun EditorRoute(
                 hasBreakpoints = uiState.activeBreakpoints.isNotEmpty(),
                 onBreakpoints = { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(true)) },
                 onOpenAiAssistant = { viewModel.onEvent(EditorUiEvent.ToggleAiAssistant(true)) },
-                onOpenAiQuickActions = { viewModel.onEvent(EditorUiEvent.ToggleAiQuickActions(true)) }
+                onOpenAiQuickActions = { viewModel.onEvent(EditorUiEvent.ToggleAiQuickActions(true)) },
+                pluginItems = pluginToolbarItems,
+                onPluginCommand = { viewModel.onEvent(EditorUiEvent.RunPluginCommand(it.pluginId, it.commandId)) }
             )
 
             if (uiState.isSearchBarVisible) {
@@ -654,6 +662,23 @@ fun EditorRoute(
     }
 }
 
+/** Ein Eintrag im Plugin-Menü der Editor-Leiste. */
+internal data class PluginToolbarItem(val pluginId: String, val commandId: String, val title: String)
+
+/** Menüeinträge für den Editor zuerst, danach alle übrigen registrierten Befehle (jeder Befehl bleibt erreichbar). */
+internal fun buildPluginToolbarItems(
+    commands: List<com.codeforge.core.domain.extension.PluginCommandInfo>,
+    entries: List<com.codeforge.core.domain.extension.PluginMenuEntry>
+): List<PluginToolbarItem> {
+    val fromMenu = entries
+        .filter { it.target == com.codeforge.core.domain.extension.PluginMenuTarget.EDITOR_MENU }
+        .map { PluginToolbarItem(it.pluginId, it.commandId, it.title) }
+    val shown = fromMenu.mapTo(HashSet()) { it.pluginId to it.commandId }
+    val rest = commands.filter { (it.pluginId to it.commandId) !in shown }
+        .map { PluginToolbarItem(it.pluginId, it.commandId, it.title) }
+    return fromMenu + rest
+}
+
 @Composable
 private fun EditorToolbar(
     modifier: Modifier = Modifier,
@@ -682,7 +707,9 @@ private fun EditorToolbar(
     hasBreakpoints: Boolean,
     onBreakpoints: () -> Unit,
     onOpenAiAssistant: () -> Unit,
-    onOpenAiQuickActions: () -> Unit
+    onOpenAiQuickActions: () -> Unit,
+    pluginItems: List<PluginToolbarItem> = emptyList(),
+    onPluginCommand: (PluginToolbarItem) -> Unit = {}
 ) {
     val isImage = activePath?.let { isImageFilePath(it) } == true
     Row(
@@ -761,6 +788,24 @@ private fun EditorToolbar(
         if (allowReferences && !isImage) {
             TooltipIconButton(onClick = onReferences, label = stringRes(R.string.lsp_references)) {
                 Icon(Icons.Default.FindInPage, contentDescription = stringRes(R.string.lsp_references))
+            }
+        }
+
+        // Befehle aus Code-Plugins (nur sichtbar, wenn mindestens ein Plugin Befehle registriert hat)
+        if (pluginItems.isNotEmpty() && !isImage) {
+            var pluginMenuOpen by remember { mutableStateOf(false) }
+            Box {
+                TooltipIconButton(onClick = { pluginMenuOpen = true }, label = stringRes(R.string.editor_plugin_befehle)) {
+                    Icon(Icons.Default.Extension, contentDescription = stringRes(R.string.editor_plugin_befehle))
+                }
+                DropdownMenu(expanded = pluginMenuOpen, onDismissRequest = { pluginMenuOpen = false }) {
+                    pluginItems.forEach { item ->
+                        DropdownMenuItem(
+                            text = { Text(item.title) },
+                            onClick = { pluginMenuOpen = false; onPluginCommand(item) }
+                        )
+                    }
+                }
             }
         }
 

@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.FindInPage
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -152,6 +153,7 @@ object HelpCatalog {
                 HelpEntry(Icons.AutoMirrored.Filled.OpenInNew, R.string.lsp_definition, R.string.help_d_definition),
                 HelpEntry(Icons.Filled.FindInPage, R.string.lsp_references, R.string.help_d_references),
                 HelpEntry(Icons.Filled.Info, R.string.lsp_more_actions, R.string.help_d_more),
+                HelpEntry(Icons.Filled.Extension, R.string.editor_plugin_befehle, R.string.help_d_plugincmds),
             )
         ),
         HelpSection(

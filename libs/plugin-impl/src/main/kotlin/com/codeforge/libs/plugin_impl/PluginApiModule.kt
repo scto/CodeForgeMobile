@@ -6,6 +6,8 @@ package com.codeforge.libs.plugin_impl
 
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.ExtensionThemeRepository
+import com.codeforge.core.domain.extension.PluginEventSink
+import com.codeforge.core.domain.extension.PluginUiRepository
 import com.codeforge.core.domain.repository.PluginRepository
 import dagger.Binds
 import dagger.Module
@@ -33,4 +35,12 @@ abstract class PluginApiModule {
     abstract fun bindExtensionThemeRepository(
         impl: ExtensionThemeRepositoryImpl
     ): ExtensionThemeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPluginUiRepository(impl: PluginHooks): PluginUiRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPluginEventSink(impl: PluginHooks): PluginEventSink
 }

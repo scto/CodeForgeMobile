@@ -46,12 +46,13 @@ import javax.inject.Singleton
 @Singleton
 class PluginRepositoryImpl @Inject constructor(
     @ApplicationContext context: Context,
-    lspClientRepository: LspClientRepository
+    lspClientRepository: LspClientRepository,
+    hooks: PluginHooks
 ) : PluginRepository, ContributionRepository {
 
     private val pluginsDir = File(context.filesDir, "plugins")
     private val registry = PluginRegistry(File(pluginsDir, "registry.json"))
-    private val runtime = PluginRuntime(context, lspClientRepository)
+    private val runtime = PluginRuntime(context, lspClientRepository, hooks)
 
     private val _installedPlugins = MutableStateFlow<List<InstalledPlugin>>(emptyList())
     override val installedPlugins: Flow<List<InstalledPlugin>> = _installedPlugins.asStateFlow()

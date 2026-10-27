@@ -35,7 +35,8 @@ class FileTreeViewModel @Inject constructor(
     private val openFileRequestBridge: OpenFileRequestBridge,
     private val settingsRepository: SettingsRepository,
     private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null,
-    private val fileSyncBridge: com.codeforge.core.navigation.FileSyncBridge? = null
+    private val fileSyncBridge: com.codeforge.core.navigation.FileSyncBridge? = null,
+    private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FileTreeUiState())
@@ -47,6 +48,15 @@ class FileTreeViewModel @Inject constructor(
     private var initialized = false
 
     init {
+        pluginUi?.let { ui ->
+            viewModelScope.launch {
+                ui.menuEntries.collect { all ->
+                    val entries = all.filter { it.target == com.codeforge.core.domain.extension.PluginMenuTarget.FILE_CONTEXT_MENU }
+                    _uiState.update { it.copy(pluginMenuEntries = entries) }
+                }
+            }
+            viewModelScope.launch { ui.messages.collect { _effect.emit(FileTreeUiEffect.ShowSnackbar(it)) } }
+        }
         // Nach dem Speichern im Editor den Git-Status auffrischen (entprellt, ein JGit-Status pro Burst).
         viewModelScope.launch {
             @OptIn(kotlinx.coroutines.FlowPreview::class)
@@ -84,6 +94,15 @@ class FileTreeViewModel @Inject constructor(
                 _uiState.update { it.copy(contextTarget = FileTreeContextTarget(event.path, event.isDirectory)) }
 
             FileTreeUiEvent.DismissContextMenu -> _uiState.update { it.copy(contextTarget = null) }
+            is FileTreeUiEvent.RunPluginEntry -> {
+                val path = _uiState.value.contextTarget?.path
+                _uiState.update { it.copy(contextTarget = null) }
+                viewModelScope.launch {
+                    pluginUi?.runCommand(event.pluginId, event.commandId, path)?.onFailure {
+                        _effect.emit(FileTreeUiEffect.ShowSnackbar(com.codeforge.core.resources.Res.string(com.codeforge.core.resources.R.string.editor_plugin_befehl_fehlgeschlagen, it.message.orEmpty())))
+                    }
+                }
+            }
             FileTreeUiEvent.CreateFileClicked -> startAction(FileTreeActionType.CREATE_FILE)
             FileTreeUiEvent.CreateDirectoryClicked -> startAction(FileTreeActionType.CREATE_DIRECTORY)
             FileTreeUiEvent.RenameClicked -> startActionOnContextTarget(FileTreeActionType.RENAME)

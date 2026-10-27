@@ -7,7 +7,13 @@ package com.codeforge.libs.plugin_impl
 import android.content.Context
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.domain.repository.LspClientRepository
+import com.codeforge.core.domain.extension.PluginPermissionPolicy
+import com.codeforge.core.domain.extension.PluginPermissions
 import com.codeforge.libs.plugin_api.CodeForgePlugin
+import com.codeforge.libs.plugin_api.PluginCommandHandler
+import com.codeforge.libs.plugin_api.PluginEventListener
+import com.codeforge.libs.plugin_api.PluginMenuTarget
+import com.codeforge.libs.plugin_api.PluginPermissionException
 import com.codeforge.libs.plugin_api.PluginContext
 import com.codeforge.libs.plugin_api.PluginHostServices
 import com.codeforge.core.resources.R
@@ -30,14 +36,16 @@ import java.io.File
  */
 internal class PluginRuntime(
     private val hostContext: Context,
-    private val lspClientRepository: LspClientRepository
+    private val lspClientRepository: LspClientRepository,
+    private val hooks: PluginHooks
 ) {
 
-    private data class LoadedPlugin(val instance: CodeForgePlugin)
+    private class LoadedPlugin(val instance: CodeForgePlugin, val context: PluginContext)
 
     private val loadedPlugins = mutableMapOf<String, LoadedPlugin>()
 
-    private val hostServices = object : PluginHostServices {
+    /** Basisdienste ohne Berechtigungsprüfung; Plugins sehen nur die geprüfte Hülle [PermissionedHostServices]. */
+    private val baseServices = object : BaseHostServices {
         override val lspClientRepository: LspClientRepository get() = this@PluginRuntime.lspClientRepository
         override val homeDir: String get() = TermuxEnvironment.home
 
@@ -58,6 +66,11 @@ internal class PluginRuntime(
 
         override fun jdkInstallPath(version: String): String = TermuxEnvironment.jdkHome(version)
     }
+
+    private fun contextFor(plugin: InstalledPlugin): PluginContext = SimplePluginContext(
+        plugin.id,
+        PermissionedHostServices(plugin.id, plugin.apiVersion, plugin.permissions, baseServices, hooks)
+    )
 
     fun isLoaded(pluginId: String): Boolean = loadedPlugins.containsKey(pluginId)
 
@@ -90,12 +103,19 @@ internal class PluginRuntime(
         val instance = pluginClass.getDeclaredConstructor().newInstance() as? CodeForgePlugin
             ?: error(Res.string(R.string.plugin_implementiert_nicht_codeforgeplugin, entryPointClassName))
 
-        instance.onLoad(SimplePluginContext(plugin.id, hostServices))
-        loadedPlugins[plugin.id] = LoadedPlugin(instance)
+        val context = contextFor(plugin)
+        try {
+            instance.onLoad(context)
+        } catch (t: Throwable) {
+            hooks.unregisterAll(plugin.id) // Teilregistrierungen eines fehlgeschlagenen onLoad entfernen
+            throw t
+        }
+        loadedPlugins[plugin.id] = LoadedPlugin(instance, context)
     }
 
     fun unload(pluginId: String): Result<Unit> = runCatching {
         val loaded = loadedPlugins.remove(pluginId) ?: return@runCatching
+        hooks.unregisterAll(pluginId)
         loaded.instance.onUnload()
     }
 
@@ -107,7 +127,8 @@ internal class PluginRuntime(
      */
     suspend fun uninstall(pluginId: String): Result<Unit> = runCatching {
         val loaded = loadedPlugins.remove(pluginId) ?: return@runCatching
-        loaded.instance.onUninstall(SimplePluginContext(pluginId, hostServices))
+        hooks.unregisterAll(pluginId)
+        loaded.instance.onUninstall(loaded.context)
         loaded.instance.onUnload()
     }
 
@@ -115,4 +136,66 @@ internal class PluginRuntime(
         override val pluginId: String,
         override val hostServices: PluginHostServices
     ) : PluginContext
+
+    /** Der ungeprüfte Teil der Host-Dienste (Shell/LSP/Pfade). */
+    private interface BaseHostServices {
+        val lspClientRepository: LspClientRepository
+        val homeDir: String
+        fun buildShellCommand(script: String, workingDirectory: String, extraPathEntries: List<String>): ShellLaunchSpec
+        fun jdkInstallPath(version: String): String
+    }
+
+    /** Host-Dienste mit Berechtigungsprüfung je Plugin (siehe [PluginPermissionPolicy]). */
+    private class PermissionedHostServices(
+        private val pluginId: String,
+        private val apiVersion: Int,
+        private val granted: Set<String>,
+        private val base: BaseHostServices,
+        private val hooks: PluginHooks
+    ) : PluginHostServices {
+
+        private fun require(permission: String) {
+            if (!PluginPermissionPolicy.isAllowed(apiVersion, granted, permission)) {
+                throw PluginPermissionException(pluginId, permission)
+            }
+        }
+
+        override val lspClientRepository: LspClientRepository
+            get() { require(PluginPermissions.LSP); return base.lspClientRepository }
+
+        override val homeDir: String get() = base.homeDir
+
+        override fun buildShellCommand(script: String, workingDirectory: String, extraPathEntries: List<String>): ShellLaunchSpec {
+            require(PluginPermissions.SHELL)
+            return base.buildShellCommand(script, workingDirectory, extraPathEntries)
+        }
+
+        override fun jdkInstallPath(version: String): String = base.jdkInstallPath(version)
+
+        override fun registerCommand(id: String, title: String, handler: PluginCommandHandler) {
+            require(PluginPermissions.COMMANDS)
+            hooks.registerCommand(pluginId, id, title, handler)
+        }
+
+        override fun registerMenuItem(id: String, title: String, target: PluginMenuTarget, commandId: String) {
+            require(PluginPermissions.MENUS)
+            hooks.registerMenuItem(
+                pluginId, id, title,
+                com.codeforge.core.domain.extension.PluginMenuTarget.valueOf(target.name),
+                commandId
+            )
+        }
+
+        override fun addEventListener(listener: PluginEventListener) {
+            // Mindestens eine der Ereignis-Berechtigungen ist nötig; je Ereignis wird beim Zustellen erneut geprüft.
+            if (!PluginPermissionPolicy.isAllowed(apiVersion, granted, PluginPermissions.FILE_EVENTS) &&
+                !PluginPermissionPolicy.isAllowed(apiVersion, granted, PluginPermissions.GIT_EVENTS)
+            ) {
+                throw PluginPermissionException(pluginId, PluginPermissions.FILE_EVENTS)
+            }
+            hooks.addListener(pluginId, apiVersion, granted, listener)
+        }
+
+        override fun showMessage(text: String) = hooks.postMessage(text)
+    }
 }

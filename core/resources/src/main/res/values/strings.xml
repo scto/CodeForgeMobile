@@ -2093,5 +2093,9 @@
     <string name="themebuilder_icon_pakete">Icon packs</string>
     <string name="themebuilder_icon_standard">Default</string>
     <string name="themebuilder_sprachpakete">Language packs</string>
+    <string name="editor_plugin_befehle">Plugin commands</string>
+    <string name="editor_plugin_befehl_fehlgeschlagen">Plugin command failed: %1$s</string>
+    <string name="help_d_plugincmds">Opens the commands that installed code plugins provide for the current file. Only visible once a plugin has registered commands.</string>
+    <string name="filetree_plugin_befehle">Plugin actions</string>
 </resources>
 

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
@@ -205,6 +206,8 @@ private fun FileTreeScreen(
             onAnalyzeApk = { onEvent(FileTreeUiEvent.AnalyzeApkClicked) },
             onScanHardcodedStrings = { onEvent(FileTreeUiEvent.ScanHardcodedStringsClicked) },
             onConvertLayoutToCompose = { onEvent(FileTreeUiEvent.ConvertLayoutToComposeClicked) },
+            pluginEntries = uiState.pluginMenuEntries,
+            onPluginEntry = { onEvent(FileTreeUiEvent.RunPluginEntry(it.pluginId, it.commandId)) },
             onDismiss = { onEvent(FileTreeUiEvent.DismissContextMenu) }
         )
     }
@@ -406,6 +409,8 @@ private fun FileTreeContextMenuDialog(
     onAnalyzeApk: () -> Unit,
     onScanHardcodedStrings: () -> Unit,
     onConvertLayoutToCompose: () -> Unit,
+    pluginEntries: List<com.codeforge.core.domain.extension.PluginMenuEntry> = emptyList(),
+    onPluginEntry: (com.codeforge.core.domain.extension.PluginMenuEntry) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -431,6 +436,13 @@ private fun FileTreeContextMenuDialog(
                         headlineContent = { Text(stringRes(R.string.x2c_context_convert_layout)) },
                         leadingContent = { Icon(Icons.Default.Transform, contentDescription = null) },
                         modifier = Modifier.clickable(onClick = onConvertLayoutToCompose)
+                    )
+                }
+                pluginEntries.forEach { entry ->
+                    ListItem(
+                        headlineContent = { Text(entry.title) },
+                        leadingContent = { Icon(Icons.Default.Extension, contentDescription = null) },
+                        modifier = Modifier.clickable { onPluginEntry(entry) }
                     )
                 }
                 ListItem(

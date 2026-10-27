@@ -108,6 +108,33 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 
 `command` darf `${pluginDir}` und `${home}` enthalten. Ein eingebauter, installierter Server hat Vorrang; sonst wird der Plugin-Server für die angegebenen `languages` verwendet. Existiert die ausführbare Datei bei absolutem Pfad nicht, gibt es keinen Server.
 
+## Code-Plugins: Befehle, Menüs, Ereignisse (API v2)
+
+```kotlin
+class MyPlugin : CodeForgePlugin {
+    override fun onLoad(context: PluginContext) {
+        val host = context.hostServices
+        host.registerCommand("count-lines", "Zeilen zählen") { args ->          // permissions: ["commands"]
+            host.showMessage("Datei: ${args.activeFilePath}")
+        }
+        host.registerMenuItem("count", "Zeilen zählen", PluginMenuTarget.FILE_CONTEXT_MENU, "count-lines") // ["menus"]
+        host.addEventListener { event ->                                          // ["file-events"] / ["git-events"]
+            if (event is PluginEvent.FileSaved) host.showMessage("Gespeichert: ${event.path}")
+        }
+    }
+    override fun onUnload() = Unit
+}
+```
+
+* **Berechtigungen** stehen in `plugin.json → permissions`. Ohne sie wirft der Zugriff `PluginPermissionException` (das Plugin lädt dann nicht).
+  `commands`, `menus`, `file-events`, `git-events` sind immer deklarationspflichtig. `shell` (`buildShellCommand`) und `lsp` (`lspClientRepository`)
+  bleiben für **v1-Plugins** (ohne `apiVersion`) wie bisher erlaubt; ab `apiVersion: 2` müssen auch sie deklariert sein.
+* **Menüs:** `EDITOR_MENU` → Plugin-Schaltfläche in der Editor-Leiste (erscheint nur, wenn ein Plugin Befehle registriert hat; alle Befehle bleiben dort erreichbar);
+  `FILE_CONTEXT_MENU` → Kontextmenü im Dateibaum (Befehl bekommt den gewählten Pfad).
+* **Ereignisse:** `FileOpened/FileSaved/FileClosed` (Editor), `GitCommitted/GitBranchChanged` (Git-Panel). Zustellung asynchron; ein werfender Listener stört weder andere Plugins noch die App.
+* **Grenzen:** max. 100 Befehle/Menüeinträge je Plugin, Titel ≤ 120 Zeichen, Nachrichten ≤ 500 Zeichen, Befehl wird nach 60 s abgebrochen.
+* Beim Deaktivieren/Deinstallieren/Fehlschlagen von `onLoad` werden alle Registrierungen des Plugins entfernt.
+
 ## Sicherheit
 
 * ZIP-Einträge werden gegen Zip-Slip geprüft; Contribution-Dateien dürfen das Plugin-Verzeichnis nicht verlassen (kanonischer Pfad).
@@ -124,5 +151,6 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 | `grammars` | umgesetzt (Phase 5), nur Dateien ohne eingebaute Grammatik |
 | `snippets` | umgesetzt (Phase 5), schreibgeschützt |
 | `extensionPack` | Modell + Auflösung (Phase 5), Store-Installation in Phase 7 |
+| Code-Plugin-Hooks | umgesetzt (Phase 6): Befehle, Menüs, Datei-/Git-Ereignisse, Berechtigungen |
 | `lspServers` | umgesetzt (Resolver) |
 | weitere | siehe `agy-tasks/61-erweiterungssystem-geraetepruefung.md` (wird mit den Phasen gefüllt) |

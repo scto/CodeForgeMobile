@@ -38,6 +38,7 @@ class GitViewModel @Inject constructor(
     private val gitSettings: GitSettingsRepository,
     private val openFileBridge: OpenFileRequestBridge,
     private val fileSync: FileSyncBridge,
+    private val pluginEvents: com.codeforge.core.domain.extension.PluginEventSink = com.codeforge.core.domain.extension.NoOpPluginEventSink,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GitUiState())
@@ -172,7 +173,11 @@ class GitViewModel @Inject constructor(
                 }
             }
 
-            is GitUiEvent.Checkout -> op(Res.string(R.string.git_op_checkout), touchesFiles = true) { git.checkout(repoPath(), event.branch) }
+            is GitUiEvent.Checkout -> op(Res.string(R.string.git_op_checkout), touchesFiles = true) {
+                git.checkout(repoPath(), event.branch).also {
+                    if (it.isSuccess) pluginEvents.publish(com.codeforge.core.domain.extension.HostEvent.GitBranchChanged(repoPath(), event.branch))
+                }
+            }
             is GitUiEvent.NewBranchRequested -> _uiState.update { it.copy(dialog = GitDialog.NewBranch(event.startPoint)) }
             is GitUiEvent.CreateBranch -> {
                 dismiss()
@@ -340,7 +345,11 @@ class GitViewModel @Inject constructor(
         val s = _uiState.value
         op(if (s.amend) Res.string(R.string.git_commit_aendern) else Res.string(R.string.git_op_commit), success = if (s.amend) Res.string(R.string.git_commit_geaendert) else Res.string(R.string.git_commit_erstellt)) {
             git.commit(repoPath(), s.commitMessage, s.amend).also {
-                if (it.isSuccess) { amendPrefill = null; _uiState.update { st -> st.copy(commitMessage = "", amend = false) } }
+                if (it.isSuccess) {
+                    amendPrefill = null
+                    _uiState.update { st -> st.copy(commitMessage = "", amend = false) }
+                    pluginEvents.publish(com.codeforge.core.domain.extension.HostEvent.GitCommitted(repoPath(), s.commitMessage))
+                }
             }
         }
     }

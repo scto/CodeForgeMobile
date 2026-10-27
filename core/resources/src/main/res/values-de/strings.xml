@@ -2093,5 +2093,9 @@
     <string name="themebuilder_icon_pakete">Icon-Pakete</string>
     <string name="themebuilder_icon_standard">Standard</string>
     <string name="themebuilder_sprachpakete">Sprachpakete</string>
+    <string name="editor_plugin_befehle">Plugin-Befehle</string>
+    <string name="editor_plugin_befehl_fehlgeschlagen">Plugin-Befehl fehlgeschlagen: %1$s</string>
+    <string name="help_d_plugincmds">Öffnet die Befehle, die installierte Code-Plugins für die aktuelle Datei bereitstellen. Nur sichtbar, sobald ein Plugin Befehle registriert hat.</string>
+    <string name="filetree_plugin_befehle">Plugin-Aktionen</string>
 </resources>
 

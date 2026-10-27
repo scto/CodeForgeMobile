@@ -34,13 +34,18 @@ data class FileTreeUiState(
      */
     val refreshToken: Int = 0,
     /** Git-Status zum Einfärben der Namen; leer, wenn deaktiviert oder kein Repository. */
-    val gitStatus: FileTreeGitStatus = FileTreeGitStatus.EMPTY
+    val gitStatus: FileTreeGitStatus = FileTreeGitStatus.EMPTY,
+    /** Von Code-Plugins im Datei-Kontextmenü angebotene Aktionen. */
+    val pluginMenuEntries: List<com.codeforge.core.domain.extension.PluginMenuEntry> = emptyList()
 )
 
 sealed interface FileTreeUiEvent {
     data class FileOpened(val path: String) : FileTreeUiEvent
     data class ContextMenuRequested(val path: String, val isDirectory: Boolean) : FileTreeUiEvent
     data object DismissContextMenu : FileTreeUiEvent
+
+    /** Führt einen Plugin-Befehl für die im Kontextmenü gewählte Datei/den Ordner aus. */
+    data class RunPluginEntry(val pluginId: String, val commandId: String) : FileTreeUiEvent
     data object CreateFileClicked : FileTreeUiEvent
     data object CreateDirectoryClicked : FileTreeUiEvent
     data object RenameClicked : FileTreeUiEvent

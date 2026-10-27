@@ -49,6 +49,7 @@ interface PluginContext {
  * Plugins wie das Kotlin-LSP-Beispiel automatisch statt nur beim Laden reagieren können.
  */
 interface PluginHostServices {
+    /** Benötigt die Berechtigung `lsp` (bei `apiVersion` 1 ohne Deklaration erlaubt). */
     val lspClientRepository: LspClientRepository
     /** Home-Verzeichnis der Termux-Umgebung (`$HOME`); sinnvoller Arbeits-/Installationsort für Plugins. */
     val homeDir: String
@@ -72,4 +73,44 @@ interface PluginHostServices {
      * KEIN Existenz-Check. Installiert wird es über den SDK-Manager bzw. `codeforge-env`.
      */
     fun jdkInstallPath(version: String): String
+
+    // --- Seit API v2 (je nach Berechtigung; ohne sie: PluginPermissionException) ---
+
+    /** Registriert einen Befehl (Berechtigung `commands`). [id] ist pro Plugin eindeutig; erneutes Registrieren ersetzt ihn. */
+    fun registerCommand(id: String, title: String, handler: PluginCommandHandler)
+
+    /** Zeigt einen Befehl in einem App-Menü an (Berechtigung `menus`); [commandId] muss ein registrierter Befehl sein. */
+    fun registerMenuItem(id: String, title: String, target: PluginMenuTarget, commandId: String)
+
+    /** Hört auf Datei-Ereignisse (Berechtigung `file-events`) bzw. Git-Ereignisse (`git-events`); je Ereignisart wird die Berechtigung geprüft. */
+    fun addEventListener(listener: PluginEventListener)
+
+    /** Zeigt eine kurze Nachricht (max. 500 Zeichen) in der App an. Keine Berechtigung nötig. */
+    fun showMessage(text: String)
 }
+
+/** Menüs, in denen Plugin-Befehle erscheinen können. */
+enum class PluginMenuTarget { EDITOR_MENU, FILE_CONTEXT_MENU }
+
+/** Kontext eines Befehlsaufrufs: aktive/ausgewählte Datei oder null. */
+data class CommandArgs(val activeFilePath: String?)
+
+fun interface PluginCommandHandler {
+    suspend fun run(args: CommandArgs)
+}
+
+sealed interface PluginEvent {
+    data class FileOpened(val path: String) : PluginEvent
+    data class FileSaved(val path: String) : PluginEvent
+    data class FileClosed(val path: String) : PluginEvent
+    data class GitCommitted(val repoPath: String, val message: String) : PluginEvent
+    data class GitBranchChanged(val repoPath: String, val branch: String) : PluginEvent
+}
+
+fun interface PluginEventListener {
+    fun onEvent(event: PluginEvent)
+}
+
+/** Ein Plugin hat eine Funktion genutzt, für die es im Manifest keine Berechtigung angefordert hat. */
+class PluginPermissionException(val pluginId: String, val permission: String) :
+    SecurityException("Plugin $pluginId benötigt die Berechtigung '$permission' (plugin.json → permissions)")
