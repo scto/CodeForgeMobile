@@ -7,6 +7,7 @@ package com.codeforge.libs.plugin_impl
 import android.content.Context
 import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.DeclarativeOnly
 import com.codeforge.core.domain.extension.PluginManifestParser
 import com.codeforge.core.domain.extension.kinds
 import com.codeforge.core.domain.model.InstalledPlugin
@@ -93,7 +94,7 @@ class PluginRepositoryImpl @Inject constructor(
             .onSuccess { _loadedPluginIds.update { it + plugin.id } }
     }
 
-    override fun installFromFile(archivePath: String): Flow<PluginInstallEvent> = flow {
+    override fun installFromFile(archivePath: String, declarativeOnly: Boolean): Flow<PluginInstallEvent> = flow {
         val archiveFile = File(archivePath)
         if (!archiveFile.isFile) {
             emit(PluginInstallEvent.Failed(Res.string(R.string.plugin_plugin_archiv_nicht_gefunden, archivePath)))
@@ -136,6 +137,11 @@ class PluginRepositoryImpl @Inject constructor(
             // Validiert u. a. die ID (wird zum Verzeichnisnamen), API-Version, Berechtigungen und Contribution-Pfade.
             val manifest = PluginManifestParser.parse(manifestFile.readText()).getOrThrow()
             val id = manifest.id
+            if (declarativeOnly) {
+                val files = tempDir.walkTopDown().filter { it.isFile }
+                    .map { it.relativeTo(tempDir).invariantSeparatorsPath }.toList()
+                DeclarativeOnly.violation(files, manifest)?.let { error("Nur deklarative Plugins erlaubt: $it") }
+            }
 
             val finalDir = File(pluginsDir, id)
             if (finalDir.exists()) {

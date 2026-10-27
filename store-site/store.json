@@ -2,16 +2,75 @@
   "schema": 1,
   "updated": "2026-10-27",
   "categories": [
-    { "id": "plugin", "title": { "de": "Plugins", "en": "Plugins" } },
-    { "id": "theme", "title": { "de": "Themes", "en": "Themes" } },
-    { "id": "icons", "title": { "de": "Icon-Pakete", "en": "Icon packs" } }
+    {
+      "id": "plugin",
+      "title": {
+        "de": "Plugins (Sideload)",
+        "en": "Plugins (sideload)"
+      }
+    },
+    {
+      "id": "theme",
+      "title": {
+        "de": "Themes",
+        "en": "Themes"
+      }
+    },
+    {
+      "id": "icons",
+      "title": {
+        "de": "Icon-Pakete",
+        "en": "Icon packs"
+      }
+    },
+    {
+      "id": "language",
+      "title": {
+        "de": "Sprachpakete",
+        "en": "Language packs"
+      }
+    },
+    {
+      "id": "grammar",
+      "title": {
+        "de": "Grammatiken",
+        "en": "Grammars"
+      }
+    },
+    {
+      "id": "snippets",
+      "title": {
+        "de": "Snippets",
+        "en": "Snippets"
+      }
+    },
+    {
+      "id": "lsp",
+      "title": {
+        "de": "Sprachserver",
+        "en": "Language servers"
+      }
+    },
+    {
+      "id": "bundle",
+      "title": {
+        "de": "Bundles",
+        "en": "Bundles"
+      }
+    }
   ],
   "items": [
     {
       "id": "example-plugin",
       "category": "plugin",
-      "name": { "de": "Beispiel-Plugin", "en": "Example plugin" },
-      "summary": { "de": "Platzhalter-Eintrag. Ersetzen oder löschen.", "en": "Placeholder entry. Replace or delete." },
+      "name": {
+        "de": "Beispiel-Plugin",
+        "en": "Example plugin"
+      },
+      "summary": {
+        "de": "Platzhalter-Eintrag. Ersetzen oder löschen.",
+        "en": "Placeholder entry. Replace or delete."
+      },
       "version": "0.0.1",
       "author": "Thomas Schmid",
       "homepage": "https://github.com/scto/CodeForgeMobile"

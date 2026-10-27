@@ -191,6 +191,24 @@ private fun PluginRow(plugin: InstalledPlugin, isLoaded: Boolean, onEvent: (Plug
                 )
             }
 
+            if (plugin.contributionKinds.isNotEmpty() || plugin.permissions.isNotEmpty() || plugin.packMembers.isNotEmpty()) {
+                val none = stringRes(R.string.plugins_none)
+                val kind = stringRes(
+                    if (plugin.contributionKinds.isEmpty() || plugin.permissions.isNotEmpty()) R.string.plugins_kind_code
+                    else R.string.plugins_kind_declarative
+                )
+                val kinds = (plugin.contributionKinds + plugin.packMembers.map { "→ $it" })
+                Text(
+                    stringRes(
+                        R.string.plugins_contributions_line,
+                        kinds.joinToString().ifEmpty { none },
+                        plugin.permissions.sorted().joinToString().ifEmpty { none },
+                        kind,
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
             if (plugin.description.isNotBlank()) {
                 Text(
                     plugin.description,

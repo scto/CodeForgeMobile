@@ -24,11 +24,18 @@ data class StoreItem(
     val downloadUrl: String?,
     val sha256: String?,
 ) {
-    /** Direkt installierbar: Kategorie „plugin“, HTTPS-Download und SHA-256 vorhanden. Die Item-ID ist die Plugin-ID. */
+    /**
+     * Direkt installierbar: deklarative Kategorie (Theme, Icons, Sprache, Grammatik, Snippets, LSP, Bundle),
+     * HTTPS-Download und SHA-256. Die Item-ID ist die Plugin-ID. Code-Plugins (Kategorie „plugin“) gibt es
+     * nur per manuellem Sideload; zusätzlich lehnt die Installation Archive mit ausführbarem Code ab.
+     */
     val isInstallablePlugin: Boolean
-        get() = categoryId == PLUGIN_CATEGORY && sha256 != null && downloadUrl?.startsWith("https://") == true
+        get() = categoryId in DECLARATIVE_CATEGORIES && sha256 != null && downloadUrl?.startsWith("https://") == true
 
-    companion object { const val PLUGIN_CATEGORY = "plugin" }
+    companion object {
+        const val PLUGIN_CATEGORY = "plugin"
+        val DECLARATIVE_CATEGORIES = setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "bundle")
+    }
 }
 
 @Immutable

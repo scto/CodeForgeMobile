@@ -232,3 +232,4 @@ Weitere offene Punkte außerhalb der Tasks (APT-Repo, Gerätetests) stehen unten
   * Nach einem Wechsel des GPG-Schlüssels gelten die Schritte aus `docs/BOOTSTRAP-WORKFLOW.md` (`mode=full`, neuer `release_tag`, `gradle.properties`, Auffüllen per `add`). Prüfen, ob das für den Schlüssel vom 2026-10-19 abgeschlossen ist.
 * Artefakte `gradle` (APT-Repo) und Release `compiler-runtime-2025.09.00-k2.1.21` (`scto/codeforge-tools`) existieren laut Inhaber (2026-10-21). Nicht geprüft: SHA-256 der Runtime gegen `CompilerRuntimeProviderImpl`/`manifest.json`, Installation auf dem Gerät.
 * Gerätetests: `docs/device-test-checklist.md` auf einem physischen Android-Gerät mit ADB ausführen; zusätzlich LSP-Start mit den nun verfügbaren JDKs (`jdtls`, Kotlin-Server).
+* Erweiterungssystem (Phasen 1–7) umgesetzt, nur per Unit-Test/Kompilierung geprüft; Geräteprüfung: `agy-tasks/61-erweiterungssystem-geraetepruefung.md`.

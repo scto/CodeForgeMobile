@@ -53,6 +53,8 @@ class StoreViewModel @Inject constructor(
                 item,
                 onDownloadProgress = { p -> _uiState.update { it.copy(installProgress = p) } },
                 onInstallProgress = { pct -> _uiState.update { it.copy(installProgress = pct / 100f) } },
+                catalog = _uiState.value.catalog?.items.orEmpty(),
+                installedIds = _uiState.value.installedPluginIds,
             )
             val text = when (result) {
                 is StoreInstallResult.Installed -> context.getString(R.string.store_install_success, result.name)

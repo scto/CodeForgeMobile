@@ -37,6 +37,21 @@ class StoreInstaller internal constructor(
         item: StoreItem,
         onDownloadProgress: (Float) -> Unit = {},
         onInstallProgress: (Int) -> Unit = {},
+        catalog: List<StoreItem> = emptyList(),
+        installedIds: Set<String> = emptySet(),
+    ): StoreInstallResult {
+        val done = HashSet<String>().apply { addAll(installedIds) }
+        return installRecursive(item, onDownloadProgress, onInstallProgress, catalog, done, depth = 1)
+    }
+
+    /** Installiert [item] und danach fehlende Bundle-Mitglieder, die im Katalog stehen (Tiefe ≤ 4, ohne Zyklen). */
+    private suspend fun installRecursive(
+        item: StoreItem,
+        onDownloadProgress: (Float) -> Unit,
+        onInstallProgress: (Int) -> Unit,
+        catalog: List<StoreItem>,
+        done: MutableSet<String>,
+        depth: Int,
     ): StoreInstallResult {
         val url = item.downloadUrl
         val expected = item.sha256
@@ -52,11 +67,27 @@ class StoreInstaller internal constructor(
             if (!Sha256Utils.verifySha256(target, expected)) return StoreInstallResult.HashMismatch
 
             var result: StoreInstallResult = StoreInstallResult.Failed("keine Rückmeldung")
-            plugins.installFromFile(target.absolutePath).collect { event ->
+            var members: List<String> = emptyList()
+            plugins.installFromFile(target.absolutePath, declarativeOnly = true).collect { event ->
                 when (event) {
                     is PluginInstallEvent.Progress -> onInstallProgress(event.percent)
-                    is PluginInstallEvent.Success -> result = StoreInstallResult.Installed(event.plugin.name)
+                    is PluginInstallEvent.Success -> {
+                        result = StoreInstallResult.Installed(event.plugin.name)
+                        done.add(event.plugin.id)
+                        members = event.plugin.packMembers
+                    }
                     is PluginInstallEvent.Failed -> result = StoreInstallResult.Failed(event.message)
+                }
+            }
+            if (result is StoreInstallResult.Installed && depth < MAX_PACK_DEPTH) {
+                for (id in members.distinct()) {
+                    if (id in done) continue
+                    val member = catalog.firstOrNull { it.id == id && it.isInstallablePlugin } ?: continue
+                    done.add(id)
+                    val r = installRecursive(member, {}, {}, catalog, done, depth + 1)
+                    if (r !is StoreInstallResult.Installed) {
+                        return StoreInstallResult.Failed("Bundle-Mitglied ${member.name}: " + ((r as? StoreInstallResult.Failed)?.message ?: "Prüfsumme falsch"))
+                    }
                 }
             }
             return result
@@ -64,4 +95,6 @@ class StoreInstaller internal constructor(
             runCatching { target.delete() }
         }
     }
+
+    private companion object { const val MAX_PACK_DEPTH = 4 }
 }

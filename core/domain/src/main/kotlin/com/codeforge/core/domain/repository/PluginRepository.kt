@@ -19,7 +19,11 @@ interface PluginRepository {
     /** Zur Laufzeit tatsächlich geladene Plugin-IDs (nicht persistiert, geräteweit pro Prozess). */
     val loadedPluginIds: StateFlow<Set<String>>
 
-    fun installFromFile(archivePath: String): Flow<PluginInstallEvent>
+    /**
+     * Installiert ein Plugin-ZIP. Mit [declarativeOnly] = true (Store) werden Archive mit ausführbarem Code
+     * (entryPointClass, .dex/.jar/.so …) abgelehnt; Code-Plugins nur per manuellem Sideload (false).
+     */
+    fun installFromFile(archivePath: String, declarativeOnly: Boolean = false): Flow<PluginInstallEvent>
 
     /** true: Plugin laden + als aktiviert speichern. false: Plugin entladen + als deaktiviert speichern. */
     suspend fun setEnabled(pluginId: String, enabled: Boolean): Result<Unit>

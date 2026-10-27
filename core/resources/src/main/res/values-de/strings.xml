@@ -2097,5 +2097,9 @@
     <string name="editor_plugin_befehl_fehlgeschlagen">Plugin-Befehl fehlgeschlagen: %1$s</string>
     <string name="help_d_plugincmds">Öffnet die Befehle, die installierte Code-Plugins für die aktuelle Datei bereitstellen. Nur sichtbar, sobald ein Plugin Befehle registriert hat.</string>
     <string name="filetree_plugin_befehle">Plugin-Aktionen</string>
+    <string name="plugins_contributions_line">Beiträge: %1$s · Berechtigungen: %2$s · %3$s</string>
+    <string name="plugins_kind_code">Code-Plugin</string>
+    <string name="plugins_kind_declarative">Deklarativ</string>
+    <string name="plugins_none">–</string>
 </resources>
 

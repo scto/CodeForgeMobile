@@ -2097,5 +2097,9 @@
     <string name="editor_plugin_befehl_fehlgeschlagen">Plugin command failed: %1$s</string>
     <string name="help_d_plugincmds">Opens the commands that installed code plugins provide for the current file. Only visible once a plugin has registered commands.</string>
     <string name="filetree_plugin_befehle">Plugin actions</string>
+    <string name="plugins_contributions_line">Contributions: %1$s · Permissions: %2$s · %3$s</string>
+    <string name="plugins_kind_code">Code</string>
+    <string name="plugins_kind_declarative">Declarative</string>
+    <string name="plugins_none">–</string>
 </resources>
 

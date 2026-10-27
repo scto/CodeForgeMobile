@@ -150,7 +150,8 @@ class MyPlugin : CodeForgePlugin {
 | `languagePacks` | umgesetzt (Phase 4), nicht abgedeckt: Plurals/`Context.getString` |
 | `grammars` | umgesetzt (Phase 5), nur Dateien ohne eingebaute Grammatik |
 | `snippets` | umgesetzt (Phase 5), schreibgeschützt |
-| `extensionPack` | Modell + Auflösung (Phase 5), Store-Installation in Phase 7 |
+| `extensionPack` | umgesetzt (Phase 5/7): Store installiert fehlende Mitglieder aus dem Katalog (Tiefe ≤ 4) |
+| Store-Policy | umgesetzt (Phase 7): nur deklarative Kategorien (`theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `bundle`); `installFromFile(declarativeOnly = true)` lehnt Archive mit `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge ab; Code-Plugins nur per Sideload |
 | Code-Plugin-Hooks | umgesetzt (Phase 6): Befehle, Menüs, Datei-/Git-Ereignisse, Berechtigungen |
 | `lspServers` | umgesetzt (Resolver) |
-| weitere | siehe `agy-tasks/61-erweiterungssystem-geraetepruefung.md` (wird mit den Phasen gefüllt) |
+| Geräteprüfung | alles bisher nur per Unit-Test/Kompilierung geprüft, siehe `agy-tasks/61-erweiterungssystem-geraetepruefung.md` |
