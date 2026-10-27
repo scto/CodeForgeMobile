@@ -50,6 +50,36 @@ class TreeSitterGrammarTest {
     }
 
     @Test
+    fun kotlinLocalsQueryExistsAndValidStructure() {
+        val localsFile = resolveModuleFile("src/main/assets/treesitter/kotlin/locals.scm")
+        org.junit.Assert.assertTrue(
+            "locals.scm fehlt für Kotlin: ${localsFile.path}",
+            localsFile.isFile && localsFile.length() > 0
+        )
+        val text = localsFile.readText()
+        org.junit.Assert.assertTrue("locals.scm muss @local.scope enthalten", text.contains("@local.scope"))
+        org.junit.Assert.assertTrue("locals.scm muss @local.scope.members enthalten", text.contains("@local.scope.members"))
+        org.junit.Assert.assertTrue("locals.scm muss @local.definition enthalten", text.contains("@local.definition"))
+        org.junit.Assert.assertTrue("locals.scm muss @local.reference enthalten", text.contains("@local.reference"))
+
+        // Klammer- und Syntaxprüfung ohne native Abhängigkeit
+        var parenDepth = 0
+        var bracketDepth = 0
+        var inString = false
+        for (ch in text) {
+            if (ch == '"') inString = !inString
+            if (!inString) {
+                if (ch == '(') parenDepth++
+                if (ch == ')') parenDepth--
+                if (ch == '[') bracketDepth++
+                if (ch == ']') bracketDepth--
+            }
+        }
+        org.junit.Assert.assertEquals("Runde Klammern in locals.scm müssen ausgeglichen sein", 0, parenDepth)
+        org.junit.Assert.assertEquals("Eckige Klammern in locals.scm müssen ausgeglichen sein", 0, bracketDepth)
+    }
+
+    @Test
     fun queryAssetsExistForEveryGrammar() {
         for (grammar in TreeSitterGrammar.entries) {
             val assetFile = resolveModuleFile("src/main/assets/${grammar.queryAssetDir}/highlights.scm")

@@ -157,11 +157,16 @@ object TreeSitterLanguageSupport {
             val blocksScm = runCatching {
                 context.assets.open("${grammar.queryAssetDir}/blocks.scm").bufferedReader().use { it.readText() }
             }.getOrDefault("")
+            val localsScm = runCatching {
+                context.assets.open("${grammar.queryAssetDir}/locals.scm").bufferedReader().use { it.readText() }
+            }.getOrDefault("")
             val tsLang = loadTsLanguage(context, grammar)
             val spec = TsLanguageSpec(
                 language = tsLang,
                 highlightScmSource = highlightScm,
-                codeBlocksScmSource = blocksScm
+                codeBlocksScmSource = blocksScm,
+                bracketsScmSource = "",
+                localsScmSource = localsScm
             )
             TsLanguage(spec) { }
         }.onFailure {
