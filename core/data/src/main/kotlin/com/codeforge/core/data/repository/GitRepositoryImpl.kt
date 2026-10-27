@@ -344,7 +344,7 @@ class GitRepositoryImpl @Inject constructor(
             val cmd = git.diff().setOutputStream(bytes).setCached(staged).setContextLines(3)
             if (path != null) cmd.setPathFilter(PathFilter.create(path))
             cmd.call()
-            out.append(bytes.toString(Charsets.UTF_8))
+            out.append(bytes.toByteArray().toString(Charsets.UTF_8))
         }
         // Neue Dateien ohne HEAD-Vergleich: untracked (Arbeitsverzeichnis) bzw. alles Staged ohne ersten Commit
         val status = git.status().call()
@@ -835,7 +835,7 @@ class GitRepositoryImpl @Inject constructor(
                 df.flush()
             }
         }
-        out.toString(Charsets.UTF_8)
+        out.toByteArray().toString(Charsets.UTF_8)
     }
 
     override suspend fun fileHistory(repoPath: String, path: String, limit: Int): Result<List<GitCommitInfo>> = git(repoPath) { git ->
