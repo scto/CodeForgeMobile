@@ -1,6 +1,6 @@
 # Task 60 – Fertige agy-Prompts für alle offenen Punkte
 
-Stand: P4 (Zwischenablage-Kürzel) und P5 (Terminal-Backup) wurden von Claude umgesetzt und entfernt (Commits a79b423, 26f03b8); P12 läuft bereits bei agy. Die Nummern der übrigen Prompts bleiben unverändert.
+Stand: P4 (Zwischenablage-Kürzel) und P5 (Terminal-Backup) wurden von Claude umgesetzt und entfernt (Commits a79b423, 26f03b8); ihr Gerätetest steht jetzt in P3 (Punkte 5 und 6); P12 läuft bereits bei agy. Die Nummern der übrigen Prompts bleiben unverändert.
 
 Jeder Block ist ein eigenständiger Prompt: kopieren, in agy einfügen, fertig.
 Gemeinsame Regeln (in jedem Prompt enthalten, hier nur zur Übersicht): Deutsch, Shell mit `set -euo pipefail`, Clean Architecture (UI / Domain / Data), Gradle Kotlin DSL + Version Catalogs, `modifier: Modifier = Modifier` als erster optionaler Parameter, `@Immutable` UI-States, keine Geheimnisse in Berichten/Commits, nichts erfinden: Nicht Ausgeführtes steht im Bericht unter **nicht getestet**. Vor jedem Push: `git fetch origin main && git rebase origin/main`. Commit-Nachrichten deutsch.
@@ -39,6 +39,8 @@ Prüfe auf dem Gerät:
 2. Schriftgröße (sp↔px, 2er-Schritte), Schriftdatei wählen, Button "JetBrains Mono", "Zurücksetzen".
 3. Zusatztasten: Preset wählen, speichern, Terminal neu öffnen – ist die Zeile geändert? Ungültige Eingabe darf nicht gespeichert werden.
 4. "Alle Sitzungen beim Schließen beenden": an, Sitzung mit `sleep 1000` starten, Zurück-Taste → Prozess muss weg sein (`ps`/Benachrichtigung). Aus: Sitzung bleibt. Gerät drehen darf nichts beenden.
+5. Zwischenablage-Kürzel (Schalter "Zwischenablage-Tastenkombinationen", Standard aus): mit Hardware-Tastatur Text markieren, Strg+Umschalt+C kopiert, Strg+Umschalt+V fügt ein. Schalter aus: beide tun nichts Neues. Strg+C muss in beiden Fällen weiter laufende Prozesse unterbrechen.
+6. Terminal-Sicherung (Karte "Terminal-Sicherung"): "Sichern…" erzeugt eine .tar.gz (Größe und Dauer notieren; `tar tzf` im Terminal zeigt `home/`, `usr/` und `codeforge-backup-v1`, keine `usr/tmp`-Einträge). Danach eine Testdatei in $HOME ändern und eine kleine Datei löschen, "Wiederherstellen…" mit dieser Sicherung: Bestätigungsdialog erscheint, Dateien sind zurück, Symlinks (`ls -l $PREFIX/bin`) und Ausführbar-Bit intakt, `apt-get check` ohne Meldung. Abbrechen während der Sicherung testen (Meldung "Abgebrochen."). Eine beliebige andere Datei (z. B. ein Foto) als Wiederherstellungsquelle wählen: muss mit "Keine gültige CodeForge-Sicherung" abgelehnt werden, ohne etwas zu verändern.
 Fehler beheben, Tests ergänzen, einzeln committen. Bericht docs/task-60-p3-report.md.
 ```
 
