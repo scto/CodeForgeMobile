@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,7 +54,13 @@ private fun TerminalSettingsScreen(
         modifier = modifier,
         topBar = { SettingsTopBar(title = stringRes(R.string.settings_terminal), onBack = onBack) }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(16.dp)
+        ) {
             Text(
                 stringRes(R.string.settings_die_shell_laeuft_in_der),
                 style = MaterialTheme.typography.bodyMedium
@@ -138,6 +145,66 @@ private fun TerminalSettingsScreen(
                         Text("${uiState.fontSize}", modifier = Modifier.padding(horizontal = 8.dp))
                         IconButton(onClick = { onEvent(TerminalSettingsUiEvent.FontSizeChanged((uiState.fontSize + 1).coerceAtMost(32))) }) {
                             Text("+")
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    val stepIndex = TerminalScrollback.STEPS.indexOfFirst { it >= uiState.scrollbackRows }
+                        .let { if (it < 0) TerminalScrollback.STEPS.lastIndex else it }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringRes(R.string.settings_terminal_scrollback), style = MaterialTheme.typography.titleSmall)
+                        Text("${uiState.scrollbackRows}", style = MaterialTheme.typography.labelLarge)
+                    }
+                    Text(
+                        stringRes(R.string.settings_terminal_scrollback_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    androidx.compose.material3.Slider(
+                        value = stepIndex.toFloat(),
+                        onValueChange = {
+                            onEvent(TerminalSettingsUiEvent.ScrollbackChanged(TerminalScrollback.STEPS[it.toInt().coerceIn(0, TerminalScrollback.STEPS.lastIndex)]))
+                        },
+                        valueRange = 0f..TerminalScrollback.STEPS.lastIndex.toFloat(),
+                        steps = TerminalScrollback.STEPS.size - 2
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(stringRes(R.string.settings_terminal_cursor_style), style = MaterialTheme.typography.titleSmall)
+                    listOf(
+                        "block" to R.string.settings_terminal_cursor_block,
+                        "bar" to R.string.settings_terminal_cursor_bar,
+                        "underline" to R.string.settings_terminal_cursor_underline
+                    ).forEach { (style, label) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = uiState.cursorStyle == style,
+                                    onClick = { onEvent(TerminalSettingsUiEvent.CursorStyleChanged(style)) }
+                                )
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = uiState.cursorStyle == style,
+                                onClick = { onEvent(TerminalSettingsUiEvent.CursorStyleChanged(style)) }
+                            )
+                            Text(stringRes(label), modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                 }

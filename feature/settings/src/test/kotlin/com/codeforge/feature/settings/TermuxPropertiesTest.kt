@@ -1,0 +1,46 @@
+package com.codeforge.feature.settings
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+class TermuxPropertiesTest {
+    @get:Rule val tmp = TemporaryFolder()
+
+    @Test
+    fun `set ersetzt vorhandenen Schluessel und behaelt Kommentare`() {
+        val text = "# Kommentar\nbell-character=ignore\nterminal-transcript-rows=2000\n"
+        val out = TermuxPropertiesText.set(text, "terminal-transcript-rows", "10000")
+        assertEquals("# Kommentar\nbell-character=ignore\nterminal-transcript-rows=10000\n", out)
+        assertEquals("10000", TermuxPropertiesText.get(out, "terminal-transcript-rows"))
+    }
+
+    @Test
+    fun `set haengt fehlenden Schluessel an und null entfernt ihn`() {
+        val added = TermuxPropertiesText.set("a=1\n", "terminal-cursor-style", "bar")
+        assertEquals("a=1\nterminal-cursor-style=bar\n", added)
+        assertEquals("a=1\n", TermuxPropertiesText.set(added, "terminal-cursor-style", null))
+        assertEquals("terminal-cursor-style=block\n", TermuxPropertiesText.set("", "terminal-cursor-style", "block"))
+    }
+
+    @Test
+    fun `auskommentierte Schluessel werden ignoriert`() {
+        val text = "# terminal-cursor-style=bar\n"
+        assertNull(TermuxPropertiesText.get(text, "terminal-cursor-style"))
+        assertEquals(
+            "# terminal-cursor-style=bar\nterminal-cursor-style=underline\n",
+            TermuxPropertiesText.set(text, "terminal-cursor-style", "underline")
+        )
+    }
+
+    @Test
+    fun `Store schreibt und liest Datei inklusive Verzeichnis`() {
+        val file = tmp.root.resolve("home/.termux/termux.properties")
+        val store = TermuxPropertiesStore(file)
+        assertNull(store.read("terminal-transcript-rows"))
+        assertEquals(true, store.write("terminal-transcript-rows", "5000"))
+        assertEquals("5000", store.read("terminal-transcript-rows"))
+    }
+}

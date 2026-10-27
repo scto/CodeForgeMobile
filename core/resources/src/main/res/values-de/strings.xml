@@ -1892,5 +1892,11 @@
     <string name="settings_git_conflict_detection_desc">Merge-Konfliktmarker im Editor hervorheben und Auflösungsoptionen anzeigen.</string>
     <string name="settings_git_file_colors">Dateinamen einfärben</string>
     <string name="settings_git_file_colors_desc">Dateinamen im Dateibaum nach Git-Status farbig darstellen (geändert, neu, Konflikt).</string>
+    <string name="settings_terminal_scrollback">Größe des Scrollback-Puffers</string>
+    <string name="settings_terminal_scrollback_desc">Anzahl der Zeilen, die als Verlauf im Speicher bleiben. Gilt für neue Terminal-Sitzungen.</string>
+    <string name="settings_terminal_cursor_style">Cursorstil</string>
+    <string name="settings_terminal_cursor_block">Block</string>
+    <string name="settings_terminal_cursor_bar">Balken</string>
+    <string name="settings_terminal_cursor_underline">Unterstrich</string>
 </resources>
 

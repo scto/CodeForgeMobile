@@ -1892,5 +1892,11 @@
     <string name="settings_git_conflict_detection_desc">Highlight merge conflict markers in the editor and offer resolution actions.</string>
     <string name="settings_git_file_colors">Color file names</string>
     <string name="settings_git_file_colors_desc">Color file names in the file tree by Git status (changed, new, conflict).</string>
+    <string name="settings_terminal_scrollback">Scrollback buffer</string>
+    <string name="settings_terminal_scrollback_desc">Number of lines kept as history. Applies to new terminal sessions.</string>
+    <string name="settings_terminal_cursor_style">Cursor style</string>
+    <string name="settings_terminal_cursor_block">Block</string>
+    <string name="settings_terminal_cursor_bar">Bar</string>
+    <string name="settings_terminal_cursor_underline">Underline</string>
 </resources>
 
