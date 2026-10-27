@@ -5,6 +5,8 @@ Stand: P4 (Zwischenablage-Kürzel) und P5 (Terminal-Backup) wurden von Claude um
 Jeder Block ist ein eigenständiger Prompt: kopieren, in agy einfügen, fertig.
 Gemeinsame Regeln (in jedem Prompt enthalten, hier nur zur Übersicht): Deutsch, Shell mit `set -euo pipefail`, Clean Architecture (UI / Domain / Data), Gradle Kotlin DSL + Version Catalogs, `modifier: Modifier = Modifier` als erster optionaler Parameter, `@Immutable` UI-States, keine Geheimnisse in Berichten/Commits, nichts erfinden: Nicht Ausgeführtes steht im Bericht unter **nicht getestet**. Vor jedem Push: `git fetch origin main && git rebase origin/main`. Commit-Nachrichten deutsch.
 
+**Reihenfolge ohne Gerät/PC/WLAN (Stand 2026-10-27):** Jetzt möglich (reine Code-/Build-Arbeit): P1, P7 (Messung 56.1–56.2), P8, P9, P12. Zurückgestellt bis Gerät oder Netz verfügbar: P2, P3, P6 (Gerätetests), P10 (braucht Workflow-Rechte und Netz), P11 (braucht Netz für `apt update`). Zurückgestellte Punkte nicht als erledigt markieren.
+
 ---
 
 ## P1 – Build und Unit-Tests grün (Voraussetzung für alles andere)
