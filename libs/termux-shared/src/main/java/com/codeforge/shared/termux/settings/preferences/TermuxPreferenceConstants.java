@@ -124,6 +124,12 @@ public final class TermuxPreferenceConstants {
     public static final String KEY_KEEP_SCREEN_ON = "screen_always_on";
     public static final boolean DEFAULT_VALUE_KEEP_SCREEN_ON = false;
 
+    /**
+     * Defines the key for whether all sessions are killed (service stopped) when the terminal activity is closed.
+     */
+    public static final String KEY_KILL_SESSIONS_ON_EXIT = "kill_sessions_on_exit";
+    public static final boolean DEFAULT_VALUE_KILL_SESSIONS_ON_EXIT = false;
+
 
     /**
      * Defines the key for font size of termux terminal view.

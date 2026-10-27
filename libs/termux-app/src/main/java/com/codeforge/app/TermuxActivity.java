@@ -361,6 +361,17 @@ public class TermuxActivity extends AppCompatActivity implements ServiceConnecti
 
         if (mIsInvalidState) return;
 
+        // Einstellung "Alle Sitzungen beim Schließen beenden": Nur beim echten Schließen (Zurück/finish),
+        // nicht bei Konfigurationsänderungen (Drehen) – dort ist isFinishing() false.
+        if (isFinishing() && mPreferences != null && mPreferences.shouldKillSessionsOnExit()) {
+            try {
+                startService(new Intent(this, TermuxService.class)
+                    .setAction(com.codeforge.shared.termux.TermuxConstants.TERMUX_APP.TERMUX_SERVICE.ACTION_STOP_SERVICE));
+            } catch (Exception e) {
+                Logger.logStackTraceWithMessage(LOG_TAG, "Failed to stop service on exit", e);
+            }
+        }
+
         if (mTermuxService != null) {
             // Do not leave service and session clients with references to activity.
             mTermuxService.unsetTermuxTerminalSessionClient();

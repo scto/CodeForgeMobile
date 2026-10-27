@@ -39,6 +39,11 @@ class TerminalSettingsViewModel @Inject constructor(
     private val properties = TermuxPropertiesStore()
     private val termuxState = MutableStateFlow(readTermuxState())
 
+    private fun readExtraKeys(): String? = properties.read(TermuxPropertiesStore.KEY_EXTRA_KEYS)?.takeIf { it.isNotBlank() }
+    private val extraKeysState = MutableStateFlow(readExtraKeys())
+    private val killOnExitState = MutableStateFlow(readKillOnExit())
+    private fun readKillOnExit(): Boolean = runCatching { termuxPrefs?.shouldKillSessionsOnExit() }.getOrNull() == true
+
     private fun readTermuxState(): Pair<Int, String> {
         val rows = properties.read(TermuxPropertiesStore.KEY_TRANSCRIPT_ROWS)?.toIntOrNull()
             ?.coerceIn(100, 50_000) ?: TerminalScrollback.DEFAULT
@@ -47,13 +52,17 @@ class TerminalSettingsViewModel @Inject constructor(
         return rows to style
     }
 
-    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState) { settings, termux, fontSp, font ->
+    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState) { e, k -> e to k }) { settings, termux, fontSp, font, extra ->
+            val (extraKeys, killOnExit) = extra
             TerminalSettingsUiState(
                 fontSize = fontSp ?: settings.terminal.fontSize.takeIf { it > 0 } ?: 14,
                 useCompactTerminal = settings.terminal.useCompactTerminal,
                 scrollbackRows = termux.first,
                 cursorStyle = termux.second,
                 customFontInstalled = font.first,
+                killSessionsOnExit = killOnExit,
+                extraKeys = extraKeys ?: ExtraKeysConfig.DEFAULT,
+                extraKeysCustom = extraKeys != null,
                 fontMessageRes = font.second,
                 isLoading = false
             )
@@ -83,6 +92,22 @@ class TerminalSettingsViewModel @Inject constructor(
                 }
                 TerminalSettingsUiEvent.BundledFontChosen -> installFont {
                     context.assets.open("fonts/jetbrainsmono_regular.ttf")
+                }
+                is TerminalSettingsUiEvent.KillSessionsOnExitChanged -> {
+                    runCatching { termuxPrefs?.setKillSessionsOnExit(event.enabled) }
+                    killOnExitState.value = readKillOnExit()
+                }
+                is TerminalSettingsUiEvent.ExtraKeysSaved -> {
+                    val text = ExtraKeysConfig.normalize(event.text)
+                    if (ExtraKeysConfig.isValid(text)) {
+                        // Standard nicht festschreiben
+                        properties.write(TermuxPropertiesStore.KEY_EXTRA_KEYS, text.takeIf { it != ExtraKeysConfig.DEFAULT })
+                        extraKeysState.value = readExtraKeys()
+                    }
+                }
+                TerminalSettingsUiEvent.ExtraKeysReset -> {
+                    properties.write(TermuxPropertiesStore.KEY_EXTRA_KEYS, null)
+                    extraKeysState.value = readExtraKeys()
                 }
                 TerminalSettingsUiEvent.FontReset -> {
                     fontInstaller.reset()

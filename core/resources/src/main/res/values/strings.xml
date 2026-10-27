@@ -1906,5 +1906,16 @@
     <string name="settings_terminal_font_invalid">Not a valid font file (TTF/OTF).</string>
     <string name="settings_terminal_font_installed">Terminal font installed.</string>
     <string name="settings_terminal_font_jetbrains">JetBrains Mono</string>
+    <string name="settings_terminal_kill_on_exit">End all sessions on close</string>
+    <string name="settings_terminal_kill_on_exit_desc">Stops the terminal service and all running sessions when the terminal is closed.</string>
+    <string name="settings_terminal_extra_keys">Extra keys</string>
+    <string name="settings_terminal_extra_keys_desc">Layout of the key row above the keyboard (extra-keys in termux.properties).</string>
+    <string name="settings_terminal_extra_keys_preset_default">Default</string>
+    <string name="settings_terminal_extra_keys_preset_single">Single row</string>
+    <string name="settings_terminal_extra_keys_preset_coding">Coding</string>
+    <string name="settings_terminal_extra_keys_invalid">Invalid layout: expected [[…], […]] with balanced brackets and quotes.</string>
+    <string name="settings_terminal_extra_keys_save">Save</string>
+    <string name="settings_terminal_extra_keys_reset">Reset to default</string>
+    <string name="settings_terminal_extra_keys_hint">Applies to new terminal sessions or after reloading the terminal settings.</string>
 </resources>
 

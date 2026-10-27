@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -251,6 +252,93 @@ private fun TerminalSettingsScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringRes(R.string.settings_terminal_kill_on_exit), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringRes(R.string.settings_terminal_kill_on_exit_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    androidx.compose.material3.Switch(
+                        checked = uiState.killSessionsOnExit,
+                        onCheckedChange = { onEvent(TerminalSettingsUiEvent.KillSessionsOnExitChanged(it)) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ExtraKeysCard(uiState = uiState, onEvent = onEvent)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExtraKeysCard(
+    modifier: Modifier = Modifier,
+    uiState: TerminalSettingsUiState,
+    onEvent: (TerminalSettingsUiEvent) -> Unit
+) {
+    var text by androidx.compose.runtime.remember(uiState.extraKeys) {
+        androidx.compose.runtime.mutableStateOf(uiState.extraKeys)
+    }
+    val valid by androidx.compose.runtime.remember { androidx.compose.runtime.derivedStateOf { ExtraKeysConfig.isValid(text) } }
+    val changed = ExtraKeysConfig.normalize(text) != uiState.extraKeys
+    Card(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(stringRes(R.string.settings_terminal_extra_keys), style = MaterialTheme.typography.titleSmall)
+            Text(
+                stringRes(R.string.settings_terminal_extra_keys_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExtraKeysConfig.PRESETS.forEach { (label, value) ->
+                    androidx.compose.material3.AssistChip(
+                        onClick = { text = value },
+                        label = { Text(stringRes(label), maxLines = 1) }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            androidx.compose.material3.OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                minLines = 3,
+                isError = !valid,
+                supportingText = if (valid) null else ({ Text(stringRes(R.string.settings_terminal_extra_keys_invalid)) })
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                androidx.compose.material3.Button(
+                    onClick = { onEvent(TerminalSettingsUiEvent.ExtraKeysSaved(text)) },
+                    enabled = valid && changed
+                ) { Text(stringRes(R.string.settings_terminal_extra_keys_save)) }
+                if (uiState.extraKeysCustom) {
+                    androidx.compose.material3.TextButton(onClick = { onEvent(TerminalSettingsUiEvent.ExtraKeysReset) }) {
+                        Text(stringRes(R.string.settings_terminal_extra_keys_reset))
+                    }
+                }
+            }
+            Text(
+                stringRes(R.string.settings_terminal_extra_keys_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }

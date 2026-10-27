@@ -120,6 +120,14 @@ public class TermuxAppSharedPreferences extends AppSharedPreferences {
         SharedPreferenceUtils.setBoolean(mSharedPreferences, TERMUX_APP.KEY_KEEP_SCREEN_ON, value, false);
     }
 
+    public boolean shouldKillSessionsOnExit() {
+        return SharedPreferenceUtils.getBoolean(mSharedPreferences, TERMUX_APP.KEY_KILL_SESSIONS_ON_EXIT, TERMUX_APP.DEFAULT_VALUE_KILL_SESSIONS_ON_EXIT);
+    }
+
+    public void setKillSessionsOnExit(boolean value) {
+        SharedPreferenceUtils.setBoolean(mSharedPreferences, TERMUX_APP.KEY_KILL_SESSIONS_ON_EXIT, value, false);
+    }
+
 
 
     public static int[] getDefaultFontSizes(Context context) {

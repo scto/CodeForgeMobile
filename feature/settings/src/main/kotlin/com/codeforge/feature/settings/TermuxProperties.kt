@@ -50,6 +50,7 @@ class TermuxPropertiesStore(private val file: File = defaultFile()) {
     companion object {
         const val KEY_TRANSCRIPT_ROWS = "terminal-transcript-rows"
         const val KEY_CURSOR_STYLE = "terminal-cursor-style"
+        const val KEY_EXTRA_KEYS = "extra-keys"
 
         fun defaultFile(): File {
             val home = System.getenv("HOME")?.takeIf { it.isNotBlank() } ?: "/data/data/com.codeforge.app/files/home"

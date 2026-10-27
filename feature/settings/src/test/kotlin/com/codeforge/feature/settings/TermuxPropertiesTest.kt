@@ -93,3 +93,27 @@ class TerminalFontInstallerTest {
         assertEquals(true, installer.reset())
     }
 }
+
+class ExtraKeysConfigTest {
+    @org.junit.Test
+    fun presetsAreValid() {
+        assert(ExtraKeysConfig.isValid(ExtraKeysConfig.DEFAULT))
+        assert(ExtraKeysConfig.isValid(ExtraKeysConfig.SINGLE_ROW))
+        assert(ExtraKeysConfig.isValid(ExtraKeysConfig.CODING))
+    }
+
+    @org.junit.Test
+    fun rejectsBrokenInput() {
+        assert(!ExtraKeysConfig.isValid(""))
+        assert(!ExtraKeysConfig.isValid("['ESC']"))
+        assert(!ExtraKeysConfig.isValid("[['ESC','TAB']"))
+        assert(!ExtraKeysConfig.isValid("[['ESC','TAB]]"))
+        assert(!ExtraKeysConfig.isValid("[[{key: '-'], ['A']]"))
+    }
+
+    @org.junit.Test
+    fun bracketsInsideStringsAreIgnoredAndNewlinesCollapse() {
+        assert(ExtraKeysConfig.isValid("[['(','['],\n ['{']]"))
+        assert(ExtraKeysConfig.normalize("[['A'],\n  ['B']]") == "[['A'], ['B']]")
+    }
+}

@@ -1906,5 +1906,16 @@
     <string name="settings_terminal_font_invalid">Keine gültige Schriftdatei (TTF/OTF).</string>
     <string name="settings_terminal_font_installed">Terminal-Schriftart installiert.</string>
     <string name="settings_terminal_font_jetbrains">JetBrains Mono</string>
+    <string name="settings_terminal_kill_on_exit">Alle Sitzungen beim Schließen beenden</string>
+    <string name="settings_terminal_kill_on_exit_desc">Beendet den Terminal-Dienst und alle laufenden Sitzungen, sobald das Terminal geschlossen wird.</string>
+    <string name="settings_terminal_extra_keys">Zusatztasten</string>
+    <string name="settings_terminal_extra_keys_desc">Belegung der Tastenzeile über der Tastatur (extra-keys in termux.properties).</string>
+    <string name="settings_terminal_extra_keys_preset_default">Standard</string>
+    <string name="settings_terminal_extra_keys_preset_single">Eine Zeile</string>
+    <string name="settings_terminal_extra_keys_preset_coding">Coding</string>
+    <string name="settings_terminal_extra_keys_invalid">Ungültige Belegung: erwartet [[…], […]] mit ausgeglichenen Klammern und Anführungszeichen.</string>
+    <string name="settings_terminal_extra_keys_save">Speichern</string>
+    <string name="settings_terminal_extra_keys_reset">Auf Standard zurücksetzen</string>
+    <string name="settings_terminal_extra_keys_hint">Gilt für neue Terminal-Sitzungen bzw. nach dem Neuladen der Terminal-Einstellungen.</string>
 </resources>
 

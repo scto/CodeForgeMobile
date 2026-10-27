@@ -16,6 +16,11 @@ data class TerminalSettingsUiState(
     val cursorStyle: String = "block",
     /** Eigene Schrift (`~/.termux/font.ttf`) ist installiert. */
     val customFontInstalled: Boolean = false,
+    /** Alle Sitzungen beenden, wenn das Terminal geschlossen wird. */
+    val killSessionsOnExit: Boolean = false,
+    /** Aktuelle `extra-keys` (Einzeiler) – eigene Belegung oder Termux-Standard. */
+    val extraKeys: String = ExtraKeysConfig.DEFAULT,
+    val extraKeysCustom: Boolean = false,
     /** Einmalige Rückmeldung zur Schriftinstallation (Resource-ID) oder null. */
     val fontMessageRes: Int? = null,
     val isLoading: Boolean = true
@@ -28,6 +33,9 @@ sealed interface TerminalSettingsUiEvent {
     data class CursorStyleChanged(val style: String) : TerminalSettingsUiEvent
     data class FontFileChosen(val uri: android.net.Uri) : TerminalSettingsUiEvent
     data object BundledFontChosen : TerminalSettingsUiEvent
+    data class KillSessionsOnExitChanged(val enabled: Boolean) : TerminalSettingsUiEvent
+    data class ExtraKeysSaved(val text: String) : TerminalSettingsUiEvent
+    data object ExtraKeysReset : TerminalSettingsUiEvent
     data object FontReset : TerminalSettingsUiEvent
     data object FontMessageShown : TerminalSettingsUiEvent
 }
@@ -50,4 +58,55 @@ object TerminalScrollback {
     const val DEFAULT = 2000
     /** Auswahlstufen für den Regler; Termux erlaubt 100–50000. */
     val STEPS = listOf(500, 1000, 2000, 5000, 10000, 20000, 50000)
+}
+
+/** Belegung der Zusatztasten (`extra-keys` in termux.properties). */
+object ExtraKeysConfig {
+    /** Termux-Standard (zwei Zeilen). */
+    const val DEFAULT =
+        "[['ESC','/',{key: '-', popup: '|'},'HOME','UP','END','PGUP'], ['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN']]"
+
+    const val SINGLE_ROW = "[['ESC','TAB','CTRL','ALT',{key: '-', popup: '|'},'DOWN','UP']]"
+    const val CODING =
+        "[['ESC','TAB','CTRL','ALT','{','}','(',')'], ['/','-','_','=',';','\"','LEFT','RIGHT']]"
+
+    val PRESETS: List<Pair<Int, String>> = listOf(
+        com.codeforge.core.resources.R.string.settings_terminal_extra_keys_preset_default to DEFAULT,
+        com.codeforge.core.resources.R.string.settings_terminal_extra_keys_preset_single to SINGLE_ROW,
+        com.codeforge.core.resources.R.string.settings_terminal_extra_keys_preset_coding to CODING
+    )
+
+    /** Mehrzeilige Eingabe auf eine Zeile bringen (termux.properties kennt keine Zeilenumbrüche im Wert). */
+    fun normalize(text: String): String = text.lines().joinToString(" ") { it.trim() }.trim()
+
+    /**
+     * Grobe Formprüfung: `[[ … ]]`, ausgeglichene Klammern/Anführungszeichen außerhalb von Strings.
+     * Die endgültige Auswertung macht Termux; bei Fehlern greift dort der Standard.
+     */
+    fun isValid(text: String): Boolean {
+        val t = normalize(text)
+        if (!t.startsWith("[[") || !t.endsWith("]]")) return false
+        var depthSquare = 0
+        var depthCurly = 0
+        var quote: Char? = null
+        var escaped = false
+        for (c in t) {
+            if (quote != null) {
+                when {
+                    escaped -> escaped = false
+                    c == '\\' -> escaped = true
+                    c == quote -> quote = null
+                }
+                continue
+            }
+            when (c) {
+                '\'', '"' -> quote = c
+                '[' -> depthSquare++
+                ']' -> { depthSquare--; if (depthSquare < 0) return false }
+                '{' -> depthCurly++
+                '}' -> { depthCurly--; if (depthCurly < 0) return false }
+            }
+        }
+        return quote == null && depthSquare == 0 && depthCurly == 0
+    }
 }
