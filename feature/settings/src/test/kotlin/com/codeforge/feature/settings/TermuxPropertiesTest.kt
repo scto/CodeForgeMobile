@@ -55,3 +55,41 @@ class TerminalFontSizeTest {
         assertEquals(TerminalFontSize.MIN_SP, TerminalFontSize.pxToSp(2, 2f))
     }
 }
+
+class TerminalFontInstallerTest {
+    @get:Rule val tmp = TemporaryFolder()
+
+    private fun ttf(extra: Int = 20) = byteArrayOf(0, 1, 0, 0) + ByteArray(extra)
+
+    @Test
+    fun `gueltige Schrift wird installiert und ersetzt die alte`() {
+        val target = tmp.root.resolve("home/.termux/font.ttf")
+        val installer = TerminalFontInstaller(target)
+        assertEquals(false, installer.isInstalled)
+        assertEquals(true, installer.install(ttf().inputStream()))
+        assertEquals(true, installer.install(("OTTO".toByteArray() + ByteArray(30)).inputStream()))
+        assertEquals(true, installer.isInstalled)
+        assertEquals("OTTO", String(target.readBytes().copyOf(4)))
+    }
+
+    @Test
+    fun `ungueltige Datei wird abgelehnt und alte Schrift bleibt`() {
+        val target = tmp.root.resolve("font.ttf")
+        val installer = TerminalFontInstaller(target)
+        assertEquals(true, installer.install(ttf().inputStream()))
+        val before = target.readBytes()
+        assertEquals(false, installer.install("kein font, nur text".toByteArray().inputStream()))
+        assertEquals(before.toList(), target.readBytes().toList())
+        assertEquals(false, tmp.root.resolve("font.ttf.tmp").exists())
+    }
+
+    @Test
+    fun `reset entfernt die Schrift`() {
+        val target = tmp.root.resolve("font.ttf")
+        val installer = TerminalFontInstaller(target)
+        installer.install(ttf().inputStream())
+        assertEquals(true, installer.reset())
+        assertEquals(false, installer.isInstalled)
+        assertEquals(true, installer.reset())
+    }
+}

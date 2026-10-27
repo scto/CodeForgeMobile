@@ -1898,5 +1898,12 @@
     <string name="settings_terminal_cursor_block">Block</string>
     <string name="settings_terminal_cursor_bar">Balken</string>
     <string name="settings_terminal_cursor_underline">Unterstrich</string>
+    <string name="settings_terminal_font">Terminal-Schriftart</string>
+    <string name="settings_terminal_font_desc">Wirkt, sobald das Terminal neu geöffnet wird.</string>
+    <string name="settings_terminal_font_system">Systemstandard</string>
+    <string name="settings_terminal_font_custom">Eigene Schrift installiert</string>
+    <string name="settings_terminal_font_pick">Schriftdatei wählen…</string>
+    <string name="settings_terminal_font_invalid">Keine gültige Schriftdatei (TTF/OTF).</string>
+    <string name="settings_terminal_font_installed">Terminal-Schriftart installiert.</string>
 </resources>
 

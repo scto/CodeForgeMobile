@@ -50,6 +50,7 @@ private fun TerminalSettingsScreen(
     onBack: () -> Unit = {},
     onEvent: (TerminalSettingsUiEvent) -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     Scaffold(
         modifier = modifier,
         topBar = { SettingsTopBar(title = stringRes(R.string.settings_terminal), onBack = onBack) }
@@ -177,6 +178,44 @@ private fun TerminalSettingsScreen(
                         valueRange = 0f..TerminalScrollback.STEPS.lastIndex.toFloat(),
                         steps = TerminalScrollback.STEPS.size - 2
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val fontPicker = androidx.activity.compose.rememberLauncherForActivityResult(
+                androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+            ) { uri -> if (uri != null) onEvent(TerminalSettingsUiEvent.FontFileChosen(uri)) }
+            val fontMessage = uiState.fontMessageRes?.let { stringRes(it) }
+            androidx.compose.runtime.LaunchedEffect(fontMessage) {
+                if (fontMessage != null) {
+                    android.widget.Toast.makeText(context, fontMessage, android.widget.Toast.LENGTH_SHORT).show()
+                    onEvent(TerminalSettingsUiEvent.FontMessageShown)
+                }
+            }
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(stringRes(R.string.settings_terminal_font), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        if (uiState.customFontInstalled) stringRes(R.string.settings_terminal_font_custom)
+                        else stringRes(R.string.settings_terminal_font_system),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        stringRes(R.string.settings_terminal_font_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        androidx.compose.material3.TextButton(onClick = {
+                            fontPicker.launch(arrayOf("font/ttf", "font/otf", "application/x-font-ttf", "application/octet-stream"))
+                        }) { Text(stringRes(R.string.settings_terminal_font_pick), maxLines = 1) }
+                        if (uiState.customFontInstalled) {
+                            androidx.compose.material3.TextButton(onClick = { onEvent(TerminalSettingsUiEvent.FontReset) }) {
+                                Text(stringRes(R.string.settings_terminal_font_system), maxLines = 1)
+                            }
+                        }
+                    }
                 }
             }
 

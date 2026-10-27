@@ -14,6 +14,10 @@ data class TerminalSettingsUiState(
     val scrollbackRows: Int = TerminalScrollback.DEFAULT,
     /** `block`, `bar` oder `underline` (`terminal-cursor-style`). */
     val cursorStyle: String = "block",
+    /** Eigene Schrift (`~/.termux/font.ttf`) ist installiert. */
+    val customFontInstalled: Boolean = false,
+    /** Einmalige Rückmeldung zur Schriftinstallation (Resource-ID) oder null. */
+    val fontMessageRes: Int? = null,
     val isLoading: Boolean = true
 )
 
@@ -22,6 +26,9 @@ sealed interface TerminalSettingsUiEvent {
     data class UseCompactTerminalChanged(val compact: Boolean) : TerminalSettingsUiEvent
     data class ScrollbackChanged(val rows: Int) : TerminalSettingsUiEvent
     data class CursorStyleChanged(val style: String) : TerminalSettingsUiEvent
+    data class FontFileChosen(val uri: android.net.Uri) : TerminalSettingsUiEvent
+    data object FontReset : TerminalSettingsUiEvent
+    data object FontMessageShown : TerminalSettingsUiEvent
 }
 
 /** Umrechnung zwischen Einstellungs-sp (8–32) und der Pixel-Schriftgröße des Termux-Terminals. */
