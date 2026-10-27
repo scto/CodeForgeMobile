@@ -3,42 +3,224 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>CodeForge Store</title>
+<meta name="description" content="Plugins, Themes und Icon-Pakete für CodeForge Mobile.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236750a4'/%3E%3Cpath d='M12 10l-6 6 6 6M20 10l6 6-6 6' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script>
+  // Theme vor dem ersten Zeichnen setzen (kein Aufblitzen): gespeicherte Wahl, sonst Systemeinstellung.
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; max-width: 720px; margin-inline: auto; }
-  h1 { font-size: 1.4rem; } .card { border: 1px solid #8884; border-radius: 12px; padding: 12px; margin: 12px 0; }
-  .meta { opacity: .7; font-size: .85rem; } nav a { margin-right: 12px; cursor: pointer; }
-  nav a.active { font-weight: bold; text-decoration: underline; }
+  :root {
+    --bg: #fdfbff; --surface: #ffffff; --surface-2: #f3eff7; --text: #1c1b1f; --muted: #605d66;
+    --primary: #6750a4; --on-primary: #ffffff; --primary-container: #eaddff; --border: #e3dfe8;
+    --shadow: 0 1px 2px rgb(0 0 0 / .06), 0 4px 16px rgb(0 0 0 / .06);
+    --header-h: 60px;
+  }
+  :root[data-theme="dark"] {
+    --bg: #141218; --surface: #1d1b20; --surface-2: #2b2930; --text: #e6e0e9; --muted: #aaa5b1;
+    --primary: #d0bcff; --on-primary: #381e72; --primary-container: #4f378b; --border: #3a3740;
+    --shadow: 0 1px 2px rgb(0 0 0 / .4), 0 4px 16px rgb(0 0 0 / .35);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--primary); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  header { position: sticky; top: 0; z-index: 20; height: var(--header-h); display: flex; align-items: center; gap: 8px;
+    padding: 0 12px; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 650; font-size: 1.05rem; }
+  .brand svg { width: 32px; height: 32px; flex: none; }
+  .spacer { flex: 1; }
+  .icon-btn { display: inline-grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%;
+    background: transparent; color: var(--text); cursor: pointer; text-decoration: none; }
+  .icon-btn:hover { background: var(--surface-2); }
+  .icon-btn:focus-visible, .nav a:focus-visible, .chip:focus-visible, input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .icon-btn svg { width: 24px; height: 24px; fill: currentColor; }
+  .icon-btn svg.stroke { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #themeBtn .moon { display: none; }
+  :root[data-theme="dark"] #themeBtn .sun { display: none; }
+  :root[data-theme="dark"] #themeBtn .moon { display: block; }
+
+  /* Menü (links oben): Seitenleiste mit den Kategorien */
+  .scrim { position: fixed; inset: 0; background: rgb(0 0 0 / .4); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 30; }
+  .nav { position: fixed; top: 0; bottom: 0; left: 0; width: min(300px, 86vw); background: var(--surface); z-index: 40;
+    transform: translateX(-100%); transition: transform .22s ease; padding: 16px 12px; border-right: 1px solid var(--border); overflow-y: auto; }
+  body.menu-open .nav { transform: none; box-shadow: var(--shadow); }
+  body.menu-open .scrim { opacity: 1; pointer-events: auto; }
+  .nav h2 { margin: 8px 12px 12px; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .nav a { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 28px;
+    color: var(--text); text-decoration: none; }
+  .nav a:hover { background: var(--surface-2); }
+  .nav a[aria-current="page"] { background: var(--primary-container); font-weight: 600; }
+  .count { font-size: .8rem; color: var(--muted); }
+
+  main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+  .hero { padding: 24px 0 8px; }
+  .hero h1 { margin: 0 0 4px; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+  .hero p { margin: 0; color: var(--muted); }
+  .tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 20px 0 8px; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; flex: 1 1 100%; }
+  .chip { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    text-decoration: none; white-space: nowrap; font-size: .92rem; }
+  .chip[aria-current="page"] { background: var(--primary-container); border-color: transparent; font-weight: 600; }
+  input[type="search"] { flex: 1 1 220px; padding: 12px 16px; border-radius: 28px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font: inherit; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 8px; }
+  .card h3 { margin: 0; font-size: 1.1rem; }
+  .meta { color: var(--muted); font-size: .85rem; }
+  .card p { margin: 0; flex: 1; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .btn { display: inline-block; padding: 9px 18px; border-radius: 20px; text-decoration: none; font-size: .92rem; font-weight: 600;
+    border: 1px solid var(--primary); color: var(--primary); }
+  .btn.primary { background: var(--primary); color: var(--on-primary); }
+  .empty, .error { color: var(--muted); padding: 32px 0; text-align: center; }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 24px 16px 40px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 </style>
 </head>
 <body>
-<h1>CodeForge Store</h1>
-<nav id="tabs"></nav>
-<main id="list"></main>
+<header>
+  <button class="icon-btn" id="menuBtn" aria-label="Menü öffnen" aria-controls="nav" aria-expanded="false">
+    <svg class="stroke" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <a class="brand" href="#" id="home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#6750a4"/><path d="M12 10l-6 6 6 6M20 10l6 6-6 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>CodeForge Store</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="icon-btn" href="https://github.com/scto/codeforge-store" target="_blank" rel="noopener" aria-label="GitHub-Repository öffnen" title="GitHub">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+  </a>
+  <button class="icon-btn" id="themeBtn" aria-label="Hell/Dunkel umschalten" title="Hell/Dunkel">
+    <svg class="sun stroke" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    <svg class="moon stroke" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="nav" id="nav" aria-label="Kategorien">
+  <h2 id="navTitle">Kategorien</h2>
+  <div id="navLinks"></div>
+</nav>
+
+<main>
+  <section class="hero">
+    <h1 id="heroTitle">Plugins, Themes und mehr</h1>
+    <p id="heroSub">Erweiterungen für CodeForge Mobile.</p>
+  </section>
+  <div class="tools">
+    <div class="chips" id="chips" role="navigation" aria-label="Kategorien"></div>
+    <label class="sr-only" for="q" id="qLabel">Suchen</label>
+    <input type="search" id="q" placeholder="Suchen …" autocomplete="off">
+  </div>
+  <div id="list" class="grid" aria-live="polite"></div>
+</main>
+<footer><span id="updated"></span></footer>
+
 <script>
-fetch('store.json').then(r => r.json()).then(cat => {
-  const lang = navigator.language.startsWith('de') ? 'de' : 'en';
-  const t = v => typeof v === 'string' ? v : (v && (v[lang] || v.en || Object.values(v)[0])) || '';
-  const tabs = document.getElementById('tabs'), list = document.getElementById('list');
-  const show = id => {
-    [...tabs.children].forEach(a => a.classList.toggle('active', a.dataset.id === id));
-    list.replaceChildren(...cat.items.filter(i => i.category === id).map(i => {
-      const d = document.createElement('div'); d.className = 'card';
-      const h = document.createElement('strong'); h.textContent = t(i.name);
-      const m = document.createElement('div'); m.className = 'meta'; m.textContent = [i.version, i.author].filter(Boolean).join(' · ');
-      const s = document.createElement('p'); s.textContent = t(i.summary);
-      d.append(h, m, s);
-      for (const [label, url] of [['Download', i.downloadUrl], ['Homepage', i.homepage]]) {
-        if (url && /^https?:\/\//.test(url)) { const a = document.createElement('a'); a.href = url; a.textContent = label; a.style.marginRight = '12px'; d.append(a); }
-      }
-      return d;
-    }));
-  };
-  cat.categories.forEach((c, n) => {
-    const a = document.createElement('a'); a.textContent = t(c.title); a.dataset.id = c.id; a.onclick = () => show(c.id); tabs.append(a);
-    if (n === 0) show(c.id);
+(function () {
+  var de = (navigator.language || 'en').toLowerCase().indexOf('de') === 0;
+  var L = de ? { cats: 'Kategorien', search: 'Suchen …', all: 'Alle', empty: 'Hier gibt es noch nichts.', none: 'Keine Treffer.',
+      err: 'Der Katalog konnte nicht geladen werden.', dl: 'Herunterladen', home: 'Homepage', upd: 'Stand: ', menu: 'Menü öffnen', close: 'Menü schließen',
+      title: 'Plugins, Themes und mehr', sub: 'Erweiterungen für CodeForge Mobile.' }
+    : { cats: 'Categories', search: 'Search …', all: 'All', empty: 'Nothing here yet.', none: 'No results.',
+      err: 'The catalog could not be loaded.', dl: 'Download', home: 'Homepage', upd: 'Updated: ', menu: 'Open menu', close: 'Close menu',
+      title: 'Plugins, themes and more', sub: 'Extensions for CodeForge Mobile.' };
+  document.documentElement.lang = de ? 'de' : 'en';
+  var $ = function (id) { return document.getElementById(id); };
+  $('navTitle').textContent = L.cats; $('q').placeholder = L.search; $('qLabel').textContent = L.search.replace(' …', '');
+  $('heroTitle').textContent = L.title; $('heroSub').textContent = L.sub; $('menuBtn').setAttribute('aria-label', L.menu);
+
+  // Theme-Umschalter
+  $('themeBtn').addEventListener('click', function () {
+    var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch (e) {}
   });
-});
+
+  // Menü
+  function setMenu(open) {
+    document.body.classList.toggle('menu-open', open);
+    $('menuBtn').setAttribute('aria-expanded', String(open));
+    $('menuBtn').setAttribute('aria-label', open ? L.close : L.menu);
+  }
+  $('menuBtn').addEventListener('click', function () { setMenu(!document.body.classList.contains('menu-open')); });
+  $('scrim').addEventListener('click', function () { setMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+
+  function t(v) { return typeof v === 'string' ? v : (v && (v[de ? 'de' : 'en'] || v.en || Object.values(v)[0])) || ''; }
+  function web(u) { return typeof u === 'string' && /^https?:\/\//.test(u); }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+
+  var cat = null, current = null;
+  function route() { return decodeURIComponent((location.hash || '').replace(/^#\/?/, '')); }
+
+  function render() {
+    if (!cat) return;
+    var id = route();
+    if (!cat.categories.some(function (c) { return c.id === id; })) id = cat.categories.length ? cat.categories[0].id : '';
+    current = id;
+    var q = $('q').value.trim().toLowerCase();
+
+    // Menü und Chips
+    var links = $('navLinks'), chips = $('chips');
+    links.replaceChildren(); chips.replaceChildren();
+    cat.categories.forEach(function (c) {
+      var n = cat.items.filter(function (i) { return i.category === c.id; }).length;
+      var a = el('a', null, null); a.href = '#/' + encodeURIComponent(c.id);
+      a.append(el('span', null, t(c.title)), el('span', 'count', String(n)));
+      if (c.id === id) a.setAttribute('aria-current', 'page');
+      a.addEventListener('click', function () { setMenu(false); });
+      links.append(a);
+      var ch = el('a', 'chip', t(c.title)); ch.href = a.href;
+      if (c.id === id) ch.setAttribute('aria-current', 'page');
+      chips.append(ch);
+    });
+
+    // Karten
+    var items = cat.items.filter(function (i) { return i.category === id; }).filter(function (i) {
+      return !q || (t(i.name) + ' ' + t(i.summary) + ' ' + (i.author || '')).toLowerCase().indexOf(q) >= 0;
+    });
+    var list = $('list'); list.replaceChildren();
+    if (!items.length) { list.append(el('p', 'empty', q ? L.none : L.empty)); return; }
+    items.forEach(function (i) {
+      var card = el('article', 'card');
+      card.append(el('h3', null, t(i.name)));
+      var meta = [i.version, i.author].filter(Boolean).join(' · ');
+      if (meta) card.append(el('div', 'meta', meta));
+      card.append(el('p', null, t(i.summary)));
+      var act = el('div', 'actions');
+      if (web(i.downloadUrl)) { var d = el('a', 'btn primary', L.dl); d.href = i.downloadUrl; d.rel = 'noopener'; act.append(d); }
+      if (web(i.homepage)) { var h = el('a', 'btn', L.home); h.href = i.homepage; h.target = '_blank'; h.rel = 'noopener'; act.append(h); }
+      if (act.children.length) card.append(act);
+      list.append(card);
+    });
+  }
+
+  window.addEventListener('hashchange', render);
+  $('q').addEventListener('input', render);
+  $('home').addEventListener('click', function (e) { e.preventDefault(); location.hash = ''; $('q').value = ''; render(); });
+
+  fetch('store.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (data) {
+      cat = data; cat.categories = cat.categories || []; cat.items = cat.items || [];
+      cat.items.forEach(function (i) { if (!cat.categories.some(function (c) { return c.id === i.category; })) cat.categories.push({ id: i.category, title: i.category }); });
+      if (cat.updated) $('updated').textContent = L.upd + cat.updated;
+      render();
+    })
+    .catch(function () { $('list').replaceChildren(el('p', 'error', L.err)); });
+})();
 </script>
 </body>
 </html>
