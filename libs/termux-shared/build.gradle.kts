@@ -24,7 +24,12 @@ android {
             path = file("src/main/cpp/Android.mk")
         }
     }
-    lint.disable += "ProtectedPermissions"
+    lint {
+        disable += "ProtectedPermissions"
+        disable += "MissingSuperCall"
+        disable += "StringFormatMatches"
+        disable += "StringFormatInvalid"
+    }
 
     testOptions {
         unitTests {

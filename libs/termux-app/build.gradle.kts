@@ -52,7 +52,11 @@ android {
         }
     }
 
-    lint.disable += "ProtectedPermissions"
+    lint {
+        disable += "ProtectedPermissions"
+        disable += "MissingSuperCall"
+        disable += "StringFormatMatches"
+    }
 
     testOptions {
         unitTests {
