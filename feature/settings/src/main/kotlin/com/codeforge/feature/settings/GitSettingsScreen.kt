@@ -104,6 +104,26 @@ private fun GitSettingsScreen(
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
+                        Text(stringRes(R.string.settings_git_file_colors), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringRes(R.string.settings_git_file_colors_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    androidx.compose.material3.Switch(
+                        checked = state.fileNameColorsEnabled,
+                        onCheckedChange = { onEvent(GitSettingsUiEvent.FileNameColorsToggled) },
+                    )
+                }
+            }
+            Card(Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
                         Text(stringRes(R.string.settings_git_gutter_markers), style = MaterialTheme.typography.titleSmall)
                         Text(
                             stringRes(R.string.settings_git_gutter_markers_desc),

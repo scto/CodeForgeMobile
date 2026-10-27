@@ -1890,5 +1890,7 @@
     <string name="editor_conflict_next">Nächster Konflikt</string>
     <string name="settings_git_conflict_detection">Konflikterkennung</string>
     <string name="settings_git_conflict_detection_desc">Merge-Konfliktmarker im Editor hervorheben und Auflösungsoptionen anzeigen.</string>
+    <string name="settings_git_file_colors">Dateinamen einfärben</string>
+    <string name="settings_git_file_colors_desc">Dateinamen im Dateibaum nach Git-Status farbig darstellen (geändert, neu, Konflikt).</string>
 </resources>
 

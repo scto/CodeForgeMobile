@@ -19,6 +19,7 @@ message GitConfig {
   // Alle Schalter invertiert gespeichert: Standard (false) = Funktion AN, auch für bestehende Installationen.
   bool gutter_markers_disabled = 1;
   bool conflict_detection_disabled = 2;
+  bool file_name_colors_disabled = 3;
 }
 
 message ThemeConfig {

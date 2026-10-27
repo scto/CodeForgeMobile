@@ -178,6 +178,7 @@ private fun FileTreeScreen(
                             FileTreeNodeRow(
                                 node = node,
                                 tree = tree,
+                                gitStatus = uiState.gitStatus,
                                 onOpenFile = { onEvent(FileTreeUiEvent.FileOpened(it)) },
                                 onContextMenu = { path, isDir ->
                                     onEvent(FileTreeUiEvent.ContextMenuRequested(path, isDir))
@@ -231,10 +232,25 @@ private fun FileTreeScreen(
 }
 
 @OptIn(ExperimentalFoundationApi::class)
+/** Farbe des Namens nach Git-Status: Konflikt rot, geändert amber, neu/hinzugefügt grün; Ordner mit Änderungen amber. */
+@Composable
+private fun gitNameColor(path: String, isDirectory: Boolean, status: FileTreeGitStatus): Color {
+    val status0 = status.files[path]
+    return when {
+        status0 == com.codeforge.core.domain.model.GitFileStatus.CONFLICTING -> MaterialTheme.colorScheme.error
+        status0 == com.codeforge.core.domain.model.GitFileStatus.MODIFIED -> Color(0xFFD9A441)
+        status0 == com.codeforge.core.domain.model.GitFileStatus.ADDED ||
+            status0 == com.codeforge.core.domain.model.GitFileStatus.UNTRACKED -> Color(0xFF4CAF50)
+        isDirectory && path in status.dirsWithChanges -> Color(0xFFD9A441)
+        else -> Color.Unspecified
+    }
+}
+
 @Composable
 private fun FileTreeNodeRow(
     node: Node<okio.Path>,
     tree: Tree<okio.Path>,
+    gitStatus: FileTreeGitStatus,
     onOpenFile: (String) -> Unit,
     onContextMenu: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -331,6 +347,7 @@ private fun FileTreeNodeRow(
         Column {
             Text(
                 text = node.name,
+                color = gitNameColor(file.absolutePath, isDirectory, gitStatus),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (isDirectory) FontWeight.SemiBold else FontWeight.Normal,
                 maxLines = 1,

@@ -32,7 +32,9 @@ data class FileTreeUiState(
      * verwendet — erzwingt einen Rebuild des Baums, da Bonsai Verzeichnisinhalte nur beim
      * erstmaligen Expandieren eines Branch-Knotens einliest (kein eigenes Refresh-API).
      */
-    val refreshToken: Int = 0
+    val refreshToken: Int = 0,
+    /** Git-Status zum Einfärben der Namen; leer, wenn deaktiviert oder kein Repository. */
+    val gitStatus: FileTreeGitStatus = FileTreeGitStatus.EMPTY
 )
 
 sealed interface FileTreeUiEvent {

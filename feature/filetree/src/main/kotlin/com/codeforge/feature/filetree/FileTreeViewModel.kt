@@ -32,7 +32,8 @@ import javax.inject.Inject
 class FileTreeViewModel @Inject constructor(
     private val fileSystemRepository: FileSystemRepository,
     private val openFileRequestBridge: OpenFileRequestBridge,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FileTreeUiState())
@@ -47,6 +48,23 @@ class FileTreeViewModel @Inject constructor(
         if (initialized && _uiState.value.rootPath == rootPath) return
         initialized = true
         _uiState.update { it.copy(rootPath = rootPath) }
+        refreshGitStatus()
+    }
+
+    /** Lädt den Git-Status neu (Initialisierung, Aktualisieren, Dateisystem-Änderungen); leer bei Deaktivierung. */
+    private fun refreshGitStatus() {
+        val root = _uiState.value.rootPath
+        val repo = gitRepository ?: return
+        viewModelScope.launch {
+            val enabled = !settingsRepository.appSettings.first().git.fileNameColorsDisabled
+            if (!enabled || root.isBlank() || !File(root, ".git").exists()) {
+                _uiState.update { it.copy(gitStatus = FileTreeGitStatus.EMPTY) }
+                return@launch
+            }
+            repo.status(root).onSuccess { status ->
+                _uiState.update { it.copy(gitStatus = FileTreeGitStatus.from(root, status.entries)) }
+            }
+        }
     }
 
     fun onEvent(event: FileTreeUiEvent) {
@@ -196,5 +214,6 @@ class FileTreeViewModel @Inject constructor(
      */
     private fun bumpRefreshToken() {
         _uiState.update { it.copy(refreshToken = it.refreshToken + 1) }
+        refreshGitStatus()
     }
 }

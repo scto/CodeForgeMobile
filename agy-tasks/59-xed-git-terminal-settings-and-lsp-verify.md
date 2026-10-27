@@ -13,7 +13,7 @@ Nicht in der Cloud verifiziert: Gerätetest, `:app:assembleDebug`.
 
 ## B. Git-Einstellungen (Vorbild Xed: Dateinamen einfärben, Gutter-Markierungen, Konfliktkennung)
 Noch NICHT vorhanden und größer als eine Einstellung — je ein eigenes Feature:
-- Dateinamen im Dateibaum nach Git-Status einfärben (modified/added/untracked/conflict) — Quelle: `GitRepository` Status.
+- ~~Dateinamen im Dateibaum einfärben~~ — umgesetzt (`FileTreeGitStatus`; Aktualisierung beim Öffnen/Aktualisieren/Datei-Mutation, nicht nach jedem Speichern im Editor). Gerätetest offen.
 - ~~Gutter-Markierungen im Editor~~ — umgesetzt (`GitLineDiff`, `GitGutterOverlayLayer`, Schalter in den Git-Einstellungen).
   Aktualisierung beim Tab-Wechsel und nach dem Speichern (gespeicherter Stand gegen HEAD, nicht live beim Tippen). Gerätetest offen.
 - ~~Konfliktkennung~~ — umgesetzt (`MergeConflicts`, `ConflictOverlayLayer`, `ConflictBar`: Eigene/Fremde/Beide übernehmen, nächster Konflikt; Schalter in den Git-Einstellungen). Gerätetest offen.

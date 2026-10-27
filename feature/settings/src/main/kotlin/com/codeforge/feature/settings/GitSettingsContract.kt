@@ -28,6 +28,7 @@ data class GitSettingsUiState(
     val credentialToDelete: GitCredentialInfo? = null,
     val gutterMarkersEnabled: Boolean = true,
     val conflictDetectionEnabled: Boolean = true,
+    val fileNameColorsEnabled: Boolean = true,
     val isLoading: Boolean = true,
 ) {
     val emailValid: Boolean get() = email.isBlank() || EMAIL.matches(email.trim())
@@ -45,6 +46,7 @@ sealed interface GitSettingsUiEvent {
     data object SaveIdentity : GitSettingsUiEvent
     data object GutterMarkersToggled : GitSettingsUiEvent
     data object ConflictDetectionToggled : GitSettingsUiEvent
+    data object FileNameColorsToggled : GitSettingsUiEvent
 
     data class AddCredentialRequested(val prefillHost: String? = null) : GitSettingsUiEvent
     data class DialogHostChanged(val value: String) : GitSettingsUiEvent
