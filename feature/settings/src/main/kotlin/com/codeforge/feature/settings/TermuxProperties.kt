@@ -4,6 +4,7 @@
  */
 package com.codeforge.feature.settings
 
+import android.annotation.SuppressLint
 import java.io.File
 
 /** Reine Textfunktionen für `termux.properties` (Kommentare und fremde Zeilen bleiben unverändert). */
@@ -52,6 +53,7 @@ class TermuxPropertiesStore(private val file: File = defaultFile()) {
         const val KEY_CURSOR_STYLE = "terminal-cursor-style"
         const val KEY_EXTRA_KEYS = "extra-keys"
 
+        @SuppressLint("SdCardPath")
         fun defaultFile(): File {
             val home = System.getenv("HOME")?.takeIf { it.isNotBlank() } ?: "/data/data/com.codeforge.app/files/home"
             return File(home, ".termux/termux.properties")

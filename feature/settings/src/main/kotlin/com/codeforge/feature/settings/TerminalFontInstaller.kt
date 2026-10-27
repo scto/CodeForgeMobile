@@ -4,6 +4,7 @@
  */
 package com.codeforge.feature.settings
 
+import android.annotation.SuppressLint
 import java.io.File
 import java.io.InputStream
 
@@ -32,6 +33,7 @@ class TerminalFontInstaller(private val target: File = defaultTarget()) {
     fun reset(): Boolean = !target.exists() || target.delete()
 
     companion object {
+        @SuppressLint("SdCardPath")
         fun defaultTarget(): File {
             val home = System.getenv("HOME")?.takeIf { it.isNotBlank() } ?: "/data/data/com.codeforge.app/files/home"
             return File(home, ".termux/font.ttf")
