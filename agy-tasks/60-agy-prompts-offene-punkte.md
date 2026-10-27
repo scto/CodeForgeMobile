@@ -44,13 +44,12 @@ Prüfe auf dem Gerät:
 Fehler beheben, Tests ergänzen, einzeln committen. Bericht docs/task-60-p3-report.md.
 ```
 
-## P6 – Task 52.12 (XML → Compose, Tests/Doku/Gerätetest)
+## P6 – Task 52 / X2C: nur noch Gerätetest (Build und JVM-Tests sind laut docs/x2c-report.md 52.12 grün)
 
 ```
-Repo: scto/CodeForgeMobile. Lies agy-tasks/52-xml-layouts-to-compose-migration.md und agy-tasks/58.
-Führe 52.12 aus: Gradle-Build der Module x2c und layoutdesigner (:libs:x2c:test, :feature:layoutdesigner:testDebugUnitTest, :app:assembleDebug), fehlende Tests ergänzen, Doku (docs/) aktualisieren, Gerätetest des Import-/git-clone-Dialogs mit einem Beispielprojekt mit Layouts ohne Compose. Der Dialog darf nie parallel zum Task-50-Dialog erscheinen.
-Bekannte Altlast: Harmony-DOM-Parser kennt nicht alle XML-Features (disallow-doctype-decl) – Verhalten ist durch runCatching abgesichert, nicht zurückbauen.
-Bericht docs/task-52-12-report.md, Task-Status in TASKS-STATUS.md auf ✅ nur bei grünem Build und Gerätetest.
+Repo: scto/CodeForgeMobile. Lies docs/x2c-report.md (Abschnitt 52.12) und docs/device-test-checklist.md (Abschnitt J, X2C-01 bis X2C-03).
+Build und Unit-Tests gelten als erledigt; offen ist ausschließlich der Gerätetest. Installiere die aktuelle Debug-APK von main, importiere bzw. klone ein Beispielprojekt mit XML-Layouts und ohne aktives Compose und führe X2C-01 bis X2C-03 aus: Dialog erscheint nach Import/git clone, Layoutauswahl, Konvertierung, Ergebnis kompiliert. Der Dialog darf nie parallel zum Task-50-Dialog erscheinen. Jeden Fehler beheben (minimal, mit Test, einzeln committen).
+Bericht: Ergebnisse je Test-ID mit Screenshot-Namen in docs/task-52-12-device-report.md; Nicht-Prüfbares unter "nicht getestet". Task-Status in TASKS-STATUS.md ergänzen ("Gerätetest ✅" erst nach bestandenem Test).
 ```
 
 ## P7 – Task 56 (Compiler-Runtime schlank)
