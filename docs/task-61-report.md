@@ -26,7 +26,7 @@ Gemäß den Vorgaben in `agy-tasks/61-erweiterungssystem-geraetepruefung.md`:
 
 3. **Bauen der 8 Test-Plugins (Vorlagen unter `templates/`):**
    * Deklarative Vorlagen via `python3 templates/build.py`:
-     - Farbschema: `templates/build/color-theme.zip` (SHA-256: `e3268fe40d681154f108c37eb782e6806982e9754c32babc2ea92963e95d25fb`)
+     - Farbschema: `templates/build/color-theme.zip` (SHA-256: `f03626ac8d8a9190bd9193d135d2296fa72a9b09954dd08d05f881edeb174036`)
      - Icon-Paket (PNG): `templates/build/icon-theme.zip` (SHA-256: `16800bb1ffb556c9f80877d6009baca29b41659b249dadf0cac0b9455ea7f9e4`)
      - Sprachpaket: `templates/build/language-pack.zip` (SHA-256: `2bdeb927528613b8553dda120710f9107d94501fd17b6e02ff973488c812e2c0`)
      - Grammatik: `templates/build/grammar.zip` (SHA-256: `28dd1855d74d42abbef66a4573fab2231fcadc4cb3f9d2b84a7aa948d45be02e`)
