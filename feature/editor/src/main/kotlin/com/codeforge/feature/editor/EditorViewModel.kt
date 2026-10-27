@@ -131,6 +131,7 @@ class EditorViewModel @Inject constructor(
 
     init {
         observeGitGutter()
+        observeSavedFiles()
         setupOpenDocumentsProvider()
         observeSettings()
         observeDiagnostics()
@@ -486,6 +487,18 @@ class EditorViewModel @Inject constructor(
                 repo.lineChanges(root, path).onSuccess { changes ->
                     _uiState.update { it.copy(gitChangesByPath = it.gitChangesByPath + (path to changes)) }
                 }
+            }
+    }
+
+    /** Meldet gespeicherte Dateien (dirty → sauber) an den Dateibaum (Git-Status). */
+    private fun observeSavedFiles() = viewModelScope.launch {
+        var previous = emptySet<String>()
+        _uiState.map { s -> s.openFiles.filter { it.isDirty }.map { it.path }.toSet() }
+            .distinctUntilChanged()
+            .collect { dirty ->
+                val stillOpen = _uiState.value.openFiles.map { it.path }.toSet()
+                (previous - dirty).filter { it in stillOpen }.forEach { fileSyncBridge.notifyFileSaved(it) }
+                previous = dirty
             }
     }
 

@@ -47,6 +47,11 @@ interface FileSyncBridge {
     suspend fun requestFlushDirectory(directory: String)
 
     suspend fun notifyDirectoryChange(directory: String)
+
+    /** Der Editor hat [path] gespeichert (z. B. für Git-Status im Dateibaum). Standard: ohne Wirkung (Fakes). */
+    val savedFiles: SharedFlow<String> get() = MutableSharedFlow()
+
+    suspend fun notifyFileSaved(path: String) {}
 }
 
 @Singleton
@@ -58,6 +63,12 @@ class FileSyncBridgeImpl @Inject constructor() : FileSyncBridge {
     override val flushRequests: SharedFlow<FlushRequest> = _flushRequests.asSharedFlow()
     override val externalChanges: SharedFlow<Set<String>> = _externalChanges.asSharedFlow()
     override val directoryChanges: SharedFlow<String> = _directoryChanges.asSharedFlow()
+    private val _savedFiles = MutableSharedFlow<String>(extraBufferCapacity = 16)
+    override val savedFiles: SharedFlow<String> = _savedFiles.asSharedFlow()
+
+    override suspend fun notifyFileSaved(path: String) {
+        _savedFiles.emit(path)
+    }
 
     override suspend fun requestFlush(paths: Set<String>) {
         if (paths.isEmpty() || _flushRequests.subscriptionCount.value == 0) return

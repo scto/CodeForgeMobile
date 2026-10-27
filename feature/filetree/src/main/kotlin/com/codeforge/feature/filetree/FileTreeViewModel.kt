@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,7 +34,8 @@ class FileTreeViewModel @Inject constructor(
     private val fileSystemRepository: FileSystemRepository,
     private val openFileRequestBridge: OpenFileRequestBridge,
     private val settingsRepository: SettingsRepository,
-    private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null
+    private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null,
+    private val fileSyncBridge: com.codeforge.core.navigation.FileSyncBridge? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FileTreeUiState())
@@ -43,6 +45,14 @@ class FileTreeViewModel @Inject constructor(
     val effect: SharedFlow<FileTreeUiEffect> = _effect.asSharedFlow()
 
     private var initialized = false
+
+    init {
+        // Nach dem Speichern im Editor den Git-Status auffrischen (entprellt, ein JGit-Status pro Burst).
+        viewModelScope.launch {
+            @OptIn(kotlinx.coroutines.FlowPreview::class)
+            fileSyncBridge?.savedFiles?.debounce(500)?.collect { refreshGitStatus() }
+        }
+    }
 
     fun initialize(rootPath: String) {
         if (initialized && _uiState.value.rootPath == rootPath) return
