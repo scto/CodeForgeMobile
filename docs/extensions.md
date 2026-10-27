@@ -73,6 +73,15 @@ Datei (`path`); alle Werte sind Bilddateien (PNG, WebP oder JPEG — **kein SVG*
 * Gilt in: Dateibaum, Editor-Tabs, Suchergebnissen, Git-Änderungen.
 * Auswahl: Einstellungen → Design → „Icon-Pakete“ (`ThemeConfig.icon_theme_id`, leer = Standard).
 
+## Sprachpakete (`languagePacks`)
+
+Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Text" } }`
+
+* Schlüssel = **Ressourcenname** aus `core/resources/src/main/res/values/strings.xml` (z. B. `common_abbrechen`). Platzhalter (`%1$s`, `%2$d`) müssen wie im Original stehen; passen sie nicht, gilt der Originaltext.
+* Fehlende Schlüssel fallen auf die App-Sprache zurück — ein Paket darf unvollständig sein.
+* Wirkt auf `Res.string(...)` und `stringRes(...)` (alle UI-Texte). **Nicht abgedeckt:** Plurals, direkte `Context.getString(...)`-Aufrufe, System-Benachrichtigungen, native Terminal-Texte.
+* Auswahl: Einstellungen → Design → „Sprachpakete“ (`ThemeConfig.language_pack_id`, leer = App-Sprache). Max. 20 000 Einträge je Paket.
+
 ## Language Server (`lspServers`)
 
 `command` darf `${pluginDir}` und `${home}` enthalten. Ein eingebauter, installierter Server hat Vorrang; sonst wird der Plugin-Server für die angegebenen `languages` verwendet. Existiert die ausführbare Datei bei absolutem Pfad nicht, gibt es keinen Server.
@@ -89,5 +98,6 @@ Datei (`path`); alle Werte sind Bilddateien (PNG, WebP oder JPEG — **kein SVG*
 |---|---|
 | `colorThemes` | umgesetzt (Phase 2) |
 | `iconThemes` | umgesetzt (Phase 3): Dateibaum, Tabs, Suche, Git |
+| `languagePacks` | umgesetzt (Phase 4), nicht abgedeckt: Plurals/`Context.getString` |
 | `lspServers` | umgesetzt (Resolver) |
 | weitere | siehe `agy-tasks/61-erweiterungssystem-geraetepruefung.md` (wird mit den Phasen gefüllt) |

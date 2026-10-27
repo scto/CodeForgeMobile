@@ -9,7 +9,9 @@ import com.codeforge.core.domain.extension.ColorThemeFileParser
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.ExtensionColorTheme
 import com.codeforge.core.domain.extension.ExtensionIconTheme
+import com.codeforge.core.domain.extension.ExtensionLanguagePack
 import com.codeforge.core.domain.extension.ExtensionThemeRepository
+import com.codeforge.core.domain.extension.LanguagePackFileParser
 import com.codeforge.core.domain.extension.IconThemeFileParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +59,16 @@ internal object ExtensionThemeLoader {
             ExtensionIconTheme(resolved.pluginId, item.id, item.label, baseDir.absolutePath, parsed)
         }
 
+    fun loadLanguagePacks(contributions: ActiveContributions): List<ExtensionLanguagePack> =
+        contributions.languagePacks.mapNotNull { resolved ->
+            val item = resolved.item
+            val pluginDir = File(resolved.pluginDir)
+            val file = File(pluginDir, item.path)
+            if (!file.isFile || !isInside(pluginDir, file)) return@mapNotNull null
+            LanguagePackFileParser.parse(file.readText()).getOrNull()
+                ?.let { ExtensionLanguagePack(resolved.pluginId, item.locale, item.label, it) }
+        }
+
     private fun isInside(dir: File, file: File): Boolean =
         file.canonicalPath.startsWith(dir.canonicalPath + File.separator)
 }
@@ -74,5 +86,9 @@ class ExtensionThemeRepositoryImpl @Inject constructor(
 
     override val iconThemes: StateFlow<List<ExtensionIconTheme>> = contributionRepository.contributions
         .map { ExtensionThemeLoader.loadIcons(it) }
+        .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    override val languagePacks: StateFlow<List<ExtensionLanguagePack>> = contributionRepository.contributions
+        .map { ExtensionThemeLoader.loadLanguagePacks(it) }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 }

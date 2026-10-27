@@ -15,7 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.domain.model.J2kProgress
@@ -69,7 +69,7 @@ fun J2kProgressScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = stringResource(R.string.j2k_title),
+                text = stringRes(R.string.j2k_title),
                 style = MaterialTheme.typography.headlineSmall
             )
 
@@ -104,7 +104,7 @@ fun J2kProgressScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedButton(onClick = { onIntent(J2kIntent.CancelMigration) }) {
-                Text(text = stringResource(R.string.common_abbrechen))
+                Text(text = stringRes(R.string.common_abbrechen))
             }
         }
     }

@@ -166,6 +166,34 @@ private fun ThemeBuilderScreen(
                 }
             }
 
+            if (uiState.languagePacks.isNotEmpty()) {
+                item {
+                    Text(stringRes(R.string.themebuilder_sprachpakete), style = MaterialTheme.typography.titleMedium)
+                }
+                item {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
+                    ) {
+                        item(key = "default") {
+                            FilterChip(
+                                selected = uiState.languagePackId.isBlank(),
+                                onClick = { onEvent(ThemeBuilderUiEvent.LanguagePackSelected("")) },
+                                label = { Text(stringRes(R.string.themebuilder_icon_standard)) }
+                            )
+                        }
+                        items(uiState.languagePacks, key = { it.key }) { pack ->
+                            FilterChip(
+                                selected = pack.key == uiState.languagePackId,
+                                onClick = { onEvent(ThemeBuilderUiEvent.LanguagePackSelected(pack.key)) },
+                                label = { Text(pack.label, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                            )
+                        }
+                    }
+                }
+            }
+
             item {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(stringRes(R.string.themebuilder_eigene_farben), style = MaterialTheme.typography.titleMedium)

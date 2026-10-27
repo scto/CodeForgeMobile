@@ -45,7 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -89,7 +89,7 @@ fun X2cDialog(
         },
         title = {
             Text(
-                text = stringResource(R.string.x2c_title),
+                text = stringRes(R.string.x2c_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -103,7 +103,7 @@ fun X2cDialog(
             ) {
                 // Zusammenfassung
                 Text(
-                    text = stringResource(
+                    text = stringRes(
                         R.string.x2c_summary,
                         totalLayouts,
                         moduleCount,
@@ -121,7 +121,7 @@ fun X2cDialog(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.x2c_backup_note),
+                        text = stringRes(R.string.x2c_backup_note),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(10.dp)
@@ -134,7 +134,7 @@ fun X2cDialog(
                 OutlinedTextField(
                     value = state.searchQuery,
                     onValueChange = { onIntent(X2cIntent.SetSearchQuery(it)) },
-                    placeholder = { Text(stringResource(R.string.x2c_search_placeholder)) },
+                    placeholder = { Text(stringRes(R.string.x2c_search_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     trailingIcon = {
                         if (state.searchQuery.isNotBlank()) {
@@ -154,7 +154,7 @@ fun X2cDialog(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = stringResource(
+                        text = stringRes(
                             R.string.x2c_selected_count,
                             state.selectedLayouts.size,
                             totalLayouts
@@ -164,10 +164,10 @@ fun X2cDialog(
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         TextButton(onClick = { onIntent(X2cIntent.SelectAllLayouts) }) {
-                            Text(stringResource(R.string.x2c_select_all), style = MaterialTheme.typography.labelSmall)
+                            Text(stringRes(R.string.x2c_select_all), style = MaterialTheme.typography.labelSmall)
                         }
                         TextButton(onClick = { onIntent(X2cIntent.DeselectAllLayouts) }) {
-                            Text(stringResource(R.string.x2c_deselect_all), style = MaterialTheme.typography.labelSmall)
+                            Text(stringRes(R.string.x2c_deselect_all), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -176,7 +176,7 @@ fun X2cDialog(
                 val displayLayouts = state.filteredLayouts
                 if (displayLayouts.isEmpty()) {
                     Text(
-                        text = stringResource(R.string.x2c_no_layouts_found),
+                        text = stringRes(R.string.x2c_no_layouts_found),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -214,8 +214,8 @@ fun X2cDialog(
 
                 // Schalter 1: Activities / Fragments umstellen
                 X2cSwitchRow(
-                    title = stringResource(R.string.x2c_option_wire_activities),
-                    description = stringResource(R.string.x2c_option_wire_activities_desc, stage2Count),
+                    title = stringRes(R.string.x2c_option_wire_activities),
+                    description = stringRes(R.string.x2c_option_wire_activities_desc, stage2Count),
                     checked = state.wireActivities,
                     enabled = stage2Count > 0,
                     onCheckedChange = { onIntent(X2cIntent.SetWireActivities(it)) }
@@ -223,8 +223,8 @@ fun X2cDialog(
 
                 // Schalter 2: Theme erzeugen
                 X2cSwitchRow(
-                    title = stringResource(R.string.x2c_option_generate_theme),
-                    description = stringResource(R.string.x2c_option_generate_theme_desc),
+                    title = stringRes(R.string.x2c_option_generate_theme),
+                    description = stringRes(R.string.x2c_option_generate_theme_desc),
                     checked = state.generateTheme,
                     enabled = true,
                     onCheckedChange = { onIntent(X2cIntent.SetGenerateTheme(it)) }
@@ -232,8 +232,8 @@ fun X2cDialog(
 
                 // Schalter 3: XML nach Erfolg entfernen
                 X2cSwitchRow(
-                    title = stringResource(R.string.x2c_option_remove_xml),
-                    description = stringResource(R.string.x2c_option_remove_xml_desc),
+                    title = stringRes(R.string.x2c_option_remove_xml),
+                    description = stringRes(R.string.x2c_option_remove_xml_desc),
                     checked = state.removeXmlAfterSuccess,
                     enabled = true,
                     onCheckedChange = { onIntent(X2cIntent.SetRemoveXmlAfterSuccess(it)) }
@@ -241,8 +241,8 @@ fun X2cDialog(
 
                 // Schalter 4: Versionskatalog
                 X2cSwitchRow(
-                    title = stringResource(R.string.x2c_option_version_catalog),
-                    description = stringResource(R.string.x2c_option_version_catalog_desc),
+                    title = stringRes(R.string.x2c_option_version_catalog),
+                    description = stringRes(R.string.x2c_option_version_catalog_desc),
                     checked = state.useVersionCatalog,
                     enabled = hasCatalog,
                     onCheckedChange = { onIntent(X2cIntent.SetUseVersionCatalog(it)) }
@@ -250,8 +250,8 @@ fun X2cDialog(
 
                 // Schalter 5: Build-Prüfung
                 X2cSwitchRow(
-                    title = stringResource(R.string.x2c_option_build_check),
-                    description = stringResource(R.string.x2c_option_build_check_desc),
+                    title = stringRes(R.string.x2c_option_build_check),
+                    description = stringRes(R.string.x2c_option_build_check_desc),
                     checked = state.runBuildCheck,
                     enabled = true,
                     onCheckedChange = { onIntent(X2cIntent.SetRunBuildCheck(it)) }
@@ -259,8 +259,8 @@ fun X2cDialog(
 
                 // Schalter 5b: vorher auch bauen (nur sinnvoll mit Build-Prüfung)
                 X2cSwitchRow(
-                    title = stringResource(R.string.x2c_option_baseline),
-                    description = stringResource(R.string.x2c_option_baseline_desc),
+                    title = stringRes(R.string.x2c_option_baseline),
+                    description = stringRes(R.string.x2c_option_baseline_desc),
                     checked = state.buildBaselineFirst,
                     enabled = state.runBuildCheck,
                     onCheckedChange = { onIntent(X2cIntent.SetBuildBaselineFirst(it)) }
@@ -268,8 +268,8 @@ fun X2cDialog(
 
                 // Schalter 6: Git-Zweig
                 X2cSwitchRow(
-                    title = stringResource(R.string.x2c_option_git_branch),
-                    description = stringResource(R.string.x2c_option_git_branch_desc),
+                    title = stringRes(R.string.x2c_option_git_branch),
+                    description = stringRes(R.string.x2c_option_git_branch_desc),
                     checked = state.createGitBranch,
                     enabled = true,
                     onCheckedChange = { onIntent(X2cIntent.SetCreateGitBranch(it)) }
@@ -277,7 +277,7 @@ fun X2cDialog(
 
                 // Schalter 7: .git in Backup
                 X2cSwitchRow(
-                    title = stringResource(R.string.x2c_option_backup_git),
+                    title = stringRes(R.string.x2c_option_backup_git),
                     description = null,
                     checked = state.includeGitInBackup,
                     enabled = true,
@@ -291,14 +291,14 @@ fun X2cDialog(
                 ) {
                     Column(modifier = Modifier.padding(10.dp)) {
                         Text(
-                            text = stringResource(R.string.x2c_compose_build_notice),
+                            text = stringRes(R.string.x2c_compose_build_notice),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Medium
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = stringResource(R.string.x2c_disclaimer),
+                            text = stringRes(R.string.x2c_disclaimer),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
@@ -315,16 +315,16 @@ fun X2cDialog(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 TextButton(onClick = { onIntent(X2cIntent.DismissDialog(dontAskAgain = true)) }) {
-                    Text(text = stringResource(R.string.x2c_action_dont_ask))
+                    Text(text = stringRes(R.string.x2c_action_dont_ask))
                 }
                 OutlinedButton(onClick = { onIntent(X2cIntent.DismissDialog(dontAskAgain = false)) }) {
-                    Text(text = stringResource(R.string.x2c_action_later))
+                    Text(text = stringRes(R.string.x2c_action_later))
                 }
                 Button(
                     onClick = { onIntent(X2cIntent.StartMigration) },
                     enabled = state.selectedLayouts.isNotEmpty()
                 ) {
-                    Text(text = stringResource(R.string.x2c_action_convert))
+                    Text(text = stringRes(R.string.x2c_action_convert))
                 }
             }
         }
@@ -425,7 +425,7 @@ private fun ClassificationBadge(classification: LayoutClassification) {
             .padding(horizontal = 6.dp, vertical = 2.dp)
     ) {
         Text(
-            text = stringResource(textRes),
+            text = stringRes(textRes),
             style = MaterialTheme.typography.labelSmall,
             color = textColor,
             fontWeight = FontWeight.Medium

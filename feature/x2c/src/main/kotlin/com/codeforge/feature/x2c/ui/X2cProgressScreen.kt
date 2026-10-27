@@ -26,7 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -75,7 +75,7 @@ fun X2cProgressScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.x2c_progress_title),
+                    text = stringRes(R.string.x2c_progress_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -92,11 +92,11 @@ fun X2cProgressScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.x2c_progress_remaining, remaining),
+                        text = stringRes(R.string.x2c_progress_remaining, remaining),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = stringResource(
+                        text = stringRes(
                             when {
                                 tracker.rolledBack -> R.string.x2c_progress_rolling_back
                                 active == null || active.ordinal < X2cPhase.APPLY.ordinal -> R.string.x2c_progress_nothing_written
@@ -113,7 +113,7 @@ fun X2cProgressScreen(
                     enabled = !tracker.rolledBack,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.x2c_progress_cancel))
+                    Text(stringRes(R.string.x2c_progress_cancel))
                 }
             }
         }
@@ -123,10 +123,10 @@ fun X2cProgressScreen(
 @Composable
 private fun phaseDetail(progress: X2cProgress?): String? = when (progress) {
     is X2cProgress.GeneratingComposables ->
-        stringResource(R.string.x2c_phase_detail_layouts, progress.current, progress.total, progress.currentLayout)
+        stringRes(R.string.x2c_phase_detail_layouts, progress.current, progress.total, progress.currentLayout)
     is X2cProgress.WiringActivities ->
-        stringResource(R.string.x2c_phase_detail_wiring, progress.current, progress.total, progress.currentClass)
-    is X2cProgress.VerifyingBuild -> stringResource(R.string.x2c_phase_detail_build, progress.task)
+        stringRes(R.string.x2c_phase_detail_wiring, progress.current, progress.total, progress.currentClass)
+    is X2cProgress.VerifyingBuild -> stringRes(R.string.x2c_phase_detail_build, progress.task)
     else -> null
 }
 
@@ -136,8 +136,8 @@ private fun PhaseRow(
     detail: String?,
     modifier: Modifier = Modifier
 ) {
-    val label = stringResource(phaseLabel(step.phase))
-    val stateLabel = stringResource(
+    val label = stringRes(phaseLabel(step.phase))
+    val stateLabel = stringRes(
         when (step.state) {
             X2cStepState.DONE -> R.string.x2c_step_done
             X2cStepState.ACTIVE -> R.string.x2c_step_active

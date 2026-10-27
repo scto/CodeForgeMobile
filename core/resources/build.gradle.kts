@@ -13,3 +13,7 @@ dependencies {
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.startup)
 }
+
+dependencies {
+    testImplementation(libs.junit)
+}

@@ -56,7 +56,8 @@ object Res {
 
     private class ContextResolver(private val appContext: Context) : Resolver {
         override fun string(id: Int, args: Array<out Any>): String =
-            if (args.isEmpty()) appContext.getString(id) else appContext.getString(id, *args)
+            LanguageOverrides.resolve(appContext.resources, id, args)
+                ?: if (args.isEmpty()) appContext.getString(id) else appContext.getString(id, *args)
 
         override fun plural(id: Int, quantity: Int, args: Array<out Any>): String =
             appContext.resources.getQuantityString(id, quantity, *args)

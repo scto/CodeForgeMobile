@@ -33,7 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,13 +68,13 @@ fun J2kResultScreen(
                     onClick = { onIntent(J2kIntent.RestoreBackup) },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = stringResource(R.string.j2k_action_undo))
+                    Text(text = stringRes(R.string.j2k_action_undo))
                 }
                 Button(
                     onClick = { onIntent(J2kIntent.DismissResult) },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = stringResource(R.string.j2k_action_close))
+                    Text(text = stringRes(R.string.j2k_action_close))
                 }
             }
         }
@@ -88,7 +88,7 @@ fun J2kResultScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = stringResource(R.string.j2k_title),
+                text = stringRes(R.string.j2k_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -97,7 +97,7 @@ fun J2kResultScreen(
 
             // Disclaimer
             Text(
-                text = stringResource(R.string.j2k_disclaimer),
+                text = stringRes(R.string.j2k_disclaimer),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -113,7 +113,7 @@ fun J2kResultScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = stringResource(
+                        text = stringRes(
                             R.string.j2k_result_summary,
                             report.convertedJavaCount,
                             report.notesJavaCount,
@@ -139,10 +139,10 @@ fun J2kResultScreen(
             ) {
                 items(J2kFilter.values()) { filter ->
                     val label = when (filter) {
-                        J2kFilter.ALL -> stringResource(R.string.j2k_filter_all)
-                        J2kFilter.CONVERTED -> stringResource(R.string.j2k_filter_converted)
-                        J2kFilter.WITH_NOTES -> stringResource(R.string.j2k_filter_notes)
-                        J2kFilter.FAILED -> stringResource(R.string.j2k_filter_failed)
+                        J2kFilter.ALL -> stringRes(R.string.j2k_filter_all)
+                        J2kFilter.CONVERTED -> stringRes(R.string.j2k_filter_converted)
+                        J2kFilter.WITH_NOTES -> stringRes(R.string.j2k_filter_notes)
+                        J2kFilter.FAILED -> stringRes(R.string.j2k_filter_failed)
                     }
                     FilterChip(
                         selected = state.selectedFilter == filter,

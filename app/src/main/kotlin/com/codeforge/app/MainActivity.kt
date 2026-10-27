@@ -17,6 +17,7 @@ import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.designsystem.CodeForgeTheme
 import com.codeforge.core.designsystem.findExtensionTheme
 import com.codeforge.core.designsystem.findIconTheme
+import com.codeforge.core.resources.LanguageOverrides
 import com.codeforge.core.domain.extension.ExtensionThemeRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -42,6 +43,13 @@ class MainActivity : ComponentActivity() {
             val extensionTheme = settings.theme.findExtensionTheme(extensionThemes)
             val iconThemes by extensionThemeRepository.iconThemes.collectAsStateWithLifecycle()
             val iconTheme = settings.theme.findIconTheme(iconThemes)
+            val languagePacks by extensionThemeRepository.languagePacks.collectAsStateWithLifecycle()
+            val languagePackKey = settings.theme.languagePackId
+            // Sprachpaket aus einem Plugin als Überschreibungsschicht über den App-Texten.
+            LaunchedEffect(languagePackKey, languagePacks) {
+                val pack = languagePacks.firstOrNull { it.key == languagePackKey }
+                LanguageOverrides.set(pack?.strings.orEmpty())
+            }
             val isDark = settings.theme.resolveIsDark(systemDark, extensionTheme)
             LaunchedEffect(isDark) {
                 enableEdgeToEdge(

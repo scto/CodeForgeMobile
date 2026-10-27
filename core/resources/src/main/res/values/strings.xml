@@ -2092,5 +2092,6 @@
     <string name="themebuilder_erweiterung_dunkel">Dark</string>
     <string name="themebuilder_icon_pakete">Icon packs</string>
     <string name="themebuilder_icon_standard">Default</string>
+    <string name="themebuilder_sprachpakete">Language packs</string>
 </resources>
 

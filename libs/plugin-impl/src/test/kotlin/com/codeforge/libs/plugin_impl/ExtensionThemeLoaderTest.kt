@@ -3,6 +3,7 @@ package com.codeforge.libs.plugin_impl
 import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ColorThemeContribution
 import com.codeforge.core.domain.extension.IconThemeContribution
+import com.codeforge.core.domain.extension.LanguagePackContribution
 import com.codeforge.core.domain.extension.Resolved
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -64,5 +65,23 @@ class ExtensionThemeLoaderTest {
         assertEquals(listOf("ok"), r.map { it.themeId })
         assertEquals(File(dir, "icons").absolutePath, r.single().baseDir)
         assertEquals("kt.png", r.single().icons.forFile("A.kt"))
+    }
+
+    @Test
+    fun `Sprachpaket wird geladen, defektes uebersprungen`() {
+        val dir = tmp.newFolder("lang")
+        File(dir, "fr.json").writeText("""{"strings":{"common_abbrechen":"Annuler"}}""")
+        File(dir, "kaputt.json").writeText("""{"strings":{}}""")
+        val r = ExtensionThemeLoader.loadLanguagePacks(
+            ActiveContributions(
+                languagePacks = listOf(
+                    Resolved("p", dir.absolutePath, LanguagePackContribution("fr", "Français", "fr.json")),
+                    Resolved("p", dir.absolutePath, LanguagePackContribution("xx", "Kaputt", "kaputt.json"))
+                )
+            )
+        )
+        assertEquals(listOf("fr"), r.map { it.locale })
+        assertEquals("Annuler", r.single().strings["common_abbrechen"])
+        assertEquals("ext:p/fr", r.single().key)
     }
 }

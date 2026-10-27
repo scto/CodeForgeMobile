@@ -29,6 +29,8 @@ message ThemeConfig {
   CustomPalette custom_palette = 4;
   // Schlüssel eines Icon-Themes aus einem Plugin ("ext:<pluginId>/<themeId>"); leer = App-Standardicons.
   string icon_theme_id = 5;
+  // Schlüssel eines Sprachpakets aus einem Plugin ("ext:<pluginId>/<locale>"); leer = Sprache des Systems/der App.
+  string language_pack_id = 6;
 }
 
 message CustomPalette {

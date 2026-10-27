@@ -33,8 +33,12 @@ class ThemeBuilderViewModel @Inject constructor(
     val uiState: StateFlow<ThemeBuilderUiState> = combine(
         settingsRepository.appSettings,
         editBuffer,
-        combine(extensionThemeRepository.themes, extensionThemeRepository.iconThemes) { colors, icons -> colors to icons }
-    ) { settings, buffer, (extensionThemes, iconThemes) ->
+        combine(
+            extensionThemeRepository.themes,
+            extensionThemeRepository.iconThemes,
+            extensionThemeRepository.languagePacks
+        ) { colors, icons, packs -> Triple(colors, icons, packs) }
+    ) { settings, buffer, (extensionThemes, iconThemes, languagePacks) ->
         val theme = settings.theme
         val primary = buffer?.primary ?: theme.customPalette.primary
         val secondary = buffer?.secondary ?: theme.customPalette.secondary
@@ -52,6 +56,8 @@ class ThemeBuilderViewModel @Inject constructor(
             extensionThemes = extensionThemes,
             iconThemes = iconThemes,
             iconThemeId = theme.iconThemeId,
+            languagePacks = languagePacks,
+            languagePackId = theme.languagePackId,
             previewExtensionTheme = if (buffer == null) theme.findExtensionTheme(extensionThemes) else null,
             isLoading = false
         )
@@ -73,6 +79,8 @@ class ThemeBuilderViewModel @Inject constructor(
                         .build()
                 }
             }
+
+            is ThemeBuilderUiEvent.LanguagePackSelected -> persist { it.toBuilder().setLanguagePackId(event.key).build() }
 
             is ThemeBuilderUiEvent.IconThemeSelected -> persist { it.toBuilder().setIconThemeId(event.key).build() }
 

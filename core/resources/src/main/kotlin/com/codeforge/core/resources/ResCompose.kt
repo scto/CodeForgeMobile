@@ -4,12 +4,20 @@ package com.codeforge.core.resources
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 
 /** Composable-Variante von [Res.string] – reagiert auf Konfigurationsänderungen (Sprache, Dark Mode). */
 @Composable
-fun stringRes(@StringRes id: Int, vararg args: Any): String = stringResource(id, *args)
+fun stringRes(@StringRes id: Int, vararg args: Any): String {
+    // Lesen von LanguageOverrides.active abonniert Sprachpaket-Wechsel (Snapshot-State).
+    val overrides = LanguageOverrides.active
+    if (overrides.isNotEmpty()) {
+        LanguageOverrides.resolve(LocalContext.current.resources, id, args, overrides)?.let { return it }
+    }
+    return stringResource(id, *args)
+}
 
 /** Composable-Variante von [Res.plural]. */
 @Composable
@@ -20,6 +28,6 @@ fun pluralRes(@PluralsRes id: Int, quantity: Int, vararg args: Any): String =
 @Composable
 fun UiText.asString(): String = when (this) {
     is UiText.Plain -> value
-    is UiText.Resource -> stringResource(id, *args.toTypedArray())
+    is UiText.Resource -> stringRes(id, *args.toTypedArray())
     is UiText.Plural -> pluralStringResource(id, quantity, *args.toTypedArray())
 }

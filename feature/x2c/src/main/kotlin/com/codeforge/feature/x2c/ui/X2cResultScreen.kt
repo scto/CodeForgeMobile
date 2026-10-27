@@ -34,7 +34,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -79,7 +79,7 @@ fun X2cResultScreen(
             ) {
                 item {
                     Text(
-                        text = stringResource(R.string.x2c_result_title),
+                        text = stringRes(R.string.x2c_result_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.semantics { heading() }
@@ -88,7 +88,7 @@ fun X2cResultScreen(
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            text = stringResource(
+                            text = stringRes(
                                 R.string.x2c_result_summary,
                                 report.generatedCount,
                                 report.generatedWithNotesCount,
@@ -99,14 +99,14 @@ fun X2cResultScreen(
                         )
                         if (report.totalTodos > 0) {
                             Text(
-                                text = stringResource(R.string.x2c_result_todos, report.totalTodos),
+                                text = stringRes(R.string.x2c_result_todos, report.totalTodos),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         if (report.addedDependencies.isNotEmpty()) {
                             Text(
-                                text = stringResource(R.string.x2c_result_added_deps, report.addedDependencies.joinToString()),
+                                text = stringRes(R.string.x2c_result_added_deps, report.addedDependencies.joinToString()),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -117,7 +117,7 @@ fun X2cResultScreen(
                 state.undoResult?.let { undo ->
                     item {
                         Text(
-                            text = stringResource(
+                            text = stringRes(
                                 R.string.x2c_undo_summary,
                                 undo.restored.size,
                                 undo.deleted.size,
@@ -131,7 +131,7 @@ fun X2cResultScreen(
                 if (state.isUndoing) {
                     item {
                         Column {
-                            Text(stringResource(R.string.x2c_undo_running), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringRes(R.string.x2c_undo_running), style = MaterialTheme.typography.bodyMedium)
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
                         }
                     }
@@ -143,32 +143,32 @@ fun X2cResultScreen(
                     ) {
                         Button(onClick = { onIntent(X2cIntent.RunBuildAgain) }, enabled = !busy) {
                             Icon(Icons.Filled.Build, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                            Text(stringResource(R.string.x2c_result_action_build))
+                            Text(stringRes(R.string.x2c_result_action_build))
                         }
                         OutlinedButton(
                             onClick = { onIntent(X2cIntent.OpenReport) },
                             enabled = report.reportPath != null
                         ) {
                             Icon(Icons.Filled.Description, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                            Text(stringResource(R.string.x2c_result_action_report))
+                            Text(stringRes(R.string.x2c_result_action_report))
                         }
                         OutlinedButton(onClick = { onIntent(X2cIntent.OpenFirstComposeFile) }) {
                             Icon(Icons.Filled.Visibility, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                            Text(stringResource(R.string.x2c_result_action_preview))
+                            Text(stringRes(R.string.x2c_result_action_preview))
                         }
                         OutlinedButton(onClick = { onIntent(X2cIntent.ShowBackupFolder) }) {
                             Icon(Icons.Filled.FolderOpen, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                            Text(stringResource(R.string.x2c_result_action_backup))
+                            Text(stringRes(R.string.x2c_result_action_backup))
                         }
                         OutlinedButton(onClick = { onIntent(X2cIntent.RestoreBackup) }, enabled = !busy) {
                             Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                            Text(stringResource(R.string.x2c_result_action_undo))
+                            Text(stringRes(R.string.x2c_result_action_undo))
                         }
                     }
                 }
                 item {
                     Text(
-                        text = stringResource(R.string.x2c_result_files),
+                        text = stringRes(R.string.x2c_result_files),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.semantics { heading() }
                     )
@@ -179,7 +179,7 @@ fun X2cResultScreen(
                             FilterChip(
                                 selected = state.resultFilter == filter,
                                 onClick = { onIntent(X2cIntent.SetResultFilter(filter)) },
-                                label = { Text(stringResource(filterLabel(filter))) }
+                                label = { Text(stringRes(filterLabel(filter))) }
                             )
                         }
                     }
@@ -188,7 +188,7 @@ fun X2cResultScreen(
                 if (files.isEmpty()) {
                     item {
                         Text(
-                            text = stringResource(R.string.x2c_result_files_empty),
+                            text = stringRes(R.string.x2c_result_files_empty),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -200,7 +200,7 @@ fun X2cResultScreen(
                 }
                 item {
                     TextButton(onClick = { onIntent(X2cIntent.DismissResult) }, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.x2c_result_close))
+                        Text(stringRes(R.string.x2c_result_close))
                     }
                 }
             }
@@ -233,7 +233,7 @@ private fun BuildCard(
     Surface(color = container, contentColor = content, shape = RoundedCornerShape(12.dp), modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = stringResource(
+                text = stringRes(
                     when {
                         running -> R.string.x2c_result_build_running
                         badge == X2cBuildBadge.SUCCESS -> R.string.x2c_result_build_ok
@@ -247,10 +247,10 @@ private fun BuildCard(
             )
             if (running) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             if (errors.isNotEmpty()) {
-                Text(stringResource(R.string.x2c_result_build_problems, errors.size), style = MaterialTheme.typography.labelMedium)
+                Text(stringRes(R.string.x2c_result_build_problems, errors.size), style = MaterialTheme.typography.labelMedium)
                 errors.forEach { problem ->
                     val where = listOfNotNull(problem.path, problem.line?.toString()).joinToString(":")
-                    val suffix = if (problem.preExisting) " (${stringResource(R.string.x2c_result_build_pre_existing)})" else ""
+                    val suffix = if (problem.preExisting) " (${stringRes(R.string.x2c_result_build_pre_existing)})" else ""
                     Text(
                         text = (if (where.isNotEmpty()) "$where  " else "") + problem.message + suffix,
                         style = MaterialTheme.typography.bodySmall,
@@ -271,7 +271,7 @@ private fun FileRow(
 ) {
     val target = file.outputComposePath ?: file.sourceXmlPath
     val name = target.substringAfterLast('/')
-    val openLabel = stringResource(R.string.x2c_result_open_file, name)
+    val openLabel = stringRes(R.string.x2c_result_open_file, name)
     Surface(
         shape = RoundedCornerShape(8.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -291,7 +291,7 @@ private fun FileRow(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = stringResource(statusLabel(file.status)),
+                    text = stringRes(statusLabel(file.status)),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (file.status == X2cFileStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -304,7 +304,7 @@ private fun FileRow(
                 overflow = TextOverflow.Ellipsis
             )
             if (file.todoCount > 0) {
-                Text(stringResource(R.string.x2c_result_todo_count, file.todoCount), style = MaterialTheme.typography.labelSmall)
+                Text(stringRes(R.string.x2c_result_todo_count, file.todoCount), style = MaterialTheme.typography.labelSmall)
             }
             file.notes.take(3).forEach { note ->
                 Text(note, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -331,13 +331,13 @@ private fun UndoConflictDialog(
 ) {
     AlertDialog(
         onDismissRequest = {},
-        title = { Text(stringResource(R.string.x2c_undo_conflict_title)) },
-        text = { Text(stringResource(R.string.x2c_undo_conflict_message, path)) },
+        title = { Text(stringRes(R.string.x2c_undo_conflict_title)) },
+        text = { Text(stringRes(R.string.x2c_undo_conflict_message, path)) },
         confirmButton = {
             Column(horizontalAlignment = Alignment.End) {
-                TextButton(onClick = { onResolve(UndoConflictPolicy.KEEP) }) { Text(stringResource(R.string.x2c_undo_keep)) }
-                TextButton(onClick = { onResolve(UndoConflictPolicy.SAVE_AS_ORIG) }) { Text(stringResource(R.string.x2c_undo_save_orig)) }
-                TextButton(onClick = { onResolve(UndoConflictPolicy.OVERWRITE) }) { Text(stringResource(R.string.x2c_undo_overwrite)) }
+                TextButton(onClick = { onResolve(UndoConflictPolicy.KEEP) }) { Text(stringRes(R.string.x2c_undo_keep)) }
+                TextButton(onClick = { onResolve(UndoConflictPolicy.SAVE_AS_ORIG) }) { Text(stringRes(R.string.x2c_undo_save_orig)) }
+                TextButton(onClick = { onResolve(UndoConflictPolicy.OVERWRITE) }) { Text(stringRes(R.string.x2c_undo_overwrite)) }
             }
         }
     )

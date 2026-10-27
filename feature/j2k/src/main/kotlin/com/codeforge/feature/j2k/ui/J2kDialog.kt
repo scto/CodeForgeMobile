@@ -22,7 +22,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.domain.model.J2kScanResult
@@ -52,7 +52,7 @@ fun J2kDialog(
             )
         },
         title = {
-            Text(text = stringResource(R.string.j2k_title))
+            Text(text = stringRes(R.string.j2k_title))
         },
         text = {
             Column(
@@ -61,14 +61,14 @@ fun J2kDialog(
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = stringResource(R.string.j2k_prompt_message, percentStr),
+                    text = stringRes(R.string.j2k_prompt_message, percentStr),
                     style = MaterialTheme.typography.bodyMedium
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = stringResource(R.string.j2k_disclaimer),
+                    text = stringRes(R.string.j2k_disclaimer),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -78,8 +78,8 @@ fun J2kDialog(
                 // Groovy -> Kotlin DSL Option (nur sichtbar wenn Groovy Gradle Dateien vorhanden sind)
                 if (scan?.hasGroovyGradle == true) {
                     OptionSwitchRow(
-                        title = stringResource(R.string.j2k_option_convert_gradle),
-                        description = stringResource(R.string.j2k_option_convert_gradle_desc),
+                        title = stringRes(R.string.j2k_option_convert_gradle),
+                        description = stringRes(R.string.j2k_option_convert_gradle_desc),
                         checked = state.convertGradle,
                         onCheckedChange = { onIntent(J2kIntent.SetConvertGradle(it)) }
                     )
@@ -88,8 +88,8 @@ fun J2kDialog(
 
                 // Version Catalog Option
                 OptionSwitchRow(
-                    title = stringResource(R.string.j2k_option_version_catalog),
-                    description = stringResource(R.string.j2k_option_version_catalog_desc),
+                    title = stringRes(R.string.j2k_option_version_catalog),
+                    description = stringRes(R.string.j2k_option_version_catalog_desc),
                     checked = state.useVersionCatalog,
                     onCheckedChange = { onIntent(J2kIntent.SetUseVersionCatalog(it)) }
                 )
@@ -98,7 +98,7 @@ fun J2kDialog(
 
                 // Build Check Option
                 OptionSwitchRow(
-                    title = stringResource(R.string.j2k_option_build_check),
+                    title = stringRes(R.string.j2k_option_build_check),
                     description = null,
                     checked = state.runBuildCheck,
                     onCheckedChange = { onIntent(J2kIntent.SetRunBuildCheck(it)) }
@@ -108,8 +108,8 @@ fun J2kDialog(
 
                 // Git Branch Option
                 OptionSwitchRow(
-                    title = stringResource(R.string.j2k_option_git_branch),
-                    description = stringResource(R.string.j2k_option_git_branch_desc),
+                    title = stringRes(R.string.j2k_option_git_branch),
+                    description = stringRes(R.string.j2k_option_git_branch_desc),
                     checked = state.createGitBranch,
                     onCheckedChange = { onIntent(J2kIntent.SetCreateGitBranch(it)) }
                 )
@@ -118,7 +118,7 @@ fun J2kDialog(
 
                 // Backup .git Option
                 OptionSwitchRow(
-                    title = stringResource(R.string.j2k_option_backup_git),
+                    title = stringRes(R.string.j2k_option_backup_git),
                     description = null,
                     checked = state.includeGitInBackup,
                     onCheckedChange = { onIntent(J2kIntent.SetIncludeGitInBackup(it)) }
@@ -127,16 +127,16 @@ fun J2kDialog(
         },
         confirmButton = {
             Button(onClick = { onIntent(J2kIntent.StartMigration) }) {
-                Text(text = stringResource(R.string.j2k_action_convert))
+                Text(text = stringRes(R.string.j2k_action_convert))
             }
         },
         dismissButton = {
             Row {
                 TextButton(onClick = { onIntent(J2kIntent.DismissDialog(dontAskAgain = true)) }) {
-                    Text(text = stringResource(R.string.j2k_action_dont_ask))
+                    Text(text = stringRes(R.string.j2k_action_dont_ask))
                 }
                 OutlinedButton(onClick = { onIntent(J2kIntent.DismissDialog(dontAskAgain = false)) }) {
-                    Text(text = stringResource(R.string.j2k_action_later))
+                    Text(text = stringRes(R.string.j2k_action_later))
                 }
             }
         }

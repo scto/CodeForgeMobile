@@ -23,7 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.domain.model.BuildTypeSettings
@@ -43,7 +43,7 @@ fun ProjectSettingsScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             SettingsTopBar(
-                title = stringResource(R.string.project_settings_title),
+                title = stringRes(R.string.project_settings_title),
                 onBack = onNavigateBack
             )
         },
@@ -58,7 +58,7 @@ fun ProjectSettingsScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    Text(text = stringResource(R.string.common_speichern))
+                    Text(text = stringRes(R.string.common_speichern))
                 }
             }
         }
@@ -75,12 +75,12 @@ fun ProjectSettingsScreen(
                 Tab(
                     selected = state.selectedTab == ProjectBuildTypeTab.RELEASE,
                     onClick = { onIntent(ProjectSettingsIntent.SelectTab(ProjectBuildTypeTab.RELEASE)) },
-                    text = { Text(stringResource(R.string.project_settings_build_type_release)) }
+                    text = { Text(stringRes(R.string.project_settings_build_type_release)) }
                 )
                 Tab(
                     selected = state.selectedTab == ProjectBuildTypeTab.DEBUG,
                     onClick = { onIntent(ProjectSettingsIntent.SelectTab(ProjectBuildTypeTab.DEBUG)) },
-                    text = { Text(stringResource(R.string.project_settings_build_type_debug)) }
+                    text = { Text(stringRes(R.string.project_settings_build_type_debug)) }
                 )
             }
 
@@ -91,8 +91,8 @@ fun ProjectSettingsScreen(
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 // Minify
                 SettingSwitchRow(
-                    title = stringResource(R.string.project_settings_minify),
-                    description = stringResource(R.string.project_settings_minify_desc),
+                    title = stringRes(R.string.project_settings_minify),
+                    description = stringRes(R.string.project_settings_minify_desc),
                     checked = current.minifyEnabled,
                     onCheckedChange = { onIntent(ProjectSettingsIntent.ToggleMinify(it)) }
                 )
@@ -101,8 +101,8 @@ fun ProjectSettingsScreen(
 
                 // Shrink (requires Minify)
                 SettingSwitchRow(
-                    title = stringResource(R.string.project_settings_shrink),
-                    description = stringResource(R.string.project_settings_shrink_desc),
+                    title = stringRes(R.string.project_settings_shrink),
+                    description = stringRes(R.string.project_settings_shrink_desc),
                     checked = current.shrinkResources,
                     enabled = current.minifyEnabled,
                     onCheckedChange = { onIntent(ProjectSettingsIntent.ToggleShrink(it)) }
@@ -112,8 +112,8 @@ fun ProjectSettingsScreen(
 
                 // PNG Crunch
                 SettingSwitchRow(
-                    title = stringResource(R.string.project_settings_crunch),
-                    description = stringResource(R.string.project_settings_crunch_desc),
+                    title = stringRes(R.string.project_settings_crunch),
+                    description = stringRes(R.string.project_settings_crunch_desc),
                     checked = current.crunchPngs,
                     onCheckedChange = { onIntent(ProjectSettingsIntent.ToggleCrunch(it)) }
                 )
@@ -122,8 +122,8 @@ fun ProjectSettingsScreen(
 
                 // Debuggable
                 SettingSwitchRow(
-                    title = stringResource(R.string.project_settings_debuggable),
-                    description = stringResource(R.string.project_settings_debuggable_desc),
+                    title = stringRes(R.string.project_settings_debuggable),
+                    description = stringRes(R.string.project_settings_debuggable_desc),
                     checked = current.debuggable,
                     onCheckedChange = { onIntent(ProjectSettingsIntent.ToggleDebuggable(it)) }
                 )
@@ -137,8 +137,8 @@ fun ProjectSettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         SettingSwitchRow(
-                            title = stringResource(R.string.project_settings_signing),
-                            description = stringResource(R.string.project_settings_signing_desc),
+                            title = stringRes(R.string.project_settings_signing),
+                            description = stringRes(R.string.project_settings_signing_desc),
                             checked = current.signingEnabled,
                             onCheckedChange = { onIntent(ProjectSettingsIntent.ToggleSigning(it)) }
                         )
@@ -166,7 +166,7 @@ fun ProjectSettingsScreen(
                                 onClick = { onIntent(ProjectSettingsIntent.OpenSigningManager) },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(text = stringResource(R.string.project_settings_signing_manage))
+                                Text(text = stringRes(R.string.project_settings_signing_manage))
                             }
                         }
                     }

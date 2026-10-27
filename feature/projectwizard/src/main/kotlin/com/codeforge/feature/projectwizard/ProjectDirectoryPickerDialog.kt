@@ -36,7 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -79,7 +79,7 @@ fun ProjectDirectoryPickerDialog(
         modifier = modifier.fillMaxWidth(),
         title = {
             Text(
-                text = stringResource(CoreR.string.pw_select_directory_title),
+                text = stringRes(CoreR.string.pw_select_directory_title),
                 style = MaterialTheme.typography.titleLarge,
             )
         },
@@ -110,12 +110,12 @@ fun ProjectDirectoryPickerDialog(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(CoreR.string.pw_folder_up),
+                            contentDescription = stringRes(CoreR.string.pw_folder_up),
                         )
                     }
 
                     OutlinedButton(onClick = { showNewFolderDialog = true }) {
-                        Text(stringResource(CoreR.string.pw_new_folder))
+                        Text(stringRes(CoreR.string.pw_new_folder))
                     }
                 }
 
@@ -166,12 +166,12 @@ fun ProjectDirectoryPickerDialog(
         },
         confirmButton = {
             Button(onClick = { onSelectDir(currentDir.absolutePath) }) {
-                Text(stringResource(CoreR.string.pw_select_this_directory))
+                Text(stringRes(CoreR.string.pw_select_this_directory))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(CoreR.string.pw_back))
+                Text(stringRes(CoreR.string.pw_back))
             }
         },
     )
@@ -182,7 +182,7 @@ fun ProjectDirectoryPickerDialog(
 
         AlertDialog(
             onDismissRequest = { showNewFolderDialog = false },
-            title = { Text(stringResource(CoreR.string.pw_new_folder_title)) },
+            title = { Text(stringRes(CoreR.string.pw_new_folder_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
@@ -191,7 +191,7 @@ fun ProjectDirectoryPickerDialog(
                             newFolderName = it
                             folderError = false
                         },
-                        label = { Text(stringResource(CoreR.string.pw_new_folder_hint)) },
+                        label = { Text(stringRes(CoreR.string.pw_new_folder_hint)) },
                         isError = folderError,
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -215,12 +215,12 @@ fun ProjectDirectoryPickerDialog(
                         }
                     },
                 ) {
-                    Text(stringResource(CoreR.string.pw_ok))
+                    Text(stringRes(CoreR.string.pw_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showNewFolderDialog = false }) {
-                    Text(stringResource(CoreR.string.pw_back))
+                    Text(stringRes(CoreR.string.pw_back))
                 }
             },
         )

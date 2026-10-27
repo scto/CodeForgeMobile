@@ -95,4 +95,5 @@ object ColorThemeFileParser {
 interface ExtensionThemeRepository {
     val themes: kotlinx.coroutines.flow.StateFlow<List<ExtensionColorTheme>>
     val iconThemes: kotlinx.coroutines.flow.StateFlow<List<ExtensionIconTheme>>
+    val languagePacks: kotlinx.coroutines.flow.StateFlow<List<ExtensionLanguagePack>>
 }

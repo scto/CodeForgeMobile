@@ -48,7 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.domain.model.ProjectInputValidator.Error
@@ -69,10 +69,10 @@ fun ProjectWizardScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(CoreR.string.pw_title)) },
+                title = { Text(stringRes(CoreR.string.pw_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(ProjectWizardUiEvent.BackClicked) }, enabled = !state.isGenerating) {
-                        Icon(painterResource(R.drawable.pw_ic_back), contentDescription = stringResource(CoreR.string.pw_back))
+                        Icon(painterResource(R.drawable.pw_ic_back), contentDescription = stringRes(CoreR.string.pw_back))
                     }
                 },
             )
@@ -92,11 +92,11 @@ fun ProjectWizardScreen(
     state.generationError?.let { message ->
         AlertDialog(
             onDismissRequest = { onEvent(ProjectWizardUiEvent.ErrorDismissed) },
-            title = { Text(stringResource(CoreR.string.pw_error_title)) },
+            title = { Text(stringRes(CoreR.string.pw_error_title)) },
             text = { Text(message) },
             confirmButton = {
                 TextButton(onClick = { onEvent(ProjectWizardUiEvent.ErrorDismissed) }) {
-                    Text(stringResource(CoreR.string.pw_ok))
+                    Text(stringRes(CoreR.string.pw_ok))
                 }
             },
         )
@@ -126,9 +126,9 @@ private fun TemplateGrid(
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxWidth().height(120.dp),
                     )
-                    Text(stringResource(ui.title), style = MaterialTheme.typography.titleMedium)
+                    Text(stringRes(ui.title), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        stringResource(ui.description),
+                        stringRes(ui.description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -152,7 +152,7 @@ private fun ConfigForm(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(stringResource(template.kind.ui().title), style = MaterialTheme.typography.titleLarge)
+        Text(stringRes(template.kind.ui().title), style = MaterialTheme.typography.titleLarge)
 
         FormField(
             value = state.projectName,
@@ -182,7 +182,7 @@ private fun ConfigForm(
                 IconButton(onClick = { showDirPicker = true }, enabled = enabled) {
                     Icon(
                         imageVector = Icons.Default.Folder,
-                        contentDescription = stringResource(CoreR.string.pw_choose_directory),
+                        contentDescription = stringRes(CoreR.string.pw_choose_directory),
                     )
                 }
             },
@@ -216,7 +216,7 @@ private fun ConfigForm(
             enabled = enabled,
         )
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(CoreR.string.pw_field_kts), modifier = Modifier.weight(1f))
+            Text(stringRes(CoreR.string.pw_field_kts), modifier = Modifier.weight(1f))
             Switch(
                 checked = state.useKotlinDsl,
                 onCheckedChange = { onEvent(ProjectWizardUiEvent.KotlinDslChanged(it)) },
@@ -225,7 +225,7 @@ private fun ConfigForm(
         }
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(CoreR.string.pw_field_git), modifier = Modifier.weight(1f))
+            Text(stringRes(CoreR.string.pw_field_git), modifier = Modifier.weight(1f))
             Switch(
                 checked = state.initGit,
                 onCheckedChange = { onEvent(ProjectWizardUiEvent.InitGitChanged(it)) },
@@ -235,7 +235,7 @@ private fun ConfigForm(
 
         if (state.initGit && state.gitIdentityMissing) {
             Text(
-                stringResource(CoreR.string.pw_git_identity_missing),
+                stringRes(CoreR.string.pw_git_identity_missing),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -248,9 +248,9 @@ private fun ConfigForm(
         ) {
             if (state.isGenerating) {
                 CircularProgressIndicator(Modifier.height(18.dp), strokeWidth = 2.dp)
-                Text(stringResource(CoreR.string.pw_creating), modifier = Modifier.padding(start = 8.dp))
+                Text(stringRes(CoreR.string.pw_creating), modifier = Modifier.padding(start = 8.dp))
             } else {
-                Text(stringResource(CoreR.string.pw_create))
+                Text(stringRes(CoreR.string.pw_create))
             }
         }
     }
@@ -270,9 +270,9 @@ private fun FormField(
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
-        label = { Text(stringResource(label)) },
+        label = { Text(stringRes(label)) },
         isError = error != null,
-        supportingText = error?.let { { Text(stringResource(it.message())) } },
+        supportingText = error?.let { { Text(stringRes(it.message())) } },
         singleLine = true,
         enabled = enabled,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -302,7 +302,7 @@ private fun <T> Dropdown(
             onValueChange = {},
             readOnly = true,
             enabled = enabled,
-            label = { Text(stringResource(label)) },
+            label = { Text(stringRes(label)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
             modifier = Modifier.menuAnchor().fillMaxWidth(),
         )
