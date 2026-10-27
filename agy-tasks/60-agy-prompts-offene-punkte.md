@@ -1,5 +1,7 @@
 # Task 60 – Fertige agy-Prompts für alle offenen Punkte
 
+Stand: P4 (Zwischenablage-Kürzel) und P5 (Terminal-Backup) wurden von Claude umgesetzt und entfernt (Commits a79b423, 26f03b8); P12 läuft bereits bei agy. Die Nummern der übrigen Prompts bleiben unverändert.
+
 Jeder Block ist ein eigenständiger Prompt: kopieren, in agy einfügen, fertig.
 Gemeinsame Regeln (in jedem Prompt enthalten, hier nur zur Übersicht): Deutsch, Shell mit `set -euo pipefail`, Clean Architecture (UI / Domain / Data), Gradle Kotlin DSL + Version Catalogs, `modifier: Modifier = Modifier` als erster optionaler Parameter, `@Immutable` UI-States, keine Geheimnisse in Berichten/Commits, nichts erfinden: Nicht Ausgeführtes steht im Bericht unter **nicht getestet**. Vor jedem Push: `git fetch origin main && git rebase origin/main`. Commit-Nachrichten deutsch.
 
@@ -38,29 +40,6 @@ Prüfe auf dem Gerät:
 3. Zusatztasten: Preset wählen, speichern, Terminal neu öffnen – ist die Zeile geändert? Ungültige Eingabe darf nicht gespeichert werden.
 4. "Alle Sitzungen beim Schließen beenden": an, Sitzung mit `sleep 1000` starten, Zurück-Taste → Prozess muss weg sein (`ps`/Benachrichtigung). Aus: Sitzung bleibt. Gerät drehen darf nichts beenden.
 Fehler beheben, Tests ergänzen, einzeln committen. Bericht docs/task-60-p3-report.md.
-```
-
-## P4 – Terminal: Zwischenablage-Tastenkombinationen (neu)
-
-```
-Repo: scto/CodeForgeMobile. Vorbild: Xed-Editor-Terminaleinstellungen. Lies feature/settings/.../TerminalSettings*.kt und libs/termux-app/.../terminal/TermuxTerminalViewClient.java (onKeyDown / Ctrl+Shift-Handling).
-Implementiere eine Einstellung "Tastenkombinationen für Zwischenablage" (Standard: aus = bisheriges Verhalten): Ctrl+Shift+C kopiert die Auswahl, Ctrl+Shift+V fügt ein, Ctrl+Shift+X optional nicht belegen.
-- Pref in TermuxAppSharedPreferences (Konstante in TermuxPreferenceConstants, Getter/Setter), Schalter in TerminalSettingsScreen (Contract/ViewModel/Screen, UiState immutable), Strings DE+EN in core/resources.
-- Logik nur in TermuxTerminalViewClient; Ctrl+C/Ctrl+V ohne Shift bleiben unverändert (SIGINT!).
-- Unit-Test für die reine Entscheidungsfunktion (Tastencode+Modifier → Aktion), in eine kleine, testbare Klasse auslagern.
-- agy-tasks/59 aktualisieren (Punkt abhaken), committen, pushen. Gerätetest unter "nicht getestet", falls kein Gerät.
-```
-
-## P5 – Terminal: Backup und Wiederherstellen (neu)
-
-```
-Repo: scto/CodeForgeMobile. Lies agy-tasks/59, libs/terminal-engine (TermuxEnvironment.kt, ScriptInstaller.kt) und BOOTSTRAP.md.
-Implementiere "Terminal sichern / wiederherstellen" in den Terminal-Einstellungen:
-- Sichern: $HOME und $PREFIX (usr) als .tar.gz per Storage Access Framework (ACTION_CREATE_DOCUMENT) in eine vom Nutzer gewählte Datei. Streaming, kein Voll-RAM. Symlinks erhalten (SYMLINKS.txt-Konvention des Bootstraps beachten). Fortschritt + Abbrechen. Laufende Sitzungen vorher warnen/beenden.
-- Wiederherstellen: ACTION_OPEN_DOCUMENT, Archiv zuerst validieren (nur Pfade unter home/ und usr/, kein ".." und keine absoluten Pfade – Zip-Slip-Schutz), Bestätigungsdialog (überschreibt!), danach Terminal neu starten.
-- Logik in :libs:terminal-engine (Interface in :core:domain, Impl in Data), UI in :feature:settings, ViewModel mit sealed UiEvent, UiState @Immutable, Strings DE+EN.
-- Tests: Archiv-Roundtrip in temporärem Verzeichnis, Zip-Slip-Ablehnung, Symlink-Erhalt.
-Nicht ausgeführte Gerätetests unter "nicht getestet". Committen und pushen.
 ```
 
 ## P6 – Task 52.12 (XML → Compose, Tests/Doku/Gerätetest)
@@ -115,7 +94,7 @@ codeforge-env setup --jdk 21 --ndk r29 --cmake 4.1.2
 Erwartung: kein "Paket fehlt im APT-Repo (jq)", keine unerfüllten Abhängigkeiten von openjdk-21. Wenn die Meldung "CMake 4.1.2 nicht verfügbar – verwende das Termux-Paket" erscheint: Quelle der CMake-Versionsliste in libs/terminal-engine/src/main/assets/codeforge-env suchen, Ursache klären (fehlt 4.1.2 im Mirror codeforge-tools oder in der Manifestliste?) und beheben. Bericht mit den echten Ausgaben, nichts schönen.
 ```
 
-## P12 – Optional: Tree-sitter Kotlin-Variablenscopes
+## P12 – Optional: Tree-sitter Kotlin-Variablenscopes (LÄUFT BEREITS bei agy – nicht erneut starten)
 
 ```
 Repo: scto/CodeForgeMobile, Modul feature/editor (assets/treesitter). Lies die vorhandenen Queries (highlights/locals).
