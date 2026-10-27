@@ -40,6 +40,7 @@ import com.codeforge.feature.settings.GitSettingsRoute
 import com.codeforge.feature.settings.HelpRoute
 import com.codeforge.feature.settings.SettingsHubRoute
 import com.codeforge.feature.settings.TerminalSettingsRoute
+import com.codeforge.feature.settings.store.StoreRoute
 import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.settings.snippets.SnippetSettingsRoute
 import com.codeforge.feature.signing.SigningRoute
@@ -64,6 +65,7 @@ internal object Routes {
     const val SETTINGS_GIT = "settings_git"
     const val SETTINGS_DEBUG = "settings_debug"
     const val SETTINGS_HELP = "settings_help"
+    const val SETTINGS_STORE = "settings_store"
     const val SETTINGS_ABOUT = "settings_about"
     const val EXTENSIONS = "extensions"
     const val TERMINAL = "terminal"
@@ -192,7 +194,8 @@ fun CodeForgeNavHost(
                 onNavigateToSigning = { navController.navigate(Routes.SETTINGS_SIGNING) },
                 onNavigateToDebug = { navController.navigate(Routes.SETTINGS_DEBUG) },
                 onNavigateToHelp = { navController.navigate(Routes.SETTINGS_HELP) },
-                onNavigateToAbout = { navController.navigate(Routes.SETTINGS_ABOUT) }
+                onNavigateToAbout = { navController.navigate(Routes.SETTINGS_ABOUT) },
+                onNavigateToStore = { navController.navigate(Routes.SETTINGS_STORE) }
             )
         }
         composable(Routes.SETTINGS_THEME) {
@@ -215,6 +218,9 @@ fun CodeForgeNavHost(
             SigningRoute(
                 onNavigateBack = { navigateBackOrStart() }
             )
+        }
+        composable(Routes.SETTINGS_STORE) {
+            StoreRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_HELP) {
             HelpRoute(onBack = { navigateBackOrStart() })

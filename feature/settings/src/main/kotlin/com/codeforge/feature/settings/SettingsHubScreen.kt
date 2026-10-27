@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SdCard
 import androidx.compose.material.icons.filled.Source
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,7 +54,8 @@ fun SettingsHubRoute(
     onNavigateToSigning: () -> Unit = {},
     onNavigateToDebug: () -> Unit = {},
     onNavigateToHelp: () -> Unit = {},
-    onNavigateToAbout: () -> Unit = {}
+    onNavigateToAbout: () -> Unit = {},
+    onNavigateToStore: () -> Unit = {}
 ) {
     val entries = listOf(
         SettingsEntry(R.string.settings_hub_theme, Icons.Filled.Palette, onNavigateToTheme),
@@ -65,6 +67,7 @@ fun SettingsHubRoute(
         SettingsEntry(R.string.settings_hub_plugins, Icons.Filled.Extension, onNavigateToPlugins),
         SettingsEntry(R.string.settings_hub_extensions, Icons.Filled.Build, onNavigateToExtensions),
         SettingsEntry(R.string.settings_hub_debug, Icons.Filled.BugReport, onNavigateToDebug),
+        SettingsEntry(R.string.settings_hub_store, Icons.Filled.Storefront, onNavigateToStore),
         SettingsEntry(R.string.settings_hub_help, Icons.AutoMirrored.Filled.HelpOutline, onNavigateToHelp),
         SettingsEntry(R.string.settings_hub_about, Icons.Filled.Info, onNavigateToAbout)
     )

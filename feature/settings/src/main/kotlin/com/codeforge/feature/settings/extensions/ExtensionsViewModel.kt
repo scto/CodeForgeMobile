@@ -17,7 +17,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ExtensionsViewModel @Inject constructor(
     private val extensionsManager: ExtensionsManager,
-    private val coordinator: ExtensionInstallCoordinator
+    private val coordinator: ExtensionInstallCoordinator,
+    private val updateChecker: LspUpdateChecker,
+    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExtensionsUiState())
@@ -26,11 +28,38 @@ class ExtensionsViewModel @Inject constructor(
     init {
         loadExtensions()
         observeInstalls()
+        observeLspSettings()
+    }
+
+    private fun observeLspSettings() {
+        viewModelScope.launch {
+            settingsRepository.appSettings.collect { s ->
+                _uiState.update {
+                    it.copy(
+                        lspMaxSessions = s.editor.lspMaxConcurrentSessions,
+                        lspIdleTimeoutMinutes = s.editor.lspIdleTimeoutMinutes
+                    )
+                }
+            }
+        }
+    }
+
+    private fun setUpdate(id: String, state: UpdateUiState) {
+        _uiState.update { s -> s.copy(extensions = s.extensions.map { if (it.pkg.id == id) it.copy(update = state) else it }) }
+    }
+
+    private fun checkUpdate(pkg: LspExtensionPackage) {
+        if (_uiState.value.extensions.firstOrNull { it.pkg.id == pkg.id }?.update == UpdateUiState.Checking) return
+        setUpdate(pkg.id, UpdateUiState.Checking)
+        viewModelScope.launch { setUpdate(pkg.id, UpdateUiState.Done(updateChecker.check(pkg))) }
     }
 
     fun onEvent(event: ExtensionsUiEvent) {
         when (event) {
             is ExtensionsUiEvent.Refresh -> loadExtensions()
+            is ExtensionsUiEvent.CheckUpdate -> checkUpdate(event.pkg)
+            is ExtensionsUiEvent.OpenDetails -> _uiState.update { it.copy(detailId = event.pkg.id) }
+            is ExtensionsUiEvent.CloseDetails -> _uiState.update { it.copy(detailId = null) }
             is ExtensionsUiEvent.DismissSnackbar -> _uiState.update { it.copy(snackbarMessage = null) }
             is ExtensionsUiEvent.InstallClicked -> installPackage(event.pkg)
             is ExtensionsUiEvent.UninstallClicked -> uninstallPackage(event.pkg)
@@ -40,6 +69,7 @@ class ExtensionsViewModel @Inject constructor(
     private fun loadExtensions() {
         _uiState.update { it.copy(isRefreshing = true) }
         val catalog = extensionsManager.getCatalog()
+        val previous = _uiState.value.extensions.associate { it.pkg.id to it.update }
         val items = catalog.map { pkg ->
             val installedFile = extensionsManager.getExecutableFile(pkg)
             val missing = extensionsManager.checkMissingRequirements(pkg)
@@ -51,7 +81,8 @@ class ExtensionsViewModel @Inject constructor(
                 status = if (installedFile != null) ExtensionStatus.INSTALLED else ExtensionStatus.NOT_INSTALLED,
                 progress = 0f,
                 missingRequirements = missing,
-                missingOptionalRequirements = missingOptional
+                missingOptionalRequirements = missingOptional,
+                update = previous[pkg.id] ?: UpdateUiState.Idle
             )
         }
         _uiState.update { it.copy(extensions = applyActive(items, coordinator.active.value), isRefreshing = false) }

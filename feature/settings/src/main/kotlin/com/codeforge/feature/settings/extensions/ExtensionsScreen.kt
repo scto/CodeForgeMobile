@@ -38,6 +38,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -86,6 +87,16 @@ fun ExtensionsScreen(
         }
     }
 
+    uiState.detailItem?.let { item ->
+        ExtensionDetailDialog(
+            item = item,
+            lspMaxSessions = uiState.lspMaxSessions,
+            lspIdleTimeoutMinutes = uiState.lspIdleTimeoutMinutes,
+            onCheckUpdate = { onEvent(ExtensionsUiEvent.CheckUpdate(item.pkg)) },
+            onDismiss = { onEvent(ExtensionsUiEvent.CloseDetails) }
+        )
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -107,7 +118,9 @@ fun ExtensionsScreen(
                 ExtensionCard(
                     item = item,
                     onInstall = { onEvent(ExtensionsUiEvent.InstallClicked(item.pkg)) },
-                    onUninstall = { onEvent(ExtensionsUiEvent.UninstallClicked(item.pkg)) }
+                    onUninstall = { onEvent(ExtensionsUiEvent.UninstallClicked(item.pkg)) },
+                    onCheckUpdate = { onEvent(ExtensionsUiEvent.CheckUpdate(item.pkg)) },
+                    onDetails = { onEvent(ExtensionsUiEvent.OpenDetails(item.pkg)) }
                 )
             }
         }
@@ -119,6 +132,8 @@ private fun ExtensionCard(
     item: ExtensionUiItem,
     onInstall: () -> Unit,
     onUninstall: () -> Unit,
+    onCheckUpdate: () -> Unit,
+    onDetails: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -325,6 +340,8 @@ private fun ExtensionCard(
                 )
             }
 
+            UpdateStatusLine(item.update)
+
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
@@ -332,6 +349,13 @@ private fun ExtensionCard(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                TextButton(onClick = onDetails) { Text(stringRes(R.string.ext_detail_button)) }
+                TextButton(onClick = onCheckUpdate, enabled = item.update != UpdateUiState.Checking) {
+                    Text(
+                        if (item.update == UpdateUiState.Checking) stringRes(R.string.ext_checking_update)
+                        else stringRes(R.string.ext_check_update)
+                    )
+                }
                 if (item.pkg.isTermuxPackage) {
                     if (!item.isInstalled) {
                         val termuxSource = item.pkg.source as ExtensionSource.TermuxPackage
@@ -380,4 +404,25 @@ private fun ExtensionCard(
             }
         }
     }
+}
+
+/** Zeigt das Ergebnis der Update-Prüfung als eine Zeile; leer, solange nichts geprüft wurde. */
+@Composable
+internal fun UpdateStatusLine(update: UpdateUiState, modifier: Modifier = Modifier) {
+    val done = (update as? UpdateUiState.Done)?.result ?: return
+    val (text, color) = when (done) {
+        is UpdateCheckResult.UpToDate ->
+            stringRes(R.string.ext_update_uptodate, done.current) to MaterialTheme.colorScheme.onSurfaceVariant
+        is UpdateCheckResult.UpdateAvailable ->
+            stringRes(R.string.ext_update_available, done.latest, done.current) to MaterialTheme.colorScheme.primary
+        is UpdateCheckResult.Failed ->
+            stringRes(R.string.ext_update_failed, done.reason) to MaterialTheme.colorScheme.error
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = color,
+        fontWeight = FontWeight.Medium,
+        modifier = modifier.padding(top = 8.dp)
+    )
 }

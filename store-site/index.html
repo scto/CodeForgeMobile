@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeForge Store</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; max-width: 720px; margin-inline: auto; }
+  h1 { font-size: 1.4rem; } .card { border: 1px solid #8884; border-radius: 12px; padding: 12px; margin: 12px 0; }
+  .meta { opacity: .7; font-size: .85rem; } nav a { margin-right: 12px; cursor: pointer; }
+  nav a.active { font-weight: bold; text-decoration: underline; }
+</style>
+</head>
+<body>
+<h1>CodeForge Store</h1>
+<nav id="tabs"></nav>
+<main id="list"></main>
+<script>
+fetch('store.json').then(r => r.json()).then(cat => {
+  const lang = navigator.language.startsWith('de') ? 'de' : 'en';
+  const t = v => typeof v === 'string' ? v : (v && (v[lang] || v.en || Object.values(v)[0])) || '';
+  const tabs = document.getElementById('tabs'), list = document.getElementById('list');
+  const show = id => {
+    [...tabs.children].forEach(a => a.classList.toggle('active', a.dataset.id === id));
+    list.replaceChildren(...cat.items.filter(i => i.category === id).map(i => {
+      const d = document.createElement('div'); d.className = 'card';
+      const h = document.createElement('strong'); h.textContent = t(i.name);
+      const m = document.createElement('div'); m.className = 'meta'; m.textContent = [i.version, i.author].filter(Boolean).join(' · ');
+      const s = document.createElement('p'); s.textContent = t(i.summary);
+      d.append(h, m, s);
+      for (const [label, url] of [['Download', i.downloadUrl], ['Homepage', i.homepage]]) {
+        if (url && /^https?:\/\//.test(url)) { const a = document.createElement('a'); a.href = url; a.textContent = label; a.style.marginRight = '12px'; d.append(a); }
+      }
+      return d;
+    }));
+  };
+  cat.categories.forEach((c, n) => {
+    const a = document.createElement('a'); a.textContent = t(c.title); a.dataset.id = c.id; a.onclick = () => show(c.id); tabs.append(a);
+    if (n === 0) show(c.id);
+  });
+});
+</script>
+</body>
+</html>
