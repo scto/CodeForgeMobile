@@ -15,6 +15,8 @@ import com.codeforge.core.designsystem.resolveIsDark
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.designsystem.CodeForgeTheme
+import com.codeforge.core.designsystem.findExtensionTheme
+import com.codeforge.core.domain.extension.ExtensionThemeRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -22,6 +24,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var extensionThemeRepository: ExtensionThemeRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Vor setContent: verhindert Flackern der Systemleisten beim Start.
@@ -34,7 +37,9 @@ class MainActivity : ComponentActivity() {
 
             // Edge-to-Edge: Systemleisten transparent; Icon-Farbe folgt dem App-Theme (nicht nur dem System).
             val systemDark = isSystemInDarkTheme()
-            val isDark = settings.theme.resolveIsDark(systemDark)
+            val extensionThemes by extensionThemeRepository.themes.collectAsStateWithLifecycle()
+            val extensionTheme = settings.theme.findExtensionTheme(extensionThemes)
+            val isDark = settings.theme.resolveIsDark(systemDark, extensionTheme)
             LaunchedEffect(isDark) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { isDark },
@@ -42,7 +47,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            CodeForgeTheme(themeState = settings.theme) {
+            CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme) {
                 CodeForgeNavHost(
                     startOnboarding = !settings.onboardingCompleted,
                     useCompactTerminal = settings.terminal.useCompactTerminal

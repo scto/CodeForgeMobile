@@ -15,4 +15,10 @@ class ResolveEditorThemeTest {
     fun `explizites Theme bleibt unveraendert`() {
         assertEquals("light_plus", resolveEditorTheme("light_plus", isDarkUi = true))
     }
+
+    @Test
+    fun `Plugin-Editor-Theme gilt nur bei auto`() {
+        assertEquals("ext:p/nord", resolveEditorTheme("auto", isDarkUi = true, extensionThemeId = "ext:p/nord"))
+        assertEquals("light_plus", resolveEditorTheme("light_plus", isDarkUi = true, extensionThemeId = "ext:p/nord"))
+    }
 }

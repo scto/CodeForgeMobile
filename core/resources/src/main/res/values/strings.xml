@@ -2087,5 +2087,8 @@
     <string name="store_install_success">Plugin “%1$s” installed.</string>
     <string name="store_hash_mismatch">Checksum mismatch – installation aborted.</string>
     <string name="store_install_failed">Installation failed: %1$s</string>
+    <string name="themebuilder_aus_erweiterungen">From extensions</string>
+    <string name="themebuilder_erweiterung_hell">Light</string>
+    <string name="themebuilder_erweiterung_dunkel">Dark</string>
 </resources>
 

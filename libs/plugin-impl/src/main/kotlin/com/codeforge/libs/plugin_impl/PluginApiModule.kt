@@ -5,6 +5,7 @@
 package com.codeforge.libs.plugin_impl
 
 import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.ExtensionThemeRepository
 import com.codeforge.core.domain.repository.PluginRepository
 import dagger.Binds
 import dagger.Module
@@ -26,4 +27,10 @@ abstract class PluginApiModule {
     abstract fun bindContributionRepository(
         impl: PluginRepositoryImpl
     ): ContributionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindExtensionThemeRepository(
+        impl: ExtensionThemeRepositoryImpl
+    ): ExtensionThemeRepository
 }

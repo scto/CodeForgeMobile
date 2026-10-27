@@ -2087,5 +2087,8 @@
     <string name="store_install_success">Plugin „%1$s“ installiert.</string>
     <string name="store_hash_mismatch">Prüfsumme stimmt nicht – Installation abgebrochen.</string>
     <string name="store_install_failed">Installation fehlgeschlagen: %1$s</string>
+    <string name="themebuilder_aus_erweiterungen">Aus Erweiterungen</string>
+    <string name="themebuilder_erweiterung_hell">Hell</string>
+    <string name="themebuilder_erweiterung_dunkel">Dunkel</string>
 </resources>
 

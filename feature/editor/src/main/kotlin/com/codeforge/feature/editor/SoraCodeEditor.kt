@@ -117,9 +117,17 @@ fun SoraCodeEditor(
     val context = LocalContext.current
     // "auto"/leer folgt dem effektiven App-Theme (Hell/Dunkel/System aus den Einstellungen).
     val isDarkUi = MaterialTheme.colorScheme.background.luminance() < 0.5f
-    val themedSettings = remember(settings, isDarkUi) {
+    // Ein aktives Plugin-Farbschema kann ein eigenes Editor-Syntaxtheme mitbringen (gilt bei "auto").
+    val themeOverride = com.codeforge.core.designsystem.LocalEditorThemeOverride.current
+    val overrideId = remember(themeOverride, context) {
+        themeOverride?.takeIf {
+            TextMateAssetLoader.ensureInitialized(context)
+            TextMateAssetLoader.registerExternalTheme(it.id, it.filePath, it.isDark)
+        }?.id
+    }
+    val themedSettings = remember(settings, isDarkUi, overrideId) {
         settings.copy(
-            textmateTheme = resolveEditorTheme(settings.textmateTheme, isDarkUi),
+            textmateTheme = resolveEditorTheme(settings.textmateTheme, isDarkUi, overrideId),
             wordWrap = settings.wordWrap || (settings.txtWordWrap && path.endsWith(".txt", ignoreCase = true))
         )
     }
@@ -420,7 +428,8 @@ private fun applyTextMateTheme(editor: CodeEditor, themeName: String) {
 }
 
 /** "auto"/leer -> dark_plus bzw. light_plus je nach effektivem App-Theme; sonst unverändert. */
-internal fun resolveEditorTheme(stored: String, isDarkUi: Boolean): String =
+internal fun resolveEditorTheme(stored: String, isDarkUi: Boolean, extensionThemeId: String? = null): String =
     if (stored.isBlank() || stored.equals("auto", ignoreCase = true)) {
-        if (isDarkUi) TextMateAssetLoader.DEFAULT_DARK_THEME else TextMateAssetLoader.DEFAULT_LIGHT_THEME
+        if (extensionThemeId != null) extensionThemeId
+        else if (isDarkUi) TextMateAssetLoader.DEFAULT_DARK_THEME else TextMateAssetLoader.DEFAULT_LIGHT_THEME
     } else stored

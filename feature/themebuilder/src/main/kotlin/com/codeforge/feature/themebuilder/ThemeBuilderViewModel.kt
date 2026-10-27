@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.datastore.proto.ThemeConfig
+import com.codeforge.core.designsystem.findExtensionTheme
 import com.codeforge.core.designsystem.supportsDynamicColor
+import com.codeforge.core.domain.extension.ExtensionThemeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,7 +23,8 @@ private data class HexBuffer(val primary: String, val secondary: String, val ter
 
 @HiltViewModel
 class ThemeBuilderViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    extensionThemeRepository: ExtensionThemeRepository
 ) : ViewModel() {
 
     /** Überschreibt die persistierten Hex-Werte während einer aktiven Custom-Color-Bearbeitung. */
@@ -29,8 +32,9 @@ class ThemeBuilderViewModel @Inject constructor(
 
     val uiState: StateFlow<ThemeBuilderUiState> = combine(
         settingsRepository.appSettings,
-        editBuffer
-    ) { settings, buffer ->
+        editBuffer,
+        extensionThemeRepository.themes
+    ) { settings, buffer, extensionThemes ->
         val theme = settings.theme
         val primary = buffer?.primary ?: theme.customPalette.primary
         val secondary = buffer?.secondary ?: theme.customPalette.secondary
@@ -45,6 +49,8 @@ class ThemeBuilderViewModel @Inject constructor(
             customTertiary = tertiary,
             isDynamicColorSupported = supportsDynamicColor(),
             previewTheme = buildPreviewTheme(theme, buffer),
+            extensionThemes = extensionThemes,
+            previewExtensionTheme = if (buffer == null) theme.findExtensionTheme(extensionThemes) else null,
             isLoading = false
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemeBuilderUiState())

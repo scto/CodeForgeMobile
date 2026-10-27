@@ -4,6 +4,7 @@ package com.codeforge.feature.themebuilder
 import androidx.compose.runtime.Immutable
 import com.codeforge.core.datastore.proto.ThemeConfig
 import com.codeforge.core.datastore.proto.ThemeMode
+import com.codeforge.core.domain.extension.ExtensionColorTheme
 
 enum class PaletteSlot { PRIMARY, SECONDARY, TERTIARY }
 
@@ -17,6 +18,10 @@ data class ThemeBuilderUiState(
     val customTertiary: String = "",
     val isDynamicColorSupported: Boolean = false,
     val previewTheme: ThemeConfig = ThemeConfig.getDefaultInstance(),
+    /** Von aktivierten Plugins beigesteuerte Farbschemata. */
+    val extensionThemes: List<ExtensionColorTheme> = emptyList(),
+    /** Aktives Plugin-Farbschema für die Vorschau (null = keins gewählt). */
+    val previewExtensionTheme: ExtensionColorTheme? = null,
     val isLoading: Boolean = true
 )
 

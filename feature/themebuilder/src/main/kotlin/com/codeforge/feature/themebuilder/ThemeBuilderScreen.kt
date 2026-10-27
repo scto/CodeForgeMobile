@@ -3,6 +3,7 @@ package com.codeforge.feature.themebuilder
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,6 +70,7 @@ import com.codeforge.core.datastore.proto.ThemeMode
 import com.codeforge.core.designsystem.CodeForgeTheme
 import com.codeforge.core.designsystem.ThemePreset
 import com.codeforge.core.designsystem.ThemePresets
+import com.codeforge.core.domain.extension.ExtensionColorTheme
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
@@ -112,7 +114,7 @@ private fun ThemeBuilderScreen(
             modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            item { ThemePreviewCard(uiState.previewTheme) }
+            item { ThemePreviewCard(uiState.previewTheme, uiState.previewExtensionTheme) }
 
             item { ModeSelector(uiState.themeMode, onEvent) }
 
@@ -134,6 +136,19 @@ private fun ThemeBuilderScreen(
                     dynamicColorActive = uiState.useDynamicColor,
                     onPresetSelected = { id -> onEvent(ThemeBuilderUiEvent.PresetSelected(id)) }
                 )
+            }
+
+            if (uiState.extensionThemes.isNotEmpty()) {
+                item {
+                    Text(stringRes(R.string.themebuilder_aus_erweiterungen), style = MaterialTheme.typography.titleMedium)
+                }
+                item {
+                    ExtensionThemeRow(
+                        themes = uiState.extensionThemes,
+                        selectedKey = uiState.colorSchemeId,
+                        onSelected = { key -> onEvent(ThemeBuilderUiEvent.PresetSelected(key)) }
+                    )
+                }
             }
 
             item {
@@ -189,8 +204,8 @@ private fun ThemeBuilderScreen(
 }
 
 @Composable
-private fun ThemePreviewCard(previewTheme: ThemeConfig) {
-    CodeForgeTheme(themeState = previewTheme) {
+private fun ThemePreviewCard(previewTheme: ThemeConfig, extensionTheme: ExtensionColorTheme?) {
+    CodeForgeTheme(themeState = previewTheme, extensionTheme = extensionTheme) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -279,6 +294,63 @@ private fun PresetRow(
                 isSelected = !dynamicColorActive && preset.id == selectedId,
                 onClick = { onPresetSelected(preset.id) }
             )
+        }
+    }
+}
+
+@Composable
+private fun ExtensionThemeRow(
+    themes: List<ExtensionColorTheme>,
+    selectedKey: String,
+    onSelected: (String) -> Unit
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
+    ) {
+        items(themes, key = { it.key }) { theme ->
+            val isSelected = theme.key == selectedKey
+            val primary = Color(((theme.colors["primary"] ?: 0xFF888888L).toInt()))
+            val secondary = Color(((theme.colors["secondary"] ?: theme.colors["primary"] ?: 0xFF888888L).toInt()))
+            val surface = Color(((theme.colors["background"] ?: if (theme.isDark) 0xFF121212L else 0xFFFFFFFFL).toInt()))
+            OutlinedCard(
+                modifier = Modifier.width(140.dp).height(115.dp),
+                onClick = { onSelected(theme.key) },
+                colors = if (isSelected) {
+                    CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                } else {
+                    CardDefaults.outlinedCardColors()
+                },
+                border = if (isSelected) {
+                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                } else {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                }
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(10.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        listOf(primary, secondary, surface).forEach { c ->
+                            Box(
+                                modifier = Modifier
+                                    .size(22.dp)
+                                    .background(c, CircleShape)
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                            )
+                        }
+                    }
+                    Column {
+                        Text(theme.label, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            stringRes(if (theme.isDark) R.string.themebuilder_erweiterung_dunkel else R.string.themebuilder_erweiterung_hell),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
         }
     }
 }

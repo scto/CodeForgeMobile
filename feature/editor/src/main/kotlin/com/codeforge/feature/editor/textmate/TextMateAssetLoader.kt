@@ -84,6 +84,29 @@ object TextMateAssetLoader {
         themeRegistry.setTheme(DEFAULT_DARK_THEME)
     }
 
+    private val externalThemes = java.util.concurrent.ConcurrentHashMap<String, String>()
+
+    /**
+     * Registriert ein TextMate-Theme aus einer Datei (z. B. aus einem Plugin-Farbschema) unter [id].
+     * Idempotent pro (id, Pfad); gibt false zurück, wenn die Datei nicht geladen werden konnte
+     * (der Aufrufer fällt dann auf das Standardtheme zurück).
+     */
+    @Synchronized
+    fun registerExternalTheme(id: String, filePath: String, isDark: Boolean): Boolean {
+        if (externalThemes[id] == filePath) return true
+        return runCatching {
+            java.io.FileInputStream(filePath).use { input ->
+                val source = IThemeSource.fromInputStream(input, filePath, null)
+                ThemeRegistry.getInstance().loadTheme(ThemeModel(source, id).apply { this.isDark = isDark })
+            }
+            externalThemes[id] = filePath
+            true
+        }.getOrElse {
+            android.util.Log.w("TextMateAssetLoader", "Externes Theme nicht ladbar: $filePath", it)
+            false
+        }
+    }
+
     fun setActiveTheme(themeName: String) {
         if (themeName.isBlank()) return
         runCatching { ThemeRegistry.getInstance().setTheme(themeName) }

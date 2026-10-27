@@ -1,0 +1,76 @@
+# Erweiterungssystem (Plugins / Extensions)
+
+Ein Plugin ist ein ZIP mit `plugin.json` im Wurzelverzeichnis. Es kann **deklarative Beiträge** (`contributes`)
+und/oder **Code** (`entryPointClass`, `classes.dex`) enthalten. Der Store listet nur rein deklarative Plugins;
+Code-Plugins gibt es nur per manuellem Sideload (Einstellungen → Plugins).
+
+## Module
+
+| Modul | Inhalt |
+|---|---|
+| `:libs:plugin-api` | SDK für Code-Plugins: `CodeForgePlugin`, `PluginContext`, `PluginHostServices` |
+| `:core:domain` (`…domain.extension`) | Manifest-Modelle, `PluginManifestParser`, `ActiveContributions`, `ContributionRepository`, Farbschema-Parser |
+| `:libs:plugin-impl` | Laufzeit: `PluginRuntime` (DexClassLoader), `PluginRegistry`, `PluginRepositoryImpl`, `ExtensionThemeRepositoryImpl`, Hilt-Modul |
+
+## plugin.json (Manifest v2)
+
+```json
+{
+  "id": "com.example.nord",
+  "name": "Nord",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Nord-Farbschema",
+  "permissions": [],
+  "entryPointClass": null,
+  "contributes": {
+    "colorThemes":   [{ "id": "nord", "label": "Nord", "uiTheme": "dark", "path": "themes/nord.json" }],
+    "iconThemes":    [{ "id": "…", "label": "…", "path": "icons/theme.json" }],
+    "languagePacks": [{ "locale": "fr", "label": "Français", "path": "l10n/fr.json" }],
+    "grammars":      [{ "languageId": "zig", "scopeName": "source.zig", "path": "g/zig.tmLanguage.json", "extensions": ["zig"] }],
+    "snippets":      [{ "languageId": "kotlin", "path": "snippets/kotlin.json" }],
+    "lspServers":    [{ "id": "zls", "label": "ZLS", "languages": ["zig"], "command": ["${pluginDir}/zls"] }],
+    "extensionPack": ["com.example.icons"]
+  }
+}
+```
+
+* v1-Manifeste (nur `id`, `name`, `version`, `description`, `entryPointClass`) bleiben gültig (`apiVersion` = 1).
+* `id`: `[A-Za-z0-9][A-Za-z0-9._-]*`, kein `..`. Alle `path`-Werte sind relativ zum Plugin-Verzeichnis, ohne `..` und ohne führenden `/`.
+* `permissions` (nur Code-Plugins): `commands`, `menus`, `file-events`, `git-events`, `shell`, `lsp`. Unbekannte Werte lehnen die Installation ab.
+* Eine neuere `apiVersion` als die App kennt wird abgelehnt.
+* Rein deklarative Plugins (ohne `entryPointClass`) laden keinen Code; ihre Beiträge werden direkt aus dem Manifest gelesen.
+* Aktivieren/Deaktivieren schaltet die Beiträge sofort (`ContributionRepository.contributions`).
+
+## Farbschemata (`colorThemes`)
+
+Datei (`path`):
+
+```json
+{ "colors": { "primary": "#88C0D0", "onPrimary": "#2E3440", "background": "#2E3440", "surface": "#3B4252" },
+  "textmateTheme": "syntax/nord.json" }
+```
+
+* Schlüssel sind Material-3-Rollen (`primary`, `onPrimary`, `primaryContainer`, `secondary`, `tertiary`, `error`, `background`, `surface`, `surfaceVariant`, `outline`, `surfaceContainer*`, …; Liste in `ColorThemeFileParser.ROLES`). Nicht angegebene Rollen kommen aus dem Standardschema der Helligkeit (`uiTheme`: `dark`/`light`). Unbekannte Rollen werden ignoriert.
+* Farben als `#RGB`, `#RRGGBB` oder `#AARRGGBB`.
+* `textmateTheme` (optional): VS-Code/TextMate-Theme-JSON für den Editor. Gilt, wenn in den Editor-Einstellungen „auto“ gewählt ist.
+* Auswahl: Einstellungen → Design → „Aus Erweiterungen“. Gespeichert wird `ThemeConfig.color_scheme_id = "ext:<pluginId>/<themeId>"`; ist das Plugin weg oder deaktiviert, fällt die App auf das Standardschema zurück. Dynamic Color hat Vorrang, wenn aktiviert.
+
+## Language Server (`lspServers`)
+
+`command` darf `${pluginDir}` und `${home}` enthalten. Ein eingebauter, installierter Server hat Vorrang; sonst wird der Plugin-Server für die angegebenen `languages` verwendet. Existiert die ausführbare Datei bei absolutem Pfad nicht, gibt es keinen Server.
+
+## Sicherheit
+
+* ZIP-Einträge werden gegen Zip-Slip geprüft; Contribution-Dateien dürfen das Plugin-Verzeichnis nicht verlassen (kanonischer Pfad).
+* Plugin-Code wird vor dem Laden schreibgeschützt gesetzt (Android 14+).
+* Der Store bietet nur deklarative Plugins mit SHA-256 an.
+
+## Status je Beitragsart
+
+| Beitrag | Stand |
+|---|---|
+| `colorThemes` | umgesetzt (Phase 2) |
+| `lspServers` | umgesetzt (Resolver) |
+| weitere | siehe `agy-tasks/61-erweiterungssystem-geraetepruefung.md` (wird mit den Phasen gefüllt) |
