@@ -16,6 +16,9 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +28,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,8 +60,16 @@ fun StoreScreen(
     onEvent: (StoreUiEvent) -> Unit,
     onBack: () -> Unit = {},
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(uiState.message) {
+        uiState.message?.let {
+            snackbarHostState.showSnackbar(it)
+            onEvent(StoreUiEvent.MessageShown)
+        }
+    }
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             SettingsTopBar(
                 title = stringRes(R.string.store_title),
@@ -138,14 +151,31 @@ private fun StoreContent(
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(entries, key = { it.id }) { StoreItemCard(it) }
+                items(entries, key = { it.id }) { entry ->
+                    StoreItemCard(
+                        item = entry,
+                        installed = entry.id in uiState.installedPluginIds,
+                        installing = uiState.installingId == entry.id,
+                        progress = uiState.installProgress.takeIf { uiState.installingId == entry.id },
+                        installBusy = uiState.installingId != null,
+                        onInstall = { onEvent(StoreUiEvent.Install(entry)) },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StoreItemCard(item: StoreItem, modifier: Modifier = Modifier) {
+private fun StoreItemCard(
+    item: StoreItem,
+    installed: Boolean,
+    installing: Boolean,
+    progress: Float?,
+    installBusy: Boolean,
+    onInstall: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val uriHandler = LocalUriHandler.current
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -161,10 +191,29 @@ private fun StoreItemCard(item: StoreItem, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(item.summary, style = MaterialTheme.typography.bodyMedium)
             }
+            if (installing) {
+                Spacer(modifier = Modifier.height(8.dp))
+                if (progress != null) LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+                else LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                item.downloadUrl?.let { url ->
-                    Button(onClick = { runCatching { uriHandler.openUri(url) } }) { Text(stringRes(R.string.store_download)) }
+                if (item.isInstallablePlugin) {
+                    Button(onClick = onInstall, enabled = !installBusy) {
+                        Text(
+                            stringRes(
+                                when {
+                                    installing -> R.string.store_installing
+                                    installed -> R.string.store_reinstall
+                                    else -> R.string.store_install
+                                }
+                            )
+                        )
+                    }
+                } else {
+                    item.downloadUrl?.let { url ->
+                        Button(onClick = { runCatching { uriHandler.openUri(url) } }) { Text(stringRes(R.string.store_download)) }
+                    }
                 }
                 item.homepageUrl?.let { url ->
                     OutlinedButton(onClick = { runCatching { uriHandler.openUri(url) } }) { Text(stringRes(R.string.store_open_page)) }

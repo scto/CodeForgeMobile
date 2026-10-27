@@ -23,7 +23,13 @@ data class StoreItem(
     val homepageUrl: String?,
     val downloadUrl: String?,
     val sha256: String?,
-)
+) {
+    /** Direkt installierbar: Kategorie „plugin“, HTTPS-Download und SHA-256 vorhanden. Die Item-ID ist die Plugin-ID. */
+    val isInstallablePlugin: Boolean
+        get() = categoryId == PLUGIN_CATEGORY && sha256 != null && downloadUrl?.startsWith("https://") == true
+
+    companion object { const val PLUGIN_CATEGORY = "plugin" }
+}
 
 @Immutable
 data class StoreCatalog(

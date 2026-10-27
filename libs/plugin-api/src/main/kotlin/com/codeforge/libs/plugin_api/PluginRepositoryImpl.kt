@@ -93,6 +93,10 @@ class PluginRepositoryImpl @Inject constructor(
                 var entry = zip.nextEntry
                 while (entry != null) {
                     val outFile = File(tempDir, entry.name)
+                    // Zip-Slip: Einträge dürfen nicht aus dem temporären Verzeichnis ausbrechen.
+                    if (!outFile.canonicalPath.startsWith(tempDir.canonicalPath + File.separator)) {
+                        error("Ungültiger Pfad im Archiv: ${entry.name}")
+                    }
                     if (entry.isDirectory) {
                         outFile.mkdirs()
                     } else {
@@ -112,6 +116,10 @@ class PluginRepositoryImpl @Inject constructor(
 
             val manifest = JSONObject(manifestFile.readText())
             val id = manifest.getString("id")
+            // Die ID wird zum Verzeichnisnamen: keine Pfadtrenner, kein "..".
+            if (!Regex("[A-Za-z0-9][A-Za-z0-9._-]*").matches(id) || id.contains("..")) {
+                error("Ungültige Plugin-ID: $id")
+            }
 
             val finalDir = File(pluginsDir, id)
             if (finalDir.exists()) {

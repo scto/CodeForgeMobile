@@ -2081,5 +2081,11 @@
     <string name="store_by_author">by %1$s</string>
     <string name="store_version">Version %1$s</string>
     <string name="store_unsupported_schema">The catalog uses a newer format. Please update the app.</string>
+    <string name="store_install">Install</string>
+    <string name="store_reinstall">Reinstall</string>
+    <string name="store_installing">Installing…</string>
+    <string name="store_install_success">Plugin “%1$s” installed.</string>
+    <string name="store_hash_mismatch">Checksum mismatch – installation aborted.</string>
+    <string name="store_install_failed">Installation failed: %1$s</string>
 </resources>
 
