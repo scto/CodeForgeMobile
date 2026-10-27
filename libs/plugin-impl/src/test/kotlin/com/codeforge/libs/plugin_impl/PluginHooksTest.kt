@@ -93,4 +93,15 @@ class PluginHooksTest {
         assertTrue(runCatching { hooks.registerCommand("p", "", "T") { } }.isFailure)
         assertFalse(runCatching { hooks.registerCommand("p", "ok", "T") { } }.isFailure)
     }
+
+    @Test
+    fun `Befehl-Timeout nach 60s bricht ab und liefert Fehler`() = kotlinx.coroutines.test.runTest {
+        val hooks = PluginHooks()
+        hooks.registerCommand("p", "slow", "Langsam") {
+            kotlinx.coroutines.delay(70_000)
+        }
+        val result = hooks.runCommand("p", "slow", null)
+        assertTrue(result.isFailure)
+        assertEquals("Befehl hat das Zeitlimit überschritten", result.exceptionOrNull()?.message)
+    }
 }
