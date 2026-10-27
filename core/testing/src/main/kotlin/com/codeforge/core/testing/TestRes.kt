@@ -28,6 +28,7 @@ object TestRes {
                 return if (args.isEmpty()) text else String.format(formatLocale, text, *args)
             }
 
+            @Suppress("ResourceType")
             override fun plural(id: Int, quantity: Int, args: Array<out Any>): String = string(id, args)
         })
     }
