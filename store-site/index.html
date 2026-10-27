@@ -86,6 +86,57 @@
   .btn.primary { background: var(--primary); color: var(--on-primary); }
   .empty, .error { color: var(--muted); padding: 32px 0; text-align: center; }
   footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 24px 16px 40px; }
+
+  /* ---------- Geräteklassen ---------- */
+  /* Notch/Rundungen: Inhalte nicht unter Systemleisten */
+  header { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  main, footer { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  @media (pointer: coarse) { .chip { padding: 11px 18px; } .btn { padding: 12px 20px; } .nav a { padding: 14px 16px; } }
+  @media (hover: hover) { .card { transition: transform .15s, box-shadow .15s; } .card:hover { transform: translateY(-2px); } }
+
+  /* Tablet (ab 640 px): zwei Spalten, größere Abstände, Menü bleibt eine Seitenleiste zum Aufklappen */
+  @media (min-width: 640px) {
+    main { padding-top: 32px; }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .chips { flex-wrap: wrap; overflow: visible; }
+    .chips, input[type="search"] { flex: 1 1 100%; }
+  }
+  /* Tablet quer / kleiner Desktop: drei Spalten */
+  @media (min-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } .chips { flex: 1 1 auto; } input[type="search"] { flex: 0 1 320px; } }
+
+  /* Desktop (ab 1024 px): Kategorien dauerhaft als Seitenleiste, kein Menüknopf, keine Chips */
+  @media (min-width: 1024px) {
+    #menuBtn, .chips, .scrim { display: none !important; }
+    .nav { top: var(--header-h); transform: none; width: 260px; box-shadow: none; padding-top: 20px; }
+    main, footer { margin-left: 260px; max-width: none; padding-left: 40px; padding-right: 40px; }
+    main { max-width: 1200px; margin-right: auto; }
+    .tools { justify-content: flex-end; }
+    input[type="search"] { flex: 0 1 380px; }
+    .hero { padding-top: 32px; }
+  }
+  @media (min-width: 1600px) { .grid { grid-template-columns: repeat(4, 1fr); } main { max-width: 1500px; } }
+
+  /* Querformat auf dem Handy: flacher Header, weniger Luft oben */
+  @media (max-height: 480px) and (orientation: landscape) { :root { --header-h: 48px; } .icon-btn { width: 40px; height: 40px; } .hero { display: none; } }
+
+  /* Uhr / sehr kleine Displays (bis 320 px): nur das Wesentliche, große Tippflächen, mittig */
+  @media (max-width: 320px) {
+    :root { --header-h: 48px; }
+    body { font-size: 14px; }
+    header { gap: 2px; padding-left: 8px; padding-right: 8px; }
+    .brand span, #heroSub, .tools, footer { display: none; }
+    .icon-btn { width: 40px; height: 40px; }
+    .hero { padding: 12px 0 4px; text-align: center; }
+    .hero h1 { font-size: 1.05rem; }
+    main { padding: 8px 12px 24px; }
+    .grid { grid-template-columns: 1fr; gap: 10px; }
+    .card { border-radius: 16px; padding: 12px; }
+    .card h3 { font-size: 1rem; }
+    .actions { justify-content: center; }
+    .btn { padding: 10px 16px; width: 100%; text-align: center; }
+    .nav { width: 100vw; border-right: 0; padding: 12px 20px; }
+    .nav a { padding: 14px 18px; }
+  }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 </style>
 </head>
@@ -94,7 +145,7 @@
   <button class="icon-btn" id="menuBtn" aria-label="Menü öffnen" aria-controls="nav" aria-expanded="false">
     <svg class="stroke" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
   </button>
-  <a class="brand" href="#" id="home">
+  <a class="brand" href="#" id="home" aria-label="CodeForge Store">
     <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#6750a4"/><path d="M12 10l-6 6 6 6M20 10l6 6-6 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span>CodeForge Store</span>
   </a>
