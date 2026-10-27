@@ -1881,5 +1881,7 @@
     <string name="lsp_implementations_title">Implementations</string>
     <string name="lsp_signature_help">Parameter info</string>
     <string name="lsp_more_actions">More language server actions</string>
+    <string name="settings_git_gutter_markers">Gutter markers</string>
+    <string name="settings_git_gutter_markers_desc">Show added, changed and deleted lines next to the line numbers (compared to the last commit).</string>
 </resources>
 

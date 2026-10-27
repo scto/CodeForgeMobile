@@ -317,6 +317,24 @@ class GitRepositoryImpl @Inject constructor(
     override suspend fun diff(repoPath: String, path: String?, staged: Boolean): Result<String> =
         git(repoPath) { git -> computeDiff(git, path, staged) }
 
+    override suspend fun lineChanges(repoPath: String, filePath: String): Result<List<com.codeforge.core.domain.model.GitLineChange>> =
+        git(repoPath) { git ->
+            val repo = git.repository
+            val file = File(filePath)
+            if (!file.isFile) return@git emptyList()
+            val rel = file.relative(repo)
+            val head = runCatching {
+                val commitId = repo.resolve(Constants.HEAD) ?: return@runCatching null
+                RevWalk(repo).use { walk ->
+                    val tree = walk.parseCommit(commitId).tree
+                    org.eclipse.jgit.treewalk.TreeWalk.forPath(repo, rel, tree)?.let { tw ->
+                        repo.open(tw.getObjectId(0)).bytes
+                    }
+                }
+            }.getOrNull()
+            com.codeforge.core.data.git.GitLineDiff.compute(head, file.readBytes())
+        }
+
     private fun computeDiff(git: Git, path: String?, staged: Boolean): String {
         val repo = git.repository
         val out = StringBuilder()

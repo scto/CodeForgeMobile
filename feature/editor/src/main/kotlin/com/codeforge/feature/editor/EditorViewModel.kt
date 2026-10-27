@@ -85,7 +85,8 @@ class EditorViewModel @Inject constructor(
     private val debugRepository: DebugRepository? = null,
     private val aiRepository: com.codeforge.core.domain.repository.AiRepository? = null,
     private val aiProvider: com.codeforge.core.domain.ai.AiProvider? = null,
-    private val workspaceRepository: WorkspaceRepository? = null
+    private val workspaceRepository: WorkspaceRepository? = null,
+    private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -129,6 +130,7 @@ class EditorViewModel @Inject constructor(
     private val aiFileBackups = mutableMapOf<String, String>()
 
     init {
+        observeGitGutter()
         setupOpenDocumentsProvider()
         observeSettings()
         observeDiagnostics()
@@ -433,6 +435,7 @@ class EditorViewModel @Inject constructor(
             currentAppSettings = settings
             _uiState.update {
                 it.copy(
+                    gitGutterEnabled = !settings.git.gutterMarkersDisabled,
                     displaySettings = EditorDisplaySettings(
                         tabSize = settings.editor.tabSize.takeIf { v -> v > 0 } ?: 4,
                         useTreeSitter = settings.editor.useTreeSitter,
@@ -461,6 +464,28 @@ class EditorViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    /**
+     * Aktualisiert die Git-Gutter-Markierungen, sobald die aktive Datei wechselt oder nach dem Speichern
+     * wieder sauber ist (Vergleich Platte ↔ HEAD).
+     */
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
+    private fun observeGitGutter() = viewModelScope.launch {
+        combine(
+            _uiState.map { s -> s.activeFile?.takeIf { !it.isDirty }?.path }.distinctUntilChanged(),
+            _uiState.map { it.gitGutterEnabled }.distinctUntilChanged(),
+            projectRoot
+        ) { path, enabled, root -> Triple(path, enabled, root) }
+            .debounce(150)
+            .collect { (path, enabled, root) ->
+                val repo = gitRepository ?: return@collect
+                if (!enabled || path == null || root == null) return@collect
+                if (!File(root, ".git").exists()) return@collect
+                repo.lineChanges(root, path).onSuccess { changes ->
+                    _uiState.update { it.copy(gitChangesByPath = it.gitChangesByPath + (path to changes)) }
+                }
+            }
     }
 
     private fun observeDiagnostics() = viewModelScope.launch {

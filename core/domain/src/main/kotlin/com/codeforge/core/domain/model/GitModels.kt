@@ -3,6 +3,15 @@ package com.codeforge.core.domain.model
 
 enum class GitFileStatus { ADDED, MODIFIED, DELETED, UNTRACKED, CONFLICTING }
 
+enum class GitLineChangeKind { ADDED, MODIFIED, DELETED }
+
+/**
+ * Zeilenänderung einer Datei gegenüber HEAD (für die Gutter-Markierung im Editor).
+ * [startLine] ist 0-basiert in der Arbeitsversion; bei [GitLineChangeKind.DELETED] ist [lineCount] 0 und
+ * [startLine] die Zeile, vor der Text entfernt wurde.
+ */
+data class GitLineChange(val kind: GitLineChangeKind, val startLine: Int, val lineCount: Int)
+
 /**
  * Eintrag der Statusliste. [staged] = Änderung ist im Index (zum Commit vorgemerkt); dieselbe Datei kann
  * gleichzeitig staged und unstaged (teilweise vorgemerkt) auftauchen.

@@ -104,6 +104,7 @@ fun SoraCodeEditor(
     completionProvider: LspCompletionProvider? = null,
     updateAnnotations: List<FileUpdateAnnotation> = emptyList(),
     breakpoints: List<Breakpoint> = emptyList(),
+    gitChanges: List<com.codeforge.core.domain.model.GitLineChange> = emptyList(),
     pausedLine: Int? = null,
     onToggleBreakpoint: (Int) -> Unit = {},
     onEditBreakpoint: (Int) -> Unit = {},
@@ -270,6 +271,13 @@ fun SoraCodeEditor(
         overlays = lineOverlays,
         onUpdateChipClick = onUpdateChipClick,
         onTestTargetClick = onTestTargetClick
+    )
+
+    com.codeforge.feature.editor.overlay.GitGutterOverlayLayer(
+        modifier = Modifier.fillMaxSize(),
+        editor = overlayEditor,
+        tick = overlayTick,
+        changes = gitChanges
     )
 
     BreakpointOverlayLayer(

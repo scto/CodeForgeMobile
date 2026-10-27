@@ -49,6 +49,12 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun updateGit(transform: (com.codeforge.core.datastore.proto.GitConfig) -> com.codeforge.core.datastore.proto.GitConfig) {
+        dataStore.updateData { current ->
+            current.toBuilder().setGit(transform(current.git)).build()
+        }
+    }
+
     suspend fun updateTerminal(transform: (TerminalConfig) -> TerminalConfig) {
         dataStore.updateData { current ->
             current.toBuilder()

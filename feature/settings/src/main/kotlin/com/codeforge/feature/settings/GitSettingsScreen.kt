@@ -97,6 +97,26 @@ private fun GitSettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             IdentityCard(state, onEvent)
+            Card(Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringRes(R.string.settings_git_gutter_markers), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringRes(R.string.settings_git_gutter_markers_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    androidx.compose.material3.Switch(
+                        checked = state.gutterMarkersEnabled,
+                        onCheckedChange = { onEvent(GitSettingsUiEvent.GutterMarkersToggled) },
+                    )
+                }
+            }
             CredentialsCard(state, onEvent)
             Text(
                 stringRes(R.string.settings_tokens_werden_verschluesselt_im_androi),

@@ -12,6 +12,12 @@ message AppSettings {
   FileHeaderConfig file_header = 6;
   MigrationConfig migration = 7;
   DebugConfig debug = 8;
+  GitConfig git = 9;
+}
+
+message GitConfig {
+  // Alle Schalter invertiert gespeichert: Standard (false) = Funktion AN, auch für bestehende Installationen.
+  bool gutter_markers_disabled = 1;
 }
 
 message ThemeConfig {

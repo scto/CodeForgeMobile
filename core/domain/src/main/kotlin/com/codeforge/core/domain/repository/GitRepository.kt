@@ -50,6 +50,13 @@ interface GitRepository {
     /** Unified Diff einer Datei (oder aller Änderungen bei `path == null`); [staged] = Index gegen HEAD. */
     suspend fun diff(repoPath: String, path: String?, staged: Boolean): Result<String>
 
+    /**
+     * Zeilenänderungen von [filePath] (absolut) gegenüber HEAD. Neue (nicht versionierte) Dateien liefern
+     * eine einzige ADDED-Änderung über alle Zeilen. Standard: keine Änderungen (z. B. für Fakes).
+     */
+    suspend fun lineChanges(repoPath: String, filePath: String): Result<List<com.codeforge.core.domain.model.GitLineChange>> =
+        Result.success(emptyList())
+
     suspend fun branches(repoPath: String): Result<List<GitBranch>>
     /** [startPoint] = Commit-Hash/Ref als Ausgangspunkt, `null` = HEAD. */
     suspend fun createBranch(repoPath: String, name: String, checkout: Boolean = true, startPoint: String? = null): Result<Unit>

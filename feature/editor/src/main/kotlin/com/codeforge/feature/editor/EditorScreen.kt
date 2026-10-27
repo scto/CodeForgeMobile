@@ -370,6 +370,7 @@ fun EditorRoute(
                                 completionProvider = viewModel.completionProvider,
                                 updateAnnotations = uiState.activeUpdateAnnotations,
                                 breakpoints = uiState.activeBreakpoints,
+                                gitChanges = uiState.activeGitChanges,
                                 pausedLine = uiState.activePausedLine,
                                 onToggleBreakpoint = { viewModel.onEvent(EditorUiEvent.ToggleBreakpoint(it)) },
                                 onEditBreakpoint = { viewModel.onEvent(EditorUiEvent.EditBreakpoint(it)) },

@@ -26,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GitSettingsViewModel @Inject constructor(
     private val repository: GitSettingsRepository,
+    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GitSettingsUiState())
@@ -40,6 +41,11 @@ class GitSettingsViewModel @Inject constructor(
             _uiState.update { it.copy(name = id.name, email = id.email, saved = id, isLoading = false) }
         }
         viewModelScope.launch {
+            settingsRepository.appSettings.collect { s ->
+                _uiState.update { it.copy(gutterMarkersEnabled = !s.git.gutterMarkersDisabled) }
+            }
+        }
+        viewModelScope.launch {
             repository.credentials.collect { list -> _uiState.update { it.copy(credentials = list) } }
         }
     }
@@ -49,6 +55,9 @@ class GitSettingsViewModel @Inject constructor(
             is GitSettingsUiEvent.NameChanged -> _uiState.update { it.copy(name = event.value) }
             is GitSettingsUiEvent.EmailChanged -> _uiState.update { it.copy(email = event.value) }
             GitSettingsUiEvent.SaveIdentity -> saveIdentity()
+            GitSettingsUiEvent.GutterMarkersToggled -> viewModelScope.launch {
+                settingsRepository.updateGit { it.toBuilder().setGutterMarkersDisabled(!it.gutterMarkersDisabled).build() }
+            }
 
             is GitSettingsUiEvent.AddCredentialRequested ->
                 _uiState.update { it.copy(credentialDialog = CredentialDialogState(host = event.prefillHost ?: "github.com")) }

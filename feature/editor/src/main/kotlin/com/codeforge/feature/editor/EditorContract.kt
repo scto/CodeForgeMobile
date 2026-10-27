@@ -72,6 +72,9 @@ data class EditorUiState(
     val isReferencesSheetVisible: Boolean = false,
     val referencesList: List<LspLocation> = emptyList(),
     val referencesSymbol: String = "",
+    /** Git-Gutter: Änderungen gegenüber HEAD je Dateipfad (nur gespeicherter Stand). */
+    val gitChangesByPath: Map<String, List<com.codeforge.core.domain.model.GitLineChange>> = emptyMap(),
+    val gitGutterEnabled: Boolean = true,
     /** Hover-Dokumentation des Symbols unter dem Cursor (null = Sheet geschlossen). */
     val hoverText: String? = null,
     /** Aktive Signaturhilfe (Parameter-Hinweis) oder null. */
@@ -126,6 +129,8 @@ data class EditorUiState(
 
     val activeFile: OpenFile? get() = openFiles.getOrNull(activeFileIndex)
     val activeDiagnostics: List<LspDiagnostic> get() = activeFile?.let { diagnosticsByPath[it.path] } ?: emptyList()
+    val activeGitChanges: List<com.codeforge.core.domain.model.GitLineChange>
+        get() = if (gitGutterEnabled) activeFile?.let { gitChangesByPath[it.path] }.orEmpty() else emptyList()
     val activeBreakpoints: List<com.codeforge.core.domain.model.Breakpoint>
         get() = activeFile?.let { breakpointsByPath[it.path] } ?: emptyList()
     val activePausedLine: Int?
