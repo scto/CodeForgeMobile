@@ -28,12 +28,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
@@ -53,6 +52,7 @@ import com.codeforge.core.domain.model.GitRepoState
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.TooltipIconButton
 import kotlinx.coroutines.flow.collectLatest
 
 /** Vollbild-Variante (Route `git/{repoPath}`), z. B. aus Deep-Links. Im Workspace wird [GitPanel] im Drawer genutzt. */
@@ -70,7 +70,7 @@ fun GitRoute(
             TopAppBar(
                 title = { Text(stringRes(R.string.common_git)) },
                 navigationIcon = {
-                    if (onBack != null) IconButton(onClick = onBack) {
+                    if (onBack != null) TooltipIconButton(onClick = onBack, label = stringRes(R.string.git_zurueck)) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringRes(R.string.git_zurueck))
                     }
                 },
@@ -197,11 +197,11 @@ private fun GitHeader(state: GitUiState, onEvent: (GitUiEvent) -> Unit, onOpenSe
                 }
             }
         }
-        IconButton(onClick = { onEvent(GitUiEvent.FetchClicked) }, enabled = enabled) { Icon(Icons.Filled.Sync, stringRes(R.string.git_fetch)) }
-        IconButton(onClick = { onEvent(GitUiEvent.PullClicked) }, enabled = enabled) { Icon(Icons.Filled.CloudDownload, stringRes(R.string.git_pull)) }
-        IconButton(onClick = { onEvent(GitUiEvent.PushClicked) }, enabled = enabled) { Icon(Icons.Filled.CloudUpload, stringRes(R.string.git_push)) }
-        IconButton(onClick = { onEvent(GitUiEvent.Refresh) }) { Icon(Icons.Filled.Refresh, stringRes(R.string.common_aktualisieren)) }
-        IconButton(onClick = onOpenSettings) { Icon(Icons.Filled.Settings, stringRes(R.string.git_einstellungen)) }
+        TooltipIconButton(onClick = { onEvent(GitUiEvent.FetchClicked) }, enabled = enabled, label = stringRes(R.string.git_fetch)) { Icon(Icons.Filled.Sync, stringRes(R.string.git_fetch)) }
+        TooltipIconButton(onClick = { onEvent(GitUiEvent.PullClicked) }, enabled = enabled, label = stringRes(R.string.git_pull)) { Icon(Icons.Filled.CloudDownload, stringRes(R.string.git_pull)) }
+        TooltipIconButton(onClick = { onEvent(GitUiEvent.PushClicked) }, enabled = enabled, label = stringRes(R.string.git_push)) { Icon(Icons.Filled.CloudUpload, stringRes(R.string.git_push)) }
+        TooltipIconButton(onClick = { onEvent(GitUiEvent.Refresh) }, label = stringRes(R.string.common_aktualisieren)) { Icon(Icons.Filled.Refresh, stringRes(R.string.common_aktualisieren)) }
+        TooltipIconButton(onClick = onOpenSettings, label = stringRes(R.string.git_einstellungen)) { Icon(Icons.Filled.Settings, stringRes(R.string.git_einstellungen)) }
     }
 }
 

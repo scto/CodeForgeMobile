@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -35,6 +34,7 @@ import com.codeforge.core.domain.model.TerminalSessionState
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.TooltipIconButton
 
 @Composable
 fun TerminalRoute(
@@ -72,7 +72,7 @@ private fun TerminalScreen(
                 title = { Text(stringRes(R.string.terminal_terminal_termux)) },
                 actions = {
                     if (onOpenFullTermuxUi != null) {
-                        IconButton(onClick = onOpenFullTermuxUi) {
+                        TooltipIconButton(onClick = onOpenFullTermuxUi, label = stringRes(R.string.terminal_termux_ui_oeffnen)) {
                             Icon(
                                 Icons.AutoMirrored.Filled.OpenInNew,
                                 contentDescription = stringRes(R.string.terminal_termux_ui_oeffnen)
@@ -81,17 +81,17 @@ private fun TerminalScreen(
                     }
                     when (uiState.sessionState) {
                         TerminalSessionState.RUNNING, TerminalSessionState.STARTING -> {
-                            IconButton(onClick = { onEvent(TerminalUiEvent.StopSession) }) {
+                            TooltipIconButton(onClick = { onEvent(TerminalUiEvent.StopSession) }, label = stringRes(R.string.terminal_sitzung_beenden)) {
                                 Icon(Icons.Filled.Stop, contentDescription = stringRes(R.string.terminal_sitzung_beenden))
                             }
                         }
                         else -> {
-                            IconButton(onClick = { onEvent(TerminalUiEvent.StartSession) }) {
+                            TooltipIconButton(onClick = { onEvent(TerminalUiEvent.StartSession) }, label = stringRes(R.string.terminal_shell_starten)) {
                                 Icon(Icons.Filled.PlayArrow, contentDescription = stringRes(R.string.terminal_shell_starten))
                             }
                         }
                     }
-                    IconButton(onClick = { onEvent(TerminalUiEvent.ClearOutput) }) {
+                    TooltipIconButton(onClick = { onEvent(TerminalUiEvent.ClearOutput) }, label = stringRes(R.string.terminal_ausgabe_loeschen)) {
                         Icon(Icons.Filled.ClearAll, contentDescription = stringRes(R.string.terminal_ausgabe_loeschen))
                     }
                 }
@@ -128,9 +128,10 @@ private fun TerminalScreen(
                     enabled = uiState.sessionState == TerminalSessionState.RUNNING,
                     placeholder = { Text(stringRes(R.string.terminal_befehl_eingeben)) }
                 )
-                IconButton(
+                TooltipIconButton(
                     onClick = { onEvent(TerminalUiEvent.SendCommand) },
-                    enabled = uiState.sessionState == TerminalSessionState.RUNNING
+                    enabled = uiState.sessionState == TerminalSessionState.RUNNING,
+                    label = stringRes(R.string.terminal_senden)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringRes(R.string.terminal_senden))
                 }

@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SdCard
@@ -49,7 +51,9 @@ fun SettingsHubRoute(
     onNavigateToGit: () -> Unit,
     onNavigateToExtensions: () -> Unit,
     onNavigateToSigning: () -> Unit = {},
-    onNavigateToDebug: () -> Unit = {}
+    onNavigateToDebug: () -> Unit = {},
+    onNavigateToHelp: () -> Unit = {},
+    onNavigateToAbout: () -> Unit = {}
 ) {
     val entries = listOf(
         SettingsEntry(R.string.settings_hub_theme, Icons.Filled.Palette, onNavigateToTheme),
@@ -60,7 +64,9 @@ fun SettingsHubRoute(
         SettingsEntry(R.string.sdkmanager_title, Icons.Filled.SdCard, onNavigateToSdkManager),
         SettingsEntry(R.string.settings_hub_plugins, Icons.Filled.Extension, onNavigateToPlugins),
         SettingsEntry(R.string.settings_hub_extensions, Icons.Filled.Build, onNavigateToExtensions),
-        SettingsEntry(R.string.settings_hub_debug, Icons.Filled.BugReport, onNavigateToDebug)
+        SettingsEntry(R.string.settings_hub_debug, Icons.Filled.BugReport, onNavigateToDebug),
+        SettingsEntry(R.string.settings_hub_help, Icons.AutoMirrored.Filled.HelpOutline, onNavigateToHelp),
+        SettingsEntry(R.string.settings_hub_about, Icons.Filled.Info, onNavigateToAbout)
     )
 
     Scaffold(

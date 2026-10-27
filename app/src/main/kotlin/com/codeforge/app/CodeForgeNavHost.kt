@@ -8,7 +8,10 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,23 +27,22 @@ import com.codeforge.feature.hardcodedstrings.HardcodedStringsRoute
 import com.codeforge.feature.layoutdesigner.LayoutDesignerRoute
 import com.codeforge.feature.onboarding.OnboardingRoute
 import com.codeforge.feature.plugins.PluginsRoute
+import com.codeforge.feature.projectsettings.ProjectSettingsEffect
+import com.codeforge.feature.projectsettings.ProjectSettingsIntent
+import com.codeforge.feature.projectsettings.ProjectSettingsScreen
+import com.codeforge.feature.projectsettings.ProjectSettingsViewModel
 import com.codeforge.feature.projectwizard.ProjectWizardRoute
 import com.codeforge.feature.sdkmanager.SdkManagerRoute
+import com.codeforge.feature.settings.AboutSettingsRoute
 import com.codeforge.feature.settings.DebugSettingsRoute
 import com.codeforge.feature.settings.EditorSettingsRoute
 import com.codeforge.feature.settings.GitSettingsRoute
+import com.codeforge.feature.settings.HelpRoute
 import com.codeforge.feature.settings.SettingsHubRoute
 import com.codeforge.feature.settings.TerminalSettingsRoute
 import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.settings.snippets.SnippetSettingsRoute
 import com.codeforge.feature.signing.SigningRoute
-import com.codeforge.feature.projectsettings.ProjectSettingsScreen
-import com.codeforge.feature.projectsettings.ProjectSettingsViewModel
-import com.codeforge.feature.projectsettings.ProjectSettingsIntent
-import com.codeforge.feature.projectsettings.ProjectSettingsEffect
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import com.codeforge.feature.terminal.TerminalRoute
 import com.codeforge.feature.themebuilder.ThemeBuilderRoute
 import com.codeforge.feature.welcome.WelcomeRoute
@@ -61,6 +63,8 @@ internal object Routes {
     const val SETTINGS_PLUGINS = "settings_plugins"
     const val SETTINGS_GIT = "settings_git"
     const val SETTINGS_DEBUG = "settings_debug"
+    const val SETTINGS_HELP = "settings_help"
+    const val SETTINGS_ABOUT = "settings_about"
     const val EXTENSIONS = "extensions"
     const val TERMINAL = "terminal"
     const val TERMINAL_PATTERN = "terminal?initialCommand={initialCommand}"
@@ -186,7 +190,9 @@ fun CodeForgeNavHost(
                 onNavigateToGit = { navController.navigate(Routes.SETTINGS_GIT) },
                 onNavigateToExtensions = { navController.navigate(Routes.EXTENSIONS) },
                 onNavigateToSigning = { navController.navigate(Routes.SETTINGS_SIGNING) },
-                onNavigateToDebug = { navController.navigate(Routes.SETTINGS_DEBUG) }
+                onNavigateToDebug = { navController.navigate(Routes.SETTINGS_DEBUG) },
+                onNavigateToHelp = { navController.navigate(Routes.SETTINGS_HELP) },
+                onNavigateToAbout = { navController.navigate(Routes.SETTINGS_ABOUT) }
             )
         }
         composable(Routes.SETTINGS_THEME) {
@@ -209,6 +215,12 @@ fun CodeForgeNavHost(
             SigningRoute(
                 onNavigateBack = { navigateBackOrStart() }
             )
+        }
+        composable(Routes.SETTINGS_HELP) {
+            HelpRoute(onBack = { navigateBackOrStart() })
+        }
+        composable(Routes.SETTINGS_ABOUT) {
+            AboutSettingsRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_DEBUG) {
             DebugSettingsRoute(

@@ -10,6 +10,7 @@
  */
 package com.codeforge.app
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -21,8 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Transform
@@ -30,7 +31,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -57,6 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.TooltipIconButton
 import com.codeforge.core.ui.rememberIsExpandedWidth
 import com.codeforge.feature.build.BuildBottomSheet
 import com.codeforge.feature.build.BuildTab
@@ -67,7 +68,6 @@ import com.codeforge.feature.build.rememberBuildTextActions
 import com.codeforge.feature.composepreview.ComposePreviewRoute
 import com.codeforge.feature.debug.DebugBottomSheet
 import com.codeforge.feature.dependencyupdates.DependencyUpdatesHost
-import androidx.activity.compose.BackHandler
 import com.codeforge.feature.editor.EditorRoute
 import com.codeforge.feature.editor.EditorViewModel
 import com.codeforge.feature.j2k.J2kIntent
@@ -206,40 +206,42 @@ fun ProjectWorkspaceRoute(
                     title = { Text(rootPath.substringAfterLast('/').ifBlank { Res.string(R.string.common_projekt) }) },
                     navigationIcon = {
                         if (!permanentDrawer) {
-                            IconButton(onClick = { coroutineScope.launch { drawerState.open() } }) {
+                            TooltipIconButton(onClick = { coroutineScope.launch { drawerState.open() } }, label = stringRes(R.string.app_menue_oeffnen)) {
                                 Icon(Icons.Filled.Menu, contentDescription = stringRes(R.string.app_menue_oeffnen))
                             }
                         }
                     },
                     actions = {
-                        IconButton(onClick = {
+                        TooltipIconButton(onClick = {
                             x2cViewModel.handleIntent(
                                 X2cIntent.ScanProject(
                                     projectPath = rootPath,
                                     manualTrigger = true
                                 )
                             )
-                        }) {
+                        },
+                            label = stringRes(R.string.x2c_menu_convert_layouts)
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Transform,
                                 contentDescription = stringRes(R.string.x2c_menu_convert_layouts)
                             )
                         }
                         if (x2cState.report != null && !x2cState.showResultScreen && !x2cState.isConverting) {
-                            IconButton(onClick = { x2cViewModel.handleIntent(X2cIntent.ShowResult) }) {
+                            TooltipIconButton(onClick = { x2cViewModel.handleIntent(X2cIntent.ShowResult) }, label = stringRes(R.string.x2c_result_title)) {
                                 Icon(
                                     imageVector = Icons.Default.Description,
                                     contentDescription = stringRes(R.string.x2c_result_title)
                                 )
                             }
                         }
-                        IconButton(onClick = { showDebugSheet = true }) {
+                        TooltipIconButton(onClick = { showDebugSheet = true }, label = stringRes(R.string.debug_title)) {
                             Icon(
                                 imageVector = Icons.Default.BugReport,
                                 contentDescription = stringRes(R.string.debug_title)
                             )
                         }
-                        IconButton(onClick = { showBuildSheet = true }) {
+                        TooltipIconButton(onClick = { showBuildSheet = true }, label = stringRes(R.string.build_bauen)) {
                             if (buildState.isBuilding) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(20.dp),

@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -79,11 +79,12 @@ import cafe.adriel.bonsai.filesystem.FileSystemTree
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.TooltipIconButton
+import java.io.File
+import java.util.Locale
 import kotlinx.coroutines.flow.collectLatest
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import java.io.File
-import java.util.Locale
 
 @Composable
 fun FileTreeRoute(
@@ -141,13 +142,13 @@ private fun FileTreeScreen(
                 modifier = Modifier.padding(start = 4.dp)
             )
             Row {
-                IconButton(onClick = { onEvent(FileTreeUiEvent.CreateFileClicked) }) {
+                TooltipIconButton(onClick = { onEvent(FileTreeUiEvent.CreateFileClicked) }, label = stringRes(R.string.filetree_neue_datei)) {
                     Icon(Icons.Filled.NoteAdd, contentDescription = stringRes(R.string.filetree_neue_datei))
                 }
-                IconButton(onClick = { onEvent(FileTreeUiEvent.CreateDirectoryClicked) }) {
+                TooltipIconButton(onClick = { onEvent(FileTreeUiEvent.CreateDirectoryClicked) }, label = stringRes(R.string.filetree_neuer_ordner)) {
                     Icon(Icons.Filled.CreateNewFolder, contentDescription = stringRes(R.string.filetree_neuer_ordner))
                 }
-                IconButton(onClick = { onEvent(FileTreeUiEvent.Refresh) }) {
+                TooltipIconButton(onClick = { onEvent(FileTreeUiEvent.Refresh) }, label = stringRes(R.string.common_aktualisieren)) {
                     Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))
                 }
             }

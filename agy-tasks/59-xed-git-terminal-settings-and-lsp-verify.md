@@ -30,3 +30,8 @@ Das Terminal ist der Termux-Fork (`libs:termux-app`); Optionen laufen über `ter
 
 ## Akzeptanz
 A abgehakt; B und C als einzelne Commits mit Tests (ViewModel) und Gerätecheck.
+
+## E. Tooltips, Hilfe, Über (Claude, 2026-10-27)
+- `TooltipIconButton` (`:core:ui`) ersetzt `IconButton` in Editor-Zeile, Git-Leiste, Debug-Leiste, Terminal, Dateibaum und Projekt-Kopfzeile (55 Stellen). Gerätetest offen: Tooltip beim langen Drücken sichtbar, kein Konflikt mit anderen Long-Press-Aktionen.
+- Neue Seiten in den Einstellungen: „Hilfe“ (`HelpScreen`: grafische Leiste + Beschreibung je Schaltfläche, Daten in `HelpCatalog`) und „Über CodeForge Mobile“ (`AboutSettingsScreen`).
+- Wer eine Schaltfläche hinzufügt, ergänzt sie in `HelpCatalog` (und nutzt `TooltipIconButton`).

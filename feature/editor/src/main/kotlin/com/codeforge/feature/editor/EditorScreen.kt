@@ -4,12 +4,12 @@
  */
 package com.codeforge.feature.editor
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -18,17 +18,15 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.clickable
-import androidx.compose.material3.Card
-import com.codeforge.core.domain.model.LspSessionInfo
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
@@ -39,15 +37,8 @@ import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Adjust
-import com.codeforge.feature.editor.ui.BreakpointsOverviewSheet
-import com.codeforge.feature.editor.ui.EditBreakpointDialog
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material.icons.filled.Psychology
-import com.codeforge.feature.editor.ui.AiAssistantSheet
-import com.codeforge.feature.editor.ui.AiDiffDialog
-import com.codeforge.feature.editor.ui.AiQuickActionsSheet
-import com.codeforge.feature.editor.ui.AiSettingsDialog
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.ContentPaste
@@ -56,25 +47,26 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.FindInPage
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -108,22 +100,30 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.LspServerCapabilities
 import com.codeforge.core.domain.model.LspServerState
+import com.codeforge.core.domain.model.LspSessionInfo
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.TooltipIconButton
 import com.codeforge.feature.editor.fileprovider.EditorFileProvider
-import com.codeforge.feature.editor.overlay.UpdateChipDialog
-import com.codeforge.feature.editor.ui.DocumentOutlineSheet
-import com.codeforge.feature.editor.ui.EditorSymbolBar
 import com.codeforge.feature.editor.overlay.ConflictChoice
 import com.codeforge.feature.editor.overlay.MergeConflicts
+import com.codeforge.feature.editor.overlay.UpdateChipDialog
+import com.codeforge.feature.editor.ui.AiAssistantSheet
+import com.codeforge.feature.editor.ui.AiDiffDialog
+import com.codeforge.feature.editor.ui.AiQuickActionsSheet
+import com.codeforge.feature.editor.ui.AiSettingsDialog
+import com.codeforge.feature.editor.ui.BreakpointsOverviewSheet
 import com.codeforge.feature.editor.ui.ConflictBar
+import com.codeforge.feature.editor.ui.DocumentOutlineSheet
+import com.codeforge.feature.editor.ui.EditBreakpointDialog
+import com.codeforge.feature.editor.ui.EditorSymbolBar
 import com.codeforge.feature.editor.ui.HoverSheet
 import com.codeforge.feature.editor.ui.ImageFilePreview
-import com.codeforge.feature.editor.ui.SignatureHelpBar
 import com.codeforge.feature.editor.ui.QuickFixSheet
 import com.codeforge.feature.editor.ui.ReferencesSheet
 import com.codeforge.feature.editor.ui.RenameDialog
+import com.codeforge.feature.editor.ui.SignatureHelpBar
 import com.codeforge.feature.editor.ui.isImageFilePath
 import com.codeforge.libs.code_tools.edit.LineEdits
 import com.codeforge.libs.code_tools.format.CodeFormatter
@@ -683,14 +683,14 @@ private fun EditorToolbar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // KI-Assistent & Schnellaktionen
-        IconButton(onClick = onOpenAiAssistant) {
+        TooltipIconButton(onClick = onOpenAiAssistant, label = stringRes(R.string.ai_assistant_title)) {
             Icon(
                 Icons.Filled.AutoAwesome,
                 contentDescription = stringRes(R.string.ai_assistant_title),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
-        IconButton(onClick = onOpenAiQuickActions) {
+        TooltipIconButton(onClick = onOpenAiQuickActions, label = stringRes(R.string.ai_quick_actions)) {
             Icon(
                 Icons.Filled.Psychology,
                 contentDescription = stringRes(R.string.ai_quick_actions)
@@ -705,7 +705,7 @@ private fun EditorToolbar(
 
         // Breakpoints-Übersicht
         if (!isImage) {
-            IconButton(onClick = onBreakpoints) {
+            TooltipIconButton(onClick = onBreakpoints, label = stringRes(R.string.debug_tab_breakpoints)) {
                 Icon(
                     imageVector = Icons.Default.Adjust,
                     contentDescription = stringRes(R.string.debug_tab_breakpoints),
@@ -716,7 +716,7 @@ private fun EditorToolbar(
 
         // Outline / Struktur: immer verfügbar (LSP oder Fallback)
         if (!isImage) {
-            IconButton(onClick = onOutline) {
+            TooltipIconButton(onClick = onOutline, label = stringRes(R.string.lsp_outline)) {
                 Icon(Icons.Default.AccountTree, contentDescription = stringRes(R.string.lsp_outline))
             }
         }
@@ -724,7 +724,7 @@ private fun EditorToolbar(
         // Quick-Fix (Glühbirne): wenn LSP aktiv und (Capabilities erlaubt oder null)
         val allowCodeAction = isLspConnected && (capabilities == null || capabilities.codeActionProvider)
         if (allowCodeAction && !isImage) {
-            IconButton(onClick = onQuickFix) {
+            TooltipIconButton(onClick = onQuickFix, label = stringRes(R.string.lsp_quick_fix)) {
                 Icon(
                     Icons.Default.Lightbulb,
                     contentDescription = stringRes(R.string.lsp_quick_fix),
@@ -736,7 +736,7 @@ private fun EditorToolbar(
         // Rename (Umbenennen): wenn LSP aktiv und (Capabilities erlaubt oder null)
         val allowRename = isLspConnected && (capabilities == null || capabilities.renameProvider)
         if (allowRename && !isImage) {
-            IconButton(onClick = onRename) {
+            TooltipIconButton(onClick = onRename, label = stringRes(R.string.lsp_rename)) {
                 Icon(Icons.Default.DriveFileRenameOutline, contentDescription = stringRes(R.string.lsp_rename))
             }
         }
@@ -744,7 +744,7 @@ private fun EditorToolbar(
         // Definition: wenn LSP aktiv und (Capabilities erlaubt oder null)
         val allowDefinition = isLspConnected && (capabilities == null || capabilities.definitionProvider)
         if (allowDefinition && !isImage) {
-            IconButton(onClick = onDefinition) {
+            TooltipIconButton(onClick = onDefinition, label = stringRes(R.string.lsp_definition)) {
                 Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = stringRes(R.string.lsp_definition))
             }
         }
@@ -752,7 +752,7 @@ private fun EditorToolbar(
         // References (Verwendungen): wenn LSP aktiv und (Capabilities erlaubt oder null)
         val allowReferences = isLspConnected && (capabilities == null || capabilities.referencesProvider)
         if (allowReferences && !isImage) {
-            IconButton(onClick = onReferences) {
+            TooltipIconButton(onClick = onReferences, label = stringRes(R.string.lsp_references)) {
                 Icon(Icons.Default.FindInPage, contentDescription = stringRes(R.string.lsp_references))
             }
         }
@@ -761,7 +761,7 @@ private fun EditorToolbar(
         if (isLspConnected && !isImage) {
             var lspMenuOpen by remember { mutableStateOf(false) }
             Box {
-                IconButton(onClick = { lspMenuOpen = true }) {
+                TooltipIconButton(onClick = { lspMenuOpen = true }, label = stringRes(R.string.lsp_more_actions)) {
                     Icon(Icons.Default.Info, contentDescription = stringRes(R.string.lsp_more_actions))
                 }
                 DropdownMenu(expanded = lspMenuOpen, onDismissRequest = { lspMenuOpen = false }) {
@@ -793,65 +793,66 @@ private fun EditorToolbar(
             }
         }
 
-        IconButton(onClick = { controller?.undo() }, enabled = !isImage && (controller?.canUndoState ?: false)) {
+        TooltipIconButton(onClick = { controller?.undo() }, enabled = !isImage && (controller?.canUndoState ?: false), label = stringRes(R.string.editor_rueckgaengig)) {
             Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringRes(R.string.editor_rueckgaengig))
         }
-        IconButton(onClick = { controller?.redo() }, enabled = !isImage && (controller?.canRedoState ?: false)) {
+        TooltipIconButton(onClick = { controller?.redo() }, enabled = !isImage && (controller?.canRedoState ?: false), label = stringRes(R.string.editor_wiederholen)) {
             Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = stringRes(R.string.editor_wiederholen))
         }
-        IconButton(onClick = { controller?.selectAll() }, enabled = !isImage) {
+        TooltipIconButton(onClick = { controller?.selectAll() }, enabled = !isImage, label = stringRes(R.string.editor_alles_auswaehlen)) {
             Icon(Icons.Filled.SelectAll, contentDescription = stringRes(R.string.editor_alles_auswaehlen))
         }
-        IconButton(onClick = { controller?.cut() }, enabled = !isImage) {
+        TooltipIconButton(onClick = { controller?.cut() }, enabled = !isImage, label = stringRes(R.string.editor_ausschneiden)) {
             Icon(Icons.Filled.ContentCut, contentDescription = stringRes(R.string.editor_ausschneiden))
         }
-        IconButton(onClick = { controller?.copy() }, enabled = !isImage) {
+        TooltipIconButton(onClick = { controller?.copy() }, enabled = !isImage, label = stringRes(R.string.editor_kopieren)) {
             Icon(Icons.Filled.ContentCopy, contentDescription = stringRes(R.string.editor_kopieren))
         }
-        IconButton(onClick = { controller?.paste() }, enabled = !isImage) {
+        TooltipIconButton(onClick = { controller?.paste() }, enabled = !isImage, label = stringRes(R.string.editor_einfuegen)) {
             Icon(Icons.Filled.ContentPaste, contentDescription = stringRes(R.string.editor_einfuegen))
         }
-        IconButton(onClick = onSave, enabled = !isImage) {
+        TooltipIconButton(onClick = onSave, enabled = !isImage, label = stringRes(R.string.common_speichern)) {
             Icon(Icons.Filled.Save, contentDescription = stringRes(R.string.common_speichern))
         }
         val hasSelection = controller?.hasSelection() == true
         val formatDesc = if (hasSelection) stringRes(R.string.editor_format_selection) else stringRes(R.string.editor_format_document)
-        IconButton(onClick = onFormat, enabled = !isImage) {
+        TooltipIconButton(onClick = onFormat, enabled = !isImage, label = formatDesc) {
             Icon(Icons.Filled.AutoFixHigh, contentDescription = formatDesc)
         }
         val unit = " ".repeat(tabSize.coerceIn(1, 8))
         val commentStyle = if (isImage) null else activePath?.let(LineEdits::commentStyleFor)
-        IconButton(
+        TooltipIconButton(
             onClick = { commentStyle?.let { style -> controller?.runLineCommand { t, a, b -> LineEdits.toggleComment(t, a, b, style) } } },
-            enabled = commentStyle != null
+            enabled = commentStyle != null,
+            label = stringRes(R.string.editor_kommentar_umschalten)
         ) {
             Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = stringRes(R.string.editor_kommentar_umschalten))
         }
-        IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.indent(t, a, b, unit) } }) {
+        TooltipIconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.indent(t, a, b, unit) } }, label = stringRes(R.string.editor_einruecken)) {
             Icon(Icons.AutoMirrored.Filled.FormatIndentIncrease, contentDescription = stringRes(R.string.editor_einruecken))
         }
-        IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.dedent(t, a, b, unit) } }) {
+        TooltipIconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.dedent(t, a, b, unit) } }, label = stringRes(R.string.editor_ausruecken)) {
             Icon(Icons.AutoMirrored.Filled.FormatIndentDecrease, contentDescription = stringRes(R.string.editor_ausruecken))
         }
-        IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.duplicateLines(t, a, b) } }) {
+        TooltipIconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.duplicateLines(t, a, b) } }, label = stringRes(R.string.editor_zeile_duplizieren)) {
             Icon(Icons.Filled.ControlPointDuplicate, contentDescription = stringRes(R.string.editor_zeile_duplizieren))
         }
-        IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.deleteLines(t, a, b) } }) {
+        TooltipIconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.deleteLines(t, a, b) } }, label = stringRes(R.string.editor_zeile_loeschen)) {
             Icon(Icons.Filled.DeleteSweep, contentDescription = stringRes(R.string.editor_zeile_loeschen))
         }
-        IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.moveLines(t, a, b, up = true) } }) {
+        TooltipIconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.moveLines(t, a, b, up = true) } }, label = stringRes(R.string.editor_zeile_nach_oben)) {
             Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringRes(R.string.editor_zeile_nach_oben))
         }
-        IconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.moveLines(t, a, b, up = false) } }) {
+        TooltipIconButton(onClick = { controller?.runLineCommand { t, a, b -> LineEdits.moveLines(t, a, b, up = false) } }, label = stringRes(R.string.editor_zeile_nach_unten)) {
             Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringRes(R.string.editor_zeile_nach_unten))
         }
-        IconButton(onClick = onGoToLine) {
+        TooltipIconButton(onClick = onGoToLine, label = stringRes(R.string.editor_gehe_zu_zeile)) {
             Icon(Icons.Filled.Numbers, contentDescription = stringRes(R.string.editor_gehe_zu_zeile))
         }
-        IconButton(onClick = onToggleSearch) {
+        TooltipIconButton(onClick = onToggleSearch, label = stringRes(R.string.editor_suchen_ersetzen)) {
             Icon(Icons.Filled.Search, contentDescription = stringRes(R.string.editor_suchen_ersetzen))
         }
-        IconButton(onClick = onShare) {
+        TooltipIconButton(onClick = onShare, label = stringRes(R.string.editor_teilen)) {
             Icon(Icons.Filled.Share, contentDescription = stringRes(R.string.editor_teilen))
         }
     }

@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.South
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,6 +34,7 @@ import com.codeforge.core.domain.model.DebugConfig
 import com.codeforge.core.domain.model.DebugSessionState
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.TooltipIconButton
 import java.io.File
 
 @Composable
@@ -129,14 +129,15 @@ fun DebugToolbar(
                 // Wenn Sitzung inaktiv ist: Start / Attach Button
                 if (!state.canStop) {
                     if (state.debugMode == DebugMode.ANDROID) {
-                        IconButton(
+                        TooltipIconButton(
                             onClick = {
                                 if (state.androidTarget.packageName.isNotBlank()) {
                                     onIntent(DebugUiIntent.AttachAndroid(state.androidTarget))
                                 } else {
                                     onIntent(DebugUiIntent.SetShowAttachDialog(true))
                                 }
-                            }
+                            },
+                            label = stringRes(R.string.debug_action_attach_android)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PhoneAndroid,
@@ -145,8 +146,9 @@ fun DebugToolbar(
                             )
                         }
 
-                        IconButton(
-                            onClick = { onIntent(DebugUiIntent.SetShowAttachDialog(true)) }
+                        TooltipIconButton(
+                            onClick = { onIntent(DebugUiIntent.SetShowAttachDialog(true)) },
+                            label = stringRes(R.string.debug_action_configure_target)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Tune,
@@ -155,8 +157,9 @@ fun DebugToolbar(
                             )
                         }
                     } else {
-                        IconButton(
-                            onClick = { onIntent(DebugUiIntent.Start(DebugConfig())) }
+                        TooltipIconButton(
+                            onClick = { onIntent(DebugUiIntent.Start(DebugConfig())) },
+                            label = stringRes(R.string.debug_action_start)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
@@ -167,9 +170,10 @@ fun DebugToolbar(
                     }
                 } else {
                     // Resume
-                    IconButton(
+                    TooltipIconButton(
                         onClick = { onIntent(DebugUiIntent.Resume) },
-                        enabled = state.canResume
+                        enabled = state.canResume,
+                        label = stringRes(R.string.debug_action_resume)
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
@@ -179,9 +183,10 @@ fun DebugToolbar(
                     }
 
                     // Pause
-                    IconButton(
+                    TooltipIconButton(
                         onClick = { onIntent(DebugUiIntent.Pause) },
-                        enabled = state.canPause
+                        enabled = state.canPause,
+                        label = stringRes(R.string.debug_action_pause)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Pause,
@@ -191,9 +196,10 @@ fun DebugToolbar(
                     }
 
                     // Step Over
-                    IconButton(
+                    TooltipIconButton(
                         onClick = { onIntent(DebugUiIntent.StepOver) },
-                        enabled = state.canStep
+                        enabled = state.canStep,
+                        label = stringRes(R.string.debug_action_step_over)
                     ) {
                         Icon(
                             imageVector = Icons.Default.SkipNext,
@@ -203,9 +209,10 @@ fun DebugToolbar(
                     }
 
                     // Step Into
-                    IconButton(
+                    TooltipIconButton(
                         onClick = { onIntent(DebugUiIntent.StepInto) },
-                        enabled = state.canStep
+                        enabled = state.canStep,
+                        label = stringRes(R.string.debug_action_step_into)
                     ) {
                         Icon(
                             imageVector = Icons.Default.South,
@@ -215,9 +222,10 @@ fun DebugToolbar(
                     }
 
                     // Step Out
-                    IconButton(
+                    TooltipIconButton(
                         onClick = { onIntent(DebugUiIntent.StepOut) },
-                        enabled = state.canStep
+                        enabled = state.canStep,
+                        label = stringRes(R.string.debug_action_step_out)
                     ) {
                         Icon(
                             imageVector = Icons.Default.North,
@@ -230,9 +238,10 @@ fun DebugToolbar(
                 Spacer(modifier = Modifier.weight(1f))
 
                 // Stop
-                IconButton(
+                TooltipIconButton(
                     onClick = { onIntent(DebugUiIntent.Stop) },
-                    enabled = state.canStop
+                    enabled = state.canStop,
+                    label = stringRes(R.string.debug_action_stop)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Stop,
