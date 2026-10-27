@@ -126,7 +126,7 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindSnippetRepository(
-        impl: com.codeforge.core.data.repository.SnippetRepositoryImpl
+        impl: com.codeforge.core.data.repository.ExtensionAwareSnippetRepository
     ): com.codeforge.core.domain.repository.SnippetRepository
 
     @Binds

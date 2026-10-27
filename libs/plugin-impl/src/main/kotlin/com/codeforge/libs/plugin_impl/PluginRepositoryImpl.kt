@@ -154,7 +154,8 @@ class PluginRepositoryImpl @Inject constructor(
                 apiVersion = manifest.apiVersion,
                 publisher = manifest.publisher,
                 permissions = manifest.permissions,
-                contributionKinds = manifest.contributes.kinds()
+                contributionKinds = manifest.contributes.kinds(),
+                packMembers = manifest.contributes.extensionPack
             )
 
             val updated = _installedPlugins.value.filterNot { it.id == id } + plugin

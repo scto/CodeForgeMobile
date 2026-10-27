@@ -18,6 +18,7 @@ import com.codeforge.core.designsystem.CodeForgeTheme
 import com.codeforge.core.designsystem.findExtensionTheme
 import com.codeforge.core.designsystem.findIconTheme
 import com.codeforge.core.resources.LanguageOverrides
+import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.ExtensionThemeRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
 
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var extensionThemeRepository: ExtensionThemeRepository
+    @Inject lateinit var contributionRepository: ContributionRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Vor setContent: verhindert Flackern der Systemleisten beim Start.
@@ -43,6 +45,7 @@ class MainActivity : ComponentActivity() {
             val extensionTheme = settings.theme.findExtensionTheme(extensionThemes)
             val iconThemes by extensionThemeRepository.iconThemes.collectAsStateWithLifecycle()
             val iconTheme = settings.theme.findIconTheme(iconThemes)
+            val activeContributions by contributionRepository.contributions.collectAsStateWithLifecycle()
             val languagePacks by extensionThemeRepository.languagePacks.collectAsStateWithLifecycle()
             val languagePackKey = settings.theme.languagePackId
             // Sprachpaket aus einem Plugin als Überschreibungsschicht über den App-Texten.
@@ -58,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme, iconTheme = iconTheme) {
+            CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme, iconTheme = iconTheme, grammars = activeContributions.grammars) {
                 CodeForgeNavHost(
                     startOnboarding = !settings.onboardingCompleted,
                     useCompactTerminal = settings.terminal.useCompactTerminal

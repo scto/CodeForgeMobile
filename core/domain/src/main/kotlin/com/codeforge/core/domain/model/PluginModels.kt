@@ -15,7 +15,9 @@ data class InstalledPlugin(
     val publisher: String = "",
     val permissions: Set<String> = emptySet(),
     /** Namen der beigesteuerten Contribution-Arten (z. B. "colorThemes"), für die Anzeige. */
-    val contributionKinds: List<String> = emptyList()
+    val contributionKinds: List<String> = emptyList(),
+    /** IDs der Plugins, die dieses Bundle (`extensionPack`) zusammenfasst. */
+    val packMembers: List<String> = emptyList()
 ) {
     val isDeclarativeOnly: Boolean get() = entryPointClass == null
 }

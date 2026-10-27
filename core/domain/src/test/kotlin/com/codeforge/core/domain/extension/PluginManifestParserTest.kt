@@ -96,3 +96,20 @@ class ActiveContributionsTest {
         assertEquals(listOf("colorThemes", "extensionPack"), c.kinds())
     }
 }
+
+class GrammarLookupTest {
+    private val c = ActiveContributions(
+        grammars = listOf(
+            Resolved("p", "/d", GrammarContribution("zig", "source.zig", "g.json", listOf("zig", ".ZIGON"))),
+            Resolved("q", "/e", GrammarContribution("just", "source.just", "j.json", listOf("justfile")))
+        )
+    )
+
+    @Test
+    fun `Endung und Dateiname werden gefunden`() {
+        assertEquals("source.zig", c.grammarForPath("/a/b/Main.ZIG")?.item?.scopeName)
+        assertEquals("source.zig", c.grammarForPath("x.zigon")?.item?.scopeName)
+        assertEquals("source.just", c.grammarForPath("/proj/Justfile")?.item?.scopeName)
+        assertNull(c.grammarForPath("a.kt"))
+    }
+}

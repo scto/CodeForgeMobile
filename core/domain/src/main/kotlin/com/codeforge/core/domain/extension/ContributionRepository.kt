@@ -43,6 +43,21 @@ data class ActiveContributions(
     }
 }
 
+/**
+ * Grammatik für [path] anhand der Dateiendung (`contributes.grammars[].extensions`, ohne Punkt, case-insensitiv)
+ * oder des exakten Dateinamens; `null`, wenn keine Plugin-Grammatik passt.
+ */
+fun ActiveContributions.grammarForPath(path: String): Resolved<GrammarContribution>? {
+    val name = path.substringAfterLast('/').lowercase()
+    val ext = name.substringAfterLast('.', "")
+    return grammars.firstOrNull { g ->
+        g.item.extensions.any { e ->
+            val x = e.lowercase().removePrefix(".")
+            x == ext || x == name
+        }
+    }
+}
+
 /** Lesezugriff der App-Module (Theme, Filetree, Editor, Git, …) auf die Contributions installierter Plugins. */
 interface ContributionRepository {
     val contributions: StateFlow<ActiveContributions>

@@ -84,6 +84,31 @@ object TextMateAssetLoader {
         themeRegistry.setTheme(DEFAULT_DARK_THEME)
     }
 
+    private val externalGrammars = java.util.concurrent.ConcurrentHashMap<String, String>()
+
+    /**
+     * Registriert eine TextMate-Grammatik (JSON/plist-Datei) eines Plugins unter [scopeName].
+     * Idempotent pro (scope, Pfad). `false`, wenn sie nicht ladbar ist → Aufrufer fällt auf Klartext zurück.
+     */
+    @Synchronized
+    fun registerExternalGrammar(scopeName: String, filePath: String): Boolean {
+        if (externalGrammars[scopeName] == filePath) return true
+        return runCatching {
+            val def = io.github.rosemoe.sora.langs.textmate.registry.model.DefaultGrammarDefinition
+                .withGrammarSource(
+                    org.eclipse.tm4e.core.registry.IGrammarSource.fromFile(java.io.File(filePath)),
+                    scopeName,
+                    scopeName
+                )
+            GrammarRegistry.getInstance().loadGrammar(def)
+            externalGrammars[scopeName] = filePath
+            true
+        }.getOrElse {
+            android.util.Log.w("TextMateAssetLoader", "Externe Grammatik nicht ladbar: $filePath", it)
+            false
+        }
+    }
+
     private val externalThemes = java.util.concurrent.ConcurrentHashMap<String, String>()
 
     /**

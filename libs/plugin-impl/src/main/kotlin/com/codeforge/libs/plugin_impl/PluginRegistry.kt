@@ -34,6 +34,8 @@ internal class PluginRegistry(private val registryFile: File) {
                     permissions = obj.optJSONArray("permissions")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() }
                         ?: emptySet(),
                     contributionKinds = obj.optJSONArray("contributionKinds")?.let { a -> (0 until a.length()).map { a.getString(it) } }
+                        ?: emptyList(),
+                    packMembers = obj.optJSONArray("packMembers")?.let { a -> (0 until a.length()).map { a.getString(it) } }
                         ?: emptyList()
                 )
             }
@@ -55,6 +57,7 @@ internal class PluginRegistry(private val registryFile: File) {
                     put("publisher", plugin.publisher)
                     put("permissions", JSONArray(plugin.permissions.toList()))
                     put("contributionKinds", JSONArray(plugin.contributionKinds))
+                    put("packMembers", JSONArray(plugin.packMembers))
                 }
             )
         }

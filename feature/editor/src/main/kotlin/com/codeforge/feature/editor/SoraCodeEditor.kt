@@ -22,6 +22,7 @@
  */
 package com.codeforge.feature.editor
 
+import com.codeforge.core.domain.extension.grammarForPath
 import android.graphics.Typeface
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -125,6 +126,23 @@ fun SoraCodeEditor(
             TextMateAssetLoader.registerExternalTheme(it.id, it.filePath, it.isDark)
         }?.id
     }
+    // Grammatik aus einem Plugin für Dateien ohne eingebaute Grammatik (Zuordnung über Dateiendung).
+    val pluginGrammars = com.codeforge.core.designsystem.LocalActiveGrammars.current
+    val extensionScope = remember(path, language, pluginGrammars) {
+        if (language != EditorLanguageType.PLAIN || pluginGrammars.isEmpty()) {
+            null
+        } else {
+            val hit = com.codeforge.core.domain.extension.ActiveContributions(grammars = pluginGrammars)
+                .grammarForPath(path)
+            hit?.takeIf {
+                TextMateAssetLoader.ensureInitialized(context)
+                TextMateAssetLoader.registerExternalGrammar(
+                    it.item.scopeName,
+                    java.io.File(it.pluginDir, it.item.path).path
+                )
+            }?.item?.scopeName
+        }
+    }
     val themedSettings = remember(settings, isDarkUi, overrideId) {
         settings.copy(
             textmateTheme = resolveEditorTheme(settings.textmateTheme, isDarkUi, overrideId),
@@ -173,7 +191,8 @@ fun SoraCodeEditor(
                         path = path,
                         languageType = language,
                         useTreeSitter = settings.useTreeSitter,
-                        completionProvider = completionProvider
+                        completionProvider = completionProvider,
+                        extensionScope = extensionScope
                     )
                 )
 

@@ -14,6 +14,8 @@ import com.codeforge.core.datastore.proto.ThemeConfig
 import com.codeforge.core.datastore.proto.ThemeMode
 import com.codeforge.core.domain.extension.ExtensionColorTheme
 import com.codeforge.core.domain.extension.ExtensionIconTheme
+import com.codeforge.core.domain.extension.GrammarContribution
+import com.codeforge.core.domain.extension.Resolved
 
 fun supportsDynamicColor(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
@@ -45,6 +47,7 @@ fun CodeForgeTheme(
     themeState: ThemeConfig,
     extensionTheme: ExtensionColorTheme? = null,
     iconTheme: ExtensionIconTheme? = null,
+    grammars: List<Resolved<GrammarContribution>> = emptyList(),
     content: @Composable () -> Unit
 ) {
     val isDark = themeState.resolveIsDark(isSystemInDarkTheme(), extensionTheme)
@@ -68,6 +71,7 @@ fun CodeForgeTheme(
         CompositionLocalProvider(
             LocalEditorThemeOverride provides editorOverride,
             LocalIconTheme provides iconTheme,
+            LocalActiveGrammars provides grammars,
             content = content
         )
     }

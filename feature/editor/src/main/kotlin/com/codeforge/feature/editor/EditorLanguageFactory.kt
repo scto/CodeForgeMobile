@@ -56,7 +56,9 @@ object EditorLanguageFactory {
         path: String,
         languageType: EditorLanguageType,
         useTreeSitter: Boolean,
-        completionProvider: LspCompletionProvider?
+        completionProvider: LspCompletionProvider?,
+        /** Scope einer Plugin-Grammatik (nur relevant für Dateien ohne eingebaute Grammatik, d. h. [EditorLanguageType.PLAIN]). */
+        extensionScope: String? = null
     ): Language {
         // Tree-sitter nur, wenn die Sprache ein Farbschema bekommt: TsLanguage wird unten mit leerem
         // Theme-Block erzeugt -> alle Token in Standardfarbe (kein Highlighting). Bis ein tsTheme-Mapping
@@ -74,7 +76,11 @@ object EditorLanguageFactory {
         // Dateien ohne Grammatik (PLAIN: .md, .txt, .toml, .yml, .sh, .gradle …) oder ein nicht
         // registrierter Scope dürfen den Editor nie zum Absturz bringen: Rückfall auf EmptyLanguage
         // (kein Highlighting, Text bleibt bearbeitbar).
-        val base: Language = if (languageType.hasGrammar) {
+        val base: Language = if (languageType == EditorLanguageType.PLAIN && extensionScope != null) {
+            runCatching { TextMateLanguage.create(extensionScope, true) }
+                .onFailure { Log.w(TAG, "Plugin-Grammatik '$extensionScope' nicht nutzbar – Rückfall auf Klartext", it) }
+                .getOrNull() ?: EmptyLanguage()
+        } else if (languageType.hasGrammar) {
             runCatching { TextMateLanguage.create(languageType.scopeName, true) }
                 .onFailure {
                     Log.w(TAG, "Keine TextMate-Grammatik für Scope '${languageType.scopeName}' – Rückfall auf Klartext", it)

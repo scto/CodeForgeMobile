@@ -82,6 +82,28 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 * Wirkt auf `Res.string(...)` und `stringRes(...)` (alle UI-Texte). **Nicht abgedeckt:** Plurals, direkte `Context.getString(...)`-Aufrufe, System-Benachrichtigungen, native Terminal-Texte.
 * Auswahl: Einstellungen → Design → „Sprachpakete“ (`ThemeConfig.language_pack_id`, leer = App-Sprache). Max. 20 000 Einträge je Paket.
 
+## Grammatiken (`grammars`)
+
+`{ "languageId": "zig", "scopeName": "source.zig", "path": "g/zig.tmLanguage.json", "extensions": ["zig"] }`
+
+* TextMate-Grammatik (JSON oder plist). Zuordnung per Dateiendung (ohne Punkt, case-insensitiv) oder exaktem Dateinamen (z. B. `justfile`).
+* Gilt nur für Dateien **ohne eingebaute Grammatik** (eingebaut: Kotlin, Java, XML, JSON). Die Grammatik wird beim ersten Öffnen einer passenden Datei registriert; lässt sie sich nicht laden, bleibt der Editor bei Klartext.
+* Ohne eigene Sprachkonfiguration (Klammerpaare/Kommentare) — nur Syntaxfarben.
+
+## Snippets (`snippets`)
+
+`{ "languageId": "kotlin", "path": "snippets/kotlin.json" }` — Datei im **VS-Code-Snippet-Format** (`prefix`, `body`, `description`).
+
+* Scope ist immer die `languageId` des Beitrags. IDs sind `ext:<pluginId>/<languageId>/<Name>`.
+* Erscheinen in der Auto-Vervollständigung und in den Snippet-Einstellungen, sind dort aber **schreibgeschützt** (nicht löschbar/bearbeitbar/abschaltbar — Plugin deaktivieren, um sie loszuwerden). Der Export enthält nur eigene Snippets.
+
+## Extension-Packs / Bundles (`extensionPack`)
+
+`"extensionPack": ["com.example.icons", "com.example.nord"]` — ein Plugin, das weitere Plugins als Mitglieder benennt (kann selbst nur ein Bundle sein, ohne eigene Beiträge).
+
+* `ExtensionPacks.missingMembers` liefert fehlende Mitglieder; `ExtensionPacks.resolveClosure` löst verschachtelte Bundles aus einem Katalog auf (ohne Zyklen, Tiefe ≤ 4).
+* Beim Installieren aus dem Store werden fehlende Mitglieder aus dem Katalog mit installiert (siehe Store-Integration, Phase 7).
+
 ## Language Server (`lspServers`)
 
 `command` darf `${pluginDir}` und `${home}` enthalten. Ein eingebauter, installierter Server hat Vorrang; sonst wird der Plugin-Server für die angegebenen `languages` verwendet. Existiert die ausführbare Datei bei absolutem Pfad nicht, gibt es keinen Server.
@@ -99,5 +121,8 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 | `colorThemes` | umgesetzt (Phase 2) |
 | `iconThemes` | umgesetzt (Phase 3): Dateibaum, Tabs, Suche, Git |
 | `languagePacks` | umgesetzt (Phase 4), nicht abgedeckt: Plurals/`Context.getString` |
+| `grammars` | umgesetzt (Phase 5), nur Dateien ohne eingebaute Grammatik |
+| `snippets` | umgesetzt (Phase 5), schreibgeschützt |
+| `extensionPack` | Modell + Auflösung (Phase 5), Store-Installation in Phase 7 |
 | `lspServers` | umgesetzt (Resolver) |
 | weitere | siehe `agy-tasks/61-erweiterungssystem-geraetepruefung.md` (wird mit den Phasen gefüllt) |

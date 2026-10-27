@@ -7,6 +7,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.codeforge.core.domain.extension.ExtensionColorTheme
+import com.codeforge.core.domain.extension.GrammarContribution
+import com.codeforge.core.domain.extension.Resolved
 
 /**
  * Baut aus einem Plugin-Farbschema ein Material-3-Schema: Start ist das Standardschema der passenden
@@ -62,6 +64,9 @@ data class EditorThemeOverride(
     val filePath: String,
     val isDark: Boolean
 )
+
+/** Grammatiken aus aktivierten Plugins (für den Editor); leer = keine. */
+val LocalActiveGrammars = staticCompositionLocalOf<List<Resolved<GrammarContribution>>> { emptyList() }
 
 /** `null`, wenn kein Plugin-Farbschema mit eigenem Editor-Theme aktiv ist. */
 val LocalEditorThemeOverride = staticCompositionLocalOf<EditorThemeOverride?> { null }
