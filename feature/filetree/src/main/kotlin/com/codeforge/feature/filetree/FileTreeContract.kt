@@ -2,11 +2,8 @@
  * Modul: :feature:filetree
  * @author Thomas Schmid
  *
- * Seit der Umstellung auf Bonsai (https://github.com/adrielcafe/bonsai, siehe
- * FileTreeScreen.kt) verwaltet die Baumstruktur selbst (Expand/Collapse, Lazy-Directory-Load)
- * intern in ihrem eigenen [cafe.adriel.bonsai.core.tree.Tree]-Objekt — dieser Contract
- * beschränkt sich daher auf das, was Bonsai NICHT abdeckt: Dateisystem-Mutationen
- * (Create/Rename/Delete) und das Kontextmenü dafür.
+ * Der Baum wird als flache Zeilenliste ([FileTreeEntry]) im ViewModel aufgebaut
+ * ([FileTreeBuilder]); Sortierung, Ansicht und Expand-Zustand liegen im State.
  */
 package com.codeforge.feature.filetree
 
@@ -26,13 +23,12 @@ data class FileTreeUiState(
     val contextTarget: FileTreeContextTarget? = null,
     val deleteConfirmTarget: FileTreeContextTarget? = null,
     val propertiesTarget: FilePropertiesData? = null,
-    /**
-     * Wird bei jeder erfolgreichen Dateisystem-Mutation erhöht und von [FileTreeScreen] als
-     * Teil des `remember`-Keys für die Bonsai-[cafe.adriel.bonsai.core.tree.Tree]-Instanz
-     * verwendet — erzwingt einen Rebuild des Baums, da Bonsai Verzeichnisinhalte nur beim
-     * erstmaligen Expandieren eines Branch-Knotens einliest (kein eigenes Refresh-API).
-     */
+    /** Wird bei jeder Dateisystem-Mutation erhöht und löst einen Neuaufbau der Zeilenliste aus. */
     val refreshToken: Int = 0,
+    /** Sortierung/Ansicht/Versteckte (persistiert in den App-Einstellungen). */
+    val options: FileTreeOptions = FileTreeOptions(),
+    /** Aktuell sichtbare Zeilen des Baums (im ViewModel auf IO berechnet). */
+    val entries: List<FileTreeEntry> = emptyList(),
     /** Git-Status zum Einfärben der Namen; leer, wenn deaktiviert oder kein Repository. */
     val gitStatus: FileTreeGitStatus = FileTreeGitStatus.EMPTY,
     /** Von Code-Plugins im Datei-Kontextmenü angebotene Aktionen. */
@@ -40,6 +36,14 @@ data class FileTreeUiState(
 )
 
 sealed interface FileTreeUiEvent {
+    /** Klappt Ordner/Modul/Gruppe mit dem Zeilen-[key] auf oder zu. */
+    data class ToggleExpanded(val key: String) : FileTreeUiEvent
+    data class SortModeChanged(val value: FileTreeSortMode) : FileTreeUiEvent
+    data class SortByChanged(val value: FileTreeSortBy) : FileTreeUiEvent
+    data class DescendingChanged(val value: Boolean) : FileTreeUiEvent
+    data class ViewChanged(val value: FileTreeView) : FileTreeUiEvent
+    data class ShowHiddenChanged(val value: Boolean) : FileTreeUiEvent
+
     data class FileOpened(val path: String) : FileTreeUiEvent
     data class ContextMenuRequested(val path: String, val isDirectory: Boolean) : FileTreeUiEvent
     data object DismissContextMenu : FileTreeUiEvent

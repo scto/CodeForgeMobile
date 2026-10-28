@@ -35,7 +35,11 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.FolderSpecial
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -45,6 +49,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Transform
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -73,10 +80,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import cafe.adriel.bonsai.core.node.BranchNode
-import cafe.adriel.bonsai.core.node.Node
-import cafe.adriel.bonsai.core.tree.Tree
-import cafe.adriel.bonsai.filesystem.FileSystemTree
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
@@ -85,8 +88,6 @@ import com.codeforge.core.ui.TooltipIconButton
 import java.io.File
 import java.util.Locale
 import kotlinx.coroutines.flow.collectLatest
-import okio.FileSystem
-import okio.Path.Companion.toPath
 
 @Composable
 fun FileTreeRoute(
@@ -141,7 +142,9 @@ private fun FileTreeScreen(
             Text(
                 text = uiState.rootPath.substringAfterLast('/').ifBlank { Res.string(R.string.common_projekt) },
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 4.dp)
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).padding(start = 4.dp)
             )
             Row {
                 TooltipIconButton(onClick = { onEvent(FileTreeUiEvent.CreateFileClicked) }, label = stringRes(R.string.filetree_neue_datei)) {
@@ -153,42 +156,32 @@ private fun FileTreeScreen(
                 TooltipIconButton(onClick = { onEvent(FileTreeUiEvent.Refresh) }, label = stringRes(R.string.common_aktualisieren)) {
                     Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))
                 }
+                FileTreeOptionsMenu(options = uiState.options, onEvent = onEvent)
             }
         }
 
         if (uiState.rootPath.isNotBlank()) {
-            key(uiState.rootPath, uiState.refreshToken) {
-                val tree = FileSystemTree(
-                    rootPath = uiState.rootPath.toPath(),
-                    fileSystem = FileSystem.SYSTEM,
-                    selfInclude = false
-                )
-
-                // Unter horizontalScroll ist die Breite unbegrenzt: ein Kind mit weight(1f) bekommt dort
-                // Breite 0 (Text unsichtbar, nur Icons sichtbar). Deshalb: Zeilen ohne weight, mindestens
-                // so breit wie der sichtbare Bereich (viewportWidth), längere Namen scrollen horizontal.
-                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    val viewportWidth = maxWidth
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .horizontalScroll(rememberScrollState())
-                    ) {
-                        items(
-                            items = tree.nodes.filter { !it.content.segments.any { s -> s == ".cfm" } },
-                            key = { it.key }
-                        ) { node ->
-                            FileTreeNodeRow(
-                                node = node,
-                                tree = tree,
-                                gitStatus = uiState.gitStatus,
-                                onOpenFile = { onEvent(FileTreeUiEvent.FileOpened(it)) },
-                                onContextMenu = { path, isDir ->
-                                    onEvent(FileTreeUiEvent.ContextMenuRequested(path, isDir))
-                                },
-                                modifier = Modifier.widthIn(min = viewportWidth)
-                            )
-                        }
+            // Unter horizontalScroll ist die Breite unbegrenzt: ein Kind mit weight(1f) bekommt dort
+            // Breite 0 (Text unsichtbar, nur Icons sichtbar). Deshalb: Zeilen ohne weight, mindestens
+            // so breit wie der sichtbare Bereich (viewportWidth), längere Namen scrollen horizontal.
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val viewportWidth = maxWidth
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    items(items = uiState.entries, key = { it.key }) { entry ->
+                        FileTreeNodeRow(
+                            entry = entry,
+                            gitStatus = uiState.gitStatus,
+                            onToggle = { onEvent(FileTreeUiEvent.ToggleExpanded(entry.key)) },
+                            onOpenFile = { onEvent(FileTreeUiEvent.FileOpened(it)) },
+                            onContextMenu = { path, isDir ->
+                                onEvent(FileTreeUiEvent.ContextMenuRequested(path, isDir))
+                            },
+                            modifier = Modifier.widthIn(min = viewportWidth)
+                        )
                     }
                 }
             }
@@ -253,16 +246,17 @@ private fun gitNameColor(path: String, isDirectory: Boolean, status: FileTreeGit
 
 @Composable
 private fun FileTreeNodeRow(
-    node: Node<okio.Path>,
-    tree: Tree<okio.Path>,
+    entry: FileTreeEntry,
     gitStatus: FileTreeGitStatus,
+    onToggle: () -> Unit,
     onOpenFile: (String) -> Unit,
     onContextMenu: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val file = node.content.toFile()
-    val isDirectory = node is BranchNode
-    val isExpanded = (node as? BranchNode)?.isExpanded == true
+    val file = remember(entry.path) { File(entry.path) }
+    val isDirectory = entry.isDirectory
+    val isExpandable = entry.expandable
+    val isExpanded = entry.expanded
     val outlineVariant = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     val indentWidth = 20.dp
 
@@ -271,29 +265,25 @@ private fun FileTreeNodeRow(
             .fillMaxWidth()
             .combinedClickable(
                 onClick = {
-                    if (isDirectory) {
-                        tree.toggleExpansion(node)
-                    } else {
-                        onOpenFile(file.absolutePath)
-                    }
+                    if (isExpandable) onToggle() else onOpenFile(file.absolutePath)
                 },
                 onLongClick = {
-                    onContextMenu(file.absolutePath, isDirectory)
+                    if (entry.isReal) onContextMenu(file.absolutePath, isDirectory)
                 }
             )
             .padding(vertical = 4.dp, horizontal = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Theme-adaptive durchgehende Einrückungslinien
-        if (node.depth > 0) {
+        if (entry.depth > 0) {
             Box(
                 modifier = Modifier
-                    .width(indentWidth * node.depth)
+                    .width(indentWidth * entry.depth)
                     .height(44.dp)
                     .drawBehind {
                         val strokePx = 1.dp.toPx()
                         val stepPx = indentWidth.toPx()
-                        for (i in 0 until node.depth) {
+                        for (i in 0 until entry.depth) {
                             val lineX = (i * stepPx) + (stepPx / 2f)
                             drawLine(
                                 color = outlineVariant,
@@ -307,9 +297,9 @@ private fun FileTreeNodeRow(
         }
 
         // Expand/Collapse Chevron für Ordner, Spacer für Dateien
-        if (isDirectory) {
+        if (isExpandable) {
             IconButton(
-                onClick = { tree.toggleExpansion(node) },
+                onClick = onToggle,
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(
@@ -339,41 +329,121 @@ private fun FileTreeNodeRow(
             getFileIconTint(file.name, MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        ThemedFileIcon(
-            fileName = file.name,
-            isDirectory = isDirectory,
-            isExpanded = isExpanded,
-            modifier = Modifier
-                .padding(start = 2.dp, end = 8.dp)
-                .size(20.dp)
-        ) { iconModifier ->
+        if (entry.kind == FileTreeEntryKind.MODULE || entry.kind == FileTreeEntryKind.GROUP) {
             Icon(
-                imageVector = icon,
+                imageVector = if (entry.kind == FileTreeEntryKind.MODULE) Icons.Default.Inventory2 else Icons.Default.FolderSpecial,
                 contentDescription = null,
-                modifier = iconModifier,
-                tint = iconTint
+                modifier = Modifier.padding(start = 2.dp, end = 8.dp).size(20.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
+        } else {
+            ThemedFileIcon(
+                fileName = file.name,
+                isDirectory = isDirectory,
+                isExpanded = isExpanded,
+                modifier = Modifier
+                    .padding(start = 2.dp, end = 8.dp)
+                    .size(20.dp)
+            ) { iconModifier ->
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = iconModifier,
+                    tint = iconTint
+                )
+            }
         }
 
         // 2-zeilige Dateiinfo: Zeile 1 Name, Zeile 2 Größe & Änderungsdatum
         Column {
             Text(
-                text = node.name,
-                color = gitNameColor(file.absolutePath, isDirectory, gitStatus),
+                text = entry.group?.let { groupLabel(it) } ?: entry.label +
+                    (entry.detail?.let { " $it" } ?: ""),
+                color = if (entry.isReal) gitNameColor(file.absolutePath, isDirectory, gitStatus) else Color.Unspecified,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isDirectory) FontWeight.SemiBold else FontWeight.Normal,
+                fontWeight = if (isExpandable) FontWeight.SemiBold else FontWeight.Normal,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = FileTreeFormatters.formatSubtitle(file, isDirectory),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (entry.isReal) {
+                Text(
+                    text = FileTreeFormatters.formatSubtitle(file, isDirectory),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun groupLabel(group: FileTreeGroup): String = when (group) {
+    FileTreeGroup.MANIFESTS -> stringRes(R.string.filetree_gruppe_manifests)
+    FileTreeGroup.SOURCES -> stringRes(R.string.filetree_gruppe_quellen)
+    FileTreeGroup.RESOURCES -> stringRes(R.string.filetree_gruppe_res)
+    FileTreeGroup.ASSETS -> stringRes(R.string.filetree_gruppe_assets)
+    FileTreeGroup.OTHER -> stringRes(R.string.filetree_gruppe_weitere)
+    FileTreeGroup.GRADLE_SCRIPTS -> stringRes(R.string.filetree_gruppe_gradle)
+    FileTreeGroup.PROJECT_FILES -> stringRes(R.string.filetree_gruppe_projektdateien)
+}
+
+/** Drei-Punkte-Menü: Sortiermodus, Sortieren nach, Reihenfolge, Ansicht, Versteckte anzeigen. */
+@Composable
+private fun FileTreeOptionsMenu(options: FileTreeOptions, onEvent: (FileTreeUiEvent) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        TooltipIconButton(onClick = { open = true }, label = stringRes(R.string.filetree_einstellungen)) {
+            Icon(Icons.Filled.MoreVert, contentDescription = stringRes(R.string.filetree_einstellungen))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            MenuSection(R.string.filetree_menu_sortmodus)
+            MenuChoice(R.string.filetree_sortmodus_gruppiert, options.sortMode == FileTreeSortMode.GROUPED) {
+                onEvent(FileTreeUiEvent.SortModeChanged(FileTreeSortMode.GROUPED))
+            }
+            MenuChoice(R.string.filetree_sortmodus_gemischt, options.sortMode == FileTreeSortMode.MIXED) {
+                onEvent(FileTreeUiEvent.SortModeChanged(FileTreeSortMode.MIXED))
+            }
+            HorizontalDivider()
+            MenuSection(R.string.filetree_menu_sortieren_nach)
+            MenuChoice(R.string.filetree_sort_name, options.sortBy == FileTreeSortBy.NAME) { onEvent(FileTreeUiEvent.SortByChanged(FileTreeSortBy.NAME)) }
+            MenuChoice(R.string.filetree_sort_typ, options.sortBy == FileTreeSortBy.TYPE) { onEvent(FileTreeUiEvent.SortByChanged(FileTreeSortBy.TYPE)) }
+            MenuChoice(R.string.filetree_sort_groesse, options.sortBy == FileTreeSortBy.SIZE) { onEvent(FileTreeUiEvent.SortByChanged(FileTreeSortBy.SIZE)) }
+            MenuChoice(R.string.filetree_sort_geaendert, options.sortBy == FileTreeSortBy.MODIFIED) { onEvent(FileTreeUiEvent.SortByChanged(FileTreeSortBy.MODIFIED)) }
+            MenuChoice(R.string.filetree_sort_absteigend, options.descending) { onEvent(FileTreeUiEvent.DescendingChanged(!options.descending)) }
+            HorizontalDivider()
+            MenuSection(R.string.filetree_menu_ansicht)
+            MenuChoice(R.string.filetree_ansicht_dateien, options.view == FileTreeView.FILES) { onEvent(FileTreeUiEvent.ViewChanged(FileTreeView.FILES)) }
+            MenuChoice(R.string.filetree_ansicht_projekt, options.view == FileTreeView.PROJECT) { onEvent(FileTreeUiEvent.ViewChanged(FileTreeView.PROJECT)) }
+            MenuChoice(R.string.filetree_ansicht_modul, options.view == FileTreeView.MODULES) { onEvent(FileTreeUiEvent.ViewChanged(FileTreeView.MODULES)) }
+            HorizontalDivider()
+            MenuChoice(R.string.filetree_versteckte_anzeigen, options.showHidden) { onEvent(FileTreeUiEvent.ShowHiddenChanged(!options.showHidden)) }
+        }
+    }
+}
+
+@Composable
+private fun MenuSection(titleRes: Int) {
+    Text(
+        text = stringRes(titleRes),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+    )
+}
+
+/** Menüpunkt mit Häkchen bei aktiver Auswahl; das Menü bleibt offen, damit mehrere Optionen änderbar sind. */
+@Composable
+private fun MenuChoice(labelRes: Int, selected: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(stringRes(labelRes)) },
+        leadingIcon = {
+            if (selected) Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+            else Spacer(Modifier.size(18.dp))
+        },
+        onClick = onClick
+    )
 }
 
 private fun getFileIcon(fileName: String): ImageVector {

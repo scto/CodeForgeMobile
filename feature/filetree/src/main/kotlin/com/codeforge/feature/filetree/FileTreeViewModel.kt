@@ -15,6 +15,8 @@ import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
@@ -46,8 +49,20 @@ class FileTreeViewModel @Inject constructor(
     val effect: SharedFlow<FileTreeUiEffect> = _effect.asSharedFlow()
 
     private var initialized = false
+    private var expanded: Set<String> = emptySet()
+    private var rebuildJob: Job? = null
 
     init {
+        // Persistierte Optionen (Sortierung, Ansicht, Versteckte) → State + Neuaufbau.
+        viewModelScope.launch {
+            settingsRepository.appSettings.collect { settings ->
+                val options = FileTreeOptions.fromProto(settings.fileTree)
+                if (options != _uiState.value.options) {
+                    _uiState.update { it.copy(options = options) }
+                    rebuildEntries()
+                }
+            }
+        }
         pluginUi?.let { ui ->
             viewModelScope.launch {
                 ui.menuEntries.collect { all ->
@@ -68,6 +83,7 @@ class FileTreeViewModel @Inject constructor(
         if (initialized && _uiState.value.rootPath == rootPath) return
         initialized = true
         _uiState.update { it.copy(rootPath = rootPath) }
+        rebuildEntries()
         refreshGitStatus()
     }
 
@@ -87,8 +103,37 @@ class FileTreeViewModel @Inject constructor(
         }
     }
 
+    /** Berechnet die Zeilenliste auf IO neu (vorherige Berechnung wird abgebrochen). */
+    private fun rebuildEntries() {
+        val root = _uiState.value.rootPath
+        if (root.isBlank()) return
+        val options = _uiState.value.options
+        val open = expanded
+        rebuildJob?.cancel()
+        rebuildJob = viewModelScope.launch {
+            val entries = withContext(Dispatchers.IO) { FileTreeBuilder.build(File(root), options, open) }
+            _uiState.update { it.copy(entries = entries) }
+        }
+    }
+
+    private fun updateOptions(transform: (FileTreeOptions) -> FileTreeOptions) {
+        val next = transform(_uiState.value.options)
+        _uiState.update { it.copy(options = next) } // sofort sichtbar, Persistierung folgt
+        rebuildEntries()
+        viewModelScope.launch { settingsRepository.updateFileTree { next.toProto() } }
+    }
+
     fun onEvent(event: FileTreeUiEvent) {
         when (event) {
+            is FileTreeUiEvent.ToggleExpanded -> {
+                expanded = if (event.key in expanded) expanded - event.key else expanded + event.key
+                rebuildEntries()
+            }
+            is FileTreeUiEvent.SortModeChanged -> updateOptions { it.copy(sortMode = event.value) }
+            is FileTreeUiEvent.SortByChanged -> updateOptions { it.copy(sortBy = event.value) }
+            is FileTreeUiEvent.DescendingChanged -> updateOptions { it.copy(descending = event.value) }
+            is FileTreeUiEvent.ViewChanged -> updateOptions { it.copy(view = event.value) }
+            is FileTreeUiEvent.ShowHiddenChanged -> updateOptions { it.copy(showHidden = event.value) }
             is FileTreeUiEvent.FileOpened -> openFile(event.path)
             is FileTreeUiEvent.ContextMenuRequested ->
                 _uiState.update { it.copy(contextTarget = FileTreeContextTarget(event.path, event.isDirectory)) }
@@ -235,14 +280,10 @@ class FileTreeViewModel @Inject constructor(
             .onFailure { _effect.emit(FileTreeUiEffect.ShowSnackbar(it.message ?: Res.string(R.string.filetree_aktion_fehlgeschlagen))) }
     }
 
-    /**
-     * Erzwingt einen Rebuild der Bonsai-Tree-Instanz in [FileTreeScreen] (siehe Doc an
-     * [FileTreeUiState.refreshToken]) — notwendig, da Bonsai Verzeichnisinhalte nicht
-     * selbstständig neu einliest, wenn sich der Inhalt außerhalb seiner eigenen
-     * Expand-Interaktion ändert (Create/Rename/Delete via Kontextmenü, externe Git-Operation).
-     */
+    /** Neuaufbau nach Dateisystem-Mutation (Create/Rename/Delete) oder manuellem Aktualisieren. */
     private fun bumpRefreshToken() {
         _uiState.update { it.copy(refreshToken = it.refreshToken + 1) }
+        rebuildEntries()
         refreshGitStatus()
     }
 }

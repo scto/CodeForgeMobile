@@ -55,6 +55,12 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun updateFileTree(transform: (com.codeforge.core.datastore.proto.FileTreeConfig) -> com.codeforge.core.datastore.proto.FileTreeConfig) {
+        dataStore.updateData { current ->
+            current.toBuilder().setFileTree(transform(current.fileTree)).build()
+        }
+    }
+
     suspend fun updateTerminal(transform: (TerminalConfig) -> TerminalConfig) {
         dataStore.updateData { current ->
             current.toBuilder()

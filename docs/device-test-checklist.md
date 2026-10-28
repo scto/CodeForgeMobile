@@ -94,6 +94,9 @@ Diese Checkliste dient der manuellen Qualitätssicherung auf echten physischen A
 | **DIR-03** | Projekt-Wizard: Projekt-Erstellung | Projekt-Wizard öffnen, Vorlage `Empty Activity` wählen, Projektname eingeben, erstellen. | Projekt wird in `<filesDir>/projects` angelegt; Gradle-Struktur vorhanden; Editor öffnet Projekt automatisch. | Pixel 8 (Android 14) | ungeprüft |
 | **DIR-04** | Projekt-Wizard: Ordnerauswahl | Im Wizard-Konfigurationsschritt den Button für die Speicherort-Auswahl betätigen. | Ordnerauswahl öffnet sich; Verzeichnisse unter `<filesDir>` können gewählt oder neu erstellt werden. | Pixel 8 (Android 14) | ungeprüft |
 | **DIR-05** | Projekt-Import (SAF) | In WelcomeScreen auf „Importieren" tippen und externen Ordner via SAF auswählen. | Verzeichnis wird rekursiv nach `<filesDir>/projects` kopiert; Fortschrittsanzeige; Projekt öffnet sich. | Pixel 8 (Android 14) | ungeprüft |
+| **DIR-06** | Dateibaum: Sortierung | Ordner mit versteckten und normalen Ordnern/Dateien öffnen. | Reihenfolge: versteckte Ordner, Ordner, versteckte Dateien, Dateien; jeweils alphabetisch (Groß/Klein egal, `f2` vor `f10`). | Pixel 8 (Android 14) | ungeprüft |
+| **DIR-07** | Dateibaum: 3-Punkte-Menü | Menü ⋮ im Dateibaum-Kopf: Sortiermodus, Sortieren nach (Name/Typ/Größe/Geändert, Absteigend), Versteckte anzeigen umschalten; App neu starten. | Baum ändert sich sofort; Einstellungen bleiben nach Neustart erhalten. | Pixel 8 (Android 14) | ungeprüft |
+| **DIR-08** | Dateibaum: Ansichten | Ansicht Dateien / Projekt / Modul (Android) wählen. | Projekt: ohne `build`, `.gradle`, `.idea`, `.git`, Module mit Modul-Icon. Modul: Module → manifests/java-kotlin/res/…, „Gradle Scripts" und „Projektdateien" am Ende; Dateien öffnen sich im Editor. | Pixel 8 (Android 14) | ungeprüft |
 
 ---
 

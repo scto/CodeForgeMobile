@@ -27,12 +27,6 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
-    // Bonsai: Dateibaum-Darstellung (als NavigationDrawer-Inhalt in ProjectWorkspaceRoute,
-    // :app, verwendet; Bonsai-Verdrahtung liegt direkt in FileTreeScreen.kt) —
-    // https://github.com/adrielcafe/bonsai, Maven Central.
-    implementation(libs.bonsai.core)
-    implementation(libs.bonsai.file.system)
-
     testImplementation(libs.junit)
     testImplementation(project(":core:testing"))
 }

@@ -13,6 +13,15 @@ message AppSettings {
   MigrationConfig migration = 7;
   DebugConfig debug = 8;
   GitConfig git = 9;
+  FileTreeConfig file_tree = 10;
+}
+
+message FileTreeConfig {
+  int32 sort_mode = 1;   // 0 gruppiert (versteckte Ordner, Ordner, versteckte Dateien, Dateien), 1 gemischt
+  int32 sort_by = 2;     // 0 Name, 1 Typ, 2 Größe, 3 Änderungsdatum
+  bool descending = 3;
+  int32 view = 4;        // 0 Dateien, 1 Projekt, 2 Modul (Android)
+  bool hide_hidden = 5;  // negiert gespeichert: Standard (false) = versteckte Dateien anzeigen
 }
 
 message GitConfig {
