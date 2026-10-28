@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Formatiert toml mit Taplo Format. Voraussetzung (Terminal): pkg install taplo",
+  "description": "Formatiert toml mit Taplo Format. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install taplo).",
   "permissions": [],
   "contributes": {
     "formatters": [
@@ -20,6 +20,12 @@
           "-"
         ],
         "timeoutSeconds": 20
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "taplo"
       }
     ]
   }

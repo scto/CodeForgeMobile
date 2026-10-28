@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Formatiert go mit gofmt. Voraussetzung (Terminal): pkg install golang",
+  "description": "Formatiert go mit gofmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install golang).",
   "permissions": [],
   "contributes": {
     "formatters": [
@@ -18,6 +18,13 @@
           "gofmt"
         ],
         "timeoutSeconds": 20
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "golang",
+        "check": "gofmt"
       }
     ]
   }

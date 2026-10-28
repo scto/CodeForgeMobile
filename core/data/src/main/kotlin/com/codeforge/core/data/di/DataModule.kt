@@ -125,6 +125,12 @@ abstract class DataModule {
 
     @Binds
     @Singleton
+    abstract fun bindPluginToolRunner(
+        impl: com.codeforge.core.data.repository.PluginToolRunnerImpl
+    ): com.codeforge.core.domain.extension.PluginToolRunner
+
+    @Binds
+    @Singleton
     abstract fun bindSnippetRepository(
         impl: com.codeforge.core.data.repository.ExtensionAwareSnippetRepository
     ): com.codeforge.core.domain.repository.SnippetRepository

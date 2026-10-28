@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet Dart Analysis Server ein. Voraussetzung (Terminal): pkg install dart",
+  "description": "Bindet Dart Analysis Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install dart).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -18,6 +18,12 @@
           "dart",
           "language-server"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "dart"
       }
     ]
   }

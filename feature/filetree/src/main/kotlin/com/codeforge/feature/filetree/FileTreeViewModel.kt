@@ -39,7 +39,9 @@ class FileTreeViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null,
     private val fileSyncBridge: com.codeforge.core.navigation.FileSyncBridge? = null,
-    private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null
+    private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null,
+    private val contributionRepository: com.codeforge.core.domain.extension.ContributionRepository? = null,
+    private val toolRunner: com.codeforge.core.domain.extension.PluginToolRunner? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FileTreeUiState())
@@ -51,8 +53,16 @@ class FileTreeViewModel @Inject constructor(
     private var initialized = false
     private var expanded: Set<String> = emptySet()
     private var rebuildJob: Job? = null
+    private var toolJob: Job? = null
 
     init {
+        contributionRepository?.let { repo ->
+            viewModelScope.launch {
+                repo.contributions.collect { c ->
+                    _uiState.update { it.copy(tools = c.tools.map { r -> FileTreeTool(r.pluginId, r.item) }) }
+                }
+            }
+        }
         // Persistierte Optionen (Sortierung, Ansicht, Versteckte) → State + Neuaufbau.
         viewModelScope.launch {
             settingsRepository.appSettings.collect { settings ->
@@ -125,6 +135,21 @@ class FileTreeViewModel @Inject constructor(
 
     fun onEvent(event: FileTreeUiEvent) {
         when (event) {
+            is FileTreeUiEvent.ToolClicked -> toolClicked(event.pluginId, event.toolId)
+            is FileTreeUiEvent.ToolInputChanged -> _uiState.update {
+                val d = it.toolDialog as? ToolDialogState.Form ?: return@update it
+                it.copy(toolDialog = d.copy(input = event.value))
+            }
+            FileTreeUiEvent.ToolFormConfirmed -> (_uiState.value.toolDialog as? ToolDialogState.Form)
+                ?.let { prepareRun(it.item, it.input) }
+            FileTreeUiEvent.ToolInstallConfirmed -> (_uiState.value.toolDialog as? ToolDialogState.Install)
+                ?.let { installAndRun(it) }
+            FileTreeUiEvent.ToolDialogDismissed -> {
+                toolJob?.cancel()
+                val finished = (_uiState.value.toolDialog as? ToolDialogState.Running)?.phase == ToolPhase.DONE
+                _uiState.update { it.copy(toolDialog = null) }
+                if (finished) bumpRefreshToken()
+            }
             is FileTreeUiEvent.ToggleExpanded -> {
                 expanded = if (event.key in expanded) expanded - event.key else expanded + event.key
                 rebuildEntries()
@@ -181,6 +206,10 @@ class FileTreeViewModel @Inject constructor(
     private fun startActionOnContextTarget(type: FileTreeActionType) {
         val target = _uiState.value.contextTarget ?: return
         _uiState.update { it.copy(pendingAction = FileTreeAction(type, target.path), contextTarget = null) }
+    }
+
+    private companion object {
+        const val MAX_TOOL_LINES = 1000
     }
 
     private fun showProperties() {
@@ -278,6 +307,71 @@ class FileTreeViewModel @Inject constructor(
         result
             .onSuccess { bumpRefreshToken() }
             .onFailure { _effect.emit(FileTreeUiEffect.ShowSnackbar(it.message ?: Res.string(R.string.filetree_aktion_fehlgeschlagen))) }
+    }
+
+    // ---- Plugin-Werkzeuge (PT-Menü) ----
+
+    private fun toolClicked(pluginId: String, toolId: String) {
+        val item = _uiState.value.tools.firstOrNull { it.pluginId == pluginId && it.tool.id == toolId } ?: return
+        if (toolRunner == null) {
+            viewModelScope.launch { _effect.emit(FileTreeUiEffect.ShowSnackbar(Res.string(R.string.filetree_tools_nicht_verfuegbar))) }
+            return
+        }
+        if (item.tool.prompt != null || item.tool.confirm != null) {
+            _uiState.update { it.copy(toolDialog = ToolDialogState.Form(item, item.tool.prompt?.default.orEmpty())) }
+        } else {
+            prepareRun(item, "")
+        }
+    }
+
+    /** Prüft Voraussetzungen; fehlen welche, fragt der Dialog vor der Installation nach. */
+    private fun prepareRun(item: FileTreeTool, input: String) {
+        val runner = toolRunner ?: return
+        toolJob?.cancel()
+        toolJob = viewModelScope.launch {
+            val missing = runner.missingRequirements(item.pluginId)
+            if (missing.isNotEmpty()) {
+                _uiState.update { it.copy(toolDialog = ToolDialogState.Install(item, input, missing)) }
+            } else {
+                runTool(item, input)
+            }
+        }
+    }
+
+    private fun installAndRun(d: ToolDialogState.Install) {
+        val runner = toolRunner ?: return
+        toolJob?.cancel()
+        toolJob = viewModelScope.launch {
+            _uiState.update { it.copy(toolDialog = ToolDialogState.Running(d.item, ToolPhase.INSTALLING)) }
+            var ok = false
+            runner.install(d.missing).collect { ev -> ok = handleToolEvent(d.item, ev, finishOnSuccess = false) || ok }
+            if (ok) runTool(d.item, d.input)
+        }
+    }
+
+    private suspend fun runTool(item: FileTreeTool, input: String) {
+        val runner = toolRunner ?: return
+        _uiState.update { it.copy(toolDialog = ToolDialogState.Running(item, ToolPhase.RUNNING)) }
+        runner.run(item.pluginId, item.tool.id, _uiState.value.rootPath, input).collect { handleToolEvent(item, it, finishOnSuccess = true) }
+    }
+
+    /** Hängt Zeilen an bzw. beendet den Lauf; liefert `true`, wenn der Schritt mit Exit-Code 0 endete. */
+    private fun handleToolEvent(item: FileTreeTool, ev: com.codeforge.core.domain.extension.ToolRunEvent, finishOnSuccess: Boolean): Boolean {
+        when (ev) {
+            is com.codeforge.core.domain.extension.ToolRunEvent.Line -> _uiState.update { st ->
+                val d = st.toolDialog as? ToolDialogState.Running ?: return@update st
+                st.copy(toolDialog = d.copy(lines = (d.lines + ev.text).takeLast(MAX_TOOL_LINES)))
+            }
+            is com.codeforge.core.domain.extension.ToolRunEvent.Finished -> {
+                val success = ev.exitCode == 0
+                if (finishOnSuccess || !success) _uiState.update { st ->
+                    val d = st.toolDialog as? ToolDialogState.Running ?: return@update st
+                    st.copy(toolDialog = d.copy(phase = ToolPhase.DONE, exitCode = ev.exitCode, timedOut = ev.timedOut))
+                }
+                return success
+            }
+        }
+        return false
     }
 
     /** Neuaufbau nach Dateisystem-Mutation (Create/Rename/Delete) oder manuellem Aktualisieren. */

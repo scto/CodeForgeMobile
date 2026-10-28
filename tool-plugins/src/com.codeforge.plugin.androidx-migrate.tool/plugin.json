@@ -1,0 +1,40 @@
+{
+  "id": "com.codeforge.plugin.androidx-migrate.tool",
+  "name": "AndroidX-Migration (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Ersetzt android.support.* / android.arch.* durch AndroidX (Imports, Layout-XML, Gradle) und setzt useAndroidX/Jetifier. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "migrate",
+        "label": "Nach AndroidX migrieren",
+        "description": "Bericht oder Umstellung der Quellen und Gradle-Dateien",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 300,
+        "prompt": {
+          "label": "Modus: check (nur Bericht) oder apply",
+          "hint": "check",
+          "default": "check"
+        },
+        "confirm": "Vor dem Umstellen (apply) bitte committen. Mit check gibt es nur einen Bericht."
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

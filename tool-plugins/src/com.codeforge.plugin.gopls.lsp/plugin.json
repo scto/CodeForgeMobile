@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet gopls (Go) ein. Voraussetzung (Terminal): pkg install gopls",
+  "description": "Bindet gopls (Go) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install gopls).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -17,6 +17,12 @@
         "command": [
           "gopls"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "gopls"
       }
     ]
   }

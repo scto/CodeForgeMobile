@@ -6,7 +6,11 @@ package com.codeforge.feature.plugins
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.PluginToolRunner
+import com.codeforge.core.domain.extension.ToolRunEvent
 import com.codeforge.core.domain.model.PluginInstallEvent
+import kotlinx.coroutines.Job
 import com.codeforge.core.domain.repository.PluginRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -26,7 +30,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PluginsViewModel @Inject constructor(
-    private val pluginRepository: PluginRepository
+    private val pluginRepository: PluginRepository,
+    private val contributionRepository: ContributionRepository? = null,
+    private val toolRunner: PluginToolRunner? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PluginsUiState())
@@ -35,7 +41,12 @@ class PluginsViewModel @Inject constructor(
     private val _effect = MutableSharedFlow<PluginsUiEffect>()
     val effect: SharedFlow<PluginsUiEffect> = _effect.asSharedFlow()
 
+    private var installJob: Job? = null
+
     init {
+        contributionRepository?.let { repo ->
+            repo.contributions.onEach { refreshMissing() }.launchIn(viewModelScope)
+        }
         combine(
             pluginRepository.installedPlugins,
             pluginRepository.loadedPluginIds
@@ -51,6 +62,46 @@ class PluginsViewModel @Inject constructor(
             is PluginsUiEvent.ToggleEnabled -> toggle(event)
             is PluginsUiEvent.Uninstall -> uninstall(event)
             is PluginsUiEvent.InstallFromFile -> install(event)
+            is PluginsUiEvent.RequirementsClicked -> {
+                val missing = _uiState.value.missingRequirements[event.pluginId].orEmpty()
+                if (missing.isNotEmpty()) _uiState.update { it.copy(requirementDialog = RequirementDialog.Confirm(event.pluginId, missing)) }
+            }
+            PluginsUiEvent.RequirementsConfirmed -> installRequirements()
+            PluginsUiEvent.RequirementsDismissed -> {
+                installJob?.cancel()
+                _uiState.update { it.copy(requirementDialog = null) }
+                refreshMissing()
+            }
+        }
+    }
+
+    /** Prüft für alle aktivierten Plugins, welche deklarierten Programme fehlen. */
+    private fun refreshMissing() {
+        val runner = toolRunner ?: return
+        val repo = contributionRepository ?: return
+        viewModelScope.launch {
+            val ids = repo.contributions.value.requires.map { it.pluginId }.distinct()
+            val result = ids.associateWith { runner.missingRequirements(it) }.filterValues { it.isNotEmpty() }
+            _uiState.update { it.copy(missingRequirements = result) }
+        }
+    }
+
+    private fun installRequirements() {
+        val runner = toolRunner ?: return
+        val d = _uiState.value.requirementDialog as? RequirementDialog.Confirm ?: return
+        _uiState.update { it.copy(requirementDialog = RequirementDialog.Running(d.pluginId)) }
+        installJob?.cancel()
+        installJob = viewModelScope.launch {
+            runner.install(d.missing).collect { ev ->
+                _uiState.update { st ->
+                    val cur = st.requirementDialog as? RequirementDialog.Running ?: return@update st
+                    when (ev) {
+                        is ToolRunEvent.Line -> st.copy(requirementDialog = cur.copy(lines = (cur.lines + ev.text).takeLast(1000)))
+                        is ToolRunEvent.Finished -> st.copy(requirementDialog = cur.copy(done = true, exitCode = ev.exitCode))
+                    }
+                }
+            }
+            refreshMissing()
         }
     }
 

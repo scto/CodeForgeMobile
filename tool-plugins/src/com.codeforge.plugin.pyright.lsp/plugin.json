@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet Pyright (Python) ein. Voraussetzung (Terminal): npm install -g pyright",
+  "description": "Bindet Pyright (Python) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g pyright).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -18,6 +18,18 @@
           "pyright-langserver",
           "--stdio"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "pyright",
+        "check": "pyright-langserver"
       }
     ]
   }

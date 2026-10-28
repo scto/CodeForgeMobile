@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet Ruff (Python-Linting) ein. Voraussetzung (Terminal): pkg install ruff",
+  "description": "Bindet Ruff (Python-Linting) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install ruff).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -18,6 +18,12 @@
           "ruff",
           "server"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "ruff"
       }
     ]
   }

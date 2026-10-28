@@ -21,7 +21,9 @@ data class ActiveContributions(
     val grammars: List<Resolved<GrammarContribution>> = emptyList(),
     val snippets: List<Resolved<SnippetContribution>> = emptyList(),
     val lspServers: List<Resolved<LspServerContribution>> = emptyList(),
-    val formatters: List<Resolved<FormatterContribution>> = emptyList()
+    val formatters: List<Resolved<FormatterContribution>> = emptyList(),
+    val tools: List<Resolved<ToolContribution>> = emptyList(),
+    val requires: List<Resolved<RequirementContribution>> = emptyList()
 ) {
     companion object {
         val EMPTY = ActiveContributions()
@@ -39,7 +41,10 @@ data class ActiveContributions(
                 grammars = collect({ it.grammars }, { it.scopeName }),
                 snippets = collect({ it.snippets }, { it.languageId + "|" + it.path }),
                 lspServers = collect({ it.lspServers }, { it.id }),
-                formatters = collect({ it.formatters }, { it.id })
+                formatters = collect({ it.formatters }, { it.id }),
+                // Werkzeug-IDs sind nur je Plugin eindeutig → keine Zusammenführung über Plugins hinweg.
+                tools = entries.flatMap { (m, dir) -> m.contributes.tools.map { Resolved(m.id, dir, it) } },
+                requires = entries.flatMap { (m, dir) -> m.contributes.requires.map { Resolved(m.id, dir, it) } }
             )
         }
     }

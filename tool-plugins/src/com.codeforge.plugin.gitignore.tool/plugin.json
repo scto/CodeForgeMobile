@@ -1,0 +1,39 @@
+{
+  "id": "com.codeforge.plugin.gitignore.tool",
+  "name": ".gitignore-Generator (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Ergänzt .gitignore um fehlende Einträge für Android, Kotlin, Node, Python, Rust oder Go. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "generate",
+        "label": ".gitignore ergänzen",
+        "description": "Typ(en): android kotlin node python rust go",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 30,
+        "prompt": {
+          "label": "Typ(en)",
+          "hint": "android node",
+          "default": "android"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

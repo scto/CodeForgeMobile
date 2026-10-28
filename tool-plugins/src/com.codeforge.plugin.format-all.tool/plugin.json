@@ -1,0 +1,39 @@
+{
+  "id": "com.codeforge.plugin.format-all.tool",
+  "name": "Alles formatieren (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Formatiert oder prüft das ganze Projekt mit den installierten Formatierern (ktlint, shfmt, ruff, gofmt, rustfmt, taplo, prettier). Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "run",
+        "label": "Projekt formatieren/prüfen",
+        "description": "Modus check (Standard) oder fix",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 600,
+        "prompt": {
+          "label": "Modus: check oder fix",
+          "hint": "check",
+          "default": "check"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

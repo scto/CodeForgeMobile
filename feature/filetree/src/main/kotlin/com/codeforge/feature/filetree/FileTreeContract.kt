@@ -16,6 +16,31 @@ data class FileTreeAction(val type: FileTreeActionType, val targetPath: String)
 /** Langgedrückter Knoten, für den das Kontextmenü (Umbenennen/Löschen) angezeigt wird. */
 data class FileTreeContextTarget(val path: String, val isDirectory: Boolean)
 
+/** Ein im PT-Menü angebotenes Plugin-Werkzeug. */
+@Immutable
+data class FileTreeTool(val pluginId: String, val tool: com.codeforge.core.domain.extension.ToolContribution)
+
+enum class ToolPhase { INSTALLING, RUNNING, DONE }
+
+/** Zustand des Werkzeug-Dialogs: Eingabe/Bestätigung → ggf. Installation fehlender Programme → Lauf mit Live-Ausgabe. */
+sealed interface ToolDialogState {
+    val item: FileTreeTool
+
+    data class Form(override val item: FileTreeTool, val input: String) : ToolDialogState
+    data class Install(
+        override val item: FileTreeTool,
+        val input: String,
+        val missing: List<com.codeforge.core.domain.extension.RequirementContribution>
+    ) : ToolDialogState
+    data class Running(
+        override val item: FileTreeTool,
+        val phase: ToolPhase,
+        val lines: List<String> = emptyList(),
+        val exitCode: Int? = null,
+        val timedOut: Boolean = false
+    ) : ToolDialogState
+}
+
 @Immutable
 data class FileTreeUiState(
     val rootPath: String = "",
@@ -32,10 +57,18 @@ data class FileTreeUiState(
     /** Git-Status zum Einfärben der Namen; leer, wenn deaktiviert oder kein Repository. */
     val gitStatus: FileTreeGitStatus = FileTreeGitStatus.EMPTY,
     /** Von Code-Plugins im Datei-Kontextmenü angebotene Aktionen. */
-    val pluginMenuEntries: List<com.codeforge.core.domain.extension.PluginMenuEntry> = emptyList()
+    val pluginMenuEntries: List<com.codeforge.core.domain.extension.PluginMenuEntry> = emptyList(),
+    /** Werkzeuge der aktivierten Plugins (PT-Menü). */
+    val tools: List<FileTreeTool> = emptyList(),
+    val toolDialog: ToolDialogState? = null
 )
 
 sealed interface FileTreeUiEvent {
+    data class ToolClicked(val pluginId: String, val toolId: String) : FileTreeUiEvent
+    data class ToolInputChanged(val value: String) : FileTreeUiEvent
+    data object ToolFormConfirmed : FileTreeUiEvent
+    data object ToolInstallConfirmed : FileTreeUiEvent
+    data object ToolDialogDismissed : FileTreeUiEvent
     /** Klappt Ordner/Modul/Gruppe mit dem Zeilen-[key] auf oder zu. */
     data class ToggleExpanded(val key: String) : FileTreeUiEvent
     data class SortModeChanged(val value: FileTreeSortMode) : FileTreeUiEvent

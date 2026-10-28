@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet Taplo (TOML) ein. Voraussetzung (Terminal): pkg install taplo",
+  "description": "Bindet Taplo (TOML) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install taplo).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -19,6 +19,12 @@
           "lsp",
           "stdio"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "taplo"
       }
     ]
   }

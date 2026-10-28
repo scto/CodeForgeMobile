@@ -1,0 +1,40 @@
+{
+  "id": "com.codeforge.plugin.unused-resources.tool",
+  "name": "Unbenutzte Ressourcen (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Findet nicht referenzierte Drawables, Layouts, Strings, Farben und mehr; löscht auf Wunsch Dateien. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "scan",
+        "label": "Unbenutzte Ressourcen finden",
+        "description": "Bericht oder Löschen unbenutzter Ressourcen-Dateien",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 300,
+        "prompt": {
+          "label": "Modus: check (nur Bericht) oder apply",
+          "hint": "check",
+          "default": "check"
+        },
+        "confirm": "Dynamische Zugriffe (getIdentifier) werden nicht erkannt. Vor apply bitte committen."
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

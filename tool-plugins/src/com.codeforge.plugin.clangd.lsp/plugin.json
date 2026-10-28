@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet clangd (C/C++) ein. Voraussetzung (Terminal): pkg install clang",
+  "description": "Bindet clangd (C/C++) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install clang).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -18,6 +18,13 @@
         "command": [
           "clangd"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "clang",
+        "check": "clangd"
       }
     ]
   }

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Formatiert sh, bash, zsh mit shfmt. Voraussetzung (Terminal): pkg install shfmt",
+  "description": "Formatiert sh, bash, zsh mit shfmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install shfmt).",
   "permissions": [],
   "contributes": {
     "formatters": [
@@ -22,6 +22,12 @@
           "${file}"
         ],
         "timeoutSeconds": 20
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "shfmt"
       }
     ]
   }

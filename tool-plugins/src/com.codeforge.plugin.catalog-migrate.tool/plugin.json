@@ -1,0 +1,40 @@
+{
+  "id": "com.codeforge.plugin.catalog-migrate.tool",
+  "name": "Version-Catalog-Migration (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Verschiebt hartcodierte Abhängigkeiten aus build.gradle(.kts) in gradle/libs.versions.toml. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "migrate",
+        "label": "Nach Version Catalog migrieren",
+        "description": "Bericht oder Umstellung der Abhängigkeiten",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 120,
+        "prompt": {
+          "label": "Modus: check (nur Bericht) oder apply",
+          "hint": "check",
+          "default": "check"
+        },
+        "confirm": "Vor dem Umstellen (apply) bitte committen. Mit check gibt es nur einen Bericht."
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

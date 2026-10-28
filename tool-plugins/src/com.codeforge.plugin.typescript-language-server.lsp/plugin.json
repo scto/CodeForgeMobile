@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet TypeScript/JavaScript Language Server ein. Voraussetzung (Terminal): npm install -g typescript typescript-language-server",
+  "description": "Bindet TypeScript/JavaScript Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g typescript typescript-language-server).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -19,6 +19,22 @@
           "typescript-language-server",
           "--stdio"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "typescript",
+        "check": "tsc"
+      },
+      {
+        "manager": "npm",
+        "name": "typescript-language-server"
       }
     ]
   }

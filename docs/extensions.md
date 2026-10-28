@@ -33,6 +33,8 @@ Vorlagen: `templates/`, Anleitung zum Selbermachen: `docs/extension-authoring.md
     "snippets":      [{ "languageId": "kotlin", "path": "snippets/kotlin.json" }],
     "lspServers":    [{ "id": "zls", "label": "ZLS", "languages": ["zig"], "command": ["${pluginDir}/zls"] }],
     "formatters":    [{ "id": "prettier", "label": "Prettier", "extensions": ["js", "ts"], "command": ["prettier", "--stdin-filepath", "${file}"] }],
+    "tools":         [{ "id": "clean", "label": "Aufräumen", "command": ["python3", "${pluginDir}/tool.py", "${projectDir}", "${input}"] }],
+    "requires":      [{ "manager": "pkg", "name": "python", "check": "python3" }],
     "extensionPack": ["com.example.icons"]
   }
 }
@@ -40,7 +42,7 @@ Vorlagen: `templates/`, Anleitung zum Selbermachen: `docs/extension-authoring.md
 
 * v1-Manifeste (nur `id`, `name`, `version`, `description`, `entryPointClass`) bleiben gültig (`apiVersion` = 1).
 * `id`: `[A-Za-z0-9][A-Za-z0-9._-]*`, kein `..`. Alle `path`-Werte sind relativ zum Plugin-Verzeichnis, ohne `..` und ohne führenden `/`.
-* `permissions` (nur Code-Plugins): `commands`, `menus`, `file-events`, `git-events`, `shell`, `lsp`. Unbekannte Werte lehnen die Installation ab.
+* `permissions` (Code-Plugins und `tools`; `tools` verlangt `shell`): `commands`, `menus`, `file-events`, `git-events`, `shell`, `lsp`. Unbekannte Werte lehnen die Installation ab.
 * Eine neuere `apiVersion` als die App kennt wird abgelehnt.
 * Rein deklarative Plugins (ohne `entryPointClass`) laden keinen Code; ihre Beiträge werden direkt aus dem Manifest gelesen.
 * Aktivieren/Deaktivieren schaltet die Beiträge sofort (`ContributionRepository.contributions`).
@@ -120,9 +122,34 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 * Der Editor startet `command`, schreibt den Dateiinhalt auf **stdin** und ersetzt ihn durch **stdout**. Exit-Code ≠ 0 gilt als Fehler (erste Zeile von stderr wird angezeigt).
 * Zuordnung über `extensions` (ohne Punkt, case-insensitiv) oder exakte `fileNames`; mindestens eines von beiden ist Pflicht. `timeoutSeconds` 1..120 (Standard 15).
 * Platzhalter: `${file}` (absoluter Pfad der Datei), `${fileName}`, `${pluginDir}`, `${home}`.
-* Das Programm muss **bereits installiert** sein (z. B. `pkg install shfmt` oder `npm i -g prettier` im Terminal); die App installiert nichts. Fehlt es, greift die nächste Strategie.
+* Das Programm muss vorhanden sein. Mit `requires` (siehe unten) bietet der Plugins-Bildschirm an, es zu installieren; fehlt es trotzdem, greift die nächste Strategie.
 * Reihenfolge beim Formatieren: **Plugin-Formatierer** → LSP → ktlint/google-java-format → eingebauter Formatierer. Bereichsformatierung (Auswahl) unterstützen Plugin-Formatierer nicht.
 * Läuft mit dem Termux-Prefix im `PATH` (`$PREFIX/bin`). Wie `lspServers` startet das Programme auf dem Gerät: Pakete mit Formatierern nur aus vertrauenswürdiger Quelle installieren.
+
+## Voraussetzungen installieren (`requires`)
+
+```json
+"requires": [ { "manager": "pkg", "name": "clang", "check": "clangd" }, { "manager": "npm", "name": "pyright", "check": "pyright-langserver" } ]
+```
+
+* `manager`: `pkg` (Termux-Pakete, `apt-get install -y`), `npm` (`npm install -g`) oder `pip` (`python3 -m pip install`). `check` = Programmname, dessen Vorhandensein geprüft wird (Standard: letztes Segment von `name`).
+* **Nie automatisch:** Der Plugins-Bildschirm zeigt „Fehlende Programme: …" und installiert erst nach Bestätigung (Live-Ausgabe, abbrechbar). Die Prüfung gilt für aktivierte Plugins. Das PT-Menü fragt vor dem Start eines Werkzeugs genauso nach.
+* Paketnamen werden validiert (keine Optionen wie `-g`, kein `..`). Im **Store** sind nur Pakete einer festen Freigabeliste erlaubt (`RequirementPolicy`: u. a. clang, nodejs, python, golang, rust, ruff, shfmt, taplo, prettier, typescript, pyright …); per Sideload sind beliebige Namen möglich, weil der Nutzer die Liste vor der Installation sieht.
+* Ersetzt das alte, nie ausgeführte `installScript` (wird weiter gelesen, aber ignoriert).
+
+## Werkzeuge im PT-Menü (`tools`)
+
+```json
+{ "id": "migrate", "label": "Nach AndroidX migrieren", "description": "…",
+  "command": ["python3", "${pluginDir}/tool.py", "${projectDir}", "${input}"],
+  "prompt": { "label": "Modus: check oder apply", "hint": "check", "default": "check" },
+  "confirm": "Vor dem Umstellen bitte committen.", "timeoutSeconds": 300 }
+```
+
+* Erscheinen im **PT**-Dropdown im Kopf des Dateibaums (links neben ⋮). Ein Tipp öffnet bei `prompt`/`confirm` einen Dialog, prüft `requires` und startet dann `command` im Projektordner; die Ausgabe erscheint live in einem Dialog. Danach wird der Dateibaum aktualisiert.
+* `command` läuft **ohne Shell** (jedes Element = ein Argument; `${input}` kann also keine Befehle einschleusen). Platzhalter: `${projectDir}`, `${pluginDir}`, `${home}`, `${input}`. `timeoutSeconds` 1..900 (Standard 120).
+* Werkzeuge führen Programme/Skripte aus: Berechtigung `shell` ist Pflicht, **im Store nicht erlaubt**, nur Sideload.
+* Fertige Werkzeuge: `tool-plugins/` (VS-Code-Import, AndroidX, Version Catalog, unbenutzte Ressourcen, Formatieren, .gitignore, LICENSE, Aufräumen).
 
 ## Code-Plugins: Befehle, Menüs, Ereignisse (API v2)
 
@@ -167,6 +194,8 @@ class MyPlugin : CodeForgePlugin {
 | `grammars` | umgesetzt (Phase 5), nur Dateien ohne eingebaute Grammatik |
 | `snippets` | umgesetzt (Phase 5), schreibgeschützt |
 | `formatters` | umgesetzt: stdin→stdout über externes Programm, nicht auf Gerät getestet |
+| `tools` | umgesetzt: PT-Menü im Dateibaum, Live-Ausgabe, nur Sideload; nicht auf Gerät getestet |
+| `requires` | umgesetzt: Prüfung + Installation nach Bestätigung (Plugins-Bildschirm, PT-Menü); nicht auf Gerät getestet |
 | `extensionPack` | umgesetzt (Phase 5/7): Store installiert fehlende Mitglieder aus dem Katalog (Tiefe ≤ 4) |
 | Store-Policy | umgesetzt (Phase 7): nur deklarative Kategorien (`theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `bundle`); `installFromFile(declarativeOnly = true)` lehnt Archive mit `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge ab; Code-Plugins nur per Sideload |
 | Code-Plugin-Hooks | umgesetzt (Phase 6): Befehle, Menüs, Datei-/Git-Ereignisse, Berechtigungen |

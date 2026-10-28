@@ -1,0 +1,39 @@
+{
+  "id": "com.codeforge.plugin.project-clean.tool",
+  "name": "Projekt bereinigen (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Löscht Build-Artefakte (build/, .gradle/, .kotlin/, .cxx/, captures/, *.iml) und zeigt die freigegebene Größe. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "clean",
+        "label": "Build-Artefakte löschen",
+        "description": "Bericht oder Löschen (check/apply)",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 120,
+        "prompt": {
+          "label": "Modus: check (nur Bericht) oder apply",
+          "hint": "check",
+          "default": "check"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

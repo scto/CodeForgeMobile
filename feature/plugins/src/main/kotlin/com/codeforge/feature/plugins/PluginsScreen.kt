@@ -7,6 +7,8 @@ package com.codeforge.feature.plugins
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -104,6 +106,7 @@ private fun PluginsScreen(
     onEvent: (PluginsUiEvent) -> Unit,
     onImportClicked: () -> Unit
 ) {
+    uiState.requirementDialog?.let { RequirementDialogView(it, onEvent) }
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -157,6 +160,7 @@ private fun PluginsScreen(
                     PluginRow(
                         plugin = plugin,
                         isLoaded = plugin.id in uiState.loadedPluginIds,
+                        missing = uiState.missingRequirements[plugin.id].orEmpty(),
                         onEvent = onEvent
                     )
                 }
@@ -166,7 +170,12 @@ private fun PluginsScreen(
 }
 
 @Composable
-private fun PluginRow(plugin: InstalledPlugin, isLoaded: Boolean, onEvent: (PluginsUiEvent) -> Unit) {
+private fun PluginRow(
+    plugin: InstalledPlugin,
+    isLoaded: Boolean,
+    missing: List<com.codeforge.core.domain.extension.RequirementContribution>,
+    onEvent: (PluginsUiEvent) -> Unit
+) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
@@ -217,11 +226,74 @@ private fun PluginRow(plugin: InstalledPlugin, isLoaded: Boolean, onEvent: (Plug
                 )
             }
 
+            if (missing.isNotEmpty()) {
+                Text(
+                    stringRes(R.string.plugins_fehlt, missing.joinToString { it.name }),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                if (missing.isNotEmpty()) {
+                    TextButton(onClick = { onEvent(PluginsUiEvent.RequirementsClicked(plugin.id)) }) {
+                        Text(stringRes(R.string.plugins_voraussetzungen_installieren))
+                    }
+                }
                 TextButton(onClick = { onEvent(PluginsUiEvent.Uninstall(plugin.id)) }) {
                     Text(stringRes(R.string.common_entfernen))
                 }
             }
         }
+    }
+}
+
+
+@Composable
+private fun RequirementDialogView(dialog: RequirementDialog, onEvent: (PluginsUiEvent) -> Unit) {
+    val dismiss = { onEvent(PluginsUiEvent.RequirementsDismissed) }
+    when (dialog) {
+        is RequirementDialog.Confirm -> androidx.compose.material3.AlertDialog(
+            onDismissRequest = dismiss,
+            title = { Text(stringRes(R.string.plugins_voraussetzungen_titel)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringRes(R.string.plugins_voraussetzungen_text))
+                    dialog.missing.forEach {
+                        Text("• ${it.manager.id}: ${it.name}", style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { onEvent(PluginsUiEvent.RequirementsConfirmed) }) { Text(stringRes(R.string.plugins_installieren)) } },
+            dismissButton = { TextButton(onClick = dismiss) { Text(stringRes(R.string.common_abbrechen)) } }
+        )
+
+        is RequirementDialog.Running -> androidx.compose.material3.AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringRes(R.string.plugins_voraussetzungen_titel)) },
+            text = {
+                Column {
+                    Text(
+                        if (!dialog.done) stringRes(R.string.plugins_installiere) else stringRes(R.string.plugins_beendet, dialog.exitCode ?: -1),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (dialog.done && dialog.exitCode != 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    val scroll = androidx.compose.foundation.rememberScrollState()
+                    androidx.compose.runtime.LaunchedEffect(dialog.lines.size) { scroll.animateScrollTo(scroll.maxValue) }
+                    Text(
+                        dialog.lines.joinToString("\n"),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        modifier = Modifier.fillMaxWidth()
+                            .heightIn(max = 320.dp)
+                            .verticalScroll(scroll)
+                    )
+                }
+            },
+            confirmButton = { TextButton(onClick = dismiss) { Text(stringRes(if (dialog.done) R.string.common_schliessen else R.string.common_abbrechen)) } }
+        )
     }
 }

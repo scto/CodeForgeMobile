@@ -97,6 +97,8 @@ Diese Checkliste dient der manuellen Qualitätssicherung auf echten physischen A
 | **DIR-06** | Dateibaum: Sortierung | Ordner mit versteckten und normalen Ordnern/Dateien öffnen. | Reihenfolge: versteckte Ordner, Ordner, versteckte Dateien, Dateien; jeweils alphabetisch (Groß/Klein egal, `f2` vor `f10`). | Pixel 8 (Android 14) | ungeprüft |
 | **DIR-07** | Dateibaum: 3-Punkte-Menü | Menü ⋮ im Dateibaum-Kopf: Sortiermodus, Sortieren nach (Name/Typ/Größe/Geändert, Absteigend), Versteckte anzeigen umschalten; App neu starten. | Baum ändert sich sofort; Einstellungen bleiben nach Neustart erhalten. | Pixel 8 (Android 14) | ungeprüft |
 | **DIR-08** | Dateibaum: Ansichten | Ansicht Dateien / Projekt / Modul (Android) wählen. | Projekt: ohne `build`, `.gradle`, `.idea`, `.git`, Module mit Modul-Icon. Modul: Module → manifests/java-kotlin/res/…, „Gradle Scripts" und „Projektdateien" am Ende; Dateien öffnen sich im Editor. | Pixel 8 (Android 14) | ungeprüft |
+| **DIR-09** | PT-Menü | Tool-Plugin per Sideload installieren (z. B. `gitignore.tool`), im Dateibaum-Kopf „PT" öffnen, Werkzeug starten. | Eingabedialog, ggf. Frage zur Installation von `python`, Live-Ausgabe, danach aktualisierter Baum. | Pixel 8 (Android 14) | ungeprüft |
+| **DIR-10** | Voraussetzungen installieren | `pyright.lsp` installieren (Node fehlt). Plugins-Bildschirm: „Fehlende Programme" → „Voraussetzungen installieren" bestätigen. | `apt-get`/`npm` laufen mit Live-Ausgabe; danach verschwindet die Warnung, Server startet im Editor. | Pixel 8 (Android 14) | ungeprüft |
 
 ---
 

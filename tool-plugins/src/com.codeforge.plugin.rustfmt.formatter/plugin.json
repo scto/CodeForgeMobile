@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Formatiert rs mit rustfmt. Voraussetzung (Terminal): pkg install rust",
+  "description": "Formatiert rs mit rustfmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install rust).",
   "permissions": [],
   "contributes": {
     "formatters": [
@@ -20,6 +20,13 @@
           "2021"
         ],
         "timeoutSeconds": 20
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "rust",
+        "check": "rustfmt"
       }
     ]
   }

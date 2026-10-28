@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet HTML/CSS/JSON Language Servers ein. Voraussetzung (Terminal): npm install -g vscode-langservers-extracted",
+  "description": "Bindet HTML/CSS/JSON Language Servers ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g vscode-langservers-extracted).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -40,6 +40,18 @@
           "vscode-json-language-server",
           "--stdio"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "vscode-langservers-extracted",
+        "check": "vscode-html-language-server"
       }
     ]
   }

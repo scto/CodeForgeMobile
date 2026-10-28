@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Formatiert py, pyi mit Ruff Format. Voraussetzung (Terminal): pkg install ruff",
+  "description": "Formatiert py, pyi mit Ruff Format. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install ruff).",
   "permissions": [],
   "contributes": {
     "formatters": [
@@ -23,6 +23,12 @@
           "-"
         ],
         "timeoutSeconds": 20
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "ruff"
       }
     ]
   }

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet rust-analyzer (Rust) ein. Voraussetzung (Terminal): pkg install rust-analyzer",
+  "description": "Bindet rust-analyzer (Rust) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install rust-analyzer).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -17,6 +17,12 @@
         "command": [
           "rust-analyzer"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "rust-analyzer"
       }
     ]
   }

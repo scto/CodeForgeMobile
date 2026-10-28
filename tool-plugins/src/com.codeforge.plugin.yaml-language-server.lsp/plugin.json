@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet YAML Language Server ein. Voraussetzung (Terminal): npm install -g yaml-language-server",
+  "description": "Bindet YAML Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g yaml-language-server).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -18,6 +18,17 @@
           "yaml-language-server",
           "--stdio"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "yaml-language-server"
       }
     ]
   }

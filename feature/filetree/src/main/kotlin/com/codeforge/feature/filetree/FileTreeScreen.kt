@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Analytics
@@ -76,6 +78,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -156,6 +159,7 @@ private fun FileTreeScreen(
                 TooltipIconButton(onClick = { onEvent(FileTreeUiEvent.Refresh) }, label = stringRes(R.string.common_aktualisieren)) {
                     Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))
                 }
+                FileTreeToolsMenu(tools = uiState.tools, onEvent = onEvent)
                 FileTreeOptionsMenu(options = uiState.options, onEvent = onEvent)
             }
         }
@@ -204,6 +208,8 @@ private fun FileTreeScreen(
             onDismiss = { onEvent(FileTreeUiEvent.DismissContextMenu) }
         )
     }
+
+    uiState.toolDialog?.let { dialog -> FileTreeToolDialog(dialog = dialog, onEvent = onEvent) }
 
     uiState.propertiesTarget?.let { properties ->
         FileTreePropertiesDialog(
@@ -387,6 +393,126 @@ private fun groupLabel(group: FileTreeGroup): String = when (group) {
     FileTreeGroup.OTHER -> stringRes(R.string.filetree_gruppe_weitere)
     FileTreeGroup.GRADLE_SCRIPTS -> stringRes(R.string.filetree_gruppe_gradle)
     FileTreeGroup.PROJECT_FILES -> stringRes(R.string.filetree_gruppe_projektdateien)
+}
+
+/** PT-Menü (Plugin-Tools): listet die Werkzeuge aller aktivierten Plugins. */
+@Composable
+private fun FileTreeToolsMenu(tools: List<FileTreeTool>, onEvent: (FileTreeUiEvent) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        TooltipIconButton(onClick = { open = true }, label = stringRes(R.string.filetree_tools)) {
+            Text("PT", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            if (tools.isEmpty()) {
+                DropdownMenuItem(text = { Text(stringRes(R.string.filetree_tools_leer)) }, enabled = false, onClick = {})
+            }
+            tools.forEach { item ->
+                DropdownMenuItem(
+                    text = {
+                        Column {
+                            Text(item.tool.label)
+                            if (item.tool.description.isNotBlank()) {
+                                Text(
+                                    item.tool.description,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    },
+                    leadingIcon = { Icon(Icons.Filled.Extension, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                    onClick = {
+                        open = false
+                        onEvent(FileTreeUiEvent.ToolClicked(item.pluginId, item.tool.id))
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FileTreeToolDialog(dialog: ToolDialogState, onEvent: (FileTreeUiEvent) -> Unit) {
+    val dismiss = { onEvent(FileTreeUiEvent.ToolDialogDismissed) }
+    when (dialog) {
+        is ToolDialogState.Form -> AlertDialog(
+            onDismissRequest = dismiss,
+            title = { Text(dialog.item.tool.label) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    dialog.item.tool.confirm?.let { Text(it) }
+                    dialog.item.tool.prompt?.let { prompt ->
+                        OutlinedTextField(
+                            value = dialog.input,
+                            onValueChange = { onEvent(FileTreeUiEvent.ToolInputChanged(it)) },
+                            label = { Text(prompt.label) },
+                            placeholder = if (prompt.hint.isNotBlank()) ({ Text(prompt.hint) }) else null,
+                            singleLine = true
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { onEvent(FileTreeUiEvent.ToolFormConfirmed) },
+                    enabled = dialog.item.tool.prompt == null || dialog.input.isNotBlank()
+                ) { Text(stringRes(R.string.filetree_tool_start)) }
+            },
+            dismissButton = { TextButton(onClick = dismiss) { Text(stringRes(R.string.common_abbrechen)) } }
+        )
+
+        is ToolDialogState.Install -> AlertDialog(
+            onDismissRequest = dismiss,
+            title = { Text(stringRes(R.string.filetree_tool_installieren_titel)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringRes(R.string.filetree_tool_installieren_text, dialog.item.tool.label))
+                    dialog.missing.forEach { r ->
+                        Text("• ${r.manager.id}: ${r.name}", style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { onEvent(FileTreeUiEvent.ToolInstallConfirmed) }) { Text(stringRes(R.string.filetree_tool_installieren)) } },
+            dismissButton = { TextButton(onClick = dismiss) { Text(stringRes(R.string.common_abbrechen)) } }
+        )
+
+        is ToolDialogState.Running -> {
+            val scroll = rememberScrollState()
+            LaunchedEffect(dialog.lines.size) { scroll.animateScrollTo(scroll.maxValue) }
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text(dialog.item.tool.label) },
+                text = {
+                    Column {
+                        Text(
+                            text = when {
+                                dialog.phase == ToolPhase.INSTALLING -> stringRes(R.string.filetree_tool_installiert)
+                                dialog.phase == ToolPhase.RUNNING -> stringRes(R.string.filetree_tool_laeuft)
+                                dialog.timedOut -> stringRes(R.string.filetree_tool_timeout)
+                                else -> stringRes(R.string.filetree_tool_fertig, dialog.exitCode ?: -1)
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (dialog.phase == ToolPhase.DONE && dialog.exitCode != 0) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Text(
+                            text = dialog.lines.joinToString("\n"),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = FontFamily.Monospace,
+                            modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp).verticalScroll(scroll)
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = dismiss) {
+                        Text(stringRes(if (dialog.phase == ToolPhase.DONE) R.string.common_schliessen else R.string.common_abbrechen))
+                    }
+                }
+            )
+        }
+    }
 }
 
 /** Drei-Punkte-Menü: Sortiermodus, Sortieren nach, Reihenfolge, Ansicht, Versteckte anzeigen. */

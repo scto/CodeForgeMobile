@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet neocmakelsp (CMake) ein. Voraussetzung (Terminal): pkg install neocmakelsp",
+  "description": "Bindet neocmakelsp (CMake) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install neocmakelsp).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -18,6 +18,12 @@
           "neocmakelsp",
           "stdio"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "neocmakelsp"
       }
     ]
   }

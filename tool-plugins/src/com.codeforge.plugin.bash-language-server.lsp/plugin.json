@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet Bash Language Server ein. Voraussetzung (Terminal): npm install -g bash-language-server (optional: pkg install shellcheck shfmt)",
+  "description": "Bindet Bash Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g bash-language-server (optional: pkg install shellcheck shfmt)).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -18,6 +18,17 @@
           "bash-language-server",
           "start"
         ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "bash-language-server"
       }
     ]
   }

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Formatiert js, jsx, mjs, cjs, ts, tsx … mit Prettier. Voraussetzung (Terminal): npm install -g prettier",
+  "description": "Formatiert js, jsx, mjs, cjs, ts, tsx … mit Prettier. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g prettier).",
   "permissions": [],
   "contributes": {
     "formatters": [
@@ -34,6 +34,17 @@
           "${file}"
         ],
         "timeoutSeconds": 20
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "prettier"
       }
     ]
   }

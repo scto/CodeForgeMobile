@@ -1,0 +1,40 @@
+{
+  "id": "com.codeforge.plugin.license.tool",
+  "name": "LICENSE-Generator (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "generate",
+        "label": "LICENSE schreiben",
+        "description": "Eingabe: <lizenz> <Name>, z. B. mit Max Mustermann",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 30,
+        "prompt": {
+          "label": "Lizenz und Name",
+          "hint": "mit Max Mustermann",
+          "default": "mit "
+        },
+        "confirm": "Eine vorhandene LICENSE-Datei wird überschrieben."
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

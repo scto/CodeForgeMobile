@@ -1,0 +1,43 @@
+{
+  "id": "com.codeforge.plugin.vscode-import.tool",
+  "name": "VS Code Import (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Konvertiert VS-Code-Themes und Icon-Packs (.vsix, Ordner oder Theme-JSON) in ein CodeForge-Plugin (ZIP in cf-plugin-out/). Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "import",
+        "label": "VS-Code-Theme/Icon-Pack importieren",
+        "description": "Aus .vsix, Extension-Ordner oder Theme-JSON ein Plugin erzeugen",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 300,
+        "prompt": {
+          "label": "Pfad zu .vsix / Ordner / Theme-JSON",
+          "hint": "z. B. downloads/theme.vsix"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      },
+      {
+        "manager": "pkg",
+        "name": "librsvg",
+        "check": "rsvg-convert"
+      }
+    ]
+  }
+}

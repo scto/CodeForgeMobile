@@ -13,13 +13,14 @@ Referenz aller Felder: `docs/extensions.md`. Lauffähige Vorlagen: `templates/` 
 | Code-Bausteine | `snippets` | deklarativ | `snippets` |
 | Language Server anbinden | `lsp-server` | deklarativ | `lsp` |
 | Externen Formatierer anbinden | `formatter` | deklarativ | `formatter` |
+| Werkzeug im PT-Menü des Dateibaums (Skript im Projekt ausführen) | `tool-plugins/scripts` (Beispiele) | deklarativ + Skript, Berechtigung `shell` | nur Sideload |
 | Mehrere Plugins bündeln | `extension-pack` | deklarativ | `bundle` |
 | Befehle, Menüs, Ereignisse, eigene Logik | `code-plugin` | Code | nur Sideload (`plugin`) |
 
 Deklarativ = nur Dateien, kein ausführbarer Code. Der Store installiert ausschließlich solche Pakete; Archive mit
 `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge werden abgelehnt.
 
-Fertige Formatierer- und Language-Server-Plugins: `tool-plugins/` (Generator + Quellen).
+Fertige Formatierer-, Language-Server- und Werkzeug-Plugins: `tool-plugins/` (Generator + Quellen). Benötigte Programme deklarierst du mit `requires`; die App installiert sie nach Bestätigung.
 
 ## 2. Schnellstart (deklarativ)
 

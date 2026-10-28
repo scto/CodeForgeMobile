@@ -38,6 +38,10 @@ object PluginManifestParser {
         val unknown = permissions - PluginPermissions.ALL
         require(unknown.isEmpty()) { "Unbekannte Berechtigungen: ${unknown.joinToString()}" }
 
+        val parsedContributes = parseContributes(root["contributes"] as? JsonObject)
+        require(parsedContributes.tools.isEmpty() || PluginPermissions.SHELL in permissions) {
+            "contributes.tools benötigt die Berechtigung '${PluginPermissions.SHELL}'"
+        }
         PluginManifest(
             id = id,
             name = name,
@@ -47,7 +51,7 @@ object PluginManifestParser {
             apiVersion = apiVersion,
             entryPointClass = root.string("entryPointClass")?.takeIf { it.isNotBlank() },
             permissions = permissions,
-            contributes = parseContributes(root["contributes"] as? JsonObject)
+            contributes = parsedContributes
         )
     }
 
@@ -110,6 +114,33 @@ object PluginManifestParser {
                     command = command,
                     timeoutSeconds = timeout
                 )
+            },
+            tools = obj.objects("tools").map {
+                val command = it.stringList("command")
+                require(command.isNotEmpty() && command.first().isNotBlank()) { "tools: 'command' darf nicht leer sein" }
+                val timeout = (it["timeoutSeconds"] as? JsonPrimitive)?.intOrNull ?: 120
+                require(timeout in 1..900) { "tools: 'timeoutSeconds' muss 1..900 sein" }
+                val prompt = (it["prompt"] as? JsonObject)?.let { p ->
+                    ToolPrompt(label = p.req("label"), hint = p.string("hint").orEmpty(), default = p.string("default").orEmpty())
+                }
+                ToolContribution(
+                    id = it.req("id").also { id -> require(ID_REGEX.matches(id)) { "tools: ungültige ID '$id'" } },
+                    label = it.string("label") ?: it.req("id"),
+                    description = it.string("description").orEmpty(),
+                    command = command,
+                    prompt = prompt,
+                    confirm = it.string("confirm")?.takeIf { c -> c.isNotBlank() },
+                    timeoutSeconds = timeout
+                )
+            },
+            requires = obj.objects("requires").map {
+                val manager = RequirementManager.of(it.req("manager"))
+                    ?: throw IllegalArgumentException("requires: 'manager' muss pkg, npm oder pip sein")
+                val name = it.req("name")
+                require(RequirementPolicy.isValidName(name)) { "requires: ungültiger Paketname '$name'" }
+                val check = it.string("check")?.takeIf { c -> c.isNotBlank() } ?: name.substringAfterLast('/')
+                require(RequirementPolicy.isValidName(check)) { "requires: ungültiger 'check'-Name '$check'" }
+                RequirementContribution(manager, name, check)
             }
         )
     }
