@@ -15,4 +15,4 @@ Die App (Einstellungen → Store) lädt `store.json` von
 - Ein höheres `schema` als das von der App unterstützte zeigt in der App den Hinweis zum App-Update.
 - Offline zeigt die App die zuletzt geladene Fassung.
 
-Hinweis: Die App öffnet Download und Homepage im Browser. Eine direkte Installation aus dem Store ist noch nicht eingebaut.
+Veröffentlichen: `python3 store-site/publish.py <checkout-von-codeforge-store>` baut alle Plugin-Pakete (Themes, TextMate, Formatierer, LSP, Bundles, Werkzeuge), schreibt `packages/*.zip` und `store.json` (mit SHA-256); danach im Store-Repo committen und pushen.

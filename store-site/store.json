@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-10-27",
+  "updated": "2026-10-28",
   "categories": [
     {
       "id": "plugin",
@@ -68,19 +68,990 @@
   ],
   "items": [
     {
-      "id": "example-plugin",
-      "category": "plugin",
+      "id": "com.codeforge.plugin.ayu-dark.theme",
+      "category": "theme",
       "name": {
-        "de": "Beispiel-Plugin",
-        "en": "Example plugin"
+        "de": "Ayu Dark (Farbschema)",
+        "en": "Ayu Dark (Farbschema)"
       },
       "summary": {
-        "de": "Platzhalter-Eintrag. Ersetzen oder löschen.",
-        "en": "Placeholder entry. Replace or delete."
+        "de": "Farbschema „Ayu Dark“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Ayu Dark“ aus CodeForge, als Dunkel- und Hell-Variante."
       },
-      "version": "0.0.1",
-      "author": "Thomas Schmid",
-      "homepage": "https://github.com/scto/CodeForgeMobile"
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ayu-dark.theme.zip",
+      "sha256": "af2fa9f3560e4241ad0294de5f603fca3d181b4d0d38759445124fb08f287ebd"
+    },
+    {
+      "id": "com.codeforge.plugin.ayu.theme",
+      "category": "theme",
+      "name": {
+        "de": "Ayu (Editor-Theme)",
+        "en": "Ayu (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Ayu als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Ayu als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ayu.theme.zip",
+      "sha256": "71f32a52ba7170b81c46c057e246df5f9849d862d3c61f419244c2349003ad8c"
+    },
+    {
+      "id": "com.codeforge.plugin.catppuccin.theme",
+      "category": "theme",
+      "name": {
+        "de": "Catppuccin (Editor-Theme)",
+        "en": "Catppuccin (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Catppuccin als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Catppuccin als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.catppuccin.theme.zip",
+      "sha256": "778899f3d7f9bddbc3ee9025ac47afb4c67ba4c3ae4b502d0bf7ba954507cdaf"
+    },
+    {
+      "id": "com.codeforge.plugin.cyberpunk-neon.theme",
+      "category": "theme",
+      "name": {
+        "de": "Cyberpunk Neon (Farbschema)",
+        "en": "Cyberpunk Neon (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Cyberpunk Neon“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Cyberpunk Neon“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.cyberpunk-neon.theme.zip",
+      "sha256": "c84ad50aa0e0c3d4fbc7584236aff54f96b4282ffa06786c1a8681910ce0f0c6"
+    },
+    {
+      "id": "com.codeforge.plugin.darcula.theme",
+      "category": "theme",
+      "name": {
+        "de": "Darcula (Farbschema)",
+        "en": "Darcula (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Darcula“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Darcula“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.darcula.theme.zip",
+      "sha256": "f11d43b036c39cf0b3adeb940a41e7f4b2c5036fa5bdfb7a515dc362efe1f423"
+    },
+    {
+      "id": "com.codeforge.plugin.dracula.theme",
+      "category": "theme",
+      "name": {
+        "de": "Dracula (Editor-Theme)",
+        "en": "Dracula (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Dracula als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Dracula als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.dracula.theme.zip",
+      "sha256": "beec5b06db392995f3abcd6f24695a9b66fb4953b5e4b334c3cd4271023b6854"
+    },
+    {
+      "id": "com.codeforge.plugin.eclipse.theme",
+      "category": "theme",
+      "name": {
+        "de": "Eclipse (Farbschema)",
+        "en": "Eclipse (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Eclipse“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Eclipse“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.eclipse.theme.zip",
+      "sha256": "e1318dfefe31668112e7329e9a9ce901b65c53039b2f5d6994ad5343bcb47872"
+    },
+    {
+      "id": "com.codeforge.plugin.everforest.theme",
+      "category": "theme",
+      "name": {
+        "de": "Everforest (Editor-Theme)",
+        "en": "Everforest (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Everforest als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Everforest als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.everforest.theme.zip",
+      "sha256": "affbe13a31d498e7a459b2b70a7178a3dab94d2ef42485561194a9eda7ce6211"
+    },
+    {
+      "id": "com.codeforge.plugin.forest.theme",
+      "category": "theme",
+      "name": {
+        "de": "Forest (Farbschema)",
+        "en": "Forest (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Forest“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Forest“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.forest.theme.zip",
+      "sha256": "84d9842b8bf4177648496c7ac2df4cb588605c23ba68755828277d7b9326d718"
+    },
+    {
+      "id": "com.codeforge.plugin.github-light.theme",
+      "category": "theme",
+      "name": {
+        "de": "GitHub Light (Farbschema)",
+        "en": "GitHub Light (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „GitHub Light“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „GitHub Light“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.github-light.theme.zip",
+      "sha256": "19b22f9b6f2f9790988b08b619203871c419ced1c51c5c92b781007603ed640e"
+    },
+    {
+      "id": "com.codeforge.plugin.github.theme",
+      "category": "theme",
+      "name": {
+        "de": "GitHub (Editor-Theme)",
+        "en": "GitHub (Editor-Theme)"
+      },
+      "summary": {
+        "de": "GitHub als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "GitHub als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.github.theme.zip",
+      "sha256": "a6bc0f612347435f915adb0c9c0d7a3f52addaff438d17647b0ccc1e7a172e62"
+    },
+    {
+      "id": "com.codeforge.plugin.gruvbox.theme",
+      "category": "theme",
+      "name": {
+        "de": "Gruvbox (Editor-Theme)",
+        "en": "Gruvbox (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Gruvbox als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Gruvbox als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.gruvbox.theme.zip",
+      "sha256": "381bd09efbda95492cd87758d66d1b2d5ba7307b5a9e946ec888bd108da93c01"
+    },
+    {
+      "id": "com.codeforge.plugin.kanagawa.theme",
+      "category": "theme",
+      "name": {
+        "de": "Kanagawa (Editor-Theme)",
+        "en": "Kanagawa (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Kanagawa als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Kanagawa als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.kanagawa.theme.zip",
+      "sha256": "4475e975ba053a883a9417b4d5aa81533f1ce4d5c4e16a7094fadc3421492270"
+    },
+    {
+      "id": "com.codeforge.plugin.material.theme",
+      "category": "theme",
+      "name": {
+        "de": "Material (Editor-Theme)",
+        "en": "Material (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Material als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Material als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.material.theme.zip",
+      "sha256": "cd869bffba4a3b3a7ed4e2f787304f01885a34d4b4a0a70271fd215fe7c441d1"
+    },
+    {
+      "id": "com.codeforge.plugin.monochrome.theme",
+      "category": "theme",
+      "name": {
+        "de": "Monochrome (Farbschema)",
+        "en": "Monochrome (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Monochrome“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Monochrome“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.monochrome.theme.zip",
+      "sha256": "ddc6f49c4f204544804ea64d43f15ec06ce89ed270941759eb3c463aaeef18c3"
+    },
+    {
+      "id": "com.codeforge.plugin.monokai.theme",
+      "category": "theme",
+      "name": {
+        "de": "Monokai (Farbschema)",
+        "en": "Monokai (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Monokai“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Monokai“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.monokai.theme.zip",
+      "sha256": "260afb22384ec60729ae39600abf5c9d8567a91d5c21facc3682b78656c3514e"
+    },
+    {
+      "id": "com.codeforge.plugin.night-owl.theme",
+      "category": "theme",
+      "name": {
+        "de": "Night Owl (Editor-Theme)",
+        "en": "Night Owl (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Night Owl als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Night Owl als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.night-owl.theme.zip",
+      "sha256": "582ac39ef7f5d3ab7c38d750053549bb30ae06438081ebeeb68bfb084b53453c"
+    },
+    {
+      "id": "com.codeforge.plugin.nord.theme",
+      "category": "theme",
+      "name": {
+        "de": "Nord (Editor-Theme)",
+        "en": "Nord (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Nord als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Nord als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.nord.theme.zip",
+      "sha256": "74147c63bb77bbb3fd5c3e1ad186a7aaea66ede6d598130da2d162d188d06fdd"
+    },
+    {
+      "id": "com.codeforge.plugin.notepad-plus-plus.theme",
+      "category": "theme",
+      "name": {
+        "de": "Notepad++ (Farbschema)",
+        "en": "Notepad++ (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Notepad++“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Notepad++“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.notepad-plus-plus.theme.zip",
+      "sha256": "1bbdaddf7fe8524df6e46a26e02a0bda983cabc641061e5ccd31c8df9f86002a"
+    },
+    {
+      "id": "com.codeforge.plugin.ocean.theme",
+      "category": "theme",
+      "name": {
+        "de": "Ocean (Farbschema)",
+        "en": "Ocean (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Ocean“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Ocean“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ocean.theme.zip",
+      "sha256": "e86d463a433a669bfed6a5ea8a34a93846428eea3cf58c06f37930eb51b677bb"
+    },
+    {
+      "id": "com.codeforge.plugin.one.theme",
+      "category": "theme",
+      "name": {
+        "de": "One (Editor-Theme)",
+        "en": "One (Editor-Theme)"
+      },
+      "summary": {
+        "de": "One als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "One als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.one.theme.zip",
+      "sha256": "cb74cfb60b1e1cc8c3104a9d9996e2bf5c9782ba10add77acf260d8157ab31f3"
+    },
+    {
+      "id": "com.codeforge.plugin.quiet-light.theme",
+      "category": "theme",
+      "name": {
+        "de": "Quiet Light (Farbschema)",
+        "en": "Quiet Light (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Quiet Light“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Quiet Light“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.quiet-light.theme.zip",
+      "sha256": "f20d4fccba11897cee4ff2fe866ebcc07d955ab6bfd57889277b4b373b94da34"
+    },
+    {
+      "id": "com.codeforge.plugin.rose-pine.theme",
+      "category": "theme",
+      "name": {
+        "de": "Rosé Pine (Editor-Theme)",
+        "en": "Rosé Pine (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Rosé Pine als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Rosé Pine als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.rose-pine.theme.zip",
+      "sha256": "b237ebc86d690f3a6324407816027238db4d020bf7cf64870ae3d59025356d03"
+    },
+    {
+      "id": "com.codeforge.plugin.solarized-dark.theme",
+      "category": "theme",
+      "name": {
+        "de": "Solarized Dark (Farbschema)",
+        "en": "Solarized Dark (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Solarized Dark“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Solarized Dark“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.solarized-dark.theme.zip",
+      "sha256": "35bc5cea1360a5e043153cfe67b240f502aa456f74945272bc53a9ce8e80d4ea"
+    },
+    {
+      "id": "com.codeforge.plugin.solarized.theme",
+      "category": "theme",
+      "name": {
+        "de": "Solarized (Editor-Theme)",
+        "en": "Solarized (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Solarized als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Solarized als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.solarized.theme.zip",
+      "sha256": "1924b397f47d018b9cb86cce70cae5e3efb8a6dc0c226e8ab5f33f34325ffb7a"
+    },
+    {
+      "id": "com.codeforge.plugin.sunset.theme",
+      "category": "theme",
+      "name": {
+        "de": "Sunset (Farbschema)",
+        "en": "Sunset (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Sunset“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Sunset“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.sunset.theme.zip",
+      "sha256": "69700271a2aea7f83bf1991a38d7f2e3ac188cb58535ac3a00ce10bfd0d84033"
+    },
+    {
+      "id": "com.codeforge.plugin.tokyo-night.theme",
+      "category": "theme",
+      "name": {
+        "de": "Tokyo Night (Editor-Theme)",
+        "en": "Tokyo Night (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Tokyo Night als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Tokyo Night als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.tokyo-night.theme.zip",
+      "sha256": "141798fa9e18c5546fc8c7c2f79e2a3a2ab23a31bbd39ab6539e877d3aa876b8"
+    },
+    {
+      "id": "com.codeforge.plugin.tomorrow.theme",
+      "category": "theme",
+      "name": {
+        "de": "Tomorrow (Editor-Theme)",
+        "en": "Tomorrow (Editor-Theme)"
+      },
+      "summary": {
+        "de": "Tomorrow als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
+        "en": "Tomorrow als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.tomorrow.theme.zip",
+      "sha256": "d87eb892251f290f3a660941478ee7c0324c234d16ef68ab6b09c6aa3ed440fc"
+    },
+    {
+      "id": "com.codeforge.plugin.violet.theme",
+      "category": "theme",
+      "name": {
+        "de": "Violet (Farbschema)",
+        "en": "Violet (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „Violet“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „Violet“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.violet.theme.zip",
+      "sha256": "a52a3f31991276fa38b2cd4157c970886984cd8ccdb12f5493400be46a4bb2b4"
+    },
+    {
+      "id": "com.codeforge.plugin.vscode-dark-plus.theme",
+      "category": "theme",
+      "name": {
+        "de": "VS Code Dark+ (Farbschema)",
+        "en": "VS Code Dark+ (Farbschema)"
+      },
+      "summary": {
+        "de": "Farbschema „VS Code Dark+“ aus CodeForge, als Dunkel- und Hell-Variante.",
+        "en": "Farbschema „VS Code Dark+“ aus CodeForge, als Dunkel- und Hell-Variante."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.vscode-dark-plus.theme.zip",
+      "sha256": "5389ddfc90ce9ea63671d5abaab2b5249f5c04ca413b8b3776e8f2ee5fa7c27b"
+    },
+    {
+      "id": "com.codeforge.plugin.bash-language-server.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "Bash Language Server (Language Server)",
+        "en": "Bash Language Server (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet Bash Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g bash-language-server (optional: pkg install shellcheck shfmt)).",
+        "en": "Bindet Bash Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g bash-language-server (optional: pkg install shellcheck shfmt))."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.bash-language-server.lsp.zip",
+      "sha256": "49f04054378fff17dd18a4f6ac0d75c6eec2e6afbc566f4649155c59edfbd2e8"
+    },
+    {
+      "id": "com.codeforge.plugin.clangd.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "clangd (C/C++) (Language Server)",
+        "en": "clangd (C/C++) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet clangd (C/C++) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install clang).",
+        "en": "Bindet clangd (C/C++) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install clang)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.clangd.lsp.zip",
+      "sha256": "6a3e83c47549ed74814ce4f72542a3df0ce8aaa823948917134202325913badf"
+    },
+    {
+      "id": "com.codeforge.plugin.dart.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "Dart Analysis Server (Language Server)",
+        "en": "Dart Analysis Server (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet Dart Analysis Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install dart).",
+        "en": "Bindet Dart Analysis Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install dart)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.dart.lsp.zip",
+      "sha256": "b510843fb8f2595b215445bc6aab0269329eca448e08b88eebae8a769b07eb8f"
+    },
+    {
+      "id": "com.codeforge.plugin.gopls.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "gopls (Go) (Language Server)",
+        "en": "gopls (Go) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet gopls (Go) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install gopls).",
+        "en": "Bindet gopls (Go) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install gopls)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.gopls.lsp.zip",
+      "sha256": "a8e0f36589e157951680045dc45670b2822cde7c64d68a48085e140438f24578"
+    },
+    {
+      "id": "com.codeforge.plugin.neocmakelsp.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "neocmakelsp (CMake) (Language Server)",
+        "en": "neocmakelsp (CMake) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet neocmakelsp (CMake) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install neocmakelsp).",
+        "en": "Bindet neocmakelsp (CMake) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install neocmakelsp)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.neocmakelsp.lsp.zip",
+      "sha256": "0085a6bb448b750557c377c1733d681bea3d11e550dd1bcb8913b464ca1c991f"
+    },
+    {
+      "id": "com.codeforge.plugin.pyright.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "Pyright (Python) (Language Server)",
+        "en": "Pyright (Python) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet Pyright (Python) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g pyright).",
+        "en": "Bindet Pyright (Python) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g pyright)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.pyright.lsp.zip",
+      "sha256": "b61b4aacf7882ea996166420ca89ad65816194c557f022f8c118ae3b0cf502fb"
+    },
+    {
+      "id": "com.codeforge.plugin.ruff.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "Ruff (Python-Linting) (Language Server)",
+        "en": "Ruff (Python-Linting) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet Ruff (Python-Linting) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install ruff).",
+        "en": "Bindet Ruff (Python-Linting) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install ruff)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ruff.lsp.zip",
+      "sha256": "ee33d8e9a32b09f7208bbbf537631de149ea17d8476a6c35c8246f39fddbe029"
+    },
+    {
+      "id": "com.codeforge.plugin.rust-analyzer.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "rust-analyzer (Rust) (Language Server)",
+        "en": "rust-analyzer (Rust) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet rust-analyzer (Rust) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install rust-analyzer).",
+        "en": "Bindet rust-analyzer (Rust) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install rust-analyzer)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.rust-analyzer.lsp.zip",
+      "sha256": "2a79cf7beb6909d9c81f9a8b4966904348ed72ceba057d1d8e8c4d4299485fd0"
+    },
+    {
+      "id": "com.codeforge.plugin.taplo.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "Taplo (TOML) (Language Server)",
+        "en": "Taplo (TOML) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet Taplo (TOML) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install taplo).",
+        "en": "Bindet Taplo (TOML) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install taplo)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.taplo.lsp.zip",
+      "sha256": "4aaa90cd56d3718b17b269650a322d8491e14e4e410c78eae84d639c4dcb74a0"
+    },
+    {
+      "id": "com.codeforge.plugin.typescript-language-server.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "TypeScript/JavaScript Language Server (Language Server)",
+        "en": "TypeScript/JavaScript Language Server (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet TypeScript/JavaScript Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g typescript typescript-language-server).",
+        "en": "Bindet TypeScript/JavaScript Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g typescript typescript-language-server)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.typescript-language-server.lsp.zip",
+      "sha256": "a992dbc1bff73fc31bfdc28814d57e3076117e12e49e122a3343a530c5f4bcbe"
+    },
+    {
+      "id": "com.codeforge.plugin.web-langservers.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "HTML/CSS/JSON Language Servers (Language Server)",
+        "en": "HTML/CSS/JSON Language Servers (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet HTML/CSS/JSON Language Servers ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g vscode-langservers-extracted).",
+        "en": "Bindet HTML/CSS/JSON Language Servers ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g vscode-langservers-extracted)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.web-langservers.lsp.zip",
+      "sha256": "d606406973a342ae8208582a31d575eab755f42a38ffe0aa9de852a527e88015"
+    },
+    {
+      "id": "com.codeforge.plugin.yaml-language-server.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "YAML Language Server (Language Server)",
+        "en": "YAML Language Server (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet YAML Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g yaml-language-server).",
+        "en": "Bindet YAML Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g yaml-language-server)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.yaml-language-server.lsp.zip",
+      "sha256": "923e91346d2570fd625aa5bf8fad2e34325560d7d9570f7a3e3de91414418c58"
+    },
+    {
+      "id": "com.codeforge.plugin.gofmt.formatter",
+      "category": "formatter",
+      "name": {
+        "de": "gofmt (Formatierer)",
+        "en": "gofmt (Formatierer)"
+      },
+      "summary": {
+        "de": "Formatiert go mit gofmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install golang).",
+        "en": "Formatiert go mit gofmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install golang)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.gofmt.formatter.zip",
+      "sha256": "f3f5106edac12132f9f1a9ee9b52bab81cbd00c6ecead72f132cfa17598e442c"
+    },
+    {
+      "id": "com.codeforge.plugin.prettier.formatter",
+      "category": "formatter",
+      "name": {
+        "de": "Prettier (Formatierer)",
+        "en": "Prettier (Formatierer)"
+      },
+      "summary": {
+        "de": "Formatiert js, jsx, mjs, cjs, ts, tsx … mit Prettier. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g prettier).",
+        "en": "Formatiert js, jsx, mjs, cjs, ts, tsx … mit Prettier. Fehlende Programme installiert die App nach Bestätigung (sonst: npm install -g prettier)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.prettier.formatter.zip",
+      "sha256": "1f4736af9b5629c0e27c04aaff9392403a2370e94a04fe19c9090a9966fc8d7b"
+    },
+    {
+      "id": "com.codeforge.plugin.ruff-format.formatter",
+      "category": "formatter",
+      "name": {
+        "de": "Ruff Format (Formatierer)",
+        "en": "Ruff Format (Formatierer)"
+      },
+      "summary": {
+        "de": "Formatiert py, pyi mit Ruff Format. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install ruff).",
+        "en": "Formatiert py, pyi mit Ruff Format. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install ruff)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ruff-format.formatter.zip",
+      "sha256": "a25d57551b8c13d6d82e690ec447d112dd7e665db23d68be9938136ac2dca2cc"
+    },
+    {
+      "id": "com.codeforge.plugin.rustfmt.formatter",
+      "category": "formatter",
+      "name": {
+        "de": "rustfmt (Formatierer)",
+        "en": "rustfmt (Formatierer)"
+      },
+      "summary": {
+        "de": "Formatiert rs mit rustfmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install rust).",
+        "en": "Formatiert rs mit rustfmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install rust)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.rustfmt.formatter.zip",
+      "sha256": "d178690945f79c2dc7beaf50f9d8d05bfec16e61eec3043cd6c631ab20109f11"
+    },
+    {
+      "id": "com.codeforge.plugin.shfmt.formatter",
+      "category": "formatter",
+      "name": {
+        "de": "shfmt (Formatierer)",
+        "en": "shfmt (Formatierer)"
+      },
+      "summary": {
+        "de": "Formatiert sh, bash, zsh mit shfmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install shfmt).",
+        "en": "Formatiert sh, bash, zsh mit shfmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install shfmt)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.shfmt.formatter.zip",
+      "sha256": "da8b6d1968476b874e6c96ee3aca5d3e8891a8fdaf887e8012f76daed097025a"
+    },
+    {
+      "id": "com.codeforge.plugin.taplo-format.formatter",
+      "category": "formatter",
+      "name": {
+        "de": "Taplo Format (Formatierer)",
+        "en": "Taplo Format (Formatierer)"
+      },
+      "summary": {
+        "de": "Formatiert toml mit Taplo Format. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install taplo).",
+        "en": "Formatiert toml mit Taplo Format. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install taplo)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.taplo-format.formatter.zip",
+      "sha256": "ce72cf5e40f4ee2b5832f63fcf8469362d8a9888a3c9036c2155410613793b05"
+    },
+    {
+      "id": "com.codeforge.plugin.all-formatters.bundle",
+      "category": "bundle",
+      "name": {
+        "de": "Alle Formatierer (Bundle)",
+        "en": "Alle Formatierer (Bundle)"
+      },
+      "summary": {
+        "de": "Alle Formatierer von CodeForge als Bundle. Die Programme selbst müssen installiert werden.",
+        "en": "Alle Formatierer von CodeForge als Bundle. Die Programme selbst müssen installiert werden."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-formatters.bundle.zip",
+      "sha256": "29be252f8cd0dce6acf5ae66c14f0bb01bd97937827a2771fb0e799e0a29223a"
+    },
+    {
+      "id": "com.codeforge.plugin.all-lsp-servers.bundle",
+      "category": "bundle",
+      "name": {
+        "de": "Alle Language Server (Bundle)",
+        "en": "Alle Language Server (Bundle)"
+      },
+      "summary": {
+        "de": "Alle Language Server von CodeForge als Bundle. Die Programme selbst müssen installiert werden.",
+        "en": "Alle Language Server von CodeForge als Bundle. Die Programme selbst müssen installiert werden."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-lsp-servers.bundle.zip",
+      "sha256": "da200fc4fcd31ff17ddf4d0718f5c4f88ccba1bb994df0f681ea50e2681910cd"
+    },
+    {
+      "id": "com.codeforge.plugin.androidx-migrate.tool",
+      "category": "plugin",
+      "name": {
+        "de": "AndroidX-Migration (Tool)",
+        "en": "AndroidX-Migration (Tool)"
+      },
+      "summary": {
+        "de": "Ersetzt android.support.* / android.arch.* durch AndroidX (Imports, Layout-XML, Gradle) und setzt useAndroidX/Jetifier. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        "en": "Ersetzt android.support.* / android.arch.* durch AndroidX (Imports, Layout-XML, Gradle) und setzt useAndroidX/Jetifier. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.androidx-migrate.tool.zip",
+      "sha256": "55ca19214f5ddb901ebc12814f9adcc3a1bcd62c6e1d9ddc93af7c8c1e45e5e1"
+    },
+    {
+      "id": "com.codeforge.plugin.catalog-migrate.tool",
+      "category": "plugin",
+      "name": {
+        "de": "Version-Catalog-Migration (Tool)",
+        "en": "Version-Catalog-Migration (Tool)"
+      },
+      "summary": {
+        "de": "Verschiebt hartcodierte Abhängigkeiten aus build.gradle(.kts) in gradle/libs.versions.toml. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        "en": "Verschiebt hartcodierte Abhängigkeiten aus build.gradle(.kts) in gradle/libs.versions.toml. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.catalog-migrate.tool.zip",
+      "sha256": "5a719578440995835ac39a20b8080dc8745b780851dea27dc4048b822f1d73f2"
+    },
+    {
+      "id": "com.codeforge.plugin.format-all.tool",
+      "category": "plugin",
+      "name": {
+        "de": "Alles formatieren (Tool)",
+        "en": "Alles formatieren (Tool)"
+      },
+      "summary": {
+        "de": "Formatiert oder prüft das ganze Projekt mit den installierten Formatierern (ktlint, shfmt, ruff, gofmt, rustfmt, taplo, prettier). Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        "en": "Formatiert oder prüft das ganze Projekt mit den installierten Formatierern (ktlint, shfmt, ruff, gofmt, rustfmt, taplo, prettier). Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.format-all.tool.zip",
+      "sha256": "fe4ce1adbd794963f3889bf594d14523b8d6569301eb72e34cdaed65a3355af3"
+    },
+    {
+      "id": "com.codeforge.plugin.gitignore.tool",
+      "category": "plugin",
+      "name": {
+        "de": ".gitignore-Generator (Tool)",
+        "en": ".gitignore-Generator (Tool)"
+      },
+      "summary": {
+        "de": "Ergänzt .gitignore um fehlende Einträge für Android, Kotlin, Node, Python, Rust oder Go. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        "en": "Ergänzt .gitignore um fehlende Einträge für Android, Kotlin, Node, Python, Rust oder Go. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.gitignore.tool.zip",
+      "sha256": "8987f27879315677e71d9cc6a48798c4bf8ee0af1a040607a964aba83c780570"
+    },
+    {
+      "id": "com.codeforge.plugin.license.tool",
+      "category": "plugin",
+      "name": {
+        "de": "LICENSE-Generator (Tool)",
+        "en": "LICENSE-Generator (Tool)"
+      },
+      "summary": {
+        "de": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        "en": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.license.tool.zip",
+      "sha256": "cd1fb8677ee2e5e8422e5c5c1c3c525aeb733e17dd984cf5d4be1655af94d434"
+    },
+    {
+      "id": "com.codeforge.plugin.project-clean.tool",
+      "category": "plugin",
+      "name": {
+        "de": "Projekt bereinigen (Tool)",
+        "en": "Projekt bereinigen (Tool)"
+      },
+      "summary": {
+        "de": "Löscht Build-Artefakte (build/, .gradle/, .kotlin/, .cxx/, captures/, *.iml) und zeigt die freigegebene Größe. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        "en": "Löscht Build-Artefakte (build/, .gradle/, .kotlin/, .cxx/, captures/, *.iml) und zeigt die freigegebene Größe. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.project-clean.tool.zip",
+      "sha256": "b4b21b62365acf6c3f47e00cd5fe6a82c87295007babef7d75e943574fc39d93"
+    },
+    {
+      "id": "com.codeforge.plugin.unused-resources.tool",
+      "category": "plugin",
+      "name": {
+        "de": "Unbenutzte Ressourcen (Tool)",
+        "en": "Unbenutzte Ressourcen (Tool)"
+      },
+      "summary": {
+        "de": "Findet nicht referenzierte Drawables, Layouts, Strings, Farben und mehr; löscht auf Wunsch Dateien. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        "en": "Findet nicht referenzierte Drawables, Layouts, Strings, Farben und mehr; löscht auf Wunsch Dateien. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.unused-resources.tool.zip",
+      "sha256": "ff175e8ad1a188878be7ec0888dae86172eb9afbdc5e5a4d8450f25d3209bd32"
+    },
+    {
+      "id": "com.codeforge.plugin.vscode-import.tool",
+      "category": "plugin",
+      "name": {
+        "de": "VS Code Import (Tool)",
+        "en": "VS Code Import (Tool)"
+      },
+      "summary": {
+        "de": "Konvertiert VS-Code-Themes und Icon-Packs (.vsix, Ordner oder Theme-JSON) in ein CodeForge-Plugin (ZIP in cf-plugin-out/). Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        "en": "Konvertiert VS-Code-Themes und Icon-Packs (.vsix, Ordner oder Theme-JSON) in ein CodeForge-Plugin (ZIP in cf-plugin-out/). Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.vscode-import.tool.zip",
+      "sha256": "679d2a925066645a495df15132fc41ea966a505c4013f43c3cbe1e159e3a0525"
     }
   ]
 }
