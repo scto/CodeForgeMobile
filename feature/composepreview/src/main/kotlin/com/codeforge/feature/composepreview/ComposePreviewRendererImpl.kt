@@ -13,7 +13,9 @@ package com.codeforge.feature.composepreview
 
 import android.content.Context
 import android.graphics.Bitmap
+import com.codeforge.core.domain.model.PreviewOptions
 import com.codeforge.core.domain.model.PreviewRenderResult
+import com.codeforge.core.domain.model.PreviewThemeMode
 import com.codeforge.core.domain.repository.CompilerRuntimeProvider
 import com.codeforge.core.domain.repository.ComposePreviewRenderer
 import com.codeforge.core.domain.repository.SdkRepository
@@ -41,7 +43,9 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         filePath: String,
         sourceCode: String,
         functionName: String,
-        onPreparingRuntime: (Int) -> Unit
+        onPreparingRuntime: (Int) -> Unit,
+        options: PreviewOptions,
+        themeMode: PreviewThemeMode
     ): Result<PreviewRenderResult> = withContext(Dispatchers.Default) {
         runCatching {
             val runtimeDir = compilerRuntimeProvider.ensureInstalled(onPreparingRuntime).getOrThrow()
@@ -171,7 +175,15 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                 // Parameterlose Signatur prüfen (Composer, Int); Funktionen mit Parametern ablehnen
                 ReflectiveComposableValidator.validateParameterless(targetMethod)
 
-                val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap { onError ->
+                val dark = when (themeMode) {
+                    PreviewThemeMode.LIGHT -> false
+                    PreviewThemeMode.DARK -> true
+                    PreviewThemeMode.AUTO -> options.darkMode ?: false
+                }
+                // Hintergrund immer deckend (auch ohne showBackground), damit Standardtext auf der dunklen App lesbar bleibt.
+                val background = options.backgroundColor?.toInt() ?: if (dark) 0xFF1C1B1F.toInt() else 0xFFFFFFFF.toInt()
+                val style = PreviewStyle(dark = dark, backgroundArgb = background, widthDp = options.widthDp, heightDp = options.heightDp)
+                val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap(style = style) { onError ->
                     ReflectiveComposableHost(targetMethod, onError = onError)
                 }
 

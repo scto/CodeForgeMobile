@@ -39,4 +39,40 @@ class ComposeSourceAnalyzerImplTest {
         assertTrue(byName.getValue("GreetingPreview").hasPreviewAnnotation)
         assertFalse(byName.getValue("Greeting").hasPreviewAnnotation)
     }
+
+    @Test
+    fun `liest Preview-Parameter auch ueber mehrere Zeilen`() {
+        val src = """
+            @Preview(
+                showBackground = true,
+                widthDp = 320,
+                heightDp = 200,
+                backgroundColor = 0xFF112233,
+                uiMode = Configuration.UI_MODE_NIGHT_YES,
+            )
+            @Composable
+            fun A() {
+            }
+
+            @Preview(showBackground = false)
+            @Composable
+            fun B() {
+            }
+
+            @Preview
+            @Composable
+            fun C() {
+            }
+        """.trimIndent()
+        val by = analyzer.findComposables(src).associateBy { it.functionName }
+        val a = by.getValue("A").options
+        assertTrue(a.showBackground)
+        assertEquals(320, a.widthDp)
+        assertEquals(200, a.heightDp)
+        assertEquals(0xFF112233L, a.backgroundColor)
+        assertEquals(true, a.darkMode)
+        assertFalse(by.getValue("B").options.showBackground)
+        assertEquals(null, by.getValue("C").options.widthDp)
+        assertEquals(null, by.getValue("C").options.darkMode)
+    }
 }

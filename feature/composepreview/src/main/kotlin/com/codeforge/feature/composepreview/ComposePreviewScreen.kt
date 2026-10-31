@@ -6,6 +6,7 @@ package com.codeforge.feature.composepreview
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,11 +33,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.ComposableCandidate
+import com.codeforge.core.domain.model.PreviewThemeMode
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
@@ -79,12 +80,30 @@ private fun ComposePreviewScreen(modifier: Modifier = Modifier, uiState: Compose
                 onSelected = { name -> onEvent(ComposePreviewUiEvent.FunctionSelected(name)) }
             )
 
+            ThemeModeRow(selected = uiState.themeMode, onSelected = { onEvent(ComposePreviewUiEvent.ThemeModeChanged(it)) })
+
             Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
                 RenderStateContent(
                     state = uiState.renderState,
                     onRetry = { onEvent(ComposePreviewUiEvent.Rerender) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ThemeModeRow(selected: PreviewThemeMode, onSelected: (PreviewThemeMode) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        listOf(
+            PreviewThemeMode.AUTO to R.string.composepreview_modus_auto,
+            PreviewThemeMode.LIGHT to R.string.composepreview_modus_hell,
+            PreviewThemeMode.DARK to R.string.composepreview_modus_dunkel
+        ).forEach { (mode, label) ->
+            FilterChip(selected = mode == selected, onClick = { onSelected(mode) }, label = { Text(stringRes(label)) })
         }
     }
 }
@@ -165,7 +184,6 @@ private fun RenderStateContent(state: PreviewRenderState, onRetry: () -> Unit) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
-                                .background(androidx.compose.ui.graphics.Color.White)
                         )
                     } else {
                         Text(stringRes(R.string.composepreview_bild_konnte_nicht_dekodiert_werden), color = MaterialTheme.colorScheme.error)

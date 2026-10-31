@@ -5,7 +5,9 @@
 package com.codeforge.core.domain.repository
 
 import com.codeforge.core.domain.model.ComposableCandidate
+import com.codeforge.core.domain.model.PreviewOptions
 import com.codeforge.core.domain.model.PreviewRenderResult
+import com.codeforge.core.domain.model.PreviewThemeMode
 import java.io.File
 
 /**
@@ -36,6 +38,8 @@ interface ComposePreviewRenderer {
         filePath: String,
         sourceCode: String,
         functionName: String,
-        onPreparingRuntime: (Int) -> Unit = {}
+        onPreparingRuntime: (Int) -> Unit = {},
+        options: PreviewOptions = PreviewOptions(),
+        themeMode: PreviewThemeMode = PreviewThemeMode.AUTO
     ): Result<PreviewRenderResult>
 }

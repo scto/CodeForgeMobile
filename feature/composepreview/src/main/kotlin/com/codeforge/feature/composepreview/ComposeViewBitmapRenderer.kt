@@ -11,7 +11,16 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
 import android.view.ViewGroup
+import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,6 +76,35 @@ internal object ComposePreviewSizeResolver {
     }
 }
 
+/** Darstellung der Vorschau: Hell/Dunkel, deckender Hintergrund und optional feste Größe (dp). */
+internal data class PreviewStyle(
+    val dark: Boolean,
+    val backgroundArgb: Int,
+    val widthDp: Int? = null,
+    val heightDp: Int? = null
+)
+
+@Composable
+private fun PreviewStyledContent(style: PreviewStyle, content: @Composable () -> Unit) {
+    val base = LocalConfiguration.current
+    val config = remember(base, style.dark) {
+        Configuration(base).apply {
+            val night = if (style.dark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+            uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or night
+        }
+    }
+    // isSystemInDarkTheme() liest LocalConfiguration; LocalContentColor deckt Texte ohne eigenes Theme ab.
+    CompositionLocalProvider(
+        LocalConfiguration provides config,
+        LocalContentColor provides if (style.dark) Color(0xFFE6E1E5) else Color.Black
+    ) {
+        var size: Modifier = Modifier
+        style.widthDp?.let { size = size.width(it.dp) }
+        style.heightDp?.let { size = size.height(it.dp) }
+        Box(modifier = size.background(Color(style.backgroundArgb))) { content() }
+    }
+}
+
 private class PreviewFallbackHostOwner :
     LifecycleOwner,
     SavedStateRegistryOwner,
@@ -109,17 +147,19 @@ internal class ComposeViewBitmapRenderer(private val context: Context) {
     }
 
     suspend fun renderToBitmap(widthPx: Int? = null, heightPx: Int? = null, content: @Composable () -> Unit): Bitmap =
-        renderToBitmapInternal(widthPx, heightPx) { _ -> content() }
+        renderToBitmapInternal(widthPx, heightPx, null) { _ -> content() }
 
     suspend fun renderToBitmap(
         widthPx: Int? = null,
         heightPx: Int? = null,
+        style: PreviewStyle? = null,
         content: @Composable (onError: (Throwable) -> Unit) -> Unit
-    ): Bitmap = renderToBitmapInternal(widthPx, heightPx, content)
+    ): Bitmap = renderToBitmapInternal(widthPx, heightPx, style, content)
 
     private suspend fun renderToBitmapInternal(
         widthPx: Int?,
         heightPx: Int?,
+        style: PreviewStyle? = null,
         content: @Composable (onError: (Throwable) -> Unit) -> Unit
     ): Bitmap = withContext(Dispatchers.Main) {
         val (targetWidth, targetHeight) = ComposePreviewSizeResolver.resolve(context, widthPx, heightPx)
@@ -150,6 +190,11 @@ internal class ComposeViewBitmapRenderer(private val context: Context) {
             val graphicsLayer = rememberGraphicsLayer()
             var hasRecorded by remember { mutableStateOf(false) }
 
+            val styled: @Composable () -> Unit = {
+                content { throwable ->
+                    resultDeferred.completeExceptionally(throwable)
+                }
+            }
             Box(
                 modifier = Modifier
                     .wrapContentSize()
@@ -161,9 +206,7 @@ internal class ComposeViewBitmapRenderer(private val context: Context) {
                         hasRecorded = true
                     }
             ) {
-                content { throwable ->
-                    resultDeferred.completeExceptionally(throwable)
-                }
+                if (style == null) styled() else PreviewStyledContent(style, styled)
             }
 
             LaunchedEffect(hasRecorded) {

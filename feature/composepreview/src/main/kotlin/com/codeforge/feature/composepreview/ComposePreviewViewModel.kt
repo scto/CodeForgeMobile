@@ -12,6 +12,7 @@ import com.codeforge.core.navigation.ActiveComposableFile
 import com.codeforge.core.navigation.ActiveComposablePreviewBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import com.codeforge.core.domain.model.PreviewOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +52,11 @@ class ComposePreviewViewModel @Inject constructor(
             ComposePreviewUiEvent.Rerender -> {
                 _uiState.value.selectedFunctionName?.let(::renderSelected)
             }
+
+            is ComposePreviewUiEvent.ThemeModeChanged -> {
+                _uiState.update { it.copy(themeMode = event.mode) }
+                _uiState.value.selectedFunctionName?.let(::renderSelected)
+            }
         }
     }
 
@@ -87,6 +93,8 @@ class ComposePreviewViewModel @Inject constructor(
                 filePath = file.path,
                 sourceCode = file.content,
                 functionName = functionName,
+                options = _uiState.value.availableComposables.firstOrNull { it.functionName == functionName }?.options ?: PreviewOptions(),
+                themeMode = _uiState.value.themeMode,
                 onPreparingRuntime = { pct ->
                     _uiState.update { state ->
                         val nextState = if (pct >= 100) {

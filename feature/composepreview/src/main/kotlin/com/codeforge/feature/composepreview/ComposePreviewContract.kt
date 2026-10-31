@@ -6,6 +6,7 @@ package com.codeforge.feature.composepreview
 
 import androidx.compose.runtime.Immutable
 import com.codeforge.core.domain.model.ComposableCandidate
+import com.codeforge.core.domain.model.PreviewThemeMode
 
 sealed interface PreviewRenderState {
     data object Idle : PreviewRenderState
@@ -26,10 +27,12 @@ data class ComposePreviewUiState(
     val filePath: String = "",
     val availableComposables: List<ComposableCandidate> = emptyList(),
     val selectedFunctionName: String? = null,
-    val renderState: PreviewRenderState = PreviewRenderState.Idle
+    val renderState: PreviewRenderState = PreviewRenderState.Idle,
+    val themeMode: PreviewThemeMode = PreviewThemeMode.AUTO
 )
 
 sealed interface ComposePreviewUiEvent {
     data class FunctionSelected(val functionName: String) : ComposePreviewUiEvent
     data object Rerender : ComposePreviewUiEvent
+    data class ThemeModeChanged(val mode: PreviewThemeMode) : ComposePreviewUiEvent
 }
