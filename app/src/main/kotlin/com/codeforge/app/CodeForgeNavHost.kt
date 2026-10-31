@@ -26,7 +26,6 @@ import com.codeforge.feature.git.GitRoute
 import com.codeforge.feature.hardcodedstrings.HardcodedStringsRoute
 import com.codeforge.feature.layoutdesigner.LayoutDesignerRoute
 import com.codeforge.feature.onboarding.OnboardingRoute
-import com.codeforge.feature.plugins.PluginsRoute
 import com.codeforge.feature.projectsettings.ProjectSettingsEffect
 import com.codeforge.feature.projectsettings.ProjectSettingsIntent
 import com.codeforge.feature.projectsettings.ProjectSettingsScreen
@@ -40,8 +39,6 @@ import com.codeforge.feature.settings.GitSettingsRoute
 import com.codeforge.feature.settings.HelpRoute
 import com.codeforge.feature.settings.SettingsHubRoute
 import com.codeforge.feature.settings.TerminalSettingsRoute
-import com.codeforge.feature.settings.store.StoreRoute
-import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.settings.snippets.SnippetSettingsRoute
 import com.codeforge.feature.signing.SigningRoute
 import com.codeforge.feature.terminal.TerminalRoute
@@ -220,7 +217,7 @@ fun CodeForgeNavHost(
             )
         }
         composable(Routes.SETTINGS_STORE) {
-            StoreRoute(onBack = { navigateBackOrStart() })
+            ExtensionsHubRoute(initialTab = ExtensionsHubTab.STORE, onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_HELP) {
             HelpRoute(onBack = { navigateBackOrStart() })
@@ -249,14 +246,10 @@ fun CodeForgeNavHost(
             )
         }
         composable(Routes.SETTINGS_PLUGINS) {
-            PluginsRoute(
-                onBack = { navigateBackOrStart() }
-            )
+            ExtensionsHubRoute(initialTab = ExtensionsHubTab.INSTALLED, onBack = { navigateBackOrStart() })
         }
         composable(Routes.EXTENSIONS) {
-            ExtensionsRoute(
-                onBack = { navigateBackOrStart() }
-            )
+            ExtensionsHubRoute(initialTab = ExtensionsHubTab.SERVERS, onBack = { navigateBackOrStart() })
         }
         composable(
             route = Routes.TERMINAL_PATTERN,

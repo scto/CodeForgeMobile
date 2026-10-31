@@ -40,17 +40,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.EmbeddedActionsBar
 import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.embeddedAwareInsets
 import com.codeforge.core.ui.TooltipIconButton
 
 @Composable
 fun StoreRoute(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
+    embedded: Boolean = false,
     viewModel: StoreViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    StoreScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent, onBack = onBack)
+    StoreScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent, onBack = onBack, embedded = embedded)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +63,7 @@ fun StoreScreen(
     uiState: StoreUiState,
     onEvent: (StoreUiEvent) -> Unit,
     onBack: () -> Unit = {},
+    embedded: Boolean = false,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.message) {
@@ -71,16 +75,15 @@ fun StoreScreen(
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = embeddedAwareInsets(embedded),
         topBar = {
-            SettingsTopBar(
-                title = stringRes(R.string.store_title),
-                onBack = onBack,
-                actions = {
-                    TooltipIconButton(onClick = { onEvent(StoreUiEvent.Reload) }, label = stringRes(R.string.store_retry)) {
-                        Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.store_retry))
-                    }
-                },
-            )
+            val reloadAction: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {
+                TooltipIconButton(onClick = { onEvent(StoreUiEvent.Reload) }, label = stringRes(R.string.store_retry)) {
+                    Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.store_retry))
+                }
+            }
+            if (embedded) EmbeddedActionsBar(actions = reloadAction)
+            else SettingsTopBar(title = stringRes(R.string.store_title), onBack = onBack, actions = reloadAction)
         },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {

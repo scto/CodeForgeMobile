@@ -1084,6 +1084,10 @@
 
     <!-- Extensions Manager (Task 16 Item 4) -->
     <string name="settings_hub_extensions">Erweiterungen (LSP)</string>
+    <string name="extensions_hub_title">Erweiterungen</string>
+    <string name="extensions_hub_tab_installed">Installiert</string>
+    <string name="extensions_hub_tab_servers">Sprachserver</string>
+    <string name="extensions_hub_tab_store">Store</string>
     <string name="extensions_title">Erweiterungen &amp; Sprachserver</string>
     <string name="extensions_installed">Installiert</string>
     <string name="extensions_not_installed">Nicht installiert</string>

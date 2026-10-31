@@ -45,7 +45,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.EmbeddedActionsBar
 import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.embeddedAwareInsets
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
 
@@ -53,6 +55,7 @@ import java.io.File
 fun PluginsRoute(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
+    embedded: Boolean = false,
     viewModel: PluginsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -80,6 +83,7 @@ fun PluginsRoute(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
+        embedded = embedded,
         onEvent = viewModel::onEvent,
         onImportClicked = { filePickerLauncher.launch(arrayOf("application/zip", "application/octet-stream")) }
     )
@@ -103,6 +107,7 @@ private fun PluginsScreen(
     uiState: PluginsUiState,
     snackbarHostState: SnackbarHostState,
     onBack: () -> Unit = {},
+    embedded: Boolean = false,
     onEvent: (PluginsUiEvent) -> Unit,
     onImportClicked: () -> Unit
 ) {
@@ -110,16 +115,15 @@ private fun PluginsScreen(
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = embeddedAwareInsets(embedded),
         topBar = {
-            SettingsTopBar(
-                title = stringRes(R.string.plugins_plugins),
-                onBack = onBack,
-                actions = {
-                    IconButton(onClick = onImportClicked) {
-                        Icon(Icons.Filled.Add, contentDescription = stringRes(R.string.plugins_plugin_installieren))
-                    }
+            val importAction: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {
+                IconButton(onClick = onImportClicked) {
+                    Icon(Icons.Filled.Add, contentDescription = stringRes(R.string.plugins_plugin_installieren))
                 }
-            )
+            }
+            if (embedded) EmbeddedActionsBar(actions = importAction)
+            else SettingsTopBar(title = stringRes(R.string.plugins_plugins), onBack = onBack, actions = importAction)
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {

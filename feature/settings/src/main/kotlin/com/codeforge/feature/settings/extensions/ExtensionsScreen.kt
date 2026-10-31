@@ -54,11 +54,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.embeddedAwareInsets
 
 @Composable
 fun ExtensionsRoute(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
+    embedded: Boolean = false,
     viewModel: ExtensionsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -66,7 +68,8 @@ fun ExtensionsRoute(
         modifier = modifier,
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        onBack = onBack
+        onBack = onBack,
+        embedded = embedded
     )
 }
 
@@ -76,7 +79,8 @@ fun ExtensionsScreen(
     modifier: Modifier = Modifier,
     uiState: ExtensionsUiState,
     onEvent: (ExtensionsUiEvent) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    embedded: Boolean = false
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -99,11 +103,14 @@ fun ExtensionsScreen(
 
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = embeddedAwareInsets(embedded),
         topBar = {
-            SettingsTopBar(
-                title = stringRes(R.string.extensions_title),
-                onBack = onBack
-            )
+            if (!embedded) {
+                SettingsTopBar(
+                    title = stringRes(R.string.extensions_title),
+                    onBack = onBack
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
