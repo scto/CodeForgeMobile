@@ -32,7 +32,8 @@ data class IconThemeFile(
     /** Relativer Pfad des Bildes für eine Datei oder null (→ App-Standardicon). */
     fun forFile(name: String): String? {
         val lower = name.lowercase()
-        fileNames[lower]?.let { return it }
+        // Schlüssel werden beim Parsen ohne führenden Punkt gespeichert (".gitignore" → "gitignore").
+        (fileNames[lower] ?: fileNames[lower.removePrefix(".")])?.let { return it }
         var idx = lower.indexOf('.')
         while (idx >= 0 && idx < lower.length - 1) {
             fileExtensions[lower.substring(idx + 1)]?.let { return it }
@@ -43,8 +44,9 @@ data class IconThemeFile(
 
     fun forFolder(name: String, open: Boolean): String? {
         val lower = name.lowercase()
-        if (open) folderNamesOpen[lower]?.let { return it }
-        folderNames[lower]?.let { return it }
+        val bare = lower.removePrefix(".")
+        if (open) (folderNamesOpen[lower] ?: folderNamesOpen[bare])?.let { return it }
+        (folderNames[lower] ?: folderNames[bare])?.let { return it }
         return if (open) folderOpen ?: folder else folder
     }
 

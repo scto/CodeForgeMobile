@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 BASE = "https://scto.github.io/codeforge-store"
 HOME = "https://github.com/scto/CodeForgeMobile"
-GENERATORS = ["theme-plugins", "textmate-plugins", "tool-plugins"]
+GENERATORS = ["theme-plugins", "textmate-plugins", "tool-plugins", "icon-plugins"]
 
 
 def category(manifest):
