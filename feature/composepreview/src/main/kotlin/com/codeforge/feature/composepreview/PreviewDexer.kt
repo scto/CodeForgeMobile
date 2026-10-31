@@ -38,7 +38,10 @@ internal class PreviewDexer {
             val builder = ProcessBuilder(command)
                 .redirectErrorStream(true)
                 .redirectInput(File("/dev/null"))
-            builder.environment().putAll(TermuxEnvironment.environment())
+            // JAVA_HOME/bin zuerst im PATH: unabhängig davon, ob update-alternatives `java` verlinkt hat
+            // (gilt für jedes installierte JDK – 17, 21, 25; es wird das höchste installierte gewählt).
+            val javaHome = TermuxEnvironment.environment()["JAVA_HOME"]
+            builder.environment().putAll(TermuxEnvironment.environment(extraPath = listOfNotNull(javaHome?.let { "$it/bin" })))
             val process = builder.start()
 
             val output = process.inputStream.bufferedReader().readText()
