@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 BASE = "https://scto.github.io/codeforge-store"
 HOME = "https://github.com/scto/CodeForgeMobile"
-GENERATORS = ["theme-plugins", "textmate-plugins", "tool-plugins", "icon-plugins"]
+GENERATORS = ["theme-plugins", "textmate-plugins", "tool-plugins", "icon-plugins", "content-plugins"]
 
 
 def category(manifest):
@@ -69,6 +69,21 @@ def main(store):
                     "homepage": HOME, "downloadUrl": f"{BASE}/packages/{z.name}",
                     "sha256": hashlib.sha256(data).hexdigest(),
                 })
+    # Sammel-Bundle „Alle Themes“: enthält alle Farbschema-Pakete des Katalogs (erst hier bekannt)
+    theme_ids = sorted(i["id"] for i in items if i["category"] == "theme")
+    bid = "com.codeforge.plugin.all-themes.bundle"
+    bundle_manifest = {"id": bid, "name": "Alle Themes (Bundle)", "version": "1.0.0", "apiVersion": 2, "publisher": "codeforge",
+                       "description": f"Alle Farbschemata von CodeForge als Bundle ({len(theme_ids)} Pakete).", "permissions": [],
+                       "contributes": {"extensionPack": theme_ids}}
+    bzip = pk / f"{bid}.zip"
+    with zipfile.ZipFile(bzip, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("plugin.json", json.dumps(bundle_manifest, ensure_ascii=False, indent=2) + "\n")
+    bdata = bzip.read_bytes()
+    seen.add(bid)
+    items.append({"id": bid, "category": "bundle", "name": {"de": bundle_manifest["name"], "en": bundle_manifest["name"]},
+                  "summary": {"de": bundle_manifest["description"], "en": bundle_manifest["description"]},
+                  "version": "1.0.0", "author": "codeforge", "homepage": HOME, "downloadUrl": f"{BASE}/packages/{bzip.name}",
+                  "sha256": hashlib.sha256(bdata).hexdigest()})
     # Bundles: Mitglieder müssen im Katalog stehen
     for it in items:
         if it["category"] == "bundle":
