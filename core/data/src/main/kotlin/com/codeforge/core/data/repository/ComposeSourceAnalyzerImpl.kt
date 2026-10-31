@@ -44,7 +44,9 @@ class ComposeSourceAnalyzerImpl @Inject constructor() : ComposeSourceAnalyzer {
                         ComposableCandidate(
                             functionName = functionMatch.groupValues[1],
                             hasPreviewAnnotation = "Preview" in pendingAnnotations,
-                            startLine = index
+                            startLine = index,
+                            // Nach "(" folgt direkt ")" → parameterlos; sonst (auch bei Zeilenumbruch) hat sie Parameter.
+                            hasParameters = !line.substring(functionMatch.range.last + 1).trimStart().startsWith(")")
                         )
                     )
                 }

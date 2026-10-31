@@ -96,6 +96,8 @@ private fun ComposableChipRow(candidates: List<ComposableCandidate>, selected: S
         items(candidates, key = { it.functionName }) { candidate ->
             FilterChip(
                 selected = candidate.functionName == selected,
+                // Funktionen mit Parametern ohne @Preview lassen sich nicht rendern → nicht anwählbar (Vorschau-Funktion ★ nutzen)
+                enabled = candidate.hasPreviewAnnotation || !candidate.hasParameters,
                 onClick = { onSelected(candidate.functionName) },
                 label = { Text(candidate.functionName) },
                 leadingIcon = if (candidate.hasPreviewAnnotation) {

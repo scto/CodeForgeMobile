@@ -64,7 +64,7 @@ class ComposePreviewViewModel @Inject constructor(
 
         val candidates = composeSourceAnalyzer.findComposables(file.content)
         val selected = candidates.firstOrNull { it.hasPreviewAnnotation }?.functionName
-            ?: candidates.firstOrNull()?.functionName
+            ?: candidates.firstOrNull { !it.hasParameters }?.functionName
 
         _uiState.update {
             it.copy(

@@ -86,7 +86,7 @@
     <string name="composepreview_d8_nicht_gefunden_build_tools">d8 nicht gefunden. Build-Tools über den SDK Manager installieren (Einstellungen → SDK Manager → Build-Tools).</string>
     <string name="composepreview_dexing_fehlgeschlagen">Dexing fehlgeschlagen: %1$s</string>
     <string name="composepreview_die_grafische_rendering_pipeline_ist">Die grafische Rendering-Pipeline ist architektonisch vorbereitet, aber noch nicht angeschlossen (dynamische Kompilierung + Klassenladen zur Laufzeit). Siehe KDoc in ComposePreviewRendererImpl.</string>
-    <string name="composepreview_funktion_hat_parameter">Funktion \'%1$s\' erfordert Parameter. Die Vorschau unterstützt derzeit nur parameterlose @Composable-Funktionen.</string>
+    <string name="composepreview_funktion_hat_parameter">Funktion \'%1$s\' erfordert Parameter. Die Vorschau unterstützt derzeit nur parameterlose @Composable-Funktionen. Wähle eine mit ★ markierte @Preview-Funktion.</string>
     <string name="composepreview_funktion_nicht_in_kompiliertem_code">Funktion \'%1$s\' nicht in kompiliertem Code gefunden.</string>
     <string name="composepreview_kompilierung_fehlgeschlagen">Kompilierung fehlgeschlagen:\n%1$s</string>
     <string name="composepreview_kompilierung_laeuft">Vorschau wird kompiliert…</string>
