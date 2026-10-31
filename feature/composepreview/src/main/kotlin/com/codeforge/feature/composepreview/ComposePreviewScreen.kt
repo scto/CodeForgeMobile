@@ -32,6 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.ComposableCandidate
@@ -158,7 +160,12 @@ private fun RenderStateContent(state: PreviewRenderState, onRetry: () -> Unit) {
                         androidx.compose.foundation.Image(
                             bitmap = bitmap.asImageBitmap(),
                             contentDescription = state.functionName,
-                            modifier = Modifier.fillMaxWidth()
+                            // Das gerenderte Bild ist transparent und nutzt Standard-Textfarbe (schwarz): auf hellem Untergrund
+                            // zeigen, sonst ist es auf dem dunklen App-Hintergrund unsichtbar.
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                                .background(androidx.compose.ui.graphics.Color.White)
                         )
                     } else {
                         Text(stringRes(R.string.composepreview_bild_konnte_nicht_dekodiert_werden), color = MaterialTheme.colorScheme.error)
