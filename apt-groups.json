@@ -83,6 +83,12 @@
       "heavy": true,
       "stage": "15-rust-analyzer",
       "repo_packages": ""
+    },
+    {
+      "name": "H7-plugin-deps",
+      "heavy": true,
+      "stage": "18-plugin-deps",
+      "repo_packages": ""
     }
   ]
 }

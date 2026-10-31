@@ -41,6 +41,7 @@ declare -a CODEFORGE_PACKAGES__STAGE_15a_rust_src=("rust-src")  # Flags: single-
 declare -a CODEFORGE_PACKAGES__STAGE_15_rust_analyzer=("rust-analyzer")
 declare -a CODEFORGE_PACKAGES__STAGE_16_native_dev=("pkg-config" "libtool" "flex" "bison" "ccache" "patchelf" "strace")
 declare -a CODEFORGE_PACKAGES__STAGE_17_debug_misc=("gdb" "android-tools" "gh" "rsync" "xmlstarlet")
+declare -a CODEFORGE_PACKAGES__STAGE_18_plugin_deps=("shfmt" "golang" "librsvg")
 
 # Reihenfolge/Zuordnung Etappe -> Variable (Name der Etappe wie in apt-stages.conf)
 declare -a CODEFORGE_STAGE_NAMES=(
@@ -64,6 +65,7 @@ declare -a CODEFORGE_STAGE_NAMES=(
     "15-rust-analyzer"
     "16-native-dev"
     "17-debug-misc"
+    "18-plugin-deps"
 )
 declare -a CODEFORGE_STAGE_VARS=(
     "CODEFORGE_PACKAGES__STAGE_00_codeforge"
@@ -86,6 +88,7 @@ declare -a CODEFORGE_STAGE_VARS=(
     "CODEFORGE_PACKAGES__STAGE_15_rust_analyzer"
     "CODEFORGE_PACKAGES__STAGE_16_native_dev"
     "CODEFORGE_PACKAGES__STAGE_17_debug_misc"
+    "CODEFORGE_PACKAGES__STAGE_18_plugin_deps"
 )
 
 # Alle Pakete (Bootstrap + alle Etappen)
