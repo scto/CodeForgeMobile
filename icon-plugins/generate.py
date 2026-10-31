@@ -231,6 +231,19 @@ def main(out):
     out.mkdir(parents=True, exist_ok=True)
     for theme in THEMES:
         build_pack(theme, out)
+    pid = "com.codeforge.plugin.all-icons.bundle"
+    folder = out / "src" / pid
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "plugin.json").write_text(json.dumps({
+        "id": pid, "name": "Alle Icon-Pakete (Bundle)", "version": "1.0.0", "apiVersion": 2, "publisher": "codeforge",
+        "description": "Alle 11 Icon-Pakete von CodeForge als Bundle (3 klassisch hell, 3 klassisch dunkel, 3 modern hell, 2 modern dunkel).",
+        "permissions": [],
+        "contributes": {"extensionPack": [f"com.codeforge.plugin.{t[0]}.icons" for t in THEMES]},
+    }, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    target = out / f"{pid}.zip"
+    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
+        z.write(folder / "plugin.json", "plugin.json")
+    print(f"{target.name}  sha256={hashlib.sha256(target.read_bytes()).hexdigest()}")
 
 
 if __name__ == "__main__":
