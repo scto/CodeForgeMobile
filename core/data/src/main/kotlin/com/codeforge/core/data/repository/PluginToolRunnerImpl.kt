@@ -90,13 +90,15 @@ class PluginToolRunnerImpl @Inject constructor(
             ProcessBuilder(listOf(executable) + command.drop(1))
                 .directory(workDir)
                 .redirectErrorStream(true)
+                // stdin bleibt ein gültiger Deskriptor (/dev/null): ein geschlossener fd 0 verschiebt
+                // die Nummern der von apt geöffneten Deskriptoren (fdsan-Abbruch, Exit 134).
+                .redirectInput(File("/dev/null"))
                 .also { it.environment().putAll(termuxEnvironment() + extraEnv) }
                 .start()
         } catch (e: Exception) {
             send(ToolRunEvent.Line("Start fehlgeschlagen: ${e.message}"))
             return StreamResult(-1)
         }
-        process.outputStream.close()
         val reader = launch {
             val br = process.inputStream.bufferedReader()
             while (true) {
