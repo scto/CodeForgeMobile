@@ -6,6 +6,7 @@ package com.codeforge.feature.composepreview
 
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import com.codeforge.libs.terminal_engine.TermuxEnvironment
 import java.io.File
 
 internal data class DexResult(val success: Boolean, val dexFile: File?, val errorOutput: String)
@@ -33,9 +34,12 @@ internal class PreviewDexer {
                 addAll(classFiles.map { it.absolutePath })
             }
 
-            val process = ProcessBuilder(command)
+            // d8 ist ein Shell-Skript und braucht `java` im PATH bzw. JAVA_HOME (Termux-Umgebung, wie kotlinc).
+            val builder = ProcessBuilder(command)
                 .redirectErrorStream(true)
-                .start()
+                .redirectInput(File("/dev/null"))
+            builder.environment().putAll(TermuxEnvironment.environment())
+            val process = builder.start()
 
             val output = process.inputStream.bufferedReader().readText()
             val exitCode = process.waitFor()
