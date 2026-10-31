@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Findet nicht referenzierte Drawables, Layouts, Strings, Farben und mehr; löscht auf Wunsch Dateien. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "description": "Findet nicht referenzierte Drawables, Layouts, Strings, Farben und mehr; löscht auf Wunsch Dateien. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
   "permissions": [
     "shell"
   ],

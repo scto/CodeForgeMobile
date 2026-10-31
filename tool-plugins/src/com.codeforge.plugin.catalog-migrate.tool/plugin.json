@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Verschiebt hartcodierte Abhängigkeiten aus build.gradle(.kts) in gradle/libs.versions.toml. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "description": "Verschiebt hartcodierte Abhängigkeiten aus build.gradle(.kts) in gradle/libs.versions.toml. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
   "permissions": [
     "shell"
   ],

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Löscht Build-Artefakte (build/, .gradle/, .kotlin/, .cxx/, captures/, *.iml) und zeigt die freigegebene Größe. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "description": "Löscht Build-Artefakte (build/, .gradle/, .kotlin/, .cxx/, captures/, *.iml) und zeigt die freigegebene Größe. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
   "permissions": [
     "shell"
   ],

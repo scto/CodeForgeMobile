@@ -165,7 +165,7 @@ def main(out):
             tool["prompt"] = prompt
         if confirm:
             tool["confirm"] = confirm
-        m = manifest(pid, f"{label} (Tool)", desc + " Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+        m = manifest(pid, f"{label} (Tool)", desc + " Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
                      {"tools": [tool], "requires": req})
         m["permissions"] = ["shell"]
         dump(folder / "plugin.json", m)

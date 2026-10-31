@@ -94,7 +94,7 @@ class PluginRepositoryImpl @Inject constructor(
             .onSuccess { _loadedPluginIds.update { it + plugin.id } }
     }
 
-    override fun installFromFile(archivePath: String, declarativeOnly: Boolean): Flow<PluginInstallEvent> = flow {
+    override fun installFromFile(archivePath: String, declarativeOnly: Boolean, allowTools: Boolean): Flow<PluginInstallEvent> = flow {
         val archiveFile = File(archivePath)
         if (!archiveFile.isFile) {
             emit(PluginInstallEvent.Failed(Res.string(R.string.plugin_plugin_archiv_nicht_gefunden, archivePath)))
@@ -140,7 +140,7 @@ class PluginRepositoryImpl @Inject constructor(
             if (declarativeOnly) {
                 val files = tempDir.walkTopDown().filter { it.isFile }
                     .map { it.relativeTo(tempDir).invariantSeparatorsPath }.toList()
-                DeclarativeOnly.violation(files, manifest)?.let { error("Nur deklarative Plugins erlaubt: $it") }
+                DeclarativeOnly.violation(files, manifest, allowTools)?.let { error("Nur deklarative Plugins erlaubt: $it") }
             }
 
             val finalDir = File(pluginsDir, id)

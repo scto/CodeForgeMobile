@@ -26,6 +26,8 @@ class ToolPluginsValidTest {
             if (m.id.endsWith(".tool")) {
                 // Werkzeuge führen Programme aus → im Store nicht erlaubt, nur Sideload
                 assertTrue(dirName, DeclarativeOnly.violation(files, m)!!.contains("tools"))
+                // Store-Kategorie „tool“: erlaubt, solange kein Plugin-Code/Native-Datei enthalten ist
+                assertNull(dirName, DeclarativeOnly.violation(files, m, allowTools = true))
             } else {
                 assertNull(dirName, DeclarativeOnly.violation(files, m))
             }

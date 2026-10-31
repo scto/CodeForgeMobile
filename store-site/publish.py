@@ -4,7 +4,7 @@
 Aufruf: python3 store-site/publish.py <pfad/zum/codeforge-store-checkout>
 * Archive landen unter packages/<id>.zip (GitHub Pages: https://scto.github.io/codeforge-store/packages/<id>.zip)
 * store.json wird neu erzeugt (Kategorien bleiben, items werden ersetzt); sha256 wird aus den veröffentlichten Dateien berechnet.
-* Werkzeug-Plugins (`.tool`) führen Programme aus und sind im Store nur zum Download (Kategorie `plugin`, Sideload).
+* Werkzeug-Plugins (`.tool`) stehen in der Kategorie `tool` (Code-Tools): per Store installierbar, die App fragt vorher nach.
 """
 import datetime, hashlib, json, subprocess, sys, tempfile, zipfile
 from pathlib import Path
@@ -20,7 +20,7 @@ def category(manifest):
     if pid.endswith(".bundle"):
         return "bundle"
     if "tools" in c:
-        return "plugin"
+        return "tool"
     if "lspServers" in c:
         return "lsp"
     if "formatters" in c:
@@ -76,10 +76,12 @@ def main(store):
             missing = [x for x in m["contributes"]["extensionPack"] if x not in seen]
             if missing:
                 raise SystemExit(f"{it['id']}: Mitglieder fehlen im Katalog: {missing}")
-    order = {c: i for i, c in enumerate(["theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle", "plugin"])}
+    order = {c: i for i, c in enumerate(["theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle", "tool", "plugin"])}
     items.sort(key=lambda i: (order[i["category"]], i["id"]))
     cat_file = store / "store.json"
     catalog = json.loads(cat_file.read_text(encoding="utf-8"))
+    if not any(c["id"] == "tool" for c in catalog["categories"]):
+        catalog["categories"].insert(1, {"id": "tool", "title": {"de": "Code-Tools", "en": "Code tools"}})
     catalog["items"] = items
     catalog["updated"] = datetime.date.today().isoformat()
     cat_file.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

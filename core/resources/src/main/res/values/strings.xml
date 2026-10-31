@@ -2121,6 +2121,7 @@
     <string name="store_by_author">by %1$s</string>
     <string name="store_version">Version %1$s</string>
     <string name="store_unsupported_schema">The catalog uses a newer format. Please update the app.</string>
+    <string name="store_tool_confirm">This tool plugin runs scripts on your device (permission “shell”) inside your project folder and can change or delete files. Only install plugins you trust. Programs it needs are only installed after a separate confirmation.</string>
     <string name="store_install">Install</string>
     <string name="store_reinstall">Reinstall</string>
     <string name="store_installing">Installing…</string>

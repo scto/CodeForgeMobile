@@ -4,7 +4,7 @@ Plugins (`com.codeforge.plugin.<name>.formatter|lsp|tool`, Publisher `codeforge`
 
 * **Formatierer** (6): Prettier, shfmt, Ruff Format, gofmt, rustfmt, Taplo Format. Bundle: `com.codeforge.plugin.all-formatters.bundle`.
 * **Language Server** (12 Plugins, 14 Server): clangd, rust-analyzer, Taplo, gopls, Ruff, neocmakelsp, Dart, Bash, TypeScript/JavaScript, Pyright, HTML/CSS/JSON, YAML. Bundle: `com.codeforge.plugin.all-lsp-servers.bundle`.
-* **Werkzeuge** (8, erscheinen im **PT**-Menü des Dateibaums, nur Sideload, Berechtigung `shell`, Skripte in Python):
+* **Werkzeuge** (8, erscheinen im **PT**-Menü des Dateibaums, Store-Kategorie „Code-Tools“ oder Sideload, Berechtigung `shell`, Skripte in Python):
   * `vscode-import` – VS-Code-Themes und Icon-Packs (.vsix / Ordner / Theme-JSON) → CodeForge-Plugin-ZIP (`cf-plugin-out/`); SVG-Icons brauchen `librsvg`.
   * `androidx-migrate` – `android.support.*`/`android.arch.*` → AndroidX (Imports, Layout-XML, Gradle, `gradle.properties`); Modus `check`/`apply`.
   * `catalog-migrate` – hartcodierte Abhängigkeiten → `gradle/libs.versions.toml`; Modus `check`/`apply`.

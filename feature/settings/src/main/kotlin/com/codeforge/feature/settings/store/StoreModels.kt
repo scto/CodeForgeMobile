@@ -29,12 +29,16 @@ data class StoreItem(
      * HTTPS-Download und SHA-256. Die Item-ID ist die Plugin-ID. Code-Plugins (Kategorie „plugin“) gibt es
      * nur per manuellem Sideload; zusätzlich lehnt die Installation Archive mit ausführbarem Code ab.
      */
+    /** Code-Tools führen Skripte aus: die App fragt vor der Installation nach. */
+    val needsConfirmation: Boolean get() = categoryId == TOOL_CATEGORY
+
     val isInstallablePlugin: Boolean
         get() = categoryId in DECLARATIVE_CATEGORIES && sha256 != null && downloadUrl?.startsWith("https://") == true
 
     companion object {
         const val PLUGIN_CATEGORY = "plugin"
-        val DECLARATIVE_CATEGORIES = setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle")
+        const val TOOL_CATEGORY = "tool"
+        val DECLARATIVE_CATEGORIES = setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle", TOOL_CATEGORY)
     }
 }
 

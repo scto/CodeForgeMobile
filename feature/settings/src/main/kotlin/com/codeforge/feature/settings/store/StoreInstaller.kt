@@ -68,7 +68,7 @@ class StoreInstaller internal constructor(
 
             var result: StoreInstallResult = StoreInstallResult.Failed("keine Rückmeldung")
             var members: List<String> = emptyList()
-            plugins.installFromFile(target.absolutePath, declarativeOnly = true).collect { event ->
+            plugins.installFromFile(target.absolutePath, declarativeOnly = true, allowTools = item.categoryId == StoreItem.TOOL_CATEGORY).collect { event ->
                 when (event) {
                     is PluginInstallEvent.Progress -> onInstallProgress(event.percent)
                     is PluginInstallEvent.Success -> {

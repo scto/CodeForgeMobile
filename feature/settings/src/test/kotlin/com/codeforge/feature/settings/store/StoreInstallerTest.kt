@@ -29,7 +29,7 @@ class StoreInstallerTest {
         var existedAtInstall = false
         override val installedPlugins: Flow<List<InstalledPlugin>> = flowOf(emptyList())
         override val loadedPluginIds: StateFlow<Set<String>> = MutableStateFlow(emptySet())
-        override fun installFromFile(archivePath: String, declarativeOnly: Boolean): Flow<PluginInstallEvent> {
+        override fun installFromFile(archivePath: String, declarativeOnly: Boolean, allowTools: Boolean): Flow<PluginInstallEvent> {
             installedFrom = archivePath
             existedAtInstall = File(archivePath).isFile
             return flowOf(*result.toTypedArray())
@@ -72,6 +72,9 @@ class StoreInstallerTest {
         assertFalse(item(goodHash, category = "plugin").isInstallablePlugin) // Code-Plugins nur per Sideload
         assertTrue(item(goodHash, category = "theme").isInstallablePlugin)
         assertTrue(item(goodHash, category = "bundle").isInstallablePlugin)
+        assertTrue(item(goodHash, category = "tool").isInstallablePlugin)
+        assertTrue(item(goodHash, category = "tool").needsConfirmation)
+        assertFalse(item(goodHash, category = "theme").needsConfirmation)
         val r = StoreInstaller(downloader, FakePlugins(emptyList()), tmp.newFolder("t3")).install(item(null))
         assertTrue(r is StoreInstallResult.Failed)
     }
@@ -91,7 +94,7 @@ class StoreInstallerTest {
             override val installedPlugins: Flow<List<InstalledPlugin>> = flowOf(emptyList())
             override val loadedPluginIds: StateFlow<Set<String>> = MutableStateFlow(emptySet())
             var n = 0
-            override fun installFromFile(archivePath: String, declarativeOnly: Boolean): Flow<PluginInstallEvent> {
+            override fun installFromFile(archivePath: String, declarativeOnly: Boolean, allowTools: Boolean): Flow<PluginInstallEvent> {
                 flags.add(declarativeOnly)
                 val p = if (n++ == 0) InstalledPlugin("pack", "Pack", "1", "", true, packMembers = listOf("m1", "pack", "gone"))
                 else InstalledPlugin("m1", "M1", "1", "", true)

@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -143,6 +144,23 @@ private fun StoreContent(
             )
         }
         val entries = selected?.let { catalog.itemsOf(it.id) }.orEmpty()
+        var pendingTool by remember { androidx.compose.runtime.mutableStateOf<StoreItem?>(null) }
+        pendingTool?.let { tool ->
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { pendingTool = null },
+                title = { Text(tool.name) },
+                text = { Text(stringRes(R.string.store_tool_confirm)) },
+                confirmButton = {
+                    androidx.compose.material3.TextButton(onClick = {
+                        pendingTool = null
+                        onEvent(StoreUiEvent.Install(tool))
+                    }) { Text(stringRes(R.string.store_install)) }
+                },
+                dismissButton = {
+                    androidx.compose.material3.TextButton(onClick = { pendingTool = null }) { Text(stringRes(R.string.common_abbrechen)) }
+                },
+            )
+        }
         if (entries.isEmpty()) {
             Text(stringRes(R.string.store_empty_category), modifier = Modifier.padding(16.dp))
         } else {
@@ -158,7 +176,7 @@ private fun StoreContent(
                         installing = uiState.installingId == entry.id,
                         progress = uiState.installProgress.takeIf { uiState.installingId == entry.id },
                         installBusy = uiState.installingId != null,
-                        onInstall = { onEvent(StoreUiEvent.Install(entry)) },
+                        onInstall = { if (entry.needsConfirmation) pendingTool = entry else onEvent(StoreUiEvent.Install(entry)) },
                     )
                 }
             }

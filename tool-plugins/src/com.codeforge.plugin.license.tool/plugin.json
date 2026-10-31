@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "description": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
   "permissions": [
     "shell"
   ],

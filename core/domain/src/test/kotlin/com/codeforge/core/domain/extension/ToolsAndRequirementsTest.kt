@@ -67,6 +67,16 @@ class ToolsAndRequirementsTest {
     }
 
     @Test
+    fun `allowTools erlaubt Skripte, aber weder Plugin-Code noch native Dateien`() {
+        val tool = PluginManifestParser.parse(manifest(contributes = """{"tools":[{"id":"a","command":["python3","x"]}]}""")).getOrThrow()
+        assertNull(DeclarativeOnly.violation(listOf("plugin.json", "tool.py"), tool, allowTools = true))
+        assertNotNull(DeclarativeOnly.violation(listOf("plugin.json", "run.sh"), tool, allowTools = true))
+        assertNotNull(DeclarativeOnly.violation(listOf("plugin.json", "lib/x.so"), tool, allowTools = true))
+        assertNotNull(DeclarativeOnly.violation(listOf("plugin.json", "classes.dex"), tool, allowTools = true))
+        assertNotNull(DeclarativeOnly.violation(listOf("plugin.json"), tool.copy(entryPointClass = "a.B"), allowTools = true))
+    }
+
+    @Test
     fun `Kommando-Platzhalter bleiben einzelne Argumente`() {
         val t = ToolContribution("a", "A", command = listOf("python3", "${'$'}{pluginDir}/t.py", "${'$'}{projectDir}", "${'$'}{input}"))
         val cmd = t.expandCommand("/p roj", "/plug", "/home", "a; rm -rf / --x")

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Ergänzt .gitignore um fehlende Einträge für Android, Kotlin, Node, Python, Rust oder Go. Erscheint im PT-Menü des Dateibaums; nur per Sideload installierbar.",
+  "description": "Ergänzt .gitignore um fehlende Einträge für Android, Kotlin, Node, Python, Rust oder Go. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
   "permissions": [
     "shell"
   ],

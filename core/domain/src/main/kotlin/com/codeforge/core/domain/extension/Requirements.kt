@@ -17,7 +17,7 @@ object RequirementPolicy {
     private val STORE_ALLOWED: Map<RequirementManager, Set<String>> = mapOf(
         RequirementManager.PKG to setOf(
             "clang", "cmake", "nodejs", "python", "golang", "rust", "rust-analyzer", "ruff", "shfmt", "shellcheck",
-            "taplo", "gopls", "dart", "neocmakelsp", "ktlint", "git", "jq", "ripgrep"
+            "taplo", "gopls", "dart", "neocmakelsp", "ktlint", "git", "jq", "ripgrep", "librsvg"
         ),
         RequirementManager.NPM to setOf(
             "prettier", "typescript", "typescript-language-server", "pyright", "bash-language-server",

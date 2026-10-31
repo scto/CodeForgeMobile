@@ -148,7 +148,7 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 
 * Erscheinen im **PT**-Dropdown im Kopf des Dateibaums (links neben ⋮). Ein Tipp öffnet bei `prompt`/`confirm` einen Dialog, prüft `requires` und startet dann `command` im Projektordner; die Ausgabe erscheint live in einem Dialog. Danach wird der Dateibaum aktualisiert.
 * `command` läuft **ohne Shell** (jedes Element = ein Argument; `${input}` kann also keine Befehle einschleusen). Platzhalter: `${projectDir}`, `${pluginDir}`, `${home}`, `${input}`. `timeoutSeconds` 1..900 (Standard 120).
-* Werkzeuge führen Programme/Skripte aus: Berechtigung `shell` ist Pflicht, **im Store nicht erlaubt**, nur Sideload.
+* Werkzeuge führen Programme/Skripte aus: Berechtigung `shell` ist Pflicht. Installation per Sideload oder (zum Testen) über die Store-Kategorie **`tool`** („Code-Tools“): `installFromFile(declarativeOnly = true, allowTools = true)` erlaubt `tools` und Skripte wie `.py`, lehnt aber weiter `entryPointClass`, `.dex/.jar/.so/.apk/.class/.aar` und `.sh` ab. Die App zeigt vor der Installation einen Bestätigungsdialog. Eine spätere, strengere Lösung (Signatur/Review) ist offen.
 * Fertige Werkzeuge: `tool-plugins/` (VS-Code-Import, AndroidX, Version Catalog, unbenutzte Ressourcen, Formatieren, .gitignore, LICENSE, Aufräumen).
 
 ## Code-Plugins: Befehle, Menüs, Ereignisse (API v2)

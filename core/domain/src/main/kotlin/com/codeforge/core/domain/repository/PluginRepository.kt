@@ -21,9 +21,9 @@ interface PluginRepository {
 
     /**
      * Installiert ein Plugin-ZIP. Mit [declarativeOnly] = true (Store) werden Archive mit ausführbarem Code
-     * (entryPointClass, .dex/.jar/.so …) abgelehnt; Code-Plugins nur per manuellem Sideload (false).
+     * (entryPointClass, .dex/.jar/.so …) abgelehnt; [allowTools] erlaubt zusätzlich `contributes.tools` mit Skripten (Store-Kategorie „tool“); Code-Plugins nur per manuellem Sideload (false).
      */
-    fun installFromFile(archivePath: String, declarativeOnly: Boolean = false): Flow<PluginInstallEvent>
+    fun installFromFile(archivePath: String, declarativeOnly: Boolean = false, allowTools: Boolean = false): Flow<PluginInstallEvent>
 
     /** true: Plugin laden + als aktiviert speichern. false: Plugin entladen + als deaktiviert speichern. */
     suspend fun setEnabled(pluginId: String, enabled: Boolean): Result<Unit>
