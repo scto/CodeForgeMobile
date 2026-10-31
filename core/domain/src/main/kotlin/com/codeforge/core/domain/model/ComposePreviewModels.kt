@@ -15,7 +15,12 @@ data class PreviewOptions(
     val widthDp: Int? = null,
     val heightDp: Int? = null,
     /** `true` bei `uiMode = UI_MODE_NIGHT_YES`, `false` bei NIGHT_NO, `null` = nicht angegeben. */
-    val darkMode: Boolean? = null
+    val darkMode: Boolean? = null,
+    /** `name = "…"` der Annotation (Beschriftung des Chips). */
+    val name: String? = null,
+    val fontScale: Float? = null,
+    /** `locale = "de"` / `"de-CH"` / `"ar"` (Sprache und Schreibrichtung). */
+    val locale: String? = null
 )
 
 data class ComposableCandidate(

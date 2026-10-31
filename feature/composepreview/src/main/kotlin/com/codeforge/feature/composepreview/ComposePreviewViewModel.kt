@@ -50,7 +50,7 @@ class ComposePreviewViewModel @Inject constructor(
             }
 
             ComposePreviewUiEvent.Rerender -> {
-                _uiState.value.selectedFunctionName?.let(::renderSelected)
+                _uiState.value.selectedFunctionName?.let { renderSelected(it, forceRefresh = true) }
             }
 
             is ComposePreviewUiEvent.ThemeModeChanged -> {
@@ -84,7 +84,7 @@ class ComposePreviewViewModel @Inject constructor(
         selected?.let(::renderSelected)
     }
 
-    private fun renderSelected(functionName: String) {
+    private fun renderSelected(functionName: String, forceRefresh: Boolean = false) {
         val file = lastActiveFile ?: return
         _uiState.update { it.copy(renderState = PreviewRenderState.PreparingRuntime(0)) }
 
@@ -95,6 +95,7 @@ class ComposePreviewViewModel @Inject constructor(
                 functionName = functionName,
                 options = _uiState.value.availableComposables.firstOrNull { it.functionName == functionName }?.options ?: PreviewOptions(),
                 themeMode = _uiState.value.themeMode,
+                forceRefresh = forceRefresh,
                 onPreparingRuntime = { pct ->
                     _uiState.update { state ->
                         val nextState = if (pct >= 100) {

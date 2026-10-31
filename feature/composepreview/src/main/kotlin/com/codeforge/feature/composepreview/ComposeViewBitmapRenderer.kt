@@ -20,6 +20,10 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
@@ -81,22 +85,29 @@ internal data class PreviewStyle(
     val dark: Boolean,
     val backgroundArgb: Int,
     val widthDp: Int? = null,
-    val heightDp: Int? = null
+    val heightDp: Int? = null,
+    val fontScale: Float? = null,
+    val locale: String? = null
 )
 
 @Composable
 private fun PreviewStyledContent(style: PreviewStyle, content: @Composable () -> Unit) {
     val base = LocalConfiguration.current
-    val config = remember(base, style.dark) {
+    val config = remember(base, style) {
         Configuration(base).apply {
+            style.locale?.let { setLocale(java.util.Locale.forLanguageTag(it)) }
             val night = if (style.dark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
             uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or night
         }
     }
     // isSystemInDarkTheme() liest LocalConfiguration; LocalContentColor deckt Texte ohne eigenes Theme ab.
+    val density = LocalDensity.current
+    val rtl = style.locale?.let { android.text.TextUtils.getLayoutDirectionFromLocale(java.util.Locale.forLanguageTag(it)) == View.LAYOUT_DIRECTION_RTL }
     CompositionLocalProvider(
         LocalConfiguration provides config,
-        LocalContentColor provides if (style.dark) Color(0xFFE6E1E5) else Color.Black
+        LocalContentColor provides if (style.dark) Color(0xFFE6E1E5) else Color.Black,
+        LocalDensity provides (style.fontScale?.let { Density(density.density, it) } ?: density),
+        LocalLayoutDirection provides (when (rtl) { true -> LayoutDirection.Rtl; false -> LayoutDirection.Ltr; null -> LocalLayoutDirection.current })
     ) {
         var size: Modifier = Modifier
         style.widthDp?.let { size = size.width(it.dp) }

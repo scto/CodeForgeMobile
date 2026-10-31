@@ -38,6 +38,11 @@ class ComposePreviewRendererImpl @Inject internal constructor(
 ) : ComposePreviewRenderer {
 
     private val dexer = PreviewDexer()
+    private val buildCache by lazy { PreviewBuildCache(File(context.cacheDir, "compose_preview_cache")) }
+    private val resultCache = PreviewResultCache<PreviewRenderResult>()
+    private val loaders = object : LinkedHashMap<String, ClassLoader>(8, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ClassLoader>?): Boolean = size > 4
+    }
 
     override suspend fun render(
         filePath: String,
@@ -45,7 +50,8 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         functionName: String,
         onPreparingRuntime: (Int) -> Unit,
         options: PreviewOptions,
-        themeMode: PreviewThemeMode
+        themeMode: PreviewThemeMode,
+        forceRefresh: Boolean
     ): Result<PreviewRenderResult> = withContext(Dispatchers.Default) {
         runCatching {
             val runtimeDir = compilerRuntimeProvider.ensureInstalled(onPreparingRuntime).getOrThrow()
@@ -70,97 +76,28 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     targetSourceOverride = sourceCode
                 )
 
-                val classesDir = File(workDir, "classes")
-                val targetFileName = targetFile.name.ifEmpty { "PreviewTarget.kt" }
-
-                val preparedTargetFile = File(workDir, targetFileName).apply {
-                    val prepared = PreviewSourcePreparer.prepare(
-                        source = sourceCode,
-                        keepPackage = true,
-                        stubProjectThemes = resolvedSources.siblingFiles.isEmpty(),
-                        stripThemeSideEffects = true
-                    )
-                    writeText(prepared)
-                }
-
-                val preparedSiblingFiles = resolvedSources.siblingFiles.mapIndexed { idx, sFile ->
-                    val siblingTargetName = if (sFile.name == targetFileName) "sibling_${idx}_${sFile.name}" else sFile.name
-                    File(workDir, siblingTargetName).apply {
-                        val originalText = try { sFile.readText() } catch (_: Exception) { "" }
-                        val prepared = PreviewSourcePreparer.prepare(
-                            source = originalText,
-                            keepPackage = true,
-                            stubProjectThemes = false,
-                            stripThemeSideEffects = true
-                        )
-                        writeText(prepared)
-                    }
-                }
-
-                val primaryFiles = listOf(preparedTargetFile) + preparedSiblingFiles
-                var compileResult = compiler.compile(
-                    sourceFiles = primaryFiles,
-                    outputDir = classesDir,
-                    runtimeClasspathJars = runtimeJars,
-                    androidPlatformJar = androidPlatformJar
+                val siblingTexts = resolvedSources.siblingFiles.joinToString("\n") { f -> f.path + "\u0001" + runCatching { f.readText() }.getOrDefault("") }
+                val buildKey = PreviewCacheKey.of(
+                    filePath, sourceCode, siblingTexts, resolvedSources.targetClassName,
+                    runtimeDir.name, runtimeJars.joinToString { it.name + ":" + it.length() }, androidPlatformJar.path, d8Path
                 )
+                val resultKey = "$buildKey|$functionName|$options|$themeMode"
+                if (!forceRefresh) resultCache.get(resultKey)?.let { return@runCatching it }
 
-                var isFallbackTheme = false
-                var fallbackReason: String? = null
-                var compiledFiles = primaryFiles.map { it.name }
-
-                // Rückfall: Falls die Mehr-Datei-Kompilierung scheitert, auf Ein-Datei-Stub zurückfallen
-                if (!compileResult.success && preparedSiblingFiles.isNotEmpty()) {
-                    val fallback = PreviewCompileStep.determineFallback(
-                        primaryResult = compileResult,
-                        targetSourceCode = sourceCode,
-                        siblingFiles = preparedSiblingFiles
-                    )
-                    if (fallback != null) {
-                        val (reason, stubSource) = fallback
-                        classesDir.deleteRecursively()
-                        classesDir.mkdirs()
-                        preparedTargetFile.writeText(stubSource)
-
-                        val fallbackResult = compiler.compile(
-                            sourceFiles = listOf(preparedTargetFile),
-                            outputDir = classesDir,
-                            runtimeClasspathJars = runtimeJars,
-                            androidPlatformJar = androidPlatformJar
-                        )
-
-                        if (fallbackResult.success) {
-                            compileResult = fallbackResult
-                            isFallbackTheme = true
-                            fallbackReason = reason
-                            compiledFiles = listOf(preparedTargetFile.name)
-                        }
-                    }
-                }
-
-                if (!compileResult.success) {
-                    error(
-                        Res.string(R.string.composepreview_kompilierung_fehlgeschlagen, compileResult.errorMessages.joinToString("\n"))
-                    )
-                }
-
-                val classFiles = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
-                if (classFiles.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
-
-                val dexOutputDir = File(workDir, "dex")
-                val dexResult = dexer.dex(classFiles, dexOutputDir, d8Path)
-                val dexFile = dexResult.dexFile
-                if (!dexResult.success || dexFile == null) {
-                    error(Res.string(R.string.composepreview_dexing_fehlgeschlagen, dexResult.errorOutput))
-                }
+                if (forceRefresh) synchronized(loaders) { loaders.remove(buildKey) }
+                val build = (if (forceRefresh) null else buildCache.lookup(buildKey))
+                    ?: buildDex(buildKey, workDir, filePath, sourceCode, resolvedSources, runtimeJars, androidPlatformJar, d8Path)
+                val dexFile = build.dexFile
+                val compiledFiles = build.compiledFiles
+                val isFallbackTheme = build.isFallbackTheme
+                val fallbackReason = build.fallbackReason
 
                 val optimizedDir = File(context.codeCacheDir, "compose_preview_dex").apply { mkdirs() }
-                val classLoader = dalvik.system.DexClassLoader(
-                    dexFile.absolutePath,
-                    optimizedDir.absolutePath,
-                    null,
-                    context.classLoader
-                )
+                val classLoader = synchronized(loaders) {
+                    loaders.getOrPut(buildKey) {
+                        dalvik.system.DexClassLoader(dexFile.absolutePath, optimizedDir.absolutePath, null, context.classLoader)
+                    }
+                }
 
                 // Top-Level-Funktionen laden: zuerst via aufgelöstem Klassennamen, sonst Fallback
                 val hostClass = try {
@@ -182,7 +119,10 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                 }
                 // Hintergrund immer deckend (auch ohne showBackground), damit Standardtext auf der dunklen App lesbar bleibt.
                 val background = options.backgroundColor?.toInt() ?: if (dark) 0xFF1C1B1F.toInt() else 0xFFFFFFFF.toInt()
-                val style = PreviewStyle(dark = dark, backgroundArgb = background, widthDp = options.widthDp, heightDp = options.heightDp)
+                val style = PreviewStyle(
+                    dark = dark, backgroundArgb = background, widthDp = options.widthDp, heightDp = options.heightDp,
+                    fontScale = options.fontScale, locale = options.locale
+                )
                 val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap(style = style) { onError ->
                     ReflectiveComposableHost(targetMethod, onError = onError)
                 }
@@ -193,11 +133,113 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     compiledFiles = compiledFiles,
                     isFallbackTheme = isFallbackTheme,
                     fallbackReason = fallbackReason
-                )
+                ).also { resultCache.put(resultKey, it) }
             } finally {
                 workDir.deleteRecursively()
             }
         }
+    }
+
+
+    /** Kompiliert (Kotlin + Compose-Plugin) und dext; legt das Ergebnis im [buildCache] ab. */
+    private suspend fun buildDex(
+        buildKey: String,
+        workDir: File,
+        filePath: String,
+        sourceCode: String,
+        resolvedSources: ResolvedPreviewSources,
+        runtimeJars: List<File>,
+        androidPlatformJar: File,
+        d8Path: String
+    ): CachedBuild {
+        val targetFile = File(filePath)
+        val classesDir = File(workDir, "classes")
+        val targetFileName = targetFile.name.ifEmpty { "PreviewTarget.kt" }
+
+        val preparedTargetFile = File(workDir, targetFileName).apply {
+            val prepared = PreviewSourcePreparer.prepare(
+                source = sourceCode,
+                keepPackage = true,
+                stubProjectThemes = resolvedSources.siblingFiles.isEmpty(),
+                stripThemeSideEffects = true
+            )
+            writeText(prepared)
+        }
+
+        val preparedSiblingFiles = resolvedSources.siblingFiles.mapIndexed { idx, sFile ->
+            val siblingTargetName = if (sFile.name == targetFileName) "sibling_${idx}_${sFile.name}" else sFile.name
+            File(workDir, siblingTargetName).apply {
+                val originalText = try { sFile.readText() } catch (_: Exception) { "" }
+                val prepared = PreviewSourcePreparer.prepare(
+                    source = originalText,
+                    keepPackage = true,
+                    stubProjectThemes = false,
+                    stripThemeSideEffects = true
+                )
+                writeText(prepared)
+            }
+        }
+
+        val primaryFiles = listOf(preparedTargetFile) + preparedSiblingFiles
+        var compileResult = compiler.compile(
+            sourceFiles = primaryFiles,
+            outputDir = classesDir,
+            runtimeClasspathJars = runtimeJars,
+            androidPlatformJar = androidPlatformJar
+        )
+
+        var isFallbackTheme = false
+        var fallbackReason: String? = null
+        var compiledFiles = primaryFiles.map { it.name }
+
+        // Rückfall: Falls die Mehr-Datei-Kompilierung scheitert, auf Ein-Datei-Stub zurückfallen
+        if (!compileResult.success && preparedSiblingFiles.isNotEmpty()) {
+            val fallback = PreviewCompileStep.determineFallback(
+                primaryResult = compileResult,
+                targetSourceCode = sourceCode,
+                siblingFiles = preparedSiblingFiles
+            )
+            if (fallback != null) {
+                val (reason, stubSource) = fallback
+                classesDir.deleteRecursively()
+                classesDir.mkdirs()
+                preparedTargetFile.writeText(stubSource)
+
+                val fallbackResult = compiler.compile(
+                    sourceFiles = listOf(preparedTargetFile),
+                    outputDir = classesDir,
+                    runtimeClasspathJars = runtimeJars,
+                    androidPlatformJar = androidPlatformJar
+                )
+
+                if (fallbackResult.success) {
+                    compileResult = fallbackResult
+                    isFallbackTheme = true
+                    fallbackReason = reason
+                    compiledFiles = listOf(preparedTargetFile.name)
+                }
+            }
+        }
+
+        if (!compileResult.success) {
+            error(
+                Res.string(R.string.composepreview_kompilierung_fehlgeschlagen, compileResult.errorMessages.joinToString("\n"))
+            )
+        }
+
+        val classFiles = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
+        if (classFiles.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
+
+        val dexOutputDir = File(workDir, "dex")
+        val dexResult = dexer.dex(classFiles, dexOutputDir, d8Path)
+        val dexFile = dexResult.dexFile
+        if (!dexResult.success || dexFile == null) {
+            error(Res.string(R.string.composepreview_dexing_fehlgeschlagen, dexResult.errorOutput))
+        }
+
+
+        val cached = buildCache.store(buildKey, dexFile, resolvedSources.targetClassName, compiledFiles, isFallbackTheme, fallbackReason)
+        return cached ?: CachedBuild(dexFile, resolvedSources.targetClassName, compiledFiles, isFallbackTheme, fallbackReason)
     }
 
     private fun Bitmap.toPngBytes(): ByteArray = ByteArrayOutputStream().use { stream ->

@@ -120,7 +120,7 @@ private fun ComposableChipRow(candidates: List<ComposableCandidate>, selected: S
                 // Funktionen mit Parametern ohne @Preview lassen sich nicht rendern → nicht anwählbar (Vorschau-Funktion ★ nutzen)
                 enabled = candidate.hasPreviewAnnotation || !candidate.hasParameters,
                 onClick = { onSelected(candidate.functionName) },
-                label = { Text(candidate.functionName) },
+                label = { Text(candidate.options.name ?: candidate.functionName) },
                 leadingIcon = if (candidate.hasPreviewAnnotation) {
                     { Icon(Icons.Filled.Star, contentDescription = "@Preview", modifier = Modifier.padding(2.dp)) }
                 } else {

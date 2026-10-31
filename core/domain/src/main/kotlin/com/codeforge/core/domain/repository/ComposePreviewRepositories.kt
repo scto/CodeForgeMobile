@@ -40,6 +40,8 @@ interface ComposePreviewRenderer {
         functionName: String,
         onPreparingRuntime: (Int) -> Unit = {},
         options: PreviewOptions = PreviewOptions(),
-        themeMode: PreviewThemeMode = PreviewThemeMode.AUTO
+        themeMode: PreviewThemeMode = PreviewThemeMode.AUTO,
+        /** `true` = Zwischenspeicher umgehen (Neu rendern). */
+        forceRefresh: Boolean = false
     ): Result<PreviewRenderResult>
 }

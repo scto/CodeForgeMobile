@@ -92,12 +92,27 @@ class ComposeSourceAnalyzerImpl @Inject constructor() : ComposeSourceAnalyzer {
             "UI_MODE_NIGHT_NO" in uiMode || uiMode == "16" || uiMode.equals("0x10", ignoreCase = true) -> false
             else -> null
         }
+        fun str(name: String) = Regex("""\b$name\s*=\s*"([^"]*)"""").find(args)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
+        val device = Regex("""\bdevice\s*=\s*(?:"([^"]*)"|([\w.]+))""").find(args)?.let { m -> (m.groupValues[1].ifEmpty { m.groupValues[2] }).let(::deviceSize) }
         return PreviewOptions(
             showBackground = Regex("""\bshowBackground\s*=\s*true""").containsMatchIn(args),
             backgroundColor = color,
-            widthDp = int("widthDp"),
-            heightDp = int("heightDp"),
-            darkMode = dark
+            // Ausdrücklich angegebene Maße gehen vor `device`
+            widthDp = int("widthDp") ?: device?.first,
+            heightDp = int("heightDp") ?: device?.second,
+            darkMode = dark,
+            name = str("name"),
+            fontScale = Regex("""\bfontScale\s*=\s*([0-9]*\.?[0-9]+)f?""").find(args)?.groupValues?.get(1)?.toFloatOrNull()?.takeIf { it > 0f },
+            locale = str("locale")
         )
+    }
+
+    /** `Devices.PHONE` usw. und `"spec:width=…dp,height=…dp"` → (Breite, Höhe) in dp; sonst `null`. */
+    internal fun deviceSize(expr: String): Pair<Int, Int>? {
+        val known = mapOf("PHONE" to (411 to 891), "TABLET" to (1280 to 800), "DESKTOP" to (1920 to 1080), "FOLDABLE" to (674 to 841))
+        known.entries.firstOrNull { expr.endsWith("Devices.${it.key}") || expr == it.key }?.let { return it.value }
+        val w = Regex("""width\s*=\s*([0-9]*\.?[0-9]+)dp""").find(expr)?.groupValues?.get(1)?.toFloatOrNull()
+        val h = Regex("""height\s*=\s*([0-9]*\.?[0-9]+)dp""").find(expr)?.groupValues?.get(1)?.toFloatOrNull()
+        return if (w != null && h != null) w.toInt() to h.toInt() else null
     }
 }

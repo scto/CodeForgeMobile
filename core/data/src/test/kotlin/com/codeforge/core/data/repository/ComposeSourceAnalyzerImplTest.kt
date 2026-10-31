@@ -75,4 +75,29 @@ class ComposeSourceAnalyzerImplTest {
         assertEquals(null, by.getValue("C").options.widthDp)
         assertEquals(null, by.getValue("C").options.darkMode)
     }
+
+    @Test
+    fun `liest name, fontScale, locale und device`() {
+        val src = """
+            @Preview(name = "Gross", fontScale = 1.5f, locale = "ar", device = "spec:width=320dp,height=640dp")
+            @Composable
+            fun A() {
+            }
+
+            @Preview(device = Devices.TABLET, widthDp = 500)
+            @Composable
+            fun B() {
+            }
+        """.trimIndent()
+        val by = analyzer.findComposables(src).associateBy { it.functionName }
+        val a = by.getValue("A").options
+        assertEquals("Gross", a.name)
+        assertEquals(1.5f, a.fontScale)
+        assertEquals("ar", a.locale)
+        assertEquals(320, a.widthDp)
+        assertEquals(640, a.heightDp)
+        val b = by.getValue("B").options
+        assertEquals(500, b.widthDp)
+        assertEquals(800, b.heightDp)
+    }
 }
