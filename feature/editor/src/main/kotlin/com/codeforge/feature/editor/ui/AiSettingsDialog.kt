@@ -1,9 +1,10 @@
 // Modul: :feature:editor
 package com.codeforge.feature.editor.ui
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,6 +51,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AiSettingsDialog(
     initialOptions: AiChatOptions,
@@ -86,10 +88,8 @@ fun AiSettingsDialog(
                     text = stringRes(R.string.ai_provider),
                     style = MaterialTheme.typography.labelLarge
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     AiProviderType.entries.forEach { provider ->
@@ -117,12 +117,11 @@ fun AiSettingsDialog(
                 )
 
                 // Model suggestions
-                Row(
+                FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
                         .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     selectedProvider.suggestedModels.forEach { suggested ->
                         FilterChip(
@@ -148,9 +147,17 @@ fun AiSettingsDialog(
 
                 OutlinedTextField(
                     value = apiKey,
-                    onValueChange = {
-                        apiKey = it
+                    onValueChange = { input ->
+                        apiKey = input
                         testResult = null
+                        // Schlüssel im falschen Anbieter ist die häufigste Fehlerquelle: Anbieter automatisch umstellen.
+                        AiProviderType.detectFromKey(input)?.let { detected ->
+                            if (detected != selectedProvider) {
+                                selectedProvider = detected
+                                modelName = detected.defaultModel
+                                baseUrl = detected.defaultBaseUrl
+                            }
+                        }
                     },
                     label = { Text(stringRes(R.string.ai_api_key)) },
                     singleLine = true,
@@ -195,35 +202,33 @@ fun AiSettingsDialog(
                         }
                         Text(stringRes(R.string.ai_test_connection))
                     }
+                }
 
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    testResult?.let { res ->
-                        if (res.isSuccess) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = stringRes(R.string.ai_connection_success, res.getOrDefault("")),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Error,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = stringRes(R.string.ai_connection_failed, res.exceptionOrNull()?.message ?: ""),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
+                testResult?.let { res ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        val ok = res.isSuccess
+                        val tint = if (ok) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        Icon(
+                            imageVector = if (ok) Icons.Default.CheckCircle else Icons.Default.Error,
+                            contentDescription = null,
+                            tint = tint,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (ok) {
+                                stringRes(R.string.ai_connection_success, res.getOrDefault(""))
+                            } else {
+                                stringRes(R.string.ai_connection_failed, res.exceptionOrNull()?.message ?: "")
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = tint,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
 

@@ -80,3 +80,12 @@ class AiSanitizerTest {
         assertTrue(result2.contains("Truncated 50 characters"))
     }
 }
+
+class AiProviderDetectionTest {
+    @org.junit.Test
+    fun detectsProviderFromKeyPrefix() {
+        org.junit.Assert.assertEquals(AiProviderType.GEMINI, AiProviderType.detectFromKey(" AIzaSyABC "))
+        org.junit.Assert.assertEquals(AiProviderType.ANTHROPIC, AiProviderType.detectFromKey("sk-ant-api03-x"))
+        org.junit.Assert.assertNull(AiProviderType.detectFromKey("sk-proj-123"))
+    }
+}

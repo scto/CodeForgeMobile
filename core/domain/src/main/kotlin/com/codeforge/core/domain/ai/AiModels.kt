@@ -63,11 +63,21 @@ enum class AiProviderType(
         id = "gemini",
         displayName = "Google Gemini",
         defaultBaseUrl = "https://generativelanguage.googleapis.com",
-        defaultModel = "gemini-2.0-flash",
-        suggestedModels = listOf("gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-pro", "gemini-1.5-flash")
+        defaultModel = "gemini-2.5-flash",
+        suggestedModels = listOf("gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro")
     );
 
     companion object {
+        /** Erkennt den Anbieter am Schlüssel-Präfix (Gemini `AIza…`, Anthropic `sk-ant-…`), sonst `null`. */
+        fun detectFromKey(rawKey: String): AiProviderType? {
+            val key = rawKey.trim()
+            return when {
+                key.startsWith("AIza") -> GEMINI
+                key.startsWith("sk-ant-") -> ANTHROPIC
+                else -> null
+            }
+        }
+
         fun fromId(id: String): AiProviderType =
             entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: OPENAI
     }

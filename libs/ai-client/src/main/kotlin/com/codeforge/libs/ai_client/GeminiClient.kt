@@ -39,7 +39,7 @@ class GeminiClient @Inject constructor() {
     fun stream(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent> = flow {
         val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://generativelanguage.googleapis.com", listOf("/v1beta", "/v1"))
         val apiKey = AiHttpSupport.cleanKey(options.apiKey)
-        val url = URL("$baseUrl/v1beta/models/${options.model.trim()}:streamGenerateContent?alt=sse&key=$apiKey")
+        val url = URL("$baseUrl/v1beta/models/${options.model.trim()}:streamGenerateContent?alt=sse")
 
         val systemMessages = messages.filter { it.role == AiRole.SYSTEM }.joinToString("\n\n") { it.content }
         val dialogMessages = messages.filter { it.role != AiRole.SYSTEM }
@@ -100,6 +100,7 @@ class GeminiClient @Inject constructor() {
                     doOutput = true
                     setRequestProperty("Content-Type", "application/json")
                     setRequestProperty("Accept", "text/event-stream")
+                    setRequestProperty("x-goog-api-key", apiKey)
                 }
 
                 connection.outputStream.use { os ->
@@ -122,10 +123,13 @@ class GeminiClient @Inject constructor() {
                     } catch (_: Exception) {
                         ""
                     }
-                    val msg = when (responseCode) {
-                        400, 401, 403 -> Res.string(R.string.ai_error_invalid_key)
-                        429 -> Res.string(R.string.ai_error_quota_exceeded)
-                        else -> Res.string(R.string.ai_error_generic, "HTTP $responseCode: $errBody")
+                    val apiMessage = errorMessage(errBody)
+                    val keyRejected = responseCode == 401 || responseCode == 403 ||
+                        (responseCode == 400 && apiMessage.contains("API key", ignoreCase = true))
+                    val msg = when {
+                        keyRejected -> Res.string(R.string.ai_error_invalid_key)
+                        responseCode == 429 -> Res.string(R.string.ai_error_quota_exceeded)
+                        else -> Res.string(R.string.ai_error_generic, "HTTP $responseCode: $apiMessage")
                     }
                     emit(AiEvent.Error(msg))
                     emit(AiEvent.Done)
@@ -192,6 +196,13 @@ class GeminiClient @Inject constructor() {
         }
     }.flowOn(Dispatchers.IO)
 
+    /** Liest `error.message` aus Googles Fehler-JSON, sonst den Rohtext (gekürzt). */
+    private fun errorMessage(body: String): String = try {
+        json.parseToJsonElement(body).jsonObject["error"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+    } catch (_: Exception) {
+        null
+    } ?: body.take(300)
+
     suspend fun testConnection(options: AiChatOptions): Result<String> {
         val testOptions = options.copy(maxTokens = 5)
         val msg = AiChatMessage(id = "test", role = AiRole.USER, content = "Ping")
@@ -219,7 +230,7 @@ class GeminiClient @Inject constructor() {
 
     suspend fun fetchModels(options: AiChatOptions): Result<List<String>> = withContext(Dispatchers.IO) {
         val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://generativelanguage.googleapis.com", listOf("/v1beta", "/v1"))
-        val url = URL("$baseUrl/v1beta/models?key=${AiHttpSupport.cleanKey(options.apiKey)}")
+        val url = URL("$baseUrl/v1beta/models")
 
         var connection: HttpURLConnection? = null
         try {
@@ -228,6 +239,7 @@ class GeminiClient @Inject constructor() {
                 readTimeout = 15_000
                 requestMethod = "GET"
                 setRequestProperty("Accept", "application/json")
+                setRequestProperty("x-goog-api-key", AiHttpSupport.cleanKey(options.apiKey))
             }
 
             if (connection.responseCode !in 200..299) {

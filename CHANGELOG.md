@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+- KI-Einstellungen: Anbieter- und Modell-Chips umbrechen (FlowRow) statt seitlich zu scrollen, der Gemini-Chip war verdeckt; Testergebnis steht unter dem Button; der Anbieter wird am Schlüssel-Präfix erkannt (`AIza…` = Gemini, `sk-ant-…` = Anthropic).
+- Gemini: Standardmodell `gemini-2.5-flash` (2.0/1.5 sind abgekündigt), Schlüssel im Header statt in der URL, Fehlermeldung nennt die echte API-Antwort (400/404 gelten nicht mehr pauschal als „ungültiger Schlüssel“).
+
 ### Hinzugefügt
 - Build: Gradle-Sync (Sync-Button im Build-Panel, `gradlew tasks --all`). Die gefundenen Projekt-Tasks erscheinen in der Task-Auswahl, die jetzt ein filterbares Dropdown ist.
 
