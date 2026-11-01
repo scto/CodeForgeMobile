@@ -488,7 +488,7 @@ fun EditorRoute(
     }
 
     uiState.hoverText?.let { text ->
-        HoverSheet(text = text, onDismiss = { viewModel.onEvent(EditorUiEvent.DismissHover) })
+        HoverSheet(text = text, palette = controller?.hoverPalette(), onDismiss = { viewModel.onEvent(EditorUiEvent.DismissHover) })
     }
 
     if (uiState.isReferencesSheetVisible) {

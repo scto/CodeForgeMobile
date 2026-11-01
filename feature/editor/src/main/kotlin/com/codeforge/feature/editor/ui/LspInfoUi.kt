@@ -18,6 +18,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import com.codeforge.libs.code_tools.kotlin.KotlinSignature
+import com.codeforge.libs.code_tools.kotlin.KotlinSignatureParser
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -67,14 +70,131 @@ internal fun parseHoverBlocks(markdown: String): List<HoverBlock> {
     return blocks
 }
 
+/** Farben des Editor-Themes für Hover-Anzeigen (aus dem aktiven `EditorColorScheme` abgeleitet). */
+@androidx.compose.runtime.Immutable
+data class HoverPalette(
+    val background: Color,
+    val text: Color,
+    val keyword: Color,
+    val function: Color,
+    val type: Color,
+    val literal: Color,
+    val comment: Color,
+)
+
+@Composable
+private fun rememberPalette(palette: HoverPalette?): HoverPalette {
+    val cs = MaterialTheme.colorScheme
+    return palette ?: HoverPalette(cs.surfaceVariant, cs.onSurfaceVariant, cs.primary, cs.tertiary, cs.secondary, cs.error, cs.outline)
+}
+
+private fun signatureText(sig: KotlinSignature, p: HoverPalette): AnnotatedString = buildAnnotatedString {
+    fun kw(t: String) = withStyle(SpanStyle(color = p.keyword, fontWeight = FontWeight.SemiBold)) { append(t) }
+    sig.modifiers.forEach { kw(it); append(" ") }
+    kw(sig.kind); append(" ")
+    sig.receiver?.let { withStyle(SpanStyle(color = p.type)) { append(it) }; append(".") }
+    withStyle(SpanStyle(color = p.function, fontWeight = FontWeight.Bold)) { append(sig.name) }
+    if (sig.kind == "fun") {
+        append("(")
+        sig.params.forEachIndexed { i, prm ->
+            if (i > 0) append(", ")
+            if (prm.modifiers.isNotEmpty()) { kw(prm.modifiers); append(" ") }
+            append(prm.name)
+            if (prm.type.isNotEmpty()) { append(": "); withStyle(SpanStyle(color = p.type)) { append(prm.type) } }
+            prm.default?.let { append(" = "); withStyle(SpanStyle(color = p.literal)) { append(it) } }
+        }
+        append(")")
+    }
+    sig.returnType?.let { append(": "); withStyle(SpanStyle(color = p.type)) { append(it) } }
+}
+
+@Composable
+private fun HoverSignatureCard(sig: KotlinSignature, pkg: String?, palette: HoverPalette) {
+    val returnsLabel = stringRes(R.string.lsp_hover_returns)
+    val packageLabel = stringRes(R.string.lsp_hover_package)
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = palette.background,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = signatureText(sig, palette),
+                color = palette.text,
+                fontFamily = FontFamily.Monospace,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            if (sig.isMutable != null) {
+                Text(
+                    text = stringRes(if (sig.isMutable == true) R.string.lsp_hover_var else R.string.lsp_hover_val),
+                    color = palette.comment,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+            }
+            if (sig.params.isNotEmpty()) {
+                Text(
+                    text = stringRes(R.string.lsp_hover_parameters),
+                    color = palette.comment,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                sig.params.forEach { prm ->
+                    Text(
+                        text = buildAnnotatedString {
+                            append("• "); append(prm.name)
+                            if (prm.type.isNotEmpty()) { append(": "); withStyle(SpanStyle(color = palette.type)) { append(prm.type) } }
+                            prm.default?.let {
+                                append("  = ")
+                                withStyle(SpanStyle(color = palette.literal)) { append(it) }
+                            }
+                        },
+                        color = palette.text,
+                        fontFamily = FontFamily.Monospace,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+            sig.returnType?.takeIf { sig.kind == "fun" }?.let {
+                Text(
+                    text = buildAnnotatedString {
+                        append(returnsLabel); append(" ")
+                        withStyle(SpanStyle(color = palette.type)) { append(it) }
+                    },
+                    color = palette.text,
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+            }
+            pkg?.let {
+                Text(
+                    text = "$packageLabel $it",
+                    color = palette.comment,
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HoverSheet(
     modifier: Modifier = Modifier,
     text: String,
+    palette: HoverPalette? = null,
     onDismiss: () -> Unit
 ) {
+    val colors = rememberPalette(palette)
     val blocks = remember(text) { parseHoverBlocks(text) }
+    val pkg = remember(text) { KotlinSignatureParser.packageOf(text) }
+    // Erster parsebarer Codeblock → strukturierte Signaturkarte; übrige Blöcke wie bisher
+    val parsed = remember(blocks) {
+        blocks.withIndex().firstNotNullOfOrNull { (i, b) -> if (b.isCode) KotlinSignatureParser.parse(b.text)?.let { i to it } else null }
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(),
@@ -92,15 +212,18 @@ fun HoverSheet(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                blocks.forEach { block ->
-                    if (block.isCode) {
+                blocks.forEachIndexed { index, block ->
+                    if (parsed != null && parsed.first == index) {
+                        HoverSignatureCard(parsed.second, pkg, colors)
+                    } else if (block.isCode) {
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            color = colors.background,
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                         ) {
                             Text(
                                 text = block.text,
+                                color = colors.text,
                                 fontFamily = FontFamily.Monospace,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(12.dp)

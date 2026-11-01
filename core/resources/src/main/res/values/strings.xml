@@ -1936,6 +1936,11 @@
     <string name="editor_remove_unused_imports">Remove unused imports</string>
     <string name="lsp_hover">Documentation</string>
     <string name="lsp_hover_none">No documentation available</string>
+    <string name="lsp_hover_var">Mutable property (var)</string>
+    <string name="lsp_hover_val">Read-only property (val)</string>
+    <string name="lsp_hover_parameters">Parameters</string>
+    <string name="lsp_hover_returns">Returns</string>
+    <string name="lsp_hover_package">Package</string>
     <string name="lsp_hover_title">Documentation</string>
     <string name="lsp_type_definition">Go to type definition</string>
     <string name="lsp_type_definition_not_found">No type definition found</string>

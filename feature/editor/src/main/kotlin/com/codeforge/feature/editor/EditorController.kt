@@ -12,6 +12,8 @@ package com.codeforge.feature.editor
 
 import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspRange
+import com.codeforge.feature.editor.ui.HoverPalette
+import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 import com.codeforge.libs.code_tools.edit.TextEdit
 import com.codeforge.libs.code_tools.imports.KotlinImportOrganizer
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -209,6 +211,20 @@ class EditorController {
         val organized = KotlinImportOrganizer.organize(text, removeUnused) ?: return false
         applyTextChange(organized)
         return true
+    }
+
+    /** Farben des aktiven Editor-Themes für Hover-Anzeigen. */
+    fun hoverPalette(): HoverPalette? = editorRef?.get()?.colorScheme?.let { cs ->
+        fun c(id: Int) = androidx.compose.ui.graphics.Color(cs.getColor(id))
+        HoverPalette(
+            background = c(EditorColorScheme.WHOLE_BACKGROUND),
+            text = c(EditorColorScheme.TEXT_NORMAL),
+            keyword = c(EditorColorScheme.KEYWORD),
+            function = c(EditorColorScheme.FUNCTION_NAME),
+            type = c(EditorColorScheme.IDENTIFIER_NAME),
+            literal = c(EditorColorScheme.LITERAL),
+            comment = c(EditorColorScheme.COMMENT),
+        )
     }
 
     /** Führt einen reinen Zeilenbefehl (Kommentar, Einrücken, Duplizieren …) auf der aktuellen Auswahl aus. */
