@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+- `codeforge-env`/SDK-Manager: build-tools und platform-tools aus den Mirror-Releases `v36.1.0` (flache Archive `buildtools_*`/`platformtools_*`) und `android-sdk-37.0.0` (`android-sdk.tar.gz`, vollständiges SDK, nur aarch64) werden jetzt gelistet und installiert (neue Typen `ghsdkfull`, `ghptfull`). Bisher erkannte der Mirror nur Assets mit Namen `*-aarch64-linux-android.*`.
+
 ### Hinzugefügt
 - Benachrichtigung „CodeForgeMobile“ (Vordergrunddienst `IdeKeepAliveService`), solange ein Build, Git-Clone oder eine SDK-Installation läuft, ein Terminal offen ist oder der Wakelock gehalten wird. Sie zeigt die Anzahl geöffneter Terminals und die laufenden Vorgänge und bietet **Wakelock aktivieren/freigeben**, **Beenden** (und bei Builds **Build abbrechen**). Die Vorgänge melden sich über `IdeActivityRegistry` (:core:domain) an; der Dienst endet von selbst. Der Wakelock ist ein Partial-Wakelock mit 6 h Zeitlimit. Der bisherige `BuildForegroundService` wird nicht mehr gestartet.
 

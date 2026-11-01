@@ -121,6 +121,9 @@ GH_VARIANT="${ASSET_VARIANT:-$GH_VARIANT_DEFAULT}"
 # Eigener Mirror (Releases android-sdk-*, android-ndk-*, cmake-*, androidide-tools-v*, lzhiyong-sdk-tools-*)
 TOOLS_REPO="${CODEFORGE_TOOLS_REPO:-${TOOLS_REPO-scto/codeforge-tools}}"
 AIDE_VARIANT="${AIDE_VARIANT:-$AIDE_VARIANT_DEFAULT}"
+# Releases v<ver> (buildtools_<ver>_<arch>.tar.xz, platformtools_<arch>.tar.xz): arm64-v8a bzw. armeabi-v7a
+case "$CF_ARCH" in arm) NU_VARIANT_DEFAULT=armeabi-v7a ;; *) NU_VARIANT_DEFAULT=arm64-v8a ;; esac
+NU_VARIANT="${NU_VARIANT:-$NU_VARIANT_DEFAULT}"
 # cmdline-tools-URL: Mirror-Release (Standard), eigene URL oder leer (= keine cmdline-tools/platforms im Manifest)
 if [ "$CMDLINE_TOOLS_URL" = "__mirror__" ]; then
   if [ -n "$TOOLS_REPO" ]; then
@@ -208,9 +211,9 @@ installed_path() { # id
       if [ -f "$cmk" ]; then cmv=$(cat "$cmk"); [ -e "$SDK_ROOT/cmake/$cmv/bin/cmake" ] && printf '%s' "$SDK_ROOT/cmake/$cmv"; fi ;;
     ghcmake)
       [ -x "$SDK_ROOT/cmake/$ver/bin/cmake" ] && printf '%s' "$SDK_ROOT/cmake/$ver" ;;
-    ghsdk|ghaidebt)
+    ghsdk|ghsdkfull|ghaidebt)
       [ -x "$SDK_ROOT/build-tools/$ver/aapt2" ] && printf '%s' "$SDK_ROOT/build-tools/$ver" ;;
-    ghpt|ghaidept)
+    ghpt|ghptfull|ghaidept)
       # platform-tools gibt es nur einmal; die Marke sagt, welche Version installiert wurde
       [ -x "$SDK_ROOT/platform-tools/adb" ] && [ "$(cat "$SDK_ROOT/platform-tools/.cf-version" 2>/dev/null)" = "$ver" ] \
         && printf '%s' "$SDK_ROOT/platform-tools" ;;
@@ -480,6 +483,12 @@ asset_re_for() { # tagprefix kind version
         ghaidept) printf '^platform-tools-%s-%s\\.tar\\.xz$' "$v" "$AIDE_VARIANT" ;;
       esac ;;
     lzhiyong-sdk-tools-) printf '^android-sdk-tools-static-%s\\.zip$' "$AIDE_VARIANT" ;;
+    v)
+      case "$2" in
+        ghaidebt) printf '^buildtools_%s_%s\\.tar\\.xz$' "$v" "$NU_VARIANT" ;;
+        ghaidept) printf '^platformtools_%s\\.tar\\.xz$' "$NU_VARIANT" ;;
+      esac ;;
+    android-sdk-) if [ "$2" = ghsdkfull ] || [ "$2" = ghptfull ]; then printf '^android-sdk\\.tar\\.gz$'; fi ;;
   esac
 }
 # Regex, mit der ein Release als installierbar erkannt wird (hat ein passendes Asset)
@@ -487,6 +496,7 @@ probe_re_for() { # tagprefix
   case "$1" in
     androidide-tools-v) printf -- '-%s\\.tar\\.xz$' "$AIDE_VARIANT" ;;
     lzhiyong-sdk-tools-) printf '^android-sdk-tools-static-%s\\.zip$' "$AIDE_VARIANT" ;;
+    v) printf '^(buildtools_[0-9.]+|platformtools)_%s\\.tar\\.xz$' "$NU_VARIANT" ;;
     *) printf -- '-%s\\.(tar\\.xz|tar\\.gz|zip|7z)$' "$GH_VARIANT" ;;
   esac
 }
@@ -558,10 +568,27 @@ mirror_dynamic() {
     | select(any(.assets[]?; .name | test($re)))
     | (.tag_name | ltrimstr($tp)) as $n
     | select($n | test("^[A-Za-z0-9._-]+$"))
+    | select(($tp != "v") or ($n | test("^[0-9]+(\\.[0-9]+)+$")))
     | select(($n | test($skip; "i") | not))
     | $ARGS.positional as $p
     | range(0; $p | length; 2) as $i
     | "\($p[$i]);\($n)|\($n)|\($p[$i + 1])|\($repo)|||tagprefix=\($tp)"' --args "$@" 2>/dev/null
+}
+
+# mirror_fullsdk: Releases android-sdk-<v> mit dem vollständigen SDK-Archiv android-sdk.tar.gz (nullij/sclrepo, nur aarch64).
+# Es enthält build-tools/<v> samt lib/d8.jar und apksigner.jar und ist deshalb dem Binär-Mirror vorzuziehen.
+mirror_fullsdk() {
+  [ -n "$TOOLS_REPO" ] && [ "$CF_ARCH" = aarch64 ] || return 0
+  command -v jq >/dev/null 2>&1 || return 0
+  gh_releases_json "$TOOLS_REPO" | jq -r --arg repo "$TOOLS_REPO" --arg skip "$GH_SKIP_RE" '
+    .[]?
+    | select(.tag_name | startswith("android-sdk-"))
+    | select(any(.assets[]?; .name == "android-sdk.tar.gz"))
+    | (.tag_name | ltrimstr("android-sdk-")) as $n
+    | select($n | test("^[0-9]+(\\.[0-9]+)+$"))
+    | select($n | test($skip; "i") | not)
+    | ("build-tools;\($n)|\($n)|ghsdkfull|\($repo)|||tagprefix=android-sdk-",
+       "platform-tools;\($n)|\($n)|ghptfull|\($repo)|||tagprefix=android-sdk-")' 2>/dev/null
 }
 
 # Pro Komponente: Mirror, sonst Upstream, sonst feste Rückfallliste
@@ -570,10 +597,13 @@ build_manifest() {
   # build-tools / platform-tools: HomuHomu833-SDK (ab 36.0.2), danach androidide-tools (33.x/34.x), danach Lzhiyong (35.x).
   # Doppelte IDs: die erste Quelle gewinnt (androidide-tools ist vollständiger als Lzhiyong).
   dyn=$(mirror_dynamic android-sdk- build-tools ghsdk platform-tools ghpt)
+  # Vollständiges SDK-Archiv (android-sdk.tar.gz) hat Vorrang vor den Binär-Archiven gleicher Version
+  d=$(mirror_fullsdk); [ -n "$d" ] && dyn="$d"$'\n'"$dyn"
   [ -n "$dyn" ] || dyn=$(gh_dynamic "$SDK_CUSTOM_REPO" build-tools ghsdk platform-tools ghpt)
   [ -n "$dyn" ] || dyn=$FALLBACK_SDK
   d=$(mirror_dynamic androidide-tools-v build-tools ghaidebt platform-tools ghaidept); [ -n "$d" ] && dyn="$dyn"$'\n'"$d"
   d=$(mirror_dynamic lzhiyong-sdk-tools- build-tools ghsdk); [ -n "$d" ] && dyn="$dyn"$'\n'"$d"
+  d=$(mirror_dynamic v build-tools ghaidebt platform-tools ghaidept); [ -n "$d" ] && dyn="$dyn"$'\n'"$d"
   m="$m"$'\n'"$(printf '%s\n' "$dyn" | awk -F'|' 'NF && !seen[$1]++')"
   dyn=$(mirror_dynamic android-ndk- ndk ghndk)
   [ -n "$dyn" ] || dyn=$(gh_dynamic "$NDK_CUSTOM_REPO" ndk ghndk)
@@ -833,6 +863,43 @@ do_install() { # id
       "$bt/aapt2" version >/dev/null 2>&1 || say "Warnung: aapt2 startet nicht – Asset-Variante prüfen (ASSET_VARIANT=$GH_VARIANT)"
       [ -f "$bt/lib/d8.jar" ] || say "Warnung: d8.jar fehlt in build-tools $ver (Google bietet diese Version nicht an?) – Gradle/AGP nutzt eigene Kopien"
       ;;
+    ghsdkfull)
+      need_tools
+      local fx="$TMP/cfsdk-full-extract" fbt fpt bdir="$SDK_ROOT/build-tools/$ver"
+      progress 6 "Suche SDK-Archiv $ver (android-sdk.tar.gz) …"
+      gh_find_asset "$src" "$ver" "$tp" "$(asset_re_for "$tp" "$kind" "$ver")" || exit 1
+      gh_fetch_extract "$fx" || { rm -rf "$fx"; exit 1; }
+      fbt=$(find "$GH_ROOT" -type f -path "*/build-tools/$ver/aapt2" | head -n1)
+      [ -n "$fbt" ] || { rm -rf "$fx"; die "build-tools/$ver/aapt2 im Archiv $GH_ASSET nicht gefunden"; }
+      progress 90 "Installiere build-tools $ver …"
+      mkdir -p "$SDK_ROOT/build-tools"; rm -rf "$bdir"
+      mv "$(dirname "$fbt")" "$bdir" || { rm -rf "$fx"; die "build-tools konnten nicht verschoben werden"; }
+      find "$bdir" -maxdepth 2 -type f ! -name '*.jar' ! -name '*.xml' ! -name '*.properties' ! -name '*.txt' -exec chmod +x {} + 2>/dev/null
+      fpt=$(find "$GH_ROOT" -type f -path '*/platform-tools/adb' | head -n1)
+      if [ -n "$fpt" ]; then
+        mkdir -p "$SDK_ROOT/platform-tools"; cp -a "$(dirname "$fpt")"/. "$SDK_ROOT/platform-tools"/
+        find "$SDK_ROOT/platform-tools" -maxdepth 1 -type f ! -name '*.properties' -exec chmod +x {} + 2>/dev/null
+      fi
+      rm -rf "$fx"
+      [ -f "$bdir/source.properties" ] || printf 'Pkg.Desc = Android SDK Build-Tools %s (%s)\nPkg.Revision = %s\n' "$ver" "$CF_ARCH" "$ver" > "$bdir/source.properties"
+      "$bdir/aapt2" version >/dev/null 2>&1 || say "Warnung: aapt2 startet nicht – Quelle/Variante prüfen"
+      [ -f "$bdir/lib/d8.jar" ] || say "Warnung: d8.jar fehlt in build-tools $ver"
+      ;;
+    ghptfull)
+      need_tools
+      local qx="$TMP/cfsdk-ptfull-extract" qadb
+      progress 6 "Suche platform-tools $ver (android-sdk.tar.gz) …"
+      gh_find_asset "$src" "$ver" "$tp" "$(asset_re_for "$tp" "$kind" "$ver")" || exit 1
+      gh_fetch_extract "$qx" || { rm -rf "$qx"; exit 1; }
+      qadb=$(find "$GH_ROOT" -type f -path '*/platform-tools/adb' | head -n1)
+      [ -n "$qadb" ] || { rm -rf "$qx"; die "platform-tools/adb im Archiv $GH_ASSET nicht gefunden"; }
+      rm -rf "$SDK_ROOT/platform-tools"; mkdir -p "$SDK_ROOT/platform-tools"
+      cp -a "$(dirname "$qadb")"/. "$SDK_ROOT/platform-tools"/
+      find "$SDK_ROOT/platform-tools" -maxdepth 1 -type f ! -name '*.properties' -exec chmod +x {} + 2>/dev/null
+      printf '%s' "$ver" > "$SDK_ROOT/platform-tools/.cf-version"
+      rm -rf "$qx"
+      "$SDK_ROOT/platform-tools/adb" version >/dev/null 2>&1 || say "Warnung: adb startet nicht – Quelle/Variante prüfen"
+      ;;
     *) die "Unbekannter Typ '$kind' im Manifest für $id" ;;
   esac
   progress 100 "Fertig"
@@ -851,8 +918,8 @@ do_uninstall() { # id
     sdkmanager) rm -rf "$p" ;;
     cmake) rm -rf "$p" "$SDK_ROOT/cmake/.cf-termux" ;;   # Symlinks; die Termux-Pakete cmake/ninja bleiben installiert
     ghcmake) rm -rf "$p" ;;
-    ghsdk|ghaidebt) rm -rf "$p" ;;   # nur build-tools/<version>
-    ghpt|ghaidept) rm -rf "$p" ;;
+    ghsdk|ghsdkfull|ghaidebt) rm -rf "$p" ;;   # nur build-tools/<version>
+    ghpt|ghptfull|ghaidept) rm -rf "$p" ;;
     ghndk) rm -rf "$p" "$SDK_ROOT/ndk/.cf-$(entry_field "$id" 2)"
            [ -e "$SDK_ROOT/ndk-bundle" ] || rm -f "$SDK_ROOT/ndk-bundle" ;;
   esac

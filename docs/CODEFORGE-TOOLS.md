@@ -22,6 +22,7 @@ ohne Android-Variante (35.0.2, 36.0.0: nur musl).
 - `TOOLS_REPO` (Standard `scto/codeforge-tools`; überschreibbar über `CODEFORGE_TOOLS_REPO` oder `sdk.conf`; leer schaltet den Mirror ab).
 - Je Komponente: Mirror → HomuHomu833 direkt → feste Rückfallliste. Der Mirror-Tag-Präfix steht im Manifest-Feld `extra` (`tagprefix=…`).
 - Neue Typen im Manifest: `ghaidebt` und `ghaidept` (androidide-tools); `lzhiyong-sdk-tools-*` läuft über `ghsdk` (Binaries über Googles build-tools).
+- Releases aus `nullij/sclrepo`: `v<ver>` (Assets `buildtools_<ver>_<arch>.tar.xz`, `platformtools_<arch>.tar.xz`, arch = arm64-v8a/armeabi-v7a; flache Archive, laufen über `ghaidebt`/`ghaidept`) und `android-sdk-<ver>` mit `android-sdk.tar.gz` (xz-komprimiertes vollständiges SDK, nur aarch64; Typen `ghsdkfull` für `build-tools;<ver>` und `ghptfull` für `platform-tools;<ver>`). Das Archiv enthält `lib/d8.jar` und `apksigner.jar`, Googles sdkmanager ist dafür nicht nötig. Test: `libs/terminal-engine/snippets/manifest-sources.test.sh`.
 - Prüfsumme: `digest` von GitHub, sonst die `<asset>.sha256` des Mirror-Releases.
 - Die Version ist der Tag ohne Präfix (`android-ndk-r29` → `ndk;r29`).
 
