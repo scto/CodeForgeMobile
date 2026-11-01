@@ -11,6 +11,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Editor)
+- **Imports organisieren / Unbenutzte Imports entfernen** (Kotlin, Toolbar-Menü „Imports“): sortiert alphabetisch,
+  entfernt Duplikate (und optional ungenutzte Imports), läuft sofort im Editor und lässt den Dateiinhalt
+  auch ohne `package`-Zeile unangetastet (`KotlinImportOrganizer`, Tests in `:libs:code-tools`).
+- **Annotation-Completion** (`@Preview`, `@Composable`, Hilt/Room/JUnit …) mit automatischem Import – unabhängig vom
+  Language Server, also auch in Dateien, die vor dessen Start geöffnet wurden.
+- **Hover-Dokumentation**: Signatur, Parameter (mit Default-Werten), Rückgabetyp, Paket und `val`/`var`
+  in den Farben des aktiven Editor-Themes (`KotlinSignatureParser`, Tests).
+- **Klammerpaare** werden immer deutlich hervorgehoben (Hintergrund, Unterstreichung, fett), unabhängig vom Rainbow-Schalter.
+- Offen: **Code Folding** – sora-editor 0.23.4 kann eingeklappte Bereiche nicht darstellen.
+
 ### Behoben
 - `codeforge-env`/SDK-Manager: build-tools und platform-tools aus den Mirror-Releases `v36.1.0` (flache Archive `buildtools_*`/`platformtools_*`) und `android-sdk-37.0.0` (`android-sdk.tar.gz`, vollständiges SDK, nur aarch64) werden jetzt gelistet und installiert (neue Typen `ghsdkfull`, `ghptfull`). Bisher erkannte der Mirror nur Assets mit Namen `*-aarch64-linux-android.*`.
 
