@@ -377,8 +377,9 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
     editor.props.symbolPairAutoCompletion = settings.symbolPairAutocompleteEnabled
 
     // Rainbow Brackets / Klammerpaar-Hervorhebung
-    editor.isHighlightBracketPair = settings.rainbowBracketsEnabled
-    editor.props.boldMatchingDelimiters = settings.rainbowBracketsEnabled
+    // Zusammengehörige Klammern werden immer deutlich hervorgehoben (Hintergrund + Unterstreichung, fett)
+    editor.isHighlightBracketPair = true
+    editor.props.boldMatchingDelimiters = true
     runCatching {
         val bracketClass = Class.forName("io.github.rosemoe.sora.widget.component.BracketPairs")
         val component = editor.getComponent(bracketClass.asSubclass(
@@ -441,9 +442,18 @@ private fun applyTextMateTheme(editor: CodeEditor, themeName: String) {
     TextMateAssetLoader.ensureInitialized(editor.context)
     TextMateAssetLoader.setActiveTheme(themeName)
     runCatching {
-        editor.colorScheme = TextMateColorScheme.create(ThemeRegistry.getInstance())
+        editor.colorScheme = TextMateColorScheme.create(ThemeRegistry.getInstance()).also(::emphasizeBracketPair)
         appliedThemes[editor] = themeName
     }.onFailure { android.util.Log.w("SoraCodeEditor", "TextMate-ColorScheme nicht anwendbar: $themeName", it) }
+}
+
+/** Klammerpaar-Farben aus der Vordergrundfarbe des Themes ableiten, damit sie in jedem Theme klar sichtbar sind. */
+private fun emphasizeBracketPair(scheme: EditorColorScheme) {
+    val fg = scheme.getColor(EditorColorScheme.TEXT_NORMAL)
+    val accent = fg
+    scheme.setColor(EditorColorScheme.HIGHLIGHTED_DELIMITERS_FOREGROUND, accent)
+    scheme.setColor(EditorColorScheme.HIGHLIGHTED_DELIMITERS_BACKGROUND, androidx.core.graphics.ColorUtils.setAlphaComponent(accent, 0x44))
+    scheme.setColor(EditorColorScheme.HIGHLIGHTED_DELIMITERS_UNDERLINE, accent)
 }
 
 /** "auto"/leer -> dark_plus bzw. light_plus je nach effektivem App-Theme; sonst unverändert. */
