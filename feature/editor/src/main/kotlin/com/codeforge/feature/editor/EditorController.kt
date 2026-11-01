@@ -13,6 +13,7 @@ package com.codeforge.feature.editor
 import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspRange
 import com.codeforge.libs.code_tools.edit.TextEdit
+import com.codeforge.libs.code_tools.imports.KotlinImportOrganizer
 import io.github.rosemoe.sora.widget.CodeEditor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -197,6 +198,17 @@ class EditorController {
         val newCursorStart = mapCursorOffset(cursorStart, old.length, prefix, suffix, newText.length)
         val newCursorEnd = mapCursorOffset(cursorEnd, old.length, prefix, suffix, newText.length)
         selectRange(newCursorStart, newCursorEnd)
+    }
+
+    /**
+     * Sortiert/dedupliziert (und entfernt optional unbenutzte) Kotlin-Imports sofort im Editor.
+     * @return `true`, wenn sich der Text geändert hat.
+     */
+    fun organizeImports(removeUnused: Boolean): Boolean {
+        val text = currentText() ?: return false
+        val organized = KotlinImportOrganizer.organize(text, removeUnused) ?: return false
+        applyTextChange(organized)
+        return true
     }
 
     /** Führt einen reinen Zeilenbefehl (Kommentar, Einrücken, Duplizieren …) auf der aktuellen Auswahl aus. */

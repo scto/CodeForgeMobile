@@ -1931,6 +1931,9 @@
     <string name="settings_keyboard_suggestions_desc">Vorschläge und Autokorrektur der Bildschirmtastatur zulassen.</string>
     <string name="settings_disable_soft_keyboard">Virtuelle Tastatur deaktivieren</string>
     <string name="settings_disable_soft_keyboard_desc">Bildschirmtastatur ausblenden, wenn eine Hardware-Tastatur verbunden ist.</string>
+    <string name="editor_imports">Imports</string>
+    <string name="editor_organize_imports">Imports organisieren</string>
+    <string name="editor_remove_unused_imports">Unbenutzte Imports entfernen</string>
     <string name="lsp_hover">Dokumentation</string>
     <string name="lsp_hover_none">Keine Dokumentation verfügbar</string>
     <string name="lsp_hover_title">Dokumentation</string>

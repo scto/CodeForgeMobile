@@ -1931,6 +1931,9 @@
     <string name="settings_keyboard_suggestions_desc">Allow suggestions and autocorrect of the on-screen keyboard.</string>
     <string name="settings_disable_soft_keyboard">Disable on-screen keyboard</string>
     <string name="settings_disable_soft_keyboard_desc">Hide the on-screen keyboard while a hardware keyboard is connected.</string>
+    <string name="editor_imports">Imports</string>
+    <string name="editor_organize_imports">Organize imports</string>
+    <string name="editor_remove_unused_imports">Remove unused imports</string>
     <string name="lsp_hover">Documentation</string>
     <string name="lsp_hover_none">No documentation available</string>
     <string name="lsp_hover_title">Documentation</string>

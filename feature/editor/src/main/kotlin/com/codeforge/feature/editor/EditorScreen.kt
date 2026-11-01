@@ -57,6 +57,7 @@ import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Share
@@ -870,6 +871,25 @@ private fun EditorToolbar(
         val formatDesc = if (hasSelection) stringRes(R.string.editor_format_selection) else stringRes(R.string.editor_format_document)
         TooltipIconButton(onClick = onFormat, enabled = !isImage, label = formatDesc) {
             Icon(Icons.Filled.AutoFixHigh, contentDescription = formatDesc)
+        }
+        val isKotlin = activePath?.let { it.endsWith(".kt") || it.endsWith(".kts") } == true
+        if (isKotlin && !isImage) {
+            var importMenuOpen by remember { mutableStateOf(false) }
+            Box {
+                TooltipIconButton(onClick = { importMenuOpen = true }, label = stringRes(R.string.editor_imports)) {
+                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringRes(R.string.editor_imports))
+                }
+                DropdownMenu(expanded = importMenuOpen, onDismissRequest = { importMenuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringRes(R.string.editor_organize_imports)) },
+                        onClick = { importMenuOpen = false; controller?.organizeImports(removeUnused = false) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringRes(R.string.editor_remove_unused_imports)) },
+                        onClick = { importMenuOpen = false; controller?.organizeImports(removeUnused = true) }
+                    )
+                }
+            }
         }
         val unit = " ".repeat(tabSize.coerceIn(1, 8))
         val commentStyle = if (isImage) null else activePath?.let(LineEdits::commentStyleFor)
