@@ -9,6 +9,7 @@
  */
 package com.codeforge.libs.terminal_engine
 
+import com.codeforge.core.domain.runtime.IdeActivityRegistry.trackedAs
 import android.content.Context
 import com.codeforge.core.domain.model.SdkInstallEvent
 import com.codeforge.core.domain.model.ToolItem
@@ -95,7 +96,7 @@ class TermuxScriptSdkRepository @Inject constructor(
         } catch (e: Exception) {
             emit(SdkInstallEvent.Error(e))
         }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(Dispatchers.IO).trackedAs("SDK $packagePath")
 
     override suspend fun uninstallSdkTool(packagePath: String): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {

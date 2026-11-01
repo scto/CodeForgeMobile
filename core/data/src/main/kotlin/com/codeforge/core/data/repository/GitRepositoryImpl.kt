@@ -1,6 +1,7 @@
 // Modul: :core:data
 package com.codeforge.core.data.repository
 
+import com.codeforge.core.domain.runtime.IdeActivityRegistry.trackedAs
 import com.codeforge.core.domain.model.GitBlameLine
 import com.codeforge.core.domain.model.GitBranch
 import com.codeforge.core.domain.model.GitChangeKind
@@ -173,7 +174,7 @@ class GitRepositoryImpl @Inject constructor(
             monitor.cancel()
             job.cancel()
         }
-    }
+    }.trackedAs("Git clone")
 
     override suspend fun isRepository(path: String): Boolean = withContext(Dispatchers.IO) { File(path, ".git").exists() }
 

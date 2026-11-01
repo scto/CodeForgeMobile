@@ -12,6 +12,7 @@ import com.codeforge.core.domain.model.ProblemSeverity
 import com.codeforge.core.domain.parser.GradleOutputParser
 import com.codeforge.core.domain.repository.BuildEvent
 import com.codeforge.core.domain.repository.GradleBuildRepository
+import com.codeforge.core.domain.runtime.IdeActivityRegistry
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.libs.terminal_engine.TermuxEnvironment
@@ -116,11 +117,8 @@ class ProcessGradleBuildRepository @Inject constructor(
             status = BuildStatus.RUNNING
         )
 
-        try {
-            BuildForegroundService.start(context, taskName)
-        } catch (_: Throwable) {
-            // Foreground-Service-Start kann in Hintergrund-Tests oder bestimmten Kontexten fehlschlagen
-        }
+        // Benachrichtigung (Wakelock/Beenden/Terminals) und Vordergrunddienst kommen aus der App über die Registry.
+        val activityId = IdeActivityRegistry.begin("Build $taskName")
         BuildForegroundService.onCancelRequested = {
             isCancelled.set(true)
             activeProcess?.destroyForcibly()
@@ -225,9 +223,7 @@ class ProcessGradleBuildRepository @Inject constructor(
             )
             emit(BuildEvent.BuildFailed(e.message ?: "Build failed with exception"))
         } finally {
-            try {
-                BuildForegroundService.stop(context)
-            } catch (_: Throwable) {}
+            IdeActivityRegistry.end(activityId)
             BuildForegroundService.onCancelRequested = null
             activeProcess = null
             isBuilding.set(false)

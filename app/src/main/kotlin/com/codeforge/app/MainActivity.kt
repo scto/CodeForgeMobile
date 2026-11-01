@@ -20,7 +20,10 @@ import com.codeforge.core.designsystem.findIconTheme
 import com.codeforge.core.resources.LanguageOverrides
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.ExtensionThemeRepository
+import androidx.lifecycle.lifecycleScope
+import com.codeforge.core.domain.runtime.IdeActivityRegistry
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -34,6 +37,10 @@ class MainActivity : ComponentActivity() {
         // Vor setContent: verhindert Flackern der Systemleisten beim Start.
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        // „Beenden“ aus der Benachrichtigung: Activity schließen (Dienst, Wakelock, Build, Terminal räumt der Dienst ab).
+        lifecycleScope.launch {
+            IdeActivityRegistry.exitRequests.collect { finishAffinity() }
+        }
         setContent {
             val settings by settingsRepository.appSettings.collectAsStateWithLifecycle(
                 initialValue = com.codeforge.core.datastore.proto.AppSettings.getDefaultInstance()

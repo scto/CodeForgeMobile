@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Benachrichtigung „CodeForgeMobile“ (Vordergrunddienst `IdeKeepAliveService`), solange ein Build, Git-Clone oder eine SDK-Installation läuft, ein Terminal offen ist oder der Wakelock gehalten wird. Sie zeigt die Anzahl geöffneter Terminals und die laufenden Vorgänge und bietet **Wakelock aktivieren/freigeben**, **Beenden** (und bei Builds **Build abbrechen**). Die Vorgänge melden sich über `IdeActivityRegistry` (:core:domain) an; der Dienst endet von selbst. Der Wakelock ist ein Partial-Wakelock mit 6 h Zeitlimit. Der bisherige `BuildForegroundService` wird nicht mehr gestartet.
+
 ### Geändert
 - Terminal: Begrüßung (MOTD) von Termux durch die von CodeForgeMobile ersetzt (`etc/motd`, wird beim Start vom `ScriptInstaller` geschrieben). `codeforge-env` hat neue Paket-Befehle `update`, `upgrade`, `search`, `remove` (statt `pkg update/upgrade/search/uninstall`); die MOTD nennt nur diese.
 

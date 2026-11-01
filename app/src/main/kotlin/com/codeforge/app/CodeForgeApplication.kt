@@ -32,6 +32,7 @@ class CodeForgeApplication : Application() {
         installCrashHandler()
         observeLogSetting()
         TermuxApplication.initTermuxApplication(this)
+        com.codeforge.app.keepalive.IdeKeepAliveController.start(this)
         com.codeforge.feature.composepreview.PreviewActivityHolder.register(this)
     }
 

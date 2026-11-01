@@ -57,6 +57,15 @@
     <string name="build_sync_erfolgreich">Gradle sync finished</string>
     <string name="build_sync_fehlgeschlagen">Gradle sync failed</string>
     <string name="build_projekt_tasks">Project tasks (%1$d)</string>
+    <string name="ide_keepalive_titel">CodeForgeMobile</string>
+    <string name="ide_keepalive_terminals">Terminals open: %1$d</string>
+    <string name="ide_keepalive_aktiv">Active: %1$s</string>
+    <string name="ide_keepalive_wakelock_an">Wakelock on</string>
+    <string name="ide_keepalive_wakelock_aktivieren">Enable wakelock</string>
+    <string name="ide_keepalive_wakelock_freigeben">Release wakelock</string>
+    <string name="ide_keepalive_beenden">Exit</string>
+    <string name="ide_keepalive_build_abbrechen">Cancel build</string>
+    <string name="ide_keepalive_kanal">CodeForgeMobile activity</string>
     <string name="build_bauen">Build</string>
     <string name="build_benachrichtigung_text">Task: %1$s</string>
     <string name="build_benachrichtigung_titel">Building %1$s</string>

@@ -12,6 +12,7 @@
  */
 package com.codeforge.libs.terminal_engine
 
+import com.codeforge.core.domain.runtime.IdeActivityRegistry
 import android.content.Context
 import com.codeforge.core.domain.model.TerminalSessionState
 import com.codeforge.core.domain.repository.TerminalSessionRepository
@@ -54,8 +55,15 @@ class TerminalSessionRepositoryImpl @Inject constructor(
     private val _output = MutableSharedFlow<String>(extraBufferCapacity = 64)
     override val output: Flow<String> = _output.asSharedFlow()
 
+    /** Setzt den Zustand und meldet der Registry, ob ein Terminal offen ist (für die Benachrichtigung). */
+    private fun publishState(state: TerminalSessionState) {
+        _sessionState.value = state
+        val open = state == TerminalSessionState.STARTING || state == TerminalSessionState.RUNNING
+        IdeActivityRegistry.setTerminalCount(if (open) 1 else 0)
+    }
+
     override suspend fun start(initialCommand: String?) {
-        _sessionState.value = TerminalSessionState.STARTING
+        publishState(TerminalSessionState.STARTING)
         runCatching {
             if (!TermuxEnvironment.isBootstrapInstalled()) {
                 error(
@@ -81,11 +89,11 @@ class TerminalSessionRepositoryImpl @Inject constructor(
                 newSession.updateSize(TERMINAL_COLUMNS, TERMINAL_ROWS)
             }
 
-            _sessionState.value = TerminalSessionState.RUNNING
+            publishState(TerminalSessionState.RUNNING)
             initialCommand?.takeIf { it.isNotBlank() }?.let { sendInput(it) }
         }.onFailure { throwable ->
             _output.tryEmit(Res.string(R.string.terminal_engine_fehler_beim_starten_der_shell, throwable.message.orEmpty()))
-            _sessionState.value = TerminalSessionState.FAILED
+            publishState(TerminalSessionState.FAILED)
         }
     }
 
@@ -108,7 +116,7 @@ class TerminalSessionRepositoryImpl @Inject constructor(
             session?.finishIfRunning()
         }
         session = null
-        _sessionState.value = TerminalSessionState.STOPPED
+        publishState(TerminalSessionState.STOPPED)
     }
 
     // ---- TerminalSessionClient: Callbacks von TerminalSession, laufen auf Main-Thread ----
@@ -121,7 +129,7 @@ class TerminalSessionRepositoryImpl @Inject constructor(
     override fun onTitleChanged(changedSession: TerminalSession) = Unit
 
     override fun onSessionFinished(finishedSession: TerminalSession) {
-        _sessionState.value = TerminalSessionState.EXITED
+        publishState(TerminalSessionState.EXITED)
     }
 
     override fun onCopyTextToClipboard(session: TerminalSession, text: String?) = Unit
