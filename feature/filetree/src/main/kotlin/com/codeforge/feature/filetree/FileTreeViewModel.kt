@@ -318,7 +318,7 @@ class FileTreeViewModel @Inject constructor(
             return
         }
         if (item.tool.prompt != null || item.tool.confirm != null) {
-            _uiState.update { it.copy(toolDialog = ToolDialogState.Form(item, item.tool.prompt?.default.orEmpty())) }
+            _uiState.update { it.copy(toolDialog = ToolDialogState.Form(item, initialToolInput(item.tool.prompt))) }
         } else {
             prepareRun(item, "")
         }
@@ -380,4 +380,10 @@ class FileTreeViewModel @Inject constructor(
         rebuildEntries()
         refreshGitStatus()
     }
+}
+
+/** Vorbelegung des Werkzeug-Dialogs; bei Dropdowns immer ein gültiger Auswahlwert. */
+internal fun initialToolInput(prompt: com.codeforge.core.domain.extension.ToolPrompt?): String {
+    if (prompt == null) return ""
+    return if (prompt.hasOptions) prompt.compose(prompt.optionOf(prompt.default), prompt.textOf(prompt.default)) else prompt.default
 }

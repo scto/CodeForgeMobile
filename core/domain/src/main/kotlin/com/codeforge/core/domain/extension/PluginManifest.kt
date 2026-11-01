@@ -118,7 +118,41 @@ data class FormatterContribution(
 )
 
 /** Eingabefeld, das ein Werkzeug vor dem Start anzeigt; der Wert steht im Kommando als `${input}`. */
-data class ToolPrompt(val label: String, val hint: String = "", val default: String = "")
+/** Auswahlwert eines Werkzeug-Dialogs (Dropdown); [value] wird als erstes Wort der Eingabe übergeben. */
+data class ToolOption(val value: String, val label: String)
+
+/**
+ * Eingabe eines Werkzeugs. Ohne [options] ein Textfeld. Mit [options] ein Dropdown; ist zusätzlich [textLabel]
+ * gesetzt, folgt ein Textfeld. Das Werkzeug erhält `"<auswahl> <text>"` (bzw. nur `"<auswahl>"`).
+ */
+data class ToolPrompt(
+    val label: String,
+    val hint: String = "",
+    val default: String = "",
+    val options: List<ToolOption> = emptyList(),
+    val textLabel: String = "",
+    val textHint: String = ""
+) {
+    val hasOptions: Boolean get() = options.isNotEmpty()
+    val hasText: Boolean get() = !hasOptions || textLabel.isNotBlank()
+
+    /** Gewählter Wert; unbekannte oder leere Vorgaben fallen auf die erste Option zurück. */
+    fun optionOf(input: String): String {
+        val first = input.trim().substringBefore(' ')
+        return options.firstOrNull { it.value == first }?.value ?: options.firstOrNull()?.value.orEmpty()
+    }
+
+    /** Text hinter dem Auswahlwert (bzw. die ganze Eingabe ohne Optionen). */
+    fun textOf(input: String): String {
+        if (!hasOptions) return input
+        if (!hasText) return ""
+        val trimmed = input.trimStart()
+        val first = trimmed.substringBefore(' ')
+        return if (options.any { it.value == first }) trimmed.substringAfter(' ', "").trim() else trimmed.trim()
+    }
+
+    fun compose(option: String, text: String): String = if (text.isBlank()) option else "$option ${text.trim()}"
+}
 
 /**
  * Werkzeug im „PT"-Menü. [command] wird ohne Shell gestartet (jedes Element ist ein Argument), Arbeitsverzeichnis ist das Projekt.

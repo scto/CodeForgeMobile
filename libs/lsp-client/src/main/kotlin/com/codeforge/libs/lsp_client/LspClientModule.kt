@@ -16,4 +16,10 @@ abstract class LspClientModule {
     abstract fun bindLspClientRepository(
         impl: LspClientRepositoryImpl
     ): LspClientRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLspRuntimeStatsProvider(
+        impl: LspRuntimeStatsProviderImpl
+    ): com.codeforge.core.domain.model.LspRuntimeStatsProvider
 }

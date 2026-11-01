@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
+  "description": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, GPL-2.0, GPL-3.0, Unlicense) – Auswahl per Dropdown. Der GPL-Volltext wird von gnu.org geladen (Internet nötig). Apache-2.0 ist nicht enthalten. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
   "permissions": [
     "shell"
   ],
@@ -13,7 +13,7 @@
       {
         "id": "generate",
         "label": "LICENSE schreiben",
-        "description": "Eingabe: <lizenz> <Name>, z. B. mit Max Mustermann",
+        "description": "Lizenz im Dropdown wählen und Namen des Urhebers eintragen",
         "command": [
           "python3",
           "${pluginDir}/tool.py",
@@ -22,9 +22,40 @@
         ],
         "timeoutSeconds": 30,
         "prompt": {
-          "label": "Lizenz und Name",
-          "hint": "mit Max Mustermann",
-          "default": "mit "
+          "label": "Lizenz",
+          "default": "mit",
+          "options": [
+            {
+              "value": "mit",
+              "label": "MIT"
+            },
+            {
+              "value": "bsd2",
+              "label": "BSD 2-Clause"
+            },
+            {
+              "value": "bsd3",
+              "label": "BSD 3-Clause"
+            },
+            {
+              "value": "isc",
+              "label": "ISC"
+            },
+            {
+              "value": "gpl",
+              "label": "GPL-2.0 (GNU General Public License v2)"
+            },
+            {
+              "value": "gplv3",
+              "label": "GPL-3.0 (GNU General Public License v3)"
+            },
+            {
+              "value": "unlicense",
+              "label": "Unlicense (Public Domain)"
+            }
+          ],
+          "textLabel": "Name des Urhebers",
+          "textHint": "Max Mustermann"
         },
         "confirm": "Eine vorhandene LICENSE-Datei wird überschrieben."
       }

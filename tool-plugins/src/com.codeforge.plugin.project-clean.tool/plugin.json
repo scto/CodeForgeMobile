@@ -13,7 +13,7 @@
       {
         "id": "clean",
         "label": "Build-Artefakte löschen",
-        "description": "Bericht oder Löschen (check/apply)",
+        "description": "Bericht oder Löschen (Prüfen/Anwenden)",
         "command": [
           "python3",
           "${pluginDir}/tool.py",
@@ -22,9 +22,18 @@
         ],
         "timeoutSeconds": 120,
         "prompt": {
-          "label": "Modus: check (nur Bericht) oder apply",
-          "hint": "check",
-          "default": "check"
+          "label": "Modus",
+          "default": "check",
+          "options": [
+            {
+              "value": "check",
+              "label": "Prüfen – nur Bericht, nichts ändern"
+            },
+            {
+              "value": "apply",
+              "label": "Anwenden – Änderungen durchführen"
+            }
+          ]
         }
       }
     ],

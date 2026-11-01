@@ -82,7 +82,21 @@ REQUIRES = {
 
 PY = _r("pkg", "python", "python3")
 SCRIPT = ["python3", "${pluginDir}/tool.py", "${projectDir}", "${input}"]
-MODE_PROMPT = {"label": "Modus: check (nur Bericht) oder apply", "hint": "check", "default": "check"}
+MODE_PROMPT = {"label": "Modus", "default": "check", "options": [
+    {"value": "check", "label": "Prüfen – nur Bericht, nichts ändern"},
+    {"value": "apply", "label": "Anwenden – Änderungen durchführen"}]}
+FIX_PROMPT = {"label": "Modus", "default": "check", "options": [
+    {"value": "check", "label": "Prüfen – nur Bericht, nichts ändern"},
+    {"value": "fix", "label": "Korrigieren – Dateien formatieren"}]}
+LICENSE_PROMPT = {"label": "Lizenz", "default": "mit", "options": [
+    {"value": "mit", "label": "MIT"},
+    {"value": "bsd2", "label": "BSD 2-Clause"},
+    {"value": "bsd3", "label": "BSD 3-Clause"},
+    {"value": "isc", "label": "ISC"},
+    {"value": "gpl", "label": "GPL-2.0 (GNU General Public License v2)"},
+    {"value": "gplv3", "label": "GPL-3.0 (GNU General Public License v3)"},
+    {"value": "unlicense", "label": "Unlicense (Public Domain)"}],
+    "textLabel": "Name des Urhebers", "textHint": "Max Mustermann"}
 
 # (name, label, beschreibung, tool-id, tool-label, tool-beschreibung, skript, prompt, confirm, requires, timeout)
 TOOLS = [
@@ -99,16 +113,16 @@ TOOLS = [
      "scan", "Unbenutzte Ressourcen finden", "Bericht oder Löschen unbenutzter Ressourcen-Dateien", "unused_resources.py",
      MODE_PROMPT, "Dynamische Zugriffe (getIdentifier) werden nicht erkannt. Vor apply bitte committen.", [PY], 300),
     ("format-all", "Alles formatieren", "Formatiert oder prüft das ganze Projekt mit den installierten Formatierern (ktlint, shfmt, ruff, gofmt, rustfmt, taplo, prettier).",
-     "run", "Projekt formatieren/prüfen", "Modus check (Standard) oder fix", "format_all.py",
-     {"label": "Modus: check oder fix", "hint": "check", "default": "check"}, None, [PY], 600),
+     "run", "Projekt formatieren/prüfen", "Prüfen (Standard) oder Korrigieren", "format_all.py",
+     FIX_PROMPT, None, [PY], 600),
     ("gitignore", ".gitignore-Generator", "Ergänzt .gitignore um fehlende Einträge für Android, Kotlin, Node, Python, Rust oder Go.",
      "generate", ".gitignore ergänzen", "Typ(en): android kotlin node python rust go", "gitignore.py",
      {"label": "Typ(en)", "hint": "android node", "default": "android"}, None, [PY], 30),
-    ("license", "LICENSE-Generator", "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten.",
-     "generate", "LICENSE schreiben", "Eingabe: <lizenz> <Name>, z. B. mit Max Mustermann", "license.py",
-     {"label": "Lizenz und Name", "hint": "mit Max Mustermann", "default": "mit "}, "Eine vorhandene LICENSE-Datei wird überschrieben.", [PY], 30),
+    ("license", "LICENSE-Generator", "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, GPL-2.0, GPL-3.0, Unlicense) – Auswahl per Dropdown. Der GPL-Volltext wird von gnu.org geladen (Internet nötig). Apache-2.0 ist nicht enthalten.",
+     "generate", "LICENSE schreiben", "Lizenz im Dropdown wählen und Namen des Urhebers eintragen", "license.py",
+     LICENSE_PROMPT, "Eine vorhandene LICENSE-Datei wird überschrieben.", [PY], 30),
     ("project-clean", "Projekt bereinigen", "Löscht Build-Artefakte (build/, .gradle/, .kotlin/, .cxx/, captures/, *.iml) und zeigt die freigegebene Größe.",
-     "clean", "Build-Artefakte löschen", "Bericht oder Löschen (check/apply)", "project_clean.py",
+     "clean", "Build-Artefakte löschen", "Bericht oder Löschen (Prüfen/Anwenden)", "project_clean.py",
      MODE_PROMPT, None, [PY], 120),
 ]
 

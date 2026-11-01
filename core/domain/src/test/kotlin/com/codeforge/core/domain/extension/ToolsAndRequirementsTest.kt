@@ -18,6 +18,36 @@ class ToolsAndRequirementsTest {
     """.trimIndent()
 
     @Test
+    fun `prompt mit Dropdown-Optionen und Textfeld wird geparst und zerlegt`() {
+        val m = PluginManifestParser.parse(
+            manifest(
+                contributes = """{"tools":[{"id":"gen","command":["x"],"prompt":{"label":"Lizenz","default":"mit",
+                "options":[{"value":"mit","label":"MIT"},{"value":"gplv3","label":"GPL-3.0"}],"textLabel":"Name"}}]}"""
+            )
+        ).getOrThrow()
+        val p = m.contributes.tools.single().prompt!!
+        assertTrue(p.hasOptions && p.hasText)
+        assertEquals(listOf("mit", "gplv3"), p.options.map { it.value })
+        assertEquals("gplv3", p.optionOf("gplv3 Max Mustermann"))
+        assertEquals("Max Mustermann", p.textOf("gplv3 Max Mustermann"))
+        assertEquals("mit", p.optionOf("")) // Fallback: erste Option
+        assertEquals("mit", p.optionOf("unbekannt x"))
+        assertEquals("gplv3 Max", p.compose("gplv3", " Max "))
+        assertEquals("gplv3", p.compose("gplv3", ""))
+    }
+
+    @Test
+    fun `ungueltige Optionen werden abgelehnt`() {
+        fun parse(options: String) = PluginManifestParser.parse(
+            manifest(contributes = """{"tools":[{"id":"a","command":["x"],"prompt":{"label":"L","options":$options}}]}""")
+        )
+        assertTrue(parse("""[{"value":"a b"}]""").isFailure)
+        assertTrue(parse("""[{"value":"a"},{"value":"a"}]""").isFailure)
+        assertTrue(parse("""["a"]""").isFailure)
+        assertTrue(parse("""[{"value":"a"}]""").isSuccess)
+    }
+
+    @Test
     fun `tools und requires werden geparst`() {
         val m = PluginManifestParser.parse(
             manifest(

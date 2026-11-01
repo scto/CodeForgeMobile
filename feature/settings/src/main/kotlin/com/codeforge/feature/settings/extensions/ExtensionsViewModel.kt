@@ -19,7 +19,8 @@ class ExtensionsViewModel @Inject constructor(
     private val extensionsManager: ExtensionsManager,
     private val coordinator: ExtensionInstallCoordinator,
     private val updateChecker: LspUpdateChecker,
-    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository
+    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository,
+    private val runtimeStats: com.codeforge.core.domain.model.LspRuntimeStatsProvider? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExtensionsUiState())
@@ -60,10 +61,34 @@ class ExtensionsViewModel @Inject constructor(
             is ExtensionsUiEvent.CheckUpdate -> checkUpdate(event.pkg)
             is ExtensionsUiEvent.OpenDetails -> _uiState.update { it.copy(detailId = event.pkg.id) }
             is ExtensionsUiEvent.CloseDetails -> _uiState.update { it.copy(detailId = null) }
+            is ExtensionsUiEvent.OpenInfo -> openInfo(event.pkg)
+            is ExtensionsUiEvent.CloseInfo -> closeInfo()
             is ExtensionsUiEvent.DismissSnackbar -> _uiState.update { it.copy(snackbarMessage = null) }
             is ExtensionsUiEvent.InstallClicked -> installPackage(event.pkg)
             is ExtensionsUiEvent.UninstallClicked -> uninstallPackage(event.pkg)
         }
+    }
+
+    private var infoJob: kotlinx.coroutines.Job? = null
+
+    /** Öffnet den Info-Dialog und aktualisiert die Laufzeitdaten alle 2 s, solange er offen ist. */
+    private fun openInfo(pkg: LspExtensionPackage) {
+        infoJob?.cancel()
+        _uiState.update { it.copy(infoId = pkg.id, infoRuntime = null) }
+        loadExtensions() // Installationsstatus und Voraussetzungen frisch lesen
+        infoJob = viewModelScope.launch {
+            while (true) {
+                val stats = runtimeStats?.statsFor(ExtensionInfoModel.serverIds(pkg))
+                _uiState.update { it.copy(infoRuntime = ExtensionInfoModel.runtime(stats)) }
+                kotlinx.coroutines.delay(2_000)
+            }
+        }
+    }
+
+    private fun closeInfo() {
+        infoJob?.cancel()
+        infoJob = null
+        _uiState.update { it.copy(infoId = null, infoRuntime = null) }
     }
 
     private fun loadExtensions() {

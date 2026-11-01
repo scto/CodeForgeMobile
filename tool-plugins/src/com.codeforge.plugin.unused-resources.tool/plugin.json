@@ -22,9 +22,18 @@
         ],
         "timeoutSeconds": 300,
         "prompt": {
-          "label": "Modus: check (nur Bericht) oder apply",
-          "hint": "check",
-          "default": "check"
+          "label": "Modus",
+          "default": "check",
+          "options": [
+            {
+              "value": "check",
+              "label": "Prüfen – nur Bericht, nichts ändern"
+            },
+            {
+              "value": "apply",
+              "label": "Anwenden – Änderungen durchführen"
+            }
+          ]
         },
         "confirm": "Dynamische Zugriffe (getIdentifier) werden nicht erkannt. Vor apply bitte committen."
       }

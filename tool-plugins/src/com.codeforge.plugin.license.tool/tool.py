@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Schreibt LICENSE. Eingabe: '<lizenz> <Name>' mit lizenz = mit | bsd2 | bsd3 | isc | unlicense, z. B. 'mit Max Mustermann'."""
-import datetime, os, sys
+"""Schreibt LICENSE. Eingabe: '<lizenz> <Name>' mit lizenz = mit | bsd2 | bsd3 | isc | gpl | gplv3 | unlicense, z. B. 'mit Max Mustermann'.
+gpl (GPL-2.0) und gplv3 (GPL-3.0): Der unveränderte Volltext wird von gnu.org geladen."""
+import datetime, os, sys, urllib.request
 from common import args, write
 
 HEAD = "Copyright (c) {year} {name}\n\n"
@@ -99,19 +100,38 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <https://unlicense.org>
 """
 LICENSES = {"mit": MIT, "bsd2": BSD2, "bsd3": BSD3, "isc": ISC, "unlicense": UNLICENSE}
+# GPL-Volltexte sind lang und müssen wortgetreu sein – daher direkt vom Herausgeber (FSF) laden.
+GPL_URLS = {
+    "gpl": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
+    "gplv3": "https://www.gnu.org/licenses/gpl-3.0.txt",
+}
+
+
+def fetch_gpl(kind):
+    try:
+        with urllib.request.urlopen(GPL_URLS[kind], timeout=20) as r:
+            text = r.read().decode("utf-8")
+    except Exception as e:  # Netzwerk, DNS, Zertifikat …
+        raise SystemExit(f"GPL-Text konnte nicht von gnu.org geladen werden ({e}). Bitte Internetverbindung prüfen und erneut starten.")
+    if "GNU GENERAL PUBLIC LICENSE" not in text or len(text) < 15000:
+        raise SystemExit("Unerwartete Antwort von gnu.org – LICENSE wurde nicht geschrieben.")
+    return text
 
 
 def main():
     project, inp = args()
     kind, _, name = inp.partition(" ")
     kind = kind.lower()
-    if kind not in LICENSES:
-        raise SystemExit(f"Unbekannte Lizenz '{kind}'. Erlaubt: {', '.join(LICENSES)} (Apache-2.0/GPL: Volltext nicht enthalten)")
-    if kind != "unlicense" and not name.strip():
-        raise SystemExit("Bitte Namen angeben, z. B. 'mit Max Mustermann'")
+    if kind not in LICENSES and kind not in GPL_URLS:
+        raise SystemExit(f"Unbekannte Lizenz '{kind}'. Erlaubt: {', '.join(list(LICENSES) + list(GPL_URLS))} (Apache-2.0: Volltext nicht enthalten)")
+    if kind not in ("unlicense", "gpl", "gplv3") and not name.strip():
+        raise SystemExit("Bitte Namen des Urhebers angeben")
     target = os.path.join(project, "LICENSE")
     existed = os.path.exists(target)
-    write(target, LICENSES[kind].format(year=datetime.date.today().year, name=name.strip()))
+    if kind in GPL_URLS:
+        write(target, fetch_gpl(kind))
+    else:
+        write(target, LICENSES[kind].format(year=datetime.date.today().year, name=name.strip()))
     print(f"LICENSE ({kind}) {'überschrieben' if existed else 'geschrieben'}.")
 
 

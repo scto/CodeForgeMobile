@@ -13,7 +13,7 @@
       {
         "id": "run",
         "label": "Projekt formatieren/prüfen",
-        "description": "Modus check (Standard) oder fix",
+        "description": "Prüfen (Standard) oder Korrigieren",
         "command": [
           "python3",
           "${pluginDir}/tool.py",
@@ -22,9 +22,18 @@
         ],
         "timeoutSeconds": 600,
         "prompt": {
-          "label": "Modus: check oder fix",
-          "hint": "check",
-          "default": "check"
+          "label": "Modus",
+          "default": "check",
+          "options": [
+            {
+              "value": "check",
+              "label": "Prüfen – nur Bericht, nichts ändern"
+            },
+            {
+              "value": "fix",
+              "label": "Korrigieren – Dateien formatieren"
+            }
+          ]
         }
       }
     ],

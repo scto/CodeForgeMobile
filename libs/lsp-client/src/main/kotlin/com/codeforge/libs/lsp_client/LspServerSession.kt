@@ -61,6 +61,21 @@ class LspServerSession(
     var lastUsedTimestamp: Long = System.currentTimeMillis()
         private set
 
+    /** Zeitpunkt, zu dem der Serverprozess gestartet wurde (Epoch-ms); `null`, solange keiner läuft. */
+    @Volatile
+    var startedAtMillis: Long? = null
+        private set
+
+    /** PID des Serverprozesses (Reflection: `Process.pid()` ist nicht auf allen Android-Versionen verfügbar). */
+    fun processId(): Long? {
+        val p = process ?: return null
+        return runCatching { Process::class.java.getMethod("pid").invoke(p) as Long }.getOrNull()
+            ?: runCatching {
+                val f = p.javaClass.getDeclaredField("pid").apply { isAccessible = true }
+                (f.get(p) as Number).toLong()
+            }.getOrNull()
+    }
+
     val openDocumentCount: Int
         get() = documentVersions.size
 
@@ -95,6 +110,7 @@ class LspServerSession(
             }
             val startedProcess = processBuilder.start()
             process = startedProcess
+            startedAtMillis = System.currentTimeMillis()
 
             val rpcConnection = LspRpcConnection(startedProcess)
             connection = rpcConnection
@@ -186,6 +202,7 @@ class LspServerSession(
         process?.destroy()
         connection = null
         process = null
+        startedAtMillis = null
         documentVersions.clear()
         _serverCapabilities.value = null
         _serverState.value = LspServerState.STOPPED

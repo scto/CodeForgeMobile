@@ -12,6 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -112,6 +116,13 @@ private fun PluginsScreen(
     onImportClicked: () -> Unit
 ) {
     uiState.requirementDialog?.let { RequirementDialogView(it, onEvent) }
+    uiState.infoDialog?.let { info ->
+        com.codeforge.core.ui.LspInfoDialog(
+            model = info.model,
+            runtime = info.runtime,
+            onDismiss = { onEvent(PluginsUiEvent.InfoDismissed) }
+        )
+    }
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -240,6 +251,16 @@ private fun PluginRow(
             }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                if (PluginLspInfo.isLspPlugin(plugin)) {
+                    androidx.compose.material3.FilledTonalButton(
+                        onClick = { onEvent(PluginsUiEvent.InfoClicked(plugin.id)) },
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Icon(Icons.Filled.Info, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringRes(R.string.lspinfo_button))
+                    }
+                }
                 if (missing.isNotEmpty()) {
                     TextButton(onClick = { onEvent(PluginsUiEvent.RequirementsClicked(plugin.id)) }) {
                         Text(stringRes(R.string.plugins_voraussetzungen_installieren))

@@ -432,6 +432,58 @@ private fun FileTreeToolsMenu(tools: List<FileTreeTool>, onEvent: (FileTreeUiEve
     }
 }
 
+/** Textfeld oder – bei `options` – Dropdown (plus optionalem Textfeld) für die Eingabe eines PT-Werkzeugs. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun ToolPromptFields(prompt: com.codeforge.core.domain.extension.ToolPrompt, input: String, onChange: (String) -> Unit) {
+    if (!prompt.hasOptions) {
+        OutlinedTextField(
+            value = input,
+            onValueChange = onChange,
+            label = { Text(prompt.label) },
+            placeholder = if (prompt.hint.isNotBlank()) ({ Text(prompt.hint) }) else null,
+            singleLine = true
+        )
+        return
+    }
+    var expanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    val selected = prompt.optionOf(input)
+    val selectedLabel = prompt.options.firstOrNull { it.value == selected }?.label ?: selected
+    androidx.compose.material3.ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        OutlinedTextField(
+            value = selectedLabel,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(prompt.label) },
+            trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            prompt.options.forEach { option ->
+                androidx.compose.material3.DropdownMenuItem(
+                    text = { Text(option.label) },
+                    onClick = {
+                        expanded = false
+                        onChange(prompt.compose(option.value, prompt.textOf(input)))
+                    }
+                )
+            }
+        }
+    }
+    if (prompt.textLabel.isNotBlank()) {
+        OutlinedTextField(
+            value = prompt.textOf(input),
+            onValueChange = { onChange(prompt.compose(selected, it)) },
+            label = { Text(prompt.textLabel) },
+            placeholder = if (prompt.textHint.isNotBlank()) ({ Text(prompt.textHint) }) else null,
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
 @Composable
 private fun FileTreeToolDialog(dialog: ToolDialogState, onEvent: (FileTreeUiEvent) -> Unit) {
     val dismiss = { onEvent(FileTreeUiEvent.ToolDialogDismissed) }
@@ -443,13 +495,7 @@ private fun FileTreeToolDialog(dialog: ToolDialogState, onEvent: (FileTreeUiEven
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     dialog.item.tool.confirm?.let { Text(it) }
                     dialog.item.tool.prompt?.let { prompt ->
-                        OutlinedTextField(
-                            value = dialog.input,
-                            onValueChange = { onEvent(FileTreeUiEvent.ToolInputChanged(it)) },
-                            label = { Text(prompt.label) },
-                            placeholder = if (prompt.hint.isNotBlank()) ({ Text(prompt.hint) }) else null,
-                            singleLine = true
-                        )
+                        ToolPromptFields(prompt, dialog.input) { onEvent(FileTreeUiEvent.ToolInputChanged(it)) }
                     }
                 }
             },

@@ -142,10 +142,12 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 ```json
 { "id": "migrate", "label": "Nach AndroidX migrieren", "description": "…",
   "command": ["python3", "${pluginDir}/tool.py", "${projectDir}", "${input}"],
-  "prompt": { "label": "Modus: check oder apply", "hint": "check", "default": "check" },
+  "prompt": { "label": "Modus", "default": "check",
+              "options": [ { "value": "check", "label": "Prüfen" }, { "value": "apply", "label": "Anwenden" } ] },
   "confirm": "Vor dem Umstellen bitte committen.", "timeoutSeconds": 300 }
 ```
 
+* `prompt.options` (Werte ohne Leerzeichen) zeigt ein Dropdown statt eines Textfelds; mit `textLabel`/`textHint` folgt zusätzlich ein Textfeld. Das Werkzeug erhält `"<auswahl> <text>"`.
 * Erscheinen im **PT**-Dropdown im Kopf des Dateibaums (links neben ⋮). Ein Tipp öffnet bei `prompt`/`confirm` einen Dialog, prüft `requires` und startet dann `command` im Projektordner; die Ausgabe erscheint live in einem Dialog. Danach wird der Dateibaum aktualisiert.
 * `command` läuft **ohne Shell** (jedes Element = ein Argument; `${input}` kann also keine Befehle einschleusen). Platzhalter: `${projectDir}`, `${pluginDir}`, `${home}`, `${input}`. `timeoutSeconds` 1..900 (Standard 120).
 * Werkzeuge führen Programme/Skripte aus: Berechtigung `shell` ist Pflicht. Installation per Sideload oder (zum Testen) über die Store-Kategorie **`tool`** („Code-Tools“): `installFromFile(declarativeOnly = true, allowTools = true)` erlaubt `tools` und Skripte wie `.py`, lehnt aber weiter `entryPointClass`, `.dex/.jar/.so/.apk/.class/.aar` und `.sh` ab. Die App zeigt vor der Installation einen Bestätigungsdialog. Eine spätere, strengere Lösung (Signatur/Review) ist offen.

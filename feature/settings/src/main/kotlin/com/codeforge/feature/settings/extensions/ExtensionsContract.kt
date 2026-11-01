@@ -2,6 +2,7 @@
 package com.codeforge.feature.settings.extensions
 
 import com.codeforge.core.resources.UiText
+import com.codeforge.core.ui.LspRuntimeInfo
 
 /** Ergebnis der Update-Prüfung eines Servers für die Anzeige. */
 sealed interface UpdateUiState {
@@ -27,11 +28,16 @@ data class ExtensionsUiState(
     val snackbarMessage: UiText? = null,
     /** ID des Servers, dessen Detailansicht offen ist. */
     val detailId: String? = null,
+    /** ID des Servers, dessen Info-Dialog (Zustand/Laufzeit/Allgemein) offen ist. */
+    val infoId: String? = null,
+    /** Live-Laufzeitdaten des Servers im Info-Dialog; `null` = läuft nicht. */
+    val infoRuntime: LspRuntimeInfo? = null,
     /** Globale Sprachserver-Werte aus den Editor-Einstellungen (Anzeige im Tab „Einstellungen“). */
     val lspMaxSessions: Int = 0,
     val lspIdleTimeoutMinutes: Int = 0
 ) {
     val detailItem: ExtensionUiItem? get() = extensions.firstOrNull { it.pkg.id == detailId }
+    val infoItem: ExtensionUiItem? get() = extensions.firstOrNull { it.pkg.id == infoId }
 }
 
 sealed interface ExtensionsUiEvent {
@@ -40,6 +46,8 @@ sealed interface ExtensionsUiEvent {
     data class CheckUpdate(val pkg: LspExtensionPackage) : ExtensionsUiEvent
     data class OpenDetails(val pkg: LspExtensionPackage) : ExtensionsUiEvent
     data object CloseDetails : ExtensionsUiEvent
+    data class OpenInfo(val pkg: LspExtensionPackage) : ExtensionsUiEvent
+    data object CloseInfo : ExtensionsUiEvent
     data object Refresh : ExtensionsUiEvent
     data object DismissSnackbar : ExtensionsUiEvent
 }

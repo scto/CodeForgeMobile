@@ -121,7 +121,21 @@ object PluginManifestParser {
                 val timeout = (it["timeoutSeconds"] as? JsonPrimitive)?.intOrNull ?: 120
                 require(timeout in 1..900) { "tools: 'timeoutSeconds' muss 1..900 sein" }
                 val prompt = (it["prompt"] as? JsonObject)?.let { p ->
-                    ToolPrompt(label = p.req("label"), hint = p.string("hint").orEmpty(), default = p.string("default").orEmpty())
+                    val options = (p["options"] as? JsonArray).orEmpty().map { o ->
+                        val obj = o as? JsonObject ?: throw IllegalArgumentException("tools: 'options' erwartet Objekte {value,label}")
+                        val value = obj.req("value")
+                        require(value.isNotBlank() && value.none { c -> c.isWhitespace() }) { "tools: Option '$value' darf keine Leerzeichen enthalten" }
+                        ToolOption(value, obj.string("label") ?: value)
+                    }
+                    require(options.map { o -> o.value }.toSet().size == options.size) { "tools: doppelte Option-Werte" }
+                    ToolPrompt(
+                        label = p.req("label"),
+                        hint = p.string("hint").orEmpty(),
+                        default = p.string("default").orEmpty(),
+                        options = options,
+                        textLabel = p.string("textLabel").orEmpty(),
+                        textHint = p.string("textHint").orEmpty()
+                    )
                 }
                 ToolContribution(
                     id = it.req("id").also { id -> require(ID_REGEX.matches(id)) { "tools: ungültige ID '$id'" } },

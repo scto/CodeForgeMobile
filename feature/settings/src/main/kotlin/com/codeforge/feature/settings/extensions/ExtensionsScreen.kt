@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -101,6 +102,14 @@ fun ExtensionsScreen(
         )
     }
 
+    uiState.infoItem?.let { item ->
+        com.codeforge.core.ui.LspInfoDialog(
+            model = ExtensionInfoModel.build(item, LspServerInfoCatalog.of(item.pkg.id)),
+            runtime = uiState.infoRuntime,
+            onDismiss = { onEvent(ExtensionsUiEvent.CloseInfo) }
+        )
+    }
+
     Scaffold(
         modifier = modifier,
         contentWindowInsets = embeddedAwareInsets(embedded),
@@ -127,7 +136,8 @@ fun ExtensionsScreen(
                     onInstall = { onEvent(ExtensionsUiEvent.InstallClicked(item.pkg)) },
                     onUninstall = { onEvent(ExtensionsUiEvent.UninstallClicked(item.pkg)) },
                     onCheckUpdate = { onEvent(ExtensionsUiEvent.CheckUpdate(item.pkg)) },
-                    onDetails = { onEvent(ExtensionsUiEvent.OpenDetails(item.pkg)) }
+                    onDetails = { onEvent(ExtensionsUiEvent.OpenDetails(item.pkg)) },
+                    onInfo = { onEvent(ExtensionsUiEvent.OpenInfo(item.pkg)) }
                 )
             }
         }
@@ -141,6 +151,7 @@ private fun ExtensionCard(
     onUninstall: () -> Unit,
     onCheckUpdate: () -> Unit,
     onDetails: () -> Unit,
+    onInfo: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -356,6 +367,11 @@ private fun ExtensionCard(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                FilledTonalButton(onClick = onInfo, contentPadding = PaddingValues(horizontal = 12.dp)) {
+                    Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(stringRes(R.string.lspinfo_button))
+                }
                 TextButton(onClick = onDetails) { Text(stringRes(R.string.ext_detail_button)) }
                 TextButton(onClick = onCheckUpdate, enabled = item.update != UpdateUiState.Checking) {
                     Text(

@@ -32,7 +32,8 @@ import javax.inject.Inject
 class PluginsViewModel @Inject constructor(
     private val pluginRepository: PluginRepository,
     private val contributionRepository: ContributionRepository? = null,
-    private val toolRunner: PluginToolRunner? = null
+    private val toolRunner: PluginToolRunner? = null,
+    private val runtimeStats: com.codeforge.core.domain.model.LspRuntimeStatsProvider? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PluginsUiState())
@@ -67,12 +68,40 @@ class PluginsViewModel @Inject constructor(
                 if (missing.isNotEmpty()) _uiState.update { it.copy(requirementDialog = RequirementDialog.Confirm(event.pluginId, missing)) }
             }
             PluginsUiEvent.RequirementsConfirmed -> installRequirements()
+            is PluginsUiEvent.InfoClicked -> openInfo(event.pluginId)
+            PluginsUiEvent.InfoDismissed -> closeInfo()
             PluginsUiEvent.RequirementsDismissed -> {
                 installJob?.cancel()
                 _uiState.update { it.copy(requirementDialog = null) }
                 refreshMissing()
             }
         }
+    }
+
+    private var infoJob: Job? = null
+
+    /** Baut den Info-Dialog und aktualisiert Zustand und Laufzeitdaten alle 2 s, solange er offen ist. */
+    private fun openInfo(pluginId: String) {
+        infoJob?.cancel()
+        infoJob = viewModelScope.launch {
+            while (true) {
+                val plugin = _uiState.value.plugins.firstOrNull { it.id == pluginId } ?: break
+                val contributions = contributionRepository?.contributions?.value
+                val servers = contributions?.lspServers.orEmpty().filter { it.pluginId == pluginId }
+                val requires = contributions?.requires.orEmpty().filter { it.pluginId == pluginId }.map { it.item }
+                val missing = toolRunner?.missingRequirements(pluginId) ?: _uiState.value.missingRequirements[pluginId].orEmpty()
+                val model = PluginLspInfo.build(plugin, servers.map { it.item }, servers.firstOrNull()?.pluginDir, missing, requires)
+                val stats = runtimeStats?.statsFor(servers.map { it.item.id }.toSet())
+                _uiState.update { it.copy(infoDialog = PluginInfoDialog(pluginId, model, PluginLspInfo.runtime(stats))) }
+                kotlinx.coroutines.delay(2_000)
+            }
+        }
+    }
+
+    private fun closeInfo() {
+        infoJob?.cancel()
+        infoJob = null
+        _uiState.update { it.copy(infoDialog = null) }
     }
 
     /** Prüft für alle aktivierten Plugins, welche deklarierten Programme fehlen. */
