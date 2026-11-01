@@ -113,6 +113,27 @@ class BuildViewModelTest {
     }
 
     @Test
+    fun syncGradleRunsHelpTaskAndKeepsSelectedTask() = runBlocking {
+        com.codeforge.core.testing.TestRes.install()
+        fakeRepository.taskFlow = flowOf(BuildEvent.BuildFinished(success = true))
+        viewModel.handleIntent(BuildUiIntent.StartBuild("assembleRelease"))
+        delay(300)
+
+        fakeRepository.taskFlow = flowOf(
+            BuildEvent.Output("assembleRelease - Assembles release."),
+            BuildEvent.Output("customTask"),
+            BuildEvent.BuildFinished(success = true)
+        )
+        viewModel.handleIntent(BuildUiIntent.SyncGradle)
+        delay(300)
+
+        assertEquals("tasks --all", fakeRepository.lastTask)
+        assertEquals("assembleRelease", viewModel.uiState.value.selectedTask)
+        assertEquals(listOf("assembleRelease", "customTask"), viewModel.uiState.value.availableTasks)
+        assertFalse(viewModel.uiState.value.isBuilding)
+    }
+
+    @Test
     fun copyTabSendsTheFilteredTextAsEffect() = runBlocking {
         com.codeforge.core.testing.TestRes.install()
         fakeRepository.taskFlow = flowOf(
@@ -428,9 +449,13 @@ class BuildViewModelTest {
 
         var taskFlow: Flow<BuildEvent> = flowOf()
         var cancelCalled = false
+        var lastTask: String? = null
 
         override suspend fun connect(projectRootPath: String): Result<Unit> = Result.success(Unit)
-        override fun runTask(taskName: String): Flow<BuildEvent> = taskFlow
+        override fun runTask(taskName: String): Flow<BuildEvent> {
+            lastTask = taskName
+            return taskFlow
+        }
         override suspend fun cancelBuild() {
             cancelCalled = true
         }

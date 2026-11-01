@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Build: Gradle-Sync (Sync-Button im Build-Panel, `gradlew tasks --all`). Die gefundenen Projekt-Tasks erscheinen in der Task-Auswahl, die jetzt ein filterbares Dropdown ist.
+
 ### Geändert
 - **Projekt-Templates auf Gradle 9.6.0 / AGP 9.5.0 / Kotlin 2.3.21**: Wrapper und Versionskatalog (`libs/template-engine/assets/gradle`) angehoben. AGP 9 bringt Kotlin eingebaut mit – Templates (Root- und App-Build) und der Modul-Maker (`ModuleMaker`, erkennt AGP ≥ 9 am Katalog) erzeugen kein `org.jetbrains.kotlin.android`-Plugin und kein `kotlinOptions` mehr; das Compose-Compiler-Plugin bleibt. AndroidX-Bibliotheksversionen und `compileSdk 35` bleiben unverändert. Ungebaut/ungetestet auf dem Gerät.
 

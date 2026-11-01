@@ -53,6 +53,10 @@
     <string name="build_abgebrochen">Build abgebrochen.</string>
     <string name="build_ausgabe">Ausgabe</string>
     <string name="build_auto_scroll">Automatischer Bildlauf</string>
+    <string name="build_gradle_sync">Gradle Sync</string>
+    <string name="build_sync_erfolgreich">Gradle-Sync abgeschlossen</string>
+    <string name="build_sync_fehlgeschlagen">Gradle-Sync fehlgeschlagen</string>
+    <string name="build_projekt_tasks">Projekt-Tasks (%1$d)</string>
     <string name="build_bauen">Bauen</string>
     <string name="build_benachrichtigung_text">Task: %1$s</string>
     <string name="build_benachrichtigung_titel">Build %1$s läuft</string>

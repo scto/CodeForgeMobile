@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -420,6 +421,12 @@ private fun BuildStatusBar(
                         text = stringRes(R.string.build_bauen),
                         modifier = Modifier.padding(start = 4.dp),
                         fontSize = 12.sp
+                    )
+                }
+                IconButton(onClick = { onIntent(BuildUiIntent.SyncGradle) }) {
+                    Icon(
+                        imageVector = Icons.Default.Sync,
+                        contentDescription = stringRes(R.string.build_gradle_sync)
                     )
                 }
                 IconButton(onClick = { onIntent(BuildUiIntent.ShowTaskSelector(true)) }) {

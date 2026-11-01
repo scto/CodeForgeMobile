@@ -40,6 +40,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+/** Task für den Gradle-Sync: konfiguriert alle Module und löst Plugins/Abhängigkeiten auf. */
+private const val SYNC_TASK = "tasks --all"
+
 @HiltViewModel
 class BuildViewModel internal constructor(
     private val gradleBuildRepository: GradleBuildRepository,
@@ -181,6 +184,9 @@ class BuildViewModel internal constructor(
             }
             is BuildUiIntent.StartBuildAndRun -> {
                 startBuild(intent.taskName, autoRunOnSuccess = true)
+            }
+            is BuildUiIntent.SyncGradle -> {
+                startBuild(SYNC_TASK, autoRunOnSuccess = false, isSync = true)
             }
             is BuildUiIntent.CancelBuild -> {
                 cancelBuild()
@@ -342,7 +348,11 @@ class BuildViewModel internal constructor(
         }
     }
 
-    fun startBuild(taskName: String, autoRunOnSuccess: Boolean = false) {
+    /**
+     * [isSync]: Gradle-Sync. Läuft als `tasks --all` (Konfigurationsphase aller Module, Plugin- und
+     * Abhängigkeitsauflösung) und übernimmt die gefundenen Tasks in die Auswahlliste; die gewählte Build-Aufgabe bleibt unverändert, das Ergebnis meldet „Sync“.
+     */
+    fun startBuild(taskName: String, autoRunOnSuccess: Boolean = false, isSync: Boolean = false) {
         if (_uiState.value.isBuilding) {
             scope.launch {
                 _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_bereits_aktiv)))
@@ -358,13 +368,14 @@ class BuildViewModel internal constructor(
         _uiState.update {
             it.copy(
                 isBuilding = true,
-                selectedTask = taskName,
+                selectedTask = if (isSync) it.selectedTask else taskName,
                 problems = emptyList(),
                 outputLines = emptyList(),
                 installStatus = if (autoRunOnSuccess) ApkInstallStatus.Building else ApkInstallStatus.Idle
             )
         }
 
+        val syncOutput = if (isSync) mutableListOf<String>() else null
         val flushJob = scope.launch {
             while (isActive) {
                 delay(100L)
@@ -380,6 +391,7 @@ class BuildViewModel internal constructor(
                             synchronized(lineBufferLock) {
                                 pendingLines.add(event.line)
                             }
+                            syncOutput?.add(event.line)
                         }
                         is BuildEvent.Problem -> {
                             _uiState.update { current ->
@@ -390,10 +402,18 @@ class BuildViewModel internal constructor(
                             flushPendingLines()
                             _uiState.update { it.copy(isBuilding = false) }
                             if (event.success) {
-                                _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_erfolgreich)))
-                                onBuildSucceeded(taskName, autoRun = autoRunOnSuccess)
+                                if (isSync) {
+                                    val found = GradleTaskListParser.parse(syncOutput.orEmpty())
+                                    if (found.isNotEmpty()) {
+                                        _uiState.update { it.copy(availableTasks = found) }
+                                    }
+                                    _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_sync_erfolgreich)))
+                                } else {
+                                    _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_erfolgreich)))
+                                    onBuildSucceeded(taskName, autoRun = autoRunOnSuccess)
+                                }
                             } else {
-                                _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_fehlgeschlagen)))
+                                _effects.send(BuildUiEffect.ShowSnackbar(Res.string(if (isSync) R.string.build_sync_fehlgeschlagen else R.string.build_fehlgeschlagen)))
                                 _uiState.update { it.copy(installStatus = ApkInstallStatus.Idle) }
                             }
                         }

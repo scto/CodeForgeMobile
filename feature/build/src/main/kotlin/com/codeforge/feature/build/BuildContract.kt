@@ -138,6 +138,8 @@ sealed interface BuildUiIntent {
     data class StartBuild(val taskName: String) : BuildUiIntent
     data class StartBuildAndRun(val taskName: String = "assembleDebug") : BuildUiIntent
     data object CancelBuild : BuildUiIntent
+    /** Gradle-Sync: konfiguriert alle Module und löst Plugins/Abhängigkeiten auf (Task `help`), ohne etwas zu bauen. */
+    data object SyncGradle : BuildUiIntent
     data object ClearOutput : BuildUiIntent
     data object CopyOutput : BuildUiIntent
 
