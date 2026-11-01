@@ -86,4 +86,44 @@ object KotlinImportOrganizer {
         return if (idx > 0) Import(raw.substring(0, idx).trim(), raw.substring(idx + 4).trim())
         else Import(raw.trim(), null)
     }
+
+    /**
+     * Ermittelt, wo und was für einen neuen Import von [fqn] einzufügen ist (alphabetisch einsortiert).
+     * @return Offset + einzufügender Text oder `null`, wenn bereits importiert bzw. Star-Import vorhanden.
+     */
+    fun insertionFor(text: String, fqn: String): Pair<Int, String>? {
+        val eol = if (text.contains("\r\n")) "\r\n" else "\n"
+        val lines = text.split(eol)
+        val offsets = IntArray(lines.size + 1)
+        for (k in lines.indices) offsets[k + 1] = offsets[k] + lines[k].length + eol.length
+        val pkg = fqn.substringBeforeLast('.')
+
+        var packageLine = -1
+        val imports = ArrayList<Pair<Int, String>>() // Zeile → Pfad
+        for ((idx, line) in lines.withIndex()) {
+            val t = line.trim()
+            if (packageLine < 0 && t.startsWith("package ")) {
+                packageLine = idx
+                if (t.removePrefix("package ").trim().trimEnd(';') == pkg) return null
+            }
+            importLine.matchEntire(line)?.let { m ->
+                val imp = parseImport(m.groupValues[1])
+                if (imp.alias == null && (imp.path == fqn || imp.path == "$pkg.*")) return null
+                imports += idx to imp.path
+            }
+        }
+        if (imports.isNotEmpty()) {
+            val next = imports.firstOrNull { it.second > fqn }
+            return if (next != null) offsets[next.first] to "import $fqn$eol"
+            else {
+                val lastLine = imports.last().first
+                val end = offsets[lastLine] + lines[lastLine].length
+                end to "$eol" + "import $fqn"
+            }
+        }
+        return if (packageLine >= 0) {
+            val end = offsets[packageLine] + lines[packageLine].length
+            end to "$eol${eol}import $fqn"
+        } else 0 to "import $fqn$eol$eol"
+    }
 }

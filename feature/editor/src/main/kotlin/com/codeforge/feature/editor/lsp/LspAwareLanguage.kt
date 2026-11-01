@@ -38,6 +38,24 @@ class LspAwareLanguage(
         val typedPrefix = extractPrefix(line, position.column)
         val snippetPrefixes = mutableSetOf<String>()
 
+        // 1b) Kotlin-Annotationen (@Preview …) samt Import – unabhängig vom Language Server
+        if (languageId == "kotlin" && KotlinAnnotationCatalog.isAnnotationContext(line, position.column, typedPrefix)) {
+            publisher.checkCancelled()
+            KotlinAnnotationCatalog.matching(typedPrefix).forEach {
+                publisher.addItem(AnnotationCompletionItem(it, typedPrefix.length))
+            }
+            publisher.updateList()
+            // Projekt-eigene Annotationen liefert der Language Server, sofern er schon läuft
+            runCatching {
+                val known = KotlinAnnotationCatalog.matching(typedPrefix).map { it.name }.toSet()
+                completionProvider.fetchCompletions(position.line, position.column)
+                    .filter { it.label !in known }
+                    .forEach { publisher.addItem(SimpleCompletionItem(it.label, it.detail.orEmpty(), 0, it.insertText)) }
+            }
+            publisher.updateList()
+            return
+        }
+
         // 2) Snippets / Live-Templates einfügen
         publisher.checkCancelled()
         runCatching {

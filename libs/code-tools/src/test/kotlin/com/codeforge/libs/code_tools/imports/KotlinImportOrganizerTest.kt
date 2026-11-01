@@ -56,4 +56,27 @@ class KotlinImportOrganizerTest {
         val src = "import b.B\r\nimport a.A\r\n\r\nval x: A = B()\r\n"
         assertEquals("import a.A\r\nimport b.B\r\n\r\nval x: A = B()\r\n", KotlinImportOrganizer.organize(src))
     }
+
+    private fun insert(src: String, fqn: String): String? =
+        KotlinImportOrganizer.insertionFor(src, fqn)?.let { (o, t) -> src.substring(0, o) + t + src.substring(o) }
+
+    @Test
+    fun `insertionFor sortiert in vorhandenen Block ein`() {
+        val src = "package a\n\nimport a.A\nimport c.C\n\nclass K\n"
+        assertEquals("package a\n\nimport a.A\nimport b.B\nimport c.C\n\nclass K\n", insert(src, "b.B"))
+        assertEquals("package a\n\nimport a.A\nimport c.C\nimport d.D\n\nclass K\n", insert(src, "d.D"))
+    }
+
+    @Test
+    fun `insertionFor ohne Block nach package oder am Dateianfang`() {
+        assertEquals("package a\n\nimport b.B\n\nclass K\n", insert("package a\n\nclass K\n", "b.B"))
+        assertEquals("import b.B\n\nclass K\n", insert("class K\n", "b.B"))
+    }
+
+    @Test
+    fun `insertionFor liefert null wenn schon importiert`() {
+        assertNull(insert("import b.B\nclass K\n", "b.B"))
+        assertNull(insert("import b.*\nclass K\n", "b.B"))
+        assertNull(insert("package b\nclass K\n", "b.B"))
+    }
 }
