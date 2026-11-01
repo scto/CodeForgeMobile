@@ -250,7 +250,12 @@ private fun PluginRow(
                 )
             }
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+            androidx.compose.foundation.layout.FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                itemVerticalAlignment = Alignment.CenterVertically
+            ) {
                 if (PluginLspInfo.isLspPlugin(plugin)) {
                     androidx.compose.material3.FilledTonalButton(
                         onClick = { onEvent(PluginsUiEvent.InfoClicked(plugin.id)) },

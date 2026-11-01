@@ -362,10 +362,12 @@ private fun ExtensionCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
+            @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+            androidx.compose.foundation.layout.FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically
             ) {
                 FilledTonalButton(onClick = onInfo, contentPadding = PaddingValues(horizontal = 12.dp)) {
                     Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp))

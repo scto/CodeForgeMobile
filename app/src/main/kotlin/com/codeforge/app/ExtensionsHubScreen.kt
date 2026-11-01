@@ -49,7 +49,7 @@ fun ExtensionsHubRoute(
         Column(Modifier.fillMaxSize().padding(padding)) {
             TabRow(selectedTabIndex = selected) {
                 labels.forEachIndexed { index, label ->
-                    Tab(selected = selected == index, onClick = { selected = index }, text = { Text(label) })
+                    Tab(selected = selected == index, onClick = { selected = index }, text = { Text(label, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = androidx.compose.material3.MaterialTheme.typography.titleSmall) })
                 }
             }
             Box(Modifier.fillMaxSize()) {
