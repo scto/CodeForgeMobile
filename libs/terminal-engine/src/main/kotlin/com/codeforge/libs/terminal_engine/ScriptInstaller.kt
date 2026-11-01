@@ -27,10 +27,42 @@ internal class ScriptInstaller(private val context: Context) {
         target.writeText(content)
         target.setExecutable(true, false)
         target.setReadable(true, false)
+        installMotd()
+    }
+
+    /**
+     * Ersetzt die Termux-Begrüßung durch die von CodeForgeMobile ([MOTD_ASSET]). Schlägt das Schreiben fehl,
+     * bleibt das Skript trotzdem installiert. Dynamische MOTD-Skripte von termux-tools (falls vorhanden)
+     * geben danach nur noch diese Datei aus.
+     */
+    private fun installMotd() {
+        runCatching {
+            val motd = context.assets.open(MOTD_ASSET).bufferedReader().use { it.readText() }
+            writeMotd(File(TermuxEnvironment.prefix), motd)
+        }
     }
 
     companion object {
         const val ASSET_NAME = "codeforge-env"
+        const val MOTD_ASSET = "codeforge-motd"
+        private val MOTD_SCRIPTS = listOf("etc/motd.sh", "etc/termux/motd.sh")
+
+        /** Schreibt `etc/motd` und ersetzt vorhandene Termux-MOTD-Skripte durch `cat` dieser Datei (idempotent). */
+        internal fun writeMotd(prefix: File, motd: String) {
+            val motdFile = File(prefix, "etc/motd")
+            if (!motdFile.isFile || motdFile.readText() != motd) {
+                motdFile.parentFile?.mkdirs()
+                motdFile.writeText(motd)
+            }
+            val shim = "#!${prefix.path}/bin/sh\ncat \"${prefix.path}/etc/motd\"\n"
+            for (rel in MOTD_SCRIPTS) {
+                val script = File(prefix, rel)
+                if (script.isFile && script.readText() != shim) {
+                    script.writeText(shim)
+                    script.setExecutable(true, false)
+                }
+            }
+        }
 
         /** Standard-Repo der eigenen Builds; per `sdk.conf` überschreibbar (siehe Skript). */
         const val DEFAULT_REPO_URL = "@CODEFORGE_SDK_REPO@"

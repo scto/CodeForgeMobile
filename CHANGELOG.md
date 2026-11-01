@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert
+- Terminal: Begrüßung (MOTD) von Termux durch die von CodeForgeMobile ersetzt (`etc/motd`, wird beim Start vom `ScriptInstaller` geschrieben). `codeforge-env` hat neue Paket-Befehle `update`, `upgrade`, `search`, `remove` (statt `pkg update/upgrade/search/uninstall`); die MOTD nennt nur diese.
+
 ### Behoben
 - KI-Einstellungen: Anbieter- und Modell-Chips umbrechen (FlowRow) statt seitlich zu scrollen, der Gemini-Chip war verdeckt; Testergebnis steht unter dem Button; der Anbieter wird am Schlüssel-Präfix erkannt (`AIza…` = Gemini, `sk-ant-…` = Anthropic).
 - Gemini: Standardmodell `gemini-2.5-flash` (2.0/1.5 sind abgekündigt), Schlüssel im Header statt in der URL, Fehlermeldung nennt die echte API-Antwort (400/404 gelten nicht mehr pauschal als „ungültiger Schlüssel“).

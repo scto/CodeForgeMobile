@@ -1,0 +1,17 @@
+
+  CodeForgeMobile – Terminal der Android-IDE
+
+  Pakete (APT-Repo von CodeForgeMobile):
+    codeforge-env update               Paketlisten aktualisieren
+    codeforge-env upgrade              installierte Pakete aktualisieren
+    codeforge-env search <begriff>     Pakete suchen
+    codeforge-env pkg <paket> …        Pakete installieren
+    codeforge-env remove <paket> …     Pakete entfernen
+
+  Entwicklungsumgebung:
+    codeforge-env list                 SDK- und Toolchain-Komponenten
+    codeforge-env install <id>         z. B. jdk;21  ndk;r29  build-tools;37.0.0
+    codeforge-env setup                Basis-Setup für Android-Entwicklung
+    codeforge-env doctor | repair      prüfen bzw. reparieren
+    codeforge-env help                 alle Befehle
+

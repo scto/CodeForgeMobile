@@ -11,6 +11,10 @@
 #   install <id|paket>           z. B. jdk;21  ndk;r29  cmake;3.22.1  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36  gradle
 #   uninstall <id>
 #   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 30 MiB über large-packages.txt, sonst per pkg)
+#   update                       aktualisiert die Paketlisten des CodeForgeMobile-APT-Repos
+#   upgrade                      aktualisiert alle installierten Pakete (update + Upgrade)
+#   search <begriff>             sucht Pakete im Repo
+#   remove <paket> [paket …]     entfernt Repo-Pakete
 #   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 4.1.2]   (Standard: JDK 21, CMake 4.1.2)
 #         [--no-ndk] [--no-cmake] [--no-gradle] [--no-kotlin] [--no-extras] [--minimal]
 #                                Basis-Setup für Android-Entwicklung (ohne Optionen alles):
@@ -1218,11 +1222,22 @@ case "$cmd" in
     MANIFEST_CACHE=$(build_manifest)
     ;;
 esac
+# Paket-Befehle (ersetzen pkg update / upgrade / search / uninstall): immer mit dem apt-Repo der App
+apt_run() { DEBIAN_FRONTEND=noninteractive apt-get "${APT_OPTS[@]}" "$@"; }
+do_update() { apt_run update || die "Paketlisten-Update fehlgeschlagen (URL: $(apt_repo_url))"; ok "Paketlisten aktualisiert"; }
+do_upgrade() { do_update; apt_run upgrade -y || die "Upgrade fehlgeschlagen (Log: $LOG_FILE)"; ok "Pakete aktualisiert"; }
+do_search() { [ $# -ge 1 ] || die "search braucht einen Suchbegriff"; apt-cache search "$@"; }
+do_remove() { [ $# -ge 1 ] || die "remove braucht mindestens einen Paketnamen"; apt_run remove -y "$@" || die "Entfernen fehlgeschlagen: $*"; ok "entfernt: $*"; }
+
 case "$cmd" in
   list) do_list ;;
   install) [ $# -ge 1 ] || die "install braucht eine ID"; do_install "$1" ;;
   uninstall) [ $# -ge 1 ] || die "uninstall braucht eine ID"; do_uninstall "$1" ;;
   pkg) [ $# -ge 1 ] || die "pkg braucht mindestens einen Paketnamen"; check_dpkg_consistency; pkg_install "$@" || exit 1; ok "$*" ;;
+  update) check_dpkg_consistency; do_update ;;
+  upgrade) check_dpkg_consistency; do_upgrade ;;
+  search) do_search "$@" ;;
+  remove) check_dpkg_consistency; do_remove "$@" ;;
   setup) do_setup "$@" ;;
   repair) do_repair "$@" ;;
   env) [ -f "$ENV_FILE" ] && cat "$ENV_FILE" || die "Noch nicht eingerichtet (codeforge-env setup)" ;;
