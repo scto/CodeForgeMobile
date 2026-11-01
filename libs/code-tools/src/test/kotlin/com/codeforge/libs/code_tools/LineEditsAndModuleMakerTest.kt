@@ -108,6 +108,20 @@ class LineEditsAndModuleMakerTest {
         return root
     }
 
+    @Test fun agp9ProjectGetsNoKotlinAndroidPlugin() {
+        val root = project()
+        File(root, "gradle/libs.versions.toml").writeText(
+            "[versions]\nagp = \"9.5.0\"\n[plugins]\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\n" +
+                "android-library = { id = \"com.android.library\", version.ref = \"agp\" }\n"
+        )
+        File(root, "build.gradle.kts").writeText("plugins {\n    alias(libs.plugins.android.application) apply false\n    alias(libs.plugins.android.library) apply false\n}\n")
+        ModuleMaker.create(root, ModuleRequest(":lib:core:libcoredu")).getOrThrow()
+        val build = File(root, "lib/core/libcoredu/build.gradle.kts").readText()
+        assertTrue(build.contains("alias(libs.plugins.android.library)"))
+        assertFalse(build.contains("kotlin"))
+        assertFalse(build.contains("\n\n}"))
+    }
+
     @Test fun createsAndroidLibraryKts() {
         val root = project()
         val r = ModuleMaker.create(root, ModuleRequest(":lib:core:libcoredu")).getOrThrow()

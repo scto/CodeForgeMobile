@@ -18,6 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -112,6 +116,16 @@ fun WelcomeRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Beim Zurückkehren (z. B. nach Projekt-Wizard, Clone, Import) den Projektstamm neu einlesen.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.onEvent(WelcomeUiEvent.RefreshProjects)
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
@@ -432,7 +446,8 @@ private fun WelcomeListContent(
                     onClick = { onProjectClick(project) },
                     onOpen = { onOpenProject(project) },
                     onSettings = { onOpenSettings(project) },
-                    onRemove = { onRemoveProject(project) }
+                    onRemove = { onRemoveProject(project) },
+                    canRemove = ProjectDiscovery.normalize(project.path) !in uiState.autoListedPaths
                 )
             }
         }
@@ -445,7 +460,8 @@ private fun RecentProjectCard(
     onClick: () -> Unit,
     onOpen: () -> Unit,
     onSettings: () -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    canRemove: Boolean = true
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val initials = getProjectInitials(project.name)
@@ -536,13 +552,15 @@ private fun RecentProjectCard(
                             onSettings()
                         }
                     )
-                    DropdownMenuItem(
-                        text = { Text(stringRes(R.string.welcome_aus_liste_entfernen)) },
-                        onClick = {
-                            menuExpanded = false
-                            onRemove()
-                        }
-                    )
+                    if (canRemove) {
+                        DropdownMenuItem(
+                            text = { Text(stringRes(R.string.welcome_aus_liste_entfernen)) },
+                            onClick = {
+                                menuExpanded = false
+                                onRemove()
+                            }
+                        )
+                    }
                 }
             }
         }

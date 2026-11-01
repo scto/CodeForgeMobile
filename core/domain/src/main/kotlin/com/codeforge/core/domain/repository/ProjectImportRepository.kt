@@ -26,4 +26,14 @@ sealed interface ImportProgress {
 
 interface ProjectImportRepository {
     fun importFromTree(treeUriString: String): Flow<ImportProgress>
+
+    /**
+     * Löst einen SAF-Verzeichnisbaum auf einen echten Dateisystempfad im externen Speicher auf
+     * (z. B. `/storage/emulated/0/Projekte/App`), damit das Projekt ohne Kopie direkt geöffnet werden kann.
+     * `null`, wenn der Baum nicht zum lokalen Speicher gehört (Cloud-Provider etc.) oder nicht existiert.
+     */
+    fun resolveLocalDirectory(treeUriString: String): String?
+
+    /** Ob direkter Zugriff auf beliebige Ordner im externen Speicher erlaubt ist („Zugriff auf alle Dateien“). */
+    fun hasAllFilesAccess(): Boolean
 }

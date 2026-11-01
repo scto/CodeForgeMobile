@@ -12,6 +12,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Geändert
+- **Projekt-Templates auf Gradle 9.6.0 / AGP 9.5.0 / Kotlin 2.3.21**: Wrapper und Versionskatalog (`libs/template-engine/assets/gradle`) angehoben. AGP 9 bringt Kotlin eingebaut mit – Templates (Root- und App-Build) und der Modul-Maker (`ModuleMaker`, erkennt AGP ≥ 9 am Katalog) erzeugen kein `org.jetbrains.kotlin.android`-Plugin und kein `kotlinOptions` mehr; das Compose-Compiler-Plugin bleibt. AndroidX-Bibliotheksversionen und `compileSdk 35` bleiben unverändert. Ungebaut/ungetestet auf dem Gerät.
+
+### Hinzugefügt
+- **Projekt importieren – lokal öffnen**: neue Auswahl „Lokal öffnen (ohne Kopie)“ oder „In CodeForgeMobileProjects kopieren“. Der SAF-Baum wird auf den echten Pfad im externen Speicher aufgelöst (`SafTreePath`, primär und SD-Karte); setzt „Zugriff auf alle Dateien“ voraus.
+- **Willkommensseite**: alle Ordner in `CodeForgeMobileProjects` erscheinen automatisch in der Projektliste (Aktualisierung bei jedem Zurückkehren); solche Projekte sind nicht aus der Liste entfernbar.
+
+### Geändert
 * `codeforge-env setup` ist jetzt das **Basis-Setup** für Android-Entwicklung: ohne Optionen werden JDK, cmdline-tools, build-tools, platform-tools, Plattform, NDK, CMake/Ninja, **Gradle**, **Kotlin-Compiler** (`kotlinc`, für die Compose-Vorschau) sowie **git/zip/unzip** installiert. Neue Optionen: `--no-gradle`, `--no-kotlin`, `--no-extras`, `--minimal` (altes Verhalten); `--gradle`/`--kotlin`/`--extras` schalten einzelne Teile wieder zu. Bereits vorhandene Werkzeuge werden übersprungen. Ungebaut/auf Gerät nicht getestet (nur `bash -n` und `scripts/test_codeforge_env_repair.sh`).
 
 ### 📦 APK-Analyse & APK-Vergleich (Task 35)

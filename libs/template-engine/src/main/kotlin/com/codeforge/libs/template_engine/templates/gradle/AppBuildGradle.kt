@@ -57,10 +57,9 @@ fun AppBuildGradle(
 
     val plugins = buildString {
         appendLine("alias(libs.plugins.android.application)")
-        if (useKotlin) {
-            appendLine("    alias(libs.plugins.kotlin.android)")
-            if (enableCompose) appendLine("    alias(libs.plugins.kotlin.compose)")
-        }
+        // AGP 9: Kotlin ist eingebaut (kein org.jetbrains.kotlin.android-Plugin mehr); jvmTarget folgt
+        // compileOptions.targetCompatibility. Nur das Compose-Compiler-Plugin bleibt.
+        if (useKotlin && enableCompose) appendLine("    alias(libs.plugins.kotlin.compose)")
     }.trimEnd()
 
     val buildFeatures = if (enableCompose) {
@@ -86,11 +85,6 @@ fun AppBuildGradle(
     }
 
     val depsBlock = deps.joinToString("\n    ")
-    val kotlinOptionsLine = if (useKotlin) {
-        if (useKts) "kotlinOptions { jvmTarget = \"17\" }" else "kotlinOptions { jvmTarget = '17' }"
-    } else {
-        ""
-    }
 
     return if (useKts) {
         AppBuildGradleKotlin(
@@ -99,7 +93,6 @@ fun AppBuildGradle(
             plugins,
             ndkVersionStr,
             buildFeatures,
-            kotlinOptionsLine,
             ndkBlock,
             depsBlock
         )
@@ -110,7 +103,6 @@ fun AppBuildGradle(
             plugins,
             ndkVersionStr,
             buildFeatures,
-            kotlinOptionsLine,
             ndkBlock,
             depsBlock
         )
@@ -123,7 +115,6 @@ fun AppBuildGradleKotlin(
     plugins: String,
     ndkVersionStr: String,
     buildFeatures: String,
-    kotlinOptionsLine: String,
     ndkBlock: String,
     depsBlock: String
 ): String = """
@@ -151,8 +142,6 @@ fun AppBuildGradleKotlin(
             targetCompatibility = JavaVersion.VERSION_17
         }
 
-        $kotlinOptionsLine
-
         $ndkBlock
     }
 
@@ -167,7 +156,6 @@ fun AppBuildGradleGroovy(
     plugins: String,
     ndkVersionStr: String,
     buildFeatures: String,
-    kotlinOptionsLine: String,
     ndkBlock: String,
     depsBlock: String
 ): String = """
@@ -194,8 +182,6 @@ fun AppBuildGradleGroovy(
             sourceCompatibility JavaVersion.VERSION_17
             targetCompatibility JavaVersion.VERSION_17
         }
-
-        $kotlinOptionsLine
 
         $ndkBlock
     }

@@ -4,6 +4,7 @@ package com.codeforge.feature.welcome
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.common.crash.CfmCrashHandler
+import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.domain.repository.LegacyProjectMigrator
 import com.codeforge.core.domain.repository.ProjectsDirectoryProvider
 import com.codeforge.core.domain.repository.RecentProjectsRepository
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -38,13 +40,30 @@ class WelcomeViewModel @Inject constructor(
     private val _effect = MutableSharedFlow<WelcomeUiEffect>()
     val effect: SharedFlow<WelcomeUiEffect> = _effect.asSharedFlow()
 
+    private val recent = MutableStateFlow<List<RecentProject>>(emptyList())
+    private val discovered = MutableStateFlow<List<RecentProject>>(emptyList())
+
     init {
         recentProjectsRepository.recentProjects
-            .onEach { projects -> _uiState.update { it.copy(recentProjects = projects, isLoading = false) } }
+            .onEach { recent.value = it; _uiState.update { s -> s.copy(isLoading = false) } }
             .launchIn(viewModelScope)
+
+        combine(recent, discovered) { r, d ->
+            ProjectDiscovery.merge(r, d) to ProjectDiscovery.autoListedPaths(d)
+        }.onEach { (projects, auto) ->
+            _uiState.update { it.copy(recentProjects = projects, autoListedPaths = auto) }
+        }.launchIn(viewModelScope)
+
+        refreshDiscoveredProjects()
 
         checkForCrashLogs()
         checkLegacyProjects()
+    }
+
+    /** Liest `CodeForgeMobileProjects` neu ein; neue Ordner erscheinen automatisch in der Liste. */
+    private fun refreshDiscoveredProjects() = viewModelScope.launch(Dispatchers.IO) {
+        val root = projectsDirectoryProvider?.getProjectsRoot() ?: return@launch
+        discovered.value = ProjectDiscovery.scan(root)
     }
 
     private fun checkForCrashLogs() = viewModelScope.launch(Dispatchers.IO) {
@@ -86,6 +105,7 @@ class WelcomeViewModel @Inject constructor(
             WelcomeUiEvent.CloneProjectClicked -> emit(WelcomeUiEffect.NavigateToCloneDialog)
             WelcomeUiEvent.TerminalClicked -> emit(WelcomeUiEffect.NavigateToTerminal)
             WelcomeUiEvent.SettingsClicked -> emit(WelcomeUiEffect.NavigateToSettings)
+            WelcomeUiEvent.RefreshProjects -> refreshDiscoveredProjects()
             is WelcomeUiEvent.RecentProjectSelected ->
                 _uiState.update { it.copy(selectedProjectId = event.projectId) }
             is WelcomeUiEvent.RecentProjectOpened -> openRecentProject(event.projectId)
@@ -175,6 +195,9 @@ class WelcomeViewModel @Inject constructor(
     }
 
     private fun removeRecentProject(projectId: String) = viewModelScope.launch {
+        val project = _uiState.value.recentProjects.find { it.id == projectId }
+        // Projekte im Projektstamm werden immer automatisch gelistet – Entfernen wäre wirkungslos.
+        if (project != null && ProjectDiscovery.normalize(project.path) in _uiState.value.autoListedPaths) return@launch
         recentProjectsRepository.remove(projectId)
     }
 

@@ -9,6 +9,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,23 +47,23 @@ fun ProjectImportRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // true = direkt am Speicherort öffnen, false = in den Projektstamm kopieren
+    var openInPlace by rememberSaveable { mutableStateOf(true) }
+
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
-        if (uri == null) {
-            onCancel()
-        } else {
-            viewModel.onTreeSelected(uri.toString())
+        when {
+            uri == null -> viewModel.retry()
+            openInPlace -> viewModel.onLocalTreeSelected(uri.toString())
+            else -> viewModel.onTreeSelected(uri.toString())
         }
     }
 
-    // Öffnet den SAF-Picker automatisch beim Betreten dieser Route — der Nutzer kam hierher
-    // bereits über den "Importieren"-Button in :feature:welcome, ein Zwischenschritt mit
-    // eigenem "Los"-Button wäre redundant.
-    LaunchedEffect(Unit) {
-        if (uiState is ProjectImportUiState.AwaitingPicker) {
-            pickerLauncher.launch(null)
-        }
+    fun pick(inPlace: Boolean) {
+        openInPlace = inPlace
+        viewModel.onPickerOpened()
+        pickerLauncher.launch(null)
     }
 
     LaunchedEffect(uiState) {
@@ -87,6 +92,28 @@ fun ProjectImportRoute(
             verticalArrangement = Arrangement.Center
         ) {
             when (val state = uiState) {
+                is ProjectImportUiState.ChooseMode -> {
+                    Text(stringRes(R.string.app_import_modus_titel), style = MaterialTheme.typography.titleMedium)
+                    Button(
+                        onClick = { pick(inPlace = true) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                    ) { Text(stringRes(R.string.app_import_lokal_oeffnen)) }
+                    Text(
+                        stringRes(R.string.app_import_lokal_hinweis),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+                    )
+                    OutlinedButton(
+                        onClick = { pick(inPlace = false) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text(stringRes(R.string.app_import_kopieren)) }
+                    Text(
+                        stringRes(R.string.app_import_kopieren_hinweis),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
                 is ProjectImportUiState.AwaitingPicker -> {
                     CircularProgressIndicator()
                     Text(stringRes(R.string.app_verzeichnisauswahl_wird_geoeffnet), modifier = Modifier.padding(top = 16.dp))
@@ -113,10 +140,7 @@ fun ProjectImportRoute(
                 is ProjectImportUiState.Failed -> {
                     Text(stringRes(R.string.app_import_fehlgeschlagen), style = MaterialTheme.typography.titleMedium)
                     Text(state.message, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
-                    Button(onClick = {
-                        viewModel.retry()
-                        pickerLauncher.launch(null)
-                    }) {
+                    Button(onClick = { viewModel.retry() }) {
                         Text(stringRes(R.string.common_erneut_versuchen))
                     }
                 }

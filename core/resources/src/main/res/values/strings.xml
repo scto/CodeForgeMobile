@@ -2149,5 +2149,12 @@
     <string name="plugins_kind_code">Code</string>
     <string name="plugins_kind_declarative">Declarative</string>
     <string name="plugins_none">–</string>
+    <string name="app_import_modus_titel">How should the project be added?</string>
+    <string name="app_import_lokal_oeffnen">Open locally (pick folder)</string>
+    <string name="app_import_lokal_hinweis">Opens the folder in place, without copying. Changes are written to the original folder.</string>
+    <string name="app_import_kopieren">Copy to CodeForgeMobileProjects</string>
+    <string name="app_import_kopieren_hinweis">Creates a copy in the projects root. Also works with cloud folders.</string>
+    <string name="app_import_lokal_nicht_aufloesbar">This folder is not on local storage and cannot be opened in place. Please copy it instead.</string>
+    <string name="app_import_lokal_berechtigung">Opening in place needs \"All files access\". Grant it in Android settings or copy the project.</string>
 </resources>
 

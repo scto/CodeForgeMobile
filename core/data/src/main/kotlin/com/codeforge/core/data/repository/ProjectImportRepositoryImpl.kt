@@ -6,6 +6,8 @@ package com.codeforge.core.data.repository
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import com.codeforge.core.domain.model.ImportedProject
 import com.codeforge.core.domain.repository.ImportProgress
@@ -62,6 +64,15 @@ class ProjectImportRepositoryImpl @Inject constructor(
             )
         )
     }.flowOn(Dispatchers.IO)
+
+    override fun resolveLocalDirectory(treeUriString: String): String? {
+        val uri = Uri.parse(treeUriString)
+        val docId = runCatching { DocumentsContract.getTreeDocumentId(uri) }.getOrNull()
+        val dir = SafTreePath.resolve(uri.authority, docId, Environment.getExternalStorageDirectory())
+        return dir?.takeIf { it.isDirectory }?.absolutePath
+    }
+
+    override fun hasAllFilesAccess(): Boolean = projectsDirectoryProvider.isExternalStorageUsable()
 
     /**
      * Kopiert [source] (SAF-DocumentFile-Baum) rekursiv nach [targetDir] (lokales

@@ -2149,5 +2149,12 @@
     <string name="plugins_kind_code">Code-Plugin</string>
     <string name="plugins_kind_declarative">Deklarativ</string>
     <string name="plugins_none">–</string>
+    <string name="app_import_modus_titel">Wie soll das Projekt eingebunden werden?</string>
+    <string name="app_import_lokal_oeffnen">Lokal öffnen (Ordner wählen)</string>
+    <string name="app_import_lokal_hinweis">Öffnet den Ordner direkt am Speicherort, ohne Kopie. Änderungen landen im Originalordner.</string>
+    <string name="app_import_kopieren">In CodeForgeMobileProjects kopieren</string>
+    <string name="app_import_kopieren_hinweis">Legt eine Kopie im Projektstamm an. Funktioniert auch mit Cloud-Ordnern.</string>
+    <string name="app_import_lokal_nicht_aufloesbar">Dieser Ordner liegt nicht im lokalen Speicher und kann nicht direkt geöffnet werden. Bitte stattdessen kopieren.</string>
+    <string name="app_import_lokal_berechtigung">Für das direkte Öffnen fehlt der „Zugriff auf alle Dateien“. Erteile ihn in den Android-Einstellungen oder kopiere das Projekt.</string>
 </resources>
 

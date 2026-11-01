@@ -57,6 +57,8 @@ data class ProjectProbe(
     val minSdk: Int,
     /** Plugin-ID → Katalog-Alias (z. B. `libs.plugins.android.library`). */
     val catalogPluginAliases: Map<String, String>,
+    /** AGP ≥ 9: Kotlin ist eingebaut – `org.jetbrains.kotlin.android` und `kotlinOptions` dürfen nicht mehr verwendet werden. */
+    val builtInKotlin: Boolean = false,
 )
 
 /** Legt Gradle-Submodule an und trägt sie in `settings.gradle(.kts)` ein. */
@@ -66,6 +68,8 @@ object ModuleMaker {
     private val NAMESPACE = Regex("""namespace\s*=?\s*["']([^"']+)["']""")
     private val APP_ID = Regex("""applicationId\s*=?\s*["']([^"']+)["']""")
     private val COMPILE_SDK = Regex("""compileSdk\s*=?\s*(\d+)""")
+    private val AGP_VERSION = Regex("""^\s*agp\s*=\s*"(\d+)""", RegexOption.MULTILINE)
+    private const val KOTLIN_ANDROID = "org.jetbrains.kotlin.android"
     private val MIN_SDK = Regex("""minSdk\s*=?\s*(\d+)""")
 
     private val JAVA_KEYWORDS = setOf(
@@ -90,7 +94,14 @@ object ModuleMaker {
             ?: texts.firstNotNullOfOrNull { APP_ID.find(it)?.groupValues?.get(1) }
         val compileSdk = texts.firstNotNullOfOrNull { COMPILE_SDK.find(it)?.groupValues?.get(1)?.toIntOrNull() } ?: 35
         val minSdk = texts.firstNotNullOfOrNull { MIN_SDK.find(it)?.groupValues?.get(1)?.toIntOrNull() } ?: 21
-        return ProjectProbe(settings, settings?.name?.endsWith(".kts") ?: true, base, compileSdk, minSdk, readPluginAliases(root))
+        return ProjectProbe(settings, settings?.name?.endsWith(".kts") ?: true, base, compileSdk, minSdk, readPluginAliases(root), usesBuiltInKotlin(root))
+    }
+
+    /** AGP-Hauptversion aus dem Versionskatalog (`agp = "9.x"`); ab 9 ist Kotlin eingebaut. */
+    private fun usesBuiltInKotlin(root: File): Boolean {
+        val toml = File(root, "gradle/libs.versions.toml").takeIf { it.isFile } ?: return false
+        val major = AGP_VERSION.find(toml.readText())?.groupValues?.get(1)?.toIntOrNull() ?: return false
+        return major >= 9
     }
 
     private fun readPluginAliases(root: File): Map<String, String> {
@@ -150,7 +161,7 @@ object ModuleMaker {
     ): String {
         fun plugin(id: String): String = probe.catalogPluginAliases[id]?.let { "alias($it)" } ?: "id(\"$id\")"
         val kts = kotlinDsl
-        return when (type) {
+        val raw = when (type) {
             ModuleType.ANDROID_LIBRARY -> if (kts) """
                 plugins {
                     ${plugin("com.android.library")}
@@ -217,7 +228,16 @@ object ModuleMaker {
                 }
             """.trimIndent() + "\n"
         }
+        return if (probe.builtInKotlin) stripKotlinPluginUsage(raw) else raw
     }
+
+    /** AGP 9: entfernt `org.jetbrains.kotlin.android`-Plugin und `kotlinOptions` (jvmTarget folgt `compileOptions`). */
+    internal fun stripKotlinPluginUsage(build: String): String =
+        build.lineSequence()
+            .filterNot { it.contains(KOTLIN_ANDROID) || it.contains("kotlin.android") || it.trim().startsWith("kotlinOptions") }
+            .joinToString("\n")
+            .replace(Regex("\n{3,}"), "\n\n")
+            .replace(Regex("\n\n(\\s*)\\}"), "\n$1}")
 
     fun dummySource(pkg: String, className: String, path: GradleModulePath): String = """
         package $pkg
@@ -260,7 +280,8 @@ object ModuleMaker {
         var newRootBuild: Pair<File, String>? = null
         val rootBuild = listOf("build.gradle.kts", "build.gradle").map { File(root, it) }.firstOrNull { it.isFile }
         val needed = when (request.type) {
-            ModuleType.ANDROID_LIBRARY -> listOf("com.android.library", "org.jetbrains.kotlin.android")
+            ModuleType.ANDROID_LIBRARY ->
+                if (probe.builtInKotlin) listOf("com.android.library") else listOf("com.android.library", KOTLIN_ANDROID)
             ModuleType.KOTLIN_JVM_LIBRARY -> listOf("org.jetbrains.kotlin.jvm")
         }
         if (rootBuild != null) {

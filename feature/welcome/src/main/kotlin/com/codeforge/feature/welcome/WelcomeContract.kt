@@ -9,6 +9,8 @@ import java.io.File
 data class WelcomeUiState(
     val recentProjects: List<RecentProject> = emptyList(),
     val selectedProjectId: String? = null,
+    /** Normalisierte Pfade der automatisch aus dem Projektstamm gelisteten Projekte (nicht entfernbar). */
+    val autoListedPaths: Set<String> = emptySet(),
     val isLoading: Boolean = true,
 
     // Task 55: Crash-Bericht Dialog
@@ -27,6 +29,7 @@ sealed interface WelcomeUiEvent {
     data object CloneProjectClicked : WelcomeUiEvent
     data object TerminalClicked : WelcomeUiEvent
     data object SettingsClicked : WelcomeUiEvent
+    data object RefreshProjects : WelcomeUiEvent
     data class RecentProjectSelected(val projectId: String) : WelcomeUiEvent
     data class RecentProjectOpened(val projectId: String) : WelcomeUiEvent
     data class RecentProjectRemoved(val projectId: String) : WelcomeUiEvent

@@ -26,6 +26,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface ProjectImportUiState {
+    /** Auswahl: lokal öffnen (ohne Kopie) oder in den Projektstamm kopieren. */
+    data object ChooseMode : ProjectImportUiState
     data object AwaitingPicker : ProjectImportUiState
     data class Copying(val currentPath: String, val filesCopiedSoFar: Int) : ProjectImportUiState
     data class Done(val rootPath: String) : ProjectImportUiState
@@ -38,7 +40,7 @@ class ProjectImportViewModel @Inject constructor(
     private val recentProjectsRepository: RecentProjectsRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ProjectImportUiState>(ProjectImportUiState.AwaitingPicker)
+    private val _uiState = MutableStateFlow<ProjectImportUiState>(ProjectImportUiState.ChooseMode)
     val uiState: StateFlow<ProjectImportUiState> = _uiState.asStateFlow()
 
     /** Wird vom SAF-Launcher (`OpenDocumentTree`) aufgerufen, sobald der Nutzer ein Verzeichnis gewählt hat. */
@@ -75,7 +77,45 @@ class ProjectImportViewModel @Inject constructor(
         }
     }
 
-    fun retry() {
+    /** Der Picker ist offen; solange wird ein Fortschrittszustand gezeigt. */
+    fun onPickerOpened() {
         _uiState.update { ProjectImportUiState.AwaitingPicker }
+    }
+
+    /**
+     * Öffnet den gewählten Ordner direkt am Speicherort (keine Kopie). Voraussetzung: lokaler Speicher
+     * und „Zugriff auf alle Dateien“. Sonst Fehlermeldung mit Hinweis auf die Kopier-Variante.
+     */
+    fun onLocalTreeSelected(treeUriString: String?) {
+        if (treeUriString == null) {
+            _uiState.update { ProjectImportUiState.Failed(Res.string(R.string.app_kein_verzeichnis_ausgewaehlt)) }
+            return
+        }
+        val path = projectImportRepository.resolveLocalDirectory(treeUriString)
+        val failure = when {
+            path == null -> Res.string(R.string.app_import_lokal_nicht_aufloesbar)
+            !projectImportRepository.hasAllFilesAccess() -> Res.string(R.string.app_import_lokal_berechtigung)
+            else -> null
+        }
+        if (path == null || failure != null) {
+            _uiState.update { ProjectImportUiState.Failed(failure.orEmpty()) }
+            return
+        }
+        viewModelScope.launch {
+            recentProjectsRepository.addOrUpdate(
+                RecentProject(
+                    id = path,
+                    name = path.substringAfterLast('/'),
+                    path = path,
+                    lastOpenedEpochMillis = System.currentTimeMillis(),
+                    moduleCount = 1
+                )
+            )
+            _uiState.update { ProjectImportUiState.Done(path) }
+        }
+    }
+
+    fun retry() {
+        _uiState.update { ProjectImportUiState.ChooseMode }
     }
 }

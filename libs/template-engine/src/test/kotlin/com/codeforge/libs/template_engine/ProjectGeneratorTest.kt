@@ -122,5 +122,24 @@ class ProjectGeneratorTest {
         assertTrue(File(target, "app/build.gradle.kts").exists())
         out.deleteRecursively()
     }
-}
 
+    @Test fun generatedKotlinProjectUsesGradle9AndBuiltInKotlin() {
+        val out = File.createTempFile("pwgen_agp9", "").apply { delete(); mkdirs() }
+        val target = File(out, "App9").apply { mkdirs() }
+        val req = ProjectRequest(
+            ProjectTemplateDescriptor("compose_activity", ProjectTemplateKind.COMPOSE_ACTIVITY, true),
+            "App9", "com.example.app9", out.path, language = ProjectLanguage.KOTLIN, useKotlinDsl = true
+        )
+        generator.generate(req, target)
+        val wrapper = File(target, "gradle/wrapper/gradle-wrapper.properties").readText()
+        assertTrue(wrapper.contains("gradle-9.6.0-bin.zip"))
+        val catalog = File(target, "gradle/libs.versions.toml").readText()
+        assertTrue(catalog.contains("agp = \"9.5.0\""))
+        assertTrue(!catalog.contains("org.jetbrains.kotlin.android"))
+        val app = File(target, "app/build.gradle.kts").readText()
+        assertTrue(app.contains("libs.plugins.kotlin.compose"))
+        assertTrue(!app.contains("kotlin.android") && !app.contains("kotlinOptions"))
+        assertTrue(!File(target, "build.gradle.kts").readText().contains("kotlin.android"))
+        out.deleteRecursively()
+    }
+}
