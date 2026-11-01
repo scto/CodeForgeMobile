@@ -2,6 +2,10 @@
 package com.codeforge.feature.settings.extensions
 
 import android.content.Context
+import com.codeforge.core.domain.extension.PluginToolRunner
+import com.codeforge.core.domain.extension.RequirementContribution
+import com.codeforge.core.domain.extension.RequirementManager
+import com.codeforge.core.domain.extension.ToolRunEvent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,12 +23,29 @@ class ExtensionsManager internal constructor(
     @Inject
     constructor(
         @ApplicationContext context: Context,
-        downloader: HttpFileDownloader
+        downloader: HttpFileDownloader,
+        toolRunner: PluginToolRunner
     ) : this(
         baseDir = resolveBaseDirectory(context),
         downloader = downloader,
         customTermuxBinDir = null
-    )
+    ) {
+        dependencyInstaller = { requirements ->
+            runCatching {
+                var exitCode = 0
+                toolRunner.install(requirements).collect { event ->
+                    if (event is ToolRunEvent.Finished) exitCode = event.exitCode
+                }
+                check(exitCode == 0) { "Installation fehlgeschlagen (Exit-Code $exitCode): ${requirements.joinToString { it.name }}" }
+            }
+        }
+    }
+
+    /**
+     * Installiert fehlende Laufzeit-Pakete (JDK, Node.js, Python, clang …) per APT. In Tests ersetzbar;
+     * ohne Installer (`null`) werden fehlende Voraussetzungen nur gemeldet.
+     */
+    var dependencyInstaller: (suspend (List<RequirementContribution>) -> Result<Unit>)? = null
 
     private val termuxBinDir: File
         get() = customTermuxBinDir ?: run {
@@ -68,20 +89,7 @@ class ExtensionsManager internal constructor(
     fun checkMissingRequirements(pkg: LspExtensionPackage): List<String> {
         val missing = mutableListOf<String>()
         for (req in pkg.requires) {
-            val satisfied = when (req) {
-                "openjdk-17", "java" -> hasBinary("java")
-                "nodejs", "node" -> hasBinary("node")
-                "npm" -> hasBinary("npm")
-                "python", "python3" -> hasBinary("python3") || hasBinary("python")
-                "clang" -> hasBinary("clangd") || hasBinary("clang")
-                "rust-analyzer" -> hasBinary("rust-analyzer")
-                "taplo" -> hasBinary("taplo")
-                "shellcheck" -> hasBinary("shellcheck")
-                else -> hasBinary(req)
-            }
-            if (!satisfied) {
-                missing.add(req)
-            }
+            if (LspDependencies.checkBinaries(req).none { hasBinary(it) }) missing.add(req)
         }
         return missing
     }
@@ -93,13 +101,7 @@ class ExtensionsManager internal constructor(
     fun checkMissingOptionalRequirements(pkg: LspExtensionPackage): List<String> {
         val missing = mutableListOf<String>()
         for (req in pkg.optionalRequires) {
-            val satisfied = when (req) {
-                "shellcheck" -> hasBinary("shellcheck")
-                else -> hasBinary(req)
-            }
-            if (!satisfied) {
-                missing.add(req)
-            }
+            if (LspDependencies.checkBinaries(req).none { hasBinary(it) }) missing.add(req)
         }
         return missing
     }
@@ -109,12 +111,24 @@ class ExtensionsManager internal constructor(
         onProgress: (progress: Float, status: ExtensionStatus) -> Unit = { _, _ -> }
     ): Result<File> = withContext(Dispatchers.IO) {
         runCatching {
+            // 0. Laufzeit-Voraussetzungen (JDK, Node.js, Python, clang …) automatisch nachinstallieren.
+            onProgress(0f, ExtensionStatus.INSTALLING_DEPENDENCIES)
+            ensureDependencies(pkg)
+
             val downloadSource = when (val source = pkg.source) {
                 is ExtensionSource.Download -> source
                 is ExtensionSource.TermuxPackage -> {
-                    throw UnsupportedOperationException(
-                        "Termux package '${source.packageName}' must be installed via 'codeforge-env pkg ${source.packageName}' in the terminal."
-                    )
+                    // Das Paket selbst (z. B. clang → clangd) kommt aus dem APT-Repository.
+                    if (getExecutableFile(pkg) == null) {
+                        val installer = dependencyInstaller ?: throw UnsupportedOperationException(
+                            "Termux package '${source.packageName}' must be installed via 'codeforge-env pkg ${source.packageName}' in the terminal."
+                        )
+                        installer(listOf(RequirementContribution(RequirementManager.PKG, source.packageName, source.binaryName))).getOrThrow()
+                    }
+                    val bin = getExecutableFile(pkg)
+                        ?: throw IllegalStateException("${source.binaryName} nach der Installation von ${source.packageName} nicht gefunden")
+                    onProgress(1f, ExtensionStatus.INSTALLED)
+                    return@runCatching bin
                 }
             }
 
@@ -202,6 +216,24 @@ class ExtensionsManager internal constructor(
                 }
                 throw e
             }
+        }
+    }
+
+    /**
+     * Installiert fehlende Pflicht-Voraussetzungen (Fehler bricht ab) und optionale (best effort).
+     * Danach wird erneut geprüft, damit ein stilles Scheitern nicht zu einem kaputten Server führt.
+     */
+    private suspend fun ensureDependencies(pkg: LspExtensionPackage) {
+        val installer = dependencyInstaller ?: return
+        val missing = checkMissingRequirements(pkg)
+        if (missing.isNotEmpty()) {
+            installer(LspDependencies.toInstallList(missing)).getOrThrow()
+            val still = checkMissingRequirements(pkg)
+            check(still.isEmpty()) { "Voraussetzungen fehlen weiterhin: ${still.joinToString()}" }
+        }
+        val optional = checkMissingOptionalRequirements(pkg)
+        if (optional.isNotEmpty()) {
+            installer(LspDependencies.toInstallList(optional)) // optional: Fehler ignorieren
         }
     }
 

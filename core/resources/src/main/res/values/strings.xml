@@ -1126,7 +1126,7 @@
     <string name="extension_taplo_desc">TOML language server for configuration files, Cargo.toml, and pyproject.toml.</string>
     <string name="extension_bash_lsp_name">Bash Language Server</string>
     <string name="extension_bash_lsp_desc">Language server for shell scripts (sh, bash, zsh) based on Tree-sitter.</string>
-    <string name="extensions_missing_prerequisite">Prerequisite missing: %1$s</string>
+    <string name="extensions_missing_prerequisite">Prerequisite missing (installed automatically with the extension): %1$s</string>
     <string name="extensions_optional_prerequisite_missing">Notice: %1$s not installed – server runs without diagnostics.</string>
     <string name="extensions_installing_dependencies">Installing dependencies…</string>
     <string name="extensions_termux_install_hint">Run in terminal: codeforge-env pkg %1$s</string>
