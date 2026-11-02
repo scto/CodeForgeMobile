@@ -8,6 +8,8 @@ import android.content.Context
 import android.util.Log
 import com.codeforge.feature.editor.lsp.LspAwareLanguage
 import com.codeforge.feature.editor.lsp.LspCompletionProvider
+import com.codeforge.feature.editor.lsp.WordListLanguage
+import com.codeforge.feature.editor.textmate.BundledGrammars
 import com.codeforge.feature.editor.treesitter.TreeSitterGrammar
 import com.codeforge.feature.editor.treesitter.TreeSitterLanguageSupport
 import io.github.rosemoe.sora.lang.EmptyLanguage
@@ -76,9 +78,15 @@ object EditorLanguageFactory {
         // Dateien ohne Grammatik (PLAIN: .md, .txt, .toml, .yml, .sh, .gradle …) oder ein nicht
         // registrierter Scope dürfen den Editor nie zum Absturz bringen: Rückfall auf EmptyLanguage
         // (kein Highlighting, Text bleibt bearbeitbar).
-        val base: Language = if (languageType == EditorLanguageType.PLAIN && extensionScope != null) {
-            runCatching { TextMateLanguage.create(extensionScope, true) }
-                .onFailure { Log.w(TAG, "Plugin-Grammatik '$extensionScope' nicht nutzbar – Rückfall auf Klartext", it) }
+        val bundledScope = if (languageType == EditorLanguageType.PLAIN && extensionScope == null) {
+            BundledGrammars.scopeForPath(path)
+        } else {
+            null
+        }
+        val scopeOverride = extensionScope ?: bundledScope
+        val base: Language = if (languageType == EditorLanguageType.PLAIN && scopeOverride != null) {
+            runCatching { TextMateLanguage.create(scopeOverride, true) }
+                .onFailure { Log.w(TAG, "Grammatik '$scopeOverride' nicht nutzbar – Rückfall auf Klartext", it) }
                 .getOrNull() ?: EmptyLanguage()
         } else if (languageType.hasGrammar) {
             runCatching { TextMateLanguage.create(languageType.scopeName, true) }
@@ -96,7 +104,10 @@ object EditorLanguageFactory {
             EditorLanguageType.JSON -> "json"
             EditorLanguageType.PLAIN -> "plaintext"
         }
-        return if (completionProvider != null) LspAwareLanguage(base, completionProvider, languageId) else base
+        val wordScope = if (languageType == EditorLanguageType.PLAIN) scopeOverride else languageType.scopeName
+        val withWords: Language =
+            if (wordScope != null && base !is EmptyLanguage) WordListLanguage(base, context, wordScope) else base
+        return if (completionProvider != null) LspAwareLanguage(withWords, completionProvider, languageId) else withWords
     }
 }
 

@@ -5,8 +5,9 @@
  * Compose-Overlay über dem sora-[CodeEditor]: Farbkästchen (Farbliterale) und Update-Chips
  * („4.0.1 -> 4.0.3“) rechts neben der jeweiligen Zeile.
  *
- * Warum kein sora-InlayHint: InlayHints (Text/Farbe) gibt es erst ab sora-editor 0.24.x, das Projekt
- * ist auf 0.23.4 gepinnt. Die Positionen kommen aus der in 0.23.4 verifizierten Public-API:
+ * Warum kein sora-InlayHint: die Klassen (`InlayHint`, `TextInlayHint`) existieren zwar, werden aber bis
+ * einschließlich 0.23.6 (Stand: neueste Maven-Version) vom Editor nicht gerendert. Die Positionen kommen aus
+ * der verifizierten Public-API:
  *  - `getCharOffsetX(line, column)`: x auf der View (inkl. Zeilennummern-Gutter, abzgl. Scroll-X)
  *  - `getCharOffsetY(line, column)`: UNTERKANTE der Zeile/Visual-Row auf der View (abzgl. Scroll-Y)
  *  - `getRowHeight()`; Updates bei `ScrollEvent` und `ContentChangeEvent`.
@@ -30,9 +31,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import kotlinx.coroutines.isActive
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -95,7 +102,7 @@ internal class EditorOverlayGeometry(private val editor: CodeEditor) {
 internal fun EditorOverlayLayer(
     modifier: Modifier = Modifier,
     editor: CodeEditor?,
-    /** Wird bei Scroll/Textänderung erhöht, um die Positionen neu zu berechnen. */
+    /** Zusätzlicher Anstoß (Scroll/Textänderung); die Positionen werden zusätzlich pro Frame abgeglichen. */
     tick: Int,
     overlays: List<LineOverlay>,
     onUpdateChipClick: (DependencyUpdate) -> Unit,
@@ -104,21 +111,60 @@ internal fun EditorOverlayLayer(
     if (editor == null || overlays.isEmpty()) return
     val geometry = remember(editor) { EditorOverlayGeometry(editor) }
     val density = LocalDensity.current
-    val viewHeight = editor.height
+
+    // Layout-Signatur des Editors (Scroll, Zoom, Umbruch, Größe, Zeilenzahl). Wird pro Frame verglichen und
+    // bei Änderung hochgezählt: die Positionen werden in der Platzierungsphase (offset-Lambda) neu gelesen,
+    // dadurch laufen die Overlays Frame für Frame synchron mit dem Editor-Inhalt mit (auch bei Fling/Zoom).
+    val sync = remember(editor) { mutableIntStateOf(0) }
+    LaunchedEffect(editor) {
+        var last = 0L
+        while (isActive) {
+            withFrameNanos { }
+            var key = editor.offsetX.toLong()
+            key = key * 31 + editor.offsetY
+            key = key * 31 + editor.rowHeight
+            key = key * 31 + editor.width
+            key = key * 31 + editor.height
+            key = key * 31 + editor.lineCount
+            key = key * 31 + editor.textSizePx.toBits()
+            key = key * 31 + if (editor.isWordwrap) 1 else 0
+            if (key != last) {
+                last = key
+                sync.intValue++
+            }
+        }
+    }
+
+    // Sichtbarer Zeilenbereich: nur dafür werden Composables erzeugt (Neukomposition nur bei Bereichswechsel).
+    val visibleRange by remember(editor) {
+        derivedStateOf {
+            sync.intValue
+            val first = (editor.firstVisibleLine - 1).coerceAtLeast(0)
+            val last = (editor.lastVisibleLine + 1).coerceAtMost(editor.lineCount - 1)
+            first..last
+        }
+    }
+    @Suppress("UNUSED_VARIABLE") val unusedTick = tick
     val rowHeight = geometry.rowHeightPx
     val swatchSizeDp = with(density) { (rowHeight * 0.7f).toDp() }.coerceIn(10.dp, 28.dp)
     val gapPx = with(density) { 8.dp.toPx() }
+    val rowHeightDp = with(density) { rowHeight.toDp() }
 
     Box(modifier = modifier.fillMaxSize().clipToBounds()) {
-        // tick wird nur gelesen, damit Änderungen eine Neuberechnung auslösen
-        @Suppress("UNUSED_VARIABLE") val unused = tick
         for (overlay in overlays) {
-            val (x, top) = geometry.lineEnd(overlay.line) ?: continue
-            if (top + rowHeight < 0 || top > viewHeight) continue // außerhalb des sichtbaren Bereichs
+            if (overlay.line !in visibleRange) continue
             Row(
                 modifier = Modifier
-                    .offset { IntOffset((x + gapPx).roundToInt(), top.roundToInt()) }
-                    .height(with(density) { rowHeight.toDp() }),
+                    .offset {
+                        sync.intValue // Platzierungsphase: neu positionieren, ohne Neukomposition
+                        val pos = geometry.lineEnd(overlay.line)
+                        if (pos == null) {
+                            IntOffset(0, -100_000) // Zeile (noch) nicht im Layout -> außerhalb verstecken
+                        } else {
+                            IntOffset((pos.first + gapPx).roundToInt(), pos.second.roundToInt())
+                        }
+                    }
+                    .height(rowHeightDp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 for (item in overlay.items) {

@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Editor/TextMate)
+- 35 zusätzliche TextMate-Grammatiken inkl. Language-Configs (Dart, Python, JS/TS/TSX/JSX, C/C++, C#, Go, Rust, PHP, HTML/HTMX, CSS, YAML, TOML, INI, Shell, Groovy/Gradle, SQL, Markdown, LaTeX, Lua, Lisp, Smali u. a.); Zuordnung über Dateiendung in `BundledGrammars`. Themes wurden bewusst nicht übernommen.
+- `keywords.json` (Schlüsselwort-Vorschläge je Scope) und `words.json` (englisches Wörterbuch für Text/Markdown/LaTeX) als Auto-Vervollständigung (`WordCatalog`, `WordListLanguage`).
+
+### Behoben (Editor)
+- Farbvorschau: Overlay-Positionen werden pro Frame mit dem Editor-Layout abgeglichen und in der Platzierungsphase gesetzt (kein „Herumfliegen“ mehr bei Scroll/Fling/Zoom/Zeilenumbruch); nur sichtbare Zeilen werden komponiert.
+
 ### Geändert (Release/R8)
 - `:app`: Release-Block mit `isMinifyEnabled = true`, `isShrinkResources = true`, `isDebuggable = false`, Release-Signatur aus
   `keystore.properties` bzw. `CODEFORGE_*`-Umgebungsvariablen (sonst Debug-Schlüssel) und nativen Debug-Symbolen.
