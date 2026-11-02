@@ -101,6 +101,42 @@
       "heavy": false,
       "stage": "19-extras",
       "repo_packages": ""
+    },
+    {
+      "name": "K-leicht-codeforge",
+      "heavy": false,
+      "stage": "00-codeforge",
+      "repo_packages": ""
+    },
+    {
+      "name": "L-leicht-nodejs",
+      "heavy": false,
+      "stage": "09-nodejs",
+      "repo_packages": ""
+    },
+    {
+      "name": "M-leicht-pure-tools",
+      "heavy": false,
+      "stage": "13-pure-tools",
+      "repo_packages": ""
+    },
+    {
+      "name": "N-leicht-ide-tools",
+      "heavy": false,
+      "stage": "14-ide-tools",
+      "repo_packages": ""
+    },
+    {
+      "name": "O-leicht-native-dev",
+      "heavy": false,
+      "stage": "16-native-dev",
+      "repo_packages": ""
+    },
+    {
+      "name": "P-leicht-debug-misc",
+      "heavy": false,
+      "stage": "17-debug-misc",
+      "repo_packages": ""
     }
   ]
 }
