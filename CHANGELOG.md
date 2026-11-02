@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Editor/Completion)
+- Das Completion-Fenster wurde von der Tastatur verdeckt: sora begrenzt es nur auf die Editorhöhe. Neue `ImeAwareAutoCompletion` ermittelt die sichtbare Höhe aus den IME-Insets, scrollt den Editor bei Bedarf und zeigt die Liste bei zu wenig Platz über der Cursorzeile.
+
 ### Behoben (Debugger)
 - JVM-Debugging/Attach scheiterte, weil der Client DAP direkt an den JDWP-Port (5005) schickte; dort läuft kein DAP-Adapter. Neu: mitgelieferter DAP-Adapter auf JDI (`CodeForgeDapAdapter.java`, wird beim ersten Start mit `javac` aus der Termux-Umgebung übersetzt) mit launch/attach, Breakpoints (inkl. Bedingung und Logpoint), Step/Continue/Pause, Stack, Variablen, einfacher Auswertung. Er verbindet sich per `127.0.0.1` (oder `adb forward`) und braucht ein JDK mit `jdk.jdi`.
 - Neuer Dialog für den JVM-Modus: Programm starten oder an einen im Terminal gestarteten JDWP-Port anhängen.

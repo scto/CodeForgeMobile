@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import com.codeforge.feature.editor.completion.ImeAwareAutoCompletion
 import com.codeforge.feature.editor.lsp.LspAwareLanguage
 import com.codeforge.feature.editor.lsp.LspCompletionProvider
 import com.codeforge.feature.editor.lsp.LspDiagnosticsBridge
@@ -201,6 +202,7 @@ fun SoraCodeEditor(
                 applyDisplaySettings(this, themedSettings)
 
                 // --- Auto-Completion-Popup aktiv halten (Snippets kommen aus LspAwareLanguage) ---
+                replaceComponent(EditorAutoCompletion::class.java, ImeAwareAutoCompletion(this))
                 getComponent(EditorAutoCompletion::class.java).isEnabled = true
 
                 // --- Diagnose-UI & Tooltips ---
