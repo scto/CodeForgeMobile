@@ -29,6 +29,8 @@ data class DebugUiState(
     val androidTarget: AndroidDebugTarget = AndroidDebugTarget(packageName = ""),
     val isAdbAvailable: Boolean = false,
     val showAttachDialog: Boolean = false,
+    val jvmConfig: DebugConfig = DebugConfig(),
+    val showJvmDialog: Boolean = false,
     val frames: List<DebugStackFrame> = emptyList(),
     val selectedFrameId: Long? = null,
     val scopes: List<Scope> = emptyList(),
@@ -55,6 +57,7 @@ sealed interface DebugUiIntent {
     data class SetDebugMode(val mode: DebugMode) : DebugUiIntent
     data class UpdateAndroidTarget(val target: AndroidDebugTarget) : DebugUiIntent
     data class SetShowAttachDialog(val show: Boolean) : DebugUiIntent
+    data class SetShowJvmDialog(val show: Boolean) : DebugUiIntent
     data object Stop : DebugUiIntent
     data object Resume : DebugUiIntent
     data object Pause : DebugUiIntent

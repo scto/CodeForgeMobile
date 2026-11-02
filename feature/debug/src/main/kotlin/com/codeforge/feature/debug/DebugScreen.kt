@@ -110,6 +110,14 @@ fun DebugScreen(
             )
         }
 
+        if (state.showJvmDialog) {
+            JvmDebugDialog(
+                current = state.jvmConfig,
+                onDismissRequest = { onIntent(DebugUiIntent.SetShowJvmDialog(false)) },
+                onConfirm = { onIntent(DebugUiIntent.Start(it)) }
+            )
+        }
+
         // Fehlermeldung
         if (state.errorMessage != null) {
             Snackbar(

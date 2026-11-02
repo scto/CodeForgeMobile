@@ -1605,6 +1605,16 @@
     <string name="debug_action_configure_target">Debug-Ziel</string>
     <string name="debug_attach_dialog_title">An Android-App anhängen</string>
     <string name="debug_attach_dialog_confirm">Anhängen</string>
+    <string name="debug_jvm_dialog_title">JVM-Programm debuggen</string>
+    <string name="debug_jvm_mode_launch">Starten</string>
+    <string name="debug_jvm_mode_attach">An JDWP-Port anhängen</string>
+    <string name="debug_jvm_main_class">Hauptklasse (z. B. com.example.MainKt)</string>
+    <string name="debug_jvm_classpath">Klassenpfad (getrennt durch :)</string>
+    <string name="debug_jvm_args">Programmargumente</string>
+    <string name="debug_jvm_port">JDWP-Port</string>
+    <string name="debug_jvm_hint_attach">Programm im Terminal starten mit: java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=127.0.0.1:5005 …</string>
+    <string name="debug_jvm_confirm_launch">Starten</string>
+    <string name="debug_jvm_confirm_attach">Anhängen</string>
     <string name="debug_error_adb_not_found">ADB nicht gefunden. Bitte Android Platform-Tools installieren.</string>
     <string name="debug_error_app_not_debuggable">App %1$s ist nicht debuggbar (android:debuggable ist false). Bitte erstelle einen Debug-Build.</string>
     <string name="debug_error_app_start_failed">Starten der App für Debugger fehlgeschlagen: %1$s</string>

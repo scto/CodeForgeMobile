@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Debugger)
+- JVM-Debugging/Attach scheiterte, weil der Client DAP direkt an den JDWP-Port (5005) schickte; dort läuft kein DAP-Adapter. Neu: mitgelieferter DAP-Adapter auf JDI (`CodeForgeDapAdapter.java`, wird beim ersten Start mit `javac` aus der Termux-Umgebung übersetzt) mit launch/attach, Breakpoints (inkl. Bedingung und Logpoint), Step/Continue/Pause, Stack, Variablen, einfacher Auswertung. Er verbindet sich per `127.0.0.1` (oder `adb forward`) und braucht ein JDK mit `jdk.jdi`.
+- Neuer Dialog für den JVM-Modus: Programm starten oder an einen im Terminal gestarteten JDWP-Port anhängen.
+- Getestet auf dem Host-JDK 21 (Launch und Attach, Breakpoint, Variablen, Evaluate, Step); nicht getestet: Termux/Gerät und Android-Attach über `adb forward`.
+
 ### Hinzugefügt (Editor/TextMate)
 - 35 zusätzliche TextMate-Grammatiken inkl. Language-Configs (Dart, Python, JS/TS/TSX/JSX, C/C++, C#, Go, Rust, PHP, HTML/HTMX, CSS, YAML, TOML, INI, Shell, Groovy/Gradle, SQL, Markdown, LaTeX, Lua, Lisp, Smali u. a.); Zuordnung über Dateiendung in `BundledGrammars`. Themes wurden bewusst nicht übernommen.
 - `keywords.json` (Schlüsselwort-Vorschläge je Scope) und `words.json` (englisches Wörterbuch für Text/Markdown/LaTeX) als Auto-Vervollständigung (`WordCatalog`, `WordListLanguage`).

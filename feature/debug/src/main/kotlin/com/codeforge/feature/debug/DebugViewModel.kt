@@ -129,6 +129,7 @@ class DebugViewModel @Inject constructor(
             is DebugUiIntent.SetDebugMode -> _uiState.update { it.copy(debugMode = intent.mode) }
             is DebugUiIntent.UpdateAndroidTarget -> _uiState.update { it.copy(androidTarget = intent.target) }
             is DebugUiIntent.SetShowAttachDialog -> _uiState.update { it.copy(showAttachDialog = intent.show) }
+            is DebugUiIntent.SetShowJvmDialog -> _uiState.update { it.copy(showJvmDialog = intent.show) }
             DebugUiIntent.Stop -> stop()
             DebugUiIntent.Resume -> resume()
             DebugUiIntent.Pause -> pause()
@@ -172,7 +173,7 @@ class DebugViewModel @Inject constructor(
 
     private fun start(config: DebugConfig) {
         viewModelScope.launch {
-            _uiState.update { it.copy(errorMessage = null) }
+            _uiState.update { it.copy(errorMessage = null, jvmConfig = config, showJvmDialog = false) }
             val result = debugRepository.start(config)
             result.onFailure { error ->
                 _uiState.update { it.copy(errorMessage = error.message) }

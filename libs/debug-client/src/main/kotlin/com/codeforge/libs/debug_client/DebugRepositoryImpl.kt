@@ -30,7 +30,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 import java.io.File
-import java.net.Socket
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,14 +39,13 @@ class DebugRepositoryImpl internal constructor(
     private val sourceToClassMapper: SourceToClassMapper = SourceToClassMapperImpl()
 ) : DebugRepository {
 
+    /**
+     * Der Debug-Port (JDWP) versteht kein DAP: Die Sitzung läuft deshalb immer über den mitgelieferten
+     * DAP-Adapter ([DapAdapterLauncher]), der sich selbst per JDWP mit `config.host:config.port` verbindet.
+     */
     @Inject
-    constructor(sourceToClassMapper: SourceToClassMapper) : this(
-        connectionFactory = { config ->
-            val socket = withContext(Dispatchers.IO) {
-                Socket(config.host, config.port)
-            }
-            DapConnection(socket.getInputStream(), socket.getOutputStream())
-        },
+    constructor(sourceToClassMapper: SourceToClassMapper, adapterLauncher: DapAdapterLauncher) : this(
+        connectionFactory = { _ -> withContext(Dispatchers.IO) { adapterLauncher.start() } },
         sourceToClassMapper = sourceToClassMapper
     )
 

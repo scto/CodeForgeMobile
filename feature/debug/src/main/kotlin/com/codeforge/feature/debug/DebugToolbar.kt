@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.codeforge.core.domain.model.DebugConfig
 import com.codeforge.core.domain.model.DebugSessionState
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
@@ -158,7 +157,7 @@ fun DebugToolbar(
                         }
                     } else {
                         TooltipIconButton(
-                            onClick = { onIntent(DebugUiIntent.Start(DebugConfig())) },
+                            onClick = { onIntent(DebugUiIntent.SetShowJvmDialog(true)) },
                             label = stringRes(R.string.debug_action_start)
                         ) {
                             Icon(
