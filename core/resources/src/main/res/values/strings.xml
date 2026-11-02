@@ -2238,5 +2238,47 @@
     <string name="lspinfo_plugin_no_server">No server definition found (enable the plugin).</string>
     <string name="lspinfo_plugin_requires_fail">Missing: %1$s – set up via \"Install prerequisites\".</string>
     <string name="lspinfo_plugin_source">Plugin %1$s</string>
-</resources>
 
+    <!-- Asset Studio -->
+    <string name="assetstudio_title">Asset Studio</string>
+    <string name="assetstudio_subtitle">Drawable &amp; Icon Maker</string>
+    <string name="assetstudio_launch">Launch Studio</string>
+    <string name="assetstudio_quick_actions">Quick Actions</string>
+    <string name="assetstudio_create_drawable">Create Drawable</string>
+    <string name="assetstudio_create_icon">Create Icon</string>
+    <string name="assetstudio_import_image">Import Image</string>
+    <string name="assetstudio_m3_icons">M3 Icons</string>
+    <string name="assetstudio_preview">Preview</string>
+    <string name="assetstudio_source">Source</string>
+    <string name="assetstudio_select_image">Select Image</string>
+    <string name="assetstudio_load_xml">Load XML</string>
+    <string name="assetstudio_source_hint">Choose an image or XML vector to create app icons</string>
+    <string name="assetstudio_source_selected">Selected: %1$s</string>
+    <string name="assetstudio_icon_settings">Icon Settings</string>
+    <string name="assetstudio_drawable_settings">Drawable Settings</string>
+    <string name="assetstudio_icon_name">Icon Name</string>
+    <string name="assetstudio_shape">Shape</string>
+    <string name="assetstudio_shape_circle">Circle</string>
+    <string name="assetstudio_shape_square">Square</string>
+    <string name="assetstudio_shape_rounded">Rounded</string>
+    <string name="assetstudio_background">Background Color</string>
+    <string name="assetstudio_icon_color">Icon Color</string>
+    <string name="assetstudio_original_colors">Original</string>
+    <string name="assetstudio_choose">Choose</string>
+    <string name="assetstudio_custom">Custom</string>
+    <string name="assetstudio_scale">Icon size: %1$d %%</string>
+    <string name="assetstudio_generate">Generate</string>
+    <string name="assetstudio_search_icons">Search icons…</string>
+    <string name="assetstudio_name_invalid">Name: lowercase letters, digits and underscores only, starting with a letter</string>
+    <string name="assetstudio_no_source">Select an image, XML vector or M3 icon first</string>
+    <string name="assetstudio_no_res">No Android res directory found in this project</string>
+    <string name="assetstudio_done">%1$d files written to %2$s</string>
+    <string name="assetstudio_error">Failed: %1$s</string>
+    <string name="assetstudio_xml_unsupported">Not a supported vector drawable</string>
+    <string name="assetstudio_hex_title">Custom color</string>
+    <string name="assetstudio_hex_hint">Hex (#RRGGBB)</string>
+    <string name="assetstudio_apply">Apply</string>
+    <string name="assetstudio_pick_color">Choose color</string>
+    <string name="assetstudio_mode_icon">App icon</string>
+    <string name="assetstudio_mode_drawable">Drawable</string>
+</resources>

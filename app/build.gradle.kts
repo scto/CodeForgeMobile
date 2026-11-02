@@ -57,6 +57,7 @@ dependencies {
     implementation(project(":feature:terminal"))
     implementation(project(":feature:sdkmanager"))
     implementation(project(":feature:layoutdesigner"))
+    implementation(project(":feature:assetstudio"))
     implementation(project(":feature:themebuilder"))
     implementation(project(":feature:git"))
     implementation(project(":feature:search"))

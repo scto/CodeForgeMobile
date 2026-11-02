@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
+import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.GridView
@@ -60,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.feature.assetstudio.ui.AssetStudioPanel
 import com.codeforge.feature.filetree.FileTreeRoute
 import com.codeforge.feature.git.GitPanel
 import com.codeforge.feature.layoutdesigner.files.LayoutFilesPanel
@@ -73,6 +75,7 @@ enum class DrawerSection(@StringRes val labelRes: Int, val icon: ImageVector, va
     GIT(R.string.common_git, Icons.Filled.Source),
     MODULES(R.string.drawer_modules, Icons.Filled.CreateNewFolder),
     LAYOUTS(R.string.drawer_layouts, Icons.Filled.GridView),
+    ASSETS(R.string.assetstudio_title, Icons.Filled.Brush),
     DEPENDENCIES(R.string.drawer_dependencies, Icons.Filled.AccountTree, isPanel = false),
     TERMINAL(R.string.settings_hub_terminal, Icons.Filled.Terminal, isPanel = false),
     SETTINGS(R.string.settings_hub_title, Icons.Filled.Settings, isPanel = false),
@@ -184,6 +187,12 @@ fun WorkspaceDrawer(
                             onConvertLayoutsToCompose = {
                                 onCloseDrawer()
                                 onConvertLayout(null)
+                            }
+                        )
+                        DrawerSection.ASSETS -> AssetStudioPanel(
+                            onAction = { action ->
+                                onCloseDrawer()
+                                onNavigate(Routes.assetStudio(rootPath, action.name))
                             }
                         )
                         DrawerSection.TERMINAL, DrawerSection.SETTINGS, DrawerSection.DEPENDENCIES -> Unit

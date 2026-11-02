@@ -24,6 +24,7 @@ import com.codeforge.feature.dependencies.DependenciesRoute
 import com.codeforge.feature.git.GitCloneRoute
 import com.codeforge.feature.git.GitRoute
 import com.codeforge.feature.hardcodedstrings.HardcodedStringsRoute
+import com.codeforge.feature.assetstudio.ui.AssetStudioRoute
 import com.codeforge.feature.layoutdesigner.LayoutDesignerRoute
 import com.codeforge.feature.onboarding.OnboardingRoute
 import com.codeforge.feature.projectsettings.ProjectSettingsEffect
@@ -70,6 +71,7 @@ internal object Routes {
     const val PROJECT_WORKSPACE_PATTERN = "workspace/{rootPath}"
     const val GIT_PATTERN = "git/{repoPath}"
     const val LAYOUT_DESIGNER_PATTERN = "layout_designer/{filePath}"
+    const val ASSET_STUDIO_PATTERN = "asset_studio?rootPath={rootPath}&action={action}"
     const val APK_ANALYZER_PATTERN = "apk_analyzer?apkPath={apkPath}&comparePath={comparePath}"
     const val HARDCODED_STRINGS_PATTERN = "hardcoded_strings?targetPath={targetPath}&projectRoot={projectRoot}"
     const val DEPENDENCIES_PATTERN = "dependencies?rootPath={rootPath}"
@@ -80,6 +82,7 @@ internal object Routes {
     fun terminalWith(command: String) = Res.string(R.string.app_terminal_initialcommand, Uri.encode(command))
     fun git(repoPath: String) = "git/${Uri.encode(repoPath)}"
     fun layoutDesigner(filePath: String) = "layout_designer/${Uri.encode(filePath)}"
+    fun assetStudio(rootPath: String, action: String = "STUDIO") = "asset_studio?rootPath=${Uri.encode(rootPath)}&action=$action"
     fun dependencies(rootPath: String) = "dependencies?rootPath=${Uri.encode(rootPath)}"
     fun apkAnalyzer(apkPath: String, comparePath: String? = null): String {
         val base = "apk_analyzer?apkPath=${Uri.encode(apkPath)}"
@@ -293,6 +296,15 @@ fun CodeForgeNavHost(
                 filePath = filePath,
                 onBack = { navController.popBackStack() }
             )
+        }
+        composable(
+            route = Routes.ASSET_STUDIO_PATTERN,
+            arguments = listOf(
+                navArgument("rootPath") { type = NavType.StringType; defaultValue = "" },
+                navArgument("action") { type = NavType.StringType; defaultValue = "STUDIO" }
+            )
+        ) {
+            AssetStudioRoute(onBack = { navController.popBackStack() })
         }
         composable(
             route = Routes.PROJECT_WORKSPACE_PATTERN,

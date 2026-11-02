@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Asset Studio)
+- Neues Modul `:feature:assetstudio` und neuer Drawer-Eintrag **Asset Studio** (Icon-Leiste neben Dateien/Suche/Git/Module/Layouts):
+  Panel mit „Launch Studio“ und Schnellaktionen (Create Drawable, Create Icon, Import Image, M3 Icons).
+- Studio-Screen mit Vorschau, Quelle (Bild, XML-Vektor, M3-Icon), Icon-Einstellungen (Name, Form, Hintergrund-/Icon-Farbe, Größe).
+  Erzeugt Adaptive Icons (`mipmap-anydpi-v26`, Foreground/Background) plus Legacy-PNGs (alle Dichten, mit Form) bzw. einfache Drawables im `res`-Ordner des Projekts.
+- M3-Icon-Browser mit Suche über alle ~2080 Material-Icons (Filled); Auswahl wird als Vector-Drawable exportiert (Compose-`ImageVector` → XML).
+- Fix: Projektliste auf der Startseite einspaltig (siehe unten).
+
 ### Hinzugefügt (Editor)
 - **Imports organisieren / Unbenutzte Imports entfernen** (Kotlin, Toolbar-Menü „Imports“): sortiert alphabetisch,
   entfernt Duplikate (und optional ungenutzte Imports), läuft sofort im Editor und lässt den Dateiinhalt

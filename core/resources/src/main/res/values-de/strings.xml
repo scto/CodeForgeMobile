@@ -2238,5 +2238,47 @@
     <string name="lspinfo_plugin_no_server">Keine Server-Definition gefunden (Plugin aktivieren).</string>
     <string name="lspinfo_plugin_requires_fail">Fehlen: %1$s – über „Voraussetzungen installieren“ einrichten.</string>
     <string name="lspinfo_plugin_source">Plugin %1$s</string>
-</resources>
 
+    <!-- Asset Studio -->
+    <string name="assetstudio_title">Asset Studio</string>
+    <string name="assetstudio_subtitle">Drawable- &amp; Icon-Maker</string>
+    <string name="assetstudio_launch">Studio starten</string>
+    <string name="assetstudio_quick_actions">Schnellaktionen</string>
+    <string name="assetstudio_create_drawable">Drawable erstellen</string>
+    <string name="assetstudio_create_icon">Icon erstellen</string>
+    <string name="assetstudio_import_image">Bild importieren</string>
+    <string name="assetstudio_m3_icons">M3-Icons</string>
+    <string name="assetstudio_preview">Vorschau</string>
+    <string name="assetstudio_source">Quelle</string>
+    <string name="assetstudio_select_image">Bild auswählen</string>
+    <string name="assetstudio_load_xml">XML laden</string>
+    <string name="assetstudio_source_hint">Wähle ein Bild oder einen XML-Vektor, um App-Icons zu erstellen</string>
+    <string name="assetstudio_source_selected">Ausgewählt: %1$s</string>
+    <string name="assetstudio_icon_settings">Icon-Einstellungen</string>
+    <string name="assetstudio_drawable_settings">Drawable-Einstellungen</string>
+    <string name="assetstudio_icon_name">Icon-Name</string>
+    <string name="assetstudio_shape">Form</string>
+    <string name="assetstudio_shape_circle">Kreis</string>
+    <string name="assetstudio_shape_square">Quadrat</string>
+    <string name="assetstudio_shape_rounded">Abgerundet</string>
+    <string name="assetstudio_background">Hintergrundfarbe</string>
+    <string name="assetstudio_icon_color">Icon-Farbe</string>
+    <string name="assetstudio_original_colors">Original</string>
+    <string name="assetstudio_choose">Wählen</string>
+    <string name="assetstudio_custom">Eigene</string>
+    <string name="assetstudio_scale">Icon-Größe: %1$d %%</string>
+    <string name="assetstudio_generate">Erzeugen</string>
+    <string name="assetstudio_search_icons">Icons suchen …</string>
+    <string name="assetstudio_name_invalid">Name: nur Kleinbuchstaben, Ziffern und Unterstriche, beginnt mit einem Buchstaben</string>
+    <string name="assetstudio_no_source">Wähle zuerst ein Bild, einen XML-Vektor oder ein M3-Icon</string>
+    <string name="assetstudio_no_res">Im Projekt wurde kein Android-res-Ordner gefunden</string>
+    <string name="assetstudio_done">%1$d Dateien nach %2$s geschrieben</string>
+    <string name="assetstudio_error">Fehlgeschlagen: %1$s</string>
+    <string name="assetstudio_xml_unsupported">Kein unterstütztes Vector-Drawable</string>
+    <string name="assetstudio_hex_title">Eigene Farbe</string>
+    <string name="assetstudio_hex_hint">Hex (#RRGGBB)</string>
+    <string name="assetstudio_apply">Übernehmen</string>
+    <string name="assetstudio_pick_color">Farbe wählen</string>
+    <string name="assetstudio_mode_icon">App-Icon</string>
+    <string name="assetstudio_mode_drawable">Drawable</string>
+</resources>

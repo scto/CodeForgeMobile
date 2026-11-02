@@ -41,6 +41,7 @@ include(
     ":feature:terminal",
     ":feature:sdkmanager",
     ":feature:layoutdesigner",
+    ":feature:assetstudio",
     ":feature:themebuilder",
     ":feature:git",
     ":feature:plugins",
