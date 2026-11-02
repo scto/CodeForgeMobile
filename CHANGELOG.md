@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Release/R8)
+- `:app`: Release-Block mit `isMinifyEnabled = true`, `isShrinkResources = true`, `isDebuggable = false`, Release-Signatur aus
+  `keystore.properties` bzw. `CODEFORGE_*`-Umgebungsvariablen (sonst Debug-Schlüssel) und nativen Debug-Symbolen.
+- R8-Dateien (`consumer-rules.pro` + `proguard-rules.pro`) für alle Android-Module ergänzt, denen sie fehlten
+  (`feature:build/debug/dependencies/hardcodedstrings/j2k/projectsettings/signing/x2c`, `libs:ai-client`, `libs:debug-client`, `feature:assetstudio`).
+- Neue Regeln: Sora-Editor-Komponenten und Tree-sitter-Sprachen (Reflection), Plugin-Laufzeit, Compose-Preview, BuildConfig/JNI/Enums in `:app`.
+- Hinweis: Der Release-Build mit R8 wurde noch nicht erfolgreich gebaut (fehlende Klassen/Warnungen sind möglich).
+
 ### Hinzugefügt (Asset Studio)
 - Neues Modul `:feature:assetstudio` und neuer Drawer-Eintrag **Asset Studio** (Icon-Leiste neben Dateien/Suche/Git/Module/Layouts):
   Panel mit „Launch Studio“ und Schnellaktionen (Create Drawable, Create Icon, Import Image, M3 Icons).

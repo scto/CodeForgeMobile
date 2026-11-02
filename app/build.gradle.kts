@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.codeforge.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -19,6 +21,40 @@ android {
         // Wird von :libs:termux-shared per Reflection aus `com.codeforge.app.BuildConfig` gelesen
         // (TermuxConstants.BUILD_CONFIG_CLASS_NAME / TermuxBootstrap) — muss zum Bootstrap-Paketformat passen.
         buildConfigField("String", "TERMUX_PACKAGE_VARIANT", "\"apt-android-7\"")
+    }
+
+    // Release-Signatur: aus keystore.properties (storeFile, storePassword, keyAlias, keyPassword) im Projektstamm
+    // oder den Umgebungsvariablen CODEFORGE_STORE_FILE/_STORE_PASSWORD/_KEY_ALIAS/_KEY_PASSWORD. Fehlt beides,
+    // wird der Release-Build mit dem Debug-Schlüssel signiert (installierbar, aber nicht für den Store).
+    val keystoreProps = Properties().apply {
+        rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+    }
+    fun signingValue(propKey: String, envKey: String): String? =
+        keystoreProps.getProperty(propKey) ?: System.getenv(envKey)
+    val releaseStoreFile = signingValue("storeFile", "CODEFORGE_STORE_FILE")
+
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = signingValue("storePassword", "CODEFORGE_STORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "CODEFORGE_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "CODEFORGE_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Code-Schrumpfung/Obfuskation (R8) und Ressourcen-Shrinking; Regeln: app/proguard-rules.pro und die
+            // consumer-rules.pro der Module (proguard-rules.pro wird von der Convention verdrahtet).
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
+            // Native Debug-Symbole für Absturzberichte (Termux-/Tree-sitter-JNI)
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
+        }
     }
 
     buildFeatures {
