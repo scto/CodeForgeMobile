@@ -440,7 +440,7 @@ private fun WelcomeListContent(
                 )
             }
         } else {
-            items(uiState.recentProjects, key = { it.id }) { project ->
+            items(uiState.recentProjects, key = { it.id }, span = { GridItemSpan(maxLineSpan) }) { project ->
                 RecentProjectCard(
                     project = project,
                     onClick = { onProjectClick(project) },
@@ -508,24 +508,29 @@ private fun RecentProjectCard(
                     text = project.path,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (relativeTime.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (relativeTime.isNotBlank()) {
                         Text(
                             text = relativeTime,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringRes(R.string.welcome_module, project.moduleCount),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.outline
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.outline,
+                            maxLines = 1
                         )
                     }
+                    Text(
+                        text = stringRes(R.string.welcome_module, project.moduleCount),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.outline,
+                        maxLines = 1,
+                        softWrap = false
+                    )
                 }
             }
 
