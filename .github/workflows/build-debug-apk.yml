@@ -1,0 +1,136 @@
+name: Build Debug APK
+
+# Baut die Debug-APK von CodeForgeMobile (./gradlew :app:assembleDebug) und lädt sie als Workflow-Artefakt hoch.
+# Der Terminal-Bootstrap (bootstrap-<version>-<arch>.zip) wird beim Bau aus dem Release in
+# scto/terminal-packages-codeforge geladen und gegen die SHA-256 aus gradle.properties geprüft.
+# Es werden keine Secrets benötigt; die Debug-APK ist mit dem Android-Debug-Schlüssel signiert.
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: "Vor dem Bau die Unit-Tests der App-Module ausführen (testDebugUnitTest)"
+        required: true
+        default: false
+        type: boolean
+      retention_days:
+        description: "Aufbewahrungsdauer des Artefakts in Tagen (1-90)"
+        required: true
+        default: "14"
+        type: string
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "agy-tasks/**"
+      - "apt-*.conf"
+      - "apt-groups.json"
+      - ".github/workflows/build-bootstrap-repo.yml"
+      - ".github/workflows/build-all-stages.yml"
+      - ".github/workflows/rehome-large-packages.yml"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "agy-tasks/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-debug-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Eingaben prüfen
+        env:
+          IN_RETENTION: ${{ inputs.retention_days || '14' }}
+        run: |
+          set -euo pipefail
+          [[ "$IN_RETENTION" =~ ^[0-9]+$ ]] && [ "$IN_RETENTION" -ge 1 ] && [ "$IN_RETENTION" -le 90 ] \
+            || { echo "::error::retention_days muss 1-90 sein (war: $IN_RETENTION)"; exit 1; }
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Gradle einrichten (Cache)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Android-SDK-Plattform 36 sicherstellen
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "sdk.dir=$SDK" > local.properties
+          if [ ! -d "$SDK/platforms/android-36" ]; then
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+            "$SDK/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+          fi
+
+      - name: Unit-Tests
+        if: inputs.run_tests == true
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Debug-APK bauen
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --stacktrace
+
+      - name: APK suchen, Prüfsumme und Zusammenfassung
+        id: apk
+        run: |
+          set -euo pipefail
+          dir="app/build/outputs/apk/debug"
+          shopt -s nullglob
+          apks=("$dir"/*.apk)
+          [ "${#apks[@]}" -gt 0 ] || { echo "::error::Keine APK in $dir gefunden"; ls -R app/build/outputs || true; exit 1; }
+          sha="$(sha256sum "${apks[@]}")"
+          printf '%s\n' "$sha" > "$dir/SHA256SUMS.txt"
+          {
+            echo "### Debug-APK"
+            echo
+            echo "- Commit: \`${GITHUB_SHA::8}\`"
+            for f in "${apks[@]}"; do
+              echo "- \`$(basename "$f")\` – $(du -h "$f" | cut -f1)"
+            done
+            echo
+            echo '```'
+            echo "$sha"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "short_sha=${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+
+      - name: Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeforgemobile-debug-${{ steps.apk.outputs.short_sha }}
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/debug/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention_days || '14' }}
+
+      - name: Build-Berichte bei Fehlern sichern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports-${{ steps.apk.outputs.short_sha || github.run_id }}
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 7
