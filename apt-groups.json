@@ -89,6 +89,18 @@
       "heavy": true,
       "stage": "18-plugin-deps",
       "repo_packages": ""
+    },
+    {
+      "name": "I-leicht-go-tools",
+      "heavy": false,
+      "stage": "19a-go-tools",
+      "repo_packages": ""
+    },
+    {
+      "name": "J-leicht-extras",
+      "heavy": false,
+      "stage": "19-extras",
+      "repo_packages": ""
     }
   ]
 }
