@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Absturz)
+- Absturz „java.io.IOException: Stream closed“ beim Tippen/Zeilenbefehl im Editor, wenn der Language-Server-Prozess inzwischen beendet war: `didOpen`/`didChange`/`didClose` schrieben ungeschützt in den geschlossenen Eingabestrom (Hauptthread, `viewModelScope.launch`). Die Session fängt den Fehler jetzt ab, markiert den Server als ausgefallen (Status `FAILED`) und sendet danach nichts mehr. Regressionstest `LspServerDeathTest`.
+
 ### Behoben (Abhängigkeiten)
 - `codeforge-env pkg clang` scheiterte mit „libllvm (= 21.1.8-3) is not installable“: `clang` und `libllvm` sind große Pakete (GitHub-Release, nicht im APT-Index), die Abhängigkeit wurde nicht mitinstalliert. `install_repo_pkg` installiert Abhängigkeiten, die selbst große Pakete sind, jetzt vorher aus dem Manifest (rekursiv, zyklensicher); normale Abhängigkeiten (lld, llvm) löst apt danach aus dem Index auf. Test in `large-pkg-snippet.test.sh`.
 

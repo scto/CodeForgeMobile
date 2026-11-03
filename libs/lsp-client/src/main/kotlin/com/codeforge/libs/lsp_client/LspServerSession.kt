@@ -216,10 +216,26 @@ class LspServerSession(
         _serverState.value = LspServerState.STOPPED
     }
 
+    /**
+     * Sendet eine Benachrichtigung, ohne den Aufrufer zu gefährden: Ist der Serverprozess beendet (Eingabestrom
+     * geschlossen), wirft das Schreiben eine IOException — bei Tastatureingaben im Hauptthread war das ein App-Absturz
+     * ("Stream closed"). Stattdessen wird der Server als ausgefallen markiert; weitere Benachrichtigungen entfallen.
+     */
+    private fun notifySafely(method: String, params: kotlinx.serialization.json.JsonObject) {
+        val active = connection ?: return
+        if (_serverState.value == LspServerState.FAILED) return
+        try {
+            active.sendNotification(method, params)
+        } catch (e: java.io.IOException) {
+            _serverState.value = LspServerState.FAILED
+            _serverCapabilities.value = null
+        }
+    }
+
     suspend fun didOpen(path: String, languageId: String, content: String) {
         touch()
         documentVersions[path] = 1
-        connection?.sendNotification(
+        notifySafely(
             "textDocument/didOpen",
             buildJsonObject {
                 put(
@@ -238,7 +254,7 @@ class LspServerSession(
     suspend fun didChange(path: String, newContent: String, version: Int) {
         touch()
         documentVersions[path] = version
-        connection?.sendNotification(
+        notifySafely(
             "textDocument/didChange",
             buildJsonObject {
                 put(
@@ -261,7 +277,7 @@ class LspServerSession(
     suspend fun didClose(path: String) {
         touch()
         documentVersions.remove(path)
-        connection?.sendNotification(
+        notifySafely(
             "textDocument/didClose",
             buildJsonObject {
                 put("textDocument", buildJsonObject { put("uri", "file://$path") })
