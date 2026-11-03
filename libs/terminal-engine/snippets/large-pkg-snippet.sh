@@ -15,6 +15,27 @@ apt_base_url() {
   printf '%s' "${url%/}"
 }
 
+# Abhängigkeiten, die selbst große Pakete sind (stehen nicht im APT-Index), VOR dem Eltern-Paket aus dem Manifest
+# installieren – sonst scheitert `apt install ./clang.deb` an "libllvm … not installable". Normale Abhängigkeiten
+# (z. B. lld, llvm) löst apt danach aus dem Index auf. Rekursion mit Schutz gegen Zyklen (CF_LARGE_STACK).
+install_large_deps() { # deb manifest arch eigener-name
+  local deb=$1 man=$2 arch=$3 self=$4 dep deps
+  [ -s "$man" ] || return 0
+  command -v dpkg-deb >/dev/null 2>&1 || return 0
+  deps=$(dpkg-deb -f "$deb" Pre-Depends Depends 2>/dev/null | sed -E 's/^(Pre-)?Depends://' | tr ',|' '\n\n' \
+    | sed -E 's/\(.*//; s/:[A-Za-z0-9]+$//; s/[[:space:]]//g' | grep -E '^[a-z0-9][a-z0-9+.-]*$' | sort -u)
+  for dep in $deps; do
+    [ "$dep" = "$self" ] && continue
+    dpkg -s "$dep" 2>/dev/null | grep -q '^Status: install ok installed' && continue
+    awk -F'|' -v p="$dep" -v a="$arch" '$1==p && ($3==a || $3=="all") {f=1} END{exit !f}' "$man" || continue
+    case " ${CF_LARGE_STACK:-} " in *" $dep "*) continue ;; esac
+    CF_LARGE_STACK="${CF_LARGE_STACK:-} $dep"
+    say "Abhängigkeit $dep (großes Paket) …"
+    install_repo_pkg "$dep" || return 1
+  done
+  return 0
+}
+
 install_repo_pkg() {
   local want="${1:-}" base arch man="$TMP/.cfsdk-large-packages.txt" row ver rarch asset sha bytes url deb got keyring
   [ -n "$want" ] || return 1
@@ -73,6 +94,8 @@ install_repo_pkg() {
     rm -f "$deb"
     return 1
   fi
+
+  install_large_deps "$deb" "$man" "$arch" "$want" || { rm -f "$deb"; return 1; }
 
   say "Installiere $asset …"
   if [ -n "${PKG_INSTALL_OUT:-}" ]; then

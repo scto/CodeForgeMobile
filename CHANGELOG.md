@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Abhängigkeiten)
+- `codeforge-env pkg clang` scheiterte mit „libllvm (= 21.1.8-3) is not installable“: `clang` und `libllvm` sind große Pakete (GitHub-Release, nicht im APT-Index), die Abhängigkeit wurde nicht mitinstalliert. `install_repo_pkg` installiert Abhängigkeiten, die selbst große Pakete sind, jetzt vorher aus dem Manifest (rekursiv, zyklensicher); normale Abhängigkeiten (lld, llvm) löst apt danach aus dem Index auf. Test in `large-pkg-snippet.test.sh`.
+
 ### Hinzugefügt (LSP)
 - LSP-Client unterstützt `textDocument/foldingRange` und `textDocument/inlayHint`: Modelle `LspFoldingRange`/`LspInlayHint`, `LspClientRepository.requestFoldingRanges`/`requestInlayHints` (Standard: leere Liste), Server-Fähigkeiten `foldingRangeProvider`/`inlayHintProvider`, Client-Capabilities beim `initialize`. Die Darstellung im Editor folgt, sobald sora-editor Faltung/Inlay-Hints rendert; Anregung: ACSIDE-Editor-Modelle.
 
