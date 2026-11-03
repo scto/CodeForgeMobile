@@ -2152,6 +2152,12 @@
     <string name="store_error">Catalog unreachable: %1$s</string>
     <string name="store_offline_cached">Offline – state of the last fetch (%1$s)</string>
     <string name="store_updated">Catalog date: %1$s</string>
+    <string name="store_server_missing">Plugin installed, but the server program is missing.</string>
+    <string name="store_server_ready">Plugin and server program installed.</string>
+    <string name="store_server_present_plugin_missing">Server program already installed; the plugin is not.</string>
+    <string name="store_server_install">Install server</string>
+    <string name="store_server_installed">Server installed: %1$s</string>
+    <string name="store_server_install_failed">Server installation failed: %1$s</string>
     <string name="store_empty_category">Nothing in this category yet.</string>
     <string name="store_retry">Reload</string>
     <string name="store_open_page">Open page</string>

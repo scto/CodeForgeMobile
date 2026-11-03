@@ -2152,6 +2152,12 @@
     <string name="store_error">Katalog nicht erreichbar: %1$s</string>
     <string name="store_offline_cached">Offline – Stand des letzten Abrufs (%1$s)</string>
     <string name="store_updated">Katalogstand: %1$s</string>
+    <string name="store_server_missing">Plugin installiert, aber das Server-Programm fehlt.</string>
+    <string name="store_server_ready">Plugin und Server-Programm installiert.</string>
+    <string name="store_server_present_plugin_missing">Server-Programm ist schon installiert, das Plugin noch nicht.</string>
+    <string name="store_server_install">Server installieren</string>
+    <string name="store_server_installed">Server installiert: %1$s</string>
+    <string name="store_server_install_failed">Server-Installation fehlgeschlagen: %1$s</string>
     <string name="store_empty_category">In dieser Kategorie gibt es noch nichts.</string>
     <string name="store_retry">Erneut laden</string>
     <string name="store_open_page">Seite öffnen</string>

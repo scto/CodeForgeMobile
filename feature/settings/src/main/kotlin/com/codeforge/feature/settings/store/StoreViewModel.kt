@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import android.content.Context
 import com.codeforge.core.domain.repository.PluginRepository
 import com.codeforge.core.resources.R
+import com.codeforge.feature.settings.extensions.ExtensionInstallCoordinator
+import com.codeforge.feature.settings.extensions.ExtensionsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,8 @@ class StoreViewModel @Inject constructor(
     private val repository: StoreRepository,
     private val installer: StoreInstaller,
     private val plugins: PluginRepository,
+    private val extensionsManager: ExtensionsManager,
+    private val coordinator: ExtensionInstallCoordinator,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -32,8 +36,49 @@ class StoreViewModel @Inject constructor(
         viewModelScope.launch {
             plugins.installedPlugins.collect { list ->
                 _uiState.update { it.copy(installedPluginIds = list.map { p -> p.id }.toSet()) }
+                refreshServerStates()
             }
         }
+        viewModelScope.launch {
+            coordinator.active.collect { active ->
+                _uiState.update { it.copy(installingServerIds = serverItemIds(active.keys)) }
+            }
+        }
+        viewModelScope.launch {
+            coordinator.outcomes.collect { outcome ->
+                refreshServerStates()
+                val text = outcome.result.fold(
+                    onSuccess = { context.getString(R.string.store_server_installed, context.getString(outcome.pkg.nameRes)) },
+                    onFailure = { context.getString(R.string.store_server_install_failed, it.message ?: it.javaClass.simpleName) },
+                )
+                _uiState.update { it.copy(message = text) }
+            }
+        }
+    }
+
+    /** Store-Item-IDs (LSP) zu laufenden Extensions-Installationen. */
+    private fun serverItemIds(activePackageIds: Set<String>): Set<String> =
+        _uiState.value.catalog?.items.orEmpty()
+            .filter { LspPluginLink.extensionIdFor(it.id) in activePackageIds }
+            .map { it.id }.toSet()
+
+    /** Gleicht je LSP-Eintrag ab, ob das Server-Programm tatsächlich vorhanden ist (nicht nur das Plugin). */
+    private fun refreshServerStates() {
+        val items = _uiState.value.catalog?.items.orEmpty()
+        val catalog = extensionsManager.getCatalog().associateBy { it.id }
+        val states = buildMap {
+            for (item in items) {
+                val pkg = LspPluginLink.extensionIdFor(item.id)?.let(catalog::get) ?: continue
+                put(item.id, if (extensionsManager.isInstalled(pkg)) LspServerState.PRESENT else LspServerState.MISSING)
+            }
+        }
+        _uiState.update { it.copy(serverStates = states) }
+    }
+
+    private fun installServer(item: StoreItem) {
+        val pkg = LspPluginLink.extensionIdFor(item.id)
+            ?.let { id -> extensionsManager.getCatalog().firstOrNull { it.id == id } } ?: return
+        coordinator.install(pkg)
     }
 
     fun onEvent(event: StoreUiEvent) {
@@ -41,6 +86,7 @@ class StoreViewModel @Inject constructor(
             StoreUiEvent.Reload -> load()
             is StoreUiEvent.SelectCategory -> _uiState.update { it.copy(selectedCategoryId = event.id) }
             is StoreUiEvent.Install -> install(event.item)
+            is StoreUiEvent.InstallServer -> installServer(event.item)
             StoreUiEvent.MessageShown -> _uiState.update { it.copy(message = null) }
         }
     }
@@ -62,6 +108,7 @@ class StoreViewModel @Inject constructor(
                 is StoreInstallResult.Failed -> context.getString(R.string.store_install_failed, result.message)
             }
             _uiState.update { it.copy(installingId = null, installProgress = null, message = text) }
+            refreshServerStates()
         }
     }
 
@@ -78,6 +125,7 @@ class StoreViewModel @Inject constructor(
                     )
                 }
             }
+            refreshServerStates()
         }
     }
 }

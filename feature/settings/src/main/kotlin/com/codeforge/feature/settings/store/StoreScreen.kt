@@ -176,6 +176,9 @@ private fun StoreContent(
                     StoreItemCard(
                         item = entry,
                         installed = entry.id in uiState.installedPluginIds,
+                        serverState = uiState.serverStates[entry.id],
+                        installingServer = entry.id in uiState.installingServerIds,
+                        onInstallServer = { onEvent(StoreUiEvent.InstallServer(entry)) },
                         installing = uiState.installingId == entry.id,
                         progress = uiState.installProgress.takeIf { uiState.installingId == entry.id },
                         installBusy = uiState.installingId != null,
@@ -191,6 +194,9 @@ private fun StoreContent(
 private fun StoreItemCard(
     item: StoreItem,
     installed: Boolean,
+    serverState: LspServerState?,
+    installingServer: Boolean,
+    onInstallServer: () -> Unit,
     installing: Boolean,
     progress: Float?,
     installBusy: Boolean,
@@ -217,8 +223,33 @@ private fun StoreItemCard(
                 if (progress != null) LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
                 else LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
+            // Das Plugin bindet den Server nur ein: Zustand des Programms getrennt ausweisen.
+            if (serverState != null && (installed || serverState == LspServerState.PRESENT)) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringRes(
+                        when {
+                            serverState == LspServerState.MISSING -> R.string.store_server_missing
+                            installed -> R.string.store_server_ready
+                            else -> R.string.store_server_present_plugin_missing
+                        }
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (serverState == LspServerState.MISSING) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (installingServer) {
+                Spacer(modifier = Modifier.height(8.dp))
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (installed && serverState == LspServerState.MISSING) {
+                    Button(onClick = onInstallServer, enabled = !installingServer) {
+                        Text(stringRes(if (installingServer) R.string.store_installing else R.string.store_server_install))
+                    }
+                }
                 if (item.isInstallablePlugin) {
                     Button(onClick = onInstall, enabled = !installBusy) {
                         Text(

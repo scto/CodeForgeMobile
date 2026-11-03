@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Erweiterungen/Store)
+- Store-Einträge der Kategorie „Sprachserver“ zeigten „Installiert“, obwohl nur das Plugin (die Anbindung) installiert war und das Server-Programm fehlte; der Reiter „Sprachserver“ prüft das Programm und meldete deshalb „Nicht installiert“. Der Store gleicht jetzt beides ab (`LspPluginLink`): „Plugin installiert, aber Server fehlt“ mit Button „Server installieren“ (nutzt denselben Installationsweg wie der Reiter), „Plugin und Server installiert“ bzw. „Server schon vorhanden“.
+
 ### Behoben (Editor/Completion)
 - Das Completion-Fenster wurde von der Tastatur verdeckt: sora begrenzt es nur auf die Editorhöhe. Neue `ImeAwareAutoCompletion` ermittelt die sichtbare Höhe aus den IME-Insets, scrollt den Editor bei Bedarf und zeigt die Liste bei zu wenig Platz über der Cursorzeile.
 

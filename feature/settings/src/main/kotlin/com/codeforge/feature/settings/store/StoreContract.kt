@@ -17,6 +17,10 @@ data class StoreUiState(
     /** Laufende Installation: Item-ID und Fortschritt 0..1 (null = unbestimmt). */
     val installingId: String? = null,
     val installProgress: Float? = null,
+    /** Item-ID (LSP-Plugin) -> Zustand des Server-Programms; nur für Einträge mit passendem Extensions-Paket. */
+    val serverStates: Map<String, LspServerState> = emptyMap(),
+    /** Item-IDs, deren Server-Programm gerade nachinstalliert wird. */
+    val installingServerIds: Set<String> = emptySet(),
     /** Einmalige Rückmeldung (fertiger Text) für die Snackbar. */
     val message: String? = null,
 ) {
@@ -28,5 +32,6 @@ sealed interface StoreUiEvent {
     data object Reload : StoreUiEvent
     data class SelectCategory(val id: String) : StoreUiEvent
     data class Install(val item: StoreItem) : StoreUiEvent
+    data class InstallServer(val item: StoreItem) : StoreUiEvent
     data object MessageShown : StoreUiEvent
 }
