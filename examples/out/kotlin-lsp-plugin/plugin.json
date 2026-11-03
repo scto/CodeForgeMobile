@@ -1,0 +1,30 @@
+{
+  "id": "com.example.kotlin-lsp",
+  "name": "Kotlin Language Server",
+  "version": "2.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Installiert den Kotlin Language Server (fwcd, 1.3.9) nach ~/.local/share und bindet ihn für Kotlin ein. Benötigt JDK 17.",
+  "permissions": [
+    "shell"
+  ],
+  "entryPointClass": "com.example.codeforgeplugin.kotlinlsp.KotlinLspPlugin",
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "kotlin-language-server",
+        "label": "Kotlin Language Server",
+        "languages": [
+          "kotlin"
+        ],
+        "command": [
+          "bash",
+          "-c",
+          "export JAVA_HOME=\"$PREFIX/lib/jvm/java-17-openjdk\"; export PATH=\"$JAVA_HOME/bin:$PATH\"; exec \"$1/.local/share/kotlin-language-server/bin/kotlin-language-server\"",
+          "kotlin-lsp",
+          "${home}"
+        ]
+      }
+    ]
+  }
+}

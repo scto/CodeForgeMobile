@@ -12,6 +12,11 @@ dependencies {
     compileOnly(libs.kotlinx.coroutines.core)
 }
 
+// Kein Toolchain-Zwang (läuft auch mit JDK 21): Bytecode-Ziel 17, d8 entzuckert für Android.
 kotlin {
-    jvmToolchain(17)
+    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
+}
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }

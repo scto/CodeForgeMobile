@@ -1,0 +1,34 @@
+{
+  "id": "com.example.toml-lsp",
+  "name": "TOML Language Server (Taplo)",
+  "version": "2.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Bindet Taplo für TOML ein. Das Paket taplo installiert die App nach Bestätigung.",
+  "permissions": [
+    "shell"
+  ],
+  "entryPointClass": "com.example.codeforgeplugin.tomllsp.TomlLspPlugin",
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "taplo",
+        "label": "Taplo (TOML)",
+        "languages": [
+          "toml"
+        ],
+        "command": [
+          "taplo",
+          "lsp",
+          "stdio"
+        ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "taplo"
+      }
+    ]
+  }
+}

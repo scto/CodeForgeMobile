@@ -90,5 +90,11 @@ include(
     ":examples:lsp-plugin-common",
     ":examples:kotlin-lsp-plugin",
     ":examples:java-lsp-plugin",
+    ":examples:xml-lsp-plugin",
+    ":examples:cpp-lsp-plugin",
+    ":examples:bash-lsp-plugin",
+    ":examples:yaml-lsp-plugin",
+    ":examples:toml-lsp-plugin",
+    ":examples:python-lsp-plugin",
     ":templates:code-plugin",
 )

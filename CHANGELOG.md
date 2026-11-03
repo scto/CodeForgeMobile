@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Beispiel-Plugins)
+- `examples/`: Kotlin- und Java-LSP-Plugin samt `lsp-plugin-common` auf das neue Plugin-Modell migriert (Manifest v2 mit `contributes.lspServers`, Berechtigung `shell`; Serverstart über den App-Resolver statt `lspClientRepository.start`, aktives Projekt als Workspace). Funktion erhalten: JDK-17-Prüfung, Installation nach `~/.local/share`, Entfernen bei Deinstallation.
+- Neu: XML-(LemMinX), C/C++-(clangd), Bash-, YAML-, TOML-(Taplo) und Python-(Pyright)-LSP-Plugin nach demselben Schema; gemeinsame Basisklasse `LspServerPlugin`, gemeinsames Packaging (`examples/plugin-packaging.gradle.kts`), Ergebnis je Plugin in `examples/out/<name>/` (ZIP für Einstellungen → Plugins → „+“).
+- Neu: `docs/plugin-modelle-vergleich.md` (Unterschiede, Vor-/Nachteile, Diagnose, wann das Code-Modell besser passt); `ExamplePluginsValidTest` prüft die Manifeste mit den echten Parsern.
+
 ### Behoben (Abhängigkeiten)
 - Fehlende Laufzeit-Pakete (z. B. `python` für JDT, `clang` für clangd) wurden mit einem nackten `apt-get install -y` installiert und brachen mit Exit-Code 134 ab. Jetzt läuft die Installation wie im Terminal über `codeforge-env pkg <paket>` (Paketlisten-Update, große Pakete des CodeForge-Repos, apt-Einstellungen der App); ohne das Skript bleibt der alte Weg als Rückfall. Bei einem Fehler enthält die Meldung die letzten Zeilen der Installer-Ausgabe.
 

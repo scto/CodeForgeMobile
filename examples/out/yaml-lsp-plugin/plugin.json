@@ -1,0 +1,39 @@
+{
+  "id": "com.example.yaml-lsp",
+  "name": "YAML Language Server",
+  "version": "2.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Bindet yaml-language-server für YAML ein. nodejs und das npm-Paket installiert die App nach Bestätigung.",
+  "permissions": [
+    "shell"
+  ],
+  "entryPointClass": "com.example.codeforgeplugin.yamllsp.YamlLspPlugin",
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "yaml-language-server",
+        "label": "YAML Language Server",
+        "languages": [
+          "yaml",
+          "yml"
+        ],
+        "command": [
+          "yaml-language-server",
+          "--stdio"
+        ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "yaml-language-server"
+      }
+    ]
+  }
+}

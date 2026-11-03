@@ -1,0 +1,40 @@
+{
+  "id": "com.example.bash-lsp",
+  "name": "Bash Language Server",
+  "version": "2.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Bindet bash-language-server für Shell-Skripte ein. nodejs und das npm-Paket installiert die App nach Bestätigung.",
+  "permissions": [
+    "shell"
+  ],
+  "entryPointClass": "com.example.codeforgeplugin.bashlsp.BashLspPlugin",
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "bash-language-server",
+        "label": "Bash Language Server",
+        "languages": [
+          "shellscript",
+          "bash",
+          "sh"
+        ],
+        "command": [
+          "bash-language-server",
+          "start"
+        ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "bash-language-server"
+      }
+    ]
+  }
+}

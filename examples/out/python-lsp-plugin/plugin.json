@@ -1,0 +1,39 @@
+{
+  "id": "com.example.python-lsp",
+  "name": "Python Language Server (Pyright)",
+  "version": "2.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Bindet Pyright für Python ein. nodejs und das npm-Paket pyright installiert die App nach Bestätigung.",
+  "permissions": [
+    "shell"
+  ],
+  "entryPointClass": "com.example.codeforgeplugin.pythonlsp.PythonLspPlugin",
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "pyright",
+        "label": "Pyright (Python)",
+        "languages": [
+          "python"
+        ],
+        "command": [
+          "pyright-langserver",
+          "--stdio"
+        ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "nodejs",
+        "check": "node"
+      },
+      {
+        "manager": "npm",
+        "name": "pyright",
+        "check": "pyright-langserver"
+      }
+    ]
+  }
+}

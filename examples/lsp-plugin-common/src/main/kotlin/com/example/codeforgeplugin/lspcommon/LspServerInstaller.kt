@@ -51,16 +51,25 @@ class LspServerInstaller(
     suspend fun install(installDir: String, downloadUrl: String, stripComponents: Int = 1): InstallOutcome =
         withContext(Dispatchers.IO) {
             val script = buildString {
-                append("set -e; ")
+                append("set -eo pipefail; ")
                 append("mkdir -p \"$installDir\"; ")
                 append("cd \"$installDir\"; ")
-                append("wget -qO- \"$downloadUrl\" | tar xz --strip-components=$stripComponents; ")
+                append("${fetchCommand(downloadUrl)} | tar xz --strip-components=$stripComponents; ")
             }
             val spec = hostServices.buildShellCommand(
                 script = script
             )
             val result = runShellCommand(spec)
-            if (result.exitCode == 0) InstallOutcome.Success else InstallOutcome.Failed(result.output)
+            if (result.exitCode == 0) InstallOutcome.Success else InstallOutcome.Failed(result.output.takeLast(OUTPUT_TAIL))
+        }
+
+    /** Lädt eine einzelne Datei (z. B. ein Uber-JAR) nach `[installDir]/[fileName]`. */
+    suspend fun installFile(installDir: String, downloadUrl: String, fileName: String): InstallOutcome =
+        withContext(Dispatchers.IO) {
+            val script = "set -e; mkdir -p \"$installDir\"; ${fetchCommand(downloadUrl)} > \"$installDir/$fileName.part\"; " +
+                "mv \"$installDir/$fileName.part\" \"$installDir/$fileName\"; "
+            val result = runShellCommand(hostServices.buildShellCommand(script = script))
+            if (result.exitCode == 0) InstallOutcome.Success else InstallOutcome.Failed(result.output.takeLast(OUTPUT_TAIL))
         }
 
     /**
@@ -84,6 +93,14 @@ class LspServerInstaller(
             val result = runShellCommand(spec)
             if (result.exitCode == 0) InstallOutcome.Success else InstallOutcome.Failed(result.output)
         }
+
+    /** wget, falls vorhanden, sonst curl — beide schreiben den Download auf stdout. */
+    private fun fetchCommand(url: String): String =
+        "if command -v wget >/dev/null 2>&1; then wget -qO- \"$url\"; else curl -fsSL \"$url\"; fi"
+
+    private companion object {
+        const val OUTPUT_TAIL = 600
+    }
 
     private fun runShellCommand(spec: ShellLaunchSpec): ShellResult = try {
         val processBuilder = ProcessBuilder(spec.command).directory(java.io.File(spec.workingDirectory)).redirectErrorStream(true)

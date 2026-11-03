@@ -1,0 +1,30 @@
+{
+  "id": "com.example.xml-lsp",
+  "name": "XML Language Server (LemMinX)",
+  "version": "2.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Lädt Eclipse LemMinX (Uber-JAR 0.28.0) nach ~/.local/share und bindet ihn für XML ein. Benötigt JDK 17.",
+  "permissions": [
+    "shell"
+  ],
+  "entryPointClass": "com.example.codeforgeplugin.xmllsp.XmlLspPlugin",
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "lemminx",
+        "label": "Eclipse LemMinX (XML)",
+        "languages": [
+          "xml"
+        ],
+        "command": [
+          "bash",
+          "-c",
+          "exec \"$PREFIX/lib/jvm/java-17-openjdk/bin/java\" -jar \"$1/.local/share/lemminx/org.eclipse.lemminx-uber.jar\"",
+          "xml-lsp",
+          "${home}"
+        ]
+      }
+    ]
+  }
+}
