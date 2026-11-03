@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Abhängigkeiten)
+- Fehlende Laufzeit-Pakete (z. B. `python` für JDT, `clang` für clangd) wurden mit einem nackten `apt-get install -y` installiert und brachen mit Exit-Code 134 ab. Jetzt läuft die Installation wie im Terminal über `codeforge-env pkg <paket>` (Paketlisten-Update, große Pakete des CodeForge-Repos, apt-Einstellungen der App); ohne das Skript bleibt der alte Weg als Rückfall. Bei einem Fehler enthält die Meldung die letzten Zeilen der Installer-Ausgabe.
+
 ### Behoben (Erweiterungen/Store)
 - Store-Einträge der Kategorie „Sprachserver“ zeigten „Installiert“, obwohl nur das Plugin (die Anbindung) installiert war und das Server-Programm fehlte; der Reiter „Sprachserver“ prüft das Programm und meldete deshalb „Nicht installiert“. Der Store gleicht jetzt beides ab (`LspPluginLink`): „Plugin installiert, aber Server fehlt“ mit Button „Server installieren“ (nutzt denselben Installationsweg wie der Reiter), „Plugin und Server installiert“ bzw. „Server schon vorhanden“.
 

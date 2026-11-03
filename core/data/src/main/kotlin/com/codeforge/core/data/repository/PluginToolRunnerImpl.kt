@@ -124,7 +124,11 @@ class PluginToolRunnerImpl @Inject constructor(
     }
 
     private fun installCommand(r: RequirementContribution): List<String> = when (r.manager) {
-        RequirementManager.PKG -> listOf("apt-get", "install", "-y", r.name)
+        // Wie im Terminal: `codeforge-env pkg` aktualisiert die Paketlisten, kennt die „großen Pakete“ des
+        // CodeForge-Repos und nutzt dessen apt-Einstellungen. Ein nackter `apt-get install` kennt das alles nicht.
+        RequirementManager.PKG ->
+            if (resolve(ENV_SCRIPT) != null) listOf(ENV_SCRIPT, "pkg", r.name)
+            else listOf("apt-get", "install", "-y", r.name)
         RequirementManager.NPM -> listOf("npm", "install", "-g", r.name)
         RequirementManager.PIP -> listOf("python3", "-m", "pip", "install", r.name)
     }
@@ -148,6 +152,7 @@ class PluginToolRunnerImpl @Inject constructor(
     )
 
     private companion object {
+        const val ENV_SCRIPT = "codeforge-env"
         const val TERMUX_PREFIX = "/data/data/com.codeforge.app/files/usr"
         const val TERMUX_HOME = "/data/data/com.codeforge.app/files/home"
     }

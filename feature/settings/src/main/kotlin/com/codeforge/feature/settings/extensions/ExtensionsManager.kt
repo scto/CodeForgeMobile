@@ -33,10 +33,20 @@ class ExtensionsManager internal constructor(
         dependencyInstaller = { requirements ->
             runCatching {
                 var exitCode = 0
+                val tail = ArrayDeque<String>()
                 toolRunner.install(requirements).collect { event ->
-                    if (event is ToolRunEvent.Finished) exitCode = event.exitCode
+                    when (event) {
+                        is ToolRunEvent.Line -> {
+                            tail.addLast(event.text)
+                            if (tail.size > 8) tail.removeFirst()
+                        }
+                        is ToolRunEvent.Finished -> exitCode = event.exitCode
+                    }
                 }
-                check(exitCode == 0) { "Installation fehlgeschlagen (Exit-Code $exitCode): ${requirements.joinToString { it.name }}" }
+                check(exitCode == 0) {
+                    "Installation fehlgeschlagen (Exit-Code $exitCode): ${requirements.joinToString { it.name }}" +
+                        tail.filter { it.isNotBlank() }.takeIf { it.isNotEmpty() }?.joinToString("\n", prefix = "\n") .orEmpty()
+                }
             }
         }
     }
