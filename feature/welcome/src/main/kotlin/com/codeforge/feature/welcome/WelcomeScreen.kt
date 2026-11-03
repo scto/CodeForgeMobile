@@ -294,6 +294,13 @@ private fun WelcomeScreen(
     }
 }
 
+/** Tatsächliche App-Version (`versionName` aus dem Paket), z. B. „v3.0.0“; leer, falls nicht lesbar. */
+@Composable
+private fun appVersionLabel(context: android.content.Context): String = remember(context) {
+    runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }
+        .getOrNull()?.takeIf { it.isNotBlank() }?.let { "v$it" }.orEmpty()
+}
+
 @Composable
 private fun WelcomeListContent(
     padding: PaddingValues,
@@ -333,17 +340,20 @@ private fun WelcomeListContent(
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Text(
-                            text = "v1.0.0",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
+                    val versionLabel = appVersionLabel(LocalContext.current)
+                    if (versionLabel.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = versionLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))

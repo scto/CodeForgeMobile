@@ -2311,4 +2311,14 @@
     <string name="aiset_models_loaded">%1$s models loaded from provider</string>
     <string name="aiset_remove_key">Remove key</string>
     <string name="aiset_today_count">Requests today: %1$d</string>
+    <string name="about_section_links">Links</string>
+    <string name="about_section_misc">Misc</string>
+    <string name="about_website">Website</string>
+    <string name="about_issues">Report a problem</string>
+    <string name="about_releases">Releases</string>
+    <string name="about_developer">Developer</string>
+    <string name="about_source_desc">Browse and contribute to the source code on GitHub.</string>
+    <string name="about_version_short">v%1$s · build %2$d</string>
+    <string name="about_build_release">release</string>
+    <string name="about_build_debug">debug</string>
 </resources>

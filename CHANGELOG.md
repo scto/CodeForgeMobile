@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Über die App / Willkommen)
+- Über-Bildschirm neu gegliedert: Kopfkarte (Icon, Name, Untertitel, Version mit Build-Nummer und Art „release/debug“), Karte „Links“ (Internetseite, Problem melden, Veröffentlichungen) und Karte „Weiteres“ (Entwickler, Quellcode, verwendete Software ausklappbar).
+- Willkommensbildschirm zeigt die tatsächliche App-Version (`versionName`) statt der fest eingetragenen „v1.0.0“.
+
 ### Hinzugefügt (KI)
 - Neuer Bildschirm **Einstellungen → KI-Anbieter** (`AiSettingsScreen`): API-Schlüssel je Anbieter (verschlüsselt, ein-/ausblendbar, entfernbar), Modell und Basis-URL je Anbieter, Verbindungstest, „Modelle laden“ (Live-Liste des Anbieters, vor den Vorschlägen einsortiert), aktiven Anbieter wählen, Datenschutz-Richtlinie und Tageslimit. `AiRepository` um `getProviderOptions`/`saveProviderOptions` erweitert (Schlüssel gehen beim Anbieterwechsel nicht mehr verloren).
 - Modelllisten aktualisiert: Gemini nach ai.google.dev (Gemini 4/3.x, 2.0 und 3-Pro-Preview sind abgeschaltet, 2.5 nur für Bestandsnutzer), Standard `gemini-3.6-flash`; Anthropic (Claude 5.x/4.x) und OpenAI (GPT-5-Reihe, 4.1, o-Serie) erweitert. Gespeicherte Modellwahlen bleiben unverändert.
