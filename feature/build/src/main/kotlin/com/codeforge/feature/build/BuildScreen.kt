@@ -280,6 +280,8 @@ fun BuildPanel(
         TaskSelectorDialog(
             currentTask = state.selectedTask,
             availableTasks = state.availableTasks,
+            taskInfos = state.availableTaskInfos,
+            isLoading = state.isBuilding && state.availableTaskInfos.isEmpty(),
             onDismiss = { onIntent(BuildUiIntent.ShowTaskSelector(false)) },
             onTaskSelected = { task ->
                 onIntent(BuildUiIntent.SetSelectedTask(task))

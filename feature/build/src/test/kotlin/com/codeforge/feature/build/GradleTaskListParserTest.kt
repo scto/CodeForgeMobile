@@ -30,4 +30,30 @@ class GradleTaskListParserTest {
             GradleTaskListParser.parse(out)
         )
     }
+
+    @Test
+    fun parseDetailedKeepsGroupAndDescription() {
+        val out = listOf(
+            "Build tasks",
+            "-----------",
+            "assemble - Assembles all variants.",
+            "",
+            "Other tasks",
+            "-----------",
+            "compileDebugKotlin"
+        )
+        val infos = GradleTaskListParser.parseDetailed(out)
+        assertEquals(GradleTaskInfo("assemble", "Build", "Assembles all variants."), infos[0])
+        assertEquals(GradleTaskInfo("compileDebugKotlin", "Other", ""), infos[1])
+    }
+
+    @Test
+    fun filterTasksMatchesNameAndGroup() {
+        val tasks = listOf(
+            GradleTaskInfo(":app:lintDebug", "Verification", "Runs lint"),
+            GradleTaskInfo("clean", "Build", "Deletes build dir")
+        )
+        assertEquals(listOf(":app:lintDebug"), filterTasks(tasks, "LINT").map { it.name })
+        assertEquals(listOf("clean"), filterTasks(tasks, "build").map { it.name })
+    }
 }

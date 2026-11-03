@@ -92,6 +92,7 @@ class BuildViewModel internal constructor(
     private val pendingLogEntries = ArrayList<LogEntry>()
     private val logcatBufferLock = Any()
     private var currentProjectRoot: File? = null
+    private val autoLoadedRoots = mutableSetOf<String>()
 
     init {
         scope.launch {
@@ -149,7 +150,20 @@ class BuildViewModel internal constructor(
             gradleBuildRepository.connect(rootPath)
             testRunnerRepository?.loadLastResults(root)
             detectModules(root)
+            autoLoadTasks(root)
         }
+    }
+
+    /**
+     * Beim Öffnen eines Gradle-Projekts einmal `tasks --all` laufen lassen (wie ein IDE-Sync), damit die Task-Liste
+     * sofort verfügbar ist. Nur einmal je Projekt und Sitzung; läuft bereits ein Build, wird nichts gestartet.
+     */
+    private fun autoLoadTasks(root: File) {
+        val isGradleProject = listOf("settings.gradle.kts", "settings.gradle", "build.gradle.kts", "build.gradle")
+            .any { File(root, it).isFile }
+        if (!isGradleProject || !autoLoadedRoots.add(root.absolutePath)) return
+        if (_uiState.value.isBuilding || _uiState.value.availableTaskInfos.isNotEmpty()) return
+        startBuild(SYNC_TASK, autoRunOnSuccess = false, isSync = true)
     }
 
     private fun detectModules(root: File) {
@@ -403,9 +417,9 @@ class BuildViewModel internal constructor(
                             _uiState.update { it.copy(isBuilding = false) }
                             if (event.success) {
                                 if (isSync) {
-                                    val found = GradleTaskListParser.parse(syncOutput.orEmpty())
-                                    if (found.isNotEmpty()) {
-                                        _uiState.update { it.copy(availableTasks = found) }
+                                    val infos = GradleTaskListParser.parseDetailed(syncOutput.orEmpty())
+                                    if (infos.isNotEmpty()) {
+                                        _uiState.update { it.copy(availableTasks = infos.map { t -> t.name }, availableTaskInfos = infos) }
                                     }
                                     _effects.send(BuildUiEffect.ShowSnackbar(Res.string(R.string.build_sync_erfolgreich)))
                                 } else {

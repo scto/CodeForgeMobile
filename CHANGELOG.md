@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Build)
+- Gradle-Task-Liste beim Öffnen eines Projekts: Für Gradle-Projekte läuft einmal je Sitzung automatisch `tasks --all`. Der Task-Dialog (Pfeil neben dem Task-Namen in der Build-Leiste) ist eine durchsuchbare Liste mit Symbol je Task (clean, install, bundle, compile, generate, test/lint, build), Task-Name, Beschreibung bzw. Gruppe, Häkchen für die Auswahl und Ladeanzeige. `GradleTaskListParser.parseDetailed` liefert Gruppe und Beschreibung.
+
 ### Behoben (Absturz)
 - Absturz „java.io.IOException: Stream closed“ beim Tippen/Zeilenbefehl im Editor, wenn der Language-Server-Prozess inzwischen beendet war: `didOpen`/`didChange`/`didClose` schrieben ungeschützt in den geschlossenen Eingabestrom (Hauptthread, `viewModelScope.launch`). Die Session fängt den Fehler jetzt ab, markiert den Server als ausgefallen (Status `FAILED`) und sendet danach nichts mehr. Regressionstest `LspServerDeathTest`.
 

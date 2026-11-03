@@ -87,6 +87,10 @@
     <string name="build_log_loeschen">Log leeren</string>
     <string name="build_probleme">Probleme</string>
     <string name="build_probleme_anzeigen">Probleme anzeigen</string>
+    <string name="build_tasks_suchen">Aufgaben suchen…</string>
+    <string name="build_tasks_laden">Projekt-Tasks werden geladen…</string>
+    <string name="build_tasks_keine_treffer">Keine passenden Tasks</string>
+    <string name="build_tasks_sonstige">Sonstige</string>
     <string name="build_starten">Ausführen</string>
     <string name="build_suchen">Log durchsuchen…</string>
     <string name="build_task_auswaehlen">Build-Task auswählen</string>
