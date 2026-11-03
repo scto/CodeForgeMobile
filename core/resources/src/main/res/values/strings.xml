@@ -2297,4 +2297,18 @@
     <string name="assetstudio_pick_color">Choose color</string>
     <string name="assetstudio_mode_icon">App icon</string>
     <string name="assetstudio_mode_drawable">Drawable</string>
+    <string name="settings_hub_ai">AI providers</string>
+    <string name="aiset_title">AI providers &amp; API keys</string>
+    <string name="aiset_keys_hint">API keys are stored encrypted on this device and only sent to the selected provider. Each provider keeps its own key, model and settings.</string>
+    <string name="aiset_active">Active</string>
+    <string name="aiset_use">Use</string>
+    <string name="aiset_saved">%1$s saved</string>
+    <string name="aiset_active_changed">%1$s is now the active provider</string>
+    <string name="aiset_toggle_key">Show or hide key</string>
+    <string name="aiset_key_set">Key saved</string>
+    <string name="aiset_key_missing">No key set</string>
+    <string name="aiset_fetch_models">Load models</string>
+    <string name="aiset_models_loaded">%1$s models loaded from provider</string>
+    <string name="aiset_remove_key">Remove key</string>
+    <string name="aiset_today_count">Requests today: %1$d</string>
 </resources>

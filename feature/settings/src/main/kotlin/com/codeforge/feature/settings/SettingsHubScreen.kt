@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Code
@@ -55,7 +56,8 @@ fun SettingsHubRoute(
     onNavigateToDebug: () -> Unit = {},
     onNavigateToHelp: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
-    onNavigateToStore: () -> Unit = {}
+    onNavigateToStore: () -> Unit = {},
+    onNavigateToAi: () -> Unit = {}
 ) {
     val entries = listOf(
         SettingsEntry(R.string.settings_hub_theme, Icons.Filled.Palette, onNavigateToTheme),
@@ -66,6 +68,7 @@ fun SettingsHubRoute(
         SettingsEntry(R.string.sdkmanager_title, Icons.Filled.SdCard, onNavigateToSdkManager),
         SettingsEntry(R.string.settings_hub_plugins, Icons.Filled.Extension, onNavigateToPlugins),
         SettingsEntry(R.string.settings_hub_extensions, Icons.Filled.Build, onNavigateToExtensions),
+        SettingsEntry(R.string.settings_hub_ai, Icons.Filled.AutoAwesome, onNavigateToAi),
         SettingsEntry(R.string.settings_hub_debug, Icons.Filled.BugReport, onNavigateToDebug),
         SettingsEntry(R.string.settings_hub_store, Icons.Filled.Storefront, onNavigateToStore),
         SettingsEntry(R.string.settings_hub_help, Icons.AutoMirrored.Filled.HelpOutline, onNavigateToHelp),

@@ -2297,4 +2297,18 @@
     <string name="assetstudio_pick_color">Farbe wählen</string>
     <string name="assetstudio_mode_icon">App-Icon</string>
     <string name="assetstudio_mode_drawable">Drawable</string>
+    <string name="settings_hub_ai">KI-Anbieter</string>
+    <string name="aiset_title">KI-Anbieter &amp; API-Schlüssel</string>
+    <string name="aiset_keys_hint">API-Schlüssel werden verschlüsselt auf diesem Gerät gespeichert und nur an den gewählten Anbieter gesendet. Jeder Anbieter hat eigenen Schlüssel, Modell und Einstellungen.</string>
+    <string name="aiset_active">Aktiv</string>
+    <string name="aiset_use">Verwenden</string>
+    <string name="aiset_saved">%1$s gespeichert</string>
+    <string name="aiset_active_changed">%1$s ist jetzt der aktive Anbieter</string>
+    <string name="aiset_toggle_key">Schlüssel ein-/ausblenden</string>
+    <string name="aiset_key_set">Schlüssel gespeichert</string>
+    <string name="aiset_key_missing">Kein Schlüssel hinterlegt</string>
+    <string name="aiset_fetch_models">Modelle laden</string>
+    <string name="aiset_models_loaded">%1$s Modelle vom Anbieter geladen</string>
+    <string name="aiset_remove_key">Schlüssel entfernen</string>
+    <string name="aiset_today_count">Anfragen heute: %1$d</string>
 </resources>

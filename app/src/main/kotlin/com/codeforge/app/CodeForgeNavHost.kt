@@ -34,6 +34,7 @@ import com.codeforge.feature.projectsettings.ProjectSettingsViewModel
 import com.codeforge.feature.projectwizard.ProjectWizardRoute
 import com.codeforge.feature.sdkmanager.SdkManagerRoute
 import com.codeforge.feature.settings.AboutSettingsRoute
+import com.codeforge.feature.settings.AiSettingsRoute
 import com.codeforge.feature.settings.DebugSettingsRoute
 import com.codeforge.feature.settings.EditorSettingsRoute
 import com.codeforge.feature.settings.GitSettingsRoute
@@ -62,6 +63,7 @@ internal object Routes {
     const val SETTINGS_PLUGINS = "settings_plugins"
     const val SETTINGS_GIT = "settings_git"
     const val SETTINGS_DEBUG = "settings_debug"
+    const val SETTINGS_AI = "settings_ai"
     const val SETTINGS_HELP = "settings_help"
     const val SETTINGS_STORE = "settings_store"
     const val SETTINGS_ABOUT = "settings_about"
@@ -193,6 +195,7 @@ fun CodeForgeNavHost(
                 onNavigateToExtensions = { navController.navigate(Routes.EXTENSIONS) },
                 onNavigateToSigning = { navController.navigate(Routes.SETTINGS_SIGNING) },
                 onNavigateToDebug = { navController.navigate(Routes.SETTINGS_DEBUG) },
+                onNavigateToAi = { navController.navigate(Routes.SETTINGS_AI) },
                 onNavigateToHelp = { navController.navigate(Routes.SETTINGS_HELP) },
                 onNavigateToAbout = { navController.navigate(Routes.SETTINGS_ABOUT) },
                 onNavigateToStore = { navController.navigate(Routes.SETTINGS_STORE) }
@@ -227,6 +230,9 @@ fun CodeForgeNavHost(
         }
         composable(Routes.SETTINGS_ABOUT) {
             AboutSettingsRoute(onBack = { navigateBackOrStart() })
+        }
+        composable(Routes.SETTINGS_AI) {
+            AiSettingsRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_DEBUG) {
             DebugSettingsRoute(

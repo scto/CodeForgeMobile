@@ -96,16 +96,38 @@ class AiRepositoryImpl internal constructor(
     override suspend fun saveAiOptions(options: AiChatOptions) {
         lock.withLock {
             store.put(KEY_PROVIDER, options.provider.id)
-            store.put(KEY_MODEL_PREFIX + options.provider.id, options.model)
-            options.baseUrl?.let { store.put(KEY_BASE_URL_PREFIX + options.provider.id, it) }
-
-            if (options.apiKey.isNotBlank()) {
-                secretStorage.storeSecret(SECRET_KEY_PREFIX + options.provider.id, options.apiKey)
-            } else {
-                secretStorage.removeSecret(SECRET_KEY_PREFIX + options.provider.id)
-            }
-
+            persistProvider(options)
             _optionsFlow.value = options
+        }
+    }
+
+    override suspend fun getProviderOptions(provider: AiProviderType): AiChatOptions = lock.withLock {
+        AiChatOptions(
+            provider = provider,
+            model = store.get(KEY_MODEL_PREFIX + provider.id) ?: provider.defaultModel,
+            baseUrl = store.get(KEY_BASE_URL_PREFIX + provider.id) ?: provider.defaultBaseUrl,
+            apiKey = try {
+                secretStorage.getSecret(SECRET_KEY_PREFIX + provider.id).orEmpty()
+            } catch (_: Exception) {
+                ""
+            }
+        )
+    }
+
+    override suspend fun saveProviderOptions(options: AiChatOptions) {
+        lock.withLock {
+            persistProvider(options)
+            if (_optionsFlow.value.provider == options.provider) _optionsFlow.value = options
+        }
+    }
+
+    private suspend fun persistProvider(options: AiChatOptions) {
+        store.put(KEY_MODEL_PREFIX + options.provider.id, options.model)
+        options.baseUrl?.let { store.put(KEY_BASE_URL_PREFIX + options.provider.id, it) }
+        if (options.apiKey.isNotBlank()) {
+            secretStorage.storeSecret(SECRET_KEY_PREFIX + options.provider.id, options.apiKey)
+        } else {
+            secretStorage.removeSecret(SECRET_KEY_PREFIX + options.provider.id)
         }
     }
 

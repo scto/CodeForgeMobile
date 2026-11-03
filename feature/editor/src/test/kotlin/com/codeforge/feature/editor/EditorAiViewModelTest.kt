@@ -283,6 +283,8 @@ class EditorAiViewModelTest {
 
         override fun getAiOptions(): Flow<AiChatOptions> = optionsFlow
         override suspend fun saveAiOptions(options: AiChatOptions) { optionsFlow.value = options }
+        override suspend fun getProviderOptions(provider: AiProviderType) = optionsFlow.value.copy(provider = provider)
+        override suspend fun saveProviderOptions(options: AiChatOptions) { optionsFlow.value = options }
 
         override fun getPrivacyPolicy(): Flow<AiPrivacyPolicy> = privacyFlow
         override suspend fun savePrivacyPolicy(policy: AiPrivacyPolicy) { privacyFlow.value = policy }

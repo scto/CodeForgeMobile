@@ -49,22 +49,55 @@ enum class AiProviderType(
         id = "anthropic",
         displayName = "Anthropic (Claude)",
         defaultBaseUrl = "https://api.anthropic.com",
-        defaultModel = "claude-3-7-sonnet-latest",
-        suggestedModels = listOf("claude-3-7-sonnet-latest", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest")
+        defaultModel = "claude-sonnet-5-5",
+        suggestedModels = listOf(
+            "claude-fable-5-1",
+            "claude-opus-5-5",
+            "claude-sonnet-5-5",
+            "claude-haiku-4-5",
+            "claude-sonnet-4-5",
+            "claude-opus-4-1",
+            "claude-3-7-sonnet-latest"
+        )
     ),
     OPENAI(
         id = "openai",
         displayName = "OpenAI-kompatibel",
         defaultBaseUrl = "https://api.openai.com/v1",
-        defaultModel = "gpt-4o",
-        suggestedModels = listOf("gpt-4o", "gpt-4o-mini", "o3-mini", "llama3.2")
+        defaultModel = "gpt-5-mini",
+        suggestedModels = listOf(
+            "gpt-5",
+            "gpt-5-mini",
+            "gpt-5-nano",
+            "gpt-4.1",
+            "gpt-4.1-mini",
+            "gpt-4o",
+            "gpt-4o-mini",
+            "o3",
+            "o4-mini",
+            "llama3.2"
+        )
     ),
     GEMINI(
         id = "gemini",
         displayName = "Google Gemini",
         defaultBaseUrl = "https://generativelanguage.googleapis.com",
-        defaultModel = "gemini-2.5-flash",
-        suggestedModels = listOf("gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro")
+        defaultModel = "gemini-3.6-flash",
+        // Stand ai.google.dev/gemini-api/docs/models (Nov 2026). 2.0-Modelle und gemini-3-pro-preview sind abgeschaltet;
+        // 2.5 läuft nur noch für Bestandsnutzer. Die Live-Liste (fetchAvailableModels) ergänzt/ersetzt diese Vorschläge.
+        suggestedModels = listOf(
+            "gemini-4-argon",
+            "gemini-3.8-flash",
+            "gemini-3.6-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-3.1-pro-preview",
+            "gemini-3-flash-preview",
+            "gemini-flash-latest",
+            "gemini-2.5-pro",
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite"
+        )
     );
 
     companion object {
