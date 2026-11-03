@@ -6,6 +6,8 @@ import com.codeforge.core.domain.model.LspCompletionItem
 import com.codeforge.core.domain.model.LspDiagnostic
 import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspHoverInfo
+import com.codeforge.core.domain.model.LspFoldingRange
+import com.codeforge.core.domain.model.LspInlayHint
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspSignatureHelp
@@ -146,6 +148,14 @@ interface LspClientRepository {
     /** `textDocument/signatureHelp` — Standard: nicht unterstützt (null). */
     suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> =
         Result.success(null)
+
+    /** `textDocument/foldingRange` — Standard: nicht unterstützt (leere Liste). */
+    suspend fun requestFoldingRanges(path: String): Result<List<LspFoldingRange>> =
+        Result.success(emptyList())
+
+    /** `textDocument/inlayHint` für [range] — Standard: nicht unterstützt (leere Liste). */
+    suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> =
+        Result.success(emptyList())
 
     suspend fun requestReferences(
         path: String,

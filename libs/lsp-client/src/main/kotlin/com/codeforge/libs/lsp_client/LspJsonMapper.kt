@@ -9,7 +9,11 @@ import com.codeforge.core.domain.model.LspDiagnostic
 import com.codeforge.core.domain.model.LspDocumentChange
 import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspFileOperation
+import com.codeforge.core.domain.model.LspFoldingKind
+import com.codeforge.core.domain.model.LspFoldingRange
 import com.codeforge.core.domain.model.LspHoverInfo
+import com.codeforge.core.domain.model.LspInlayHint
+import com.codeforge.core.domain.model.LspInlayHintKind
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspSignatureHelp
@@ -144,6 +148,59 @@ internal fun parseSignatureHelp(result: JsonElement?): LspSignatureHelp? {
         activeSignature = ((obj["activeSignature"] as? JsonPrimitive)?.intOrNull ?: 0).coerceIn(0, signatures.lastIndex),
         activeParameter = (obj["activeParameter"] as? JsonPrimitive)?.intOrNull ?: 0
     )
+}
+
+internal fun parseFoldingRanges(result: JsonElement?): List<LspFoldingRange> {
+    val array = result as? JsonArray ?: return emptyList()
+    return array.mapNotNull { element ->
+        val obj = element as? JsonObject ?: return@mapNotNull null
+        val start = (obj["startLine"] as? JsonPrimitive)?.intOrNull ?: return@mapNotNull null
+        val end = (obj["endLine"] as? JsonPrimitive)?.intOrNull ?: return@mapNotNull null
+        // Mindestens zwei Zeilen: sonst gibt es nichts zu falten.
+        if (start < 0 || end <= start) return@mapNotNull null
+        LspFoldingRange(
+            startLine = start,
+            endLine = end,
+            startCharacter = (obj["startCharacter"] as? JsonPrimitive)?.intOrNull,
+            endCharacter = (obj["endCharacter"] as? JsonPrimitive)?.intOrNull,
+            kind = when ((obj["kind"] as? JsonPrimitive)?.contentOrNull) {
+                "comment" -> LspFoldingKind.COMMENT
+                "imports" -> LspFoldingKind.IMPORTS
+                "region" -> LspFoldingKind.REGION
+                else -> null
+            },
+            collapsedText = (obj["collapsedText"] as? JsonPrimitive)?.contentOrNull
+        )
+    }
+}
+
+internal fun parseInlayHints(result: JsonElement?): List<LspInlayHint> {
+    val array = result as? JsonArray ?: return emptyList()
+    return array.mapNotNull { element ->
+        val obj = element as? JsonObject ?: return@mapNotNull null
+        val position = (obj["position"] as? JsonObject)?.let {
+            val line = (it["line"] as? JsonPrimitive)?.intOrNull ?: return@let null
+            val character = (it["character"] as? JsonPrimitive)?.intOrNull ?: return@let null
+            LspPosition(line, character)
+        } ?: return@mapNotNull null
+        val label = when (val l = obj["label"]) {
+            is JsonPrimitive -> l.contentOrNull
+            is JsonArray -> l.joinToString("") { part -> ((part as? JsonObject)?.get("value") as? JsonPrimitive)?.contentOrNull.orEmpty() }
+            else -> null
+        }?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+        LspInlayHint(
+            position = position,
+            label = label,
+            kind = when ((obj["kind"] as? JsonPrimitive)?.intOrNull) {
+                1 -> LspInlayHintKind.TYPE
+                2 -> LspInlayHintKind.PARAMETER
+                else -> null
+            },
+            tooltip = obj["tooltip"]?.let { extractHoverText(it) }?.takeIf { it.isNotEmpty() },
+            paddingLeft = (obj["paddingLeft"] as? JsonPrimitive)?.booleanOrNull ?: false,
+            paddingRight = (obj["paddingRight"] as? JsonPrimitive)?.booleanOrNull ?: false
+        )
+    }
 }
 
 private fun extractHoverText(element: JsonElement): String = when (element) {
@@ -403,7 +460,9 @@ internal fun parseServerCapabilities(result: JsonElement?): LspServerCapabilitie
         completionProvider = capabilities["completionProvider"] is JsonObject,
         typeDefinitionProvider = isEnabled("typeDefinitionProvider"),
         implementationProvider = isEnabled("implementationProvider"),
-        signatureHelpProvider = capabilities["signatureHelpProvider"] is JsonObject
+        signatureHelpProvider = capabilities["signatureHelpProvider"] is JsonObject,
+        foldingRangeProvider = isEnabled("foldingRangeProvider"),
+        inlayHintProvider = isEnabled("inlayHintProvider")
     )
 }
 

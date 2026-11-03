@@ -269,4 +269,44 @@ class LspJsonMapperTest {
         assertTrue(caps.implementationProvider)
         assertTrue(caps.signatureHelpProvider)
     }
+
+    @Test
+    fun `parseFoldingRanges liest Bereiche und verwirft Einzeiler`() {
+        val ranges = parseFoldingRanges(
+            Json.parseToJsonElement(
+                """[{"startLine":0,"endLine":4,"kind":"imports"},{"startLine":6,"endLine":6},{"startLine":8,"endLine":12,"startCharacter":10,"collapsedText":"…"},{"endLine":3}]"""
+            )
+        )
+        assertEquals(2, ranges.size)
+        assertEquals(com.codeforge.core.domain.model.LspFoldingKind.IMPORTS, ranges[0].kind)
+        assertEquals(10, ranges[1].startCharacter)
+        assertEquals("…", ranges[1].collapsedText)
+        assertTrue(parseFoldingRanges(Json.parseToJsonElement("null")).isEmpty())
+    }
+
+    @Test
+    fun `parseInlayHints unterstuetzt String- und Teile-Labels mit Padding`() {
+        val hints = parseInlayHints(
+            Json.parseToJsonElement(
+                """[{"position":{"line":1,"character":5},"label":": Int","kind":1,"paddingLeft":true},
+                   {"position":{"line":2,"character":0},"label":[{"value":"name"},{"value":":"}],"kind":2,"paddingRight":true,"tooltip":{"kind":"markdown","value":"Parametername"}},
+                   {"position":{"line":3,"character":0},"label":""},{"label":"x"}]"""
+            )
+        )
+        assertEquals(2, hints.size)
+        assertEquals(com.codeforge.core.domain.model.LspInlayHintKind.TYPE, hints[0].kind)
+        assertEquals(" : Int", hints[0].displayText)
+        assertEquals("name:", hints[1].label)
+        assertEquals("name: ", hints[1].displayText)
+        assertEquals("Parametername", hints[1].tooltip)
+    }
+
+    @Test
+    fun `parseServerCapabilities erkennt foldingRange und inlayHint`() {
+        val caps = parseServerCapabilities(
+            Json.parseToJsonElement("""{"capabilities":{"foldingRangeProvider":true,"inlayHintProvider":{"resolveProvider":false}}}""")
+        )
+        assertTrue(caps.foldingRangeProvider)
+        assertTrue(caps.inlayHintProvider)
+    }
 }

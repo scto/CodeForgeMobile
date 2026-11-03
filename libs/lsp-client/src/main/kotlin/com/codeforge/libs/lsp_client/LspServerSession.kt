@@ -8,9 +8,11 @@ import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspFoldingRange
+import com.codeforge.core.domain.model.LspInlayHint
+import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspSignatureHelp
 import com.codeforge.core.domain.model.LspPrepareRenameResult
-import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspServerCapabilities
 import com.codeforge.core.domain.model.LspServerState
 import com.codeforge.core.domain.model.LspWorkspaceEdit
@@ -168,6 +170,12 @@ class LspServerSession(
                         })
                         put("references", buildJsonObject {
                             put("dynamicRegistration", true)
+                        })
+                        put("foldingRange", buildJsonObject {
+                            put("lineFoldingOnly", true)
+                        })
+                        put("inlayHint", buildJsonObject {
+                            put("dynamicRegistration", false)
                         })
                     })
                     put("workspace", buildJsonObject {
@@ -435,6 +443,32 @@ class LspServerSession(
             )
             parseSignatureHelp(response["result"])
         }
+
+    suspend fun requestFoldingRanges(path: String): Result<List<LspFoldingRange>> = runCatching {
+        touch()
+        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+        val response = activeConnection.sendRequest(
+            "textDocument/foldingRange",
+            buildJsonObject { put("textDocument", buildJsonObject { put("uri", "file://$path") }) }
+        )
+        parseFoldingRanges(response["result"])
+    }
+
+    suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> = runCatching {
+        touch()
+        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+        val response = activeConnection.sendRequest(
+            "textDocument/inlayHint",
+            buildJsonObject {
+                put("textDocument", buildJsonObject { put("uri", "file://$path") })
+                put("range", buildJsonObject {
+                    put("start", positionToJson(range.start))
+                    put("end", positionToJson(range.end))
+                })
+            }
+        )
+        parseInlayHints(response["result"])
+    }
 
     suspend fun requestReferences(
         path: String,

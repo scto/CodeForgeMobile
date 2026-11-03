@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (LSP)
+- LSP-Client unterstützt `textDocument/foldingRange` und `textDocument/inlayHint`: Modelle `LspFoldingRange`/`LspInlayHint`, `LspClientRepository.requestFoldingRanges`/`requestInlayHints` (Standard: leere Liste), Server-Fähigkeiten `foldingRangeProvider`/`inlayHintProvider`, Client-Capabilities beim `initialize`. Die Darstellung im Editor folgt, sobald sora-editor Faltung/Inlay-Hints rendert; Anregung: ACSIDE-Editor-Modelle.
+
 ### Geändert (Über die App / Willkommen)
 - Über-Bildschirm neu gegliedert: Kopfkarte (Icon, Name, Untertitel, Version mit Build-Nummer und Art „release/debug“), Karte „Links“ (Internetseite, Problem melden, Veröffentlichungen) und Karte „Weiteres“ (Entwickler, Quellcode, verwendete Software ausklappbar).
 - Willkommensbildschirm zeigt die tatsächliche App-Version (`versionName`) statt der fest eingetragenen „v1.0.0“.

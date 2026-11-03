@@ -8,9 +8,11 @@ import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.domain.model.LspPosition
+import com.codeforge.core.domain.model.LspFoldingRange
+import com.codeforge.core.domain.model.LspInlayHint
+import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspSignatureHelp
 import com.codeforge.core.domain.model.LspPrepareRenameResult
-import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspServerCapabilities
 import com.codeforge.core.domain.model.LspServerState
 import com.codeforge.core.domain.model.LspWorkspaceEdit
@@ -269,6 +271,18 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
         return session.requestSignatureHelp(path, position)
+    }
+
+    override suspend fun requestFoldingRanges(path: String): Result<List<LspFoldingRange>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestFoldingRanges(path)
+    }
+
+    override suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        return session.requestInlayHints(path, range)
     }
 
     override suspend fun requestReferences(

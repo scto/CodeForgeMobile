@@ -159,6 +159,39 @@ data class LspPrepareRenameResult(
     val placeholder: String
 )
 
+/** Art eines Faltungsbereichs (`FoldingRangeKind`). */
+enum class LspFoldingKind { COMMENT, IMPORTS, REGION }
+
+/** `textDocument/foldingRange`: Zeilen 0-basiert, [endLine] ist die letzte noch gefaltete Zeile. */
+data class LspFoldingRange(
+    val startLine: Int,
+    val endLine: Int,
+    val startCharacter: Int? = null,
+    val endCharacter: Int? = null,
+    val kind: LspFoldingKind? = null,
+    val collapsedText: String? = null
+)
+
+enum class LspInlayHintKind { TYPE, PARAMETER }
+
+/** `textDocument/inlayHint`: [label] ist bereits aus Label-Teilen zusammengesetzt; Padding wie im Protokoll. */
+data class LspInlayHint(
+    val position: LspPosition,
+    val label: String,
+    val kind: LspInlayHintKind? = null,
+    val tooltip: String? = null,
+    val paddingLeft: Boolean = false,
+    val paddingRight: Boolean = false
+) {
+    /** Anzeigetext inklusive Leerzeichen-Padding. */
+    val displayText: String
+        get() = buildString {
+            if (paddingLeft) append(' ')
+            append(label)
+            if (paddingRight) append(' ')
+        }
+}
+
 data class LspServerCapabilities(
     val codeActionProvider: Boolean = false,
     val renameProvider: Boolean = false,
@@ -172,5 +205,7 @@ data class LspServerCapabilities(
     val completionProvider: Boolean = false,
     val typeDefinitionProvider: Boolean = false,
     val implementationProvider: Boolean = false,
-    val signatureHelpProvider: Boolean = false
+    val signatureHelpProvider: Boolean = false,
+    val foldingRangeProvider: Boolean = false,
+    val inlayHintProvider: Boolean = false
 )
