@@ -11,6 +11,20 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Dokumentation)
+- **KDoc für die gesamte öffentliche API** (Klassen, Schnittstellen, Funktionen, Properties) in allen Modulen unter `core`, `libs`, `feature` und `app`; die Abdeckung misst `scripts/kdoc-gap.py` (Stand in `docs/dev/kdoc-status.md`: 0 von 3902 offen). Nicht erfasst: `build-logic`, `examples`, Tests.
+- **Dokka 2 + Mermaid** im Versionskatalog (`dokka`, `dokka-mermaid-plugin`); `./gradlew dokkaGenerate` erzeugt die API-Referenz (`build/dokka/html`), `scripts/gen-module-graph.py` den Modulgraphen.
+- **Projektdokumentation** als MkDocs-Seite: Anwenderhandbuch (DE), User Guide (EN), Entwicklerhandbuch, APK-Dokumentation, Modulgraph, Release Notes 3.0.0 (DE/EN); Workflow `docs-pages.yml` veröffentlicht Handbücher (`/`) und API-Referenz (`/api/`) auf GitHub Pages.
+- Doku-Seite und API-Referenz im Design des CodeForge Stores (Material-3-Violett, hell/dunkel, Pillen-Navigation, Karten): `docs/stylesheets/store.css`, `docs/dokka/store-dokka.css`.
+- **App-Screenshots** (hell/dunkel) als Compose-Screenshot-Tests (Roborazzi 1.50 + Robolectric 4.17): `./gradlew :app:recordRoborazziDebug` schreibt nach `docs/screenshots/`; README (DE/EN) zeigt sie.
+- Englische Release Notes: `docs/release-notes/3.0.0.en.md`.
+
+### Behoben (Release-Build)
+- R8-Release-Build (`:app:minifyReleaseWithR8`) brach mit „Missing class java.lang.ProcessHandle“ ab: `ProcessX2cBuildChecker` rief `Process.descendants()` auf (Java 9, auf Android nicht vorhanden – hätte auch zur Laufzeit mit `NoSuchMethodError` geendet). Kindprozesse werden jetzt best effort per `pkill -P <pid>` beendet. Der Lauf von `minifyReleaseWithR8` ist damit erfolgreich; das Verhalten der Release-APK auf einem Gerät ist weiterhin ungeprüft.
+
+### Geändert (Beispiel-Plugins)
+- `kmp-lsp-plugin` 2.1.0: lädt das fertige Termux-Binary (aarch64/x86_64) aus dem Release `termux-1` von `scto/kmp-lsp`, prüft die SHA-256-Summe und legt Server und `kmp-jar-indexer.jar` unter `~/.local/share/kmp-lsp/bin` ab. Die Pakete `rust` und `clang` und der `cargo install`-Build entfallen.
+
 ### Hinzugefügt (LSP)
 - Diagnose-Logging der LSP-Sitzung (Logcat-Tag `CF-LSP`): Serverstart mit Kommando, jede stderr-Zeile des Servers, Exit-Code und Laufzeit bei unerwartetem Ende (Status `FAILED`, mit den letzten 40 stderr-Zeilen). stderr wird nun fortlaufend gelesen (ein voller Pipe-Puffer konnte den Server blockieren).
 - Neues Beispiel-Plugin `kmp-lsp-plugin` (`com.example.kmp-lsp`): kmp-lsp (Rust/tree-sitter) für Kotlin, Java und Swift als Alternative zu Kotlin Language Server/JDT LS; Build beim ersten Laden per `cargo install` (Pakete `rust`, `clang`). `LspServerSpec` kennt dafür `installScript`.

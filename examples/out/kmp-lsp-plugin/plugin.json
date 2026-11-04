@@ -1,10 +1,10 @@
 {
   "id": "com.example.kmp-lsp",
   "name": "kmp-lsp (Kotlin Multiplatform)",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 2,
   "publisher": "example",
-  "description": "Schneller Rust-Language-Server für Kotlin, Java und Swift (tree-sitter, ohne JVM/Gradle-Import). Wird beim ersten Laden per cargo gebaut (Pakete rust und clang nötig). Alternative zu den Plugins Kotlin Language Server und JDT LS: bei gleicher Sprache gilt der zuerst geladene Server.",
+  "description": "Schneller Rust-Language-Server für Kotlin, Java und Swift (tree-sitter, ohne JVM/Gradle-Import). Lädt beim ersten Laden das fertige Termux-Binary aus dem Release termux-1 von scto/kmp-lsp (SHA-256-geprüft). Alternative zu den Plugins Kotlin Language Server und JDT LS: bei gleicher Sprache gilt der zuerst geladene Server.",
   "permissions": [
     "shell"
   ],
@@ -22,17 +22,6 @@
         "command": [
           "${home}/.local/share/kmp-lsp/bin/kmp-lsp"
         ]
-      }
-    ],
-    "requires": [
-      {
-        "manager": "pkg",
-        "name": "rust",
-        "check": "cargo"
-      },
-      {
-        "manager": "pkg",
-        "name": "clang"
       }
     ]
   }

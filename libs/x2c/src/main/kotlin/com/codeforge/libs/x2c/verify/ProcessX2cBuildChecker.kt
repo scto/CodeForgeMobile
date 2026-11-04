@@ -58,7 +58,7 @@ class ProcessX2cBuildChecker(
                 delay(100)
             }
         } finally {
-            if (process.isAlive) { process.descendants().forEach { it.destroyForcibly() }; process.destroyForcibly() }
+            if (process.isAlive) { killChildren(process); process.destroyForcibly() }
             reader.join(2000)
         }
         val text = synchronized(sb) { sb.toString() }
@@ -72,4 +72,19 @@ class ProcessX2cBuildChecker(
     }
 
     private fun isWindows() = System.getProperty("os.name").orEmpty().startsWith("Windows", ignoreCase = true)
+
+    /**
+     * Beendet die Kindprozesse (Gradle-Daemon-Clients, Compiler) best effort. `Process.descendants()`/`ProcessHandle`
+     * gibt es auf Android nicht (Java 9), deshalb über `pkill -P <pid>`; fehlt `pkill` oder die PID, bleibt es
+     * beim Beenden des Hauptprozesses.
+     */
+    private fun killChildren(process: Process) {
+        val pid = runCatching { Process::class.java.getMethod("pid").invoke(process) as Long }.getOrNull()
+            ?: runCatching {
+                val f = process.javaClass.getDeclaredField("pid").apply { isAccessible = true }
+                (f.get(process) as Number).toLong()
+            }.getOrNull()
+            ?: return
+        runCatching { ProcessBuilder("pkill", "-KILL", "-P", pid.toString()).redirectErrorStream(true).start().waitFor(2, TimeUnit.SECONDS) }
+    }
 }
