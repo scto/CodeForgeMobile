@@ -4,6 +4,7 @@ package com.codeforge.core.domain.ai
 import com.codeforge.core.domain.model.DiffLineType
 import com.codeforge.core.domain.model.UnifiedDiffParser
 
+/** Extrahiert aus Assistenten-Antworten vorgeschlagene Dateiänderungen (unified Diffs und Codeblöcke mit Dateipfad). */
 object AiPatchParser {
 
     private val FILE_PATH_HEADER_REGEX = Regex(
@@ -18,6 +19,15 @@ object AiPatchParser {
         """```(?:diff|patch)?\n([\s\S]*?)```"""
     )
 
+    /**
+     * Findet Änderungsvorschläge in [assistantText].
+     *
+     * Diffs werden zuerst ausgewertet, danach Codeblöcke mit Pfadangabe.
+     *
+     * @param assistantText Antwort des Assistenten.
+     * @param currentFilePath Pfad der aktuell geöffneten Datei (Fallback für Diffs ohne Pfad).
+     * @param currentFileContent Inhalt der aktuellen Datei als Ausgangsbasis.
+     */
     fun parseProposedChanges(
         assistantText: String,
         currentFilePath: String? = null,

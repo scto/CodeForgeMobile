@@ -10,8 +10,10 @@ import java.io.File
 
 /** Wandelt die Snippet-Dateien (VS-Code-Format) der Plugins in schreibgeschützte [Snippet]s um. */
 object ExtensionSnippets {
+    /** Präfix der IDs von Plugin-Snippets. */
     const val ID_PREFIX = "ext:"
 
+    /** Ob [id] zu einem Plugin-Snippet gehört. */
     fun isExtensionSnippet(id: String) = id.startsWith(ID_PREFIX)
 
     /** Deterministische IDs, Scope = Sprache des Beitrags, `isBuiltin` = true (nicht löschbar). Defekte Dateien ergeben eine leere Liste. */

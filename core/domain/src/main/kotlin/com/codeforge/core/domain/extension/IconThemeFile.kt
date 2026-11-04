@@ -42,6 +42,7 @@ data class IconThemeFile(
         return file
     }
 
+    /** Bild für einen Ordner; spezifische Namen und der geöffnete Zustand haben Vorrang vor dem Standard. */
     fun forFolder(name: String, open: Boolean): String? {
         val lower = name.lowercase()
         val bare = lower.removePrefix(".")
@@ -56,6 +57,7 @@ data class IconThemeFile(
             folderNames.values + folderNamesOpen.values
 }
 
+/** Liest und validiert Icon-Theme-Dateien von Plugins (nur relative Pfade, Formate png/webp/jpg/jpeg). */
 object IconThemeFileParser {
     private val ALLOWED = setOf("png", "webp", "jpg", "jpeg")
 

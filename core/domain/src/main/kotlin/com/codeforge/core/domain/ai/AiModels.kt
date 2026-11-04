@@ -3,18 +3,21 @@ package com.codeforge.core.domain.ai
 
 import kotlinx.coroutines.flow.Flow
 
+/** Rolle einer Chat-Nachricht: Systemanweisung, Nutzer oder Assistent. */
 enum class AiRole {
     SYSTEM,
     USER,
     ASSISTANT
 }
 
+/** Token-Verbrauch einer Antwort (Prompt, Completion, Summe). */
 data class AiUsage(
     val promptTokens: Int = 0,
     val completionTokens: Int = 0,
     val totalTokens: Int = 0
 )
 
+/** Vom Assistenten vorgeschlagene Dateiänderung: Pfad, Original, neuer Inhalt und optional der unified Diff. */
 data class AiProposedChange(
     val filePath: String,
     val originalContent: String,
@@ -22,6 +25,7 @@ data class AiProposedChange(
     val unifiedDiff: String? = null
 )
 
+/** Eine Nachricht im KI-Chat mit Rolle, Inhalt, Zeitstempel, optionalem Verbrauch und vorgeschlagenen Änderungen. */
 data class AiChatMessage(
     val id: String,
     val role: AiRole,
@@ -31,13 +35,19 @@ data class AiChatMessage(
     val proposedChanges: List<AiProposedChange> = emptyList()
 )
 
+/** Ereignis eines gestreamten KI-Aufrufs. */
 sealed class AiEvent {
+    /** Teilstück der Antwort. */
     data class TextDelta(val text: String) : AiEvent()
+    /** Token-Verbrauch (meist am Ende des Streams). */
     data class Usage(val promptTokens: Int, val completionTokens: Int, val totalTokens: Int) : AiEvent()
+    /** Der Stream ist vollständig. */
     object Done : AiEvent()
+    /** Fehler beim Aufruf; [cause] enthält optional die Ursache. */
     data class Error(val message: String, val cause: Throwable? = null) : AiEvent()
 }
 
+/** Unterstützte KI-Anbieter mit ihren Standardwerten. */
 enum class AiProviderType(
     val id: String,
     val displayName: String,
@@ -111,11 +121,13 @@ enum class AiProviderType(
             }
         }
 
+        /** Liefert den Anbieter zur [id] (Groß-/Kleinschreibung egal); unbekannte IDs ergeben [OPENAI]. */
         fun fromId(id: String): AiProviderType =
             entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: OPENAI
     }
 }
 
+/** Optionen eines Chat-Aufrufs: Anbieter, Modell, optionale Basis-URL, API-Schlüssel, Temperatur und Token-Limit. */
 data class AiChatOptions(
     val provider: AiProviderType,
     val model: String,
@@ -125,12 +137,14 @@ data class AiChatOptions(
     val maxTokens: Int? = null
 )
 
+/** Datenschutzrichtlinie für den Kontext: immer nachfragen, nur Auswahl oder ganze Datei. */
 enum class AiPrivacyPolicy {
     ALWAYS_ASK,
     ONLY_SELECTED,
     FULL_FILE
 }
 
+/** Herkunft eines Kontext-Elements. */
 enum class AiContextSource {
     CURRENT_FILE,
     SELECTION,
@@ -140,6 +154,7 @@ enum class AiContextSource {
     GIT_DIFF
 }
 
+/** Ein Kontext-Element für den Prompt; [isRedacted] und [redactedSecretsCount] zeigen geschwärzte Geheimnisse an. */
 data class AiContextItem(
     val source: AiContextSource,
     val title: String,
@@ -149,6 +164,7 @@ data class AiContextItem(
     val redactedSecretsCount: Int = 0
 )
 
+/** Fertig aufbereiteter Kontext: Elemente, Gesamt-Prompt, Zeichenzahl, ob gekürzt und Anzahl der Schwärzungen. */
 data class AiPreparedContext(
     val items: List<AiContextItem>,
     val fullPrompt: String,
@@ -157,8 +173,12 @@ data class AiPreparedContext(
     val redactedCount: Int
 )
 
+/** Abstraktion eines KI-Anbieters (Streaming-Chat, Verbindungstest, Modellliste). */
 interface AiProvider {
+    /** Streamt die Antwort auf [messages] als [AiEvent]s. */
     fun streamChat(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent>
+    /** Prüft Zugang und Konfiguration; liefert bei Erfolg eine kurze Meldung. */
     suspend fun testConnection(options: AiChatOptions): Result<String>
+    /** Liest die beim Anbieter verfügbaren Modell-IDs. */
     suspend fun fetchAvailableModels(options: AiChatOptions): Result<List<String>>
 }

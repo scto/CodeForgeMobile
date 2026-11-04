@@ -3,8 +3,10 @@ package com.codeforge.core.domain.ai
 
 import java.util.regex.Pattern
 
+/** Schützt vor Datenabfluss an KI-Anbieter: schließt sensible Dateien aus, schwärzt Geheimnisse und kürzt zu langen Kontext. */
 object AiSanitizer {
 
+    /** Dateinamensmuster (mit `*` am Anfang oder Ende), die nie an einen Anbieter gesendet werden. */
     val EXCLUDED_FILE_PATTERNS: List<String> = listOf(
         "*.jks",
         "*.keystore",
@@ -36,6 +38,7 @@ object AiSanitizer {
         )
     )
 
+    /** Ob die Datei unter [path] ausgeschlossen ist (Dateiname gegen [EXCLUDED_FILE_PATTERNS]). */
     fun isPathExcluded(path: String): Boolean {
         val fileName = path.substringAfterLast('/').substringAfterLast('\\')
         return EXCLUDED_FILE_PATTERNS.any { pattern ->
@@ -52,6 +55,11 @@ object AiSanitizer {
         }
     }
 
+    /**
+     * Ersetzt erkannte Geheimnisse (Schlüssel, Tokens, Passwörter) durch `[REDACTED_SECRET]`.
+     *
+     * @return Bereinigter Text und Anzahl der Ersetzungen.
+     */
     fun sanitizeText(text: String): Pair<String, Int> {
         var result = text
         var redactions = 0
@@ -76,6 +84,11 @@ object AiSanitizer {
         return Pair(result, redactions)
     }
 
+    /**
+     * Kürzt [text] auf höchstens [maxChars] Zeichen und hängt einen Hinweis an.
+     *
+     * @return Ergebnistext und ob gekürzt wurde.
+     */
     fun truncateWithNotice(text: String, maxChars: Int = 40_000): Pair<String, Boolean> {
         return if (text.length > maxChars) {
             val truncated = text.take(maxChars) +

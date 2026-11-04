@@ -26,6 +26,7 @@ data class ActiveContributions(
     val requires: List<Resolved<RequirementContribution>> = emptyList()
 ) {
     companion object {
+        /** Leere Gesamtsicht ohne Contributions. */
         val EMPTY = ActiveContributions()
 
         /** Fasst Manifeste (nur aktivierte Plugins) zu einer Gesamtsicht zusammen; spätere Plugins überschreiben bei gleicher Contribution-ID nicht — erste gewinnt. */
@@ -86,5 +87,6 @@ fun FormatterContribution.expandCommand(file: String, pluginDir: String, home: S
 
 /** Lesezugriff der App-Module (Theme, Filetree, Editor, Git, …) auf die Contributions installierter Plugins. */
 interface ContributionRepository {
+    /** Aktuelle Gesamtsicht der Contributions aller aktivierten Plugins. */
     val contributions: StateFlow<ActiveContributions>
 }

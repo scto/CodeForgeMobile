@@ -11,6 +11,7 @@ import java.util.Locale
  */
 object ApkReportFormatter {
 
+    /** Formatiert eine Bytezahl menschenlesbar (B, KB, MB, …). */
     fun formatBytes(bytes: Long): String {
         val absBytes = kotlin.math.abs(bytes)
         return when {
@@ -21,6 +22,7 @@ object ApkReportFormatter {
         }
     }
 
+    /** Erzeugt einen Markdown-Bericht zu einer APK-Analyse. */
     fun formatAnalysisToMarkdown(result: ApkAnalysisResult): String {
         val sb = StringBuilder()
         sb.appendLine("# APK-Analysebericht: ${result.fileName}")
@@ -122,6 +124,7 @@ object ApkReportFormatter {
         return sb.toString()
     }
 
+    /** Erzeugt einen Markdown-Bericht zum Vergleich zweier APKs. */
     fun formatComparisonToMarkdown(comparison: ApkComparisonResult): String {
         val sb = StringBuilder()
         sb.appendLine("# APK-Vergleich")

@@ -24,6 +24,14 @@ object ApkZipAnalyzer {
 
     private const val DEFAULT_TOP_N = 10
 
+    /**
+     * Analysiert die APK-Datei.
+     *
+     * @param apkFile Zu analysierende APK.
+     * @param topN Anzahl der größten Dateien im Ergebnis.
+     * @param metadata Optionale Manifest-Metadaten (aapt/AXML).
+     * @throws ApkAnalysisException wenn die Datei fehlt, beschädigt ist oder unsichere Pfade (Zip-Slip) enthält.
+     */
     @Throws(ApkAnalysisException::class)
     fun analyze(
         apkFile: File,

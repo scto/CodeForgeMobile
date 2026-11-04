@@ -3,8 +3,8 @@
 Erzeugt mit `python3 scripts/kdoc-gap.py` (Heuristik: Deklarationen ohne KDoc je Modul, Format: undokumentiert/gesamt).
 
 ```
-TOTAL decl 6866 undoc 5349
-core/domain                                902/1507
+TOTAL decl 6866 undoc 5306
+core/domain                                859/1507
 feature/layoutdesigner                     639/698
 feature/settings                           489/582
 feature/editor                             451/519

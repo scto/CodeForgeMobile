@@ -33,17 +33,23 @@ data class ExtensionColorTheme(
     /** Absoluter Pfad einer TextMate-Theme-Datei für den Editor, falls das Plugin eine mitliefert und sie existiert. */
     val textMateThemePath: String? = null
 ) {
+    /** Eindeutiger Schlüssel `ext:<plugin>/<theme>` des Farbschemas. */
     val key: String get() = keyOf(pluginId, themeId)
 
     companion object {
+        /** Präfix aller Schlüssel von Plugin-Themes. */
         const val PREFIX = "ext:"
+        /** Bildet den Schlüssel aus Plugin- und Theme-ID. */
         fun keyOf(pluginId: String, themeId: String) = "$PREFIX$pluginId/$themeId"
+        /** Ob [id] ein Plugin-Theme-Schlüssel ist. */
         fun isExtensionKey(id: String) = id.startsWith(PREFIX)
     }
 }
 
+/** Liest und validiert Farbschema-Dateien (JSON) von Plugins. */
 object ColorThemeFileParser {
 
+    /** Erlaubte Material-3-Farbrollen. */
     val ROLES: Set<String> = setOf(
         "primary", "onPrimary", "primaryContainer", "onPrimaryContainer",
         "secondary", "onSecondary", "secondaryContainer", "onSecondaryContainer",
@@ -68,6 +74,11 @@ object ColorThemeFileParser {
         return if (expanded.length == 6) 0xFF000000L or n else n
     }
 
+    /**
+     * Parst eine Farbschema-Datei.
+     *
+     * Unbekannte Rollen werden ignoriert; ungültige Farben, fehlende `colors` oder unsichere `textmateTheme`-Pfade führen zu einem Fehler.
+     */
     fun parse(text: String): Result<ColorThemeFile> = runCatching {
         val root = Json.parseToJsonElement(text) as? JsonObject
             ?: throw IllegalArgumentException("Farbschema muss ein JSON-Objekt sein")
@@ -93,7 +104,10 @@ object ColorThemeFileParser {
 
 /** Alle Farbschemata aktivierter Plugins (Dateien bereits gelesen/validiert; defekte werden übersprungen). */
 interface ExtensionThemeRepository {
+    /** Aktive Farbschemata. */
     val themes: kotlinx.coroutines.flow.StateFlow<List<ExtensionColorTheme>>
+    /** Aktive Icon-Themes. */
     val iconThemes: kotlinx.coroutines.flow.StateFlow<List<ExtensionIconTheme>>
+    /** Aktive Sprachpakete. */
     val languagePacks: kotlinx.coroutines.flow.StateFlow<List<ExtensionLanguagePack>>
 }

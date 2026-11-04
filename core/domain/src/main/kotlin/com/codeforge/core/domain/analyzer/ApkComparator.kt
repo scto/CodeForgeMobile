@@ -16,6 +16,13 @@ import com.codeforge.core.domain.model.ApkSectionDiff
  */
 object ApkComparator {
 
+    /**
+     * Vergleicht zwei Analyseergebnisse.
+     *
+     * @param baseResult Ausgangs-APK.
+     * @param comparedResult Verglichene APK.
+     * @return Differenz je Bereich und Datei sowie insgesamt.
+     */
     fun compare(
         baseResult: ApkAnalysisResult,
         comparedResult: ApkAnalysisResult

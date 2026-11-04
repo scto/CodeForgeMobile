@@ -50,6 +50,7 @@ object AndroidDangerousPermissions {
         "android.permission.WRITE_EXTERNAL_STORAGE"
     )
 
+    /** Ob [permission] zu den gefährlichen Berechtigungen (Laufzeitabfrage) zählt. */
     fun isDangerous(permission: String): Boolean {
         val clean = permission.trim()
         val shortName = clean.substringAfterLast('.')
