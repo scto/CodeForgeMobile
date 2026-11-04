@@ -45,6 +45,7 @@ import com.codeforge.core.ui.SettingsTopBar
 import com.codeforge.core.ui.embeddedAwareInsets
 import com.codeforge.core.ui.TooltipIconButton
 
+/** Route des Stores. */
 @Composable
 fun StoreRoute(
     modifier: Modifier = Modifier,
@@ -56,6 +57,7 @@ fun StoreRoute(
     StoreScreen(modifier = modifier, uiState = uiState, onEvent = viewModel::onEvent, onBack = onBack, embedded = embedded)
 }
 
+/** Bildschirm des Stores mit Kategorien und Einträgen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreScreen(

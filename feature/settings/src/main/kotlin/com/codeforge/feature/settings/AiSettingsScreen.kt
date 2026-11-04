@@ -59,6 +59,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Route der KI-Einstellungen. */
 @Composable
 fun AiSettingsRoute(
     modifier: Modifier = Modifier,
@@ -69,6 +70,7 @@ fun AiSettingsRoute(
     AiSettingsScreen(modifier = modifier, uiState = uiState, onBack = onBack, onEvent = viewModel::onEvent)
 }
 
+/** Bildschirm der KI-Einstellungen (Anbieter, Schlüssel, Modell). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AiSettingsScreen(

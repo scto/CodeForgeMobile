@@ -3,6 +3,7 @@ package com.codeforge.feature.settings.store
 
 import androidx.compose.runtime.Immutable
 
+/** Zustand des Stores (Katalog, Kategorie, Installation, Meldungen). */
 @Immutable
 data class StoreUiState(
     val isLoading: Boolean = true,
@@ -24,14 +25,21 @@ data class StoreUiState(
     /** Einmalige Rückmeldung (fertiger Text) für die Snackbar. */
     val message: String? = null,
 ) {
+    /** Gewählte Kategorie, sonst die erste. */
     val selectedCategory: StoreCategory?
         get() = catalog?.categories?.let { cats -> cats.firstOrNull { it.id == selectedCategoryId } ?: cats.firstOrNull() }
 }
 
+/** Aktionen im Store. */
 sealed interface StoreUiEvent {
+    /** Katalog neu laden. */
     data object Reload : StoreUiEvent
+    /** Kategorie wählen. */
     data class SelectCategory(val id: String) : StoreUiEvent
+    /** Eintrag installieren. */
     data class Install(val item: StoreItem) : StoreUiEvent
+    /** Server-Programm eines Eintrags installieren. */
     data class InstallServer(val item: StoreItem) : StoreUiEvent
+    /** Meldung wurde angezeigt. */
     data object MessageShown : StoreUiEvent
 }

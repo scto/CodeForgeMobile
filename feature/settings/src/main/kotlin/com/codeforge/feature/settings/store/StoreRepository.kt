@@ -13,10 +13,13 @@ import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Ergebnis des Ladens. */
 sealed interface StoreLoadResult {
+    /** Katalog online geladen. */
     data class Online(val catalog: StoreCatalog) : StoreLoadResult
     /** Katalog stammt aus dem Zwischenspeicher (offline); [cachedAt] ist lesbar formatiert. */
     data class Cached(val catalog: StoreCatalog, val cachedAt: String) : StoreLoadResult
+    /** Laden fehlgeschlagen. */
     data class Failed(val message: String, val unsupportedSchema: Boolean = false) : StoreLoadResult
 }
 
@@ -32,6 +35,7 @@ class StoreRepository internal constructor(
         @ApplicationContext context: Context,
     ) : this(fetcher, File(context.filesDir, "store-catalog.json"))
 
+    /** Lädt den Katalog (online, sonst Zwischenspeicher). */
     suspend fun load(language: String): StoreLoadResult = withContext(Dispatchers.IO) {
         val fetched = fetcher.fetch(url)
         fetched.onSuccess { body ->

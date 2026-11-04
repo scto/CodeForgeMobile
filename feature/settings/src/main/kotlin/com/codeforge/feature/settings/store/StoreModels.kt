@@ -9,9 +9,11 @@ object StoreConfig {
     const val SUPPORTED_SCHEMA = 1
 }
 
+/** Kategorie des Stores. */
 @Immutable
 data class StoreCategory(val id: String, val title: String)
 
+/** Eintrag im Store (Plugin, Theme, Tool usw.). */
 @Immutable
 data class StoreItem(
     val id: String,
@@ -32,6 +34,7 @@ data class StoreItem(
     /** Code-Tools führen Skripte aus: die App fragt vor der Installation nach. */
     val needsConfirmation: Boolean get() = categoryId == TOOL_CATEGORY
 
+    /** Ob der Eintrag direkt installierbar ist. */
     val isInstallablePlugin: Boolean
         get() = categoryId in DECLARATIVE_CATEGORIES && sha256 != null && downloadUrl?.startsWith("https://") == true
 
@@ -42,6 +45,7 @@ data class StoreItem(
     }
 }
 
+/** Katalog mit Kategorien und Einträgen. */
 @Immutable
 data class StoreCatalog(
     val schema: Int,
@@ -49,7 +53,9 @@ data class StoreCatalog(
     val categories: List<StoreCategory>,
     val items: List<StoreItem>,
 ) {
+    /** Einträge einer Kategorie. */
     fun itemsOf(categoryId: String): List<StoreItem> = items.filter { it.categoryId == categoryId }
 }
 
+/** Der Katalog nutzt ein nicht unterstütztes Schema. */
 class UnsupportedStoreSchemaException(val schema: Int) : Exception("Schema $schema wird nicht unterstützt")

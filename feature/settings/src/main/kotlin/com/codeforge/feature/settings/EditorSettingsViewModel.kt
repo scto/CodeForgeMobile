@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
+/** ViewModel der Editor-Einstellungen. */
 @HiltViewModel
 class EditorSettingsViewModel internal constructor(
     private val settingsRepository: SettingsRepository,
@@ -33,6 +34,7 @@ class EditorSettingsViewModel internal constructor(
 
     private val availableThemes = TextMateThemeCatalog.getAvailableThemes(themesDir)
 
+    /** UI-Zustand. */
     val uiState: StateFlow<EditorSettingsUiState> = settingsRepository.appSettings
         .map { settings ->
             EditorSettingsUiState(
@@ -75,6 +77,7 @@ class EditorSettingsViewModel internal constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EditorSettingsUiState(availableThemes = availableThemes))
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: EditorSettingsUiEvent) {
         viewModelScope.launch {
             when (event) {

@@ -53,6 +53,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Route der Editor-Einstellungen. */
 @Composable
 fun EditorSettingsRoute(
     modifier: Modifier = Modifier,

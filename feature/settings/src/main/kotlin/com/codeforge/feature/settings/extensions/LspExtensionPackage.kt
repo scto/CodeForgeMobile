@@ -88,6 +88,7 @@ data class LspExtensionPackage(
     val downloadUrl: String? get() = (source as? ExtensionSource.Download)?.url
     /** Erwartete SHA-256-Summe oder `null`. */
     val expectedSha256: String? get() = (source as? ExtensionSource.Download)?.sha256
+    /** Archivformat der Quelle oder `null`. */
     val archiveType: ExtensionArchiveType? get() = (source as? ExtensionSource.Download)?.archiveType
     /** Ob die Quelle ein Termux-Paket ist. */
     val isTermuxPackage: Boolean get() = source is ExtensionSource.TermuxPackage

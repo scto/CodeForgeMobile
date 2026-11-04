@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel der Terminal-Einstellungen (inkl. Termux-Schrift). */
 @HiltViewModel
 class TerminalSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
@@ -62,6 +63,7 @@ class TerminalSettingsViewModel @Inject constructor(
         return rows to style
     }
 
+    /** UI-Zustand. */
     val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState, backupState) { e, k, c, b -> listOf(e, k, c, b) }) { settings, termux, fontSp, font, extra ->
             @Suppress("UNCHECKED_CAST")
             val extraKeys = extra[0] as String?
@@ -86,6 +88,7 @@ class TerminalSettingsViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TerminalSettingsUiState())
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: TerminalSettingsUiEvent) {
         viewModelScope.launch {
             when (event) {

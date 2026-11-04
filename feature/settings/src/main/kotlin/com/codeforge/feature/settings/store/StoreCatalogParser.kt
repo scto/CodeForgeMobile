@@ -18,6 +18,7 @@ import kotlinx.serialization.json.jsonObject
 object StoreCatalogParser {
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
+    /** Liest den Katalog aus JSON; wählt Texte in [language]. Fehler bei nicht unterstütztem Schema. */
     fun parse(body: String, language: String): Result<StoreCatalog> = runCatching {
         val root = json.parseToJsonElement(body).jsonObject
         val schema = (root["schema"] as? JsonPrimitive)?.intOrNull ?: 1

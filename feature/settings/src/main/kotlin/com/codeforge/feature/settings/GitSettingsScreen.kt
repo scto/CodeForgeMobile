@@ -50,6 +50,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Route der Git-Einstellungen. */
 @Composable
 fun GitSettingsRoute(
     modifier: Modifier = Modifier,

@@ -33,6 +33,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Route der Terminal-Einstellungen. */
 @Composable
 fun TerminalSettingsRoute(
     modifier: Modifier = Modifier,

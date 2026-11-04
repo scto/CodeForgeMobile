@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel der Git-Einstellungen. */
 @HiltViewModel
 class GitSettingsViewModel @Inject constructor(
     private val repository: GitSettingsRepository,
@@ -30,9 +31,11 @@ class GitSettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GitSettingsUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<GitSettingsUiState> = _uiState.asStateFlow()
 
     private val _effects = Channel<GitSettingsUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects: Flow<GitSettingsUiEffect> = _effects.receiveAsFlow()
 
     init {
@@ -54,6 +57,7 @@ class GitSettingsViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: GitSettingsUiEvent) {
         when (event) {
             is GitSettingsUiEvent.NameChanged -> _uiState.update { it.copy(name = event.value) }

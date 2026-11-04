@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** ViewModel der KI-Einstellungen. */
 @HiltViewModel
 class AiSettingsViewModel @Inject constructor(
     private val repository: AiRepository,
@@ -26,6 +27,7 @@ class AiSettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AiSettingsUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<AiSettingsUiState> = _uiState.asStateFlow()
 
     init {
@@ -54,6 +56,7 @@ class AiSettingsViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: AiSettingsUiEvent) {
         when (event) {
             is AiSettingsUiEvent.ApiKeyChanged -> edit(event.provider) {

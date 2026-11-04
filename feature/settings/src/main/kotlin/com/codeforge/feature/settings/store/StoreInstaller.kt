@@ -13,8 +13,11 @@ import javax.inject.Inject
 
 /** Ergebnis der Installation eines Store-Plugins. */
 sealed interface StoreInstallResult {
+    /** Installiert. */
     data class Installed(val name: String) : StoreInstallResult
+    /** SHA-256 stimmt nicht überein. */
     data object HashMismatch : StoreInstallResult
+    /** Fehlgeschlagen. */
     data class Failed(val message: String) : StoreInstallResult
 }
 
@@ -33,6 +36,7 @@ class StoreInstaller internal constructor(
         @ApplicationContext context: Context,
     ) : this(downloader as FileDownloader, plugins, File(context.cacheDir, "store"))
 
+    /** Lädt den Eintrag, prüft SHA-256 und installiert ihn als Plugin. */
     suspend fun install(
         item: StoreItem,
         onDownloadProgress: (Float) -> Unit = {},

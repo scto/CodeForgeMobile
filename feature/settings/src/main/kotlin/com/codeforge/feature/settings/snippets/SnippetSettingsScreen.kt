@@ -77,6 +77,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Route der Snippet-Einstellungen. */
 @Composable
 fun SnippetSettingsRoute(
     modifier: Modifier = Modifier,
@@ -92,6 +93,7 @@ fun SnippetSettingsRoute(
     )
 }
 
+/** Bildschirm der Snippet-Einstellungen mit Liste, Filter und Dialogen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SnippetSettingsScreen(

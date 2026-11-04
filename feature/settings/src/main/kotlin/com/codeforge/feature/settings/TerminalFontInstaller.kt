@@ -14,6 +14,7 @@ import java.io.InputStream
  */
 class TerminalFontInstaller(private val target: File = defaultTarget()) {
 
+    /** Ob die Schriftdatei bereits installiert ist. */
     val isInstalled: Boolean get() = target.isFile
 
     /** `true`, wenn [input] eine gültige Schrift war und installiert wurde; die alte Schrift bleibt sonst unverändert. */

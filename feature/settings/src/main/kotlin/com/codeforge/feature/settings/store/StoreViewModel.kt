@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 
+/** ViewModel des Stores (Laden, Installation, Server-Status). */
 @HiltViewModel
 class StoreViewModel @Inject constructor(
     private val repository: StoreRepository,
@@ -29,6 +30,7 @@ class StoreViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StoreUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<StoreUiState> = _uiState.asStateFlow()
 
     init {
@@ -81,6 +83,7 @@ class StoreViewModel @Inject constructor(
         coordinator.install(pkg)
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: StoreUiEvent) {
         when (event) {
             StoreUiEvent.Reload -> load()

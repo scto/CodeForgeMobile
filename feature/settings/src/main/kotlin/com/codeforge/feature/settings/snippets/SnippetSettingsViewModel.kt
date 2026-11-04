@@ -18,12 +18,14 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
+/** ViewModel der Snippet-Einstellungen (Liste, Bearbeiten, Import/Export). */
 @HiltViewModel
 class SnippetSettingsViewModel @Inject constructor(
     private val snippetRepository: SnippetRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SnippetSettingsUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<SnippetSettingsUiState> = _uiState.asStateFlow()
 
     init {
@@ -38,6 +40,7 @@ class SnippetSettingsViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: SnippetSettingsUiEvent) {
         when (event) {
             is SnippetSettingsUiEvent.SearchChanged -> {
