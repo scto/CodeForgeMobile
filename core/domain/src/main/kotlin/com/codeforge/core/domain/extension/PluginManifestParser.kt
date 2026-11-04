@@ -18,6 +18,7 @@ object PluginManifestParser {
 
     private val ID_REGEX = Regex("[A-Za-z0-9][A-Za-z0-9._-]*")
 
+    /** Parst und validiert ein Plugin-Manifest (JSON); Fehler werden als Failure geliefert. */
     fun parse(text: String): Result<PluginManifest> = runCatching {
         val root = Json.parseToJsonElement(text) as? JsonObject
             ?: throw IllegalArgumentException("plugin.json muss ein JSON-Objekt sein")

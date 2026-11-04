@@ -4,6 +4,7 @@
  */
 package com.codeforge.core.domain.model
 
+/** Log-Level wie in Logcat (Buchstabe und Priorität). */
 enum class LogLevel(val letter: Char, val priority: Int) {
     VERBOSE('V', 2),
     DEBUG('D', 3),
@@ -13,6 +14,7 @@ enum class LogLevel(val letter: Char, val priority: Int) {
     FATAL('F', 7);
 
     companion object {
+        /** Ordnet einen Level-Buchstaben zu (`A` zählt als FATAL, Unbekanntes als DEBUG). */
         fun fromLetter(c: Char): LogLevel = when (c.uppercaseChar()) {
             'V' -> VERBOSE
             'D' -> DEBUG
@@ -25,6 +27,7 @@ enum class LogLevel(val letter: Char, val priority: Int) {
     }
 }
 
+/** Ein Stack-Frame einer Ausnahme mit Klasse, Methode, Datei, Zeile und Originaltext. */
 data class StackFrame(
     val className: String,
     val methodName: String,
@@ -33,6 +36,7 @@ data class StackFrame(
     val rawLine: String
 )
 
+/** Ein Logcat-Eintrag; [isCrash] markiert Abstürze, [stackFrames] die geparsten Frames. */
 data class LogEntry(
     val id: Long,
     val timestamp: String,
@@ -44,16 +48,19 @@ data class LogEntry(
     val isCrash: Boolean = false,
     val stackFrames: List<StackFrame> = emptyList()
 ) {
+    /** Eintrag als eine Textzeile im Logcat-Format. */
     val fullFormattedText: String
         get() = "$timestamp $pid $tid ${level.letter} $tag: $message"
 }
 
+/** Quelle der Logs: eigener Prozess, `READ_LOGS`-Berechtigung oder ADB über Loopback. */
 enum class LogcatSource {
     OWN_PROCESS,
     READ_LOGS_PERMISSION,
     ADB_LOOPBACK
 }
 
+/** Ob eine [LogcatSource] nutzbar ist, samt Ressourcen-IDs für Erklärung und Hilfetext. */
 data class LogcatSourceAvailability(
     val source: LogcatSource,
     val isAvailable: Boolean,
@@ -61,6 +68,7 @@ data class LogcatSourceAvailability(
     val helpInstructionResId: Int? = null
 )
 
+/** Filter für Logcat-Einträge (Paket, PID, Mindest-Level, Tag, Text, nur Abstürze). */
 data class LogcatFilter(
     val packageName: String = "",
     val targetPid: Int? = null,
@@ -69,6 +77,7 @@ data class LogcatFilter(
     val textQuery: String = "",
     val crashesOnly: Boolean = false
 ) {
+    /** Ob [entry] alle gesetzten Filterkriterien erfüllt. */
     fun matches(entry: LogEntry): Boolean {
         if (entry.level.priority < minLevel.priority) return false
         if (crashesOnly && !entry.isCrash) return false

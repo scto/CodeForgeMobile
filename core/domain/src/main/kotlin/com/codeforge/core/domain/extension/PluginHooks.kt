@@ -9,10 +9,15 @@ import kotlinx.coroutines.flow.StateFlow
 
 /** Ereignisse, die App-Module (Editor, Git) an Plugins melden. */
 sealed interface HostEvent {
+    /** Eine Datei wurde geöffnet. */
     data class FileOpened(val path: String) : HostEvent
+    /** Eine Datei wurde gespeichert. */
     data class FileSaved(val path: String) : HostEvent
+    /** Eine Datei wurde geschlossen. */
     data class FileClosed(val path: String) : HostEvent
+    /** Ein Commit wurde erstellt. */
     data class GitCommitted(val repoPath: String, val message: String) : HostEvent
+    /** Der aktuelle Branch hat gewechselt. */
     data class GitBranchChanged(val repoPath: String, val branch: String) : HostEvent
 
     /** Benötigte Plugin-Berechtigung (siehe [PluginPermissions]). */
@@ -25,17 +30,22 @@ sealed interface HostEvent {
 
 /** Eingang für Ereignisse; Standard im Test/ohne Plugin-System ist [NoOpPluginEventSink]. */
 interface PluginEventSink {
+    /** Meldet [event] an die Plugins (nur an solche mit passender Berechtigung). */
     fun publish(event: HostEvent)
 }
 
+/** Ereignissenke ohne Wirkung (Tests, deaktiviertes Plugin-System). */
 object NoOpPluginEventSink : PluginEventSink {
     override fun publish(event: HostEvent) = Unit
 }
 
+/** Ort, an dem ein Plugin-Menüeintrag erscheint: Editor-Menü oder Kontextmenü des Dateibaums. */
 enum class PluginMenuTarget { EDITOR_MENU, FILE_CONTEXT_MENU }
 
+/** Ein von einem Plugin registrierter Befehl. */
 data class PluginCommandInfo(val pluginId: String, val commandId: String, val title: String)
 
+/** Menüeintrag eines Plugins, der den Befehl [commandId] auslöst. */
 data class PluginMenuEntry(
     val pluginId: String,
     val id: String,
@@ -46,7 +56,9 @@ data class PluginMenuEntry(
 
 /** Was die UI von Code-Plugins sieht: registrierte Befehle/Menüeinträge, Ausführung, Meldungen. */
 interface PluginUiRepository {
+    /** Alle registrierten Plugin-Befehle. */
     val commands: StateFlow<List<PluginCommandInfo>>
+    /** Alle Plugin-Menüeinträge. */
     val menuEntries: StateFlow<List<PluginMenuEntry>>
 
     /** Kurze Nachrichten von Plugins (`showMessage`), von der UI als Snackbar gezeigt. */
@@ -64,6 +76,7 @@ interface PluginUiRepository {
 object PluginPermissionPolicy {
     private val LEGACY_OPEN = setOf(PluginPermissions.SHELL, PluginPermissions.LSP)
 
+    /** Ob [permission] für ein Plugin der [apiVersion] mit den Berechtigungen [granted] erlaubt ist. */
     fun isAllowed(apiVersion: Int, granted: Set<String>, permission: String): Boolean =
         permission in granted || (apiVersion < 2 && permission in LEGACY_OPEN)
 }

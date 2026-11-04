@@ -14,6 +14,7 @@ enum class ProjectTemplateKind {
     COMPOSE_ACTIVITY
 }
 
+/** Programmiersprache eines neuen Projekts. */
 enum class ProjectLanguage { KOTLIN, JAVA }
 
 /**
@@ -41,11 +42,14 @@ data class ProjectRequest(
     val initGit: Boolean = true
 ) {
     companion object {
+        /** Standardwert für die minimale SDK-Version. */
         const val DEFAULT_MIN_SDK = 21
+        /** Auswählbare minimale SDK-Versionen. */
         val MIN_SDK_OPTIONS = listOf(21, 24, 26, 28, 29, 30, 33)
     }
 }
 
+/** Ergebnis der Projekterstellung: Wurzel, Name, Modulzahl und Git-Status. */
 data class ProjectHandle(
     val rootPath: String,
     val projectName: String,

@@ -4,6 +4,7 @@
  */
 package com.codeforge.core.domain.model
 
+/** Ein installiertes Plugin mit Metadaten, Berechtigungen und Aktivierungsstatus. */
 data class InstalledPlugin(
     val id: String,
     val name: String,
@@ -19,11 +20,16 @@ data class InstalledPlugin(
     /** IDs der Plugins, die dieses Bundle (`extensionPack`) zusammenfasst. */
     val packMembers: List<String> = emptyList()
 ) {
+    /** Ob das Plugin keinen ausführbaren Code enthält. */
     val isDeclarativeOnly: Boolean get() = entryPointClass == null
 }
 
+/** Ereignis einer Plugin-Installation. */
 sealed interface PluginInstallEvent {
+    /** Fortschritt in Prozent. */
     data class Progress(val percent: Int) : PluginInstallEvent
+    /** Installation erfolgreich. */
     data class Success(val plugin: InstalledPlugin) : PluginInstallEvent
+    /** Installation fehlgeschlagen. */
     data class Failed(val message: String) : PluginInstallEvent
 }

@@ -1,6 +1,7 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
+/** Parser für die Baumausgabe von `gradle dependencies`. */
 object GradleDependencyTreeParser {
 
     private class NodeBuilder(
@@ -182,6 +183,7 @@ object GradleDependencyTreeParser {
         }
     }
 
+    /** Zerlegt den Text eines Baumknotens in Koordinate, Versionen und Markierungen. */
     fun parseNodeContent(rawContent: String): DependencyNode {
         var content = rawContent.trim()
 

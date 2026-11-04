@@ -1,6 +1,7 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
+/** Momentaufnahme einer LSP-Sitzung (Server, Workspace, Zustand, offene Dokumente). */
 data class LspSessionInfo(
     val sessionId: String,
     val serverId: String,

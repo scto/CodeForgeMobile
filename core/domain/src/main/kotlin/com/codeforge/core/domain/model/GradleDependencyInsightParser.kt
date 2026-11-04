@@ -1,8 +1,14 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
+/** Parser für die Ausgabe von `gradle dependencyInsight`. */
 object GradleDependencyInsightParser {
 
+    /**
+     * Parst [output] zu Auswahlgründen, aufgelöster Version und Pfaden zur Wurzel.
+     *
+     * @param targetCoordinate Gesuchte Koordinate, falls nicht aus der Ausgabe ableitbar.
+     */
     fun parse(output: String, targetCoordinate: String = ""): DependencyInsight {
         val lines = output.lines()
         val selectionReasons = mutableListOf<String>()

@@ -1,22 +1,26 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
+/** Art eines Diff-Abschnitts. */
 enum class WordDiffType {
     UNCHANGED,
     ADDED,
     REMOVED
 }
 
+/** Textabschnitt mit Diff-Art. */
 data class WordDiffSpan(
     val text: String,
     val type: WordDiffType
 )
 
+/** Wortweiser Diff für die Konfliktansicht. */
 object WordDiff {
 
     private val TOKEN_REGEX = Regex("""\w+|[^\w\s]+|\s+""")
     private const val MAX_COMPARE_MATRIX = 20000
 
+    /** Zerlegt Text in Wörter, Satzzeichen und Leerraum. */
     fun tokenize(text: String): List<String> =
         TOKEN_REGEX.findAll(text).map { it.value }.toList()
 

@@ -16,12 +16,16 @@ object ProjectInputValidator {
         "volatile", "while", "true", "false", "null"
     )
 
+    /** Fehlerarten bei der Projekteingabe. */
     enum class Error { INVALID_NAME, INVALID_PACKAGE, RESERVED_PACKAGE_SEGMENT, DIRECTORY_EXISTS, TARGET_BLANK, COMPOSE_REQUIRES_KOTLIN }
 
+    /** Ob [name] ein gültiger Projektname ist. */
     fun isValidProjectName(name: String): Boolean = PROJECT_NAME.matches(name)
 
+    /** Ob [pkg] ein gültiger Package-Name ist. */
     fun isValidPackageName(pkg: String): Boolean = PACKAGE_NAME.matches(pkg)
 
+    /** Ob ein Package-Segment ein reserviertes Java-Schlüsselwort ist. */
     fun hasReservedSegment(pkg: String): Boolean = pkg.split('.').any { it in JAVA_KEYWORDS }
 
     /** Schlägt aus Vorlagenname und Projektname einen Package-Namen vor (`com.<vorlage>.<projekt>`). */
@@ -48,5 +52,6 @@ object ProjectInputValidator {
         return errors
     }
 
+    /** Eingabefelder, denen ein Fehler zugeordnet wird. */
     enum class Field { PROJECT_NAME, PACKAGE_NAME, TARGET_DIR, LANGUAGE }
 }

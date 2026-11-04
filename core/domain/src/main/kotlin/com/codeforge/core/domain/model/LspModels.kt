@@ -1,12 +1,16 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
+/** Position in einem Dokument (nullbasierte Zeile und Zeichen). */
 data class LspPosition(val line: Int, val character: Int)
 
+/** Bereich zwischen zwei Positionen. */
 data class LspRange(val start: LspPosition, val end: LspPosition)
 
+/** Schweregrad einer Diagnose. */
 enum class DiagnosticSeverity { ERROR, WARNING, INFORMATION, HINT }
 
+/** Diagnose des Language-Servers (Bereich, Schweregrad, Text). */
 data class LspDiagnostic(
     val range: LspRange,
     val severity: DiagnosticSeverity,
@@ -14,12 +18,14 @@ data class LspDiagnostic(
     val source: String? = null
 )
 
+/** Ein Vorschlag der Code-Vervollständigung. */
 data class LspCompletionItem(
     val label: String,
     val detail: String? = null,
     val insertText: String = label
 )
 
+/** Hover-Information mit optionalem Bereich. */
 data class LspHoverInfo(val contents: String, val range: LspRange? = null)
 
 /** Eine Signatur aus `textDocument/signatureHelp`; [parameters] sind die Parameter-Labels in Reihenfolge. */
@@ -30,14 +36,17 @@ data class LspSignature(
     val activeParameter: Int? = null
 )
 
+/** Signaturhilfe für einen Funktionsaufruf. */
 data class LspSignatureHelp(
     val signatures: List<LspSignature>,
     val activeSignature: Int = 0,
     val activeParameter: Int = 0
 )
 
+/** Zustand eines Language-Servers. */
 enum class LspServerState { STOPPED, STARTING, RUNNING, FAILED, ERROR }
 
+/** Art eines Symbols (Werte nach LSP-Spezifikation). */
 enum class LspSymbolKind(val value: Int) {
     FILE(1),
     MODULE(2),
@@ -67,11 +76,13 @@ enum class LspSymbolKind(val value: Int) {
     TYPE_PARAMETER(26);
 
     companion object {
+        /** Liefert die Symbolart zum LSP-Zahlenwert. */
         fun fromValue(value: Int): LspSymbolKind =
             entries.firstOrNull { it.value == value } ?: VARIABLE
     }
 }
 
+/** Symbol eines Dokuments (hierarchisch). */
 data class LspDocumentSymbol(
     val name: String,
     val detail: String? = null,
@@ -81,23 +92,29 @@ data class LspDocumentSymbol(
     val children: List<LspDocumentSymbol> = emptyList()
 )
 
+/** Ort in einer Datei (URI und Bereich). */
 data class LspLocation(val uri: String, val range: LspRange)
 
+/** Textänderung: [range] wird durch [newText] ersetzt. */
 data class LspTextEdit(val range: LspRange, val newText: String)
 
+/** Änderungen an einem Dokument. */
 data class LspTextDocumentEdit(
     val uri: String,
     val version: Int? = null,
     val edits: List<LspTextEdit>
 )
 
+/** Dateioperation eines Workspace-Edits. */
 sealed interface LspFileOperation {
+    /** Datei anlegen. */
     data class CreateFile(
         val uri: String,
         val overwrite: Boolean = false,
         val ignoreIfExists: Boolean = false
     ) : LspFileOperation
 
+    /** Datei umbenennen oder verschieben. */
     data class RenameFile(
         val oldUri: String,
         val newUri: String,
@@ -105,6 +122,7 @@ sealed interface LspFileOperation {
         val ignoreIfExists: Boolean = false
     ) : LspFileOperation
 
+    /** Datei löschen. */
     data class DeleteFile(
         val uri: String,
         val recursive: Boolean = false,
@@ -112,11 +130,15 @@ sealed interface LspFileOperation {
     ) : LspFileOperation
 }
 
+/** Einzelne Änderung eines Workspace-Edits: Textänderung oder Dateioperation. */
 sealed interface LspDocumentChange {
+    /** Textänderung an einem Dokument. */
     data class DocumentEdit(val edit: LspTextDocumentEdit) : LspDocumentChange
+    /** Dateioperation. */
     data class FileOp(val operation: LspFileOperation) : LspDocumentChange
 }
 
+/** Änderungen über mehrere Dateien (z. B. Rename, Code-Action). */
 data class LspWorkspaceEdit(
     val changes: Map<String, List<LspTextEdit>> = emptyMap(),
     val documentChanges: List<LspDocumentChange> = emptyList()
@@ -135,16 +157,19 @@ data class LspWorkspaceEdit(
         return result
     }
 
+    /** Alle Dateioperationen des Edits in Reihenfolge. */
     val allFileOperations: List<LspFileOperation>
         get() = documentChanges.mapNotNull { (it as? LspDocumentChange.FileOp)?.operation }
 }
 
+/** Ein vom Server angebotener Befehl. */
 data class LspCommand(
     val title: String,
     val command: String,
     val arguments: List<Any?> = emptyList()
 )
 
+/** Code-Action (Quick-Fix/Refactoring) mit Edit und/oder Befehl. */
 data class LspCodeAction(
     val title: String,
     val kind: String? = null,
@@ -154,6 +179,7 @@ data class LspCodeAction(
     val command: LspCommand? = null
 )
 
+/** Ergebnis der Rename-Vorbereitung: veränderbarer Bereich und Platzhalter. */
 data class LspPrepareRenameResult(
     val range: LspRange,
     val placeholder: String
@@ -172,6 +198,7 @@ data class LspFoldingRange(
     val collapsedText: String? = null
 )
 
+/** Art eines Inlay-Hints. */
 enum class LspInlayHintKind { TYPE, PARAMETER }
 
 /** `textDocument/inlayHint`: [label] ist bereits aus Label-Teilen zusammengesetzt; Padding wie im Protokoll. */
@@ -192,6 +219,7 @@ data class LspInlayHint(
         }
 }
 
+/** Fähigkeiten, die ein Server beim Start meldet. */
 data class LspServerCapabilities(
     val codeActionProvider: Boolean = false,
     val renameProvider: Boolean = false,

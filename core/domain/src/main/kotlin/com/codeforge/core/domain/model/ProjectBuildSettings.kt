@@ -1,5 +1,6 @@
 package com.codeforge.core.domain.model
 
+/** Einstellungen eines Build-Typs (Minify, Ressourcen-Shrinking, PNG-Crunch, debuggable, ProGuard-Regeln, Signierung). */
 data class BuildTypeSettings(
     val minifyEnabled: Boolean = false,
     val shrinkResources: Boolean = false,
@@ -9,6 +10,7 @@ data class BuildTypeSettings(
     val signingEnabled: Boolean = false
 )
 
+/** Build-Einstellungen eines Projekts für Release und Debug. */
 data class ProjectBuildSettings(
     val projectPath: String,
     val release: BuildTypeSettings = BuildTypeSettings(

@@ -65,6 +65,7 @@ object IconThemeFileParser {
         p.isNotBlank() && !p.startsWith("/") && !p.startsWith("\\") && p.split('/', '\\').none { it == ".." } &&
             p.substringAfterLast('.', "").lowercase() in ALLOWED
 
+    /** Parst eine Icon-Theme-Datei; ungültige oder unsichere Pfade führen zu einem Fehler. */
     fun parse(text: String): Result<IconThemeFile> = runCatching {
         val root = Json.parseToJsonElement(text) as? JsonObject
             ?: throw IllegalArgumentException("Icon-Theme muss ein JSON-Objekt sein")
@@ -101,5 +102,6 @@ data class ExtensionIconTheme(
     val baseDir: String,
     val icons: IconThemeFile
 ) {
+    /** Eindeutiger Schlüssel `ext:<plugin>/<theme>` des Icon-Themes. */
     val key: String get() = ExtensionColorTheme.keyOf(pluginId, themeId)
 }

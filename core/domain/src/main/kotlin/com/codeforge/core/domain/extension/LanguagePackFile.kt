@@ -15,9 +15,13 @@ import kotlinx.serialization.json.contentOrNull
  * Der Name ist der Ressourcenname aus `core/resources/src/main/res/values/strings.xml`.
  */
 object LanguagePackFileParser {
+    /** Höchstzahl an Einträgen eines Sprachpakets. */
     const val MAX_ENTRIES = 20_000
     private val NAME = Regex("[A-Za-z][A-Za-z0-9_]*")
 
+    /**
+     * Parst ein Sprachpaket zu einer Map aus Ressourcenname und Text; ungültige Namen, Nicht-Strings oder leere Pakete ergeben einen Fehler.
+     */
     fun parse(text: String): Result<Map<String, String>> = runCatching {
         val root = Json.parseToJsonElement(text) as? JsonObject
             ?: throw IllegalArgumentException("Sprachpaket muss ein JSON-Objekt sein")
@@ -43,5 +47,6 @@ data class ExtensionLanguagePack(
     val label: String,
     val strings: Map<String, String>
 ) {
+    /** Eindeutiger Schlüssel `ext:<plugin>/<locale>` des Sprachpakets. */
     val key: String get() = ExtensionColorTheme.keyOf(pluginId, locale)
 }

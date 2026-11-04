@@ -26,6 +26,7 @@ object RequirementPolicy {
         RequirementManager.PIP to emptySet()
     )
 
+    /** Ob Store-Plugins das angeforderte Paket installieren lassen dürfen (Allowlist je Manager). */
     fun isStoreAllowed(r: RequirementContribution): Boolean = r.name in STORE_ALLOWED[r.manager].orEmpty()
 }
 
@@ -40,7 +41,9 @@ fun ToolContribution.expandCommand(projectDir: String, pluginDir: String, home: 
 
 /** Ereignisse eines Werkzeug- bzw. Installationslaufs. */
 sealed interface ToolRunEvent {
+    /** Eine Ausgabezeile. */
     data class Line(val text: String) : ToolRunEvent
+    /** Ende des Laufs mit Exit-Code; [timedOut] bei Zeitüberschreitung. */
     data class Finished(val exitCode: Int, val timedOut: Boolean = false) : ToolRunEvent
 }
 

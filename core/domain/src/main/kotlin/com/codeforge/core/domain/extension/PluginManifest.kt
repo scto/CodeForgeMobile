@@ -6,21 +6,32 @@ package com.codeforge.core.domain.extension
 
 /** Versionen des Manifest-/SDK-Vertrags. v1 = nur id/name/version/entryPointClass, v2 = + contributes/permissions. */
 object PluginApiVersion {
+    /** Aktuelle Version des Plugin-API-Vertrags. */
     const val CURRENT: Int = 2
 }
 
 /** Berechtigungen, die ein Code-Plugin im Manifest anfordern muss (rein deklarative Plugins brauchen keine). */
 object PluginPermissions {
+    /** Befehle registrieren. */
     const val COMMANDS = "commands"
+    /** Menüeinträge beisteuern. */
     const val MENUS = "menus"
+    /** Dateiereignisse empfangen. */
     const val FILE_EVENTS = "file-events"
+    /** Git-Ereignisse empfangen. */
     const val GIT_EVENTS = "git-events"
+    /** Shell-Befehle ausführen. */
     const val SHELL = "shell"
+    /** Auf Language-Server zugreifen. */
     const val LSP = "lsp"
 
+    /** Menge aller bekannten Berechtigungen. */
     val ALL: Set<String> = setOf(COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP)
 }
 
+/**
+ * Manifest eines Plugins (`plugin.json`): Identität, Version, API-Version, optionaler Einstiegspunkt, Berechtigungen und Contributions.
+ */
 data class PluginManifest(
     val id: String,
     val name: String,
@@ -36,6 +47,7 @@ data class PluginManifest(
     val isDeclarativeOnly: Boolean get() = entryPointClass == null
 }
 
+/** Beiträge eines Plugins zur IDE (Themes, Sprachpakete, Grammatiken, Snippets, LSP-Server, Formatter, Werkzeuge, Voraussetzungen). */
 data class Contributes(
     val colorThemes: List<ColorThemeContribution> = emptyList(),
     val iconThemes: List<IconThemeContribution> = emptyList(),
@@ -51,6 +63,7 @@ data class Contributes(
     /** Programme, die dieses Plugin benötigt und die die App nach Bestätigung installieren kann. */
     val requires: List<RequirementContribution> = emptyList()
 ) {
+    /** Ob das Plugin keinerlei Contributions enthält. */
     val isEmpty: Boolean
         get() = colorThemes.isEmpty() && iconThemes.isEmpty() && languagePacks.isEmpty() &&
             grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty() &&
@@ -79,6 +92,7 @@ data class LanguagePackContribution(
     val path: String
 )
 
+/** Beitrag einer TextMate-Grammatik für eine Sprache. */
 data class GrammarContribution(
     val languageId: String,
     val scopeName: String,
@@ -86,6 +100,7 @@ data class GrammarContribution(
     val extensions: List<String> = emptyList()
 )
 
+/** Beitrag einer Snippet-Datei. */
 data class SnippetContribution(
     val languageId: String,
     val path: String
@@ -133,7 +148,9 @@ data class ToolPrompt(
     val textLabel: String = "",
     val textHint: String = ""
 ) {
+    /** Ob das Werkzeug eine Auswahlliste anbietet. */
     val hasOptions: Boolean get() = options.isNotEmpty()
+    /** Ob zusätzlich ein Textfeld angezeigt wird. */
     val hasText: Boolean get() = !hasOptions || textLabel.isNotBlank()
 
     /** Gewählter Wert; unbekannte oder leere Vorgaben fallen auf die erste Option zurück. */
@@ -151,6 +168,7 @@ data class ToolPrompt(
         return if (options.any { it.value == first }) trimmed.substringAfter(' ', "").trim() else trimmed.trim()
     }
 
+    /** Setzt Auswahl und Text zum Aufrufwert `"<auswahl> <text>"` zusammen. */
     fun compose(option: String, text: String): String = if (text.isBlank()) option else "$option ${text.trim()}"
 }
 
@@ -168,10 +186,12 @@ data class ToolContribution(
     val timeoutSeconds: Int = 120
 )
 
+/** Paketmanager, über den ein Plugin Voraussetzungen anfordern kann. */
 enum class RequirementManager(val id: String) {
     PKG("pkg"), NPM("npm"), PIP("pip");
 
     companion object {
+        /** Liefert den Manager zur [id] oder `null`. */
         fun of(id: String): RequirementManager? = entries.firstOrNull { it.id == id }
     }
 }
