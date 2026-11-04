@@ -6,14 +6,32 @@ site_dir: site
 theme:
   name: material
   language: de
+  # Design wie der CodeForge Store: Farben, Formen und Schrift kommen aus stylesheets/store.css (system-ui statt Webfont)
+  font: false
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
+      primary: custom
+      accent: custom
       toggle: { icon: material/weather-night, name: Dunkles Design }
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
+      primary: custom
+      accent: custom
       toggle: { icon: material/weather-sunny, name: Helles Design }
+  features:
+    - navigation.instant
+    - navigation.top
+    - navigation.sections
+    - content.code.copy
+    - search.highlight
+extra_css:
+  - stylesheets/store.css
 markdown_extensions:
+  - attr_list
+  - md_in_html
   - tables
   - admonition
   - toc: { permalink: true }

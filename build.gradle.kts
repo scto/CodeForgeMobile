@@ -34,6 +34,9 @@ dokka {
     moduleName.set("CodeForgeMobile")
     pluginsConfiguration.html {
         footerMessage.set("CodeForgeMobile – API-Dokumentation")
+        // Aussehen wie der CodeForge Store: Farben/Formen per Stylesheet, Logo ersetzt das Dokka-Symbol
+        customStyleSheets.from(rootProject.file("docs/dokka/store-dokka.css"))
+        customAssets.from(rootProject.file("docs/dokka/logo-icon.svg"))
     }
 }
 

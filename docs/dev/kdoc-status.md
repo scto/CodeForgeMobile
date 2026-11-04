@@ -1,46 +1,43 @@
 # KDoc-Status
 
 Erzeugt mit `python3 scripts/kdoc-gap.py` (Heuristik: öffentliche Deklarationen ohne KDoc je Modul, Format: undokumentiert/gesamt; Konstruktor-Properties und lokale Variablen zählen nicht).
-
 ```
-TOTAL decl 3902 undoc 1731
-feature/settings                           290/363
-feature/layoutdesigner                     242/297
-feature/editor                             205/267
-feature/git                                141/156
-feature/build                              133/146
-feature/signing                             75/76
-feature/composepreview                      73/92
-feature/filetree                            62/83
-feature/x2c                                 57/74
-feature/debug                               45/46
-feature/welcome                             37/42
-feature/assetstudio                         36/68
-app                                         32/42
-feature/dependencies                        31/31
-feature/j2k                                 29/29
-feature/search                              28/30
-feature/onboarding                          27/32
-feature/hardcodedstrings                    26/26
-feature/plugins                             25/28
-feature/projectwizard                       25/27
-feature/projectsettings                     21/21
-feature/modulemaker                         18/20
-feature/themebuilder                        16/18
-core/designsystem                           15/49
-feature/sdkmanager                          14/14
-feature/terminal                            11/11
-feature/dependencyupdates                    7/11
-libs/template-engine                         5/84
-core/domain                                  4/816
-templates                                    1/1
+TOTAL decl 3902 undoc 0
+app                                          0/42
 core/common                                  0/37
 core/data                                    0/69
 core/datastore                               0/18
+core/designsystem                            0/49
+core/domain                                  0/816
 core/navigation                              0/35
 core/resources                               0/21
 core/testing                                 0/4
 core/ui                                      0/21
+feature/assetstudio                          0/68
+feature/build                                0/146
+feature/composepreview                       0/92
+feature/debug                                0/46
+feature/dependencies                         0/31
+feature/dependencyupdates                    0/11
+feature/editor                               0/267
+feature/filetree                             0/83
+feature/git                                  0/156
+feature/hardcodedstrings                     0/26
+feature/j2k                                  0/29
+feature/layoutdesigner                       0/297
+feature/modulemaker                          0/20
+feature/onboarding                           0/32
+feature/plugins                              0/28
+feature/projectsettings                      0/21
+feature/projectwizard                        0/27
+feature/sdkmanager                           0/14
+feature/search                               0/30
+feature/settings                             0/363
+feature/signing                              0/76
+feature/terminal                             0/11
+feature/themebuilder                         0/18
+feature/welcome                              0/42
+feature/x2c                                  0/74
 libs/ai-client                               0/21
 libs/code-tools                              0/74
 libs/debug-client                            0/45
@@ -54,6 +51,8 @@ libs/j2k                                     0/45
 libs/lsp-client                              0/84
 libs/plugin-api                              0/29
 libs/plugin-impl                             0/26
+libs/template-engine                         0/84
 libs/terminal-engine                         0/47
 libs/x2c                                     0/145
+templates                                    0/1
 ```

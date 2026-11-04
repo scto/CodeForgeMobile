@@ -1,0 +1,97 @@
+/* Design wie der CodeForge Store (https://scto.github.io/codeforge-store/): Material-3-Violett, Pillen-Navigation,
+   Karten mit 20 px Radius, Header mit Weichzeichner. Überschreibt die Farben/Formen von MkDocs Material. */
+:root, [data-md-color-scheme="default"] {
+  --cf-bg: #fdfbff; --cf-surface: #ffffff; --cf-surface-2: #f3eff7; --cf-text: #1c1b1f; --cf-muted: #605d66;
+  --cf-primary: #6750a4; --cf-on-primary: #ffffff; --cf-container: #eaddff; --cf-border: #e3dfe8;
+  --cf-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 4px 16px rgb(0 0 0 / .06);
+}
+[data-md-color-scheme="slate"] {
+  --cf-bg: #141218; --cf-surface: #1d1b20; --cf-surface-2: #2b2930; --cf-text: #e6e0e9; --cf-muted: #aaa5b1;
+  --cf-primary: #d0bcff; --cf-on-primary: #381e72; --cf-container: #4f378b; --cf-border: #3a3740;
+  --cf-shadow: 0 1px 2px rgb(0 0 0 / .4), 0 4px 16px rgb(0 0 0 / .35);
+}
+[data-md-color-primary="custom"], [data-md-color-scheme] {
+  --md-primary-fg-color: var(--cf-primary);
+  --md-primary-fg-color--light: var(--cf-container);
+  --md-primary-fg-color--dark: var(--cf-primary);
+  --md-primary-bg-color: var(--cf-text);
+  --md-accent-fg-color: var(--cf-primary);
+  --md-default-bg-color: var(--cf-bg);
+  --md-default-fg-color: var(--cf-text);
+  --md-default-fg-color--light: var(--cf-muted);
+  --md-default-fg-color--lighter: var(--cf-border);
+  --md-default-fg-color--lightest: var(--cf-surface-2);
+  --md-typeset-color: var(--cf-text);
+  --md-typeset-a-color: var(--cf-primary);
+  --md-code-bg-color: var(--cf-surface-2);
+  --md-code-fg-color: var(--cf-text);
+  --md-footer-bg-color: var(--cf-bg);
+  --md-footer-bg-color--dark: var(--cf-bg);
+  --md-footer-fg-color: var(--cf-muted);
+  --md-footer-fg-color--light: var(--cf-muted);
+  --md-text-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+body, .md-typeset { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+body { background: var(--cf-bg); color: var(--cf-text); }
+
+/* Header: Oberfläche mit Weichzeichner und Linie, wie im Store */
+.md-header { background: color-mix(in srgb, var(--cf-surface) 88%, transparent); backdrop-filter: blur(10px);
+  color: var(--cf-text); border-bottom: 1px solid var(--cf-border); box-shadow: none; }
+.md-header__title { font-weight: 650; }
+.md-header__button.md-logo img, .md-header__button.md-logo svg { height: 2rem; width: 2rem; }
+.md-header__button:hover { background: var(--cf-surface-2); border-radius: 50%; }
+.md-search__form { background: var(--cf-surface); border: 1px solid var(--cf-border); border-radius: 28px; }
+.md-search__input::placeholder { color: var(--cf-muted); }
+.md-search__output { border-radius: 0 0 20px 20px; }
+.md-tabs { background: transparent; color: var(--cf-text); border-bottom: 1px solid var(--cf-border); }
+
+/* Seitenleiste: Pillen, aktive Seite als Container-Farbe */
+.md-nav__link { border-radius: 28px; padding: .5rem .9rem; }
+.md-nav__link:hover { background: var(--cf-surface-2); color: var(--cf-text); }
+.md-nav__item .md-nav__link--active, .md-nav__link--active { background: var(--cf-container); color: var(--cf-text); font-weight: 600; }
+.md-nav--primary .md-nav__title, .md-nav__title { color: var(--cf-muted); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; }
+.md-sidebar__scrollwrap { scrollbar-color: var(--cf-border) transparent; }
+@media (max-width: 76.1875em) {
+  .md-nav--primary, .md-nav--primary .md-nav { background: var(--cf-surface); }
+  .md-nav--primary .md-nav__title { background: var(--cf-surface); color: var(--cf-muted); box-shadow: none; }
+}
+
+/* Inhalt */
+.md-typeset h1 { font-weight: 650; color: var(--cf-text); letter-spacing: 0; }
+.md-typeset a { text-decoration-thickness: 1px; }
+.md-typeset table:not([class]) { border: 1px solid var(--cf-border); border-radius: 16px; overflow: hidden; box-shadow: none;
+  background: var(--cf-surface); display: table; }
+.md-typeset table:not([class]) th { background: var(--cf-surface-2); color: var(--cf-text); font-weight: 600; }
+.md-typeset table:not([class]) td, .md-typeset table:not([class]) th { border-color: var(--cf-border); }
+.md-typeset code { border-radius: 8px; }
+.md-typeset pre > code { border-radius: 16px; }
+.md-typeset .highlight { border: 1px solid var(--cf-border); border-radius: 16px; overflow: hidden; }
+.md-typeset .admonition, .md-typeset details { border-radius: 20px; border-width: 1px; box-shadow: var(--cf-shadow); background: var(--cf-surface); }
+.md-typeset hr { border-color: var(--cf-border); }
+.md-typeset img { border-radius: 16px; }
+.md-source-file, .md-source { color: var(--cf-muted); }
+.md-footer { border-top: 1px solid var(--cf-border); }
+.md-footer-meta { background: var(--cf-bg); }
+.md-copyright { color: var(--cf-muted); }
+
+/* Buttons und Karten (Startseite) */
+.md-typeset .md-button { border-radius: 20px; font-weight: 600; padding: .55em 1.3em; border: 1px solid var(--cf-primary);
+  color: var(--cf-primary); background: transparent; }
+.md-typeset .md-button--primary { background: var(--cf-primary); color: var(--cf-on-primary); }
+.md-typeset .md-button:hover { background: var(--cf-container); color: var(--cf-text); border-color: var(--cf-primary); }
+.md-typeset .md-button--primary:hover { background: var(--cf-primary); color: var(--cf-on-primary); opacity: .9; }
+
+.cf-hero { padding: 8px 0 4px; }
+.cf-hero h1 { margin: 0 0 4px; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+.cf-hero p { margin: 0; color: var(--cf-muted); }
+.cf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 24px 0; }
+.cf-card { background: var(--cf-surface); border: 1px solid var(--cf-border); border-radius: 20px; padding: 18px; box-shadow: var(--cf-shadow);
+  display: flex; flex-direction: column; gap: 6px; color: var(--cf-text); text-decoration: none; }
+.cf-card h3 { margin: 0; font-size: 1.1rem; font-weight: 650; }
+.cf-card .cf-meta { color: var(--cf-muted); font-size: .85rem; }
+.cf-card p { margin: 0; }
+.cf-card p:has(.md-button) { margin-top: auto; padding-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+.cf-card .md-button { margin: 0; }
+@media (hover: hover) { .cf-card { transition: transform .15s, box-shadow .15s; } .cf-card:hover { transform: translateY(-2px); } }
+@media (pointer: coarse) { .md-typeset .md-button { padding: .75em 1.4em; } .md-nav__link { padding: .7rem 1rem; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }

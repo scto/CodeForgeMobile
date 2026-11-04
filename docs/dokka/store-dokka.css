@@ -1,0 +1,85 @@
+/* API-Referenz im Design des CodeForge Stores (Material-3-Violett, Pillen, 20-px-Karten). */
+:root {
+  --cf-bg: #fdfbff; --cf-surface: #ffffff; --cf-surface-2: #f3eff7; --cf-text: #1c1b1f; --cf-muted: #605d66;
+  --cf-primary: #6750a4; --cf-container: #eaddff; --cf-border: #e3dfe8;
+  --background-color: var(--cf-bg);
+  --default-gray: var(--cf-surface-2);
+  --default-white: var(--cf-surface);
+  --default-font-color: var(--cf-text);
+  --header-font-color: var(--cf-text);
+  --hover-link-color: var(--cf-primary);
+  --border-color: var(--cf-border);
+  --blockquote-background: var(--cf-surface-2);
+  --navigation-highlight-color: var(--cf-surface-2);
+  --active-section-color: var(--cf-primary);
+  --sidemenu-section-active-color: var(--cf-primary);
+  --inactive-section-color: var(--cf-muted);
+  --active-tab-border-color: var(--cf-primary);
+  --default-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-dark: var(--cf-text);
+  --dark-mode-and-search-icon-color: var(--cf-text);
+  --color-key-blue: var(--cf-primary);
+  --color-key-blue-hover: color-mix(in srgb, var(--cf-primary) 85%, var(--cf-text));
+  --color-key-blue-50: color-mix(in srgb, var(--cf-primary) 50%, transparent);
+  --color-background-nav: var(--cf-surface); --color-background-nav-dt: var(--cf-surface);
+  --color-background-page: var(--cf-bg); --color-background-page-dt: var(--cf-bg);
+  --color-background-footer: var(--cf-surface); --color-background-footer-dt: var(--cf-surface);
+  --color-text: var(--cf-text); --color-text-dt: var(--cf-text);
+}
+html.theme-dark {
+  --cf-bg: #141218; --cf-surface: #1d1b20; --cf-surface-2: #2b2930; --cf-text: #e6e0e9; --cf-muted: #aaa5b1;
+  --cf-primary: #d0bcff; --cf-container: #4f378b; --cf-border: #3a3740;
+  --background-color: var(--cf-bg);
+  --default-font-color: var(--cf-text);
+  --border-color: var(--cf-border);
+  --blockquote-background: var(--cf-surface-2);
+  --navigation-highlight-color: var(--cf-surface-2);
+  --active-section-color: var(--cf-primary);
+  --sidemenu-section-active-color: var(--cf-primary);
+  --inactive-section-color: var(--cf-muted);
+  --footer-background: var(--cf-surface);
+  --footer-font-color: var(--cf-muted);
+  --color-dark: var(--cf-text);
+  --dark-mode-and-search-icon-color: var(--cf-text);
+  --color-key-blue: var(--cf-primary);
+  --color-background-nav: var(--cf-surface); --color-background-nav-dt: var(--cf-surface);
+  --color-background-page: var(--cf-bg); --color-background-page-dt: var(--cf-bg);
+  --color-background-footer: var(--cf-surface); --color-background-footer-dt: var(--cf-surface);
+}
+body, .root { background: var(--cf-bg); color: var(--cf-text); font-family: var(--default-font-family); }
+a { color: var(--cf-primary); }
+
+/* Kopfzeile wie im Store */
+.navigation { background: color-mix(in srgb, var(--cf-surface) 88%, transparent) !important; backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--cf-border); color: var(--cf-text) !important; --dark-mode-and-search-icon-color: var(--cf-text); }
+.library-name--link, .navigation-controls--btn { color: var(--cf-text); }
+.navigation-controls--btn:hover { background: var(--cf-surface-2); border-radius: 50%; }
+/* Symbole in Dokka sind weiß: im hellen Design umkehren */
+.navigation-controls--btn { filter: invert(1); }
+html.theme-dark .navigation-controls--btn { filter: none; }
+
+/* Seitenleiste: Pillen, aktive Seite als Container-Farbe */
+.sidebar { background: var(--cf-bg); border-right: 1px solid var(--cf-border); }
+.toc--row { border-radius: 20px; }
+.toc--row:hover { background: var(--cf-surface-2) !important; }
+.toc--row .toc--link, .toc--row .toc--link:hover { background: transparent !important; color: var(--cf-text) !important; }
+/* nur die aktuelle Seite (tiefster aktiver Eintrag) hervorheben */
+.toc--part[data-active="true"]:not(:has(.toc--part[data-active="true"])) > .toc--row { background: var(--cf-container) !important; font-weight: 600; }
+.toc--link { color: var(--cf-text); }
+.toc--button { background-color: transparent !important; border-radius: 50%; }
+.toc--button:hover { background-color: var(--cf-surface-2) !important; }
+
+/* Inhalt */
+h1, h2, h3, h4 { color: var(--cf-text); font-weight: 650; }
+.main-content .table, .table { border: 1px solid var(--cf-border); border-radius: 16px; overflow: hidden; background: var(--cf-surface); }
+.table-row { border-color: var(--cf-border); }
+.table-row:hover { background: var(--cf-surface-2); }
+code, .inline-code, .symbol { font-family: var(--default-monospace-font-family); }
+.sample-container, div.sourceCode, pre { background: var(--cf-surface-2); border: 1px solid var(--cf-border); border-radius: 16px; }
+.symbol { background: var(--cf-surface-2); border: 1px solid var(--cf-border); border-radius: 16px; }
+.button, .platform-tag, .filter-section--item { border-radius: 20px; }
+.platform-tag { border: 1px solid var(--cf-border); }
+.footer { background: var(--cf-surface); border-top: 1px solid var(--cf-border); color: var(--cf-muted); }
+blockquote { border-radius: 12px; }
+@media (hover: hover) { .table-row { transition: background .15s; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
