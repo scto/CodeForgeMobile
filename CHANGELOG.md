@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.0.2] - 2026-11-04
+
 ### Geändert (Release-Automatik)
 - Workflow `bump-version.yml`: Auswahl `build` (`none` | `debug` | `release`) startet nach dem Bump den Debug- bzw. den signierten Release-Build (inkl. Schalter `prerelease`); Berechtigung `actions: write` ergänzt, damit `gh workflow run` funktioniert.
 - `scripts/release/bump_version.py` ändert keine Dateien unter `.github/workflows/` mehr (der `GITHUB_TOKEN` darf sie nicht pushen).
