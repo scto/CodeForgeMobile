@@ -11,17 +11,6 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-## [3.0.2] - 2026-11-04
-
-### Geändert
-- bump-version: Auswahl none|debug|release für den anschließenden Build
-- Convention-Plugin codeforge.android.signing, Signing-Block aus :app entfernt
-- Workflow release-release-apk.yml (signierte Release-APK aus GitHub-Secrets), Signatur-Doku
-- release: Version 3.0.1, Release Notes und Release-Automatik
-
-### Behoben
-- release: bump_version.py fasst keine Workflow-Dateien mehr an (GITHUB_TOKEN darf sie nicht pushen)
-
 ## [3.0.1] - 2026-11-04
 
 ### Hinzugefügt (Release-Automatik)

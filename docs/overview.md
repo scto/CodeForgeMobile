@@ -37,7 +37,7 @@ Entscheidung. Siehe `docs/sub/NOTICE.md`, `docs/sub/LICENSE.termux`.
 
 0. **Zentrale Strings:** `:core:resources` (Texte in `strings.xml`, Zugriff `Res`/`stringRes`) – migriert, nicht gebaut; siehe `docs/resources-and-strings.md`.
 0b. **Modul-Pflichtdateien, `:app`-Ressourcen** (Theme, Icon, Backup-Regeln): ergänzt, nicht gebaut; siehe `docs/module-files-and-app-resources.md`.
-0c. **Dokumentationsstand:** aktuelle Übersicht in `/STATUS.md`, `/CHANGELOG.md`, `/README.md`, `/README_DE.md`; Version 3.0.2.
+0c. **Dokumentationsstand:** aktuelle Übersicht in `/STATUS.md`, `/CHANGELOG.md`, `/README.md`, `/README_DE.md`; Version 3.0.1.
 0d. **Layout-Designer** (`:feature:layoutdesigner`): visueller XML-Layout-Editor, JVM-Logik getestet, UI ungebaut; siehe `docs/layout-designer.md`.
 1. ~~Bootstrap-Installation verdrahten~~ — erledigt (Onboarding → Termux → `codeforge-env setup`); Gerätetest offen.
 2. Echten `terminal-packages-codeforge`-Bootstrap-Release bauen und
