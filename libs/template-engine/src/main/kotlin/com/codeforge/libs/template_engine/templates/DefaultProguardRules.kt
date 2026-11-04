@@ -1,5 +1,6 @@
 package com.codeforge.libs.template_engine.templates
 
+/** Liefert den Text der Vorlagendatei `DefaultProguardRules`. */
 fun DefaultProguardRules(): String = """
     # Add project specific ProGuard rules here.
     # You can control the set of applied configuration files using the

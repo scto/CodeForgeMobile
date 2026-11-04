@@ -1,5 +1,6 @@
 package com.codeforge.libs.template_engine.templates.basicactivity.xml
 
+/** Liefert den Text der Vorlagendatei `BasicActivityLayout`. */
 fun BasicActivityLayout() = """
     <?xml version="1.0" encoding="utf-8"?>
     <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"

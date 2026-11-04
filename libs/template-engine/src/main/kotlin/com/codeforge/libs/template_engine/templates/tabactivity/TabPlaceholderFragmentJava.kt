@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.tabactivity
 
+/**
+ * Liefert den Text der Vorlagendatei `TabPlaceholderFragmentJava`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun TabPlaceholderFragmentJava(pkg: String) = """
     package $pkg.ui.main;
 

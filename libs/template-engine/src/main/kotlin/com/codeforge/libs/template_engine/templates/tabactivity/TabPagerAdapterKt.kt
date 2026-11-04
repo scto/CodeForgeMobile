@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.tabactivity
 
+/**
+ * Liefert den Text der Vorlagendatei `TabPagerAdapterKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun TabPagerAdapterKt(pkg: String) = """
     package $pkg.ui.main
 

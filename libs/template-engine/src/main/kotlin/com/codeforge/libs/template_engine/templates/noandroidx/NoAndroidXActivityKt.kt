@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.noandroidx
 
+/**
+ * Liefert den Text der Vorlagendatei `NoAndroidXActivityKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun NoAndroidXActivityKt(pkg: String) = """
     package $pkg
 

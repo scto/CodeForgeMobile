@@ -1,5 +1,6 @@
 package com.codeforge.libs.template_engine.templates
 
+/** Liefert den Text der Vorlagendatei `BaseLayoutContentMain`. */
 fun BaseLayoutContentMain() = """
     <?xml version="1.0" encoding="utf-8"?>
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"

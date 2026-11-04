@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.bottomnav
 
+/**
+ * Liefert den Text der Vorlagendatei `BotNavDashboardFragmentJava`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun BotNavDashboardFragmentJava(pkg: String) = """
     package $pkg.ui.dashboard;
 

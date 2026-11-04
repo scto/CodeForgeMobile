@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.tabactivity
 
+/**
+ * Liefert den Text der Vorlagendatei `TabActivityJava`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun TabActivityJava(pkg: String) = """
     package $pkg;
 

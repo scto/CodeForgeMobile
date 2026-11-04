@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.cppactivity.jni
 
+/**
+ * Liefert den Text der Vorlagendatei `BasicJniCppSource`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun BasicJniCppSource(pkg: String): String = """
     #include <jni.h>
     #include <string>

@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.cppactivity
 
+/**
+ * Liefert den Text der Vorlagendatei `CppActivityKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun CppActivityKt(pkg: String) = """
     package $pkg
 

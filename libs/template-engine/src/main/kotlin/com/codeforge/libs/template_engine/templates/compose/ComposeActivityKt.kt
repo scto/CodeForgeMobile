@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.compose
 
+/**
+ * Liefert den Text der Vorlagendatei `ComposeActivityKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun ComposeActivityKt(pkg: String) = """
     package $pkg
 

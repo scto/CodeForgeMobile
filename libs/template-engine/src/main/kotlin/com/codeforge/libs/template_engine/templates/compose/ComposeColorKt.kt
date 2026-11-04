@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.compose
 
+/**
+ * Liefert den Text der Vorlagendatei `ComposeColorKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun ComposeColorKt(pkg: String) = """
     package $pkg.ui.theme
 

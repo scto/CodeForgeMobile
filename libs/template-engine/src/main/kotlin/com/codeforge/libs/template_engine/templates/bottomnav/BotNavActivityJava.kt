@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.bottomnav
 
+/**
+ * Liefert den Text der Vorlagendatei `BotNavActivityJava`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun BotNavActivityJava(pkg: String) = """
     package $pkg;
 

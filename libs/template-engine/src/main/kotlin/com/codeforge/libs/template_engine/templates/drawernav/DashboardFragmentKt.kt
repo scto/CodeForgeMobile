@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.drawernav
 
+/**
+ * Liefert den Text der Vorlagendatei `DashboardFragmentKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun DashboardFragmentKt(pkg: String) = """
     package $pkg.ui.dashboard;
 

@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.drawernav.xml
 
+/**
+ * Liefert den Text der Vorlagendatei `NavDrawerNavigationXml`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun NavDrawerNavigationXml(pkg: String) = """
     <?xml version="1.0" encoding="utf-8"?>
     <navigation xmlns:android="http://schemas.android.com/apk/res/android"

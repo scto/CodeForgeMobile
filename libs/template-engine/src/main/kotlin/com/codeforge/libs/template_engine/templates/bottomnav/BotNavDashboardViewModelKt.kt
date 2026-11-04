@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.bottomnav
 
+/**
+ * Liefert den Text der Vorlagendatei `BotNavDashboardViewModelKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun BotNavDashboardViewModelKt(pkg: String) = """
     package $pkg.ui.dashboard
 

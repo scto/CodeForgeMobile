@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.bottomnav
 
+/**
+ * Liefert den Text der Vorlagendatei `BotNavHomeFragmentKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun BotNavHomeFragmentKt(pkg: String) = """
     package $pkg.ui.home
 

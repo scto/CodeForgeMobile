@@ -1,5 +1,6 @@
 package com.codeforge.libs.template_engine.templates
 
+/** Liefert den Text der Vorlagendatei `DefaultGitIgnore`. */
 fun DefaultGitIgnore(): String = """
     # Gradle files
     .gradle/

@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.emptyactivity
 
+/**
+ * Liefert den Text der Vorlagendatei `EmptyActivityJava`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun EmptyActivityJava(pkg: String) = """
     package $pkg;
 

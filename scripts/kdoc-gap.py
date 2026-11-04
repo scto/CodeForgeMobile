@@ -12,6 +12,10 @@ for f in files:
         d=decl.match(l)
         if not d: continue
         if re.match(r'^\s{4,}',l) and len(l)-len(l.lstrip())>4: continue
+        # Konstruktor-Properties (Zeile endet auf Komma oder danach folgt ')') zählen nicht: sie gehören zur Klassen-Doku.
+        if d.group(1) in ('val','var'):
+            nxt=next((x.strip() for x in lines[i+1:] if x.strip()),'')
+            if l.rstrip().endswith(',') or nxt.startswith(')'): continue
         t+=1
         j=i-1
         while j>=0 and (lines[j].strip().startswith('@') or lines[j].strip()==''): j-=1

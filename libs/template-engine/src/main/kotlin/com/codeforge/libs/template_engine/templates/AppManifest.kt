@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates
 
+/**
+ * Liefert den Text der Vorlagendatei `AppManifest`.
+ *
+ * @param appId Anwendungs-ID.
+ */
 fun AppManifest(appId: String): String = """
     <?xml version="1.0" encoding="utf-8"?>
     <manifest xmlns:android="http://schemas.android.com/apk/res/android">

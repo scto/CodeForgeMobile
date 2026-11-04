@@ -80,6 +80,13 @@ import java.io.File
  */
 class ProjectGenerator(private val assets: AssetSource) {
 
+    /**
+     * Erzeugt das Projekt in [projectDir].
+     *
+     * @param request Eingaben des Wizards (Vorlage, Sprache, Package, Gradle-DSL).
+     * @param projectDir Zielordner (existiert und ist leer).
+     * @return Handle des erzeugten Projekts.
+     */
     fun generate(request: ProjectRequest, projectDir: File): ProjectHandle {
         val kind = request.template.kind
         val useKotlin = request.language == ProjectLanguage.KOTLIN

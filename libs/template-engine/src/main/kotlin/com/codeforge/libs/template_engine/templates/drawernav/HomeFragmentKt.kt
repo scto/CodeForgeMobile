@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.drawernav
 
+/**
+ * Liefert den Text der Vorlagendatei `HomeFragmentKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun HomeFragmentKt(pkg: String) = """
     package $pkg.ui.home;
 

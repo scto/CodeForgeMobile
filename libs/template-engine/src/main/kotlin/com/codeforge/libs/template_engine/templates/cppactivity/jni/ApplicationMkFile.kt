@@ -1,5 +1,6 @@
 package com.codeforge.libs.template_engine.templates.cppactivity.jni
 
+/** Liefert den Text der Vorlagendatei `ApplicationMkFile`. */
 fun ApplicationMkFile(): String = """
     APP_ABI := armeabi-v7a arm64-v8a x86 x86_64
     APP_PLATFORM := android-21

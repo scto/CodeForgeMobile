@@ -1,5 +1,6 @@
 package com.codeforge.libs.template_engine.templates.drawernav.xml
 
+/** Liefert den Text der Vorlagendatei `NavDrawerStringsXml`. */
 fun NavDrawerStringsXml() = """
     <resources>
         <string name="navigation_drawer_open">Open navigation drawer</string>

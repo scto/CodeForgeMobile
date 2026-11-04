@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.bottomnav
 
+/**
+ * Liefert den Text der Vorlagendatei `BotNavNotifFragmentKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun BotNavNotifFragmentKt(pkg: String) = """
     package $pkg.ui.notifications
 

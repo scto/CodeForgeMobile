@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.bottomnav.xml
 
+/**
+ * Liefert den Text der Vorlagendatei `BotNavNavigationXml`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun BotNavNavigationXml(pkg: String) = """
     <?xml version="1.0" encoding="utf-8"?>
     <navigation xmlns:android="http://schemas.android.com/apk/res/android"

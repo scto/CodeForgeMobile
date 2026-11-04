@@ -17,6 +17,11 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Erzeugt Projekte aus Vorlagen (Wizard) auf einem IO-Dispatcher und initialisiert optional ein Git-Repository.
+ *
+ * Bei Fehlern wird das teilweise erzeugte Projekt wieder gelöscht; Git-Fehler verwerfen das Projekt nicht, sondern werden als Hinweis gemeldet.
+ */
 @Singleton
 class TemplateEngineRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -53,8 +58,10 @@ class TemplateEngineRepositoryImpl @Inject constructor(
         }
 
     private companion object {
+        /** Nachricht des ersten Commits. */
         const val INITIAL_COMMIT_MESSAGE = "Initial commit"
 
+        /** Alle verfügbaren Vorlagen. */
         val DESCRIPTORS = listOf(
             ProjectTemplateDescriptor("no_activity", ProjectTemplateKind.NO_ACTIVITY),
             ProjectTemplateDescriptor("empty_activity", ProjectTemplateKind.EMPTY_ACTIVITY),

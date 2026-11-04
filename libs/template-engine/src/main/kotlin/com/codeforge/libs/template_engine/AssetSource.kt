@@ -8,6 +8,7 @@ import java.io.InputStream
 interface AssetSource {
     /** Namen der direkten Kinder von [path]; leer bei Dateien und unbekannten Pfaden. */
     fun list(path: String): List<String>
+    /** Öffnet die Datei unter [path] zum Lesen; der Aufrufer schließt den Stream. */
     fun open(path: String): InputStream
 }
 

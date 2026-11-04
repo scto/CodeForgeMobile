@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.drawernav
 
+/**
+ * Liefert den Text der Vorlagendatei `HomeViewModelKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun HomeViewModelKt(pkg: String) = """
     package $pkg.ui.home;
 

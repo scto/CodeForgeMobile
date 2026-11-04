@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.gradle
 
+/**
+ * Liefert den Text der Vorlagendatei `SettingsGradle`.
+ *
+ * @param projectName Wert, der in die Vorlage eingesetzt wird.
+ */
 fun SettingsGradle(projectName: String): String = """
     pluginManagement {
         repositories {

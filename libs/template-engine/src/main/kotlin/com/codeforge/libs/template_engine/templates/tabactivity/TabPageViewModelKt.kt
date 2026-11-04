@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.tabactivity
 
+/**
+ * Liefert den Text der Vorlagendatei `TabPageViewModelKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun TabPageViewModelKt(pkg: String) = """
     package $pkg.ui.main
 

@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.basicactivity
 
+/**
+ * Liefert den Text der Vorlagendatei `BasicActivityJava`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun BasicActivityJava(pkg: String) = """
     package $pkg;
 

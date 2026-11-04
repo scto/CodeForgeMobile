@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.drawernav
 
+/**
+ * Liefert den Text der Vorlagendatei `NavDrawerActivityKt`.
+ *
+ * @param pkg Package-Name des Projekts.
+ */
 fun NavDrawerActivityKt(pkg: String) = """
     package $pkg
 

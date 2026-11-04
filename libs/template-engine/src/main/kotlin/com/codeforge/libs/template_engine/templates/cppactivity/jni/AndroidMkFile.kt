@@ -1,5 +1,6 @@
 package com.codeforge.libs.template_engine.templates.cppactivity.jni
 
+/** Liefert den Text der Vorlagendatei `AndroidMkFile`. */
 fun AndroidMkFile(): String = """
     LOCAL_PATH := $(call my-dir)
 

@@ -3,11 +3,13 @@ package com.codeforge.libs.template_engine
 
 import java.io.File
 
+/** Schreibt [content] nach [file] und legt fehlende Elternordner an. */
 internal fun writeText(file: File, content: String) {
     file.parentFile?.mkdirs()
     file.writeText(content)
 }
 
+/** Kopiert das Asset [assetPath] nach [dst] und legt fehlende Elternordner an. */
 internal fun copyAsset(assets: AssetSource, assetPath: String, dst: File) {
     dst.parentFile?.mkdirs()
     assets.open(assetPath).use { input -> dst.outputStream().use { input.copyTo(it) } }

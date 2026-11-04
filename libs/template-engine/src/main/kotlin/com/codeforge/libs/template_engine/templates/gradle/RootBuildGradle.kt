@@ -1,7 +1,13 @@
 package com.codeforge.libs.template_engine.templates.gradle
 
+/**
+ * Liefert den Text der Vorlagendatei `RootBuildGradle`.
+ *
+ * @param useKts Wert, der in die Vorlage eingesetzt wird.
+ */
 fun RootBuildGradle(useKts: Boolean): String = if (useKts) AppGradleKotlin() else AppGradleGroovy()
 
+/** Liefert den Text der Vorlagendatei `AppGradleKotlin`. */
 fun AppGradleKotlin(): String = """
     plugins {
         alias(libs.plugins.android.application) apply false
@@ -14,6 +20,7 @@ fun AppGradleKotlin(): String = """
     }
 """.trimIndent()
 
+/** Liefert den Text der Vorlagendatei `AppGradleGroovy`. */
 fun AppGradleGroovy(): String = """
     plugins {
         alias(libs.plugins.android.application) apply false

@@ -1,5 +1,10 @@
 package com.codeforge.libs.template_engine.templates.gradle
 
+/**
+ * Liefert den Text der Vorlagendatei `GradleProperties`.
+ *
+ * @param addAndroidX Wert, der in die Vorlage eingesetzt wird.
+ */
 fun GradleProperties(addAndroidX: Boolean): String = """
     # Project-wide Gradle settings.
     org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8

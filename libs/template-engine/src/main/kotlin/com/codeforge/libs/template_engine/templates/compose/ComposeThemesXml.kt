@@ -1,5 +1,6 @@
 package com.codeforge.libs.template_engine.templates.compose
 
+/** Liefert den Text der Vorlagendatei `ComposeThemesXml`. */
 fun ComposeThemesXml() = """
     <?xml version="1.0" encoding="utf-8"?>
     <resources>
