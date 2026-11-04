@@ -55,6 +55,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import java.util.Locale
 
+/** Sheet mit Details zu einem Testfall. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TestDetailSheet(

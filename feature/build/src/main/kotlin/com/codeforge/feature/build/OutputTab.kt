@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Reiter mit der Build-Ausgabe. */
 @Composable
 fun OutputTab(
     state: BuildUiState,

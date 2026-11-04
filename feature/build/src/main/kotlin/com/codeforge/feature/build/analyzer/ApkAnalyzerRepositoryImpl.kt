@@ -31,12 +31,14 @@ import java.util.zip.ZipFile
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Analysiert APKs mit `aapt2` und `apksigner` (Manifest, Dateien, Berechtigungen, Signatur, Vergleich). */
 @Singleton
 class ApkAnalyzerRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ApkAnalyzerRepository {
 
     // Testbarer Prozess-Starter
+    /** Startet Prozesse (in Tests ersetzbar). */
     internal var processLauncher: (command: List<String>, env: Map<String, String>, workingDir: File) -> Process = { cmd, env, dir ->
         ProcessBuilder(cmd).apply {
             directory(dir)
@@ -213,6 +215,7 @@ class ApkAnalyzerRepositoryImpl @Inject constructor(
         }
     }
 
+    /** Pfad zu `aapt2` oder `null`. */
     internal fun resolveAaptBinary(): File? {
         val candidates = mutableListOf<File>()
 
@@ -247,6 +250,7 @@ class ApkAnalyzerRepositoryImpl @Inject constructor(
         return candidates.firstOrNull { it.isFile && it.canExecute() }
     }
 
+    /** Pfad zu `apksigner` oder `null`. */
     internal fun resolveApksignerBinary(): File? {
         val candidates = mutableListOf<File>()
 

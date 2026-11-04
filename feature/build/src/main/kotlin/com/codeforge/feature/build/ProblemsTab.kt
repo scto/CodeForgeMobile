@@ -49,6 +49,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import java.io.File
 
+/** Reiter mit Build-Problemen. */
 @Composable
 fun ProblemsTab(
     state: BuildUiState,

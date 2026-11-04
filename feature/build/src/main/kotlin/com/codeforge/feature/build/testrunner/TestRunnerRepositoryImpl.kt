@@ -20,6 +20,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Führt Gradle-Tests aus und liest die XML-Ergebnisse. */
 @Singleton
 class TestRunnerRepositoryImpl @Inject constructor(
     private val gradleBuildRepository: GradleBuildRepository
@@ -106,6 +107,7 @@ class TestRunnerRepositoryImpl @Inject constructor(
             }
     }
 
+    /** Sucht die Ergebnisdateien im Projekt. */
     internal fun findTestResultFiles(projectRoot: File): List<File> {
         return projectRoot.walkTopDown()
             .onEnter { dir ->
@@ -119,6 +121,7 @@ class TestRunnerRepositoryImpl @Inject constructor(
             .toList()
     }
 
+    /** Gradle-Pfad des Moduls zur Ergebnisdatei. */
     internal fun determineModuleGradlePath(projectRoot: File, testXmlFile: File): String {
         // e.g. projectRoot = /repo, testXmlFile = /repo/core/domain/build/test-results/testDebugUnitTest/TEST-foo.xml
         val canonicalRoot = projectRoot.canonicalPath

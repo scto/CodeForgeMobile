@@ -20,17 +20,21 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
+/** ViewModel der APK-Analyse. */
 @HiltViewModel
 class ApkAnalyzerViewModel @Inject constructor(
     private val repository: ApkAnalyzerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ApkAnalyzerUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<ApkAnalyzerUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<ApkAnalyzerUiEffect>()
+    /** Einmalige Effekte. */
     val effect: SharedFlow<ApkAnalyzerUiEffect> = _effect.asSharedFlow()
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: ApkAnalyzerUiEvent) {
         when (event) {
             is ApkAnalyzerUiEvent.LoadApk -> loadApk(event.path)

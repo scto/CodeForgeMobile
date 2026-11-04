@@ -16,6 +16,7 @@ internal object GradleTaskListParser {
     private val taskLine = Regex("""^([A-Za-z:][\w:.\-]*)(?: - (.*))?$""")
     private val underline = Regex("""^-{3,}$""")
 
+    /** Liest die Task-Namen aus der Ausgabe von `gradle tasks`. */
     fun parse(lines: List<String>): List<String> = parseDetailed(lines).map { it.name }.sorted()
 
     /** Mit Gruppe (Überschrift über der Strichlinie) und Beschreibung; Reihenfolge nach Name, je Name der erste Treffer. */

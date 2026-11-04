@@ -105,6 +105,7 @@ private fun getSectionColor(section: ApkSection): Color = when (section) {
     ApkSection.OTHER -> Color(0xFF795548)
 }
 
+/** Bildschirm der APK-Analyse mit Reitern. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApkAnalyzerScreen(

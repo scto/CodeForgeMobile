@@ -9,10 +9,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Hilt-Modul des Testläufers. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class TestRunnerModule {
 
+    /** Bindet die Implementierung. */
     @Binds
     @Singleton
     abstract fun bindTestRunnerRepository(

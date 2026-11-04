@@ -34,6 +34,7 @@ class BuildTextActions internal constructor(
     private val onMessage: (String) -> Unit
 ) {
 
+    /** Kopiert Text in die Zwischenablage. */
     fun copy(text: String) {
         val trimmed = text.keepTail()
         try {
@@ -48,6 +49,7 @@ class BuildTextActions internal constructor(
         }
     }
 
+    /** Teilt Text. */
     fun share(text: String, title: String) {
         val trimmed = text.keepTail()
         val send = Intent(Intent.ACTION_SEND).apply {
@@ -62,11 +64,13 @@ class BuildTextActions internal constructor(
         }
     }
 
+    /** Speichert Text als Datei (Dateiauswahl). */
     fun save(text: String, fileName: String) {
         setPendingSave(text)
         launchSave(fileName)
     }
 
+    /** Schreibt den Text in die gewählte Datei. */
     internal fun writeTo(uri: Uri?, text: String?) {
         if (uri == null) return // Auswahl abgebrochen
         if (text == null) return
@@ -82,6 +86,7 @@ class BuildTextActions internal constructor(
     }
 }
 
+/** Erzeugt die Textaktionen und merkt sie sich. */
 @Composable
 fun rememberBuildTextActions(onMessage: (String) -> Unit): BuildTextActions {
     val context = LocalContext.current

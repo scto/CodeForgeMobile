@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 /** Task für den Gradle-Sync: konfiguriert alle Module und löst Plugins/Abhängigkeiten auf. */
 private const val SYNC_TASK = "tasks --all"
 
+/** ViewModel des Build-Panels: Gradle-Builds, Probleme, Logcat, Tests, APK-Installation. */
 @HiltViewModel
 class BuildViewModel internal constructor(
     private val gradleBuildRepository: GradleBuildRepository,
@@ -78,9 +79,11 @@ class BuildViewModel internal constructor(
     private val scope: CoroutineScope = externalScope ?: viewModelScope
 
     private val _uiState = MutableStateFlow(BuildUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<BuildUiState> = _uiState.asStateFlow()
 
     private val _effects = Channel<BuildUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects = _effects.receiveAsFlow()
 
     private var activeBuildJob: Job? = null
@@ -143,6 +146,7 @@ class BuildViewModel internal constructor(
         startLogcatStream(preferredSource)
     }
 
+    /** Verbindet das ViewModel mit dem Projekt. */
     fun connectProject(rootPath: String) {
         val root = File(rootPath)
         currentProjectRoot = root
@@ -188,6 +192,7 @@ class BuildViewModel internal constructor(
         _uiState.update { it.copy(availableModules = modules.sorted()) }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun handleIntent(intent: BuildUiIntent) {
         when (intent) {
             is BuildUiIntent.SelectTab -> {
@@ -596,6 +601,7 @@ class BuildViewModel internal constructor(
         }
     }
 
+    /** Bricht den laufenden Build ab. */
     fun cancelBuild() {
         scope.launch {
             gradleBuildRepository.cancelBuild()
@@ -605,6 +611,7 @@ class BuildViewModel internal constructor(
         }
     }
 
+    /** Führt Tests aus. */
     fun runTests(moduleGradlePath: String? = null, testFilter: String? = null) {
         val root = currentProjectRoot ?: return
         val runner = testRunnerRepository ?: return
@@ -681,6 +688,7 @@ class BuildViewModel internal constructor(
         }
     }
 
+    /** Wiederholt fehlgeschlagene Tests. */
     fun rerunFailedTests() {
         val root = currentProjectRoot ?: return
         val runner = testRunnerRepository ?: return
@@ -867,6 +875,7 @@ class BuildViewModel internal constructor(
         }
     }
 
+    /** Ermittelt die Quelldatei zu einem Stack-Frame. */
     internal fun resolveStackFrameFile(root: File, frame: StackFrame): File? {
         if (!root.exists() || !root.isDirectory) return null
 

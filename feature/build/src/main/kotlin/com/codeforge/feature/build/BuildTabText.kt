@@ -20,6 +20,7 @@ fun BuildUiState.textFor(tab: BuildTab): String = when (tab) {
         .joinToString("\n\n") { it.asBlock() }
 }
 
+/** Problem als Textzeile. */
 fun BuildProblem.asLine(): String {
     val where = if (path != null) {
         buildString {
@@ -33,6 +34,7 @@ fun BuildProblem.asLine(): String {
     return "${severity.name} $where$message" + (taskName?.let { " [$it]" } ?: "")
 }
 
+/** Testergebnis als Textblock. */
 fun TestCaseResult.asBlock(): String = buildString {
     append(status.name).append(' ').append(className).append('.').append(name)
     append(" (").append(durationSeconds).append(" s)")
@@ -61,4 +63,5 @@ fun String.keepTail(max: Int = MAX_TRANSFER_CHARS): TrimResult {
     return TrimResult(tail.substring(cut), true)
 }
 
+/** Gekürzter Text und ob gekürzt wurde. */
 data class TrimResult(val text: String, val truncated: Boolean)

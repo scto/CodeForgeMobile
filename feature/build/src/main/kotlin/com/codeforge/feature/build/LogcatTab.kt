@@ -81,6 +81,7 @@ import com.codeforge.core.domain.model.StackFrame
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Reiter mit Logcat. */
 @Composable
 fun LogcatTab(
     state: BuildUiState,

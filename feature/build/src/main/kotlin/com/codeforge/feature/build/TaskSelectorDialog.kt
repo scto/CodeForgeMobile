@@ -74,6 +74,7 @@ internal fun filterTasks(tasks: List<GradleTaskInfo>, query: String): List<Gradl
     }
 }
 
+/** Dialog zur Auswahl des Gradle-Tasks. */
 @Composable
 fun TaskSelectorDialog(
     currentTask: String,

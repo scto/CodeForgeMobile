@@ -9,10 +9,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Hilt-Modul der APK-Analyse. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ApkAnalyzerModule {
 
+    /** Bindet die Implementierung. */
     @Binds
     @Singleton
     abstract fun bindApkAnalyzerRepository(

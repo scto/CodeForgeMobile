@@ -64,6 +64,7 @@ import com.codeforge.core.resources.stringRes
 import com.codeforge.feature.build.testrunner.TestDetailSheet
 import com.codeforge.feature.build.testrunner.TestsTab
 
+/** Bottom Sheet mit dem Build-Panel. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuildBottomSheet(
@@ -111,6 +112,7 @@ private val ConsumeRemainingScroll = object : NestedScrollConnection {
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity = available
 }
 
+/** Build-Panel mit Reitern für Ausgabe, Probleme, Logcat und Tests. */
 @Composable
 fun BuildPanel(
     state: BuildUiState,

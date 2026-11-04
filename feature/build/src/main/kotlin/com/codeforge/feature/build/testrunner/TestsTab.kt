@@ -75,6 +75,7 @@ import com.codeforge.feature.build.BuildUiIntent
 import com.codeforge.feature.build.BuildUiState
 import java.util.Locale
 
+/** Reiter mit Testergebnissen. */
 @Composable
 fun TestsTab(
     state: BuildUiState,

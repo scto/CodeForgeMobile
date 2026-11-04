@@ -51,6 +51,7 @@ import com.codeforge.core.domain.model.ApkInstallStatus
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Bereich zum Installieren, Starten und Deinstallieren der gebauten APK. */
 @Composable
 fun ApkInstallSection(
     state: BuildUiState,
