@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-11-04
+
+### Hinzugefügt (Release-Automatik)
+- `scripts/release/bump_version.py`: zählt `versionName`/`versionCode` hoch (patch/minor/major/explizit, Code = MAJOR*10000 + MINOR*100 + PATCH), verschiebt `[Unreleased]` nach `[X.Y.Z]`, erzeugt `docs/release-notes/X.Y.Z.md` und `.en.md` und trägt sie in `mkdocs.yml` ein; fehlen Einträge, werden sie aus den Commits seit dem letzten Tag erzeugt. Workflow `bump-version.yml` führt das per Knopfdruck aus; `release-debug-apk.yml` übernimmt die Release Notes als Release-Text. Beschreibung: `docs/dev/ReleaseProcess.md`.
+
 ### Hinzugefügt (Widmung an Basti)
 - Das Projekt ist Basti gewidmet, dem Golden Retriever des Autors. Pixelfigur (32×32) als erwachsener Basti und als Welpe, erzeugt von `scripts/basti/gen_sprites.py` (GIFs für die Webseite, Sprite-Sheets für die App).
 - App: `BastiSprite` (`:core:designsystem`, animiert, Nearest-Neighbor, bei abgeschalteten Systemanimationen still), eigener Bildschirm „Über Basti“ (Einstellungen → Über Basti; Heute/Welpe, Antippen = „Wuff!“, Widmung), Basti neben dem App-Logo im Über-Bildschirm und auf der Startseite.
@@ -87,6 +92,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Behoben (Editor)
 - Farbvorschau: Overlay-Positionen werden pro Frame mit dem Editor-Layout abgeglichen und in der Platzierungsphase gesetzt (kein „Herumfliegen“ mehr bei Scroll/Fling/Zoom/Zeilenumbruch); nur sichtbare Zeilen werden komponiert.
+
+## [3.0.0 Nachträge] - 2026-11-02
+
+Änderungen, die vor dem Tag `v3.0.0` auf `main` landeten (in den Release Notes 3.0.0 enthalten).
 
 ### Geändert (Release/R8)
 - `:app`: Release-Block mit `isMinifyEnabled = true`, `isShrinkResources = true`, `isDebuggable = false`, Release-Signatur aus

@@ -3,7 +3,7 @@ name: Release Debug APK
 # Baut die Debug-APK (./gradlew :app:assembleDebug) und veröffentlicht sie als GitHub-Release (Pre-release) mit Tag.
 #
 # Zwei Wege:
-#   1. Tag pushen:       git tag debug-3.0.0-1 && git push origin debug-3.0.0-1   (Tags debug-*)
+#   1. Tag pushen:       git tag debug-3.0.1-1 && git push origin debug-3.0.1-1   (Tags debug-*)
 #   2. Manuell starten:  Actions -> "Release Debug APK" -> Run workflow (Tag leer = debug-<versionName>-<Laufnummer>);
 #                        das Tag wird am gewählten Commit/Branch automatisch angelegt.
 # Keine Secrets nötig (GITHUB_TOKEN). Die APK ist mit dem Android-Debug-Schlüssel signiert, die Prüfsumme liegt bei.
@@ -110,6 +110,25 @@ jobs:
           echo "file=$out" >> "$GITHUB_OUTPUT"
           { echo "### Debug-Release \`$TAG\`"; echo; cat dist/SHA256SUMS.txt; } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Release-Text zusammenstellen
+        env:
+          VER: ${{ steps.meta.outputs.version }}
+          CODE: ${{ steps.meta.outputs.code }}
+          SHA: ${{ steps.meta.outputs.short_sha }}
+        run: |
+          set -euo pipefail
+          {
+            echo "**Debug-Build** (nicht für den Store, mit Debug-Schlüssel signiert) – Version \`$VER\` (versionCode \`$CODE\`), Commit \`$SHA\`."
+            echo
+            echo "Installation: APK herunterladen und auf dem Gerät installieren (Installation aus unbekannten Quellen erlauben). Prüfsumme in \`SHA256SUMS.txt\`."
+            # Release Notes der Version (von scripts/release/bump_version.py erzeugt), ohne Titel und Fußzeile
+            if [ -f "docs/release-notes/$VER.md" ]; then
+              echo
+              sed -e '1{/^# /d}' -e '/^---$/,$d' "docs/release-notes/$VER.md"
+              echo "Englisch: [Release Notes $VER (EN)](https://scto.github.io/CodeForgeMobile/release-notes/$VER.en/) · [CHANGELOG](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md)"
+            fi
+          } > dist/RELEASE_BODY.md
+
       - name: Release veröffentlichen
         uses: softprops/action-gh-release@v2
         with:
@@ -118,10 +137,7 @@ jobs:
           name: "CodeForgeMobile ${{ steps.meta.outputs.version }} (Debug) – ${{ steps.meta.outputs.tag }}"
           prerelease: true
           generate_release_notes: true
-          body: |
-            **Debug-Build** (nicht für den Store, mit Debug-Schlüssel signiert) – Version `${{ steps.meta.outputs.version }}` (versionCode `${{ steps.meta.outputs.code }}`), Commit `${{ steps.meta.outputs.short_sha }}`.
-
-            Installation: APK herunterladen und auf dem Gerät installieren (Installation aus unbekannten Quellen erlauben). Prüfsumme in `SHA256SUMS.txt`.
+          body_path: dist/RELEASE_BODY.md
           files: |
             ${{ steps.apk.outputs.file }}
             dist/SHA256SUMS.txt

@@ -54,8 +54,11 @@ nav:
       - User Guide: user/UserGuide.md
       - Entwicklerhandbuch: dev/DeveloperGuide.md
       - Plugins entwickeln: dev/PluginDevelopment.md
+      - Release-Ablauf: dev/ReleaseProcess.md
       - Modulgraph: dev/module-graph.md
       - APK: apk/APK-Dokumentation.md
+      - Release Notes 3.0.1: release-notes/3.0.1.md
+      - Release Notes 3.0.1 (EN): release-notes/3.0.1.en.md
       - Release Notes 3.0.0: release-notes/3.0.0.md
       - Release Notes 3.0.0 (EN): release-notes/3.0.0.en.md
   - API-Referenz: api/index.html

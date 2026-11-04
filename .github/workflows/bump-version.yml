@@ -1,0 +1,74 @@
+name: Bump Version
+
+# Zählt Version und versionCode hoch, verschiebt [Unreleased] im CHANGELOG nach [X.Y.Z] und erzeugt
+# docs/release-notes/X.Y.Z.md (DE) und X.Y.Z.en.md (EN). Details: docs/dev/ReleaseProcess.md
+#
+# Actions -> "Bump Version" -> Run workflow: Art wählen (patch/minor/major oder explizite Version).
+# Das Ergebnis wird als Commit auf den gewählten Branch gepusht; optional wird gleich ein Debug-Release
+# gebaut (Tag debug-<Version>-<Laufnummer>, startet "Release Debug APK").
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "patch | minor | major oder explizite Version (z. B. 3.1.0)"
+        required: true
+        default: "patch"
+        type: string
+      release:
+        description: "Danach Debug-Release bauen (Tag debug-<Version>-<Lauf>)"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bump-version
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Eingabe prüfen
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          [[ "$BUMP" =~ ^(patch|minor|major|[0-9]+\.[0-9]+\.[0-9]+)$ ]] || { echo "::error::Ungültige Eingabe: $BUMP"; exit 1; }
+
+      - name: Version hochzählen, Notes erzeugen
+        id: bump
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+          python3 scripts/release/bump_version.py "$BUMP"
+          ver="$(sed -n 's/.*versionName *= *"\(.*\)".*/\1/p' app/build.gradle.kts | head -n1)"
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+          git diff --stat
+
+      - name: Committen und pushen
+        env:
+          VER: ${{ steps.bump.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(release): Version $VER"
+          git push
+
+      - name: Debug-Release auslösen
+        if: inputs.release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VER: ${{ steps.bump.outputs.version }}
+        run: |
+          gh workflow run release-debug-apk.yml --ref "${GITHUB_REF_NAME}" -f tag="debug-${VER}-${GITHUB_RUN_NUMBER}"
