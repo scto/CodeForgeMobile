@@ -1,5 +1,7 @@
 # Plugins schreiben (Autorenhandbuch)
 
+> Ausführliche Fassung von A bis Z mit lauffähigen Beispielen: [Plugins entwickeln](dev/PluginDevelopment.md).
+
 Referenz aller Felder: `docs/extensions.md`. Lauffähige Vorlagen: `templates/` (Übersicht in `templates/README.md`).
 
 ## 1. Welche Art brauche ich?

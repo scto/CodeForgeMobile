@@ -51,6 +51,7 @@ nav:
       - Anwenderhandbuch: user/Anwenderhandbuch.md
       - User Guide: user/UserGuide.md
       - Entwicklerhandbuch: dev/DeveloperGuide.md
+      - Plugins entwickeln: dev/PluginDevelopment.md
       - Modulgraph: dev/module-graph.md
       - APK: apk/APK-Dokumentation.md
       - Release Notes 3.0.0: release-notes/3.0.0.md

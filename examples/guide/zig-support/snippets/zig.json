@@ -1,0 +1,27 @@
+{
+  "Main": {
+    "prefix": "main",
+    "body": [
+      "const std = @import(\"std\");",
+      "",
+      "pub fn main() !void {",
+      "    $0",
+      "}"
+    ],
+    "description": "Programmeinstieg"
+  },
+  "Print": {
+    "prefix": "print",
+    "body": "std.debug.print(\"${1:text}\\n\", .{$2});",
+    "description": "Debug-Ausgabe"
+  },
+  "Test": {
+    "prefix": "test",
+    "body": [
+      "test \"${1:name}\" {",
+      "    try std.testing.expectEqual(@as(i32, ${2:1}), ${3:1});",
+      "}"
+    ],
+    "description": "Testfall"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "scopeName": "source.zig",
+  "name": "Zig",
+  "patterns": [
+    { "name": "comment.line.double-slash.zig", "match": "//.*$" },
+    { "name": "string.quoted.double.zig", "begin": "\"", "end": "\"",
+      "patterns": [ { "name": "constant.character.escape.zig", "match": "\\\\." } ] },
+    { "name": "constant.numeric.zig", "match": "\\b(0x[0-9A-Fa-f_]+|[0-9][0-9_]*(\\.[0-9_]+)?)\\b" },
+    { "name": "storage.type.zig", "match": "\\b(const|var|fn|pub|struct|enum|union|error|comptime|test)\\b" },
+    { "name": "keyword.control.zig", "match": "\\b(if|else|while|for|switch|return|try|catch|defer|errdefer|break|continue|orelse)\\b" },
+    { "name": "support.function.builtin.zig", "match": "@[A-Za-z_][A-Za-z0-9_]*" }
+  ]
+}

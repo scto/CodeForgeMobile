@@ -1,0 +1,10 @@
+{
+  "id": "com.example.guide.commit-notes",
+  "name": "Commit-Notizen",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Protokolliert Git-Commits in einer Logdatei und zeigt die letzten Einträge über einen Editor-Befehl an (nur per Sideload).",
+  "permissions": ["commands", "menus", "git-events"],
+  "entryPointClass": "com.example.codeforgeplugin.commitnotes.CommitNotesPlugin"
+}

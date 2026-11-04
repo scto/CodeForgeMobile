@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Baut alle deklarativen Vorlagen zu installierbaren ZIPs (templates/build/<ordner>.zip).
 
-Aufruf:  python3 templates/build.py [ordner ...]
+Aufruf:  python3 templates/build.py [vorlage-oder-pfad ...]
 Prüft vorher, dass alle JSON-Dateien gültig sind und alle in plugin.json referenzierten Dateien existieren,
 und gibt je ZIP die SHA-256 aus (für den Store-Katalog). Das Code-Plugin baut Gradle:
   ./gradlew :templates:code-plugin:packagePlugin
@@ -41,12 +41,17 @@ def build(folder):
             if f.is_file():
                 z.write(f, f.relative_to(folder).as_posix())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
-    print(f"{target.relative_to(ROOT.parent)}  sha256={digest}")
+    try:
+        shown = target.relative_to(ROOT.parent)
+    except ValueError:
+        shown = target
+    print(f"{shown}  sha256={digest}")
 
 
 if __name__ == "__main__":
     names = sys.argv[1:]
-    folders = [ROOT / n for n in names] if names else [
+    # Name = Vorlage unter templates/, sonst Pfad zu einem beliebigen Plugin-Ordner (z. B. examples/guide/nord-night)
+    folders = [(Path(n).resolve() if (Path(n) / "plugin.json").is_file() else ROOT / n) for n in names] if names else [
         p.parent for p in sorted(ROOT.glob("*/plugin.json")) if "entryPointClass" not in p.read_text(encoding="utf-8")
     ]
     for folder in folders:

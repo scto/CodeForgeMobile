@@ -98,4 +98,8 @@ include(
     ":examples:kmp-lsp-plugin",
     ":examples:python-lsp-plugin",
     ":templates:code-plugin",
+    ":examples:guide-commit-notes",
 )
+
+// Beispiel-Plugin aus dem Plugin-Leitfaden (docs/dev/PluginDevelopment.md) liegt unter examples/guide/
+project(":examples:guide-commit-notes").projectDir = file("examples/guide/commit-notes")

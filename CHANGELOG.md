@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugin-Leitfaden)
+- Entwicklerhandbuch „Plugins entwickeln – von A bis Z“ (`docs/dev/PluginDevelopment.md`): Plugin-Arten, Manifest, Berechtigungen, Entwicklungsumgebung, sechs Beispiele, Testen, Store-Veröffentlichung, Fehlersuche.
+- Lauffähige Beispiele unter `examples/guide/`: `nord-night` (Farbschema), `zig-support` (Grammatik, Snippets, Formatierer, LSP), `todo-report` (PT-Werkzeug mit Python), `commit-notes` (Code-Plugin, Modul `:examples:guide-commit-notes`). `GuidePluginsValidTest` prüft sie mit den echten Parsern.
+- `templates/build.py` baut jetzt auch Plugin-Ordner außerhalb von `templates/` (Pfad als Argument).
+
 ### Hinzugefügt (zentrale Seite)
 - `scto.github.io/CodeForgeMobile` ist jetzt die zentrale Seite: Start (App-Vorstellung, Screenshots hell/dunkel), Store, APT-Repo, Dokumentation und API-Referenz in einem Menü. Store und APT-Repo werden live aus `store.json` bzw. `dists/stable/main/binary-*/Packages` angezeigt. Die Maschinen-URLs von Katalog und APT-Repo bleiben unverändert (in App und Bootstrap fest eingetragen). Store- und APT-Seite verlinken zurück.
 

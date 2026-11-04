@@ -1,0 +1,21 @@
+{
+  "colors": {
+    "primary": "#88C0D0",
+    "onPrimary": "#2E3440",
+    "primaryContainer": "#3B5A66",
+    "onPrimaryContainer": "#D8F0F7",
+    "secondary": "#A3BE8C",
+    "onSecondary": "#2E3440",
+    "tertiary": "#B48EAD",
+    "error": "#BF616A",
+    "onError": "#2E3440",
+    "background": "#2E3440",
+    "onBackground": "#ECEFF4",
+    "surface": "#3B4252",
+    "onSurface": "#ECEFF4",
+    "surfaceVariant": "#434C5E",
+    "onSurfaceVariant": "#D8DEE9",
+    "outline": "#6B7894"
+  },
+  "textmateTheme": "themes/syntax/nord-night-tm.json"
+}

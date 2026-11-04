@@ -1,0 +1,12 @@
+{
+  "name": "Nord Night",
+  "type": "dark",
+  "colors": { "editor.background": "#2E3440", "editor.foreground": "#D8DEE9" },
+  "tokenColors": [
+    { "scope": ["comment"], "settings": { "foreground": "#616E88", "fontStyle": "italic" } },
+    { "scope": ["string"], "settings": { "foreground": "#A3BE8C" } },
+    { "scope": ["keyword", "storage"], "settings": { "foreground": "#81A1C1" } },
+    { "scope": ["constant.numeric"], "settings": { "foreground": "#B48EAD" } },
+    { "scope": ["entity.name.function"], "settings": { "foreground": "#88C0D0" } }
+  ]
+}

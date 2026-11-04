@@ -51,3 +51,7 @@ Plugins gemeinsam genutzt werden kann.
 
 JDK, SDK, NDK und CMake installiert `codeforge-env` im Termux-Prefix (siehe `libs/terminal-engine/BOOTSTRAP.md`). Die JVM-basierten
 Plugins (Kotlin, Java, XML) prüfen `$PREFIX/lib/jvm/java-17-openjdk/bin/java` und melden sonst, dass das JDK im SDK-Manager zu installieren ist.
+
+## Beispiele des Plugin-Leitfadens
+
+`examples/guide/` enthält vier Plugins anderer Arten (Farbschema, Sprachunterstützung, PT-Werkzeug, Code-Plugin), beschrieben in `docs/dev/PluginDevelopment.md`. Das Code-Plugin baut `./gradlew :examples:guide-commit-notes:packagePlugin` (Ergebnis in `examples/guide/commit-notes/build/plugin-package/`), die deklarativen baut `python3 templates/build.py examples/guide/<name>`.

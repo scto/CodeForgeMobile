@@ -1,0 +1,33 @@
+{
+  "id": "com.example.guide.todo-report.tool",
+  "name": "TODO-Bericht (Werkzeug)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Listet TODO-, FIXME- und HACK-Marker eines Projekts im PT-Menü des Dateibaums auf. Führt ein Skript aus (Berechtigung shell).",
+  "permissions": ["shell"],
+  "contributes": {
+    "tools": [
+      {
+        "id": "report",
+        "label": "TODO-Bericht",
+        "description": "Sucht Marker in Quelltexten",
+        "command": ["python3", "${pluginDir}/tool.py", "${projectDir}", "${input}"],
+        "timeoutSeconds": 60,
+        "prompt": {
+          "label": "Marker",
+          "default": "all",
+          "options": [
+            { "value": "all", "label": "Alle" },
+            { "value": "todo", "label": "Nur TODO" },
+            { "value": "fixme", "label": "Nur FIXME" },
+            { "value": "hack", "label": "Nur HACK" }
+          ]
+        }
+      }
+    ],
+    "requires": [
+      { "manager": "pkg", "name": "python", "check": "python3" }
+    ]
+  }
+}

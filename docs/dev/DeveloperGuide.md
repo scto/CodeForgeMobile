@@ -75,6 +75,8 @@ Zwei Arten (Vergleich: [../plugin-modelle-vergleich.md](../plugin-modelle-vergle
 
 LSP-Server werden deklarativ über `contributes.lspServers` gestartet; der Resolver (`LspServerResolverImpl.resolveContributed`) ersetzt `${home}` und `${pluginDir}`. Bei mehreren Servern für eine Sprache gewinnt der zuerst gefundene. Beispiele und Packaging: `examples/README.md`, `./gradlew :examples:<modul>:packagePlugin` → `examples/out/<modul>/`.
 
+**Eigene Plugins schreiben (von A bis Z, mit Beispielen):** [Plugins entwickeln](PluginDevelopment.md).
+
 ## 6. LSP-Client (`:libs:lsp-client`)
 
 `LspServerSession` startet den Prozess (stdio), liest stderr (Logcat-Tag `CF-LSP`) und überwacht das Ende; `LspRpcConnection` kapselt JSON-RPC; `LspJsonMapper` wandelt JSON ↔ Domänenmodelle; `LspClientRepositoryImpl` routet je (Server, Workspace). Schreibzugriffe auf einen toten Server fängt `notifySafely` ab (Status `FAILED`). Optionale Anfragen (`foldingRange`, `inlayHint`) liefern ohne Serverunterstützung leere Listen.

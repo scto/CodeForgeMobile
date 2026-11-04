@@ -1,0 +1,27 @@
+{
+  "id": "com.example.guide.zig-support",
+  "name": "Zig-Unterstützung",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Syntaxfarben, Snippets, Formatierer (zig fmt) und Language Server (zls) für Zig. Nur per Sideload: zig und zls stehen nicht auf der Store-Freigabeliste.",
+  "permissions": [],
+  "contributes": {
+    "grammars": [
+      { "languageId": "zig", "scopeName": "source.zig", "path": "grammars/zig.tmLanguage.json", "extensions": ["zig", "zon"] }
+    ],
+    "snippets": [
+      { "languageId": "zig", "path": "snippets/zig.json" }
+    ],
+    "formatters": [
+      { "id": "zig-fmt", "label": "zig fmt", "extensions": ["zig", "zon"], "command": ["zig", "fmt", "--stdin"], "timeoutSeconds": 20 }
+    ],
+    "lspServers": [
+      { "id": "zls", "label": "ZLS (Zig)", "languages": ["zig"], "command": ["zls"] }
+    ],
+    "requires": [
+      { "manager": "pkg", "name": "zig", "check": "zig" },
+      { "manager": "pkg", "name": "zls", "check": "zls" }
+    ]
+  }
+}
