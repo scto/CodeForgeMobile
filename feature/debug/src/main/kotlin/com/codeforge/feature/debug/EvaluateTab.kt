@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Reiter zum Auswerten von Ausdrücken. */
 @Composable
 fun EvaluateTab(
     state: DebugUiState,

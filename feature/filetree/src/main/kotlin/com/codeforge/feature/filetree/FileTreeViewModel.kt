@@ -32,6 +32,7 @@ import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
 
+/** ViewModel des Dateibaums. */
 @HiltViewModel
 class FileTreeViewModel @Inject constructor(
     private val fileSystemRepository: FileSystemRepository,
@@ -45,9 +46,11 @@ class FileTreeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FileTreeUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<FileTreeUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<FileTreeUiEffect>()
+    /** Einmalige Effekte. */
     val effect: SharedFlow<FileTreeUiEffect> = _effect.asSharedFlow()
 
     private var initialized = false
@@ -89,6 +92,7 @@ class FileTreeViewModel @Inject constructor(
         }
     }
 
+    /** Setzt den Wurzelordner und lädt den Baum. */
     fun initialize(rootPath: String) {
         if (initialized && _uiState.value.rootPath == rootPath) return
         initialized = true
@@ -133,6 +137,7 @@ class FileTreeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.updateFileTree { next.toProto() } }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: FileTreeUiEvent) {
         when (event) {
             is FileTreeUiEvent.ToolClicked -> toolClicked(event.pluginId, event.toolId)

@@ -31,6 +31,7 @@ import com.codeforge.core.domain.model.AndroidDebugTarget
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Dialog zum Anhängen an einen Android-Prozess. */
 @Composable
 fun AttachAndroidDialog(
     currentTarget: AndroidDebugTarget,

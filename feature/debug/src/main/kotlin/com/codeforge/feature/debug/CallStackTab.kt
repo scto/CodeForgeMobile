@@ -29,6 +29,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import java.io.File
 
+/** Reiter mit dem Aufrufstapel. */
 @Composable
 fun CallStackTab(
     state: DebugUiState,

@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/** Angezeigte Eigenschaften einer Datei oder eines Ordners. */
 data class FilePropertiesData(
     val name: String,
     val path: String,
@@ -20,8 +21,10 @@ data class FilePropertiesData(
     val permissions: String
 )
 
+/** Formatierung von Größe, Datum und Rechten. */
 object FileTreeFormatters {
 
+    /** Größe lesbar (B, KB, MB …). */
     fun formatFileSize(bytes: Long): String {
         if (bytes < 0) return "0 B"
         if (bytes < 1024) return "$bytes B"
@@ -33,12 +36,14 @@ object FileTreeFormatters {
         return String.format(Locale.US, "%.1f GB", gb)
     }
 
+    /** Datum lesbar in der Sprache [locale]. */
     fun formatFileDate(timestamp: Long, locale: Locale = Locale.getDefault()): String {
         if (timestamp <= 0L) return "-"
         val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", locale)
         return sdf.format(Date(timestamp))
     }
 
+    /** Anzahl Einträge eines Ordners. */
     fun formatChildCount(count: Int): String {
         return when {
             count <= 0 -> Res.string(R.string.filetree_keine_eintraege)
@@ -47,6 +52,7 @@ object FileTreeFormatters {
         }
     }
 
+    /** Rechte im Stil `rwx`. */
     fun formatFilePermissions(file: File): String {
         val r = if (file.canRead()) "r" else "-"
         val w = if (file.canWrite()) "w" else "-"
@@ -54,6 +60,7 @@ object FileTreeFormatters {
         return "$r$w$x"
     }
 
+    /** Liest die Eigenschaften. */
     fun extractFileProperties(file: File, isDirectory: Boolean): FilePropertiesData {
         val name = file.name.ifBlank { file.absolutePath }
         val path = file.absolutePath
@@ -91,6 +98,7 @@ object FileTreeFormatters {
         )
     }
 
+    /** Untertitel eines Eintrags. */
     fun formatSubtitle(file: File, isDirectory: Boolean): String {
         val dateText = formatFileDate(file.lastModified())
         return if (isDirectory) {

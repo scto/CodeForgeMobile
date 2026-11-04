@@ -13,5 +13,6 @@ interface X2cRunNotifier {
     /** [percent] 0..99 oder `null` = unbestimmt. */
     fun update(phase: X2cPhase?, percent: Int?)
 
+    /** Meldet, dass der Lauf beendet ist. */
     fun finished()
 }

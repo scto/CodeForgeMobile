@@ -92,6 +92,7 @@ import java.io.File
 import java.util.Locale
 import kotlinx.coroutines.flow.collectLatest
 
+/** Route des Dateibaums. */
 @Composable
 fun FileTreeRoute(
     modifier: Modifier = Modifier,

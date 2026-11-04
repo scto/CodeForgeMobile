@@ -5,6 +5,7 @@ import com.codeforge.core.domain.model.X2cBuildStepResult
 import com.codeforge.core.domain.model.X2cBuildStepStatus
 import com.codeforge.core.domain.model.X2cReport
 
+/** Ergebnis des Prüf-Builds. */
 enum class X2cBuildBadge { NOT_RUN, SUCCESS, FAILED, SKIPPED }
 
 /** Gesamtstatus des Builds für die Anzeige. Ein erneuter Lauf („Build ausführen“) hat Vorrang vor dem Lauf der Migration. */

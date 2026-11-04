@@ -30,6 +30,7 @@ enum class FileTreeView {
     MODULES
 }
 
+/** Anzeige-Optionen des Dateibaums (Sortierung, Ansicht, versteckte Dateien). */
 @Immutable
 data class FileTreeOptions(
     val sortMode: FileTreeSortMode = FileTreeSortMode.GROUPED,
@@ -48,6 +49,7 @@ data class FileTreeOptions(
         )
     }
 
+    /** Wandelt in die gespeicherte Konfiguration. */
     fun toProto(): com.codeforge.core.datastore.proto.FileTreeConfig =
         com.codeforge.core.datastore.proto.FileTreeConfig.newBuilder()
             .setSortMode(sortMode.ordinal)
@@ -58,6 +60,7 @@ data class FileTreeOptions(
             .build()
 }
 
+/** Art eines Eintrags. */
 enum class FileTreeEntryKind { DIRECTORY, FILE, MODULE, GROUP }
 
 /** Virtuelle Gruppen der Modul-Ansicht. */
@@ -81,6 +84,8 @@ data class FileTreeEntry(
     /** Zusatz hinter dem Namen, z. B. Source-Set "(test)" oder Modulname bei Gradle-Skripten. */
     val detail: String? = null
 ) {
+    /** Ob der Eintrag ein Ordner oder Modul ist. */
     val isDirectory: Boolean get() = kind == FileTreeEntryKind.DIRECTORY || kind == FileTreeEntryKind.MODULE
+    /** Ob der Eintrag einer echten Datei entspricht. */
     val isReal: Boolean get() = path.isNotEmpty()
 }

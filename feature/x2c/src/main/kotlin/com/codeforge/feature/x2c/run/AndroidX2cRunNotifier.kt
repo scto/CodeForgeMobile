@@ -6,6 +6,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Meldet das Ende des Laufs als Android-Benachrichtigung. */
 @Singleton
 class AndroidX2cRunNotifier @Inject constructor(
     @ApplicationContext private val context: Context

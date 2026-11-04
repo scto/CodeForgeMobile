@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
+/** ViewModel des Debuggers. */
 @HiltViewModel
 class DebugViewModel @Inject constructor(
     private val debugRepository: DebugRepository,
@@ -34,6 +35,7 @@ class DebugViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DebugUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<DebugUiState> = _uiState.asStateFlow()
 
     private var breakpointCollectionJob: Job? = null
@@ -92,6 +94,7 @@ class DebugViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    /** Setzt das Projektverzeichnis. */
     fun setProjectRoot(projectRoot: String) {
         if (_uiState.value.projectRoot == projectRoot) return
         _uiState.update { it.copy(projectRoot = projectRoot) }
@@ -122,6 +125,7 @@ class DebugViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun handleIntent(intent: DebugUiIntent) {
         when (intent) {
             is DebugUiIntent.Start -> start(intent.config)

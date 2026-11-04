@@ -56,6 +56,7 @@ import com.codeforge.feature.x2c.X2cUiState
 import com.codeforge.feature.x2c.buildBadge
 import com.codeforge.feature.x2c.buildErrors
 
+/** Ergebnisbildschirm der Umwandlung. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun X2cResultScreen(

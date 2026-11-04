@@ -55,6 +55,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.feature.x2c.X2cIntent
 import com.codeforge.feature.x2c.X2cUiState
 
+/** Dialog zur Konfiguration der Umwandlung. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun X2cDialog(

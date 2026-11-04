@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel der XML-zu-Compose-Umwandlung. */
 @HiltViewModel
 class X2cViewModel @Inject constructor(
     private val scanner: ComposeMigrationScanner,
@@ -41,9 +42,11 @@ class X2cViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(X2cUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<X2cUiState> = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<X2cEffect>()
+    /** Einmalige Effekte. */
     val effects: SharedFlow<X2cEffect> = _effects.asSharedFlow()
 
     private var migrationJob: Job? = null
@@ -69,6 +72,7 @@ class X2cViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun handleIntent(intent: X2cIntent) {
         when (intent) {
             is X2cIntent.ScanProject -> scanProject(intent.projectPath, intent.manualTrigger, intent.preselectedLayout)

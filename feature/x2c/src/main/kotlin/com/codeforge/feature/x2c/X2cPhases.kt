@@ -6,8 +6,10 @@ import com.codeforge.core.domain.model.X2cProgress
 /** Reihenfolge entspricht dem Ablauf in `X2cRepositoryImpl.executeMigration`. */
 enum class X2cPhase { ANALYSE, LAYOUTS, THEME, WIRING, BACKUP, BASELINE, APPLY, VERIFY }
 
+/** Zustand eines Schritts. */
 enum class X2cStepState { DONE, ACTIVE, PENDING }
 
+/** Schritt mit Phase und Zustand. */
 @Immutable
 data class X2cPhaseStep(val phase: X2cPhase, val state: X2cStepState)
 
@@ -19,6 +21,7 @@ data class X2cPhasePlan(
     val baseline: Boolean,
     val verify: Boolean
 ) {
+    /** Angezeigte Phasen. */
     val phases: List<X2cPhase> = X2cPhase.entries.filter {
         when (it) {
             X2cPhase.THEME -> theme
@@ -41,6 +44,7 @@ data class X2cPhaseTracker(
     val rolledBack: Boolean = false,
     val failed: Boolean = false
 ) {
+    /** Verarbeitet einen Fortschritt. */
     fun onProgress(progress: X2cProgress?): X2cPhaseTracker = when (progress) {
         null, X2cProgress.Idle -> this
         is X2cProgress.Analyzing -> advance(X2cPhase.ANALYSE)
@@ -63,6 +67,7 @@ data class X2cPhaseTracker(
         return if (current != null && phase.ordinal < current.ordinal) this else copy(active = phase)
     }
 
+    /** Schritte mit Zustand. */
     fun steps(): List<X2cPhaseStep> {
         val current = active
         return plan.phases.map { phase ->

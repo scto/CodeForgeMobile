@@ -28,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 
+/** Bottom Sheet des Debuggers. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DebugBottomSheet(
@@ -63,6 +64,7 @@ fun DebugBottomSheet(
     }
 }
 
+/** Route des Debuggers. */
 @Composable
 fun DebugRoute(
     projectRoot: String,
@@ -84,6 +86,7 @@ fun DebugRoute(
     )
 }
 
+/** Bildschirm des Debuggers. */
 @Composable
 fun DebugScreen(
     state: DebugUiState,

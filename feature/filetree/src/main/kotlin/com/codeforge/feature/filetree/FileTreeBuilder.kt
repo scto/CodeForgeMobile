@@ -21,6 +21,7 @@ object FileTreeBuilder {
     /** In der Projekt-/Modul-Ansicht ausgeblendete Build- und IDE-Verzeichnisse. */
     private val PROJECT_HIDDEN_DIRS = setOf("build", ".gradle", ".idea", ".git", ".kotlin", ".cxx", ".externalNativeBuild")
 
+    /** Baut die flache Liste der sichtbaren Einträge ab [root] (aufgeklappte Ordner, Sortierung, Ansicht). */
     fun build(root: File, options: FileTreeOptions, expanded: Set<String>): List<FileTreeEntry> {
         if (!root.isDirectory) return emptyList()
         val out = ArrayList<FileTreeEntry>()

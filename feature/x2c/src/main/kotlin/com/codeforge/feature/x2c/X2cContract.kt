@@ -17,6 +17,7 @@ import com.codeforge.core.resources.UiText
 /** Filter der Dateiliste im Ergebnis. */
 enum class X2cResultFilter { ALL, PROBLEMS, TODOS }
 
+/** Filter der Layout-Liste. */
 enum class X2cFilter {
     ALL,
     AUTOMATIC,
@@ -24,6 +25,7 @@ enum class X2cFilter {
     NOT_CONVERTIBLE
 }
 
+/** Zustand der XML-zu-Compose-Umwandlung. */
 @Immutable
 data class X2cUiState(
     val isScanning: Boolean = false,
@@ -68,6 +70,7 @@ data class X2cUiState(
             }
         }
 
+    /** Layouts nach Filter und Suche. */
     val filteredLayouts: List<LayoutPlanEntry>
         get() {
             val list = plan?.layouts ?: emptyList()
@@ -87,47 +90,77 @@ data class X2cUiState(
         }
 }
 
+/** Aktionen der Umwandlung. */
 sealed interface X2cIntent {
+    /** Projekt nach Layouts durchsuchen. */
     data class ScanProject(
         val projectPath: String,
         val manualTrigger: Boolean = false,
         val preselectedLayout: String? = null
     ) : X2cIntent
 
+    /** Layout an-/abwählen. */
     data class ToggleLayoutSelection(val relativePath: String) : X2cIntent
+    /** Alle wählen. */
     data object SelectAllLayouts : X2cIntent
+    /** Alle abwählen. */
     data object DeselectAllLayouts : X2cIntent
+    /** Suchtext ändern. */
     data class SetSearchQuery(val query: String) : X2cIntent
+    /** Activities verdrahten. */
     data class SetWireActivities(val enabled: Boolean) : X2cIntent
+    /** Theme erzeugen. */
     data class SetGenerateTheme(val enabled: Boolean) : X2cIntent
+    /** XML nach Erfolg entfernen. */
     data class SetRemoveXmlAfterSuccess(val enabled: Boolean) : X2cIntent
+    /** Versionskatalog verwenden. */
     data class SetUseVersionCatalog(val enabled: Boolean) : X2cIntent
+    /** Build danach prüfen. */
     data class SetRunBuildCheck(val enabled: Boolean) : X2cIntent
+    /** Zuerst Ausgangs-Build prüfen. */
     data class SetBuildBaselineFirst(val enabled: Boolean) : X2cIntent
+    /** Git-Zweig anlegen. */
     data class SetCreateGitBranch(val enabled: Boolean) : X2cIntent
+    /** Git in die Sicherung aufnehmen. */
     data class SetIncludeGitInBackup(val enabled: Boolean) : X2cIntent
+    /** Umwandlung starten. */
     data object StartMigration : X2cIntent
+    /** Umwandlung abbrechen. */
     data object CancelMigration : X2cIntent
+    /** Dialog schließen (optional „nicht mehr fragen“). */
     data class DismissDialog(val dontAskAgain: Boolean) : X2cIntent
+    /** Datei öffnen. */
     data class OpenFile(val filePath: String) : X2cIntent
+    /** Ergebnis schließen. */
     data object DismissResult : X2cIntent
 
     /** Ergebnis des letzten Laufs wieder anzeigen (nach Schließen oder Dateiwechsel). */
     data object ShowResult : X2cIntent
+    /** Sicherung wiederherstellen. */
     data object RestoreBackup : X2cIntent
+    /** Listenfilter setzen. */
     data class SetFilter(val filter: X2cFilter) : X2cIntent
+    /** Ergebnisfilter setzen. */
     data class SetResultFilter(val filter: X2cResultFilter) : X2cIntent
 
     /** Antwort auf die Rückfrage bei einer nachträglich geänderten Datei während „Rückgängig“. */
     data class ResolveUndoConflict(val policy: UndoConflictPolicy) : X2cIntent
+    /** Build erneut ausführen. */
     data object RunBuildAgain : X2cIntent
+    /** Bericht öffnen. */
     data object OpenReport : X2cIntent
+    /** Sicherungsordner zeigen. */
     data object ShowBackupFolder : X2cIntent
+    /** Erste Compose-Datei öffnen. */
     data object OpenFirstComposeFile : X2cIntent
+    /** Ergebnis des Rückgängigmachens schließen. */
     data object DismissUndoResult : X2cIntent
 }
 
+/** Einmalige Effekte. */
 sealed interface X2cEffect {
+    /** Meldung anzeigen. */
     data class ShowMessage(val message: UiText) : X2cEffect
+    /** Zur Datei navigieren. */
     data class NavigateToFile(val filePath: String) : X2cEffect
 }

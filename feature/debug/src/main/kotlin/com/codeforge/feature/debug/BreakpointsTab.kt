@@ -40,6 +40,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import java.io.File
 
+/** Reiter mit Haltepunkten. */
 @Composable
 fun BreakpointsTab(
     state: DebugUiState,

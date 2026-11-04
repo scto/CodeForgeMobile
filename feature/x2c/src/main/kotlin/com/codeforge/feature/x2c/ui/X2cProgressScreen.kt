@@ -46,6 +46,7 @@ import com.codeforge.feature.x2c.X2cStepState
 import com.codeforge.feature.x2c.X2cUiState
 import com.codeforge.feature.x2c.phaseFraction
 
+/** Fortschrittsanzeige der Umwandlung. */
 @Composable
 fun X2cProgressScreen(
     state: X2cUiState,
@@ -187,6 +188,7 @@ private fun PhaseRow(
     }
 }
 
+/** Beschriftung der Phase. */
 internal fun phaseLabel(phase: X2cPhase): Int = when (phase) {
     X2cPhase.ANALYSE -> R.string.x2c_phase_analyse
     X2cPhase.LAYOUTS -> R.string.x2c_phase_layouts

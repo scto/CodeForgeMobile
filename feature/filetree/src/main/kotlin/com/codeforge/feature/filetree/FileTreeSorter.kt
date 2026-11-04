@@ -60,6 +60,7 @@ object FileTreeSorter {
         return if (rest != 0) rest else a.compareTo(b)
     }
 
+    /** Sortiert die Dateien nach den Optionen. */
     fun sort(files: List<File>, options: FileTreeOptions): List<File> {
         val items = files.map(::Item)
         val dir = if (options.descending) -1 else 1

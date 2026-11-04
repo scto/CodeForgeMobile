@@ -36,6 +36,7 @@ import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.TooltipIconButton
 import java.io.File
 
+/** Werkzeugleiste mit Start, Pause, Schritten und Stopp. */
 @Composable
 fun DebugToolbar(
     state: DebugUiState,
