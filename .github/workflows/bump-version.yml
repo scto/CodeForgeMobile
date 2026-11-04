@@ -30,6 +30,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # nötig für "gh workflow run" (Debug-/Release-Build anstoßen)
 
 concurrency:
   group: bump-version
