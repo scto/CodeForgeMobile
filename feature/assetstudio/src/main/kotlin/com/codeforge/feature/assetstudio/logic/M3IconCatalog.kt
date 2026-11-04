@@ -16,6 +16,7 @@ object M3IconCatalog {
 
     @Volatile private var names: List<String>? = null
 
+    /** Namen der Material-Symbole (zwischengespeichert). */
     fun names(context: Context): List<String> = names ?: synchronized(this) {
         names ?: IconNames.parseCatalog(
             context.assets.open(ASSET).bufferedReader().use { it.readLines() }

@@ -18,17 +18,21 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** ViewModel der Abhängigkeitsansicht. */
 @HiltViewModel
 class DependenciesViewModel @Inject constructor(
     private val repository: DependencyGraphRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DependenciesUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<DependenciesUiState> = _uiState.asStateFlow()
 
     private val _effects = Channel<DependenciesUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects = _effects.receiveAsFlow()
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun handleIntent(intent: DependenciesUiIntent) {
         when (intent) {
             is DependenciesUiIntent.Init -> initProject(intent.projectRoot)

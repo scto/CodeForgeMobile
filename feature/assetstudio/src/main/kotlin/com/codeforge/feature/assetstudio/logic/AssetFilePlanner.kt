@@ -7,11 +7,14 @@ class PlannedFile(val relativePath: String, val bytes: ByteArray) {
     constructor(relativePath: String, text: String) : this(relativePath, text.toByteArray(Charsets.UTF_8))
 }
 
+/** Form des Symbols. */
 enum class IconShape { CIRCLE, SQUARE, ROUNDED }
 
 /** Quelle des Foreground-Motivs: Vektor-XML oder fertig kodiertes PNG. */
 sealed interface ForegroundSource {
+    /** Vordergrund als Vektor-XML. */
     data class VectorXml(val xml: String) : ForegroundSource
+    /** Vordergrund als PNG. */
     class Png(val bytes: ByteArray) : ForegroundSource
 }
 
@@ -73,6 +76,7 @@ object AssetFilePlanner {
     /** Randabstand in Prozent so, dass das Motiv [scale] der Fläche belegt (0.6 → 20 %). */
     fun insetPercent(scale: Float): Int = kotlin.math.round(((1f - scale.coerceIn(0.3f, 1f)) / 2f) * 100f).toInt().coerceIn(0, 35)
 
+    /** Farbe als `#AARRGGBB`. */
     fun colorHex(argb: Int): String =
         if (argb ushr 24 == 0xFF) "#%06X".format(argb and 0xFFFFFF) else "#%08X".format(argb)
 

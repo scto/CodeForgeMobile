@@ -45,6 +45,7 @@ import com.codeforge.feature.j2k.J2kFilter
 import com.codeforge.feature.j2k.J2kIntent
 import com.codeforge.feature.j2k.J2kUiState
 
+/** Ergebnisbildschirm der Umwandlung. */
 @Composable
 fun J2kResultScreen(
     state: J2kUiState,

@@ -30,6 +30,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.feature.j2k.J2kIntent
 import com.codeforge.feature.j2k.J2kUiState
 
+/** Dialog zur Konfiguration der Umwandlung. */
 @Composable
 fun J2kDialog(
     state: J2kUiState,

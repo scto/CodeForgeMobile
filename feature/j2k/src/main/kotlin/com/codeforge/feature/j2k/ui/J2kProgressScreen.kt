@@ -23,6 +23,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.feature.j2k.J2kIntent
 import com.codeforge.feature.j2k.J2kUiState
 
+/** Fortschrittsanzeige der Umwandlung. */
 @Composable
 fun J2kProgressScreen(
     state: J2kUiState,

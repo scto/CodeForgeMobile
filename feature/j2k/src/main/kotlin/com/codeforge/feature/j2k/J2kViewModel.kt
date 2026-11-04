@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel der Java-zu-Kotlin-Umwandlung. */
 @HiltViewModel
 class J2kViewModel @Inject constructor(
     private val repository: J2kRepository,
@@ -24,9 +25,11 @@ class J2kViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(J2kUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<J2kUiState> = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<J2kEffect>()
+    /** Einmalige Effekte. */
     val effects: SharedFlow<J2kEffect> = _effects.asSharedFlow()
 
     private var migrationJob: Job? = null
@@ -40,6 +43,7 @@ class J2kViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun handleIntent(intent: J2kIntent) {
         when (intent) {
             is J2kIntent.ScanProject -> scanProject(intent.projectPath, intent.manualTrigger)

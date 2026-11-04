@@ -48,6 +48,7 @@ internal object ProjectDiscovery {
     fun autoListedPaths(discovered: List<RecentProject>): Set<String> =
         discovered.mapTo(HashSet()) { normalize(it.path) }
 
+    /** Normalisiert den Pfad für den Vergleich. */
     fun normalize(path: String): String =
         runCatching { File(path).canonicalPath }.getOrDefault(path)
 }

@@ -29,6 +29,7 @@ object IconRenderer {
     /** Legacy-Launcher-Dichten und Kantenlängen in Pixel. */
     val LEGACY_SIZES = listOf("mdpi" to 48, "hdpi" to 72, "xhdpi" to 96, "xxhdpi" to 144, "xxxhdpi" to 192)
 
+    /** Motiv des Symbols. */
     sealed interface Motif {
         class Raster(val image: ImageBitmap) : Motif
         class Vector(val vector: ImageVector, val tint: Color?) : Motif
@@ -43,11 +44,13 @@ object IconRenderer {
             )
         }
 
+    /** Rendert das Symbol als PNG. */
     fun renderPng(px: Int, motif: Motif, shape: IconShape, backgroundArgb: Int, scale: Float): ByteArray {
         val bmp = render(px, motif, shape, backgroundArgb, scale).asAndroidBitmap()
         return ByteArrayOutputStream().also { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
     }
 
+    /** Rendert das Symbol als Bitmap. */
     fun render(px: Int, motif: Motif, shape: IconShape, backgroundArgb: Int, scale: Float): ImageBitmap {
         val target = ImageBitmap(px, px)
         val canvas = Canvas(target)

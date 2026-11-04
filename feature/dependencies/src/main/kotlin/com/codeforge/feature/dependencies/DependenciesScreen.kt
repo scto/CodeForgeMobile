@@ -73,6 +73,7 @@ import com.codeforge.core.domain.model.DependencyNode
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Route der Abhängigkeitsansicht. */
 @Composable
 fun DependenciesRoute(
     projectRoot: String,
@@ -124,6 +125,7 @@ fun DependenciesRoute(
     )
 }
 
+/** Bildschirm der Abhängigkeitsansicht. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DependenciesScreen(

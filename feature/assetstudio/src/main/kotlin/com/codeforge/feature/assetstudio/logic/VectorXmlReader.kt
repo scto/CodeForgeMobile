@@ -19,6 +19,7 @@ object VectorXmlReader {
 
     private const val NS = "http://schemas.android.com/apk/res/android"
 
+    /** Liest Vektor-XML als [ImageVector]; `null` bei Fehler. */
     fun parse(xml: String): ImageVector? = runCatching {
         val factory = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
         val root = factory.newDocumentBuilder().parse(xml.byteInputStream()).documentElement

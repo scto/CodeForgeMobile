@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
+/** ViewModel des Startbildschirms. */
 @HiltViewModel
 class WelcomeViewModel @Inject constructor(
     private val recentProjectsRepository: RecentProjectsRepository,
@@ -35,9 +36,11 @@ class WelcomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WelcomeUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<WelcomeUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<WelcomeUiEffect>()
+    /** Einmalige Effekte. */
     val effect: SharedFlow<WelcomeUiEffect> = _effect.asSharedFlow()
 
     private val recent = MutableStateFlow<List<RecentProject>>(emptyList())
@@ -98,6 +101,7 @@ class WelcomeViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: WelcomeUiEvent) {
         when (event) {
             WelcomeUiEvent.CreateProjectClicked -> emit(WelcomeUiEffect.NavigateToProjectWizard)

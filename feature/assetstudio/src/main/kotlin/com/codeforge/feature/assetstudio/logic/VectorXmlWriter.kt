@@ -76,9 +76,11 @@ object VectorXmlWriter {
         return (ch(alpha) shl 24) or (ch(red) shl 16) or (ch(green) shl 8) or ch(blue)
     }
 
+    /** Formatiert eine Zahl für XML. */
     internal fun num(v: Float): String =
         if (v == v.toInt().toFloat()) v.toInt().toString() else String.format(Locale.ROOT, "%.4f", v).trimEnd('0').trimEnd('.')
 
+    /** Pfaddaten als Text. */
     internal fun pathData(nodes: List<PathNode>): String = nodes.joinToString("") { n ->
         when (n) {
             is PathNode.Close -> "Z"

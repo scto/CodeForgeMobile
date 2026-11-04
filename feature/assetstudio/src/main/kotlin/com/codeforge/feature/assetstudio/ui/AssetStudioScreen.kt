@@ -68,6 +68,7 @@ import com.codeforge.feature.assetstudio.StudioMode
 import com.codeforge.feature.assetstudio.StudioSource
 import com.codeforge.feature.assetstudio.logic.IconShape
 
+/** Route des Asset-Studios. */
 @Composable
 fun AssetStudioRoute(onBack: () -> Unit, modifier: Modifier = Modifier, viewModel: AssetStudioViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
@@ -103,6 +104,7 @@ fun AssetStudioRoute(onBack: () -> Unit, modifier: Modifier = Modifier, viewMode
     }
 }
 
+/** Bildschirm des Asset-Studios mit Vorschau und Optionen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetStudioScreen(

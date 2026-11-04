@@ -48,6 +48,7 @@ import com.codeforge.core.domain.model.DependencyNode
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Sheet mit Details zu einer Abhängigkeit. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DependencyDetailBottomSheet(

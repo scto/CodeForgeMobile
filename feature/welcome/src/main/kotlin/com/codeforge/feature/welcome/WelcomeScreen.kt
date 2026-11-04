@@ -102,6 +102,7 @@ private val secondaryActions = listOf(
     WelcomeAction(R.string.settings_hub_title, Icons.Filled.Settings) { it.onEvent(WelcomeUiEvent.SettingsClicked) }
 )
 
+/** Route des Startbildschirms. */
 @Composable
 fun WelcomeRoute(
     modifier: Modifier = Modifier,
@@ -671,6 +672,7 @@ private fun RecentProjectDetailPane(
     }
 }
 
+/** Initialen des Projektnamens für das Symbol. */
 fun getProjectInitials(name: String): String {
     val clean = name.trim()
     if (clean.isEmpty()) return "?"
@@ -682,6 +684,7 @@ fun getProjectInitials(name: String): String {
     }
 }
 
+/** Formatiert den Zeitpunkt relativ („vor 2 Std.“). */
 fun formatRelativeTime(epochMillis: Long): String {
     if (epochMillis <= 0L) return ""
     val now = System.currentTimeMillis()

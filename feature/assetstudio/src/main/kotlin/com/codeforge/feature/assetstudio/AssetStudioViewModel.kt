@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 
+/** ViewModel des Asset-Studios. */
 @HiltViewModel
 class AssetStudioViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -49,9 +50,11 @@ class AssetStudioViewModel @Inject constructor(
             showM3Picker = action == StudioAction.M3,
         )
     )
+    /** UI-Zustand. */
     val state: StateFlow<AssetStudioUiState> = _state.asStateFlow()
 
     private val _effects = Channel<AssetStudioEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects = _effects.receiveAsFlow()
 
     /** Name wurde vom Nutzer geändert → Vorschläge (M3-Auswahl) überschreiben ihn nicht mehr. */
@@ -60,6 +63,7 @@ class AssetStudioViewModel @Inject constructor(
     /** Einmalige Start-Aktion für Import (Bildauswahl) – von der UI abgefragt. */
     val launchPickerOnStart: Boolean = action == StudioAction.IMPORT
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onIntent(intent: AssetStudioIntent) {
         when (intent) {
             is AssetStudioIntent.SetMode -> _state.update { it.copy(mode = intent.mode) }
