@@ -7,7 +7,7 @@
 | Eigenschaft | Wert |
 |---|---|
 | Paket (`applicationId`) | `com.codeforge.app` |
-| Version | `3.0.1` (`versionCode` 30001; Schema `MAJOR*10000 + MINOR*100 + PATCH`) |
+| Version | `3.0.2` (`versionCode` 30002; Schema `MAJOR*10000 + MINOR*100 + PATCH`) |
 | `minSdk` / `targetSdk` / `compileSdk` | 26 / 28 / 36 |
 | Quelle der Version | `app/build.gradle.kts` |
 | Lizenz | GPLv3 |
@@ -62,7 +62,7 @@ Die APK enthält die App (Kotlin/Compose), native Bibliotheken (Termux-Emulator,
 
 1. Version in `app/build.gradle.kts` und `CHANGELOG.md` anheben.
 2. Tests: `./gradlew testDebugUnitTest`.
-3. Tag pushen (`debug-3.0.1-1`) → Release-Workflow baut und veröffentlicht.
+3. Tag pushen (`debug-3.0.2-1`) → Release-Workflow baut und veröffentlicht.
 4. Signierter Release-Build: Schlüssel als CI-Secrets hinterlegen (siehe [Release-Signatur](../dev/Signing.md)), Tag `vX.Y.Z` pushen → Workflow `release-release-apk.yml` baut `assembleRelease`, prüft die Signatur und veröffentlicht den Release.
 
 Weitere Berichte: [../apk-analyzer-report.md](../apk-analyzer-report.md), [../install-and-run-apk-report.md](../install-and-run-apk-report.md).
