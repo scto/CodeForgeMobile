@@ -7,7 +7,7 @@
 
 Eine native Android-IDE mit **Sora Editor**, **Termux-basierter Shell** (JDK, Android SDK, NDK per `codeforge-env`), **Git (JGit)**, **Language Server Protocol**, **Compose-Live-Preview**, **visuellem Layout-Designer** und **Material 3 Expressive**.
 
-[![Version](https://img.shields.io/badge/Version-3.0.2-blueviolet.svg?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-3.0.3-blueviolet.svg?style=for-the-badge)](CHANGELOG.md)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.21-7F52FF.svg?style=for-the-badge&logo=kotlin)](https://kotlinlang.org/)
 [![Android](https://img.shields.io/badge/Android-AGP_8.13.2-3DDC84.svg?style=for-the-badge&logo=android)](https://developer.android.com/)
 [![Compose](https://img.shields.io/badge/Jetpack_Compose-BOM_2025.09.00-4285F4.svg?style=for-the-badge&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
