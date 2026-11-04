@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Installiert bei Bedarf den Debug-Adapter und startet ihn mit dem Termux-JDK; die Verbindung läuft über dessen stdio. */
 @Singleton
 class DapAdapterLauncher @Inject constructor(
     @ApplicationContext private val context: Context

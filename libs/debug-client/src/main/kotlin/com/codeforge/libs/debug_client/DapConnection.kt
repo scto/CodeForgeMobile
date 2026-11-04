@@ -33,6 +33,7 @@ class DapConnection(
     private var readerJob: Job? = null
     private var onCloseHandler: (() -> Unit)? = null
 
+    /** Ob die Verbindung zum Adapter besteht. */
     val isConnected: Boolean
         get() = readerJob?.isActive == true
 
@@ -127,4 +128,5 @@ class DapConnection(
     }
 }
 
+/** Fehler einer DAP-Anfrage; [command] ist der Name des Befehls. */
 class DapException(val command: String, message: String) : RuntimeException("[$command] $message")

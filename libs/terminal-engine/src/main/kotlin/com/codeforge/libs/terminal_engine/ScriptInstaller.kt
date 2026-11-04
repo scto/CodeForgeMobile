@@ -17,6 +17,7 @@ import java.io.File
  */
 internal class ScriptInstaller(private val context: Context) {
 
+    /** Installiert das Skript `codeforge-env` nach `$PREFIX/bin`; schlägt fehl, wenn das Termux-Bootstrap fehlt. */
     fun install(): Result<Unit> = runCatching {
         check(TermuxEnvironment.isBootstrapInstalled()) { Res.string(R.string.terminal_engine_termux_bootstrap_ist_nicht_installiert) }
         val target = File(TermuxEnvironment.sdkScriptPath)

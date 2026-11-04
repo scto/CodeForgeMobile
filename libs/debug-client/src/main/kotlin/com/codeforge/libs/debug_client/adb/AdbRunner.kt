@@ -12,20 +12,27 @@ import java.io.InputStreamReader
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Ergebnis eines ADB-Aufrufs (Exit-Code und Ausgabe). */
 data class AdbResult(
     val exitCode: Int,
     val stdout: String,
     val stderr: String
 ) {
+    /** Ob der Aufruf mit Exit-Code 0 endete. */
     val isSuccess: Boolean get() = exitCode == 0
 }
 
+/** Führt `adb`-Befehle aus. */
 interface AdbRunner {
+    /** Ob ADB verfügbar ist. */
     fun isAvailable(): Boolean
+    /** Pfad des ADB-Programms oder `null`. */
     fun getAdbPath(): String?
+    /** Führt `adb` mit [args] aus. */
     suspend fun execute(vararg args: String): AdbResult
 }
 
+/** Standard-Runner: startet `adb` als Prozess. */
 @Singleton
 class DefaultAdbRunner @Inject constructor() : AdbRunner {
 

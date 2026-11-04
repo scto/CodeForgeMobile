@@ -23,6 +23,9 @@ import java.util.zip.ZipFile
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Bereitet das Debuggen einer App per ADB vor (Portweiterleitung) und räumt sie nach dem Ende der Sitzung auf; stoppt die App optional.
+ */
 @Singleton
 class AndroidDebugManagerImpl @Inject constructor(
     private val adbRunner: AdbRunner,

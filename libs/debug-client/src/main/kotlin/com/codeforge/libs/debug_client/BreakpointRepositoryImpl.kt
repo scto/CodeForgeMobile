@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Verwaltet Breakpoints je Projekt und speichert sie als JSON im App-Verzeichnis. */
 @Singleton
 class BreakpointRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context

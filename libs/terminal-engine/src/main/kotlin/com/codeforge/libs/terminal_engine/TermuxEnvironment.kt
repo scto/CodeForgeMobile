@@ -21,17 +21,23 @@ data class ShellLaunchSpec(
     val workingDirectory: String,
 )
 
+/** Pfade und Umgebungsvariablen der Termux-Umgebung (Prefix, Home, SDK, Shell). */
 object TermuxEnvironment {
     const val SDK_SCRIPT_NAME = "codeforge-env"
 
+    /** Termux-`$PREFIX`. */
     val prefix: String get() = TermuxConstants.TERMUX_PREFIX_DIR_PATH
+    /** Termux-`$HOME`. */
     val home: String get() = TermuxConstants.TERMUX_HOME_DIR_PATH
 
     /** ANDROID_HOME — muss mit `SDK_ROOT` in assets/codeforge-env übereinstimmen. */
     val sdkRoot: String get() = TermuxDevEnvironment.getSdkRoot()
+    /** Pfad des SDK-Skripts `codeforge-env`. */
     val sdkScriptPath: String get() = "${TermuxConstants.TERMUX_BIN_PREFIX_DIR_PATH}/$SDK_SCRIPT_NAME"
+    /** Pfad der Bash. */
     val bashPath: String get() = "${TermuxConstants.TERMUX_BIN_PREFIX_DIR_PATH}/bash"
 
+    /** Ob das Termux-Bootstrap installiert ist (Bash vorhanden). */
     fun isBootstrapInstalled(): Boolean = File(bashPath).isFile
 
     /** Basis-Umgebung der Termux-Shell; [extraPath] wird dem PATH vorangestellt. */
@@ -63,6 +69,7 @@ object TermuxEnvironment {
         extraPath: List<String> = emptyList(),
     ): ShellLaunchSpec = ShellLaunchSpec(command, environment(extraPath), workingDirectory)
 
+    /** Startbeschreibung für ein Shell-Skript über `bash -lc`. */
     fun shellScriptSpec(script: String, workingDirectory: String = home): ShellLaunchSpec =
         launchSpec(listOf(bashPath, "-lc", script), workingDirectory)
 

@@ -33,6 +33,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Debug-Sitzung über das Debug Adapter Protocol: Start, Schritte, Stack, Variablen und Beenden. */
 @Singleton
 class DebugRepositoryImpl internal constructor(
     private val connectionFactory: suspend (DebugConfig) -> DapConnection,

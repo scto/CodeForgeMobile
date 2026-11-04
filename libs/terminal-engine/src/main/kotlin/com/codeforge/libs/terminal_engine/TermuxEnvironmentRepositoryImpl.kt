@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Prüft und installiert die Termux-Umgebung (Bootstrap, SDK-Skript). */
 @Singleton
 class TermuxEnvironmentRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,

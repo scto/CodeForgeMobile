@@ -6,15 +6,18 @@ import kotlinx.serialization.json.JsonObject
  * Basis-Typen für das Debug Adapter Protocol (DAP).
  */
 sealed interface DapMessage {
+    /** Sequenznummer der Nachricht. */
     val seq: Int
 }
 
+/** Anfrage an den Debug-Adapter. */
 data class DapRequest(
     override val seq: Int,
     val command: String,
     val arguments: JsonObject? = null
 ) : DapMessage
 
+/** Antwort des Debug-Adapters. */
 data class DapResponse(
     override val seq: Int,
     val requestSeq: Int,
@@ -24,6 +27,7 @@ data class DapResponse(
     val body: JsonObject? = null
 ) : DapMessage
 
+/** Ereignis des Debug-Adapters. */
 data class DapEvent(
     override val seq: Int,
     val event: String,

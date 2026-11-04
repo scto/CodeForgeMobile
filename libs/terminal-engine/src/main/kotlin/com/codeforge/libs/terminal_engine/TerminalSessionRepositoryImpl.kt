@@ -36,6 +36,7 @@ import javax.inject.Singleton
 private const val TERMINAL_COLUMNS = 100
 private const val TERMINAL_ROWS = 40
 
+/** Verwaltet Terminal-Sitzungen (Termux-Engine) und stellt ihren Zustand als Flow bereit. */
 @Singleton
 class TerminalSessionRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context

@@ -24,6 +24,7 @@ import kotlinx.serialization.json.put
  */
 object DapJsonMapper {
 
+    /** Argumente für `initialize`. */
     fun buildInitializeArguments(): JsonObject = buildJsonObject {
         put("clientID", "codeforge")
         put("clientName", "CodeForge IDE")
@@ -35,6 +36,7 @@ object DapJsonMapper {
         put("supportsRunInTerminalRequest", false)
     }
 
+    /** Argumente für `launch` aus der [config]. */
     fun buildLaunchArguments(config: DebugConfig): JsonObject = buildJsonObject {
         config.mainClass?.let { put("mainClass", it) }
         put("classPaths", buildJsonArray {
@@ -51,12 +53,14 @@ object DapJsonMapper {
         put("stopOnEntry", false)
     }
 
+    /** Argumente für `attach` aus der [config]. */
     fun buildAttachArguments(config: DebugConfig): JsonObject = buildJsonObject {
         put("hostName", config.host)
         put("port", config.port)
         put("timeout", 10_000)
     }
 
+    /** Argumente für `setBreakpoints` einer Datei. */
     fun buildSetBreakpointsArguments(path: String, breakpoints: List<Breakpoint>): JsonObject = buildJsonObject {
         put("source", buildJsonObject {
             put("path", path)
@@ -73,6 +77,7 @@ object DapJsonMapper {
         put("sourceModified", false)
     }
 
+    /** Ordnet die Antwort von `setBreakpoints` den ursprünglichen Breakpoints zu. */
     fun parseSetBreakpointsResponse(path: String, originalBreakpoints: List<Breakpoint>, body: JsonObject?): List<Breakpoint> {
         val bpArray = body?.get("breakpoints") as? JsonArray ?: return originalBreakpoints
         return originalBreakpoints.mapIndexed { index, bp ->
@@ -84,6 +89,7 @@ object DapJsonMapper {
         }
     }
 
+    /** Liest die Stack-Frames einer `stackTrace`-Antwort. */
     fun parseStackFrames(body: JsonObject?): List<DebugStackFrame> {
         val framesArray = body?.get("stackFrames") as? JsonArray ?: return emptyList()
         return framesArray.mapNotNull { element ->
@@ -98,6 +104,7 @@ object DapJsonMapper {
         }
     }
 
+    /** Liest die Scopes einer `scopes`-Antwort. */
     fun parseScopes(body: JsonObject?): List<Scope> {
         val scopesArray = body?.get("scopes") as? JsonArray ?: return emptyList()
         return scopesArray.mapNotNull { element ->
@@ -109,6 +116,7 @@ object DapJsonMapper {
         }
     }
 
+    /** Liest die Variablen einer `variables`-Antwort. */
     fun parseVariables(body: JsonObject?): List<Variable> {
         val varsArray = body?.get("variables") as? JsonArray ?: return emptyList()
         return varsArray.mapNotNull { element ->

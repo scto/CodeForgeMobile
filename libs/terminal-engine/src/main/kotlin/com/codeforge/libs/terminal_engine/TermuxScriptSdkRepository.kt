@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** SDK-Verwaltung über das Skript `codeforge-env` in Termux; liest dessen Zeilenprotokoll als Flow. */
 @Singleton
 class TermuxScriptSdkRepository @Inject constructor(
     @ApplicationContext private val context: Context,

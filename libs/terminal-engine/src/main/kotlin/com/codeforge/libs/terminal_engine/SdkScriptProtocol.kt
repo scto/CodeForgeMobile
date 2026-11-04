@@ -10,13 +10,19 @@ package com.codeforge.libs.terminal_engine
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 
+/** Eine Ausgabezeile des SDK-Skripts. */
 sealed interface SdkScriptLine {
+    /** Ein Werkzeug mit Version, Installationsstatus und Pfad. */
     data class Item(val id: String, val version: String, val installed: Boolean, val path: String?) : SdkScriptLine
+    /** Installationsfortschritt mit Meldung. */
     data class Progress(val percent: Int, val message: String) : SdkScriptLine
+    /** Installation von [id] erfolgreich. */
     data class Ok(val id: String) : SdkScriptLine
+    /** Fehlermeldung des Skripts. */
     data class Error(val message: String) : SdkScriptLine
 }
 
+/** Zeilenprotokoll zwischen App und SDK-Skript (Parsen der Ausgabe, Validierung von IDs). */
 object SdkScriptProtocol {
     private const val PREFIX = "CFSDK|"
 
@@ -41,5 +47,6 @@ object SdkScriptProtocol {
 
     /** Paket-ID muss ins Schema passen, bevor sie an die Shell geht. */
     private val SAFE_ID = Regex("^[A-Za-z0-9][A-Za-z0-9._;\\-]{0,63}$")
+    /** Ob [id] nur sichere Zeichen enthält und an das Skript übergeben werden darf. */
     fun isSafeId(id: String): Boolean = SAFE_ID.matches(id)
 }

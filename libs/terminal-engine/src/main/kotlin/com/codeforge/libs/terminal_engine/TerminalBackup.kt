@@ -24,6 +24,7 @@ class InvalidBackupException(message: String) : IOException(message)
 /** Vorgang wurde abgebrochen. */
 class BackupCancelledException : IOException("cancelled")
 
+/** Zusammenfassung einer Sicherung oder Wiederherstellung (Dateien, Ordner, Symlinks, Bytes). */
 data class BackupSummary(val files: Int, val dirs: Int, val links: Int, val bytes: Long)
 
 /**
@@ -35,6 +36,11 @@ data class BackupSummary(val files: Int, val dirs: Int, val links: Int, val byte
  */
 class TerminalBackup(private val home: File, private val prefix: File) {
 
+    /**
+     * Schreibt die Sicherung von `$HOME` und `$PREFIX` als `.tar.gz` nach [out].
+     *
+     * @param isCancelled Liefert `true`, wenn abgebrochen werden soll (dann [BackupCancelledException]).
+     */
     fun backup(out: OutputStream, isCancelled: () -> Boolean = { false }): BackupSummary {
         var files = 0; var dirs = 0; var links = 0; var bytes = 0L
         val gz = GZIPOutputStream(out.buffered(BUFFER))
@@ -88,6 +94,7 @@ class TerminalBackup(private val home: File, private val prefix: File) {
     /** Prüft das Archiv vollständig, ohne etwas zu schreiben. */
     fun validate(input: InputStream): BackupSummary = process(input, extract = false) { false }
 
+    /** Stellt aus [input] wieder her; nur Pfade unter `home/` und `usr/` werden akzeptiert (sonst [InvalidBackupException]). */
     fun restore(input: InputStream, isCancelled: () -> Boolean = { false }): BackupSummary =
         process(input, extract = true, isCancelled = isCancelled)
 
@@ -178,14 +185,18 @@ class TerminalBackup(private val home: File, private val prefix: File) {
 
 /** Minimaler GNU-Tar-Schreiber (Header 512 Byte, lange Namen über `././@LongLink`). */
 internal class TarWriter(private val out: OutputStream) {
+    /** Schreibt einen Ordnereintrag. */
     fun writeDirectory(name: String, mtime: Long) = writeEntry(name.trimEnd('/') + "/", '5', "", 0, 0b111_101_101, mtime)
+    /** Schreibt einen Symlink. */
     fun writeSymlink(name: String, target: String, mtime: Long) = writeEntry(name, '2', target, 0, 0b111_111_111, mtime)
 
+    /** Schreibt eine Datei aus einem Byte-Array. */
     fun writeFile(name: String, content: ByteArray, executable: Boolean, mtime: Long) {
         writeEntry(name, '0', "", content.size.toLong(), mode(executable), mtime)
         out.write(content); pad(content.size.toLong())
     }
 
+    /** Schreibt eine Datei aus einem Stream der Länge [size]. */
     fun writeFile(name: String, input: InputStream, size: Long, executable: Boolean, mtime: Long) {
         // Größe steht im Header; wächst die Datei während der Sicherung, wird abgeschnitten, schrumpft sie, wird aufgefüllt.
         writeEntry(name, '0', "", size, mode(executable), mtime)
@@ -200,6 +211,7 @@ internal class TarWriter(private val out: OutputStream) {
         pad(size)
     }
 
+    /** Schreibt das Archivende (Nullblöcke). */
     fun finish() = out.write(ByteArray(1024))
 
     private fun mode(executable: Boolean) = if (executable) 0b111_101_101 else 0b110_100_100
@@ -249,11 +261,13 @@ internal class TarWriter(private val out: OutputStream) {
 
 /** Minimaler GNU-Tar-Leser für die oben geschriebenen Einträge (inkl. LongLink). */
 internal class TarReader(private val input: InputStream) {
+    /** Ein Archiveintrag. */
     class Entry(val name: String, val type: Char, val linkName: String, val size: Long, val mode: Int, val mtime: Long)
 
     private var remaining = 0L
     private var padding = 0
 
+    /** Liest den nächsten Eintrag; `null` am Archivende. */
     fun next(): Entry? {
         skipData()
         var longName: String? = null
@@ -278,6 +292,7 @@ internal class TarReader(private val input: InputStream) {
         }
     }
 
+    /** Überspringt die Daten des aktuellen Eintrags. */
     fun skipData() {
         while (remaining > 0) {
             val n = input.skip(remaining)
@@ -286,6 +301,7 @@ internal class TarReader(private val input: InputStream) {
         skipBytes(padding.toLong()); padding = 0
     }
 
+    /** Kopiert die Daten des aktuellen Eintrags nach [out]. */
     fun copyDataTo(out: OutputStream) {
         val buf = ByteArray(32 * 1024)
         while (remaining > 0) {

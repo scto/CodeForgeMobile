@@ -12,6 +12,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Ordnet Quelldateien den Klassen zu (für Breakpoints). */
 @Singleton
 class SourceToClassMapperImpl @Inject constructor() : SourceToClassMapper {
 

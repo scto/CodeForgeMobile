@@ -10,21 +10,25 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Hilt-Modul der Terminal-Engine. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class TerminalEngineModule {
+    /** Bindet das Termux-Umgebungs-Repository. */
     @Binds
     @Singleton
     abstract fun bindTermuxEnvironmentRepository(
         impl: TermuxEnvironmentRepositoryImpl
     ): TermuxEnvironmentRepository
 
+    /** Bindet das Terminal-Sitzungs-Repository. */
     @Binds
     @Singleton
     abstract fun bindTerminalSessionRepository(
         impl: TerminalSessionRepositoryImpl
     ): TerminalSessionRepository
 
+    /** Bindet das SDK-Repository (Skript `codeforge-env`). */
     @Binds
     @Singleton
     abstract fun bindSdkRepository(
