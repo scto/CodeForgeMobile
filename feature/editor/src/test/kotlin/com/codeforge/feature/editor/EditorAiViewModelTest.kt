@@ -2,6 +2,7 @@
 package com.codeforge.feature.editor
 
 import androidx.datastore.core.DataStore
+import androidx.lifecycle.viewModelScope
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.datastore.proto.AppSettings
 import com.codeforge.core.domain.ai.AiChatMessage
@@ -60,6 +61,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -184,6 +186,8 @@ class EditorAiViewModelTest {
 
     @After
     fun tearDown() {
+        // Hängende viewModelScope-Coroutinen nicht in den nächsten Test laufen lassen (UncaughtExceptionsBeforeTest).
+        viewModel.viewModelScope.cancel()
         Dispatchers.resetMain()
     }
 

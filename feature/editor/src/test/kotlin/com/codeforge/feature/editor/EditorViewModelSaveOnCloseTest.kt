@@ -1,6 +1,7 @@
 package com.codeforge.feature.editor
 
 import androidx.datastore.core.DataStore
+import androidx.lifecycle.viewModelScope
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.datastore.proto.AppSettings
 import com.codeforge.core.domain.model.CfmOpenFile
@@ -53,6 +54,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -178,6 +180,9 @@ class EditorViewModelSaveOnCloseTest {
 
     @After
     fun tearDown() {
+        // Hängende viewModelScope-Coroutinen (Autosave/Debounce) würden sonst nach dem Test laufen und ihre Ausnahme
+        // beim nächsten Test als UncaughtExceptionsBeforeTest melden (flaky in CI).
+        viewModel.viewModelScope.cancel()
         Dispatchers.resetMain()
     }
 
