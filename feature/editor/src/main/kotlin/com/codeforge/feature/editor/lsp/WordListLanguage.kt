@@ -16,6 +16,7 @@ import io.github.rosemoe.sora.lang.completion.SimpleCompletionItem
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.ContentReference
 
+/** Sprache mit Wortlisten-Vervollständigung für Prosa und Konfiguration. */
 class WordListLanguage(
     private val delegate: Language,
     private val context: Context,

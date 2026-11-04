@@ -11,12 +11,14 @@ data class ConflictBlock(
     val theirsLabel: String
 )
 
+/** Wahl bei einem Merge-Konflikt. */
 enum class ConflictChoice { OURS, THEIRS, BOTH }
 
 /** Erkennt und löst Git-Merge-Konfliktmarker (`<<<<<<<` / `|||||||` / `=======` / `>>>>>>>`) in reinem Text. */
 object MergeConflicts {
     private const val MAX_CHARS = 2_000_000
 
+    /** Sucht Konfliktblöcke im Text. */
     fun scan(text: String): List<ConflictBlock> {
         if (text.length > MAX_CHARS || !text.contains("<<<<<<<")) return emptyList()
         val lines = text.split('\n')

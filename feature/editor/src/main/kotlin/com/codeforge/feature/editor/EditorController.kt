@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.lang.ref.WeakReference
 
+/** Steuert das Sora-`CodeEditor`-Widget von außen (Rückgängig, Zwischenablage, Sprünge, Auswahl). */
 class EditorController {
 
     private var editorRef: WeakReference<CodeEditor>? = null
@@ -29,9 +30,11 @@ class EditorController {
     /** Compose-beobachtbar, damit die Toolbar-Buttons nach jeder Änderung neu bewertet werden. */
     var canUndoState by mutableStateOf(false)
         private set
+    /** Zustand für „Wiederholen“ (Compose-beobachtbar). */
     var canRedoState by mutableStateOf(false)
         private set
 
+    /** Verbindet den Controller mit dem Editor. */
     internal fun attach(editor: CodeEditor) {
         editorRef = WeakReference(editor)
         refreshUndoRedo()
@@ -44,6 +47,7 @@ class EditorController {
         canRedoState = editor?.canRedo() ?: false
     }
 
+    /** Löst die Verbindung. */
     internal fun detach() {
         editorRef?.clear()
         editorRef = null
@@ -54,15 +58,23 @@ class EditorController {
     }
 
     // --- Undo / Redo (sora-editors Content-Klasse führt den Undo-Stack intern unbegrenzt) ---
+    /** Macht die letzte Änderung rückgängig. */
     fun undo() { withEditor { if (it.canUndo()) it.undo() }; refreshUndoRedo() }
+    /** Stellt die letzte rückgängig gemachte Änderung wieder her. */
     fun redo() { withEditor { if (it.canRedo()) it.redo() }; refreshUndoRedo() }
+    /** Ob Rückgängig möglich ist. */
     fun canUndo(): Boolean = editorRef?.get()?.canUndo() ?: false
+    /** Ob Wiederholen möglich ist. */
     fun canRedo(): Boolean = editorRef?.get()?.canRedo() ?: false
 
     // --- Selektion / Clipboard ---
+    /** Wählt den gesamten Text. */
     fun selectAll() = withEditor { it.selectAll() }
+    /** Schneidet die Auswahl aus. */
     fun cut() = withEditor { it.copyText(); it.deleteText() }
+    /** Kopiert die Auswahl. */
     fun copy() = withEditor { it.copyText() }
+    /** Fügt die Zwischenablage ein. */
     fun paste() = withEditor { it.pasteText() }
 
     /** Fügt [text] an der aktuellen Cursor-Position ein (bzw. ersetzt die aktive Auswahl). */
@@ -81,12 +93,14 @@ class EditorController {
     }
 
     // --- Navigation ---
+    /** Springt zur Zeile. */
     fun jumpToLine(line: Int) = withEditor { editor ->
         val target = line.coerceIn(0, (editor.text.lineCount - 1).coerceAtLeast(0))
         editor.setSelection(target, 0)
         editor.ensurePositionVisible(target, 0)
     }
 
+    /** Springt zu Zeile und Spalte. */
     fun jumpToPosition(line: Int, column: Int) = withEditor { editor ->
         val targetLine = line.coerceIn(0, (editor.text.lineCount - 1).coerceAtLeast(0))
         val lineLength = editor.text.getColumnCount(targetLine)
@@ -128,11 +142,13 @@ class EditorController {
 
     // --- Text-Zugriff / Selektion über Zeichen-Offsets (Grundlage der eigenen Such-/Format-Engine
     // aus :libs:code-tools; sora-Spalten/Zeilen werden über den Indexer umgerechnet) ---
+    /** Aktueller Text oder `null`. */
     fun currentText(): String? = editorRef?.get()?.text?.toString()
 
     /** `(start, end)` der Auswahl als Offsets; bei reinem Cursor `start == end`. */
     fun selection(): Pair<Int, Int>? = editorRef?.get()?.cursor?.let { it.left to it.right }
 
+    /** Ob Text ausgewählt ist. */
     fun hasSelection(): Boolean = editorRef?.get()?.cursor?.let { it.left != it.right } ?: false
 
     /** Liefert die aktive Auswahl als [LspRange] (0-basiert) oder null, wenn keine Auswahl vorliegt. */
@@ -149,6 +165,7 @@ class EditorController {
         )
     }
 
+    /** Wählt den Bereich [start, end). */
     fun selectRange(start: Int, end: Int) = withEditor { editor ->
         val len = editor.text.length
         val s = start.coerceIn(0, len)
@@ -236,10 +253,12 @@ class EditorController {
 
     // --- Darstellung (zusätzlich zu den persistierten EditorConfig-Settings: spontane
     // Toggles für die laufende Sitzung, ohne DataStore-Roundtrip) ---
+    /** Schaltet den Zeilenumbruch um. */
     fun toggleWordWrap() = withEditor { it.isWordwrap = !it.isWordwrap }
 
     /** Textgröße in sp — Persistenz erfolgt separat über EditorConfig (:feature:settings). */
     fun setTextSizeSp(sizeSp: Float) = withEditor { it.setTextSize(sizeSp.coerceIn(6f, 48f)) }
+    /** Aktuelle Schriftgröße in sp. */
     fun currentTextSizeSp(): Float = editorRef?.get()?.textSizePx?.let { px ->
         px / (editorRef?.get()?.resources?.displayMetrics?.scaledDensity ?: 1f)
     } ?: 14f

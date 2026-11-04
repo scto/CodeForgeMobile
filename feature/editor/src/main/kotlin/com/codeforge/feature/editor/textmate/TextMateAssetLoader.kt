@@ -30,6 +30,7 @@ import io.github.rosemoe.sora.langs.textmate.registry.provider.AssetsFileResolve
 import org.eclipse.tm4e.core.registry.IThemeSource
 import java.util.concurrent.atomic.AtomicBoolean
 
+/** Lädt TextMate-Grammatiken und -Themes. */
 object TextMateAssetLoader {
 
     private val initialized = AtomicBoolean(false)
@@ -132,6 +133,7 @@ object TextMateAssetLoader {
         }
     }
 
+    /** Aktiviert das Theme. */
     fun setActiveTheme(themeName: String) {
         if (themeName.isBlank()) return
         runCatching { ThemeRegistry.getInstance().setTheme(themeName) }
@@ -147,6 +149,7 @@ object TextMateAssetLoader {
  * [io.github.rosemoe.sora.langs.textmate.registry.FileProviderRegistry] auf.
  */
 private object FileProviderRegistryHelper {
+    /** Öffnet die Asset-Datei. */
     fun open(path: String) =
         io.github.rosemoe.sora.langs.textmate.registry.FileProviderRegistry.getInstance()
             .tryGetInputStream(path)

@@ -28,6 +28,7 @@ import com.codeforge.core.domain.model.LspLocation
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Sheet mit Fundstellen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReferencesSheet(

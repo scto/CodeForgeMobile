@@ -32,14 +32,17 @@ import androidx.compose.ui.unit.sp
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Taste der Symbolleiste. */
 data class EditorSymbolItem(
     val display: String,
     val insert: String = display,
     val isAction: Boolean = false
 )
 
+/** Symbolvorgaben je Sprache. */
 object EditorSymbolPresets {
 
+    /** Allgemeine Symbole. */
     val GENERAL_SYMBOLS: List<EditorSymbolItem> = listOf(
         EditorSymbolItem(display = "Tab", insert = "\t", isAction = true),
         EditorSymbolItem(display = "->"),
@@ -69,6 +72,7 @@ object EditorSymbolPresets {
         EditorSymbolItem(display = "_")
     )
 
+    /** Symbole für Kotlin/Java. */
     val KOTLIN_JAVA_SYMBOLS: List<EditorSymbolItem> = listOf(
         EditorSymbolItem(display = "Tab", insert = "\t", isAction = true),
         EditorSymbolItem(display = "{"),
@@ -102,6 +106,7 @@ object EditorSymbolPresets {
         EditorSymbolItem(display = "%")
     )
 
+    /** Symbole für Python. */
     val PYTHON_SYMBOLS: List<EditorSymbolItem> = listOf(
         EditorSymbolItem(display = "Tab", insert = "\t", isAction = true),
         EditorSymbolItem(display = ":"),
@@ -126,6 +131,7 @@ object EditorSymbolPresets {
         EditorSymbolItem(display = "<")
     )
 
+    /** Symbole für XML/HTML. */
     val XML_HTML_SYMBOLS: List<EditorSymbolItem> = listOf(
         EditorSymbolItem(display = "Tab", insert = "\t", isAction = true),
         EditorSymbolItem(display = "<"),
@@ -144,6 +150,7 @@ object EditorSymbolPresets {
         EditorSymbolItem(display = "#")
     )
 
+    /** Symbole für Shell. */
     val BASH_SYMBOLS: List<EditorSymbolItem> = listOf(
         EditorSymbolItem(display = "Tab", insert = "\t", isAction = true),
         EditorSymbolItem(display = "$"),
@@ -167,6 +174,7 @@ object EditorSymbolPresets {
         EditorSymbolItem(display = "/")
     )
 
+    /** Symbole passend zum Dateipfad. */
     fun symbolsForPath(path: String?): List<EditorSymbolItem> {
         val ext = path?.substringAfterLast('.', "")?.lowercase() ?: return GENERAL_SYMBOLS
         return when (ext) {
@@ -179,6 +187,7 @@ object EditorSymbolPresets {
     }
 }
 
+/** Symbolleiste über der Tastatur. */
 @Composable
 fun EditorSymbolBar(
     modifier: Modifier = Modifier,

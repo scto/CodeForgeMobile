@@ -66,6 +66,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel des Editors: Tabs, Speichern, LSP, Suche, Haltepunkte, KI und Plugins. */
 @HiltViewModel
 class EditorViewModel @Inject constructor(
     private val openFileUseCase: OpenFileUseCase,
@@ -92,14 +93,17 @@ class EditorViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<EditorUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<EditorUiEffect>()
+    /** Einmalige Effekte. */
     val effect: SharedFlow<EditorUiEffect> = _effect.asSharedFlow()
 
     /** Von Code-Plugins registrierte Befehle bzw. Menüeinträge (leer ohne Plugin-System). */
     val pluginCommands: StateFlow<List<com.codeforge.core.domain.extension.PluginCommandInfo>> =
         pluginUi?.commands ?: MutableStateFlow(emptyList())
+    /** Menüeinträge, die Plugins beisteuern. */
     val pluginMenuEntries: StateFlow<List<com.codeforge.core.domain.extension.PluginMenuEntry>> =
         pluginUi?.menuEntries ?: MutableStateFlow(emptyList())
 
@@ -537,6 +541,7 @@ class EditorViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: EditorUiEvent) {
         when (event) {
             is EditorUiEvent.OpenFile -> openFile(event.path)
@@ -1156,6 +1161,7 @@ class EditorViewModel @Inject constructor(
         )
     }
 
+    /** Testet die Verbindung mit den KI-Optionen. */
     suspend fun testAiConnection(options: com.codeforge.core.domain.ai.AiChatOptions): Result<String> {
         return aiProvider?.testConnection(options) ?: Result.failure(IllegalStateException("No AI provider"))
     }
@@ -1687,6 +1693,7 @@ class EditorViewModel @Inject constructor(
         )
     }
 
+    /** Fragt nach ungespeicherten Änderungen, bevor [onProceed] läuft. */
     fun requestClose(onProceed: () -> Unit) {
         val dirty = _uiState.value.openFiles.filter { it.isDirty }
         if (dirty.isEmpty()) {

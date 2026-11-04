@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Art der KI-Schnellaktion. */
 enum class AiQuickActionType {
     EXPLAIN,
     FIX_ERROR,
@@ -36,6 +37,7 @@ enum class AiQuickActionType {
     GENERATE_KDOC
 }
 
+/** Bottom Sheet mit KI-Schnellaktionen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiQuickActionsSheet(

@@ -16,6 +16,7 @@ import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer
 import io.github.rosemoe.sora.text.Content
 
+/** Überträgt LSP-Diagnosen in den Editor. */
 object LspDiagnosticsBridge {
 
     /**

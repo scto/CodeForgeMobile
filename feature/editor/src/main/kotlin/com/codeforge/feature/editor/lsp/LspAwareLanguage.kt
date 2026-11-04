@@ -19,6 +19,7 @@ import io.github.rosemoe.sora.lang.completion.snippet.parser.CodeSnippetParser
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.ContentReference
 
+/** Sprache, die Vorschläge vom Language-Server ergänzt. */
 class LspAwareLanguage(
     private val delegate: Language,
     private val completionProvider: LspCompletionProvider,

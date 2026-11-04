@@ -12,9 +12,12 @@ import io.github.rosemoe.sora.lang.completion.CompletionItem
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.CodeEditor
 
+/** Bekannte Annotation (Name, voller Name). */
 internal data class KnownAnnotation(val name: String, val fqn: String?)
 
+/** Katalog häufiger Kotlin-Annotationen. */
 internal object KotlinAnnotationCatalog {
+    /** Alle Annotationen. */
     val all: List<KnownAnnotation> = listOf(
         "androidx.compose.ui.tooling.preview.Preview",
         "androidx.compose.runtime.Composable",
@@ -49,6 +52,7 @@ internal object KotlinAnnotationCatalog {
         "Volatile", "Throws", "RequiresOptIn", "ExperimentalStdlibApi",
     ).map { KnownAnnotation(it, null) }
 
+    /** Annotationen, die mit [prefix] beginnen. */
     fun matching(prefix: String): List<KnownAnnotation> =
         all.filter { it.name.startsWith(prefix, ignoreCase = true) }.sortedBy { it.name }
 

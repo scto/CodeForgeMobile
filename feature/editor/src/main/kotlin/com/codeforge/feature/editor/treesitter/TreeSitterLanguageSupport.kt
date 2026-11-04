@@ -34,6 +34,7 @@ import io.github.rosemoe.sora.editor.ts.TsLanguage
 import io.github.rosemoe.sora.editor.ts.TsLanguageSpec
 import io.github.rosemoe.sora.lang.Language
 
+/** Unterstützte Tree-sitter-Grammatiken. */
 enum class TreeSitterGrammar(
     val langName: String,
     val queryAssetDir: String,
@@ -75,6 +76,7 @@ enum class TreeSitterGrammar(
     }
 }
 
+/** Tree-sitter-Unterstützung für den Editor. */
 object TreeSitterLanguageSupport {
 
     private val availability = mutableMapOf<TreeSitterGrammar, Boolean>()

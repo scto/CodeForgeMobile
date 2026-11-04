@@ -56,6 +56,7 @@ import org.xmlpull.v1.XmlPullParser
 import java.io.File
 import java.util.Locale
 
+/** Vorschau einer Bilddatei mit Zoom. */
 @Composable
 fun ImageFilePreview(
     filePath: String,
@@ -322,6 +323,7 @@ private fun loadDrawableFromFile(file: File, context: Context): Drawable? {
     return loadXmlDrawable(file, context)
 }
 
+/** Ob der Pfad auf ein Bild zeigt. */
 fun isImageFilePath(path: String): Boolean {
     val clean = path.removePrefix("file://").let { runCatching { Uri.decode(it) }.getOrDefault(it) }
     val ext = clean.substringAfterLast('.', "").lowercase(Locale.ROOT)

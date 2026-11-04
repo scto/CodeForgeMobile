@@ -8,6 +8,7 @@
  */
 package com.codeforge.feature.editor.textmate
 
+/** Mitgelieferte TextMate-Grammatiken. */
 object BundledGrammars {
 
     private val byExtension: Map<String, String> = buildMap {
@@ -49,6 +50,7 @@ object BundledGrammars {
         add("text.plain", "txt")
     }
 
+    /** Scope-Name für den Dateipfad oder `null`. */
     fun scopeForPath(path: String): String? {
         val name = path.substringAfterLast('/').lowercase()
         if (name == "gradlew" || name == ".bashrc" || name == ".profile") return "source.shell"

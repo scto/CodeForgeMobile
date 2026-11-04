@@ -65,6 +65,7 @@ sealed interface OverlayItem {
     @Immutable data class TestRunChip(val target: TestTarget) : OverlayItem
 }
 
+/** Overlay-Elemente einer Zeile. */
 @Immutable
 data class LineOverlay(val line: Int, val items: List<OverlayItem>)
 
@@ -86,6 +87,7 @@ fun buildLineOverlays(
  * angepasst werden muss. Gibt `null` zurück, wenn die Zeile (noch) nicht im Layout existiert.
  */
 internal class EditorOverlayGeometry(private val editor: CodeEditor) {
+    /** Zeilenhöhe in Pixeln. */
     val rowHeightPx: Int get() = editor.rowHeight
 
     /** Obere Kante der letzten Visual-Row der Zeile + x direkt hinter dem Zeilenende (View-Koordinaten). */
@@ -98,6 +100,7 @@ internal class EditorOverlayGeometry(private val editor: CodeEditor) {
     }.getOrNull()
 }
 
+/** Overlay-Ebene über dem Editor. */
 @Composable
 internal fun EditorOverlayLayer(
     modifier: Modifier = Modifier,

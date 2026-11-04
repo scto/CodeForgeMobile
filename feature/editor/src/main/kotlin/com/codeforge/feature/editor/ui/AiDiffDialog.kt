@@ -41,6 +41,7 @@ private val ADDED_BG = Color(0x3329A329)
 private val REMOVED_BG = Color(0x33D32F2F)
 private val HUNK_BG = Color(0x224C8DFF)
 
+/** Dialog mit dem Diff einer KI-Änderung. */
 @Composable
 fun AiDiffDialog(
     proposedChange: AiProposedChange,

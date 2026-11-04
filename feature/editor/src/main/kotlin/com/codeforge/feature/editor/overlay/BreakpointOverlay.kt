@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.codeforge.core.domain.model.Breakpoint
 import io.github.rosemoe.sora.widget.CodeEditor
 
+/** Zeichnet Haltepunkte und die pausierte Zeile über dem Editor. */
 @Composable
 fun BreakpointOverlayLayer(
     editor: CodeEditor?,

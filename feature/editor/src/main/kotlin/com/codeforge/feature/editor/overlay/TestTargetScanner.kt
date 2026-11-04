@@ -3,6 +3,7 @@ package com.codeforge.feature.editor.overlay
 
 import androidx.compose.runtime.Immutable
 
+/** Ausführbarer Test (Klasse oder Methode). */
 @Immutable
 data class TestTarget(
     val line: Int,
@@ -11,6 +12,7 @@ data class TestTarget(
     val isClass: Boolean
 )
 
+/** Findet Tests im Quelltext. */
 object TestTargetScanner {
 
     private val TEST_ANNOTATION_NAMES = setOf(
@@ -22,6 +24,7 @@ object TestTargetScanner {
         "TestFactory"
     )
 
+    /** Tests der Datei. */
     fun scan(path: String, content: String): List<TestTarget> {
         val ext = path.substringAfterLast('.', "").lowercase()
         if (ext != "kt" && ext != "kts" && ext != "java") {

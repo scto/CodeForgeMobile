@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
 
+/** Auto-Vervollständigung, die auf die Bildschirmtastatur Rücksicht nimmt. */
 class ImeAwareAutoCompletion(private val codeEditor: CodeEditor) : EditorAutoCompletion(codeEditor) {
 
     private val location = IntArray(2)

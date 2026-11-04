@@ -15,6 +15,7 @@ import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.domain.repository.SnippetRepository
 import kotlinx.coroutines.runBlocking
 
+/** Liefert Vervollständigungen vom Language-Server. */
 class LspCompletionProvider(
     private val lspClient: LspClientRepository,
     private val snippetRepository: SnippetRepository? = null,

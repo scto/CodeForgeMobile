@@ -29,6 +29,7 @@ import com.codeforge.core.domain.model.LspCodeAction
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Sheet mit Schnellkorrekturen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickFixSheet(

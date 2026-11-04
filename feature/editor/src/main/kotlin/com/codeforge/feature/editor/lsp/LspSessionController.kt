@@ -24,23 +24,31 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Verwaltet LSP-Sitzungen: Start, Leerlauf-Ende, Fehlerpause und Obergrenze. */
 @Singleton
 class LspSessionController @Inject constructor(
     private val lspClient: LspClientRepository,
     private val serverResolver: LspServerResolver,
     private val settingsRepository: SettingsRepository? = null
 ) {
+    /** Coroutine-Scope. */
     var scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /** Zeitquelle (Tests). */
     var timeSource: () -> Long = System::currentTimeMillis
+    /** Höchstzahl gleichzeitiger Sitzungen. */
     var maxConcurrentSessions: Int = 3
+    /** Leerlaufzeit in Minuten bis zum Beenden. */
     var idleTimeoutMinutes: Int = 10
+    /** Pause nach einem Fehler in ms. */
     var errorCooldownMillis: Long = 30_000L
 
     private var openDocumentsProvider: OpenDocumentsProvider? = null
 
+    /** Zustand des Servers. */
     val serverState: StateFlow<LspServerState> = lspClient.serverState
 
     private val _errors = MutableSharedFlow<String>(extraBufferCapacity = 16)
+    /** Fehlermeldungen. */
     val errors: SharedFlow<String> = _errors.asSharedFlow()
 
     private var activeWorkspaceRoot: String? = null
@@ -51,6 +59,7 @@ class LspSessionController @Inject constructor(
     private val failedSessionTimestamps = ConcurrentHashMap<String, Long>()
     private val sessionToLanguageMap = ConcurrentHashMap<String, String>()
 
+    /** Informationen zu den Sitzungen. */
     val sessionInfos: StateFlow<List<LspSessionInfo>> = lspClient.sessionStates
         .map { states ->
             states.map { (sessionId, state) ->
@@ -73,6 +82,7 @@ class LspSessionController @Inject constructor(
         startIdleTimer()
     }
 
+    /** Setzt die Quelle der offenen Dokumente. */
     fun setOpenDocumentsProvider(provider: OpenDocumentsProvider?) {
         this.openDocumentsProvider = provider
     }
@@ -203,6 +213,7 @@ class LspSessionController @Inject constructor(
         }
     }
 
+    /** Startet die Sitzung neu. */
     suspend fun restartSession(sessionId: String) {
         lspClient.stopSession(sessionId)
         failedSessionTimestamps.remove(sessionId)
@@ -213,14 +224,17 @@ class LspSessionController @Inject constructor(
         onFileOpened(languageId = lang, workspaceRoot = workspace, forceRestart = true)
     }
 
+    /** Beendet die Sitzung. */
     suspend fun stopSession(sessionId: String) {
         lspClient.stopSession(sessionId)
     }
 
+    /** Beendet alle Sitzungen beim Schließen des Projekts. */
     suspend fun onProjectClosed() {
         stop()
     }
 
+    /** Beendet alles. */
     suspend fun stop() {
         activeWorkspaceRoot = null
         activeLanguageId = null
@@ -231,6 +245,7 @@ class LspSessionController @Inject constructor(
         runCatching { lspClient.stopAll() }
     }
 
+    /** Beendet Sitzungen im Leerlauf. */
     suspend fun checkIdleSessions() {
         val timeoutMs = idleTimeoutMinutes * 60 * 1000L
         val now = timeSource()

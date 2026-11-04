@@ -14,11 +14,13 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import java.io.File
 
+/** Stellt Dateien per `content://`-URI bereit. */
 object EditorFileProvider {
 
     private fun authority(context: Context): String =
         "${context.packageName}.feature.editor.fileprovider"
 
+    /** URI für den absoluten Pfad. */
     fun uriForFile(context: Context, absolutePath: String) =
         FileProvider.getUriForFile(context.applicationContext, authority(context), File(absolutePath))
 

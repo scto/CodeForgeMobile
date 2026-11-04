@@ -95,6 +95,7 @@ data class EditorDisplaySettings(
     val keyboardSuggestions: Boolean = false
 )
 
+/** Compose-Hülle um den Sora-Editor (Syntax, LSP, Overlays). */
 @Composable
 fun SoraCodeEditor(
     modifier: Modifier = Modifier,

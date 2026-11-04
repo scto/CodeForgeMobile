@@ -37,6 +37,7 @@ import com.codeforge.core.domain.model.LspSymbolKind
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Sheet mit der Gliederung des Dokuments. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocumentOutlineSheet(

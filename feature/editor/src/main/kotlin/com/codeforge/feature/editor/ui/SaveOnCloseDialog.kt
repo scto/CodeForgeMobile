@@ -27,6 +27,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.feature.editor.OpenFile
 
+/** Dialog mit Speichern/Verwerfen beim Schließen. */
 @Composable
 fun SaveOnCloseDialog(
     modifier: Modifier = Modifier,

@@ -27,12 +27,15 @@ object ColorLiteralScanner {
     const val MAX_TEXT_LENGTH = 400_000
     const val MAX_MATCHES = 2_000
 
+    /** Ob der Dateityp Farbliterale unterstützt. */
     fun supports(path: String): Boolean = path.substringAfterLast('.', "").lowercase() in SUPPORTED_EXTENSIONS
 
+    /** Farbliterale für den Dateityp. */
     fun scanForPath(path: String, text: String): List<ColorMatch> =
         if (!supports(path)) emptyList()
         else scan(text, alphaLast = path.substringAfterLast('.', "").lowercase() in ALPHA_LAST_EXTENSIONS)
 
+    /** Sucht Farbliterale im Text. */
     fun scan(text: String, alphaLast: Boolean = false): List<ColorMatch> {
         if (text.length > MAX_TEXT_LENGTH) return emptyList()
         val found = ArrayList<Pair<Int, ColorMatch>>() // Offset für stabile Reihenfolge je Zeile
@@ -51,6 +54,7 @@ object ColorLiteralScanner {
         return found.sortedBy { it.first }.map { it.second }
     }
 
+    /** Liest `#RGB`, `#RRGGBB` oder `#AARRGGBB`. */
     internal fun parseHash(hex: String, alphaLast: Boolean): Int? = when (hex.length) {
         3 -> expand(hex).let { 0xFF000000.toInt() or it.toInt(16) }
         4 -> {

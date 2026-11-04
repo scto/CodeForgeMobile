@@ -6,6 +6,7 @@ import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspSymbolKind
 
+/** Liest die Gliederung (Symbole) aus dem Quelltext. */
 object SymbolOutlineExtractor {
 
     private val KOTLIN_CLASS_REGEX = Regex("""\b(?:data\s+|sealed\s+|open\s+|abstract\s+|inner\s+)*(class|interface|object|enum\s+class)\s+([A-Za-z0-9_]+)""")
@@ -18,6 +19,7 @@ object SymbolOutlineExtractor {
     private val PYTHON_DEF_REGEX = Regex("""^\s*(def|class)\s+([A-Za-z0-9_]+)""")
     private val RUST_FN_REGEX = Regex("""\b(?:pub\s+)?(fn|struct|enum|trait|impl)\s+([A-Za-z0-9_]+)""")
 
+    /** Symbole der Datei. */
     fun extract(path: String, content: String): List<LspDocumentSymbol> {
         val extension = path.substringAfterLast('.', "").lowercase()
         return when (extension) {

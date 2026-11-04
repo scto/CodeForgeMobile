@@ -65,6 +65,7 @@ import com.codeforge.core.domain.ai.AiUsage
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Bottom Sheet des KI-Assistenten (Chat, Kontext, Vorschläge). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiAssistantSheet(

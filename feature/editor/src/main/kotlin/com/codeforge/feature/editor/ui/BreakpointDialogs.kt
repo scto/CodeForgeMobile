@@ -43,6 +43,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import java.io.File
 
+/** Dialog zum Bearbeiten eines Haltepunkts. */
 @Composable
 fun EditBreakpointDialog(
     breakpoint: Breakpoint,
@@ -126,6 +127,7 @@ fun EditBreakpointDialog(
     )
 }
 
+/** Übersicht aller Haltepunkte. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BreakpointsOverviewSheet(

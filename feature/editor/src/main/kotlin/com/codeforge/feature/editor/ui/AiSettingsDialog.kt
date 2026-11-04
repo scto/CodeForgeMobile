@@ -51,6 +51,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import kotlinx.coroutines.launch
 
+/** Dialog für KI-Optionen im Editor. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AiSettingsDialog(

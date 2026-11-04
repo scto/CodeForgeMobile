@@ -50,6 +50,7 @@ import kotlinx.coroutines.withContext
 
 private const val MAX_MATCHES = 20_000
 
+/** Suchleiste mit Ersetzen, Groß-/Kleinschreibung, Regex und Ganzwort. */
 @Composable
 fun EditorSearchBar(
     modifier: Modifier = Modifier,

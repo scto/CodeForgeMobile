@@ -11,6 +11,7 @@ import android.content.Context
 import android.util.JsonReader
 import java.io.InputStreamReader
 
+/** Wortlisten für die Vervollständigung. */
 object WordCatalog {
 
     private const val MAX_RESULTS = 30
@@ -22,8 +23,10 @@ object WordCatalog {
     /** Scopes, für die das Wörterbuch (Fließtext) statt Schlüsselwörtern verwendet wird. */
     private val proseScopes = setOf("text.plain", "text.html.markdown", "text.tex.latex")
 
+    /** Ob der Scope Prosa ist. */
     fun isProse(scope: String): Boolean = scope in proseScopes
 
+    /** Schlüsselwörter zum Präfix. */
     fun keywordsFor(context: Context, scope: String, prefix: String): List<String> {
         if (prefix.isEmpty()) return emptyList()
         val list = loadKeywords(context)[scope] ?: return emptyList()
@@ -32,6 +35,7 @@ object WordCatalog {
             .take(MAX_RESULTS).toList()
     }
 
+    /** Wörter zum Präfix. */
     fun wordsFor(context: Context, prefix: String): List<String> {
         if (prefix.length < MIN_WORD_PREFIX) return emptyList()
         val all = loadWords(context)

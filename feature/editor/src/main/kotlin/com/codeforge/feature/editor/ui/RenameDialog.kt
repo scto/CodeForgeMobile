@@ -17,6 +17,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.feature.editor.RenameDialogState
 
+/** Dialog zum Umbenennen eines Symbols. */
 @Composable
 fun RenameDialog(
     modifier: Modifier = Modifier,

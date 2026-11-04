@@ -16,6 +16,7 @@ import io.github.rosemoe.sora.lang.EmptyLanguage
 import io.github.rosemoe.sora.lang.Language
 import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
 
+/** Art der Sprachunterstützung im Editor. */
 enum class EditorLanguageType(val scopeName: String) {
     KOTLIN("source.kotlin"),
     JAVA("source.java"),
@@ -53,6 +54,7 @@ object EditorLanguageFactory {
 
     private const val TAG = "EditorLanguageFactory"
 
+    /** Erzeugt die Sprache für den Pfad (TextMate, Tree-sitter oder LSP). */
     fun create(
         context: Context,
         path: String,

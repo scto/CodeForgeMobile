@@ -180,6 +180,7 @@ private fun HoverSignatureCard(sig: KotlinSignature, pkg: String?, palette: Hove
     }
 }
 
+/** Sheet mit Hover-Informationen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HoverSheet(
