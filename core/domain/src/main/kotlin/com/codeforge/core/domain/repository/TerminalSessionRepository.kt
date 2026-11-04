@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
  * Implementiert in :libs:terminal-engine, konsumiert von :feature:terminal.
  */
 interface TerminalSessionRepository {
+    /** Zustand der Terminalsitzung. */
     val sessionState: StateFlow<TerminalSessionState>
+    /** Ausgabe des Terminals. */
     val output: Flow<String>
 
     /**
@@ -18,6 +20,8 @@ interface TerminalSessionRepository {
      * (z. B. `codeforge-env setup --jdk 17` am Ende des Onboardings).
      */
     suspend fun start(initialCommand: String? = null)
+    /** Sendet Eingabe an das Terminal. */
     suspend fun sendInput(text: String)
+    /** Beendet die Sitzung. */
     suspend fun stop()
 }

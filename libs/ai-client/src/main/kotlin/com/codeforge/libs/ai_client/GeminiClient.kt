@@ -31,11 +31,18 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
+/** Streaming-Client für die Google-Gemini-API (`streamGenerateContent`). */
 @Singleton
 class GeminiClient @Inject constructor() {
 
     private val json = Json { ignoreUnknownKeys = true }
 
+    /**
+     * Sendet [messages] und liefert die Antwort als Strom von [AiEvent]s.
+     *
+     * @param messages bisheriger Gesprächsverlauf.
+     * @param options Modell, API-Schlüssel, Basis-URL und Generierungsoptionen.
+     */
     fun stream(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent> = flow {
         val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://generativelanguage.googleapis.com", listOf("/v1beta", "/v1"))
         val apiKey = AiHttpSupport.cleanKey(options.apiKey)
@@ -203,6 +210,11 @@ class GeminiClient @Inject constructor() {
         null
     } ?: body.take(300)
 
+    /**
+     * Prüft Schlüssel und Erreichbarkeit mit einer minimalen Anfrage.
+     *
+     * @return Erfolg mit kurzer Rückmeldung oder Fehler mit nutzerlesbarer Meldung.
+     */
     suspend fun testConnection(options: AiChatOptions): Result<String> {
         val testOptions = options.copy(maxTokens = 5)
         val msg = AiChatMessage(id = "test", role = AiRole.USER, content = "Ping")
@@ -228,6 +240,11 @@ class GeminiClient @Inject constructor() {
         }
     }
 
+    /**
+     * Lädt die für den Schlüssel verfügbaren Modelle.
+     *
+     * @return Liste der Modellnamen oder Fehler.
+     */
     suspend fun fetchModels(options: AiChatOptions): Result<List<String>> = withContext(Dispatchers.IO) {
         val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://generativelanguage.googleapis.com", listOf("/v1beta", "/v1"))
         val url = URL("$baseUrl/v1beta/models")

@@ -18,11 +18,14 @@ data class DependencyNode(
     val failureReason: String? = null,
     val updateAvailable: String? = null
 ) {
+    /** Eindeutiger Schlüssel des Knotens (`project:<name>` bzw. `<group>:<name>`). */
     val key: String get() = if (isProject) "project:$name" else "$group:$name"
 
+    /** Ob die angeforderte von der aufgelösten Version abweicht (Konflikt). */
     val hasConflict: Boolean
         get() = !isProject && requestedVersion != null && resolvedVersion != null && requestedVersion != resolvedVersion
 
+    /** Anzeigetext des Knotens (Koordinate mit Version). */
     val displayLabel: String
         get() = when {
             isProject -> "project $name"

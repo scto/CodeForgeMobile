@@ -14,6 +14,7 @@ import com.codeforge.core.resources.Res
  */
 object HunkPatcher {
 
+    /** Richtung beim Anwenden eines Hunks: vorwärts oder rückwärts (Rücknahme). */
     enum class Direction { FORWARD, REVERSE }
 
     private val HEADER = Regex("""^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@.*""")

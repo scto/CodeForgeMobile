@@ -3,6 +3,7 @@ package com.codeforge.core.domain.model
 
 import java.io.File
 
+/** Erkennt Binärdateien, die nicht im Texteditor geöffnet werden sollen (nach Endung und Inhalt). */
 object BinaryFileDetector {
 
     private val BINARY_EXTENSIONS = setOf(
@@ -12,6 +13,12 @@ object BinaryFileDetector {
         "class", "dex", "exe", "bin", "keystore", "jks"
     )
 
+    /**
+     * Prüft den Inhalt der Datei auf Binärdaten.
+     *
+     * @param file zu prüfende Datei.
+     * @return `true` bei Binärdatei; `false`, wenn sie fehlt oder Text enthält.
+     */
     fun isBinary(file: File): Boolean {
         if (!file.exists() || !file.isFile) return false
         val ext = file.extension.lowercase()
@@ -26,6 +33,11 @@ object BinaryFileDetector {
         }.getOrDefault(false)
     }
 
+    /**
+     * Prüft nur die Dateiendung gegen bekannte Binärformate (Bilder, Archive, Medien, Klassen …).
+     *
+     * @param path Dateipfad oder -name.
+     */
     fun isBinaryExtension(path: String): Boolean {
         val ext = path.substringAfterLast('.', "").lowercase()
         return ext in BINARY_EXTENSIONS

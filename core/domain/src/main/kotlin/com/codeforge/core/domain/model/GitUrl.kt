@@ -3,6 +3,7 @@ package com.codeforge.core.domain.model
 
 /** Hilfen für Remote-URLs (Host-Erkennung für Zugangsdaten). */
 object GitUrl {
+    /** Ob die Adresse ein HTTP(S)-URL ist (Groß-/Kleinschreibung egal). */
     fun isHttp(url: String): Boolean = url.startsWith("https://", true) || url.startsWith("http://", true)
 
     /** Kleingeschriebener Host einer HTTP(S)-URL; `null` für SSH/lokale Pfade. */

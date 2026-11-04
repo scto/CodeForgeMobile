@@ -5,14 +5,21 @@ import com.codeforge.core.domain.model.LspFileOperation
 import com.codeforge.core.domain.model.LspWorkspaceEdit
 import java.io.File
 
+/** Fehler beim Anwenden eines `WorkspaceEdit` (z. B. fehlende Datei, Konflikt). */
 class WorkspaceEditException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 
+/**
+ * Ergebnis des Anwendens: geänderte Dateien ([changedFiles]), Anzahl der Änderungen ([totalEdits]) und [undo] zum atomaren Zurücknehmen.
+ */
 data class AppliedEditResult(
     val changedFiles: Set<String>,
     val totalEdits: Int,
     val undo: suspend () -> Unit
 )
 
+/**
+ * Wendet ein `WorkspaceEdit` mehrdateilich und atomar an (offene Puffer und Dateien auf dem Datenträger, inklusive Anlegen/Umbenennen/Löschen) und liefert eine Undo-Funktion. Die Dateizugriffe sind injizierbar (Tests).
+ */
 class LspWorkspaceEditApplier(
     private val getOpenFileContent: (path: String) -> String?,
     private val updateOpenFileContent: (path: String, newContent: String) -> Unit,
@@ -32,8 +39,15 @@ class LspWorkspaceEditApplier(
     private val fileExists: (path: String) -> Boolean = { File(it).exists() }
 ) {
 
+    /** Entfernt das `file://`-Präfix einer URI und liefert den Pfad. */
     fun normalizeUri(uri: String): String = uri.removePrefix("file://")
 
+    /**
+     * Wendet [edit] an; schlägt es teilweise fehl, wird bereits Geändertes zurückgenommen.
+     *
+     * @param edit anzuwendende Änderungen.
+     * @return Ergebnis mit Undo oder ein [WorkspaceEditException].
+     */
     suspend fun apply(edit: LspWorkspaceEdit): Result<AppliedEditResult> = runCatching {
         val textEditsByPath = edit.allTextEdits().mapKeys { normalizeUri(it.key) }
         val fileOps = edit.allFileOperations

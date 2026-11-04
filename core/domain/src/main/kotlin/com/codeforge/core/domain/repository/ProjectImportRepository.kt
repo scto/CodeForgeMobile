@@ -18,13 +18,23 @@ package com.codeforge.core.domain.repository
 import com.codeforge.core.domain.model.ImportedProject
 import kotlinx.coroutines.flow.Flow
 
+/** Fortschritt eines Imports. */
 sealed interface ImportProgress {
+    /** Dateien werden kopiert. */
     data class Copying(val currentPath: String, val filesCopiedSoFar: Int) : ImportProgress
+    /** Import abgeschlossen. */
     data class Done(val result: ImportedProject) : ImportProgress
+    /** Import fehlgeschlagen. */
     data class Failed(val message: String) : ImportProgress
 }
 
+/** Importiert ein per Storage-Access-Framework gewähltes Verzeichnis in den lokalen Projektordner. */
 interface ProjectImportRepository {
+    /**
+     * Importiert das Verzeichnis und streamt den Fortschritt.
+     *
+     * @param treeUriString Tree-URI aus der Dateiauswahl.
+     */
     fun importFromTree(treeUriString: String): Flow<ImportProgress>
 
     /**

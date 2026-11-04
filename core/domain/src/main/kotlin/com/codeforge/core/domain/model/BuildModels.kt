@@ -4,12 +4,14 @@
  */
 package com.codeforge.core.domain.model
 
+/** Schweregrad eines Build-Problems. */
 enum class ProblemSeverity {
     ERROR,
     WARNING,
     INFO,
 }
 
+/** Quelle eines Build-Problems (Kotlin-Compiler, javac, AAPT2, Gradle). */
 enum class ProblemSource {
     KOTLIN,
     JAVA,
@@ -18,6 +20,7 @@ enum class ProblemSource {
     OTHER,
 }
 
+/** Ein Problem aus der Build-Ausgabe mit Ort ([path], [line], [column]), Nachricht und ggf. Task. */
 data class BuildProblem(
     val severity: ProblemSeverity,
     val source: ProblemSource,
@@ -28,6 +31,7 @@ data class BuildProblem(
     val taskName: String? = null,
 )
 
+/** Zustand eines Builds. */
 enum class BuildStatus {
     IDLE,
     RUNNING,
@@ -36,6 +40,7 @@ enum class BuildStatus {
     CANCELLED,
 }
 
+/** Eine Build-Sitzung: Task, Startzeit, Dauer, Status und Anzahl Fehler/Warnungen. */
 data class BuildSession(
     val taskName: String,
     val startTimeMillis: Long,

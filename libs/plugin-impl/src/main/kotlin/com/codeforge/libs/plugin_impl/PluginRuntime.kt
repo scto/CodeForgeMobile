@@ -72,8 +72,20 @@ internal class PluginRuntime(
         PermissionedHostServices(plugin.id, plugin.apiVersion, plugin.permissions, baseServices, hooks)
     )
 
+    /**
+     * Prüft, ob das Plugin aktuell geladen ist.
+     *
+     * @param pluginId Plugin-ID.
+     */
     fun isLoaded(pluginId: String): Boolean = loadedPlugins.containsKey(pluginId)
 
+    /**
+     * Lädt ein Code-Plugin per `DexClassLoader` und ruft `onLoad` auf; bereits geladene Plugins bleiben unverändert.
+     *
+     * @param plugin Eintrag der Registry.
+     * @param pluginDir Verzeichnis mit `classes.dex`.
+     * @return Erfolg oder der aufgetretene Fehler.
+     */
     fun load(plugin: InstalledPlugin, pluginDir: File): Result<Unit> = runCatching {
         if (loadedPlugins.containsKey(plugin.id)) return@runCatching // bereits geladen
 
@@ -113,6 +125,12 @@ internal class PluginRuntime(
         loadedPlugins[plugin.id] = LoadedPlugin(instance, context)
     }
 
+    /**
+     * Ruft `onUnload` auf und entfernt alles, was das Plugin registriert hat.
+     *
+     * @param pluginId Plugin-ID.
+     * @return Erfolg oder der aufgetretene Fehler.
+     */
     fun unload(pluginId: String): Result<Unit> = runCatching {
         val loaded = loadedPlugins.remove(pluginId) ?: return@runCatching
         hooks.unregisterAll(pluginId)

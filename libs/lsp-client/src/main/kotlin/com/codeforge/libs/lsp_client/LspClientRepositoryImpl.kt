@@ -76,6 +76,11 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
         updateActiveSessionState()
     }
 
+    /**
+     * Hängt eine bereits erzeugte Sitzung ein (Tests und Wiederverwendung).
+     *
+     * @param session die zu verwaltende Sitzung.
+     */
     internal fun attachSession(session: LspServerSession) {
         sessions[session.sessionId] = session
         updateSessionStates()
@@ -311,8 +316,15 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
     override fun getRunningSessionIds(): List<String> =
         sessions.keys.toList()
 
+    /**
+     * Liefert eine Sitzung nach ID.
+     *
+     * @param sessionId Sitzungs-ID (Server und Workspace-Wurzel).
+     * @return die Sitzung oder `null`.
+     */
     fun getSession(sessionId: String): LspServerSession? = sessions[sessionId]
 
+    /** Liefert alle aktuell verwalteten Sitzungen. */
     fun getAllSessions(): List<LspServerSession> = sessions.values.toList()
 
     private fun findOrCreateRoutingForOpen(path: String, languageId: String): LspServerSession? {

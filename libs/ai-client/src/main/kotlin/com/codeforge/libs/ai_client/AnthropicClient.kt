@@ -30,11 +30,18 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
+/** Streaming-Client für die Anthropic-Messages-API (SSE). */
 @Singleton
 class AnthropicClient @Inject constructor() {
 
     private val json = Json { ignoreUnknownKeys = true }
 
+    /**
+     * Sendet [messages] und liefert die Antwort als Strom von [AiEvent]s (Textteile, Ende, Fehler).
+     *
+     * @param messages bisheriger Gesprächsverlauf.
+     * @param options Modell, API-Schlüssel, Basis-URL und Generierungsoptionen.
+     */
     fun stream(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent> = flow {
         val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://api.anthropic.com", listOf("/v1/messages", "/v1"))
         val apiKey = AiHttpSupport.cleanKey(options.apiKey)
@@ -191,6 +198,11 @@ class AnthropicClient @Inject constructor() {
         }
     }.flowOn(Dispatchers.IO)
 
+    /**
+     * Prüft Schlüssel und Erreichbarkeit mit einer minimalen Anfrage.
+     *
+     * @return Erfolg mit kurzer Rückmeldung oder Fehler mit nutzerlesbarer Meldung.
+     */
     suspend fun testConnection(options: AiChatOptions): Result<String> {
         val testOptions = options.copy(maxTokens = 5)
         val msg = AiChatMessage(id = "test", role = AiRole.USER, content = "Ping")

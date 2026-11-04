@@ -1,15 +1,22 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
+/** Art einer Diff-Zeile. */
 enum class DiffLineType { ADDED, REMOVED, CONTEXT, NO_NEWLINE }
 
+/** Zeile eines Diffs mit Art, Text und alter/neuer Zeilennummer (jeweils `null`, wo nicht vorhanden). */
 data class DiffLine(val type: DiffLineType, val text: String, val oldNumber: Int?, val newNumber: Int?)
 
+/** Ein Hunk: Kopfzeile (`@@ … @@`) und seine Zeilen. */
 data class DiffHunk(val header: String, val lines: List<DiffLine>)
 
+/** Diff einer Datei: alter/neuer Pfad, Hunks und ob die Datei binär ist. */
 data class DiffFile(val oldPath: String, val newPath: String, val hunks: List<DiffHunk>, val isBinary: Boolean) {
+    /** Anzuzeigender Pfad (bei gelöschten Dateien der alte). */
     val displayPath: String get() = if (newPath == "/dev/null") oldPath else newPath
+    /** Anzahl hinzugefügter Zeilen. */
     val added: Int get() = hunks.sumOf { h -> h.lines.count { it.type == DiffLineType.ADDED } }
+    /** Anzahl entfernter Zeilen. */
     val removed: Int get() = hunks.sumOf { h -> h.lines.count { it.type == DiffLineType.REMOVED } }
 }
 
@@ -18,6 +25,11 @@ object UnifiedDiffParser {
 
     private val HUNK = Regex("""^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@.*""")
 
+    /**
+     * Zerlegt einen unified Diff in Dateien, Hunks und Zeilen.
+     *
+     * @param diff Text des Diffs (`git diff`-Format).
+     */
     fun parse(diff: String): List<DiffFile> {
         val files = ArrayList<DiffFile>()
         var oldPath = ""

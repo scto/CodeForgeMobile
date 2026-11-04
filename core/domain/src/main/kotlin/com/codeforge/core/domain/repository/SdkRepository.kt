@@ -21,8 +21,15 @@ import kotlinx.coroutines.flow.Flow
  * die App kennt keine feste Liste. `platform-tools` gibt es nur einmal: als installiert gilt die zuletzt installierte Version.
  */
 interface SdkRepository {
+    /** Listet die verfügbaren SDK-Pakete. */
     suspend fun listAvailablePackages(): Result<List<ToolItem>>
+    /**
+     * Installiert ein SDK-Paket und streamt den Fortschritt.
+     *
+     * @param packagePath Paketpfad, z. B. `platforms;android-36`.
+     */
     fun installSdkTool(packagePath: String): Flow<SdkInstallEvent>
+    /** Deinstalliert ein SDK-Paket. */
     suspend fun uninstallSdkTool(packagePath: String): Result<Unit>
 
     /** ANDROID_HOME im Termux-Prefix; `null`, wenn der Termux-Bootstrap fehlt. */

@@ -32,8 +32,11 @@ data class SdkSetupOptions(
 
     companion object {
         private val SAFE = Regex("^[0-9A-Za-z.]{1,16}$")
+        /** Auswählbare JDK-Hauptversionen. */
         val JDK_CHOICES = listOf("17", "21")
+        /** Auswählbare NDK-Versionen. */
         val NDK_CHOICES = listOf("r29", "r28c", "r27d")
+        /** Standardversion von CMake. */
         const val DEFAULT_CMAKE = "4.1.2"
     }
 }

@@ -1,8 +1,10 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
+/** Zustand einer Datei im Status. */
 enum class GitFileStatus { ADDED, MODIFIED, DELETED, UNTRACKED, CONFLICTING }
 
+/** Art einer Zeilenänderung gegenüber HEAD. */
 enum class GitLineChangeKind { ADDED, MODIFIED, DELETED }
 
 /**
@@ -18,6 +20,7 @@ data class GitLineChange(val kind: GitLineChangeKind, val startLine: Int, val li
  */
 data class GitStatusEntry(val path: String, val status: GitFileStatus, val staged: Boolean = false)
 
+/** Ein Commit der Historie: Hashes, Autor, Nachricht, Zeitpunkt, Eltern und zugehörige Refs. */
 data class GitCommitInfo(
     val hash: String,
     val shortHash: String,
@@ -57,11 +60,15 @@ data class GitRepoStatus(
     /** Gesamtanzahl der Schritte bei einem Rebase, z. B. 7 bei „Rebase 3/7“. */
     val rebaseTotalSteps: Int? = null,
 ) {
+    /** Änderungen im Index (zum Commit vorgemerkt). */
     val staged: List<GitStatusEntry> get() = entries.filter { it.staged }
+    /** Änderungen in der Arbeitskopie ohne Konflikte. */
     val unstaged: List<GitStatusEntry> get() = entries.filter { !it.staged && it.status != GitFileStatus.CONFLICTING }
+    /** Dateien mit Konflikten. */
     val conflicts: List<GitStatusEntry> get() = entries.filter { it.status == GitFileStatus.CONFLICTING }
 }
 
+/** Ein Branch: Name, ob aktuell, ob Remote-Branch und verkürzter Hash. */
 data class GitBranch(
     val name: String,
     val isCurrent: Boolean,
@@ -69,15 +76,22 @@ data class GitBranch(
     val shortHash: String = "",
 )
 
+/** Ein konfigurierter Remote: Name und URL. */
 data class GitRemote(val name: String, val url: String)
 
+/** Ergebnis eines Merges. */
 enum class GitMergeStatus { FAST_FORWARD, MERGED, ALREADY_UP_TO_DATE, CONFLICTING, FAILED, ABORTED, NOTHING_TO_COMMIT }
 
+/** Ergebnis eines Merges mit der Liste der Konfliktdateien. */
 data class GitMergeResult(val status: GitMergeStatus, val conflicts: List<String> = emptyList())
 
+/** Fortschritt beim Klonen. */
 sealed interface GitCloneProgress {
+    /** Das Klonen läuft: Titel des aktuellen Schritts und Prozentwert. */
     data class InProgress(val taskTitle: String, val percent: Int) : GitCloneProgress
+    /** Klonen abgeschlossen. */
     data object Completed : GitCloneProgress
+    /** Klonen fehlgeschlagen. */
     data class Failed(val message: String) : GitCloneProgress
 }
 
@@ -86,10 +100,12 @@ data class GitInitResult(val initialCommitCreated: Boolean, val note: String? = 
 
 /** Commit-Identität (user.name / user.email). */
 data class GitIdentity(val name: String = "", val email: String = "") {
+    /** Ob Name und E-Mail gesetzt sind (Voraussetzung zum Committen). */
     val isComplete: Boolean get() = name.isNotBlank() && email.isNotBlank()
 }
 
 /** Gespeicherter Zugang für einen HTTPS-Host; das Token selbst verlässt [GitCredential] nie Richtung UI. */
 data class GitCredentialInfo(val host: String, val username: String)
 
+/** Zugangsdaten für einen HTTPS-Host: Nutzername und Token (Geheimnis). */
 data class GitCredential(val host: String, val username: String, val token: String)

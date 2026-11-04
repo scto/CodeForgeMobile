@@ -16,6 +16,11 @@ import java.io.File
  */
 internal class PluginRegistry(private val registryFile: File) {
 
+    /**
+     * Liest die installierten Plugins aus der Registry-Datei.
+     *
+     * @return Liste; leer, wenn die Datei fehlt oder nicht lesbar ist.
+     */
     fun loadAll(): List<InstalledPlugin> {
         if (!registryFile.exists()) return emptyList()
         return runCatching {
@@ -42,6 +47,11 @@ internal class PluginRegistry(private val registryFile: File) {
         }.getOrDefault(emptyList())
     }
 
+    /**
+     * Schreibt die Liste der installierten Plugins in die Registry-Datei.
+     *
+     * @param plugins vollständiger Bestand.
+     */
     fun saveAll(plugins: List<InstalledPlugin>) {
         val array = JSONArray()
         plugins.forEach { plugin ->

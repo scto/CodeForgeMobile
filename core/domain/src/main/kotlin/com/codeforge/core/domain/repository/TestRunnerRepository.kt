@@ -6,8 +6,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 
+/** Führt Unit-Tests aus und hält das letzte Ergebnis. */
 interface TestRunnerRepository {
+    /** Ergebnis des letzten Testlaufs. */
     val lastRunResult: StateFlow<TestRunResult?>
+    /** Ob gerade Tests laufen. */
     val isRunning: StateFlow<Boolean>
 
     /**

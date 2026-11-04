@@ -18,7 +18,13 @@ import com.codeforge.libs.terminal_engine.ShellLaunchSpec
  * Java-Bytecode — DexClassLoader lädt nur Dex-Code, keine rohen .class-Dateien.
  */
 interface CodeForgePlugin {
+    /**
+     * Wird beim Laden (bzw. Aktivieren) des Plugins aufgerufen; hier Server/Ressourcen sicherstellen und Befehle registrieren.
+     *
+     * @param context Kontext mit Plugin-ID und Host-Diensten.
+     */
     fun onLoad(context: PluginContext)
+    /** Wird beim Deaktivieren oder Entladen aufgerufen; laufende Coroutinen und Ressourcen freigeben. */
     fun onUnload()
 
     /**
@@ -32,8 +38,11 @@ interface CodeForgePlugin {
     suspend fun onUninstall(context: PluginContext) {}
 }
 
+/** Laufzeitkontext eines Plugins: Identität und der Zugriff auf die freigegebenen Host-Dienste. */
 interface PluginContext {
+    /** Die eindeutige Plugin-ID aus `plugin.json`. */
     val pluginId: String
+    /** Die vom Host bereitgestellten, berechtigungsgeprüften Dienste (siehe [PluginHostServices]). */
     val hostServices: PluginHostServices
 }
 
@@ -95,19 +104,37 @@ enum class PluginMenuTarget { EDITOR_MENU, FILE_CONTEXT_MENU }
 /** Kontext eines Befehlsaufrufs: aktive/ausgewählte Datei oder null. */
 data class CommandArgs(val activeFilePath: String?)
 
+/** Handler eines vom Plugin registrierten Befehls; wird auf Nutzeraktion aus einem Menü oder der Befehlsliste aufgerufen. */
 fun interface PluginCommandHandler {
+    /**
+     * Führt den Befehl aus.
+     *
+     * @param args Kontext des Aufrufs (aktive Datei oder `null`).
+     */
     suspend fun run(args: CommandArgs)
 }
 
+/** Ereignisse der App, auf die Plugins mit den Berechtigungen `file-events` bzw. `git-events` hören können. */
 sealed interface PluginEvent {
+    /** Eine Datei wurde im Editor geöffnet; [path] ist der absolute Pfad. */
     data class FileOpened(val path: String) : PluginEvent
+    /** Eine Datei wurde gespeichert; [path] ist der absolute Pfad. */
     data class FileSaved(val path: String) : PluginEvent
+    /** Eine Datei wurde im Editor geschlossen; [path] ist der absolute Pfad. */
     data class FileClosed(val path: String) : PluginEvent
+    /** Ein Git-Commit wurde erstellt: [repoPath] = Repository-Stamm, [message] = Commit-Nachricht. */
     data class GitCommitted(val repoPath: String, val message: String) : PluginEvent
+    /** Der Branch eines Repositories hat gewechselt: [repoPath] = Repository-Stamm, [branch] = neuer Branch. */
     data class GitBranchChanged(val repoPath: String, val branch: String) : PluginEvent
 }
 
+/** Empfänger für [PluginEvent]; wird mit [PluginHostServices.addEventListener] registriert. */
 fun interface PluginEventListener {
+    /**
+     * Wird für jedes passende Ereignis aufgerufen (nicht auf dem UI-Thread garantiert).
+     *
+     * @param event das aufgetretene Ereignis.
+     */
     fun onEvent(event: PluginEvent)
 }
 

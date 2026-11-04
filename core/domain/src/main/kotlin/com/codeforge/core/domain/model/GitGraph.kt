@@ -7,6 +7,7 @@ data class GraphEdge(val fromLane: Int, val toLane: Int, val colorLane: Int, val
     enum class Kind { THROUGH, IN, OUT }
 }
 
+/** Zeile des Commit-Graphen: Commit, seine Spur ([lane]), die Kanten und die Gesamtzahl der Spuren. */
 data class GraphRow(val commit: GitCommitInfo, val lane: Int, val edges: List<GraphEdge>, val laneCount: Int)
 
 /**
@@ -15,6 +16,11 @@ data class GraphRow(val commit: GitCommitInfo, val lane: Int, val edges: List<Gr
  */
 object GitGraphLayout {
 
+    /**
+     * Berechnet die Graph-Zeilen.
+     *
+     * @param commits Commits, neueste zuerst, Kinder vor Eltern.
+     */
     fun layout(commits: List<GitCommitInfo>): List<GraphRow> {
         val active = ArrayList<String?>()
         val rows = ArrayList<GraphRow>(commits.size)

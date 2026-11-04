@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
  * :libs:plugin-api, konsumiert von :feature:plugins.
  */
 interface PluginRepository {
+    /** Installierte Plugins. */
     val installedPlugins: Flow<List<InstalledPlugin>>
 
     /** Zur Laufzeit tatsächlich geladene Plugin-IDs (nicht persistiert, geräteweit pro Prozess). */
@@ -27,5 +28,10 @@ interface PluginRepository {
 
     /** true: Plugin laden + als aktiviert speichern. false: Plugin entladen + als deaktiviert speichern. */
     suspend fun setEnabled(pluginId: String, enabled: Boolean): Result<Unit>
+    /**
+     * Deinstalliert ein Plugin (ruft `onUninstall` und entfernt Dateien).
+     *
+     * @param pluginId Plugin-ID.
+     */
     suspend fun uninstall(pluginId: String): Result<Unit>
 }

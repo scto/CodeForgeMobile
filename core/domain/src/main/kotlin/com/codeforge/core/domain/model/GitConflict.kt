@@ -16,10 +16,14 @@ enum class ConflictResolution {
     BOTH_REVERSED,
 }
 
+/** Abschnitt einer Datei mit Konfliktmarkern: unkonfliktierter Text oder ein Konfliktblock. */
 sealed interface ConflictSegment {
     /** Unkonfligierter Text (Zeilen ohne Zeilenende). */
     data class Plain(val lines: List<String>) : ConflictSegment
 
+    /**
+     * Ein Konfliktblock mit eigenen ([ours]) und eingehenden ([theirs]) Zeilen, optional gemeinsamem Vorfahren ([base]) und den Beschriftungen der Marker.
+     */
     data class Conflict(
         /** Laufende Nummer unter den Konfliktblöcken der Datei (0-basiert). */
         val index: Int,
@@ -41,6 +45,7 @@ object ConflictParser {
     private const val SEP = "======="
     private const val THEIRS = ">>>>>>> "
 
+    /** Prüft, ob der Text mindestens einen vollständigen Konfliktblock enthält. */
     fun hasConflicts(text: String): Boolean = parse(text).any { it is ConflictSegment.Conflict }
 
     /** Prüft, ob im Text noch unaufgelöste Git-Konfliktmarker vorhanden sind. */

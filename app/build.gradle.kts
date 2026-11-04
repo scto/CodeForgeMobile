@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.codeforge.android.hilt)
     alias(libs.plugins.codeforge.quality)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
@@ -59,6 +60,18 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    // Screenshot-Tests (Roborazzi/Robolectric) brauchen Android-Ressourcen in Unit-Tests.
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        // Optional: vorab geladene Robolectric-Android-JARs (z. B. hinter Proxy/Offline) – ROBOLECTRIC_DEPS_DIR.
+        unitTests.all { test ->
+            System.getenv("ROBOLECTRIC_DEPS_DIR")?.let {
+                test.systemProperty("robolectric.offline", "true")
+                test.systemProperty("robolectric.dependency.dir", it)
+            }
+        }
     }
 
     compileOptions {
@@ -139,4 +152,18 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // Screenshots der App (docs/screenshots): ./gradlew :app:recordRoborazziDebug
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.junit.rule)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+roborazzi {
+    outputDir.set(rootProject.layout.projectDirectory.dir("docs/screenshots"))
 }

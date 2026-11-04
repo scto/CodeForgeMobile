@@ -11,5 +11,11 @@ import com.codeforge.core.domain.model.LspServerLaunch
  * konsumiert von :feature:editor (LspSessionController).
  */
 interface LspServerResolver {
+    /**
+     * Ermittelt, wie der Server für eine Sprache gestartet wird.
+     *
+     * @param languageId Sprachkennung, z. B. `kotlin`.
+     * @return Startkommando und Umgebung oder `null`, wenn kein Server verfügbar ist.
+     */
     suspend fun resolve(languageId: String): LspServerLaunch?
 }

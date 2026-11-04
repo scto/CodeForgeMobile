@@ -31,6 +31,19 @@ The development environment (shell, JDK, Android SDK, NDK) runs inside a **Termu
 
 ---
 
+## 📸 Screenshots
+
+| Light | Dark |
+|:---:|:---:|
+| <img src="docs/screenshots/welcome-light.png" width="260" alt="Welcome screen with recent projects (Light)"> | <img src="docs/screenshots/welcome-dark.png" width="260" alt="Welcome screen with recent projects (Dark)"> |
+| *Welcome screen with recent projects* | *Welcome screen with recent projects* |
+| <img src="docs/screenshots/welcome-empty-light.png" width="260" alt="Welcome screen without projects (Light)"> | <img src="docs/screenshots/welcome-empty-dark.png" width="260" alt="Welcome screen without projects (Dark)"> |
+| *Welcome screen without projects* | *Welcome screen without projects* |
+| <img src="docs/screenshots/about-light.png" width="260" alt="About CodeForge Mobile (Light)"> | <img src="docs/screenshots/about-dark.png" width="260" alt="About CodeForge Mobile (Dark)"> |
+| *About CodeForge Mobile* | *About CodeForge Mobile* |
+
+> Generated with Compose screenshot tests (Roborazzi + Robolectric, sample data): `./gradlew :app:recordRoborazziDebug`. Fonts and system bars may differ from a real device.
+
 ## ✨ Key Features
 
 Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial

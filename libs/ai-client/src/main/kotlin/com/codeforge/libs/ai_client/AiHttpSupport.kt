@@ -41,6 +41,12 @@ internal object AiHttpSupport {
         return url
     }
 
+    /**
+     * Wandelt eine [IOException] in eine nutzerlesbare Meldung um; Schlüssel in der Adresse (`?key=…`) werden maskiert.
+     *
+     * @param e der aufgetretene Netzwerkfehler.
+     * @return Meldungstext ohne Geheimnisse.
+     */
     fun describe(e: IOException): String {
         // Meldungen können die Adresse samt `?key=…` enthalten: Schlüssel nie anzeigen.
         val message = e.message.orEmpty().replace(KEY_PARAM, "$1***")

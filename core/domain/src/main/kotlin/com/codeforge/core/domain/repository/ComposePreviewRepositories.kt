@@ -18,6 +18,11 @@ import java.io.File
  * zu verstoßen (:feature:* darf niemals direkt von :feature:* abhängen).
  */
 interface ComposeSourceAnalyzer {
+    /**
+     * Findet renderbare `@Composable`-Funktionen (mit `@Preview`) im Quelltext.
+     *
+     * @param sourceCode Kotlin-Quelltext.
+     */
     fun findComposables(sourceCode: String): List<ComposableCandidate>
 }
 
@@ -26,6 +31,12 @@ interface ComposeSourceAnalyzer {
  * Compiler-Runtime-Bundle unter `filesDir/compiler-runtime` installiert und verifiziert ist.
  */
 interface CompilerRuntimeProvider {
+    /**
+     * Stellt sicher, dass die Compiler-Laufzeit installiert ist (lädt sie bei Bedarf).
+     *
+     * @param onProgress Fortschritt in Prozent.
+     * @return Pfad der Laufzeit oder Fehler.
+     */
     suspend fun ensureInstalled(onProgress: (Int) -> Unit = {}): Result<File>
 }
 
@@ -34,6 +45,7 @@ interface CompilerRuntimeProvider {
  * in :feature:composepreview.
  */
 interface ComposePreviewRenderer {
+    /** Kompiliert und rendert eine Vorschau. */
     suspend fun render(
         filePath: String,
         sourceCode: String,

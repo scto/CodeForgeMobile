@@ -17,15 +17,21 @@ data class Breakpoint(
  * Zustand einer Debug-Sitzung.
  */
 sealed interface DebugSessionState {
+    /** Keine Sitzung aktiv. */
     data object Idle : DebugSessionState
+    /** Die Sitzung wird gestartet. */
     data object Starting : DebugSessionState
+    /** Das Programm läuft. */
     data object Running : DebugSessionState
+    /** Das Programm ist angehalten (Haltepunkt, Schritt oder Pause). */
     data class Paused(
         val threadId: Long,
         val reason: String,
         val frames: List<DebugStackFrame> = emptyList()
     ) : DebugSessionState
+    /** Das Programm ist beendet ([exitCode], falls bekannt). */
     data class Terminated(val exitCode: Int? = null) : DebugSessionState
+    /** Die Sitzung ist fehlgeschlagen ([message]). */
     data class Failed(val message: String) : DebugSessionState
 }
 
@@ -92,10 +98,16 @@ data class AndroidDebugTarget(
  * Ereignisse aus dem Debug Adapter Protocol (DAP).
  */
 sealed interface DebugEvent {
+    /** Ausgabe des Programms ([category], z. B. `console`, `stdout`). */
     data class Output(val text: String, val category: String = "console") : DebugEvent
+    /** Das Programm hat angehalten: Thread, Grund und optionale Beschreibung. */
     data class Stopped(val threadId: Long, val reason: String, val description: String? = null) : DebugEvent
+    /** Die Ausführung wurde fortgesetzt. */
     data object Continued : DebugEvent
+    /** Der Debugger hat einen Haltepunkt bestätigt oder abgelehnt ([verified]). */
     data class BreakpointValidated(val path: String, val breakpointId: String, val verified: Boolean, val line: Int?) : DebugEvent
+    /** Das Programm wurde beendet. */
     data class Terminated(val exitCode: Int? = null) : DebugEvent
+    /** Ein Fehler des Debuggers. */
     data class Error(val message: String) : DebugEvent
 }

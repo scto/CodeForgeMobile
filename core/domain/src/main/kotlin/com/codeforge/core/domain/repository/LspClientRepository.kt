@@ -28,8 +28,11 @@ import kotlinx.coroutines.flow.StateFlow
  * (Content-Length-Header + JSON-RPC 2.0 Body).
  */
 interface LspClientRepository {
+    /** Zustand des Sprachservers. */
     val serverState: StateFlow<LspServerState>
+    /** Diagnosen je Datei (Pfad und Liste). */
     val diagnostics: Flow<Pair<String, List<LspDiagnostic>>>
+    /** Fähigkeiten des Servers (`null`, solange nicht bekannt). */
     val serverCapabilities: StateFlow<LspServerCapabilities?>
 
     /**
@@ -105,36 +108,49 @@ interface LspClientRepository {
         workspaceRootPath: String,
         extraProcessEnv: Map<String, String> = emptyMap()
     ): Result<Unit>
+    /** Beendet den Server. */
     suspend fun stop()
 
+    /** Meldet ein geöffnetes Dokument. */
     suspend fun didOpen(path: String, languageId: String, content: String)
+    /** Meldet eine Textänderung (voller Inhalt) mit aufsteigender Version. */
     suspend fun didChange(path: String, newContent: String, version: Int)
+    /** Meldet das Schließen eines Dokuments. */
     suspend fun didClose(path: String)
 
+    /** Fordert Vervollständigungen an. */
     suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>>
+    /** Fordert Hover-Informationen an. */
     suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?>
+    /** Formatiert das Dokument. */
     suspend fun requestFormat(path: String, content: String): Result<String>
+    /** Formatiert einen Bereich. */
     suspend fun requestRangeFormat(path: String, content: String, range: LspRange): Result<String>
 
+    /** Fordert Code-Aktionen/Quick-Fixes an. */
     suspend fun requestCodeActions(
         path: String,
         range: LspRange,
         diagnostics: List<LspDiagnostic> = emptyList()
     ): Result<List<LspCodeAction>>
 
+    /** Prüft, ob Umbenennen an der Position möglich ist. */
     suspend fun requestPrepareRename(
         path: String,
         position: LspPosition
     ): Result<LspPrepareRenameResult?>
 
+    /** Fordert die Änderungen für ein Umbenennen an. */
     suspend fun requestRename(
         path: String,
         position: LspPosition,
         newName: String
     ): Result<LspWorkspaceEdit?>
 
+    /** Fordert die Dokumentgliederung an. */
     suspend fun requestDocumentSymbols(path: String): Result<List<LspDocumentSymbol>>
 
+    /** Fordert die Definition an. */
     suspend fun requestDefinition(path: String, position: LspPosition): Result<List<LspLocation>>
 
     /** `textDocument/typeDefinition` — Standard: nicht unterstützt (leere Liste). */
@@ -157,12 +173,14 @@ interface LspClientRepository {
     suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> =
         Result.success(emptyList())
 
+    /** Sucht Referenzen. */
     suspend fun requestReferences(
         path: String,
         position: LspPosition,
         includeDeclaration: Boolean = true
     ): Result<List<LspLocation>>
 
+    /** Führt ein Server-Kommando aus. */
     suspend fun executeCommand(
         command: String,
         arguments: List<Any?> = emptyList()

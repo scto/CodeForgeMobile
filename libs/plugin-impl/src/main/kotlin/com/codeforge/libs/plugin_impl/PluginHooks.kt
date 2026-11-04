@@ -66,6 +66,15 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
         _menuEntries.value = menus.toList()
     }
 
+    /**
+     * Registriert einen Befehl eines Plugins; ein vorhandener Befehl mit gleicher [id] wird ersetzt.
+     *
+     * @param pluginId Plugin, dem der Befehl gehört.
+     * @param id Befehls-ID (nicht leer, begrenzte Länge).
+     * @param title angezeigter Titel.
+     * @param handler wird bei Aufruf ausgeführt.
+     * @throws IllegalArgumentException bei ungültiger ID.
+     */
     fun registerCommand(pluginId: String, id: String, title: String, handler: PluginCommandHandler) {
         require(id.isNotBlank() && id.length <= MAX_ID) { "Ungültige Befehls-ID" }
         require(title.isNotBlank() && title.length <= MAX_TITLE) { "Ungültiger Befehlstitel" }
@@ -77,6 +86,15 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
         }
     }
 
+    /**
+     * Hängt einen registrierten Befehl in ein App-Menü ein.
+     *
+     * @param pluginId Plugin, dem der Eintrag gehört.
+     * @param id Eintrags-ID.
+     * @param title angezeigter Titel.
+     * @param target Menü, in dem der Eintrag erscheint.
+     * @param commandId ID des auszuführenden Befehls.
+     */
     fun registerMenuItem(pluginId: String, id: String, title: String, target: PluginMenuTarget, commandId: String) {
         require(id.isNotBlank() && id.length <= MAX_ID) { "Ungültige Menü-ID" }
         require(title.isNotBlank() && title.length <= MAX_TITLE) { "Ungültiger Menütitel" }
@@ -89,10 +107,23 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
         }
     }
 
+    /**
+     * Registriert einen Ereignis-Listener; zugestellt werden nur Ereignisse, für die [granted] die Berechtigung enthält.
+     *
+     * @param pluginId Plugin des Listeners.
+     * @param apiVersion API-Version des Plugins (Version 1 hat die Ereignisberechtigungen implizit).
+     * @param granted gewährte Berechtigungen.
+     * @param listener Empfänger.
+     */
     fun addListener(pluginId: String, apiVersion: Int, granted: Set<String>, listener: PluginEventListener) {
         synchronized(lock) { listeners.add(Listener(pluginId, apiVersion, granted, listener)) }
     }
 
+    /**
+     * Meldet dem Nutzer eine kurze Nachricht (wird auf die maximale Länge gekürzt).
+     *
+     * @param text Nachrichtentext.
+     */
     fun postMessage(text: String) {
         _messages.tryEmit(text.take(MAX_MESSAGE))
     }

@@ -2,12 +2,14 @@ package com.codeforge.core.domain.model
 
 import kotlinx.serialization.Serializable
 
+/** Cursorposition (Zeile, Spalte). */
 @Serializable
 data class CfmCursorPosition(
     val line: Int,
     val column: Int
 )
 
+/** Eine im Editor geöffnete Datei mit Aktiv-Markierung und Cursorposition. */
 @Serializable
 data class CfmOpenFile(
     val path: String,
@@ -15,6 +17,7 @@ data class CfmOpenFile(
     val cursor: CfmCursorPosition? = null
 )
 
+/** Eintrag der Projektdateiliste: relativer Pfad, Größe und Änderungszeit. */
 @Serializable
 data class CfmFileInfo(
     val path: String,
@@ -22,6 +25,7 @@ data class CfmFileInfo(
     val modified: Long
 )
 
+/** Inhalt der Arbeitsbereichsdatei `.cfm/cfm.json`: Schemaversion, Projekt, Zeitstempel, Dateiliste, offene und geänderte Dateien. */
 @Serializable
 data class CfmWorkspace(
     val version: Int = 1,

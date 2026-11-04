@@ -31,6 +31,19 @@ Die Entwicklungsumgebung (Shell, JDK, Android SDK, NDK) läuft in einem **Termux
 
 ---
 
+## 📸 Screenshots
+
+| Hell | Dunkel |
+|:---:|:---:|
+| <img src="docs/screenshots/welcome-light.png" width="260" alt="Startseite mit zuletzt geöffneten Projekten (Hell)"> | <img src="docs/screenshots/welcome-dark.png" width="260" alt="Startseite mit zuletzt geöffneten Projekten (Dunkel)"> |
+| *Startseite mit zuletzt geöffneten Projekten* | *Startseite mit zuletzt geöffneten Projekten* |
+| <img src="docs/screenshots/welcome-empty-light.png" width="260" alt="Startseite ohne Projekte (Hell)"> | <img src="docs/screenshots/welcome-empty-dark.png" width="260" alt="Startseite ohne Projekte (Dunkel)"> |
+| *Startseite ohne Projekte* | *Startseite ohne Projekte* |
+| <img src="docs/screenshots/about-light.png" width="260" alt="Über CodeForge Mobile (Hell)"> | <img src="docs/screenshots/about-dark.png" width="260" alt="Über CodeForge Mobile (Dunkel)"> |
+| *Über CodeForge Mobile* | *Über CodeForge Mobile* |
+
+> Erzeugt mit Compose-Screenshot-Tests (Roborazzi + Robolectric, Beispieldaten): `./gradlew :app:recordRoborazziDebug`. Schriften und Systemleisten können vom echten Gerät abweichen.
+
 ## ✨ Hauptmerkmale
 
 Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise

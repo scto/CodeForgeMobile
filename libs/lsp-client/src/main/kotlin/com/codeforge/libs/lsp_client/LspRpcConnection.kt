@@ -46,6 +46,13 @@ class LspRpcConnection(
     private var connectionScope: CoroutineScope? = null
     private var readerJob: Job? = null
 
+    /**
+     * Startet den Lese-Job des Servers.
+     *
+     * @param scope Scope, in dem gelesen wird.
+     * @param onNotification Handler für Server-Benachrichtigungen.
+     * @param onRequest optionaler Handler für Anfragen des Servers (z. B. `workspace/applyEdit`).
+     */
     fun start(
         scope: CoroutineScope,
         onNotification: (method: String, params: JsonObject?) -> Unit,
@@ -104,6 +111,13 @@ class LspRpcConnection(
         pendingRequests.remove(id)?.complete(message)
     }
 
+    /**
+     * Sendet eine Anfrage und wartet auf die Antwort.
+     *
+     * @param method LSP-Methode.
+     * @param params Parameter.
+     * @return die vollständige Antwort-Nachricht.
+     */
     suspend fun sendRequest(method: String, params: JsonObject): JsonObject {
         val id = requestIdCounter.incrementAndGet()
         val deferred = CompletableDeferred<JsonObject>()
@@ -120,6 +134,11 @@ class LspRpcConnection(
         return deferred.await()
     }
 
+    /**
+     * Sendet eine Benachrichtigung (ohne Antwort).
+     *
+     * @throws java.io.IOException wenn der Eingabestrom des Servers geschlossen ist.
+     */
     fun sendNotification(method: String, params: JsonObject) {
         val payload = buildJsonObject {
             put("jsonrpc", "2.0")
@@ -129,6 +148,7 @@ class LspRpcConnection(
         writeMessage(output, payload)
     }
 
+    /** Beendet Lese-Job und Verbindung. */
     fun close() {
         readerJob?.cancel()
         pendingRequests.values.forEach { it.cancel() }
@@ -140,6 +160,11 @@ class LspRpcConnection(
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
 
+        /**
+         * Liest eine Nachricht im `Content-Length`-Rahmen.
+         *
+         * @return die JSON-Nachricht oder `null` am Ende des Stroms.
+         */
         fun readMessage(input: InputStream): JsonObject? {
             val headers = mutableMapOf<String, String>()
             while (true) {
@@ -175,6 +200,7 @@ class LspRpcConnection(
             }
         }
 
+        /** Schreibt eine Nachricht mit `Content-Length`-Kopf und flusht den Strom. */
         fun writeMessage(output: OutputStream, payload: JsonObject) {
             val bodyText = json.encodeToString(JsonObject.serializer(), payload)
             val bodyBytes = bodyText.toByteArray(Charsets.UTF_8)

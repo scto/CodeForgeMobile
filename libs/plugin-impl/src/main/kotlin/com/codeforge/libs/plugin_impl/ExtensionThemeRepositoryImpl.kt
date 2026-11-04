@@ -26,6 +26,12 @@ import javax.inject.Singleton
 
 /** Liest die Farbschema-Dateien der aktivierten Plugins; defekte Dateien werden übersprungen, nie ein Absturz. */
 internal object ExtensionThemeLoader {
+    /**
+     * Liest die Farbschemata aller aktiven Plugin-Beiträge.
+     *
+     * @param contributions aktuell aktive Beiträge.
+     * @return gültige Farbschemata; defekte Dateien werden übersprungen.
+     */
     fun load(contributions: ActiveContributions): List<ExtensionColorTheme> =
         contributions.colorThemes.mapNotNull { resolved ->
             val item = resolved.item
@@ -59,6 +65,12 @@ internal object ExtensionThemeLoader {
             ExtensionIconTheme(resolved.pluginId, item.id, item.label, baseDir.absolutePath, parsed)
         }
 
+    /**
+     * Liest die Sprachpakete aller aktiven Plugin-Beiträge.
+     *
+     * @param contributions aktuell aktive Beiträge.
+     * @return gültige Sprachpakete; defekte Dateien werden übersprungen.
+     */
     fun loadLanguagePacks(contributions: ActiveContributions): List<ExtensionLanguagePack> =
         contributions.languagePacks.mapNotNull { resolved ->
             val item = resolved.item
@@ -73,6 +85,7 @@ internal object ExtensionThemeLoader {
         file.canonicalPath.startsWith(dir.canonicalPath + File.separator)
 }
 
+/** [ExtensionThemeRepository]: stellt Farbschemata und Sprachpakete der aktivierten Plugins als Zustandsströme bereit. */
 @Singleton
 class ExtensionThemeRepositoryImpl @Inject constructor(
     contributionRepository: ContributionRepository

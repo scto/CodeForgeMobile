@@ -23,6 +23,9 @@ data class PreviewOptions(
     val locale: String? = null
 )
 
+/**
+ * Eine `@Composable`-Funktion im Quelltext: Name, Startzeile, ob `@Preview` vorhanden ist, ob sie Parameter hat (nur parameterlose sind renderbar) und die Vorschau-Optionen.
+ */
 data class ComposableCandidate(
     val functionName: String,
     val hasPreviewAnnotation: Boolean,
@@ -32,6 +35,9 @@ data class ComposableCandidate(
     val options: PreviewOptions = PreviewOptions()
 )
 
+/**
+ * Ergebnis eines Vorschau-Renderings: PNG-Bytes (`null` bei Fehler), kompilierte Dateien und ob wegen eines Problems das Ersatz-Theme verwendet wurde ([fallbackReason]).
+ */
 data class PreviewRenderResult(
     val functionName: String,
     val imageBytes: ByteArray?,

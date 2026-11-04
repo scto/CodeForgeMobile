@@ -1,5 +1,6 @@
 package com.codeforge.core.domain.model
 
+/** Woher ein Formatierergebnis stammt (Sprachserver, externe CLI oder eingebauter Formatierer). */
 enum class UnifiedFormatSource {
     LSP,
     KTLINT,
@@ -8,6 +9,7 @@ enum class UnifiedFormatSource {
     BUILTIN_SIMPLIFIED
 }
 
+/** Formatierter Text mit Quelle ([source], [sourceName]), Hinweis auf unveränderten Text ([isUnchanged]) und optionaler Warnung. */
 data class FormattedCode(
     val text: String,
     val source: UnifiedFormatSource,
@@ -16,6 +18,9 @@ data class FormattedCode(
     val warning: String? = null
 )
 
+/**
+ * Optionen des einheitlichen Formatierers: Einrückungsbreite, Tabs, maximale Zeilenlänge, Leerzeichen am Zeilenende entfernen, abschließender Zeilenumbruch.
+ */
 data class UnifiedFormatOptions(
     val indentSize: Int = 4,
     val useTabs: Boolean = false,
@@ -32,6 +37,7 @@ data class UnifiedFormatOptions(
  */
 object EditorConfigResolver {
 
+    /** Ermittelt die Optionen für eine Datei aus `.editorconfig` und Einstellungen. */
     fun resolve(
         editorConfigContent: String?,
         filePath: String,
@@ -102,6 +108,7 @@ object EditorConfigResolver {
         return result
     }
 
+    /** Prüft, ob [fileName] zum `.editorconfig`-Muster [pattern] passt. */
     internal fun matchesPattern(fileName: String, pattern: String): Boolean {
         if (pattern == "*") return true
         val ext = fileName.substringAfterLast('.', "")

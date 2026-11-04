@@ -10,7 +10,10 @@ import kotlinx.coroutines.flow.Flow
  * (Liste von Pfaden) statt Proto, da unstrukturiert/häufig wechselnd.
  */
 interface RecentProjectsRepository {
+    /** Zuletzt geöffnete Projekte. */
     val recentProjects: Flow<List<RecentProject>>
+    /** Fügt ein Projekt hinzu oder aktualisiert es. */
     suspend fun addOrUpdate(project: RecentProject)
+    /** Entfernt ein Projekt aus der Liste. */
     suspend fun remove(projectId: String)
 }

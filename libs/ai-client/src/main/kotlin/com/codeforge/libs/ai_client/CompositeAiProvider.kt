@@ -10,6 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 
+/** [AiProvider], der je nach gewähltem Anbieter an [AnthropicClient], [OpenAiClient] oder [GeminiClient] delegiert. */
 @Singleton
 class CompositeAiProvider @Inject constructor(
     private val anthropicClient: AnthropicClient,

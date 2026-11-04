@@ -7,12 +7,28 @@ import kotlinx.coroutines.flow.Flow
  * Persistiert und verwaltet Haltepunkte projektbezogen im privaten App-Speicher.
  */
 interface BreakpointRepository {
+    /** Haltepunkte je Projekt und Datei (Zeilen werden mit [adjustBreakpointsOnEdit] bei Textänderungen verschoben). */
     fun getBreakpoints(projectRoot: String): Flow<Map<String, List<Breakpoint>>>
+    /** Ersetzt alle Haltepunkte der Datei [path]. */
     suspend fun setBreakpoints(projectRoot: String, path: String, breakpoints: List<Breakpoint>)
+    /**
+     * Schaltet einen Haltepunkt in [line] um.
+     *
+     * @return den neuen Haltepunkt oder `null`, wenn er entfernt wurde.
+     */
     suspend fun toggleBreakpoint(projectRoot: String, path: String, line: Int): Breakpoint?
+    /** Aktualisiert einen Haltepunkt (z. B. Bedingung, aktiviert). */
     suspend fun updateBreakpoint(projectRoot: String, breakpoint: Breakpoint)
+    /** Entfernt den Haltepunkt mit der ID [breakpointId]. */
     suspend fun removeBreakpoint(projectRoot: String, breakpointId: String)
+    /** Entfernt alle Haltepunkte des Projekts. */
     suspend fun removeAll(projectRoot: String)
+    /**
+     * Verschiebt Haltepunkte nach einer Textänderung.
+     *
+     * @param changeLine Zeile der Änderung.
+     * @param lineDelta hinzugekommene (positiv) oder entfernte (negativ) Zeilen.
+     */
     suspend fun adjustBreakpointsOnEdit(projectRoot: String, path: String, changeLine: Int, lineDelta: Int)
 }
 

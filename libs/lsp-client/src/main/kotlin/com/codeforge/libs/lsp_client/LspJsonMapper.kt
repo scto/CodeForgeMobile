@@ -36,16 +36,19 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.put
 
+/** Wandelt eine [LspPosition] in ein LSP-`Position`-JSON um. */
 internal fun positionToJson(position: LspPosition): JsonObject = buildJsonObject {
     put("line", position.line)
     put("character", position.character)
 }
 
+/** Wandelt einen [LspRange] in ein LSP-`Range`-JSON um. */
 internal fun rangeToJson(range: LspRange): JsonObject = buildJsonObject {
     put("start", positionToJson(range.start))
     put("end", positionToJson(range.end))
 }
 
+/** Wandelt eine [LspDiagnostic] in ein LSP-`Diagnostic`-JSON um. */
 internal fun diagnosticToJson(diagnostic: LspDiagnostic): JsonObject = buildJsonObject {
     put("range", rangeToJson(diagnostic.range))
     put("severity", severityToCode(diagnostic.severity))
@@ -53,6 +56,11 @@ internal fun diagnosticToJson(diagnostic: LspDiagnostic): JsonObject = buildJson
     diagnostic.source?.let { put("source", it) }
 }
 
+/**
+ * Liest ein LSP-`Position`-JSON.
+ *
+ * @return die Position oder `null`, wenn Felder fehlen oder fehlerhaft sind.
+ */
 internal fun parsePosition(element: JsonElement?): LspPosition? {
     val obj = element as? JsonObject ?: return null
     val line = (obj["line"] as? JsonPrimitive)?.intOrNull ?: return null
@@ -60,6 +68,11 @@ internal fun parsePosition(element: JsonElement?): LspPosition? {
     return LspPosition(line, character)
 }
 
+/**
+ * Liest ein LSP-`Range`-JSON.
+ *
+ * @return der Bereich oder `null`, wenn Start oder Ende fehlen.
+ */
 internal fun parseRange(element: JsonElement?): LspRange? {
     val obj = element as? JsonObject ?: return null
     val start = parsePosition(obj["start"]) ?: return null
@@ -67,6 +80,9 @@ internal fun parseRange(element: JsonElement?): LspRange? {
     return LspRange(start, end)
 }
 
+/**
+ * Ordnet einen LSP-Schweregradcode (1 = Fehler … 4 = Hinweis) einer [DiagnosticSeverity] zu; unbekannte Werte werden zu einem Standardwert.
+ */
 internal fun severityFromCode(code: Int?): DiagnosticSeverity = when (code) {
     1 -> DiagnosticSeverity.ERROR
     2 -> DiagnosticSeverity.WARNING
@@ -75,6 +91,7 @@ internal fun severityFromCode(code: Int?): DiagnosticSeverity = when (code) {
     else -> DiagnosticSeverity.ERROR
 }
 
+/** Ordnet eine [DiagnosticSeverity] ihrem LSP-Schweregradcode zu. */
 internal fun severityToCode(severity: DiagnosticSeverity): Int = when (severity) {
     DiagnosticSeverity.ERROR -> 1
     DiagnosticSeverity.WARNING -> 2
@@ -82,6 +99,7 @@ internal fun severityToCode(severity: DiagnosticSeverity): Int = when (severity)
     DiagnosticSeverity.HINT -> 4
 }
 
+/** Liest eine Liste von `Diagnostic`-Objekten; fehlerhafte Einträge werden übersprungen. */
 internal fun parseDiagnostics(element: JsonElement?): List<LspDiagnostic> {
     val array = element as? JsonArray ?: return emptyList()
     return array.mapNotNull { item ->
@@ -94,6 +112,7 @@ internal fun parseDiagnostics(element: JsonElement?): List<LspDiagnostic> {
     }
 }
 
+/** Liest ein Completion-Ergebnis (`CompletionItem[]` oder `CompletionList`). */
 internal fun parseCompletionResult(result: JsonElement?): List<LspCompletionItem> {
     val items: JsonArray = when (result) {
         is JsonArray -> result
@@ -110,6 +129,11 @@ internal fun parseCompletionResult(result: JsonElement?): List<LspCompletionItem
     }
 }
 
+/**
+ * Liest ein Hover-Ergebnis (Markup, Zeichenkette oder `MarkedString`-Liste).
+ *
+ * @return die Hover-Information oder `null`, wenn leer.
+ */
 internal fun parseHoverResult(result: JsonElement?): LspHoverInfo? {
     val obj = result as? JsonObject ?: return null
     val contents = obj["contents"] ?: return null
@@ -117,6 +141,11 @@ internal fun parseHoverResult(result: JsonElement?): LspHoverInfo? {
     return LspHoverInfo(contents = extractHoverText(contents), range = range)
 }
 
+/**
+ * Liest ein `SignatureHelp`-Ergebnis.
+ *
+ * @return die Signaturhilfe oder `null`, wenn der Server keine liefert.
+ */
 internal fun parseSignatureHelp(result: JsonElement?): LspSignatureHelp? {
     val obj = result as? JsonObject ?: return null
     val signatures = (obj["signatures"] as? JsonArray)?.mapNotNull { element ->
@@ -150,6 +179,7 @@ internal fun parseSignatureHelp(result: JsonElement?): LspSignatureHelp? {
     )
 }
 
+/** Liest `FoldingRange[]` (Faltbereiche mit Art `comment`, `imports`, `region`). */
 internal fun parseFoldingRanges(result: JsonElement?): List<LspFoldingRange> {
     val array = result as? JsonArray ?: return emptyList()
     return array.mapNotNull { element ->
@@ -174,6 +204,7 @@ internal fun parseFoldingRanges(result: JsonElement?): List<LspFoldingRange> {
     }
 }
 
+/** Liest `InlayHint[]` (Beschriftung als Text oder Teile, Art Typ/Parameter). */
 internal fun parseInlayHints(result: JsonElement?): List<LspInlayHint> {
     val array = result as? JsonArray ?: return emptyList()
     return array.mapNotNull { element ->
@@ -210,6 +241,11 @@ private fun extractHoverText(element: JsonElement): String = when (element) {
     is kotlinx.serialization.json.JsonNull -> ""
 }
 
+/**
+ * Liest ein `TextEdit`.
+ *
+ * @return die Änderung oder `null`, wenn Bereich oder Text fehlen.
+ */
 internal fun parseTextEdit(element: JsonElement?): LspTextEdit? {
     val obj = element as? JsonObject ?: return null
     val range = parseRange(obj["range"]) ?: return null
@@ -217,11 +253,13 @@ internal fun parseTextEdit(element: JsonElement?): LspTextEdit? {
     return LspTextEdit(range, newText)
 }
 
+/** Wandelt eine [LspTextEdit] in ein `TextEdit`-JSON um. */
 internal fun textEditToJson(edit: LspTextEdit): JsonObject = buildJsonObject {
     put("range", rangeToJson(edit.range))
     put("newText", edit.newText)
 }
 
+/** Liest ein `TextDocumentEdit` (Dokument mit Version und Änderungen). */
 internal fun parseTextDocumentEdit(element: JsonElement?): LspTextDocumentEdit? {
     val obj = element as? JsonObject ?: return null
     val textDocument = obj["textDocument"] as? JsonObject ?: return null
@@ -232,6 +270,7 @@ internal fun parseTextDocumentEdit(element: JsonElement?): LspTextDocumentEdit? 
     return LspTextDocumentEdit(uri, version, edits)
 }
 
+/** Liest eine Datei-Operation eines `WorkspaceEdit` (`create`, `rename`, `delete`) samt Optionen. */
 internal fun parseFileOperation(element: JsonElement?): LspFileOperation? {
     val obj = element as? JsonObject ?: return null
     val kind = (obj["kind"] as? JsonPrimitive)?.contentOrNull ?: return null
@@ -259,6 +298,11 @@ internal fun parseFileOperation(element: JsonElement?): LspFileOperation? {
     }
 }
 
+/**
+ * Liest ein `WorkspaceEdit` (`changes` und `documentChanges` inklusive Datei-Operationen).
+ *
+ * @return das Edit oder `null`, wenn das Ergebnis leer ist.
+ */
 internal fun parseWorkspaceEdit(result: JsonElement?): LspWorkspaceEdit? {
     val obj = result as? JsonObject ?: return null
 
@@ -287,6 +331,7 @@ internal fun parseWorkspaceEdit(result: JsonElement?): LspWorkspaceEdit? {
     return LspWorkspaceEdit(changes = changesMap, documentChanges = docChanges)
 }
 
+/** Wandelt ein [LspWorkspaceEdit] in ein `WorkspaceEdit`-JSON um. */
 internal fun workspaceEditToJson(edit: LspWorkspaceEdit): JsonObject = buildJsonObject {
     if (edit.changes.isNotEmpty()) {
         put("changes", buildJsonObject {
@@ -335,6 +380,7 @@ internal fun workspaceEditToJson(edit: LspWorkspaceEdit): JsonObject = buildJson
     }
 }
 
+/** Liest ein LSP-`Command` (Titel, Kommando, Argumente). */
 internal fun parseCommand(element: JsonElement?): LspCommand? {
     val obj = element as? JsonObject ?: return null
     val title = (obj["title"] as? JsonPrimitive)?.contentOrNull ?: ""
@@ -343,6 +389,7 @@ internal fun parseCommand(element: JsonElement?): LspCommand? {
     return LspCommand(title = title, command = command, arguments = args)
 }
 
+/** Liest eine `CodeAction`-/`Command`-Liste. */
 internal fun parseCodeActions(result: JsonElement?): List<LspCodeAction> {
     val array = result as? JsonArray ?: return emptyList()
     return array.mapNotNull { item ->
@@ -370,6 +417,7 @@ internal fun parseCodeActions(result: JsonElement?): List<LspCodeAction> {
     }
 }
 
+/** Liest das Ergebnis von `textDocument/prepareRename` (Bereich, optional Platzhalter). */
 internal fun parsePrepareRename(result: JsonElement?): LspPrepareRenameResult? {
     val obj = result as? JsonObject ?: return null
     // Fall 1: { range: Range, placeholder: String }
@@ -378,6 +426,7 @@ internal fun parsePrepareRename(result: JsonElement?): LspPrepareRenameResult? {
     return LspPrepareRenameResult(range = range, placeholder = placeholder)
 }
 
+/** Liest Dokumentsymbole (hierarchisch als `DocumentSymbol` oder flach als `SymbolInformation`). */
 internal fun parseDocumentSymbols(result: JsonElement?): List<LspDocumentSymbol> {
     val array = result as? JsonArray ?: return emptyList()
     return array.mapNotNull { item ->
@@ -414,6 +463,7 @@ internal fun parseDocumentSymbols(result: JsonElement?): List<LspDocumentSymbol>
     }
 }
 
+/** Liest `Location`/`Location[]`/`LocationLink[]`. */
 internal fun parseLocations(result: JsonElement?): List<LspLocation> {
     return when (result) {
         is JsonArray -> result.mapNotNull { parseSingleLocation(it) }
@@ -435,6 +485,11 @@ private fun parseSingleLocation(element: JsonElement?): LspLocation? {
     return LspLocation(uri = uri, range = range)
 }
 
+/**
+ * Liest die Serverfähigkeiten aus der `initialize`-Antwort.
+ *
+ * @return die [LspServerCapabilities]; bei fehlenden Feldern mit Standardwerten.
+ */
 internal fun parseServerCapabilities(result: JsonElement?): LspServerCapabilities {
     val root = result as? JsonObject ?: return LspServerCapabilities()
     val capabilities = root["capabilities"] as? JsonObject ?: root
@@ -475,6 +530,7 @@ internal fun applyTextEdits(original: String, result: JsonElement?): String {
     return applyTextEditsToString(original, parsedEdits)
 }
 
+/** Rechnet eine LSP-Position (Zeile, UTF-16-Zeichen) in einen Zeichen-Offset des [text] um. */
 internal fun lspPositionToCharOffset(text: String, position: LspPosition): Int {
     var currentLine = 0
     var i = 0
@@ -496,6 +552,11 @@ internal fun lspPositionToCharOffset(text: String, position: LspPosition): Int {
     return i.coerceIn(0, len)
 }
 
+/**
+ * Wendet [edits] auf [original] an (Offsets rückwärts, damit sich Positionen nicht verschieben).
+ *
+ * @return der geänderte Text.
+ */
 internal fun applyTextEditsToString(original: String, edits: List<LspTextEdit>): String {
     if (edits.isEmpty()) return original
 

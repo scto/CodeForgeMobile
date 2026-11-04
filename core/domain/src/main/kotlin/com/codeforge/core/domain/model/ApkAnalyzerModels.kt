@@ -17,6 +17,11 @@ enum class ApkSection(val id: String) {
     OTHER("other");
 
     companion object {
+        /**
+         * Ordnet einen Archivpfad dem Abschnitt der APK zu (Manifest, `resources.arsc`, `META-INF`, …).
+         *
+         * @param path Pfad im Archiv (auch mit Backslashes).
+         */
         fun fromPath(path: String): ApkSection {
             val normalized = path.replace('\\', '/')
             return when {
@@ -190,7 +195,10 @@ data class ApkComparisonResult(
  * Spezifische Ausnahmearten bei der APK-Analyse.
  */
 sealed class ApkAnalysisException(message: String, cause: Throwable? = null) : Exception(message, cause) {
+    /** Die APK-Datei [path] existiert nicht. */
     class FileNotFound(path: String) : ApkAnalysisException("APK-Datei nicht gefunden: $path")
+    /** Das Archiv ist beschädigt oder keine gültige ZIP-Datei. */
     class CorruptArchive(message: String, cause: Throwable? = null) : ApkAnalysisException(message, cause)
+    /** Ein Eintrag verlässt per Pfadtrick das Zielverzeichnis (Zip-Slip); die Analyse wird abgebrochen. */
     class ZipSlipDetected(entryName: String) : ApkAnalysisException("Sicherheitswarnung (Zip-Slip): Unzulässiger Pfad im Archiv: $entryName")
 }

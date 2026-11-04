@@ -158,6 +158,21 @@ fun WelcomeRoute(
  * (Grid + Recent-Projects) gezeigt; auf Tablet/Foldable erscheint das Detail-Pane
  * (Projekt-Metadaten, Module, letzte Änderung) parallel neben der Liste.
  */
+/**
+ * Zustandsbasierte Darstellung des Willkommensbildschirms ohne ViewModel; Aktionen sind wirkungslos.
+ * Für Screenshots und Vorschauen.
+ *
+ * @param uiState anzuzeigender Zustand.
+ * @param modifier Modifier des Wurzel-Layouts.
+ */
+@Composable
+fun WelcomeContent(
+    uiState: WelcomeUiState,
+    modifier: Modifier = Modifier
+) {
+    WelcomeScreen(modifier = modifier, uiState = uiState, onActionClick = {}, onEvent = {})
+}
+
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 private fun WelcomeScreen(

@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Liefert Laufzeitdaten der LSP-Sitzungen (Zustand, offene Dokumente, Laufzeit) für die Anzeige in den Einstellungen. */
 @Singleton
 class LspRuntimeStatsProviderImpl @Inject constructor(
     private val client: LspClientRepositoryImpl

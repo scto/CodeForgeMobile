@@ -60,11 +60,14 @@ class LspServerSession(
     private val documentVersions = ConcurrentHashMap<String, Int>()
 
     private val _serverState = MutableStateFlow(LspServerState.STOPPED)
+    /** Zustand des Serverprozesses (gestartet, laufend, gestoppt, ausgefallen). */
     val serverState: StateFlow<LspServerState> = _serverState.asStateFlow()
 
     private val _serverCapabilities = MutableStateFlow<LspServerCapabilities?>(null)
+    /** Vom Server gemeldete Fähigkeiten; `null`, solange nicht initialisiert oder nach einem Ausfall. */
     val serverCapabilities: StateFlow<LspServerCapabilities?> = _serverCapabilities.asStateFlow()
 
+    /** Zeitpunkt (ms) der letzten Nutzung; dient dem Beenden ungenutzter Sitzungen. */
     @Volatile
     var lastUsedTimestamp: Long = System.currentTimeMillis()
         private set
@@ -84,14 +87,18 @@ class LspServerSession(
             }.getOrNull()
     }
 
+    /** Anzahl der aktuell geöffneten Dokumente. */
     val openDocumentCount: Int
         get() = documentVersions.size
 
+    /** Pfade der aktuell geöffneten Dokumente. */
     val openDocuments: Set<String>
         get() = documentVersions.keys
 
+    /** Prüft, ob das Dokument an den Server gemeldet (geöffnet) ist. */
     fun hasDocument(path: String): Boolean = documentVersions.containsKey(path)
 
+    /** Markiert die Sitzung als soeben genutzt. */
     fun touch() {
         lastUsedTimestamp = System.currentTimeMillis()
     }
@@ -104,6 +111,13 @@ class LspServerSession(
         _serverState.value = LspServerState.RUNNING
     }
 
+    /**
+     * Startet den Serverprozess und führt `initialize`/`initialized` aus. Protokolliert Kommando, stderr und das Ende im Logcat (Tag `CF-LSP`).
+     *
+     * @param serverCommand Kommando mit Argumenten.
+     * @param extraProcessEnv zusätzliche Umgebungsvariablen.
+     * @return Erfolg oder der Startfehler.
+     */
     suspend fun start(
         serverCommand: List<String>,
         extraProcessEnv: Map<String, String> = emptyMap()
@@ -256,6 +270,7 @@ class LspServerSession(
         }, "lsp-exit-watch").apply { isDaemon = true }.start()
     }
 
+    /** Beendet den Server (`shutdown`/`exit`), schließt die Verbindung und setzt den Zustand zurück. */
     suspend fun stop(): Unit = withContext(Dispatchers.IO) {
         runCatching {
             connection?.sendNotification("shutdown", buildJsonObject { })
@@ -287,6 +302,13 @@ class LspServerSession(
         }
     }
 
+    /**
+     * Meldet ein geöffnetes Dokument (`textDocument/didOpen`).
+     *
+     * @param path absoluter Pfad.
+     * @param languageId LSP-Sprachkennung.
+     * @param content vollständiger Text.
+     */
     suspend fun didOpen(path: String, languageId: String, content: String) {
         touch()
         documentVersions[path] = 1
@@ -306,6 +328,13 @@ class LspServerSession(
         )
     }
 
+    /**
+     * Meldet eine Textänderung (`textDocument/didChange`, voller Inhalt). Ist der Server ausgefallen, wird nichts gesendet.
+     *
+     * @param path absoluter Pfad.
+     * @param newContent neuer Gesamttext.
+     * @param version aufsteigende Dokumentversion.
+     */
     suspend fun didChange(path: String, newContent: String, version: Int) {
         touch()
         documentVersions[path] = version
@@ -329,6 +358,7 @@ class LspServerSession(
         )
     }
 
+    /** Meldet das Schließen eines Dokuments (`textDocument/didClose`). */
     suspend fun didClose(path: String) {
         touch()
         documentVersions.remove(path)
@@ -340,6 +370,13 @@ class LspServerSession(
         )
     }
 
+    /**
+     * Fordert Vervollständigungen an (`textDocument/completion`).
+     *
+     * @param path absoluter Dateipfad.
+     * @param position Cursorposition (nullbasiert: Zeile, Zeichen).
+     * @return Ergebnis oder Fehler, wenn der Server nicht antwortet oder die Anfrage nicht unterstützt.
+     */
     suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>> =
         runCatching {
             touch()
@@ -354,6 +391,13 @@ class LspServerSession(
             parseCompletionResult(response["result"])
         }
 
+    /**
+     * Fordert Hover-Informationen an (`textDocument/hover`).
+     *
+     * @param path absoluter Dateipfad.
+     * @param position Cursorposition (nullbasiert: Zeile, Zeichen).
+     * @return Ergebnis oder Fehler, wenn der Server nicht antwortet oder die Anfrage nicht unterstützt.
+     */
     suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> =
         runCatching {
             touch()
@@ -368,6 +412,13 @@ class LspServerSession(
             parseHoverResult(response["result"])
         }
 
+    /**
+     * Formatiert das ganze Dokument (`textDocument/formatting`).
+     *
+     * @param path absoluter Pfad.
+     * @param content aktueller Text.
+     * @return der formatierte Text oder Fehler.
+     */
     suspend fun requestFormat(path: String, content: String): Result<String> =
         runCatching {
             touch()
@@ -388,6 +439,14 @@ class LspServerSession(
             applyTextEdits(content, response["result"])
         }
 
+    /**
+     * Formatiert einen Bereich (`textDocument/rangeFormatting`).
+     *
+     * @param path absoluter Pfad.
+     * @param content aktueller Text.
+     * @param range zu formatierender Bereich.
+     * @return der Text nach dem Formatieren oder Fehler.
+     */
     suspend fun requestRangeFormat(path: String, content: String, range: LspRange): Result<String> =
         runCatching {
             touch()
@@ -409,6 +468,7 @@ class LspServerSession(
             applyTextEdits(content, response["result"])
         }
 
+    /** Fordert Code-Aktionen/Quick-Fixes für einen Bereich an (`textDocument/codeAction`). */
     suspend fun requestCodeActions(
         path: String,
         range: LspRange,
@@ -429,6 +489,7 @@ class LspServerSession(
         parseCodeActions(response["result"])
     }
 
+    /** Prüft, ob an der Position umbenannt werden kann (`textDocument/prepareRename`). */
     suspend fun requestPrepareRename(
         path: String,
         position: LspPosition
@@ -443,6 +504,7 @@ class LspServerSession(
         parsePrepareRename(response["result"])
     }
 
+    /** Fordert ein `WorkspaceEdit` für das Umbenennen an (`textDocument/rename`). */
     suspend fun requestRename(
         path: String,
         position: LspPosition,
@@ -459,6 +521,7 @@ class LspServerSession(
         parseWorkspaceEdit(response["result"])
     }
 
+    /** Fordert die Gliederung des Dokuments an (`textDocument/documentSymbol`). */
     suspend fun requestDocumentSymbols(path: String): Result<List<LspDocumentSymbol>> = runCatching {
         touch()
         val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
@@ -469,6 +532,13 @@ class LspServerSession(
         parseDocumentSymbols(response["result"])
     }
 
+    /**
+     * Springt zur Definition (`textDocument/definition`).
+     *
+     * @param path absoluter Dateipfad.
+     * @param position Cursorposition (nullbasiert: Zeile, Zeichen).
+     * @return Ergebnis oder Fehler, wenn der Server nicht antwortet oder die Anfrage nicht unterstützt.
+     */
     suspend fun requestDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
         runCatching {
             touch()
@@ -481,9 +551,23 @@ class LspServerSession(
             parseLocations(response["result"])
         }
 
+    /**
+     * Springt zur Typdefinition (`textDocument/typeDefinition`).
+     *
+     * @param path absoluter Dateipfad.
+     * @param position Cursorposition (nullbasiert: Zeile, Zeichen).
+     * @return Ergebnis oder Fehler, wenn der Server nicht antwortet oder die Anfrage nicht unterstützt.
+     */
     suspend fun requestTypeDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
         requestLocations("textDocument/typeDefinition", path, position)
 
+    /**
+     * Sucht Implementierungen (`textDocument/implementation`).
+     *
+     * @param path absoluter Dateipfad.
+     * @param position Cursorposition (nullbasiert: Zeile, Zeichen).
+     * @return Ergebnis oder Fehler, wenn der Server nicht antwortet oder die Anfrage nicht unterstützt.
+     */
     suspend fun requestImplementation(path: String, position: LspPosition): Result<List<LspLocation>> =
         requestLocations("textDocument/implementation", path, position)
 
@@ -501,6 +585,13 @@ class LspServerSession(
             parseLocations(response["result"])
         }
 
+    /**
+     * Fordert die Signaturhilfe an (`textDocument/signatureHelp`).
+     *
+     * @param path absoluter Dateipfad.
+     * @param position Cursorposition (nullbasiert: Zeile, Zeichen).
+     * @return Ergebnis oder Fehler, wenn der Server nicht antwortet oder die Anfrage nicht unterstützt.
+     */
     suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> =
         runCatching {
             touch()
@@ -515,6 +606,11 @@ class LspServerSession(
             parseSignatureHelp(response["result"])
         }
 
+    /**
+     * Fordert Faltbereiche an (`textDocument/foldingRange`); ohne Serverunterstützung eine leere Liste.
+     *
+     * @param path absoluter Pfad.
+     */
     suspend fun requestFoldingRanges(path: String): Result<List<LspFoldingRange>> = runCatching {
         touch()
         val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
@@ -525,6 +621,12 @@ class LspServerSession(
         parseFoldingRanges(response["result"])
     }
 
+    /**
+     * Fordert Inlay-Hints für einen Bereich an (`textDocument/inlayHint`); ohne Serverunterstützung eine leere Liste.
+     *
+     * @param path absoluter Pfad.
+     * @param range sichtbarer Bereich.
+     */
     suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> = runCatching {
         touch()
         val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
@@ -541,6 +643,7 @@ class LspServerSession(
         parseInlayHints(response["result"])
     }
 
+    /** Sucht Referenzen (`textDocument/references`). */
     suspend fun requestReferences(
         path: String,
         position: LspPosition,
@@ -559,6 +662,12 @@ class LspServerSession(
         parseLocations(response["result"])
     }
 
+    /**
+     * Führt ein Server-Kommando aus (`workspace/executeCommand`).
+     *
+     * @param command Kommando-ID.
+     * @param arguments Argumente (JSON-serialisierbar).
+     */
     suspend fun executeCommand(command: String, arguments: List<Any?>): Result<Unit> = runCatching {
         touch()
         val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))

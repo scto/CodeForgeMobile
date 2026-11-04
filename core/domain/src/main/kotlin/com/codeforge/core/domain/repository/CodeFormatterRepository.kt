@@ -14,6 +14,7 @@ import com.codeforge.core.domain.model.UnifiedFormatOptions
  */
 interface CodeFormatterRepository {
 
+    /** Formatiert eine ganze Datei (LSP, externe CLI oder eingebauter Formatierer). */
     suspend fun formatFile(
         path: String,
         content: String,
@@ -21,6 +22,7 @@ interface CodeFormatterRepository {
         fallbackOptions: UnifiedFormatOptions = UnifiedFormatOptions()
     ): Result<FormattedCode>
 
+    /** Formatiert einen Zeilen-/Zeichenbereich einer Datei. */
     suspend fun formatRange(
         path: String,
         content: String,

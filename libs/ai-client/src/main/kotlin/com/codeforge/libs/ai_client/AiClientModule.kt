@@ -8,10 +8,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Hilt-Modul des KI-Clients: bindet [AiProvider] an die Implementierung [CompositeAiProvider]. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AiClientModule {
 
+    /** Bindet [CompositeAiProvider] als [AiProvider]. */
     @Binds
     @Singleton
     abstract fun bindAiProvider(impl: CompositeAiProvider): AiProvider
