@@ -1,0 +1,139 @@
+name: Release Debug APK
+
+# Baut die Debug-APK (./gradlew :app:assembleDebug) und veröffentlicht sie als GitHub-Release (Pre-release) mit Tag.
+#
+# Zwei Wege:
+#   1. Tag pushen:       git tag debug-3.0.0-1 && git push origin debug-3.0.0-1   (Tags debug-*)
+#   2. Manuell starten:  Actions -> "Release Debug APK" -> Run workflow (Tag leer = debug-<versionName>-<Laufnummer>);
+#                        das Tag wird am gewählten Commit/Branch automatisch angelegt.
+# Keine Secrets nötig (GITHUB_TOKEN). Die APK ist mit dem Android-Debug-Schlüssel signiert, die Prüfsumme liegt bei.
+# Der Terminal-Bootstrap wird beim Bau aus scto/terminal-packages-codeforge geladen (siehe build-debug-apk.yml).
+
+on:
+  push:
+    tags: ["debug-*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release-Tag (leer = debug-<versionName>-<Laufnummer>)"
+        required: false
+        default: ""
+        type: string
+      run_tests:
+        description: "Vor dem Bau die Unit-Tests ausführen (testDebugUnitTest)"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-debug-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Gradle einrichten (Cache)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Android-SDK-Plattform 36 sicherstellen
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "sdk.dir=$SDK" > local.properties
+          if [ ! -d "$SDK/platforms/android-36" ]; then
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+            "$SDK/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+          fi
+
+      - name: Version und Tag bestimmen
+        id: meta
+        env:
+          IN_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          ver="$(sed -n 's/.*versionName *= *"\(.*\)".*/\1/p' app/build.gradle.kts | head -n1)"
+          code="$(sed -n 's/.*versionCode *= *\([0-9]*\).*/\1/p' app/build.gradle.kts | head -n1)"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            tag="${GITHUB_REF_NAME}"
+          elif [ -n "$IN_TAG" ]; then
+            tag="$IN_TAG"
+          else
+            tag="debug-${ver}-${GITHUB_RUN_NUMBER}"
+          fi
+          [[ "$tag" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Ungültiger Tag: $tag"; exit 1; }
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+
+      - name: Unit-Tests
+        if: inputs.run_tests == true
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Debug-APK bauen
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --stacktrace
+
+      - name: APK umbenennen und Prüfsumme erzeugen
+        id: apk
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+          src="$(ls app/build/outputs/apk/debug/*.apk | head -n1)"
+          [ -f "$src" ] || { echo "::error::Keine Debug-APK gefunden"; exit 1; }
+          mkdir -p dist
+          out="dist/CodeForgeMobile-${TAG}.apk"
+          cp "$src" "$out"
+          (cd dist && sha256sum "$(basename "$out")" > SHA256SUMS.txt)
+          echo "file=$out" >> "$GITHUB_OUTPUT"
+          { echo "### Debug-Release \`$TAG\`"; echo; cat dist/SHA256SUMS.txt; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: "CodeForgeMobile ${{ steps.meta.outputs.version }} (Debug) – ${{ steps.meta.outputs.tag }}"
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            **Debug-Build** (nicht für den Store, mit Debug-Schlüssel signiert) – Version `${{ steps.meta.outputs.version }}` (versionCode `${{ steps.meta.outputs.code }}`), Commit `${{ steps.meta.outputs.short_sha }}`.
+
+            Installation: APK herunterladen und auf dem Gerät installieren (Installation aus unbekannten Quellen erlauben). Prüfsumme in `SHA256SUMS.txt`.
+          files: |
+            ${{ steps.apk.outputs.file }}
+            dist/SHA256SUMS.txt
+          fail_on_unmatched_files: true
+
+      - name: Build-Berichte bei Fehlern sichern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports-${{ github.run_id }}
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 7
