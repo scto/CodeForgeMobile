@@ -9,9 +9,11 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Liest Metadaten einer APK (Paketname, Version, SDK-Stufen, Berechtigungen). */
 @Singleton
 class ApkMetadataParser @Inject constructor() {
 
+    /** Parst die Metadaten der APK. */
     fun parse(
         jsonContent: String,
         metadataDirectory: File,

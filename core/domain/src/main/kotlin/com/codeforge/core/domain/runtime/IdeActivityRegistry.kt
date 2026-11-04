@@ -38,12 +38,19 @@ object IdeActivityRegistry {
     private val wakeLockWanted = MutableStateFlow(false)
 
     private val _state = MutableStateFlow(IdeActivityState())
+    /** Aktueller Zustand aller angemeldeten Vorgänge. */
     val state: StateFlow<IdeActivityState> = _state.asStateFlow()
 
     private val _exitRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     /** „Beenden“ aus der Benachrichtigung; die Activity schließt sich. */
     val exitRequests: SharedFlow<Unit> = _exitRequests.asSharedFlow()
 
+    /**
+     * Meldet einen Vorgang an.
+     *
+     * @param label Anzeigename (Build, Klonen …).
+     * @return ID für [end].
+     */
     fun begin(label: String): Long {
         val id = ids.incrementAndGet()
         running.update { it + (id to label) }
@@ -51,21 +58,25 @@ object IdeActivityRegistry {
         return id
     }
 
+    /** Meldet den Vorgang [id] ab. */
     fun end(id: Long) {
         running.update { list -> list.filterNot { it.first == id } }
         publish()
     }
 
+    /** Setzt die Anzahl offener Terminals. */
     fun setTerminalCount(count: Int) {
         terminalCount.value = count.coerceAtLeast(0)
         publish()
     }
 
+    /** Schaltet den Wakelock-Wunsch um. */
     fun setWakeLock(enabled: Boolean) {
         wakeLockWanted.value = enabled
         publish()
     }
 
+    /** Fordert das Beenden der App an (siehe [exitRequests]). */
     fun requestExit() {
         _exitRequests.tryEmit(Unit)
     }

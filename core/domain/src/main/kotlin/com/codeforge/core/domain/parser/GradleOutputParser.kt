@@ -10,6 +10,7 @@ import com.codeforge.core.domain.model.ProblemSource
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Erkennt Fehler und Warnungen (Kotlin, Java, AAPT, Gradle) in der Gradle-Ausgabe. */
 @Singleton
 class GradleOutputParser @Inject constructor() {
 
@@ -34,9 +35,11 @@ class GradleOutputParser @Inject constructor() {
             """^Execution failed for task '([^']+)'.*"""
         )
 
+        /** Entfernt ANSI-Escape-Sequenzen. */
         fun stripAnsi(text: String): String = ANSI_REGEX.replace(text, "")
     }
 
+    /** Parst ein vollständiges Log zu einer Liste von [BuildProblem]s. */
     fun parse(log: String): List<BuildProblem> {
         val session = Session()
         val allProblems = mutableListOf<BuildProblem>()
@@ -47,8 +50,10 @@ class GradleOutputParser @Inject constructor() {
         return allProblems
     }
 
+    /** Startet eine Sitzung zum zeilenweisen Parsen eines laufenden Builds. */
     fun createSession(): Session = Session()
 
+    /** Zustand beim zeilenweisen Parsen. */
     class Session {
         private var currentTask: String? = null
         private var pendingJavaProblem: MutableJavaProblem? = null
@@ -56,6 +61,7 @@ class GradleOutputParser @Inject constructor() {
         private val whatWentWrongLines = mutableListOf<String>()
         private var whatWentWrongTask: String? = null
 
+        /** Verarbeitet eine Zeile und liefert abgeschlossene Probleme. */
         fun feedLine(rawLine: String): List<BuildProblem> {
             val line = stripAnsi(rawLine)
             val trimmed = line.trim()
@@ -229,6 +235,7 @@ class GradleOutputParser @Inject constructor() {
             return emitted
         }
 
+        /** Beendet die Sitzung und liefert noch offene Probleme. */
         fun finish(): List<BuildProblem> {
             val remaining = mutableListOf<BuildProblem>()
             pendingJavaProblem?.toBuildProblem()?.let { remaining.add(it) }
@@ -268,6 +275,7 @@ class GradleOutputParser @Inject constructor() {
         val lines: MutableList<String>,
         val taskName: String?
     ) {
+        /** Wandelt den gesammelten Zustand in ein [BuildProblem]. */
         fun toBuildProblem(): BuildProblem = BuildProblem(
             severity = severity,
             source = source,

@@ -7,7 +7,10 @@ package com.codeforge.core.domain.security
  * und niemals im Klartext in Logs oder Dateisystem-Caches abgelegt werden.
  */
 interface SecretStorage {
+    /** Liest das Geheimnis zu [key] oder `null`. */
     suspend fun getSecret(key: String): String?
+    /** Speichert [secret] verschlüsselt unter [key]. */
     suspend fun storeSecret(key: String, secret: String)
+    /** Löscht das Geheimnis zu [key]. */
     suspend fun removeSecret(key: String)
 }

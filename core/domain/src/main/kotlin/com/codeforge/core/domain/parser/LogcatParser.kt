@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Parst Logcat-Zeilen (Format `threadtime`) zu Einträgen und Stack-Frames. */
 @Singleton
 class LogcatParser @Inject constructor() {
 
@@ -24,12 +25,17 @@ class LogcatParser @Inject constructor() {
         """^\s*at\s+([a-zA-Z0-9_$.]+)\.([a-zA-Z0-9_$<>-]+)\(([^:()]+):(\d+)\)"""
     )
 
+    /** Ergebnis des Parsens einer Zeile. */
     sealed interface ParseLineResult {
+        /** Neuer Eintrag. */
         data class NewEntry(val entry: LogEntry) : ParseLineResult
+        /** Fortsetzungszeile (z. B. Stack-Frame) des vorherigen Eintrags. */
         data class Continuation(val text: String, val stackFrame: StackFrame?) : ParseLineResult
+        /** Zeile ohne Bedeutung. */
         data object Ignored : ParseLineResult
     }
 
+    /** Parst eine einzelne Zeile. */
     fun parseLine(rawLine: String): ParseLineResult {
         val line = rawLine.trimEnd('\r', '\n')
         if (line.isBlank() || line.startsWith("--------- beginning of")) {
@@ -66,6 +72,7 @@ class LogcatParser @Inject constructor() {
         return ParseLineResult.Continuation(line, stackFrame)
     }
 
+    /** Parst mehrere Zeilen und fasst Fortsetzungszeilen zusammen. */
     fun parseLines(lines: List<String>): List<LogEntry> {
         val result = mutableListOf<LogEntry>()
         var currentEntry: LogEntry? = null
@@ -118,6 +125,7 @@ class LogcatParser @Inject constructor() {
         return result
     }
 
+    /** Parst eine Stack-Frame-Zeile (`at Klasse.methode(Datei:Zeile)`). */
     fun parseStackFrame(line: String): StackFrame? {
         val match = stackFrameRegex.find(line) ?: return null
         val (className, methodName, fileName, lineStr) = match.destructured

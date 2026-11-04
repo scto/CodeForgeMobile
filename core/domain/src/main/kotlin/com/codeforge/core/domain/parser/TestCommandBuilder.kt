@@ -3,6 +3,7 @@ package com.codeforge.core.domain.parser
 
 import com.codeforge.core.domain.model.TestCaseResult
 
+/** Baut Gradle-Kommandos für Unit-Tests (ganzes Projekt, Modul, Filter, Wiederholung fehlgeschlagener Tests). */
 object TestCommandBuilder {
 
     /**

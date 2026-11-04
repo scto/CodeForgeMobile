@@ -27,11 +27,13 @@ object KeytoolOutputParser {
     private val KEY_ALG_REGEX = Regex("""(?i)(?:Subject\s+Public\s+Key\s+Algorithm|Algorithmus\s+des\s+öffentlichen\s+(?:Subjekt)?schlüssels)\s*:\s*(.*)""")
     private val VERSION_REGEX = Regex("""(?i)Version\s*:\s*(\d+)""")
 
+    /** Ergebnis des Parsens: Keystore-Typ und Einträge. */
     data class ParsedKeystore(
         val keystoreType: String,
         val entries: List<KeystoreEntryInfo>
     )
 
+    /** Parst die Ausgabe von `keytool -list -v` (englisch und deutsch). */
     fun parse(output: String): ParsedKeystore {
         var keystoreType = "PKCS12"
         val entries = mutableListOf<KeystoreEntryInfo>()

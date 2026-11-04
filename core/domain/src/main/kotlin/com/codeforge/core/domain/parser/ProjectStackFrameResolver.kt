@@ -4,6 +4,7 @@ package com.codeforge.core.domain.parser
 import com.codeforge.core.domain.model.StackFrame
 import java.io.File
 
+/** Ordnet Stack-Frames Dateien im Projekt zu (für Sprung zur Fehlerstelle). */
 object ProjectStackFrameResolver {
 
     /**

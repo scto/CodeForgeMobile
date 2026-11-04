@@ -15,6 +15,7 @@ import java.io.File
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
+/** Liest JUnit-XML-Berichte von Gradle zu Testklassen-Ergebnissen. */
 object JUnitXmlParser {
 
     private val STACK_FRAME_REGEX = Regex("""^\s*at\s+([a-zA-Z0-9_$]+(?:\.[a-zA-Z0-9_$]+)*)\.([a-zA-Z0-9_$<>]+)\(([^:)]+):(\d+)\)""")
@@ -39,6 +40,7 @@ object JUnitXmlParser {
         return factory
     }
 
+    /** Parst XML-Text. */
     fun parseXml(xmlContent: String): List<TestClassSuite> {
         if (xmlContent.isBlank()) return emptyList()
         return runCatching {
@@ -46,6 +48,7 @@ object JUnitXmlParser {
         }.getOrDefault(emptyList())
     }
 
+    /** Parst eine XML-Datei. */
     fun parseFile(file: File): List<TestClassSuite> {
         if (!file.exists() || !file.isFile || file.length() == 0L) return emptyList()
         return runCatching {
@@ -53,6 +56,7 @@ object JUnitXmlParser {
         }.getOrDefault(emptyList())
     }
 
+    /** Parst einen XML-Stream. */
     fun parseInputStream(inputStream: InputStream): List<TestClassSuite> {
         val factory = createDocumentBuilderFactory()
         val builder = factory.newDocumentBuilder()
@@ -175,6 +179,7 @@ object JUnitXmlParser {
         )
     }
 
+    /** Ermittelt erwarteten und tatsächlichen Wert aus Meldung oder Stacktrace (Vergleichsfehler). */
     internal fun extractExpectedAndActual(message: String?, stackTrace: String): Pair<String?, String?> {
         val candidates = buildList {
             if (!message.isNullOrBlank()) add(message)
@@ -193,6 +198,7 @@ object JUnitXmlParser {
         return null to null
     }
 
+    /** Zerlegt einen Stacktrace in [StackFrame]s. */
     internal fun extractStackFrames(stackTrace: String): List<StackFrame> {
         if (stackTrace.isBlank()) return emptyList()
         val frames = mutableListOf<StackFrame>()

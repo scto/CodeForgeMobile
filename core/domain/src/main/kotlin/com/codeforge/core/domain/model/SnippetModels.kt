@@ -40,7 +40,9 @@ data class Snippet(
  * Ergebnis einer Snippet-Syntaxprüfung.
  */
 sealed interface SnippetValidationResult {
+    /** Das Snippet ist syntaktisch gültig. */
     data object Valid : SnippetValidationResult
+    /** Das Snippet ist ungültig; Fehlertext und Position (Zeile, Spalte). */
     data class Invalid(val error: String, val line: Int, val column: Int) : SnippetValidationResult
 }
 
@@ -83,6 +85,7 @@ object SnippetParser {
         "WORKSPACE_FOLDER"
     )
 
+    /** Prüft die Syntax des Snippet-Körpers (Tabstopps, Platzhalter, Variablen). */
     fun validate(body: String): SnippetValidationResult {
         if (body.isEmpty()) return SnippetValidationResult.Valid
 

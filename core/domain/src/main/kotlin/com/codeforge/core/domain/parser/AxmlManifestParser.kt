@@ -23,6 +23,7 @@ object AxmlManifestParser {
     private const val RES_XML_START_ELEMENT_TYPE = 0x00100102
     private const val UTF8_FLAG = 0x00000100
 
+    /** Liest ein binäres AndroidManifest (AXML) zu Metadaten; `null`, wenn es nicht lesbar ist. */
     fun parse(bytes: ByteArray): ApkDetailedMetadata? {
         return try {
             parseStream(ByteArrayInputStream(bytes))

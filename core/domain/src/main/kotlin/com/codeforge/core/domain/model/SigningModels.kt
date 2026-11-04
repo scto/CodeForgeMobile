@@ -16,6 +16,7 @@ enum class KeyAlgorithm(
     EC_256("EC", 256, "secp256r1"),
     EC_384("EC", 384, "secp384r1");
 
+    /** Ob der Schlüssel ein Elliptische-Kurven-Schlüssel ist. */
     val isEc: Boolean get() = this == EC_256 || this == EC_384
 }
 
@@ -30,6 +31,7 @@ data class DistinguishedName(
     val state: String = "",
     val country: String = ""
 ) {
+    /** Formatiert den Namen als X.500-String (`CN=…, OU=…`), nur gesetzte Teile, mit Escaping. */
     fun toDnameString(): String = buildList {
         if (commonName.isNotBlank()) add("CN=${escape(commonName)}")
         if (organizationalUnit.isNotBlank()) add("OU=${escape(organizationalUnit)}")
@@ -55,6 +57,7 @@ data class CreateKeystoreRequest(
     val storePassword: String,
     val keyPassword: String = storePassword
 ) {
+    /** Gültigkeit in Tagen (Jahre mal 365). */
     val validityDays: Int get() = validityYears * 365
 }
 
@@ -74,6 +77,7 @@ data class KeystoreCertificateInfo(
     val publicKeyAlgorithm: String = "",
     val version: Int = 3
 ) {
+    /** Ob es sich um ein Android-Debug-Zertifikat handelt (Besitzer/Aussteller enthalten „Android Debug“). */
     val isDebugCertificate: Boolean
         get() = owner.contains("CN=Android Debug", ignoreCase = true) ||
             issuer.contains("CN=Android Debug", ignoreCase = true) ||
@@ -90,9 +94,11 @@ data class KeystoreEntryInfo(
     val certificateChainLength: Int = 1,
     val certificates: List<KeystoreCertificateInfo> = emptyList()
 ) {
+    /** Erstes Zertifikat der Kette. */
     val primaryCertificate: KeystoreCertificateInfo?
         get() = certificates.firstOrNull()
 
+    /** Ob der Eintrag der Debug-Schlüssel ist (Alias `androiddebugkey` oder Debug-Zertifikat). */
     val isDebugKey: Boolean
         get() = alias.equals("androiddebugkey", ignoreCase = true) ||
             primaryCertificate?.isDebugCertificate == true
@@ -111,9 +117,11 @@ data class KeystoreInfo(
     val lastModifiedMillis: Long = 0L,
     val hasStoredPassword: Boolean = false
 ) {
+    /** Ob der Keystore einen Debug-Schlüssel enthält oder „debug“ im Namen trägt. */
     val isDebugKeystore: Boolean
         get() = entries.any { it.isDebugKey } || name.contains("debug", ignoreCase = true)
 
+    /** Alias des ersten Eintrags. */
     val primaryAlias: String?
         get() = entries.firstOrNull()?.alias
 }
@@ -132,6 +140,7 @@ data class SignApkRequest(
     val v4SigningEnabled: Boolean = true,
     val minSdkVersion: Int? = null
 ) {
+    /** Ausgabepfad der signierten APK: [outputApkPath], sonst neben der Eingabe ohne Endung `-unsigned`. */
     fun resolveOutputPath(): String {
         outputApkPath?.let { return it }
         val inputFile = File(inputApkPath)
@@ -172,6 +181,7 @@ data class ApkVerificationResult(
     val warnings: List<String> = emptyList(),
     val rawOutput: String = ""
 ) {
+    /** Ob die APK mit einem Debug-Zertifikat signiert ist. */
     val isSignedWithDebugKey: Boolean
         get() = certificates.any { it.isDebugCertificate }
 }
@@ -186,6 +196,7 @@ enum class PasswordStrength {
     STRONG,
     VERY_STRONG;
 
+    /** Numerischer Wert von 1 (sehr schwach) bis 5 (sehr stark). */
     val score: Int
         get() = when (this) {
             VERY_WEAK -> 1
@@ -200,6 +211,7 @@ enum class PasswordStrength {
  * Bewertet Passwortstärke für Keystores ohne externe Bibliotheken.
  */
 object PasswordStrengthEvaluator {
+    /** Bewertet [password] nach Länge und Zeichenklassen. */
     fun evaluate(password: String): PasswordStrength {
         if (password.length < 6) return PasswordStrength.VERY_WEAK
 
@@ -235,11 +247,16 @@ data class ProjectSigningAssignment(
  * Hilfsfunktionen zum Generieren von Gradle-Code für Release-Signierung.
  */
 object GradleSigningSnippet {
+    /** Umgebungsvariable mit dem Keystore-Pfad. */
     const val ENV_KEYSTORE_PATH = "CODEFORGE_KEYSTORE_PATH"
+    /** Umgebungsvariable mit dem Schlüssel-Alias. */
     const val ENV_KEYSTORE_ALIAS = "CODEFORGE_KEYSTORE_ALIAS"
+    /** Umgebungsvariable mit dem Keystore-Passwort. */
     const val ENV_KEYSTORE_PASSWORD = "CODEFORGE_KEYSTORE_PASSWORD"
+    /** Umgebungsvariable mit dem Schlüsselpasswort. */
     const val ENV_KEY_PASSWORD = "CODEFORGE_KEY_PASSWORD"
 
+    /** Erzeugt einen Gradle-Codeausschnitt für die Release-Signierung über Umgebungsvariablen. */
     fun generateSnippet(): String = """
         // In app/build.gradle.kts:
         android {

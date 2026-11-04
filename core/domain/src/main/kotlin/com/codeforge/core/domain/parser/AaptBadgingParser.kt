@@ -25,6 +25,7 @@ object AaptBadgingParser {
     private val RECEIVER_REGEX = Regex("""^receiver:\s*name='([^']+)'""")
     private val PROVIDER_REGEX = Regex("""^provider:\s*name='([^']+)'""")
 
+    /** Parst die Ausgabe von `aapt dump badging` zu APK-Metadaten. */
     fun parse(output: String): ApkDetailedMetadata {
         var packageName: String? = null
         var versionCode: Long? = null

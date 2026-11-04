@@ -22,6 +22,7 @@ object ApksignerOutputParser {
     private val KEY_ALG_REGEX = Regex("""(?i).*key\s+algorithm:\s*(.*)""")
     private val KEY_SIZE_REGEX = Regex("""(?i).*key\s+size\s*\(bits\):\s*(\d+)""")
 
+    /** Parst die Ausgabe von `apksigner verify` zu einem Prüfergebnis. */
     fun parse(output: String): ApkVerificationResult {
         val lines = output.lines()
         val isVerified = lines.any { it.trim().equals("Verifies", ignoreCase = true) }
