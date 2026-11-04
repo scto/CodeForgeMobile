@@ -9,6 +9,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.libs.terminal_engine.TermuxEnvironment
 import java.io.File
 
+/** Ergebnis des Dexens. */
 internal data class DexResult(val success: Boolean, val dexFile: File?, val errorOutput: String)
 
 /**
@@ -23,6 +24,7 @@ internal data class DexResult(val success: Boolean, val dexFile: File?, val erro
  */
 internal class PreviewDexer {
 
+    /** Wandelt Klassen mit D8 in DEX. */
     fun dex(classFiles: List<File>, outputDir: File, d8BinaryPath: String): DexResult {
         outputDir.mkdirs()
 

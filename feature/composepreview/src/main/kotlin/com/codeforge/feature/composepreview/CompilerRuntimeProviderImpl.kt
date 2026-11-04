@@ -20,11 +20,15 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+/** Name der Manifest-Datei der Compiler-Laufzeit. */
 internal const val COMPILER_RUNTIME_MANIFEST_NAME = "manifest.json"
+/** Ordnername der Compiler-Laufzeit. */
 internal const val COMPILER_RUNTIME_DIR_NAME = "compiler-runtime"
 
+/** Datei der Laufzeit (Name, SHA-256, Größe). */
 internal data class CompilerRuntimeFileEntry(val name: String, val sha256: String, val size: Long)
 
+/** Manifest der Laufzeit (BOM, Kotlin-Version, Dateien). */
 internal data class CompilerRuntimeManifest(val bom: String, val kotlin: String, val files: List<CompilerRuntimeFileEntry>) {
     companion object {
         // lazy: ein Regex-Syntaxfehler (ICU/Android) soll nicht die ganze Klasse unbenutzbar machen
@@ -76,10 +80,13 @@ internal data class CompilerRuntimeManifest(val bom: String, val kotlin: String,
     }
 }
 
+/** Lädt Dateien der Compiler-Laufzeit herunter. */
 internal fun interface CompilerRuntimeDownloader {
+    /** Lädt [url] nach [destination] und meldet den Fortschritt. */
     suspend fun download(url: String, destination: File, onProgress: (bytesDownloaded: Long, totalBytes: Long) -> Unit): Result<File>
 }
 
+/** Lädt per HTTPS. */
 @Singleton
 internal class HttpCompilerRuntimeDownloader @Inject constructor() : CompilerRuntimeDownloader {
 
@@ -198,6 +205,7 @@ internal class HttpCompilerRuntimeDownloader @Inject constructor() : CompilerRun
     }
 }
 
+/** Stellt die Compiler-Laufzeit für Compose-Vorschauen bereit: Prüfung, Download und SHA-256-Kontrolle. */
 @Singleton
 class CompilerRuntimeProviderImpl internal constructor(
     private val filesDir: File,
@@ -285,8 +293,10 @@ class CompilerRuntimeProviderImpl internal constructor(
         }
     }
 
+    /** Ob der Ordner eine vollständige, gültige Laufzeit enthält. */
     internal fun isDirectoryValid(dir: File): Boolean = runCatching { verifyDirectoryOrThrow(dir) }.isSuccess
 
+    /** Prüft den Ordner und wirft bei Fehlern. */
     internal fun verifyDirectoryOrThrow(dir: File) {
         if (!dir.isDirectory) {
             throw IllegalStateException("Compiler runtime directory does not exist: ${dir.absolutePath}")

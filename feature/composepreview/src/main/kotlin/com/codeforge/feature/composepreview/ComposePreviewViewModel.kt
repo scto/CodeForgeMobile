@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** ViewModel der Compose-Vorschau. */
 @HiltViewModel
 class ComposePreviewViewModel @Inject constructor(
     private val previewBridge: ActiveComposablePreviewBridge,
@@ -31,6 +32,7 @@ class ComposePreviewViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ComposePreviewUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<ComposePreviewUiState> = _uiState.asStateFlow()
 
     /** Wird für Re-Render (FunctionSelected/Rerender) benötigt, ohne den Quelltext im UiState zu duplizieren. */
@@ -42,6 +44,7 @@ class ComposePreviewViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: ComposePreviewUiEvent) {
         when (event) {
             is ComposePreviewUiEvent.FunctionSelected -> {

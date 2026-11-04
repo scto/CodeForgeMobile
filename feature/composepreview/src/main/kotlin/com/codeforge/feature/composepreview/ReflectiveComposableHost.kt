@@ -26,6 +26,7 @@ class ParameterizedComposableException(val functionName: String, override val me
  */
 internal object ReflectiveComposableValidator {
 
+    /** Prüft, dass die Methode parameterlos ist. */
     fun validateParameterless(targetMethod: Method) {
         val types = targetMethod.parameterTypes
         val isParameterless = types.size == 2 &&

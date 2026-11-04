@@ -58,6 +58,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 
+/** Bestimmt die Größe der Vorschau. */
 internal object ComposePreviewSizeResolver {
 
     /**
@@ -127,12 +128,14 @@ private class PreviewFallbackHostOwner :
     override val lifecycle: Lifecycle get() = lifecycleRegistry
     override val savedStateRegistry: SavedStateRegistry get() = savedStateRegistryController.savedStateRegistry
 
+    /** Startet den Renderer. */
     fun start() {
         savedStateRegistryController.performAttach()
         savedStateRegistryController.performRestore(null)
         lifecycleRegistry.currentState = Lifecycle.State.RESUMED
     }
 
+    /** Gibt den Renderer frei. */
     fun destroy() {
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         viewModelStore.clear()
@@ -157,9 +160,11 @@ internal class ComposeViewBitmapRenderer(private val context: Context) {
         return PreviewActivityHolder.currentActivity
     }
 
+    /** Rendert den Inhalt in eine Bitmap. */
     suspend fun renderToBitmap(widthPx: Int? = null, heightPx: Int? = null, content: @Composable () -> Unit): Bitmap =
         renderToBitmapInternal(widthPx, heightPx, null) { _ -> content() }
 
+    /** Rendert den Inhalt in eine Bitmap (mit Größenvorgabe). */
     suspend fun renderToBitmap(
         widthPx: Int? = null,
         heightPx: Int? = null,

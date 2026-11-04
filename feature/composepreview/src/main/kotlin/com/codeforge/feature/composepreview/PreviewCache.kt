@@ -13,10 +13,12 @@ import java.io.File
 import java.security.MessageDigest
 import java.util.Properties
 
+/** Schlüssel für den Zwischenspeicher. */
 internal object PreviewCacheKey {
     /** Bei Änderungen an Quell-Aufbereitung/Compiler-Optionen erhöhen, damit alte Builds verworfen werden. */
     const val PIPELINE_VERSION = "1"
 
+    /** Bildet den Schlüssel aus den Teilen (Hash). */
     fun of(vararg parts: String): String {
         val md = MessageDigest.getInstance("SHA-256")
         md.update(PIPELINE_VERSION.toByteArray())
@@ -28,6 +30,7 @@ internal object PreviewCacheKey {
     }
 }
 
+/** Zwischengespeicherter Build. */
 internal data class CachedBuild(
     val dexFile: File,
     val targetClassName: String,
@@ -36,8 +39,10 @@ internal data class CachedBuild(
     val fallbackReason: String?
 )
 
+/** Plattencache für Builds (LRU, höchstens [maxEntries]). */
 internal class PreviewBuildCache(private val root: File, private val maxEntries: Int = 20) {
 
+    /** Sucht den Build zum Schlüssel. */
     fun lookup(key: String): CachedBuild? {
         val dir = File(root, key)
         val dex = File(dir, "classes.dex")
@@ -80,6 +85,7 @@ internal class PreviewBuildCache(private val root: File, private val maxEntries:
         CachedBuild(dex, targetClassName, compiledFiles, isFallbackTheme, fallbackReason)
     }.getOrNull()
 
+    /** Leert den Cache. */
     fun clear() {
         root.listFiles()?.forEach { it.deleteRecursively() }
     }
@@ -90,6 +96,7 @@ internal class PreviewBuildCache(private val root: File, private val maxEntries:
     }
 }
 
+/** Speichercache für Ergebnisse (LRU). */
 internal class PreviewResultCache<V>(private val maxEntries: Int = 24) {
     private val map = object : LinkedHashMap<String, V>(16, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, V>?): Boolean = size > maxEntries

@@ -14,10 +14,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 
+/** Kompiliert Vorschau-Code mit `kotlinc` als eigenem Prozess. */
 @Singleton
 internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompiling {
 
+    /** Zeitlimit in ms. */
     var timeoutMillis: Long = 120_000L
+    /** Maximaler Heap des Prozesses. */
     var maxHeapMemory: String = "768m"
 
     override suspend fun compile(
@@ -128,6 +131,7 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
         androidPlatformJar = androidPlatformJar
     )
 
+    /** Baut die Kommandozeile. */
     internal fun buildCommandLine(
         kotlincBin: File,
         pluginJar: File,
@@ -146,6 +150,7 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
         add(outputDir.absolutePath)
     }
 
+    /** Baut die Kommandozeile (mit zusätzlichen Pfaden). */
     internal fun buildCommandLine(
         kotlincBin: File,
         pluginJar: File,
@@ -160,6 +165,7 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
         outputDir = outputDir
     )
 
+    /** Pfad zu `kotlinc` oder `null`. */
     internal open fun resolveKotlincBinary(): File? {
         val candidates = listOf(
             File(TermuxEnvironment.prefix, "opt/kotlin/bin/kotlinc"),
@@ -168,6 +174,7 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
         return candidates.firstOrNull { it.isFile && it.canExecute() }
     }
 
+    /** Pfad zum Compose-Compiler-Plugin oder `null`. */
     internal open fun resolveComposePluginJar(): File? {
         val candidates = listOf(
             File(TermuxEnvironment.prefix, "opt/kotlin/lib/compose-compiler-plugin.jar"),
@@ -176,6 +183,7 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
         return candidates.firstOrNull { it.isFile }
     }
 
+    /** Pfad zur Kotlin-Stdlib oder `null`. */
     internal open fun resolveKotlinStdlibJar(): File? {
         val candidates = listOf(
             File(TermuxEnvironment.prefix, "opt/kotlin/lib/kotlin-stdlib.jar"),
@@ -185,10 +193,12 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
     }
 }
 
+/** Liest Fehler aus der Ausgabe von `kotlinc`. */
 internal object KotlincOutputParser {
     private val LINE_ERROR_REGEX = Regex("""^(.*?\.kt):(\d+):(\d+):\s*error:\s*(.*)$""", RegexOption.MULTILINE)
     private val R_REFERENCE_REGEX = Regex("""\bunresolved reference:?\s*['"]?R['"]?|\bunresolved reference:?\s*['"]?(?:string|drawable|color|layout|id)['"]?""")
 
+    /** Fehlermeldungen aus der Ausgabe. */
     fun parseErrors(output: String): List<String> {
         val lineErrors = LINE_ERROR_REGEX.findAll(output).map { match ->
             val (file, line, col, msg) = match.destructured

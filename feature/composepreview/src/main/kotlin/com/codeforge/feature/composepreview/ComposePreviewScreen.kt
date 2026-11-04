@@ -41,6 +41,7 @@ import com.codeforge.core.domain.model.PreviewThemeMode
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Route der Compose-Vorschau. */
 @Composable
 fun ComposePreviewRoute(modifier: Modifier = Modifier, viewModel: ComposePreviewViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()

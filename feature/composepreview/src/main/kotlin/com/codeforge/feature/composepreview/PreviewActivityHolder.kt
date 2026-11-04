@@ -16,9 +16,11 @@ object PreviewActivityHolder : Application.ActivityLifecycleCallbacks {
 
     private var currentActivityRef: WeakReference<Activity>? = null
 
+    /** Aktuell sichtbare Activity oder `null`. */
     val currentActivity: Activity?
         get() = currentActivityRef?.get()
 
+    /** Registriert die Anwendung, um die aktuelle Activity zu verfolgen. */
     fun register(application: Application) {
         application.registerActivityLifecycleCallbacks(this)
     }

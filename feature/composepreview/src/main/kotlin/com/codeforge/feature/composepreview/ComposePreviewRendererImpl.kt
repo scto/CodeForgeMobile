@@ -29,6 +29,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/** Rendert `@Preview`-Funktionen: kompiliert den Code, wandelt ihn mit D8 und lädt ihn in einem Klassenlader. */
 @Singleton
 class ComposePreviewRendererImpl @Inject internal constructor(
     @ApplicationContext private val context: Context,
@@ -247,6 +248,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         stream.toByteArray()
     }
 
+    /** JAR-Dateien der Laufzeit. */
     internal fun resolveRuntimeJars(runtimeDir: File): List<File> = Companion.resolveRuntimeJars(runtimeDir)
 
     private suspend fun resolveAndroidPlatformJar(): File? {
@@ -297,7 +299,9 @@ class ComposePreviewRendererImpl @Inject internal constructor(
     }
 }
 
+/** Entscheidet über Rückfälle beim Kompilieren. */
 internal object PreviewCompileStep {
+    /** Bestimmt den Rückfall bei Kompilierfehlern. */
     fun determineFallback(
         primaryResult: CompileResult,
         targetSourceCode: String,

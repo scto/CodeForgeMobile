@@ -45,6 +45,7 @@ internal object PreviewDependencyResolver {
 
     private val COMPOSABLE_ANNOTATION = Regex("""@(?:androidx\.compose\.runtime\.)?Composable\b""")
 
+    /** Gelesene Kotlin-Datei (Paket, Importe, Symbole, Bezeichner). */
     internal data class ParsedKotlinFile(
         val file: File,
         val packageName: String,
@@ -166,6 +167,7 @@ internal object PreviewDependencyResolver {
         return needed.distinctBy { it.file.absolutePath }
     }
 
+    /** Liest eine Datei. */
     internal fun parseFile(file: File, text: String): ParsedKotlinFile {
         val packageName = extractPackage(text)
         val symbols = extractTopLevelSymbols(text)
@@ -182,6 +184,7 @@ internal object PreviewDependencyResolver {
         )
     }
 
+    /** Ob die Nachbardatei nicht mitkompiliert werden soll. */
     internal fun isExcludedSiblingFile(text: String): Boolean {
         val hasComposable = COMPOSABLE_ANNOTATION.containsMatchIn(text)
         if (hasComposable) {
@@ -191,18 +194,23 @@ internal object PreviewDependencyResolver {
         return PURE_EXCLUDED_CLASS_PATTERNS.any { it.containsMatchIn(text) }
     }
 
+    /** Paketname. */
     internal fun extractPackage(text: String): String =
         PACKAGE_REGEX.find(text)?.groupValues?.get(1)?.trim().orEmpty()
 
+    /** Importe. */
     internal fun extractImports(text: String): List<String> =
         IMPORT_REGEX.findAll(text).map { it.groupValues[1] }.toList()
 
+    /** Symbole der obersten Ebene. */
     internal fun extractTopLevelSymbols(text: String): Set<String> =
         TOP_LEVEL_DECLARATIONS.findAll(text).map { it.groupValues[1] }.toSet()
 
+    /** Referenzierte Bezeichner. */
     internal fun extractReferencedIdentifiers(text: String): Set<String> =
         IDENTIFIER_REGEX.findAll(text).map { it.groupValues[1] }.toSet()
 
+    /** Klassenname der Datei (`…Kt`). */
     internal fun determineTargetClassName(file: File, text: String, pkg: String): String {
         val jvmName = JVM_NAME_REGEX.find(text)?.groupValues?.get(1)
         val simpleName = if (!jvmName.isNullOrBlank()) {
@@ -214,6 +222,7 @@ internal object PreviewDependencyResolver {
         return if (pkg.isEmpty()) simpleName else "$pkg.$simpleName"
     }
 
+    /** Quellordner des Moduls. */
     internal fun findModuleSourceRoots(targetFile: File): List<File> {
         val parent = targetFile.parentFile ?: return emptyList()
         var current: File? = parent
@@ -243,6 +252,7 @@ internal object PreviewDependencyResolver {
         return existing.ifEmpty { listOfNotNull(moduleRoot) }
     }
 
+    /** Alle Kotlin-Dateien in den Ordnern. */
     internal fun scanKotlinFiles(roots: List<File>): List<File> {
         val result = mutableListOf<File>()
         var totalBytes = 0L
