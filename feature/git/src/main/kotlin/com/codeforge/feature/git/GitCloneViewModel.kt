@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** Steuert das Klonen eines Repositories (Eingaben, Fortschritt, Abbruch und Navigation). */
 @HiltViewModel
 class GitCloneViewModel @Inject constructor(
     private val gitRepository: GitRepository,
@@ -32,11 +33,14 @@ class GitCloneViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         GitCloneUiState(targetDirectory = projectsDirectoryProvider.getProjectsRoot().absolutePath)
     )
+    /** UI-Zustand. */
     val uiState: StateFlow<GitCloneUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<GitCloneUiEffect>()
+    /** Einmalige Effekte. */
     val effect: SharedFlow<GitCloneUiEffect> = _effect.asSharedFlow()
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: GitCloneUiEvent) {
         when (event) {
             is GitCloneUiEvent.UrlChanged ->

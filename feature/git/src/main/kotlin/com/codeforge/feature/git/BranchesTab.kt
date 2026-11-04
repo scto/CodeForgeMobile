@@ -44,6 +44,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 
+/** Tab „Branches“: lokale und Remote-Branches, Tags und Remotes. */
 @Composable
 internal fun BranchesTab(state: GitUiState, onEvent: (GitUiEvent) -> Unit, modifier: Modifier = Modifier) {
     val local = state.branches.filter { !it.isRemote }

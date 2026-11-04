@@ -32,6 +32,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
+/** ViewModel der Git-Ansicht: lädt Status, Verlauf, Branches und Stashes und führt alle Git-Aktionen aus. */
 @HiltViewModel
 class GitViewModel @Inject constructor(
     private val git: GitRepository,
@@ -42,15 +43,18 @@ class GitViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GitUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<GitUiState> = _uiState.asStateFlow()
 
     private val _effects = Channel<GitUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte (z. B. Meldungen). */
     val effects: Flow<GitUiEffect> = _effects.receiveAsFlow()
 
     private var initializedFor: String? = null
     private var identityJob: Job? = null
     private var amendPrefill: String? = null
 
+    /** Initialisiert das ViewModel für das Repository [repoPath] (wiederholte Aufrufe mit demselben Pfad werden ignoriert). */
     fun initialize(repoPath: String) {
         if (initializedFor == repoPath) return
         initializedFor = repoPath
@@ -62,6 +66,7 @@ class GitViewModel @Inject constructor(
         refresh()
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: GitUiEvent) {
         when (event) {
             GitUiEvent.Refresh -> refresh()

@@ -26,6 +26,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import kotlinx.coroutines.flow.collectLatest
 
+/** Route des Klon-Bildschirms: verbindet das ViewModel mit der UI und navigiert nach erfolgreichem Klonen. */
 @Composable
 fun GitCloneRoute(
     modifier: Modifier = Modifier,

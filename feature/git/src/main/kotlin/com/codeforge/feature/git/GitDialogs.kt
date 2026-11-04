@@ -26,6 +26,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 
+/** Zeigt den zum Zustand passenden Git-Dialog. */
 @Composable
 internal fun GitDialogs(state: GitUiState, onEvent: (GitUiEvent) -> Unit) {
     val dismiss = { onEvent(GitUiEvent.DismissDialog) }

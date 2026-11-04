@@ -49,6 +49,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 
+/** Tab „Änderungen“: vorgemerkte, nicht vorgemerkte und konfliktbehaftete Dateien samt Commit-Feld. */
 @Composable
 internal fun ChangesTab(state: GitUiState, onEvent: (GitUiEvent) -> Unit, modifier: Modifier = Modifier) {
     val status = state.status
@@ -236,6 +237,7 @@ private fun FileMenu(entry: GitStatusEntry, state: GitUiState, onEvent: (GitUiEv
     }
 }
 
+/** Kleines Kennzeichen für den Dateistatus. */
 @Composable
 internal fun StatusBadge(status: GitFileStatus) {
     val (letter, color) = when (status) {

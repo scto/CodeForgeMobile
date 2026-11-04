@@ -41,6 +41,7 @@ private val ROW_HEIGHT = 52.dp
 private val LANE_WIDTH = 14.dp
 private const val MAX_VISIBLE_LANES = 6
 
+/** Tab „Graph“: Commit-Graph mit Verlauf. */
 @Composable
 internal fun GraphTab(state: GitUiState, onEvent: (GitUiEvent) -> Unit, modifier: Modifier = Modifier) {
     if (state.graph.isEmpty()) {
