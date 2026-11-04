@@ -95,6 +95,7 @@ include(
     ":examples:bash-lsp-plugin",
     ":examples:yaml-lsp-plugin",
     ":examples:toml-lsp-plugin",
+    ":examples:kmp-lsp-plugin",
     ":examples:python-lsp-plugin",
     ":templates:code-plugin",
 )

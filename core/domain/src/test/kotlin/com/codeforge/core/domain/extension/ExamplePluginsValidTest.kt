@@ -14,8 +14,8 @@ class ExamplePluginsValidTest {
     private val plugins = dir.listFiles { f -> File(f, "plugin.json").isFile }.orEmpty().sortedBy { it.name }
 
     @Test
-    fun `alle acht LSP-Plugins haben gueltige Code-Manifeste mit lspServers`() {
-        assertEquals(plugins.map { it.name }.toString(), 8, plugins.size)
+    fun `alle neun LSP-Plugins haben gueltige Code-Manifeste mit lspServers`() {
+        assertEquals(plugins.map { it.name }.toString(), 9, plugins.size)
         plugins.forEach { folder ->
             val m = PluginManifestParser.parse(File(folder, "plugin.json").readText()).getOrThrow()
             assertEquals(folder.name, 2, m.apiVersion)
@@ -31,7 +31,11 @@ class ExamplePluginsValidTest {
     fun `Plugin-IDs und Sprachen sind eindeutig`() {
         val ms = plugins.map { PluginManifestParser.parse(File(it, "plugin.json").readText()).getOrThrow() }
         assertEquals(ms.size, ms.map { it.id }.toSet().size)
-        val langs = ms.flatMap { m -> m.contributes.lspServers.flatMap { it.languages } }
+        val serverIds = ms.flatMap { m -> m.contributes.lspServers.map { it.id } }
+        assertEquals(serverIds.toString(), serverIds.size, serverIds.toSet().size)
+        // Sprachen sind je Plugin eindeutig; kmp-lsp ist bewusst Alternative zu Kotlin-/Java-Plugin (gleiche Sprachen).
+        val langs = ms.filter { it.id != "com.example.kmp-lsp" }
+            .flatMap { m -> m.contributes.lspServers.flatMap { it.languages } }
         assertEquals(langs.toString(), langs.size, langs.toSet().size)
     }
 }

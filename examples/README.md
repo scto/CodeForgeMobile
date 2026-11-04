@@ -14,6 +14,7 @@ Acht LSP-Referenz-Plugins im **neuen Modell** (Manifest v2 + Code für Installat
 | `yaml-lsp-plugin` | YAML | yaml-language-server | `requires`: nodejs + npm |
 | `toml-lsp-plugin` | TOML | Taplo | `requires`: pkg `taplo` |
 | `python-lsp-plugin` | Python | Pyright | `requires`: nodejs + npm |
+| `kmp-lsp-plugin` | Kotlin/Java/Swift | kmp-lsp (Rust, tree-sitter) | `requires`: pkg `rust` + `clang`; Build per `cargo install` |
 | `lsp-plugin-common` | – | Basisklasse `LspServerPlugin`, Installer | wird in jedes `classes.dex` gebündelt |
 
 Start der Server: deklarativ über `contributes.lspServers` (App-Resolver, aktives Projekt als Workspace). Das Plugin stellt nur sicher, dass der Server vorhanden ist (JDK-Check, Download, Meldung) und räumt bei der Deinstallation auf.
@@ -22,7 +23,7 @@ Start der Server: deklarativ über `contributes.lspServers` (App-Resolver, aktiv
 
 ```bash
 export ANDROID_HOME=/pfad/zum/android/sdk   # build-tools mit d8 + platforms/android-*/android.jar
-./gradlew :examples:kotlin-lsp-plugin:packagePlugin   # ebenso java-, xml-, cpp-, bash-, yaml-, toml-, python-lsp-plugin
+./gradlew :examples:kotlin-lsp-plugin:packagePlugin   # ebenso java-, xml-, cpp-, bash-, yaml-, toml-, python-, kmp-lsp-plugin
 ```
 
 Ergebnis je Plugin in `examples/out/<modul>/`: `<modul>.zip` (installierbar), daneben `plugin.json` und `classes.dex` (lose Kopie; `*.dex` ist git-ignoriert, das ZIP ist eingecheckt).

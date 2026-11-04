@@ -18,6 +18,7 @@ import com.codeforge.core.domain.model.LspServerState
 import com.codeforge.core.domain.model.LspWorkspaceEdit
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -48,6 +49,11 @@ class LspServerSession(
     private val onApplyEdit: (suspend (LspWorkspaceEdit) -> Boolean)? = null
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private companion object {
+        const val TAG = "CF-LSP"
+        const val STDERR_TAIL_LINES = 40
+    }
 
     private var process: Process? = null
     private var connection: LspRpcConnection? = null
@@ -106,6 +112,7 @@ class LspServerSession(
         runCatching {
             _serverState.value = LspServerState.STARTING
 
+            logI("Starte LSP-Server ($workspaceRootPath): ${serverCommand.joinToString(" ")}")
             val processBuilder = ProcessBuilder(serverCommand).redirectErrorStream(false)
             if (extraProcessEnv.isNotEmpty()) {
                 processBuilder.environment().putAll(extraProcessEnv)
@@ -113,6 +120,8 @@ class LspServerSession(
             val startedProcess = processBuilder.start()
             process = startedProcess
             startedAtMillis = System.currentTimeMillis()
+            drainStderr(startedProcess, serverCommand.firstOrNull().orEmpty())
+            watchExit(startedProcess, serverCommand.firstOrNull().orEmpty())
 
             val rpcConnection = LspRpcConnection(startedProcess)
             connection = rpcConnection
@@ -197,8 +206,54 @@ class LspServerSession(
 
             _serverState.value = LspServerState.RUNNING
         }.onFailure {
+            logE("LSP-Start fehlgeschlagen: ${it.javaClass.simpleName}: ${it.message}" + stderrTailSuffix())
             _serverState.value = LspServerState.FAILED
         }
+    }
+
+    private val stderrTail = ArrayDeque<String>()
+
+    // Android-Log; in JVM-Unit-Tests ohne Android-Stubs ein No-op.
+    private fun logI(msg: String) { runCatching { Log.i(TAG, msg) } }
+    private fun logW(msg: String) { runCatching { Log.w(TAG, msg) } }
+    private fun logE(msg: String) { runCatching { Log.e(TAG, msg) } }
+
+    private fun stderrTailSuffix(): String = synchronized(stderrTail) {
+        if (stderrTail.isEmpty()) "" else "\nstderr (letzte ${stderrTail.size} Zeilen):\n" + stderrTail.joinToString("\n")
+    }
+
+    /**
+     * Liest stderr des Servers fortlaufend: schreibt jede Zeile ins Logcat (Tag [TAG]) und hält die letzten
+     * [STDERR_TAIL_LINES] Zeilen für Fehlermeldungen vor. Ungelesen kann ein voller Pipe-Puffer den Server blockieren.
+     */
+    private fun drainStderr(proc: Process, name: String) {
+        Thread({
+            runCatching {
+                proc.errorStream.bufferedReader().forEachLine { line ->
+                    logW("[$name] stderr: $line")
+                    synchronized(stderrTail) {
+                        if (stderrTail.size >= STDERR_TAIL_LINES) stderrTail.removeFirst()
+                        stderrTail.addLast(line)
+                    }
+                }
+            }
+        }, "lsp-stderr").apply { isDaemon = true }.start()
+    }
+
+    /** Protokolliert das Ende des Serverprozesses mit Exit-Code und Laufzeit; ein unerwartetes Ende setzt FAILED. */
+    private fun watchExit(proc: Process, name: String) {
+        Thread({
+            val code = runCatching { proc.waitFor() }.getOrNull() ?: return@Thread
+            val ranMs = startedAtMillis?.let { System.currentTimeMillis() - it }
+            val expected = _serverState.value == LspServerState.STOPPED || process !== proc
+            if (expected) {
+                logI("LSP-Server [$name] beendet (Exit $code, gestoppt)")
+            } else {
+                logE("LSP-Server [$name] unerwartet beendet: Exit $code nach ${ranMs ?: -1} ms" + stderrTailSuffix())
+                _serverState.value = LspServerState.FAILED
+                _serverCapabilities.value = null
+            }
+        }, "lsp-exit-watch").apply { isDaemon = true }.start()
     }
 
     suspend fun stop(): Unit = withContext(Dispatchers.IO) {

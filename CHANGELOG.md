@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (LSP)
+- Diagnose-Logging der LSP-Sitzung (Logcat-Tag `CF-LSP`): Serverstart mit Kommando, jede stderr-Zeile des Servers, Exit-Code und Laufzeit bei unerwartetem Ende (Status `FAILED`, mit den letzten 40 stderr-Zeilen). stderr wird nun fortlaufend gelesen (ein voller Pipe-Puffer konnte den Server blockieren).
+- Neues Beispiel-Plugin `kmp-lsp-plugin` (`com.example.kmp-lsp`): kmp-lsp (Rust/tree-sitter) für Kotlin, Java und Swift als Alternative zu Kotlin Language Server/JDT LS; Build beim ersten Laden per `cargo install` (Pakete `rust`, `clang`). `LspServerSpec` kennt dafür `installScript`.
+
 ### Hinzugefügt (Build)
 - Gradle-Task-Liste beim Öffnen eines Projekts: Für Gradle-Projekte läuft einmal je Sitzung automatisch `tasks --all`. Der Task-Dialog (Pfeil neben dem Task-Namen in der Build-Leiste) ist eine durchsuchbare Liste mit Symbol je Task (clean, install, bundle, compile, generate, test/lint, build), Task-Name, Beschreibung bzw. Gruppe, Häkchen für die Auswahl und Ladeanzeige. `GradleTaskListParser.parseDetailed` liefert Gruppe und Beschreibung.
 
