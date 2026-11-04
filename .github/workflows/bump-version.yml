@@ -4,8 +4,9 @@ name: Bump Version
 # docs/release-notes/X.Y.Z.md (DE) und X.Y.Z.en.md (EN). Details: docs/dev/ReleaseProcess.md
 #
 # Actions -> "Bump Version" -> Run workflow: Art wählen (patch/minor/major oder explizite Version).
-# Das Ergebnis wird als Commit auf den gewählten Branch gepusht; optional wird gleich ein Debug-Release
-# gebaut (Tag debug-<Version>-<Laufnummer>, startet "Release Debug APK").
+# Das Ergebnis wird als Commit auf den gewählten Branch gepusht; optional wird danach gleich gebaut:
+#   debug   -> "Release Debug APK"   (Tag debug-<Version>-<Laufnummer>, Debug-Schlüssel)
+#   release -> "Release Release APK" (Tag v<Version>, Release-Schlüssel aus den Secrets, docs/dev/Signing.md)
 
 on:
   workflow_dispatch:
@@ -15,10 +16,16 @@ on:
         required: true
         default: "patch"
         type: string
-      release:
-        description: "Danach Debug-Release bauen (Tag debug-<Version>-<Lauf>)"
+      build:
+        description: "Danach bauen: none | debug (Debug-APK) | release (signierte Release-APK)"
         required: true
-        default: false
+        default: "none"
+        type: choice
+        options: [none, debug, release]
+      prerelease:
+        description: "Nur bei build=release: als Pre-release markieren (false = öffentlicher Release)"
+        required: true
+        default: true
         type: boolean
 
 permissions:
@@ -66,9 +73,19 @@ jobs:
           git push
 
       - name: Debug-Release auslösen
-        if: inputs.release
+        if: inputs.build == 'debug'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VER: ${{ steps.bump.outputs.version }}
         run: |
           gh workflow run release-debug-apk.yml --ref "${GITHUB_REF_NAME}" -f tag="debug-${VER}-${GITHUB_RUN_NUMBER}"
+
+      - name: Release-Build auslösen
+        if: inputs.build == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VER: ${{ steps.bump.outputs.version }}
+          PRE: ${{ inputs.prerelease }}
+        run: |
+          # Tag v<Version> wird vom Release-Workflow am gebumpten Commit angelegt
+          gh workflow run release-release-apk.yml --ref "${GITHUB_REF_NAME}" -f tag="v${VER}" -f prerelease="${PRE}"

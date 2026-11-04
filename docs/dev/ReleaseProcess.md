@@ -47,5 +47,7 @@ Abschnitt. `--notes-only X.Y.Z` erzeugt die Notes einer bestehenden CHANGELOG-Ve
 ## Per GitHub Actions
 
 Workflow **Bump Version** (*Actions → Bump Version → Run workflow*): Art wählen, das Ergebnis wird als Commit
-gepusht. Mit der Option *release* startet danach **Release Debug APK**; dessen Release-Text enthält die
-Release Notes der Version (`docs/release-notes/<Version>.md`).
+gepusht. Mit *build* lässt sich danach direkt bauen: `debug` startet **Release Debug APK** (Debug-Schlüssel), `release`
+startet **Release Release APK** (Tag `v<Version>`, Release-Schlüssel aus den Secrets, Schalter *prerelease*,
+siehe [Release-Signatur](Signing.md)). Beide übernehmen die Release Notes der Version
+(`docs/release-notes/<Version>.md`) als Release-Text.
