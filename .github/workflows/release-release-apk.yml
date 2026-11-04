@@ -1,0 +1,217 @@
+name: Release Release APK
+
+# Baut die signierte Release-APK (./gradlew :app:assembleRelease, R8 + Resource-Shrinking) mit dem Release-Schlüssel
+# aus den GitHub-Secrets und veröffentlicht sie als GitHub-Release. Anleitung: docs/dev/Signing.md
+#
+# Secrets (Settings -> Secrets and variables -> Actions):
+#   CODEFORGE_KEYSTORE_BASE64   Keystore-Datei (.jks/.p12), base64-kodiert (eine Zeile)
+#   CODEFORGE_STORE_PASSWORD    Keystore-Passwort
+#   CODEFORGE_KEY_ALIAS         Alias des Schlüssels
+#   CODEFORGE_KEY_PASSWORD      Schlüssel-Passwort (bei PKCS12 meist = Keystore-Passwort)
+#
+# Zwei Wege:
+#   1. Tag pushen:       git tag v3.0.1 && git push origin v3.0.1   (Tags v<MAJOR>.<MINOR>.<PATCH>; muss zum versionName passen)
+#      -> Pre-release, solange die Repository-Variable RELEASE_IS_PUBLIC nicht "true" ist.
+#   2. Manuell starten:  Actions -> "Release Release APK" -> Run workflow (Tag + Pre-release-Schalter).
+# Der Build bricht ab, wenn Secrets fehlen oder die APK nicht mit dem Release-Schlüssel signiert ist.
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release-Tag (leer = v<versionName>)"
+        required: false
+        default: ""
+        type: string
+      prerelease:
+        description: "Als Pre-release markieren (false = erster öffentlicher Release)"
+        required: true
+        default: true
+        type: boolean
+      run_tests:
+        description: "Vor dem Bau die Unit-Tests ausführen (testDebugUnitTest)"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-release-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment: release   # optional: Environment "release" mit Genehmigung/eigenen Secrets anlegen; ohne Anlage wird es automatisch erzeugt
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Secrets prüfen
+        env:
+          KS: ${{ secrets.CODEFORGE_KEYSTORE_BASE64 }}
+          SP: ${{ secrets.CODEFORGE_STORE_PASSWORD }}
+          KA: ${{ secrets.CODEFORGE_KEY_ALIAS }}
+          KP: ${{ secrets.CODEFORGE_KEY_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$KS" ] || missing="$missing CODEFORGE_KEYSTORE_BASE64"
+          [ -n "$SP" ] || missing="$missing CODEFORGE_STORE_PASSWORD"
+          [ -n "$KA" ] || missing="$missing CODEFORGE_KEY_ALIAS"
+          [ -n "$KP" ] || missing="$missing CODEFORGE_KEY_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Fehlende Secrets:$missing (siehe docs/dev/Signing.md)"
+            exit 1
+          fi
+
+      - name: Version und Tag bestimmen
+        id: meta
+        env:
+          IN_TAG: ${{ inputs.tag }}
+          IN_PRE: ${{ inputs.prerelease }}
+          IS_PUBLIC: ${{ vars.RELEASE_IS_PUBLIC }}
+        run: |
+          set -euo pipefail
+          ver="$(sed -n 's/.*versionName *= *"\(.*\)".*/\1/p' app/build.gradle.kts | head -n1)"
+          code="$(sed -n 's/.*versionCode *= *\([0-9]*\).*/\1/p' app/build.gradle.kts | head -n1)"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then tag="${GITHUB_REF_NAME}"
+          elif [ -n "$IN_TAG" ]; then tag="$IN_TAG"
+          else tag="v${ver}"; fi
+          [[ "$tag" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Ungültiger Tag: $tag"; exit 1; }
+          # Tag und App-Version müssen übereinstimmen (verhindert Releases mit falscher Version)
+          if [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ && "$tag" != "v${ver}" ]]; then
+            echo "::error::Tag $tag passt nicht zu versionName $ver in app/build.gradle.kts"; exit 1
+          fi
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then pre="$IN_PRE"
+          elif [ "$IS_PUBLIC" = "true" ]; then pre="false"
+          else pre="true"; fi
+          {
+            echo "version=$ver"; echo "code=$code"; echo "tag=$tag"; echo "prerelease=$pre"
+            echo "short_sha=${GITHUB_SHA::8}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: JDK 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Gradle einrichten (Cache)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Android-SDK-Plattform 36 sicherstellen
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "sdk.dir=$SDK" > local.properties
+          if [ ! -d "$SDK/platforms/android-36" ]; then
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+            "$SDK/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+          fi
+
+      - name: Keystore aus Secret wiederherstellen
+        env:
+          KS: ${{ secrets.CODEFORGE_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s' "$KS" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          [ -s "$RUNNER_TEMP/release.keystore" ] || { echo "::error::Keystore leer – Base64 ungültig?"; exit 1; }
+          echo "CODEFORGE_STORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+
+      - name: Unit-Tests
+        if: inputs.run_tests == true
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Release-APK bauen
+        env:
+          CODEFORGE_STORE_PASSWORD: ${{ secrets.CODEFORGE_STORE_PASSWORD }}
+          CODEFORGE_KEY_ALIAS: ${{ secrets.CODEFORGE_KEY_ALIAS }}
+          CODEFORGE_KEY_PASSWORD: ${{ secrets.CODEFORGE_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease --stacktrace
+
+      - name: Signatur prüfen, APK umbenennen, Prüfsumme erzeugen
+        id: apk
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+          src="$(ls app/build/outputs/apk/release/*.apk | head -n1)"
+          [ -f "$src" ] || { echo "::error::Keine Release-APK gefunden"; exit 1; }
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          apksigner="$(ls "$SDK"/build-tools/*/apksigner | sort -V | tail -n1)"
+          "$apksigner" verify --verbose --print-certs "$src" | tee signer.txt
+          if grep -qi "Android Debug" signer.txt; then
+            echo "::error::APK ist mit dem Debug-Schlüssel signiert – Release-Schlüssel nicht verwendet"; exit 1
+          fi
+          mkdir -p dist
+          out="dist/CodeForgeMobile-${TAG}.apk"
+          cp "$src" "$out"
+          (cd dist && sha256sum "$(basename "$out")" > SHA256SUMS.txt)
+          grep -E "certificate (SHA-256|SHA-1) digest" signer.txt > dist/SIGNER.txt
+          echo "file=$out" >> "$GITHUB_OUTPUT"
+          { echo "### Release \`$TAG\`"; echo; cat dist/SHA256SUMS.txt; echo; cat dist/SIGNER.txt; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Release-Text zusammenstellen
+        env:
+          VER: ${{ steps.meta.outputs.version }}
+          CODE: ${{ steps.meta.outputs.code }}
+          SHA: ${{ steps.meta.outputs.short_sha }}
+          PRE: ${{ steps.meta.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          {
+            if [ "$PRE" = "true" ]; then kind="Pre-release"; else kind="Release"; fi
+            echo "**$kind** (signiert mit dem Release-Schlüssel, kein Play-Store-Build) – Version \`$VER\` (versionCode \`$CODE\`), Commit \`$SHA\`."
+            echo
+            echo "Installation: APK herunterladen und installieren (Installation aus unbekannten Quellen erlauben). Prüfsumme in \`SHA256SUMS.txt\`, Signatur-Fingerabdruck in \`SIGNER.txt\`. Eine bisher installierte Debug-Version mit anderem Schlüssel muss vorher deinstalliert werden."
+            if [ -f "docs/release-notes/$VER.md" ]; then
+              echo
+              sed -e '1{/^# /d}' -e '/^---$/,$d' "docs/release-notes/$VER.md" | { if [ "$PRE" = "true" ]; then cat; else grep -v '^> ⚠️'; fi; }
+              echo "Englisch: [Release Notes $VER (EN)](https://scto.github.io/CodeForgeMobile/release-notes/$VER.en/) · [CHANGELOG](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md)"
+            fi
+          } > dist/RELEASE_BODY.md
+
+      - name: Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: "CodeForgeMobile ${{ steps.meta.outputs.version }}"
+          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
+          make_latest: ${{ steps.meta.outputs.prerelease != 'true' }}
+          generate_release_notes: false
+          body_path: dist/RELEASE_BODY.md
+          files: |
+            ${{ steps.apk.outputs.file }}
+            dist/SHA256SUMS.txt
+            dist/SIGNER.txt
+          fail_on_unmatched_files: true
+
+      - name: Keystore entfernen
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"
+
+      - name: Build-Berichte bei Fehlern sichern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports-${{ github.run_id }}
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 7

@@ -226,20 +226,21 @@ def carry_over(prev: str | None, lang: str) -> tuple[str, str, str]:
     return intro, warn, tail
 
 
-def build_notes(root: Path, version: str, prev_version: str, body: str, lang: str) -> str:
+def build_notes(root: Path, version: str, prev_version: str, body: str, lang: str, public: bool = False) -> str:
     prev = previous_notes(root, version, lang)
     intro, warn, tail = carry_over(prev[0] if prev else None, lang)
+    warn = "" if public else warn + "\n\n"
     entries = parse_entries(body)
     groups = render_groups(entries, lang)
     if lang == "en":
         head = (
-            f"# CodeForge Mobile {version}\n\n{intro}\n\n{warn}\n\n"
+            f"# CodeForge Mobile {version}\n\n{intro}\n\n{warn}"
             f"<!-- TODO: bullets are copied from CHANGELOG.md (German) – translate before release. -->\n\n"
             f"## Changes since {prev_version}\n\n{groups}\n"
         )
         foot = "\n---\n**Full changelog:** [`CHANGELOG.md`](../../CHANGELOG.md)\n"
     else:
-        head = f"# CodeForge Mobile {version}\n\n{intro}\n\n{warn}\n\n## Änderungen seit {prev_version}\n\n{groups}\n"
+        head = f"# CodeForge Mobile {version}\n\n{intro}\n\n{warn}## Änderungen seit {prev_version}\n\n{groups}\n"
         foot = "\n---\n**Vollständiges Änderungsprotokoll:** [`CHANGELOG.md`](../../CHANGELOG.md)\n"
     return head + tail + foot
 
@@ -303,6 +304,7 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="nichts schreiben, nur anzeigen")
     ap.add_argument("--no-notes", action="store_true", help="keine Release Notes erzeugen")
     ap.add_argument("--notes-only", metavar="VERSION", help="nur Notes für bestehende CHANGELOG-Version neu erzeugen")
+    ap.add_argument("--public", action="store_true", help="Notes ohne Vorabversion-/Debug-Hinweis (erster öffentlicher Release)")
     ap.add_argument("--from-git", action="store_true", help="Einträge aus Commits erzeugen, auch wenn [Unreleased] gefüllt ist")
     args = ap.parse_args()
 
@@ -321,7 +323,7 @@ def main() -> int:
         for lang, suffix in (("de", ".md"), ("en", ".en.md")):
             target = root / NOTES_DIR / f"{ver}{suffix}"
             if not dry:
-                target.write_text(build_notes(root, ver, prev_v, body, lang), encoding="utf-8")
+                target.write_text(build_notes(root, ver, prev_v, body, lang, args.public), encoding="utf-8")
             log(f"Notes: {target.relative_to(root)}")
         update_mkdocs(root, ver, dry)
         return 0
@@ -332,15 +334,6 @@ def main() -> int:
         raise SystemExit(f"Neue Version {fmt(new)} muss größer sein als {fmt(cur)}")
     old_s, new_s, code = fmt(cur), fmt(new), version_code(new)
     log(f"Version {old_s} ({cur_code}) -> {new_s} ({code})")
-
-    # build.gradle.kts
-    gp = root / GRADLE
-    g = gp.read_text(encoding="utf-8")
-    g = CODE_RE.sub(lambda m: f"{m[1]}{code}", g, count=1)
-    g = NAME_RE.sub(lambda m: f'{m[1]}{new_s}{m[3]}', g, count=1)
-    if not dry:
-        gp.write_text(g, encoding="utf-8")
-    log(f"{GRADLE}: versionCode={code}, versionName=\"{new_s}\"")
 
     # CHANGELOG
     head, unreleased, rest = split_changelog(cl)
@@ -355,6 +348,15 @@ def main() -> int:
         cl_path.write_text(new_cl, encoding="utf-8")
     log(f"CHANGELOG: [Unreleased] -> [{new_s}] - {args.date}")
 
+    # build.gradle.kts
+    gp = root / GRADLE
+    g = gp.read_text(encoding="utf-8")
+    g = CODE_RE.sub(lambda m: f"{m[1]}{code}", g, count=1)
+    g = NAME_RE.sub(lambda m: f'{m[1]}{new_s}{m[3]}', g, count=1)
+    if not dry:
+        gp.write_text(g, encoding="utf-8")
+    log(f"{GRADLE}: versionCode={code}, versionName=\"{new_s}\"")
+
     # Notes
     if not args.no_notes:
         for lang, suffix in (("de", ".md"), ("en", ".en.md")):
@@ -363,7 +365,7 @@ def main() -> int:
                 log(f"Notes vorhanden, übersprungen: {target.relative_to(root)}")
                 continue
             if not dry:
-                target.write_text(build_notes(root, new_s, old_s, unreleased, lang), encoding="utf-8")
+                target.write_text(build_notes(root, new_s, old_s, unreleased, lang, args.public), encoding="utf-8")
             log(f"Notes: {target.relative_to(root)}")
         if update_mkdocs(root, new_s, dry):
             log("mkdocs.yml: Navigation ergänzt")

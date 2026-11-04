@@ -55,6 +55,7 @@ nav:
       - Entwicklerhandbuch: dev/DeveloperGuide.md
       - Plugins entwickeln: dev/PluginDevelopment.md
       - Release-Ablauf: dev/ReleaseProcess.md
+      - Release-Signatur: dev/Signing.md
       - Modulgraph: dev/module-graph.md
       - APK: apk/APK-Dokumentation.md
       - Release Notes 3.0.1: release-notes/3.0.1.md

@@ -63,6 +63,6 @@ Die APK enthält die App (Kotlin/Compose), native Bibliotheken (Termux-Emulator,
 1. Version in `app/build.gradle.kts` und `CHANGELOG.md` anheben.
 2. Tests: `./gradlew testDebugUnitTest`.
 3. Tag pushen (`debug-3.0.1-1`) → Release-Workflow baut und veröffentlicht.
-4. Für ein signiertes Release-Build Schlüssel als CI-Secrets hinterlegen und den Workflow auf `assembleRelease` erweitern.
+4. Signierter Release-Build: Schlüssel als CI-Secrets hinterlegen (siehe [Release-Signatur](../dev/Signing.md)), Tag `vX.Y.Z` pushen → Workflow `release-release-apk.yml` baut `assembleRelease`, prüft die Signatur und veröffentlicht den Release.
 
 Weitere Berichte: [../apk-analyzer-report.md](../apk-analyzer-report.md), [../install-and-run-apk-report.md](../install-and-run-apk-report.md).
