@@ -3,7 +3,7 @@ name: Release Debug APK
 # Baut die Debug-APK (./gradlew :app:assembleDebug) und veröffentlicht sie als GitHub-Release (Pre-release) mit Tag.
 #
 # Zwei Wege:
-#   1. Tag pushen:       git tag debug-3.0.1-1 && git push origin debug-3.0.1-1   (Tags debug-*)
+#   1. Tag pushen:       git tag debug-<Version>-1 && git push origin debug-<Version>-1   (Tags debug-*)
 #   2. Manuell starten:  Actions -> "Release Debug APK" -> Run workflow (Tag leer = debug-<versionName>-<Laufnummer>);
 #                        das Tag wird am gewählten Commit/Branch automatisch angelegt.
 # Keine Secrets nötig (GITHUB_TOKEN). Die APK ist mit dem Android-Debug-Schlüssel signiert, die Prüfsumme liegt bei.

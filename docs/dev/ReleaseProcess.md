@@ -38,7 +38,7 @@ Python-Standardbibliothek.
 | `CHANGELOG.md` | `[Unreleased]` → `[X.Y.Z] - Datum`, neuer leerer `[Unreleased]` |
 | `docs/release-notes/X.Y.Z[.en].md` | neu (Installation, Einschränkungen und Lizenz aus den vorherigen Notes übernommen) |
 | `mkdocs.yml` | Navigation |
-| `README.md`, `README_DE.md`, `STATUS.md`, `docs/apk/…`, `docs/index.md`, `docs/overview.md`, Workflow-Kommentar | Versionsangaben |
+| `README.md`, `README_DE.md`, `STATUS.md`, `docs/apk/…`, `docs/index.md`, `docs/overview.md` | Versionsangaben |
 
 Ist `[Unreleased]` leer, erzeugt das Skript die Einträge aus den Conventional Commits seit dem letzten
 `v*`-Tag (`feat` → Hinzugefügt, `fix` → Behoben, sonst Geändert); `--from-git` ergänzt sie auch bei gefülltem
@@ -51,3 +51,6 @@ gepusht. Mit *build* lässt sich danach direkt bauen: `debug` startet **Release 
 startet **Release Release APK** (Tag `v<Version>`, Release-Schlüssel aus den Secrets, Schalter *prerelease*,
 siehe [Release-Signatur](Signing.md)). Beide übernehmen die Release Notes der Version
 (`docs/release-notes/<Version>.md`) als Release-Text.
+
+> Das Skript ändert bewusst keine Dateien unter `.github/workflows/`: der `GITHUB_TOKEN` darf sie nicht pushen
+> ("refusing to allow a GitHub App to create or update workflow … without `workflows` permission").

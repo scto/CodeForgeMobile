@@ -270,7 +270,6 @@ def update_references(root: Path, old: str, new: str, code: int, dry: bool) -> l
         ("docs/apk/APK-Dokumentation.md", rf"debug-{o}-1", f"debug-{new}-1"),
         ("docs/overview.md", rf"(; Version ){o}", rf"\g<1>{new}"),
         ("docs/index.md", rf"\[Release Notes {o}\]\(release-notes/{o}\.md\)", f"[Release Notes {new}](release-notes/{new}.md)"),
-        (".github/workflows/release-debug-apk.yml", rf"debug-{o}-1", f"debug-{new}-1"),
     ]
     for rel, pat, rep in jobs:
         if sub_file(root, rel, pat, rep, dry):
