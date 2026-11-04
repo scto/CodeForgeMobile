@@ -116,6 +116,7 @@ th{{background:var(--hd);position:sticky;top:0}} .n{{white-space:nowrap;text-ali
 {chr(10).join(body)}
 </tbody></table></div>
 <p class="m" id="c"></p>
+<p class="m"><a href="https://scto.github.io/CodeForgeMobile/basti/">Gewidmet Basti 🐾</a></p>
 </main>
 <script>
 const q=document.getElementById('q'),rs=[...document.querySelectorAll('#t tr')],c=document.getElementById('c');

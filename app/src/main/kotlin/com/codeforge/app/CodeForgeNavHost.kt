@@ -33,6 +33,7 @@ import com.codeforge.feature.projectsettings.ProjectSettingsScreen
 import com.codeforge.feature.projectsettings.ProjectSettingsViewModel
 import com.codeforge.feature.projectwizard.ProjectWizardRoute
 import com.codeforge.feature.sdkmanager.SdkManagerRoute
+import com.codeforge.feature.settings.AboutBastiRoute
 import com.codeforge.feature.settings.AboutSettingsRoute
 import com.codeforge.feature.settings.AiSettingsRoute
 import com.codeforge.feature.settings.DebugSettingsRoute
@@ -68,6 +69,7 @@ internal object Routes {
     const val SETTINGS_HELP = "settings_help"
     const val SETTINGS_STORE = "settings_store"
     const val SETTINGS_ABOUT = "settings_about"
+    const val SETTINGS_BASTI = "settings_basti"
     const val EXTENSIONS = "extensions"
     const val TERMINAL = "terminal"
     const val TERMINAL_PATTERN = "terminal?initialCommand={initialCommand}"
@@ -209,6 +211,7 @@ fun CodeForgeNavHost(
                 onNavigateToAi = { navController.navigate(Routes.SETTINGS_AI) },
                 onNavigateToHelp = { navController.navigate(Routes.SETTINGS_HELP) },
                 onNavigateToAbout = { navController.navigate(Routes.SETTINGS_ABOUT) },
+                onNavigateToBasti = { navController.navigate(Routes.SETTINGS_BASTI) },
                 onNavigateToStore = { navController.navigate(Routes.SETTINGS_STORE) }
             )
         }
@@ -240,7 +243,13 @@ fun CodeForgeNavHost(
             HelpRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_ABOUT) {
-            AboutSettingsRoute(onBack = { navigateBackOrStart() })
+            AboutSettingsRoute(
+                onBack = { navigateBackOrStart() },
+                onOpenBasti = { navController.navigate(Routes.SETTINGS_BASTI) }
+            )
+        }
+        composable(Routes.SETTINGS_BASTI) {
+            AboutBastiRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_AI) {
             AiSettingsRoute(onBack = { navigateBackOrStart() })

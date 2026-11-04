@@ -21,6 +21,8 @@ A native Android IDE featuring **Sora Editor**, a **Termux-based shell** (JDK, A
 
 **Website:** [scto.github.io/CodeForgeMobile](https://scto.github.io/CodeForgeMobile/) – App, Store, APT-Repo and documentation in one place.
 
+**Dedication:** CodeForge Mobile is dedicated to Basti, a male Golden Retriever – [meet him](https://scto.github.io/CodeForgeMobile/basti/) (or in the app: Settings → About Basti).
+
 ---
 
 > ⚠️ **Development status:** The code was written without an Android SDK/Gradle run. There is **no verified build yet**; only pure JVM logic (Git, code tools, layout model) is tested. See [STATUS.md](STATUS.md) for details.

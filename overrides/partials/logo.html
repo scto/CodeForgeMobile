@@ -1,0 +1,5 @@
+{#- Kopfzeile: App-Logo und daneben der kleine Basti (Widmung). Überschreibt partials/logo.html von Material. -#}
+{% if config.theme.logo %}
+  <img src="{{ config.theme.logo | url }}" alt="CodeForge Mobile">
+  <img class="cf-basti" src="{{ 'assets/basti-small.gif' | url }}" alt="Basti, Golden Retriever" title="Gewidmet Basti" width="32" height="32">
+{% endif %}

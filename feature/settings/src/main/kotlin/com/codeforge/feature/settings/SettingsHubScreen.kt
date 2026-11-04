@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.SdCard
 import androidx.compose.material.icons.filled.Source
 import androidx.compose.material.icons.filled.Storefront
@@ -57,6 +58,7 @@ fun SettingsHubRoute(
     onNavigateToDebug: () -> Unit = {},
     onNavigateToHelp: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
+    onNavigateToBasti: () -> Unit = {},
     onNavigateToStore: () -> Unit = {},
     onNavigateToAi: () -> Unit = {}
 ) {
@@ -73,7 +75,8 @@ fun SettingsHubRoute(
         SettingsEntry(R.string.settings_hub_debug, Icons.Filled.BugReport, onNavigateToDebug),
         SettingsEntry(R.string.settings_hub_store, Icons.Filled.Storefront, onNavigateToStore),
         SettingsEntry(R.string.settings_hub_help, Icons.AutoMirrored.Filled.HelpOutline, onNavigateToHelp),
-        SettingsEntry(R.string.settings_hub_about, Icons.Filled.Info, onNavigateToAbout)
+        SettingsEntry(R.string.settings_hub_about, Icons.Filled.Info, onNavigateToAbout),
+        SettingsEntry(R.string.settings_hub_basti, Icons.Filled.Pets, onNavigateToBasti)
     )
 
     Scaffold(

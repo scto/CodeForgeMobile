@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Widmung an Basti)
+- Das Projekt ist Basti gewidmet, dem Golden Retriever des Autors. Pixelfigur (32×32) als erwachsener Basti und als Welpe, erzeugt von `scripts/basti/gen_sprites.py` (GIFs für die Webseite, Sprite-Sheets für die App).
+- App: `BastiSprite` (`:core:designsystem`, animiert, Nearest-Neighbor, bei abgeschalteten Systemanimationen still), eigener Bildschirm „Über Basti“ (Einstellungen → Über Basti; Heute/Welpe, Antippen = „Wuff!“, Widmung), Basti neben dem App-Logo im Über-Bildschirm und auf der Startseite.
+- Webseite: Basti neben dem Logo in der Kopfzeile, Widmung auf der Startseite, Seite `/basti/`, Fußzeile auf allen Seiten (auch Store und APT-Übersicht).
+
 ### Hinzugefügt (Plugin-Leitfaden)
 - Entwicklerhandbuch „Plugins entwickeln – von A bis Z“ (`docs/dev/PluginDevelopment.md`): Plugin-Arten, Manifest, Berechtigungen, Entwicklungsumgebung, sechs Beispiele, Testen, Store-Veröffentlichung, Fehlersuche.
 - Lauffähige Beispiele unter `examples/guide/`: `nord-night` (Farbschema), `zig-support` (Grammatik, Snippets, Formatierer, LSP), `todo-report` (PT-Werkzeug mit Python), `commit-notes` (Code-Plugin, Modul `:examples:guide-commit-notes`). `GuidePluginsValidTest` prüft sie mit den echten Parsern.

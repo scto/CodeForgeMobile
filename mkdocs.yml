@@ -1,10 +1,12 @@
 site_name: CodeForge Mobile
 site_description: Dokumentation der Android-IDE CodeForge Mobile
+copyright: 'CodeForge Mobile · gewidmet <a href="https://scto.github.io/CodeForgeMobile/basti/">Basti</a> 🐾'
 repo_url: https://github.com/scto/CodeForgeMobile
 docs_dir: docs
 site_dir: site
 theme:
   name: material
+  custom_dir: overrides
   language: de
   # Design wie der CodeForge Store: Farben, Formen und Schrift kommen aus stylesheets/store.css (system-ui statt Webfont)
   font: false
@@ -57,6 +59,7 @@ nav:
       - Release Notes 3.0.0: release-notes/3.0.0.md
       - Release Notes 3.0.0 (EN): release-notes/3.0.0.en.md
   - API-Referenz: api/index.html
+  - Basti: basti.md
 # Dateien in docs/, die nicht zur Seite gehören (Skripte, Rohberichte ohne Navigation) erzeugen nur Hinweise
 validation:
   links: { not_found: ignore, absolute_links: ignore, unrecognized_links: ignore }

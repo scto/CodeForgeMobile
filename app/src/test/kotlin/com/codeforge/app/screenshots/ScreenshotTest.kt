@@ -11,6 +11,7 @@ import com.codeforge.core.datastore.proto.ThemeConfig
 import com.codeforge.core.datastore.proto.ThemeMode
 import com.codeforge.core.designsystem.CodeForgeTheme
 import com.codeforge.core.domain.model.RecentProject
+import com.codeforge.feature.settings.AboutBastiScreen
 import com.codeforge.feature.settings.AboutInfo
 import com.codeforge.feature.settings.AboutSettingsScreen
 import com.codeforge.feature.welcome.WelcomeContent
@@ -69,6 +70,10 @@ class ScreenshotTest {
     @Test fun aboutLight() = shot("about", false) { about() }
 
     @Test fun aboutDark() = shot("about", true) { about() }
+
+    @Test fun aboutBastiLight() = shot("about-basti", false) { AboutBastiScreen() }
+
+    @Test fun aboutBastiDark() = shot("about-basti", true) { AboutBastiScreen() }
 
     @Composable
     private fun welcome(withProjects: Boolean) = WelcomeContent(

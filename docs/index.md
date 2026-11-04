@@ -6,7 +6,16 @@ hide:
 
 <div class="cf-hero" markdown>
 
+<div class="cf-hero-row" markdown>
+<img class="cf-basti-hero" src="assets/basti.gif" alt="Basti, ein Golden Retriever im Pixel-Stil, wedelt mit der Rute" width="128" height="128">
+<div markdown>
+
 # CodeForge Mobile
+
+*Gewidmet [Basti](basti.md), meinem Golden Retriever.*
+
+</div>
+</div>
 
 Native Android-IDE mit Sora Editor, Termux-Shell, Git, Language Server, Compose-Live-Preview und visuellem Layout-Designer – gebaut mit Kotlin, Jetpack Compose und Material 3 Expressive.
 

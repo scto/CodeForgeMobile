@@ -13,6 +13,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Card
@@ -48,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -55,6 +58,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.codeforge.core.designsystem.BastiSprite
 import com.codeforge.core.designsystem.R as DesignSystemR
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
@@ -84,10 +88,11 @@ const val ABOUT_RELEASES_URL = "$ABOUT_SOURCE_URL/releases"
 fun AboutSettingsRoute(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
+    onOpenBasti: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val info = remember(context) { loadAboutInfo(context) }
-    AboutSettingsScreen(modifier = modifier, info = info, onBack = onBack)
+    AboutSettingsScreen(modifier = modifier, info = info, onBack = onBack, onOpenBasti = onOpenBasti)
 }
 
 /**
@@ -96,6 +101,7 @@ fun AboutSettingsRoute(
  * @param modifier Modifier.
  * @param info Anzuzeigende App-Daten.
  * @param onBack Zurück-Aktion.
+ * @param onOpenBasti öffnet „Über Basti“ (Figur neben dem App-Icon und Eintrag in „Weiteres“).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,6 +109,7 @@ fun AboutSettingsScreen(
     modifier: Modifier = Modifier,
     info: AboutInfo,
     onBack: () -> Unit = {},
+    onOpenBasti: () -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     val open: (String) -> Unit = { url -> runCatching { uriHandler.openUri(url) } }
@@ -116,7 +123,7 @@ fun AboutSettingsScreen(
             modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            AboutHeader(info = info)
+            AboutHeader(info = info, onOpenBasti = onOpenBasti)
 
             AboutSection(title = stringRes(R.string.about_section_links)) {
                 AboutItem(Icons.Filled.Language, R.string.about_website, ABOUT_SOURCE_URL) { open(ABOUT_SOURCE_URL) }
@@ -126,6 +133,7 @@ fun AboutSettingsScreen(
 
             AboutSection(title = stringRes(R.string.about_section_misc)) {
                 AboutItem(Icons.Filled.Person, R.string.about_developer, stringRes(R.string.about_author))
+                AboutItem(Icons.Filled.Pets, R.string.about_basti_item, stringRes(R.string.about_basti_hint), onClick = onOpenBasti)
                 AboutItem(Icons.Filled.Code, R.string.about_source, stringRes(R.string.about_source_desc)) { open(ABOUT_SOURCE_URL) }
                 AboutItem(
                     icon = Icons.Filled.Favorite,
@@ -146,17 +154,25 @@ fun AboutSettingsScreen(
 }
 
 @Composable
-private fun AboutHeader(info: AboutInfo, modifier: Modifier = Modifier) {
+private fun AboutHeader(info: AboutInfo, modifier: Modifier = Modifier, onOpenBasti: () -> Unit = {}) {
     Card(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Image(
-                painter = painterResource(id = DesignSystemR.drawable.icon),
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Image(
+                    painter = painterResource(id = DesignSystemR.drawable.icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(72.dp),
+                )
+                // Basti sitzt neben dem Logo (Widmung); Antippen öffnet „Über Basti“.
+                BastiSprite(
+                    modifier = Modifier.clickable(role = Role.Button, onClick = onOpenBasti),
+                    size = 72.dp,
+                    contentDescription = stringRes(R.string.basti_sprite_cd),
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
             Text(stringRes(R.string.app_name), style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
             Text(

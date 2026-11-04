@@ -110,3 +110,12 @@ body { background: var(--cf-bg); color: var(--cf-text); }
 .cf-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
 .cf-table-wrap { overflow-x: auto; }
 .cf-card h3 { margin-top: 0; }
+
+/* Basti (Widmung): kleiner Sprite neben dem Logo, größerer auf Startseite und /basti/ */
+.md-header__button.md-logo { display: flex; align-items: center; gap: .35rem; }
+.md-header__button.md-logo img.cf-basti { height: 2rem; width: 2rem; margin: 0; }
+img.cf-basti, .cf-basti-hero { image-rendering: pixelated; image-rendering: crisp-edges; }
+.cf-hero-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.cf-hero-row .cf-basti-hero { width: 128px; height: 128px; flex: none; }
+.cf-dedication { border-left: 4px solid var(--md-primary-fg-color); padding: 4px 0 4px 16px; font-size: 1.05rem; }
+.md-copyright { color: var(--md-default-fg-color--light); }

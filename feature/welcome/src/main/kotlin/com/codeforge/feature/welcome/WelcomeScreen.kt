@@ -76,6 +76,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import com.codeforge.core.common.fileprovider.CfmFileProvider
+import com.codeforge.core.designsystem.BastiSprite
 import com.codeforge.core.designsystem.R as DesignSystemR
 import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.resources.R
@@ -344,11 +345,15 @@ private fun WelcomeListContent(
                     .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = painterResource(id = DesignSystemR.drawable.icon),
-                    contentDescription = stringRes(R.string.welcome_codeforge_mobile),
-                    modifier = Modifier.size(64.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Image(
+                        painter = painterResource(id = DesignSystemR.drawable.icon),
+                        contentDescription = stringRes(R.string.welcome_codeforge_mobile),
+                        modifier = Modifier.size(64.dp)
+                    )
+                    // Widmung: Basti sitzt neben dem Logo (dekorativ)
+                    BastiSprite(size = 64.dp)
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
