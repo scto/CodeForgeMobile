@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 /** Startet den [IdeKeepAliveService], sobald die Registry Arbeit meldet; er beendet sich selbst wieder. */
 object IdeKeepAliveController {
+    /** Startet den Vordergrunddienst, solange Aufgaben laufen. */
     fun start(context: Context) {
         val app = context.applicationContext
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate).launch {

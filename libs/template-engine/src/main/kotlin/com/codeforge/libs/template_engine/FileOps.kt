@@ -55,6 +55,7 @@ internal fun mergeStringsXml(valuesDir: File, additionalStringsXml: String) {
     )
 }
 
+/** Erzeugt `strings.xml` mit dem App-Namen. */
 internal fun buildStringsXml(appName: String): String = """
     <?xml version="1.0" encoding="utf-8"?>
     <resources>
@@ -62,5 +63,6 @@ internal fun buildStringsXml(appName: String): String = """
     </resources>
 """.trimIndent() + "\n"
 
+/** Maskiert XML-Sonderzeichen. */
 internal fun String.escapeXml(): String =
     replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "\\'")

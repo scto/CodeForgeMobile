@@ -14,6 +14,7 @@ import dagger.hilt.components.SingletonComponent
 import java.io.File
 import javax.inject.Singleton
 
+/** Hilt-Modul für die Protokollierung. */
 @Module
 @InstallIn(SingletonComponent::class)
 object LoggingModule {
@@ -29,6 +30,7 @@ object LoggingModule {
         fallbackLogDir = context.getExternalFilesDir(CfmLogger.LOG_DIR_NAME) ?: File(context.filesDir, CfmLogger.LOG_DIR_NAME)
     )
 
+    /** Stellt den Logger bereit. */
     @Provides
     @Singleton
     fun provideCfmLogger(manager: CfmLogManager): CfmLogger = manager

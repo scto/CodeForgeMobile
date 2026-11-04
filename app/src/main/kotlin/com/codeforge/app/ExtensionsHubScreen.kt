@@ -27,8 +27,10 @@ import com.codeforge.feature.plugins.PluginsRoute
 import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.settings.store.StoreRoute
 
+/** Reiter der Erweiterungen. */
 enum class ExtensionsHubTab { INSTALLED, SERVERS, STORE }
 
+/** Route der Erweiterungen (Installiert, Server, Store). */
 @Composable
 fun ExtensionsHubRoute(
     initialTab: ExtensionsHubTab,

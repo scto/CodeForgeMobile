@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel des Terminals. */
 @HiltViewModel
 class TerminalViewModel @Inject constructor(
     private val terminalSessionRepository: TerminalSessionRepository,
@@ -30,6 +31,7 @@ class TerminalViewModel @Inject constructor(
 
 
     private val _uiState = MutableStateFlow(TerminalUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<TerminalUiState> = _uiState.asStateFlow()
 
     init {
@@ -47,6 +49,7 @@ class TerminalViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: TerminalUiEvent) {
         when (event) {
             TerminalUiEvent.StartSession -> viewModelScope.launch {

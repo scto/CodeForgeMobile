@@ -32,6 +32,7 @@ import com.codeforge.core.domain.model.ProjectSigningAssignment
 import com.codeforge.core.resources.R
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Bildschirm der Projekteinstellungen (Build-Typen). */
 @Composable
 fun ProjectSettingsScreen(
     state: ProjectSettingsUiState,

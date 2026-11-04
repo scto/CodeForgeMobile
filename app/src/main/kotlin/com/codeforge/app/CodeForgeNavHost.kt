@@ -47,6 +47,7 @@ import com.codeforge.feature.terminal.TerminalRoute
 import com.codeforge.feature.themebuilder.ThemeBuilderRoute
 import com.codeforge.feature.welcome.WelcomeRoute
 
+/** Routen der Navigation und ihre Hilfsfunktionen für Argumente. */
 internal object Routes {
     const val ONBOARDING = "onboarding"
     const val WELCOME = "welcome"
@@ -79,22 +80,32 @@ internal object Routes {
     const val DEPENDENCIES_PATTERN = "dependencies?rootPath={rootPath}"
     const val PROJECT_SETTINGS_PATTERN = "project_settings/{projectPath}"
 
+    /** Route der Projekteinstellungen. */
     fun projectSettings(projectPath: String) = "project_settings/${Uri.encode(projectPath)}"
+    /** Route des Arbeitsbereichs. */
     fun projectWorkspace(rootPath: String) = "workspace/${Uri.encode(rootPath)}"
+    /** Route des Terminals mit Startbefehl. */
     fun terminalWith(command: String) = Res.string(R.string.app_terminal_initialcommand, Uri.encode(command))
+    /** Route der Git-Ansicht. */
     fun git(repoPath: String) = "git/${Uri.encode(repoPath)}"
+    /** Route des Layout-Designers. */
     fun layoutDesigner(filePath: String) = "layout_designer/${Uri.encode(filePath)}"
+    /** Route des Asset-Studios. */
     fun assetStudio(rootPath: String, action: String = "STUDIO") = "asset_studio?rootPath=${Uri.encode(rootPath)}&action=$action"
+    /** Route der Abhängigkeitsansicht. */
     fun dependencies(rootPath: String) = "dependencies?rootPath=${Uri.encode(rootPath)}"
+    /** Route der APK-Analyse (optional mit Vergleichs-APK). */
     fun apkAnalyzer(apkPath: String, comparePath: String? = null): String {
         val base = "apk_analyzer?apkPath=${Uri.encode(apkPath)}"
         return if (comparePath != null) "$base&comparePath=${Uri.encode(comparePath)}" else base
     }
+    /** Route des Prüfers für fest eingebaute Texte. */
     fun hardcodedStrings(targetPath: String, projectRoot: String = targetPath): String {
         return "hardcoded_strings?targetPath=${Uri.encode(targetPath)}&projectRoot=${Uri.encode(projectRoot)}"
     }
 }
 
+/** Navigationsgraph der App. */
 @Composable
 fun CodeForgeNavHost(
     startOnboarding: Boolean,

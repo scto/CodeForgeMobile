@@ -36,6 +36,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.TooltipIconButton
 
+/** Route des Terminals. */
 @Composable
 fun TerminalRoute(
     modifier: Modifier = Modifier,

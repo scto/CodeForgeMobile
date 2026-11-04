@@ -25,15 +25,21 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** Zustand des Projektimports. */
 sealed interface ProjectImportUiState {
     /** Auswahl: lokal öffnen (ohne Kopie) oder in den Projektstamm kopieren. */
     data object ChooseMode : ProjectImportUiState
+    /** Wartet auf die Ordnerauswahl. */
     data object AwaitingPicker : ProjectImportUiState
+    /** Kopiert Dateien. */
     data class Copying(val currentPath: String, val filesCopiedSoFar: Int) : ProjectImportUiState
+    /** Fertig. */
     data class Done(val rootPath: String) : ProjectImportUiState
+    /** Fehlgeschlagen. */
     data class Failed(val message: String) : ProjectImportUiState
 }
 
+/** ViewModel des Projektimports (kopiert den gewählten Ordner in den App-Speicher). */
 @HiltViewModel
 class ProjectImportViewModel @Inject constructor(
     private val projectImportRepository: ProjectImportRepository,
@@ -41,6 +47,7 @@ class ProjectImportViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProjectImportUiState>(ProjectImportUiState.ChooseMode)
+    /** UI-Zustand. */
     val uiState: StateFlow<ProjectImportUiState> = _uiState.asStateFlow()
 
     /** Wird vom SAF-Launcher (`OpenDocumentTree`) aufgerufen, sobald der Nutzer ein Verzeichnis gewählt hat. */
@@ -115,6 +122,7 @@ class ProjectImportViewModel @Inject constructor(
         }
     }
 
+    /** Versucht den Import erneut. */
     fun retry() {
         _uiState.update { ProjectImportUiState.ChooseMode }
     }

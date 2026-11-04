@@ -2,6 +2,7 @@ package com.codeforge.libs.template_engine.templates.gradle
 
 import com.codeforge.core.domain.model.ProjectTemplateKind
 
+/** Erzeugt die `build.gradle(.kts)` des App-Moduls im gewählten Dialekt. */
 fun AppBuildGradle(
     appId: String,
     minSdk: Int,
@@ -109,6 +110,7 @@ fun AppBuildGradle(
     }
 }
 
+/** Erzeugt die Kotlin-DSL-Fassung. */
 fun AppBuildGradleKotlin(
     appId: String,
     minSdk: Int,
@@ -150,6 +152,7 @@ fun AppBuildGradleKotlin(
     }
 """.trimIndent()
 
+/** Erzeugt die Groovy-Fassung. */
 fun AppBuildGradleGroovy(
     appId: String,
     minSdk: Int,

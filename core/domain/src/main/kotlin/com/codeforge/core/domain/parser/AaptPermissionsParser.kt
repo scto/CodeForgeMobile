@@ -13,11 +13,13 @@ object AaptPermissionsParser {
     private val USES_PERMISSION_REGEX = Regex("""uses-permission:\s*(?:name=)?['"]?([^'"\s]+)['"]?(?:\s+maxSdkVersion=['"]?(\d+)['"]?)?""")
     private val DECLARED_PERMISSION_REGEX = Regex("""permission:\s*(?:name=)?['"]?([^'"\s]+)['"]?(?:\s+protectionLevel=['"]?([^'"\s]+)['"]?)?""")
 
+    /** Ergebnis: Paketname und Berechtigungen. */
     data class ParseResult(
         val packageName: String?,
         val permissions: List<ApkPermission>
     )
 
+    /** Liest Paket und Berechtigungen aus der Ausgabe von `aapt2 dump permissions`. */
     fun parse(output: String): ParseResult {
         var packageName: String? = null
         val permissions = mutableListOf<ApkPermission>()

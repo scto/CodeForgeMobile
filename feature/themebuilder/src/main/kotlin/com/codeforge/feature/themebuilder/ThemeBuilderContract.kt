@@ -8,8 +8,10 @@ import com.codeforge.core.domain.extension.ExtensionColorTheme
 import com.codeforge.core.domain.extension.ExtensionIconTheme
 import com.codeforge.core.domain.extension.ExtensionLanguagePack
 
+/** Farbplatz der Palette. */
 enum class PaletteSlot { PRIMARY, SECONDARY, TERTIARY }
 
+/** Zustand des Theme-Builders. */
 @Immutable
 data class ThemeBuilderUiState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
@@ -33,13 +35,18 @@ data class ThemeBuilderUiState(
     val isLoading: Boolean = true
 )
 
+/** Aktionen des Theme-Builders. */
 sealed interface ThemeBuilderUiEvent {
+    /** Hell/Dunkel/System gewählt. */
     data class ModeSelected(val mode: ThemeMode) : ThemeBuilderUiEvent
+    /** Vorgabe gewählt. */
     data class PresetSelected(val presetId: String) : ThemeBuilderUiEvent
     /** Leerer Schlüssel = App-Standardicons. */
     data class IconThemeSelected(val key: String) : ThemeBuilderUiEvent
     /** Leerer Schlüssel = App-Sprache. */
     data class LanguagePackSelected(val key: String) : ThemeBuilderUiEvent
+    /** Dynamische Farben umgeschaltet. */
     data object DynamicColorToggled : ThemeBuilderUiEvent
+    /** Eigene Farbe geändert. */
     data class CustomColorChanged(val slot: PaletteSlot, val hex: String) : ThemeBuilderUiEvent
 }

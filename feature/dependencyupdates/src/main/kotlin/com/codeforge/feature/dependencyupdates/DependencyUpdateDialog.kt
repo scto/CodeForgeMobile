@@ -58,6 +58,7 @@ fun DependencyUpdatesHost(
     }
 }
 
+/** Dialog zur Suche und Anwendung von Abhängigkeits-Updates. */
 @Composable
 fun DependencyUpdateDialog(
     modifier: Modifier = Modifier,

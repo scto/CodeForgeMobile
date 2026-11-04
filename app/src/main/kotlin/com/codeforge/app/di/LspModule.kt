@@ -9,10 +9,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Hilt-Modul für die Language-Server-Auflösung. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class LspModule {
 
+    /** Bindet die Implementierung. */
     @Binds
     @Singleton
     abstract fun bindLspServerResolver(

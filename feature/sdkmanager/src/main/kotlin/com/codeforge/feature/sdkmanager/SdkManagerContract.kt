@@ -8,6 +8,7 @@ import androidx.compose.runtime.Immutable
 import com.codeforge.core.domain.model.ToolItem
 import com.codeforge.core.domain.model.ToolType
 
+/** Zustand des SDK-Managers. */
 @Immutable
 data class SdkManagerState(
     val jdkVersions: List<ToolItem> = emptyList(),
@@ -23,14 +24,22 @@ data class SdkManagerState(
     val pendingSelection: Set<String> = emptySet()
 )
 
+/** Aktionen des SDK-Managers. */
 sealed interface SdkManagerEvent {
+    /** Versionsauswahl öffnen. */
     data class OpenVersionDialog(val toolType: ToolType) : SdkManagerEvent
+    /** Version an-/abwählen. */
     data class ToggleVersionSelection(val version: String) : SdkManagerEvent
+    /** Auswahl bestätigen. */
     data object ConfirmVersionDialog : SdkManagerEvent
+    /** Auswahl schließen. */
     data object DismissVersionDialog : SdkManagerEvent
+    /** Liste der verfügbaren Versionen neu laden. */
     data object RefreshRemoteList : SdkManagerEvent
 }
 
+/** Einmalige Effekte. */
 sealed interface SdkManagerEffect {
+    /** Meldung anzeigen. */
     data class ShowSnackbar(val message: String) : SdkManagerEffect
 }

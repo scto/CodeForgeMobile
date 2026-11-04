@@ -81,6 +81,7 @@ import com.codeforge.feature.x2c.ui.X2cProgressScreen
 import com.codeforge.feature.x2c.ui.X2cResultScreen
 import kotlinx.coroutines.launch
 
+/** Route des Arbeitsbereichs: Editor, Dateibaum, Build, Terminal und Git. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectWorkspaceRoute(

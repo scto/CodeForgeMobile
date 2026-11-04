@@ -13,6 +13,7 @@ import com.codeforge.libs.plugin_api.PluginEvent
 import com.codeforge.libs.plugin_api.PluginMenuTarget
 import java.io.File
 
+/** Beispiel-Plugin, das als Vorlage für eigene Code-Plugins dient. */
 class TemplatePlugin : CodeForgePlugin {
 
     override fun onLoad(context: PluginContext) {

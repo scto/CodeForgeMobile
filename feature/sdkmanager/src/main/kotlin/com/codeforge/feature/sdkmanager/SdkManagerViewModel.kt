@@ -23,21 +23,25 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel des SDK-Managers. */
 @HiltViewModel
 class SdkManagerViewModel @Inject constructor(
     private val sdkRepository: SdkRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SdkManagerState())
+    /** UI-Zustand. */
     val uiState: StateFlow<SdkManagerState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<SdkManagerEffect>()
+    /** Einmalige Effekte. */
     val effect: SharedFlow<SdkManagerEffect> = _effect.asSharedFlow()
 
     init {
         refresh()
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: SdkManagerEvent) {
         when (event) {
             is SdkManagerEvent.OpenVersionDialog -> openDialog(event.toolType)

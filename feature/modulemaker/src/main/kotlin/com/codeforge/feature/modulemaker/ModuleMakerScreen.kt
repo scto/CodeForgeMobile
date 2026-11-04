@@ -49,6 +49,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import com.codeforge.libs.code_tools.module.ModuleType
 
+/** Route des Modul-Assistenten. */
 @Composable
 fun ModuleMakerRoute(
     rootPath: String,
@@ -70,6 +71,7 @@ fun ModuleMakerRoute(
     ModuleMakerScreen(modifier = modifier, state = state, onEvent = viewModel::onEvent)
 }
 
+/** Bildschirm des Modul-Assistenten. */
 @Composable
 fun ModuleMakerScreen(
     modifier: Modifier = Modifier,

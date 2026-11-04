@@ -78,6 +78,7 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Route des Theme-Builders. */
 @Composable
 fun ThemeBuilderRoute(
     modifier: Modifier = Modifier,

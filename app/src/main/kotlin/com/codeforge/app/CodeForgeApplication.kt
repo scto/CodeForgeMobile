@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
+/** Anwendungsklasse: initialisiert Hilt, Protokollierung, Absturzbehandlung und Hintergrunddienste. */
 @HiltAndroidApp
 class CodeForgeApplication : Application() {
 

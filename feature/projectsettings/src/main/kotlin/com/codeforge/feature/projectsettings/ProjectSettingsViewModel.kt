@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel der Projekteinstellungen. */
 @HiltViewModel
 class ProjectSettingsViewModel @Inject constructor(
     private val repository: ProjectSettingsRepository,
@@ -25,11 +26,14 @@ class ProjectSettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProjectSettingsUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<ProjectSettingsUiState> = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<ProjectSettingsEffect>()
+    /** Einmalige Effekte. */
     val effects: SharedFlow<ProjectSettingsEffect> = _effects.asSharedFlow()
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun handleIntent(intent: ProjectSettingsIntent) {
         when (intent) {
             is ProjectSettingsIntent.Load -> loadSettings(intent.projectPath)

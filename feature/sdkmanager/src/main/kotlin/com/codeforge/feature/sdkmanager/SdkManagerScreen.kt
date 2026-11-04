@@ -51,6 +51,7 @@ import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 import kotlinx.coroutines.flow.collectLatest
 
+/** Route des SDK-Managers. */
 @Composable
 fun SdkManagerRoute(
     modifier: Modifier = Modifier,

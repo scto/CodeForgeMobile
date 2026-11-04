@@ -21,6 +21,7 @@ private val HEX_COLOR_REGEX = Regex("^#[0-9A-Fa-f]{6}$")
 
 private data class HexBuffer(val primary: String, val secondary: String, val tertiary: String)
 
+/** ViewModel des Theme-Builders. */
 @HiltViewModel
 class ThemeBuilderViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
@@ -30,6 +31,7 @@ class ThemeBuilderViewModel @Inject constructor(
     /** Überschreibt die persistierten Hex-Werte während einer aktiven Custom-Color-Bearbeitung. */
     private val editBuffer = MutableStateFlow<HexBuffer?>(null)
 
+    /** UI-Zustand. */
     val uiState: StateFlow<ThemeBuilderUiState> = combine(
         settingsRepository.appSettings,
         editBuffer,
@@ -63,6 +65,7 @@ class ThemeBuilderViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemeBuilderUiState())
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: ThemeBuilderUiEvent) {
         when (event) {
             is ThemeBuilderUiEvent.ModeSelected -> {

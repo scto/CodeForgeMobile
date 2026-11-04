@@ -6,8 +6,10 @@ package com.codeforge.feature.themebuilder
 
 import java.util.Locale
 
+/** Hilfen für Farben im Hex-/RGB-Format. */
 object RgbColorUtils {
 
+    /** Schnellauswahl-Farben. */
     val QUICK_PRESETS: List<String> = listOf(
         "#F44336", // Material Red
         "#E91E63", // Material Pink
@@ -21,6 +23,7 @@ object RgbColorUtils {
         "#FF5722"  // Material Deep Orange
     )
 
+    /** Wandelt `#RRGGBB` in RGB; `null` bei ungültiger Eingabe. */
     fun hexToRgb(hex: String): Triple<Int, Int, Int>? {
         val clean = hex.trim().removePrefix("#")
         if (clean.length != 6) return null
@@ -32,6 +35,7 @@ object RgbColorUtils {
         }.getOrNull()
     }
 
+    /** Wandelt RGB in `#RRGGBB`. */
     fun rgbToHex(r: Int, g: Int, b: Int): String {
         val cr = r.coerceIn(0, 255)
         val cg = g.coerceIn(0, 255)
@@ -39,6 +43,7 @@ object RgbColorUtils {
         return String.format(Locale.ROOT, "#%02X%02X%02X", cr, cg, cb)
     }
 
+    /** Ob der Text ein gültiger Hex-Farbwert ist. */
     fun isValidHex(hex: String): Boolean {
         return hexToRgb(hex) != null
     }

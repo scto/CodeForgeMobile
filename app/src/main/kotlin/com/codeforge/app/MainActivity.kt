@@ -26,6 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** Einzige Activity der App; hostet die Compose-Oberfläche. */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

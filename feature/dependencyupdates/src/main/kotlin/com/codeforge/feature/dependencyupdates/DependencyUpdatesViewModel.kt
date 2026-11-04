@@ -34,6 +34,7 @@ class DependencyUpdatesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DependencyUpdatesUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<DependencyUpdatesUiState> = _uiState.asStateFlow()
 
     private var startedRoot: String? = null
@@ -42,6 +43,7 @@ class DependencyUpdatesViewModel @Inject constructor(
     /** Schlüssel erfolgreich angewendeter Updates — verhindert kurzes „Wiederauftauchen“ bis zur Neuprüfung. */
     private val handledKeys = MutableStateFlow<Set<String>>(emptySet())
 
+    /** Startet die Suche im Projekt. */
     fun start(rootPath: String) {
         if (startedRoot == rootPath) return
         startedRoot = rootPath
@@ -55,6 +57,7 @@ class DependencyUpdatesViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: DependencyUpdatesEvent) {
         val root = startedRoot ?: return
         val update = _uiState.value.current ?: return

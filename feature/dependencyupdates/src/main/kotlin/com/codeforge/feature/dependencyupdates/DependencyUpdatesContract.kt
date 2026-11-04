@@ -7,6 +7,7 @@ package com.codeforge.feature.dependencyupdates
 import androidx.compose.runtime.Immutable
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 
+/** Zustand der Update-Suche. */
 @Immutable
 data class DependencyUpdatesUiState(
     /** Aktuell im Dialog angezeigtes Update (`null` = kein Dialog). */
@@ -17,6 +18,7 @@ data class DependencyUpdatesUiState(
     val errorMessage: String? = null
 )
 
+/** Aktionen der Update-Suche. */
 sealed interface DependencyUpdatesEvent {
     /** Update dauerhaft ignorieren (pro Bibliothek + Zielversion). */
     data object Dismiss : DependencyUpdatesEvent
@@ -24,5 +26,6 @@ sealed interface DependencyUpdatesEvent {
     /** Beim nächsten Öffnen des Projekts erneut fragen. */
     data object AskLater : DependencyUpdatesEvent
 
+    /** Update anwenden. */
     data object Update : DependencyUpdatesEvent
 }

@@ -18,6 +18,7 @@ data class ModulePreview(
     val buildFileName: String,
 )
 
+/** Zustand des Modul-Assistenten. */
 @Immutable
 data class ModuleMakerUiState(
     val rootPath: String = "",
@@ -34,20 +35,31 @@ data class ModuleMakerUiState(
     val result: ModuleResult? = null,
     val error: String? = null,
 ) {
+    /** Ob das Modul erstellt werden kann. */
     val canCreate: Boolean get() = preview != null && inputError == null && hasSettingsFile && !isCreating
 }
 
+/** Aktionen des Modul-Assistenten. */
 sealed interface ModuleMakerUiEvent {
+    /** Wurzelordner setzen. */
     data class Initialize(val rootPath: String) : ModuleMakerUiEvent
+    /** Eingabe geändert. */
     data class InputChanged(val value: String) : ModuleMakerUiEvent
+    /** Modultyp geändert. */
     data class TypeChanged(val type: ModuleType) : ModuleMakerUiEvent
+    /** Basis-Paket geändert. */
     data class BasePackageChanged(val value: String) : ModuleMakerUiEvent
+    /** Modul erstellen. */
     data object Create : ModuleMakerUiEvent
+    /** Ergebnis schließen. */
     data object DismissResult : ModuleMakerUiEvent
+    /** Datei öffnen. */
     data class OpenFile(val path: String) : ModuleMakerUiEvent
 }
 
+/** Einmalige Effekte. */
 sealed interface ModuleMakerUiEffect {
+    /** Meldung anzeigen. */
     data class ShowSnackbar(val message: String) : ModuleMakerUiEffect
     /** Datei wurde im Editor geöffnet. */
     data object FileOpened : ModuleMakerUiEffect

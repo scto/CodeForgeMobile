@@ -84,6 +84,7 @@ enum class DrawerSection(@StringRes val labelRes: Int, val icon: ImageVector, va
 private val MaxDrawerWidth = 420.dp
 private val PermanentDrawerWidth = 360.dp
 
+/** Seitenleiste des Arbeitsbereichs. */
 @Composable
 fun WorkspaceDrawer(
     rootPath: String,

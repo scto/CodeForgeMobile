@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** ViewModel des Modul-Assistenten. */
 @HiltViewModel
 class ModuleMakerViewModel @Inject constructor(
     private val fileSyncBridge: FileSyncBridge,
@@ -33,11 +34,14 @@ class ModuleMakerViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ModuleMakerUiState())
+    /** UI-Zustand. */
     val state: StateFlow<ModuleMakerUiState> = _state.asStateFlow()
 
     private val _effects = Channel<ModuleMakerUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects = _effects.receiveAsFlow()
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: ModuleMakerUiEvent) {
         when (event) {
             is ModuleMakerUiEvent.Initialize -> initialize(event.rootPath)

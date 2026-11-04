@@ -20,5 +20,6 @@ import javax.inject.Inject
 class ComposablePreviewBridgeViewModel @Inject constructor(
     bridge: ActiveComposablePreviewBridge
 ) : ViewModel() {
+    /** Aktive Datei mit Composables. */
     val activeFile: StateFlow<ActiveComposableFile?> = bridge.activeFile
 }

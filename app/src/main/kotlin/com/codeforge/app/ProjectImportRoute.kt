@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Route des Projektimports. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectImportRoute(
