@@ -1,5 +1,6 @@
 package com.codeforge.libs.code_tools.kotlin
 
+/** Ein Parameter einer Signatur (Name, Typ, Standardwert, Modifikatoren). */
 data class KotlinParam(val name: String, val type: String, val default: String?, val modifiers: String = "")
 
 /** Zerlegte Kotlin-Deklaration aus einem Hover-Codeblock. [isMutable] ist nur für `val`/`var` gesetzt. */
@@ -21,9 +22,11 @@ object KotlinSignatureParser {
     private val packageRegex = Regex("""(?m)^\s*package\s+([\w.]+)""")
     private val definedInRegex = Regex("""(?:defined in|in package|\(in)\s+`?([a-z][\w]*(?:\.[\w]+)+)`?""")
 
+    /** Ermittelt den Package-Namen aus einem Hover-Text. */
     fun packageOf(markdown: String): String? =
         packageRegex.find(markdown)?.groupValues?.get(1) ?: definedInRegex.find(markdown)?.groupValues?.get(1)
 
+    /** Zerlegt eine Kotlin-Deklaration; `null`, wenn sie nicht erkannt wird. */
     fun parse(code: String): KotlinSignature? {
         val text = code.lineSequence().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("@") && !it.startsWith("package ") }
             .joinToString(" ")

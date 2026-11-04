@@ -22,8 +22,10 @@ data class TextMatch(
     val matchText: String,
 )
 
+/** Ergebnis einer Ersetzung: neuer Text und Anzahl der Ersetzungen. */
 data class ReplaceResult(val text: String, val count: Int)
 
+/** Die Suche wurde wegen eines Zeitlimits abgebrochen. */
 class SearchTimeoutException : RuntimeException("Suche abgebrochen (Zeitlimit — evtl. zu aufwendiger Regex)")
 
 /** Baut aus [SearchOptions] ein [Pattern]; liefert bei ungültigem Regex eine verständliche Fehlermeldung. */
@@ -53,6 +55,7 @@ private class DeadlineCharSequence(private val inner: CharSequence, private val 
     override fun toString(): String = inner.toString()
 }
 
+/** Suche und Ersetzen in einem Text. */
 object TextSearch {
 
     const val DEFAULT_TIMEOUT_MS = 2_000L
@@ -207,6 +210,7 @@ internal class LineIndex(text: String) {
         list.toIntArray()
     }
 
+    /** Zeilennummer (0-basiert) zum Offset. */
     fun lineOf(offset: Int): Int {
         var lo = 0
         var hi = starts.size - 1
@@ -217,6 +221,7 @@ internal class LineIndex(text: String) {
         return lo
     }
 
+    /** Baut einen [TextMatch] für den Bereich. */
     fun toMatch(text: String, start: Int, end: Int): TextMatch {
         val line = lineOf(start)
         val lineStart = starts[line]

@@ -14,6 +14,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
+/** Erstellt ZIP-Backups und stellt Projekte daraus oder über das Journal wieder her. */
 class ProjectBackupRepositoryImpl : ProjectBackupRepository {
 
     companion object {

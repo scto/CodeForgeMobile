@@ -8,6 +8,7 @@ data class TextEdit(
     val selStart: Int,
     val selEnd: Int,
 ) {
+    /** Wendet die Änderung auf [text] an. */
     fun applyTo(text: String): String = text.substring(0, replaceStart) + replacement + text.substring(replaceEnd)
 }
 
@@ -17,6 +18,7 @@ data class CommentStyle(val prefix: String, val suffix: String = "")
 /** Reine Zeilenbefehle (Kommentar umschalten, Ein-/Ausrücken, Duplizieren, Verschieben, Löschen). */
 object LineEdits {
 
+    /** Kommentar-Syntax für die Datei [path] anhand der Endung; `null`, wenn unbekannt. */
     fun commentStyleFor(path: String): CommentStyle? {
         val name = path.substringAfterLast('/')
         return when (name.substringAfterLast('.', "").lowercase()) {
@@ -50,6 +52,7 @@ object LineEdits {
         return result
     }
 
+    /** Schaltet Kommentare für die Zeilen der Auswahl um. */
     fun toggleComment(text: String, selStart: Int, selEnd: Int, style: CommentStyle): TextEdit {
         val r = range(text, selStart, selEnd)
         val nonBlank = r.lines.filter { it.isNotBlank() }
@@ -93,6 +96,7 @@ object LineEdits {
         return TextEdit(r.start, r.end, replacement, adjust(selStart, changes), adjust(selEnd, changes))
     }
 
+    /** Rückt die Zeilen der Auswahl um [unit] ein. */
     fun indent(text: String, selStart: Int, selEnd: Int, unit: String = "    "): TextEdit {
         val r = range(text, selStart, selEnd)
         val changes = ArrayList<Triple<Int, Int, Int>>()
@@ -105,6 +109,7 @@ object LineEdits {
         return TextEdit(r.start, r.end, out.joinToString("\n"), adjust(selStart, changes), adjust(selEnd, changes))
     }
 
+    /** Rückt die Zeilen der Auswahl um [unit] aus. */
     fun dedent(text: String, selStart: Int, selEnd: Int, unit: String = "    "): TextEdit {
         val r = range(text, selStart, selEnd)
         val changes = ArrayList<Triple<Int, Int, Int>>()
@@ -121,6 +126,7 @@ object LineEdits {
         return TextEdit(r.start, r.end, out.joinToString("\n"), adjust(selStart, changes), adjust(selEnd, changes))
     }
 
+    /** Dupliziert die Zeilen der Auswahl. */
     fun duplicateLines(text: String, selStart: Int, selEnd: Int): TextEdit {
         val r = range(text, selStart, selEnd)
         val block = text.substring(r.start, r.end)
@@ -128,6 +134,7 @@ object LineEdits {
         return TextEdit(r.start, r.end, block + "\n" + block, selStart + shift, selEnd + shift)
     }
 
+    /** Löscht die Zeilen der Auswahl. */
     fun deleteLines(text: String, selStart: Int, selEnd: Int): TextEdit {
         val r = range(text, selStart, selEnd)
         // Zeilenumbruch mitnehmen: nach der Zeile, sonst (letzte Zeile) davor

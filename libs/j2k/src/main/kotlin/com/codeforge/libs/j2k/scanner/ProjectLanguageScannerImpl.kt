@@ -5,6 +5,7 @@ import com.codeforge.core.domain.model.J2kScanResult
 import com.codeforge.core.domain.repository.ProjectLanguageScanner
 import java.io.File
 
+/** Zählt Quelldateien und Zeilen nach Sprache und überspringt Build-Ordner. */
 class ProjectLanguageScannerImpl : ProjectLanguageScanner {
 
     companion object {

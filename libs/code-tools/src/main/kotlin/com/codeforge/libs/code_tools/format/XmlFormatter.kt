@@ -12,6 +12,7 @@ internal object XmlFormatter {
     private class Leaf(val raw: String) : Node // Kommentar, CDATA, PI, Doctype, selbstschließendes Tag
     private class Element(val open: String, val children: MutableList<Node> = ArrayList(), var close: String = "", val start: Int, var end: Int = 0) : Node
 
+    /** Formatiert XML; `null`, wenn der Text nicht gelesen werden kann. */
     fun format(text: String, options: FormatOptions): FormatResult? {
         val root = parse(text) ?: return null
         val out = ArrayList<String>()

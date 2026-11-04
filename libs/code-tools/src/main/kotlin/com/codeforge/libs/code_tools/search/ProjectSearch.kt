@@ -6,6 +6,7 @@ import java.nio.charset.CharacterCodingException
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
 
+/** Optionen der Projektsuche (Suche, Include-/Exclude-Globs, maximale Dateigröße und Trefferzahl). */
 data class ProjectSearchOptions(
     val search: SearchOptions,
     /** Glob-Muster, z. B. Endung-Muster oder Ordner-Muster mit Doppelstern; leer = alle Dateien. */
@@ -16,8 +17,10 @@ data class ProjectSearchOptions(
     val maxMatches: Int = 5_000,
 )
 
+/** Treffer in einer Datei. */
 data class FileMatches(val path: String, val relativePath: String, val matches: List<TextMatch>)
 
+/** Ergebnis der Projektsuche (Dateien, Trefferzahl, gescannte Dateien, ob gekürzt). */
 data class ProjectSearchResult(
     val files: List<FileMatches>,
     val totalMatches: Int,
@@ -26,6 +29,7 @@ data class ProjectSearchResult(
     val truncated: Boolean,
 )
 
+/** Ergebnis von „Alle ersetzen“: geänderte Dateien, Ersetzungen und fehlgeschlagene Dateien. */
 data class ProjectReplaceResult(val changedFiles: List<String>, val replacements: Int, val failedFiles: List<String>)
 
 /**
@@ -35,6 +39,7 @@ data class ProjectReplaceResult(val changedFiles: List<String>, val replacements
  */
 class ProjectSearcher(private val isCancelled: () -> Boolean = { false }) {
 
+    /** Durchsucht [root] rekursiv. */
     fun search(root: File, options: ProjectSearchOptions): Result<ProjectSearchResult> = runCatching {
         options.search.compile().getOrThrow()
         val files = ArrayList<FileMatches>()

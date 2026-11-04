@@ -4,6 +4,7 @@ import com.codeforge.core.domain.repository.VersionCatalogMigrationResult
 import com.codeforge.core.domain.repository.VersionCatalogMigrator
 import java.io.File
 
+/** Erzeugt `libs.versions.toml` aus Gradle-Abhängigkeiten. */
 class VersionCatalogMigratorImpl : VersionCatalogMigrator {
 
     override suspend fun migrateToCatalog(

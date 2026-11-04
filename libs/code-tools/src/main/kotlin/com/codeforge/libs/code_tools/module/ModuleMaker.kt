@@ -2,12 +2,16 @@ package com.codeforge.libs.code_tools.module
 
 import java.io.File
 
+/** Art des neuen Moduls. */
 enum class ModuleType { ANDROID_LIBRARY, KOTLIN_JVM_LIBRARY }
 
 /** Gradle-Projektpfad wie `:lib:core:libcoredu`. */
 data class GradleModulePath(val segments: List<String>) {
+    /** Gradle-Pfad mit führendem Doppelpunkt. */
     val path: String get() = segments.joinToString(separator = ":", prefix = ":")
+    /** Relativer Ordner (Segmente mit `/`). */
     val relativeDir: String get() = segments.joinToString("/")
+    /** Letztes Segment als Modulname. */
     val name: String get() = segments.last()
 
     companion object {
@@ -31,6 +35,7 @@ data class GradleModulePath(val segments: List<String>) {
     }
 }
 
+/** Anfrage zum Anlegen eines Moduls (Gradle-Pfad, Typ, Package). */
 data class ModuleRequest(
     val gradlePath: String,
     val type: ModuleType = ModuleType.ANDROID_LIBRARY,
@@ -38,6 +43,7 @@ data class ModuleRequest(
     val basePackage: String? = null,
 )
 
+/** Ergebnis: angelegte Dateien und Hinweise. */
 data class ModuleResult(
     val gradlePath: String,
     val moduleDir: String,
@@ -80,6 +86,7 @@ object ModuleMaker {
         "throw", "throws", "transient", "try", "void", "volatile", "while", "true", "false", "null",
     )
 
+    /** Liest aus dem Projekt Settings-Datei, Gradle-DSL, Basis-Package, compileSdk/minSdk (Standard 35/21) und Katalog-Aliase der Plugins. */
     fun probe(root: File): ProjectProbe {
         val kts = File(root, "settings.gradle.kts")
         val groovy = File(root, "settings.gradle")
@@ -120,6 +127,7 @@ object ModuleMaker {
         return map
     }
 
+    /** Leitet den Package-Namen aus Basis und Modulpfad ab. */
     fun packageFor(base: String, path: GradleModulePath): String {
         val parts = path.segments.map { seg ->
             var s = seg.lowercase().filter { it.isLetterOrDigit() }
@@ -130,6 +138,7 @@ object ModuleMaker {
         return (base.split('.').filter { it.isNotEmpty() } + parts).joinToString(".")
     }
 
+    /** Leitet den Klassennamen aus dem Modulpfad ab. */
     fun className(path: GradleModulePath): String {
         val camel = path.name.split('-', '_').filter { it.isNotEmpty() }
             .joinToString("") { it.replaceFirstChar { c -> c.uppercaseChar() } }
@@ -153,6 +162,7 @@ object ModuleMaker {
         return (rootBuild.substring(0, m.range.last + 1) + insert + rootBuild.substring(m.range.last + 1)) to true
     }
 
+    /** Erzeugt die Build-Datei des Moduls. */
     fun buildFile(
         type: ModuleType,
         pkg: String,
@@ -239,6 +249,7 @@ object ModuleMaker {
             .replace(Regex("\n{3,}"), "\n\n")
             .replace(Regex("\n\n(\\s*)\\}"), "\n$1}")
 
+    /** Erzeugt eine Platzhalter-Quelldatei. */
     fun dummySource(pkg: String, className: String, path: GradleModulePath): String = """
         package $pkg
 
@@ -248,6 +259,7 @@ object ModuleMaker {
         }
     """.trimIndent() + "\n"
 
+    /** Legt das Modul an und trägt es in die Settings ein; Fehler als Failure. */
     fun create(root: File, request: ModuleRequest): Result<ModuleResult> = runCatching {
         val path = GradleModulePath.parse(request.gradlePath).getOrThrow()
         val probe = probe(root)

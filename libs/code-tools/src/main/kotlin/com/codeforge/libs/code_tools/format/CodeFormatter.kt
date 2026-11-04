@@ -1,7 +1,9 @@
 package com.codeforge.libs.code_tools.format
 
+/** Von [CodeFormatter] unterstützte Sprachen. */
 enum class FormatLanguage { KOTLIN, JAVA, C_LIKE, GRADLE, JSON, XML, MARKDOWN, PLAIN }
 
+/** Formatierungsoptionen (Einrückung, Tabs, Leerraum am Zeilenende, Endzeilenumbruch, Leerzeilen). */
 data class FormatOptions(
     val indentSize: Int = 4,
     val useTabs: Boolean = false,
@@ -22,6 +24,7 @@ data class FormatResult(val text: String, val warning: String? = null)
  */
 object CodeFormatter {
 
+    /** Bestimmt die Sprache anhand der Dateiendung. */
     fun languageFor(path: String): FormatLanguage {
         val name = path.substringAfterLast('/')
         return when (name.substringAfterLast('.', "").lowercase()) {
@@ -36,6 +39,7 @@ object CodeFormatter {
         }
     }
 
+    /** Formatiert [text] in der [language]; bei ungültigem JSON/XML mit Warnung im Ergebnis. */
     fun format(text: String, language: FormatLanguage, options: FormatOptions = FormatOptions()): FormatResult {
         val crlf = text.contains("\r\n")
         val normalized = if (crlf) text.replace("\r\n", "\n") else text
@@ -52,9 +56,11 @@ object CodeFormatter {
         return if (crlf) result.copy(text = result.text.replace("\n", "\r\n")) else result
     }
 
+    /** Einrückung für die Tiefe [level]. */
     internal fun indentString(level: Int, options: FormatOptions): String =
         if (options.useTabs) "\t".repeat(level) else " ".repeat(level * options.indentSize)
 
+    /** Normalisiert nur den Leerraum. */
     internal fun whitespaceOnly(text: String, options: FormatOptions, trim: Boolean): String {
         val lines = text.split('\n')
         val out = ArrayList<String>(lines.size)
@@ -73,6 +79,7 @@ object CodeFormatter {
         return finish(out, options)
     }
 
+    /** Setzt Zeilen zusammen und beachtet Endzeilenumbruch und Leerzeilen-Limit. */
     internal fun finish(lines: List<String>, options: FormatOptions): String {
         val trimmed = lines.toMutableList()
         while (trimmed.isNotEmpty() && trimmed.last().isEmpty()) trimmed.removeAt(trimmed.size - 1)
@@ -94,6 +101,7 @@ internal class BraceFormatter(private val language: FormatLanguage, private val 
     private val stack = ArrayList<Int>()
     private var previousCode = ""
 
+    /** Formatiert JSON-Text (Pretty-Print). */
     fun format(text: String): String {
         val out = ArrayList<String>()
         var blanks = 0

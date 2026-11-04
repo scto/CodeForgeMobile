@@ -5,6 +5,7 @@ import com.codeforge.core.domain.model.J2kFileStatus
 import com.codeforge.core.domain.repository.GradleDslConverter
 import com.codeforge.core.domain.repository.J2kFileResultWithContent
 
+/** Textbasierter Konverter von Groovy-DSL in Kotlin-DSL. */
 class GradleDslConverterImpl : GradleDslConverter {
 
     override suspend fun convertFile(groovySource: String, filePath: String): J2kFileResultWithContent {

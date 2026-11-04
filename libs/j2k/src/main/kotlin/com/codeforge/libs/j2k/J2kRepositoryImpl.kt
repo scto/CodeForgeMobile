@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/** Standardimplementierung der Migration: Scan, Backup, Konvertierung, Build-Prüfung und Bericht. */
 class J2kRepositoryImpl(
     private val scanner: ProjectLanguageScanner = ProjectLanguageScannerImpl(),
     private val backupRepo: ProjectBackupRepository = ProjectBackupRepositoryImpl(),

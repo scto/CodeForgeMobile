@@ -6,6 +6,7 @@ import com.codeforge.core.domain.repository.J2kFileResultWithContent
 import com.codeforge.core.domain.repository.JavaToKotlinConverter
 import java.util.regex.Pattern
 
+/** Textbasierter Konverter von Java nach Kotlin; unsichere Stellen werden als Hinweis markiert. */
 class JavaToKotlinConverterImpl : JavaToKotlinConverter {
 
     override suspend fun convertFile(javaSource: String, filePath: String): J2kFileResultWithContent {
