@@ -37,6 +37,7 @@ import com.codeforge.core.designsystem.CodeForgeTheme
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Bildschirm zum Erteilen der Berechtigungen. */
 @Composable
 fun PermissionScreen(
     storageGranted: Boolean,

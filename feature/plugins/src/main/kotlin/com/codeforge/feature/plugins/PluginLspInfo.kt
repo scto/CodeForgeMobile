@@ -20,6 +20,7 @@ internal object PluginLspInfo {
 
     const val KIND = "lspServers"
 
+    /** Ob das Plugin einen Language-Server beisteuert. */
     fun isLspPlugin(plugin: InstalledPlugin): Boolean = KIND in plugin.contributionKinds
 
     /** Löst das Startprogramm auf (absoluter Pfad oder Termux-`bin`/`PATH`); `null`, wenn nicht gefunden. */
@@ -31,8 +32,10 @@ internal object PluginLspInfo {
             .firstOrNull { it.isFile && it.canExecute() }
     }
 
+    /** Ordner `bin` der Termux-Umgebung. */
     fun termuxBin(): File = File(System.getenv("PREFIX") ?: "/data/data/com.codeforge.app/files/usr", "bin")
 
+    /** Baut das Modell für den Info-Dialog. */
     fun build(
         plugin: InstalledPlugin,
         servers: List<LspServerContribution>,
@@ -91,6 +94,7 @@ internal object PluginLspInfo {
         )
     }
 
+    /** Laufzeitdaten oder `null`. */
     fun runtime(stats: LspRuntimeStats?): LspRuntimeInfo? = stats?.let {
         LspRuntimeInfo(
             running = it.state == LspServerState.RUNNING || it.state == LspServerState.STARTING,

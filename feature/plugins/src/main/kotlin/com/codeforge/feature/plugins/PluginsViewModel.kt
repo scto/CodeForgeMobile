@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel der Plugin-Verwaltung. */
 @HiltViewModel
 class PluginsViewModel @Inject constructor(
     private val pluginRepository: PluginRepository,
@@ -37,9 +38,11 @@ class PluginsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PluginsUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<PluginsUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<PluginsUiEffect>()
+    /** Einmalige Effekte. */
     val effect: SharedFlow<PluginsUiEffect> = _effect.asSharedFlow()
 
     private var installJob: Job? = null
@@ -58,6 +61,7 @@ class PluginsViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: PluginsUiEvent) {
         when (event) {
             is PluginsUiEvent.ToggleEnabled -> toggle(event)

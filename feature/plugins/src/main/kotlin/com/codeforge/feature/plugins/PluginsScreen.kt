@@ -55,6 +55,7 @@ import com.codeforge.core.ui.embeddedAwareInsets
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
 
+/** Route der Plugin-Verwaltung. */
 @Composable
 fun PluginsRoute(
     modifier: Modifier = Modifier,

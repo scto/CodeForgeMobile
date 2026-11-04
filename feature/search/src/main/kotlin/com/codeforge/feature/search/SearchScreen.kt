@@ -86,6 +86,7 @@ fun SearchRoute(
     SearchScreen(modifier = modifier, state = state, onEvent = viewModel::onEvent)
 }
 
+/** Bildschirm der Projektsuche. */
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,

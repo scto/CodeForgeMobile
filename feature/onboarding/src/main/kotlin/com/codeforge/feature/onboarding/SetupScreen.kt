@@ -31,6 +31,7 @@ import com.codeforge.core.domain.repository.SdkSetupOptions
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Bildschirm der Werkzeug-Einrichtung (JDK, NDK, CMake). */
 @Composable
 fun SetupScreen(
     options: SdkSetupOptions,

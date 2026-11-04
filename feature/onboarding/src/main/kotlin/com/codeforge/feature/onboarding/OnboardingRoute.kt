@@ -35,6 +35,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import kotlinx.coroutines.flow.collectLatest
 
+/** Route der Einrichtung. */
 @Composable
 fun OnboardingRoute(
     modifier: Modifier = Modifier,

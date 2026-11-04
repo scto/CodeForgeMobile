@@ -71,6 +71,7 @@ import com.codeforge.libs.hardcodedstrings.model.HardcodedStringFinding
 import com.codeforge.libs.hardcodedstrings.model.ReplacementContextType
 import com.codeforge.libs.hardcodedstrings.model.StringConfidence
 
+/** Route des Prüfers. */
 @Composable
 fun HardcodedStringsRoute(
     targetPath: String,
@@ -107,6 +108,7 @@ fun HardcodedStringsRoute(
     )
 }
 
+/** Bildschirm des Prüfers für fest eingebaute Texte. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HardcodedStringsScreen(

@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** ViewModel der Projektsuche. */
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val openFileBridge: OpenFileRequestBridge,
@@ -35,13 +36,16 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SearchUiState())
+    /** UI-Zustand. */
     val state: StateFlow<SearchUiState> = _state.asStateFlow()
 
     private val _effects = Channel<SearchUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects = _effects.receiveAsFlow()
 
     private var searchJob: Job? = null
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: SearchUiEvent) {
         when (event) {
             is SearchUiEvent.Initialize -> if (_state.value.rootPath != event.rootPath) {

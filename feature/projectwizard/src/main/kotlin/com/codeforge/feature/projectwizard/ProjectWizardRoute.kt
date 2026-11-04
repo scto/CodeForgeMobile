@@ -9,6 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 
+/** Route des Projektassistenten. */
 @Composable
 fun ProjectWizardRoute(
     onNavigateToEditor: (String) -> Unit,

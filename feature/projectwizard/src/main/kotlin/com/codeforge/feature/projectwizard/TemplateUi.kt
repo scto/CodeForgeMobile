@@ -13,6 +13,7 @@ internal data class TemplateUi(
     @DrawableRes val image: Int,
 )
 
+/** Anzeigedaten (Symbol, Texte) zur Vorlagenart. */
 internal fun ProjectTemplateKind.ui(): TemplateUi = when (this) {
     ProjectTemplateKind.NO_ACTIVITY -> TemplateUi(CoreR.string.pw_tpl_no_activity, CoreR.string.pw_tpl_no_activity_desc, R.drawable.pw_no_activity)
     ProjectTemplateKind.EMPTY_ACTIVITY -> TemplateUi(CoreR.string.pw_tpl_empty, CoreR.string.pw_tpl_empty_desc, R.drawable.pw_empty_activity)

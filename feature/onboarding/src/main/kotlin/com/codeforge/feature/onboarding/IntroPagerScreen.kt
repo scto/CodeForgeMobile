@@ -64,6 +64,7 @@ private val introPages = listOf(
     )
 )
 
+/** Einführung als Seitenfolge. */
 @Composable
 fun IntroPagerScreen(
     currentPage: Int,

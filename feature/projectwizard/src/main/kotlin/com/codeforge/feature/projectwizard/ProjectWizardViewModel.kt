@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
+/** ViewModel des Projektassistenten. */
 @HiltViewModel
 class ProjectWizardViewModel @Inject constructor(
     private val templateEngine: TemplateEngineRepository,
@@ -33,9 +34,11 @@ class ProjectWizardViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProjectWizardUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<ProjectWizardUiState> = _uiState.asStateFlow()
 
     private val _effects = Channel<ProjectWizardUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects: Flow<ProjectWizardUiEffect> = _effects.receiveAsFlow()
 
     init {
@@ -58,6 +61,7 @@ class ProjectWizardViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: ProjectWizardUiEvent) {
         when (event) {
             is ProjectWizardUiEvent.TemplateSelected -> _uiState.update {

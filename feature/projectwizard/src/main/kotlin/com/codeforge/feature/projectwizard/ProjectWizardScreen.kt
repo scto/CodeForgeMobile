@@ -59,6 +59,7 @@ import com.codeforge.core.domain.model.ProjectTemplateDescriptor
 import com.codeforge.core.resources.R as CoreR
 import com.codeforge.core.resources.Res
 
+/** Bildschirm des Projektassistenten. */
 @Composable
 fun ProjectWizardScreen(
     state: ProjectWizardUiState,

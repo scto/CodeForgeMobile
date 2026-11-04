@@ -19,17 +19,21 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
+/** ViewModel des Prüfers für fest eingebaute Texte. */
 @HiltViewModel
 class HardcodedStringsViewModel @Inject constructor() : ViewModel() {
 
     private val engine = HardcodedStringsEngine()
 
     private val _uiState = MutableStateFlow(HardcodedStringsUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<HardcodedStringsUiState> = _uiState.asStateFlow()
 
     private val _effects = MutableSharedFlow<HardcodedStringsUiEffect>()
+    /** Einmalige Effekte. */
     val effects: SharedFlow<HardcodedStringsUiEffect> = _effects.asSharedFlow()
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: HardcodedStringsUiEvent) {
         when (event) {
             is HardcodedStringsUiEvent.ScanRequested -> scan(event.targetPath, event.projectRoot)

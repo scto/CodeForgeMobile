@@ -32,11 +32,14 @@ class OnboardingViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
     private val _effect = Channel<OnboardingUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effect = _effect.receiveAsFlow()
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: OnboardingUiEvent) {
         when (event) {
             is OnboardingUiEvent.IntroPageChanged ->
