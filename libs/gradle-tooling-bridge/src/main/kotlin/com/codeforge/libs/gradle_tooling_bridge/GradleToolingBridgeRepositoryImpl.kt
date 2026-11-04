@@ -24,6 +24,7 @@ import com.codeforge.core.domain.model.BuildSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/** Veraltete Variante über die Gradle Tooling API (AIDL); ersetzt durch [ProcessGradleBuildRepository]. */
 @Deprecated("Unused AIDL Gradle Tooling API implementation. ProcessGradleBuildRepository is used instead.")
 @Singleton
 class GradleToolingBridgeRepositoryImpl @Inject constructor(

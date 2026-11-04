@@ -100,6 +100,7 @@ object StringKeyGenerator {
         }
     }
 
+    /** Leitet den Schlüssel-Präfix aus dem Dateinamen ab (Endungen wie Screen/Activity entfallen, höchstens 15 Zeichen). */
     fun derivePrefix(sourceFile: File?): String {
         if (sourceFile == null) return ""
         val nameWithoutExt = sourceFile.nameWithoutExtension
@@ -122,6 +123,7 @@ object StringKeyGenerator {
         }
     }
 
+    /** Bereinigt einen Schlüssel (Kleinbuchstaben, gültige Zeichen; beginnt er mit einer Ziffer, wird `str_` vorangestellt). */
     fun sanitizeKey(key: String): String {
         var result = key.lowercase(Locale.ROOT)
         // If starts with digit, prefix with "str_"

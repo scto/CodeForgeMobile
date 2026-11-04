@@ -38,6 +38,17 @@ class KotlinStringExtractor(
 
     private val loggingClasses = setOf("log", "timber", "logger", "system")
 
+    /**
+     * Findet fest eingetragene UI-Texte in einer Kotlin- oder Java-Datei (Logging, Fehlermeldungen und Ähnliches werden ausgelassen).
+     *
+     * @param file Quelldatei.
+     * @param content Inhalt der Datei.
+     * @param relativePath Pfad für die Anzeige.
+     * @param moduleName Modulname.
+     * @param existingXmlKeys Bereits vorhandene Schlüssel und Texte in `strings.xml`.
+     * @param targetStringsXmlFile Ziel-`strings.xml` für neue Einträge.
+     * @param resNamespace Namensraum der `R`-Klasse.
+     */
     fun extract(
         file: File,
         content: String,

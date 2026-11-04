@@ -8,10 +8,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Hilt-Modul der Gradle-Anbindung. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class GradleToolingBridgeModule {
 
+    /** Bindet das Build-Repository. */
     @Binds
     @Singleton
     abstract fun bindGradleBuildRepository(

@@ -22,6 +22,7 @@ class CircularLineBuffer(val maxLines: Int = 20_000) {
     private var head = 0
     private var count = 0
 
+    /** Fügt eine Zeile hinzu; bei vollem Puffer wird die älteste überschrieben. */
     fun add(line: String) = lock.withLock {
         if (count < maxLines) {
             buffer.add(line)
@@ -32,6 +33,7 @@ class CircularLineBuffer(val maxLines: Int = 20_000) {
         }
     }
 
+    /** Fügt mehrere Zeilen hinzu. */
     fun addAll(lines: Collection<String>) = lock.withLock {
         for (line in lines) {
             if (count < maxLines) {
@@ -44,14 +46,17 @@ class CircularLineBuffer(val maxLines: Int = 20_000) {
         }
     }
 
+    /** Anzahl der gespeicherten Zeilen. */
     val lineCount: Int get() = lock.withLock { count }
 
+    /** Leert den Puffer. */
     fun clear() = lock.withLock {
         buffer.clear()
         head = 0
         count = 0
     }
 
+    /** Alle Zeilen, älteste zuerst. */
     fun toList(): List<String> = lock.withLock {
         if (count < maxLines) {
             ArrayList(buffer)
@@ -64,5 +69,6 @@ class CircularLineBuffer(val maxLines: Int = 20_000) {
         }
     }
 
+    /** Alle Zeilen als ein Text mit Zeilenumbrüchen. */
     fun getAllText(): String = toList().joinToString("\n")
 }

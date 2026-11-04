@@ -145,11 +145,13 @@ object AndroidStringEscaper {
     }
 }
 
+/** Ergebnis des Maskierens: XML-Wert und Platzhalter. */
 data class EscapedResult(
     val xmlValue: String,
     val placeholders: List<String>
 )
 
+/** Ergebnis der Umwandlung in ein Format-Template: formatierter Text und Platzhalter. */
 data class TemplateConversionResult(
     val formattedString: String,
     val placeholders: List<String>

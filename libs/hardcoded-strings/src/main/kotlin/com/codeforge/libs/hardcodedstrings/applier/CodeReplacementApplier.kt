@@ -58,6 +58,9 @@ object CodeReplacementApplier {
         )
     }
 
+    /**
+     * Ersatzausdruck für ein Fundstück: `stringResource(…)` (Compose), `getString(…)` (Kontext) oder `"@string/…"` (XML); manuelle Fälle bleiben unverändert.
+     */
     fun buildReplacementSnippet(finding: HardcodedStringFinding): String {
         return when (finding.contextType) {
             ReplacementContextType.COMPOSE -> {
@@ -86,6 +89,7 @@ object CodeReplacementApplier {
         }
     }
 
+    /** Ergänzt die für die Ersetzungen benötigten Imports. */
     fun insertImports(content: String, findings: List<HardcodedStringFinding>): String {
         val neededImports = mutableSetOf<String>()
 

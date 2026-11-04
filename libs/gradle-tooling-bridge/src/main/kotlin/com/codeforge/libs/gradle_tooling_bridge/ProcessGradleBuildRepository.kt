@@ -52,6 +52,7 @@ class ProcessGradleBuildRepository @Inject constructor(
     private var projectRootPath: String? = null
     private val extraEnvironment = java.util.concurrent.ConcurrentHashMap<String, String>()
 
+    /** Ausgabe des laufenden Builds (letzte 20.000 Zeilen). */
     val outputBuffer = CircularLineBuffer(maxLines = 20_000)
 
     override fun setExtraEnvironment(env: Map<String, String>) {
@@ -62,6 +63,7 @@ class ProcessGradleBuildRepository @Inject constructor(
     override fun getExtraEnvironment(): Map<String, String> = extraEnvironment.toMap()
 
     // Für JVM-Unit-Tests überschreibbar
+    /** Startet den Build-Prozess; in Tests ersetzbar. */
     internal var processLauncher: (command: List<String>, env: Map<String, String>, workingDir: File) -> Process = { cmd, env, dir ->
         ProcessBuilder(cmd).apply {
             directory(dir)

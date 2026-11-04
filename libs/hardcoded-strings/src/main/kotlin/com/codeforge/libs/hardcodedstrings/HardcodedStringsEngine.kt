@@ -266,6 +266,7 @@ class HardcodedStringsEngine {
         }
     }
 
+    /** Liest die Konfiguration (ignorierte Schlüssel, Texte und Dateimuster) aus JSON. */
     internal fun parseConfigJson(json: String): HardcodedStringsConfig {
         fun extractStringList(key: String): Set<String> {
             val pattern = Regex(""""$key"\s*:\s*\[([^\]]*)\]""")
@@ -285,6 +286,7 @@ class HardcodedStringsEngine {
         )
     }
 
+    /** Schreibt die Konfiguration als JSON. */
     internal fun serializeConfigJson(config: HardcodedStringsConfig): String {
         fun formatList(items: Set<String>): String {
             return items.joinToString(",\n    ") { "\"$it\"" }

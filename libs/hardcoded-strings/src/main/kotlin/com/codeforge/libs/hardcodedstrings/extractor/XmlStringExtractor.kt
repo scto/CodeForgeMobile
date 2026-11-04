@@ -26,6 +26,17 @@ class XmlStringExtractor(
         "android:summary"
     )
 
+    /**
+     * Findet fest eingetragene Texte in Layout-XML (`android:text`, `android:hint`, …).
+     *
+     * @param file Layoutdatei.
+     * @param content Inhalt der Datei.
+     * @param relativePath Pfad für die Anzeige.
+     * @param moduleName Modulname.
+     * @param existingXmlKeys Bereits vorhandene Schlüssel und Texte in `strings.xml`.
+     * @param targetStringsXmlFile Ziel-`strings.xml` für neue Einträge.
+     * @param resNamespace Namensraum der `R`-Klasse.
+     */
     fun extract(
         file: File,
         content: String,

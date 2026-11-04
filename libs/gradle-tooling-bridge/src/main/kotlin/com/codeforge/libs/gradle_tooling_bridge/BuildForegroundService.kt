@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 
+/** Vordergrunddienst mit Benachrichtigung, solange ein Gradle-Build läuft. */
 class BuildForegroundService : Service() {
 
     companion object {

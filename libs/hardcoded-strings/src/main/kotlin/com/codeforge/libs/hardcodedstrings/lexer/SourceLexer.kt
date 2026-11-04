@@ -1,5 +1,6 @@
 package com.codeforge.libs.hardcodedstrings.lexer
 
+/** Art eines Tokens. */
 enum class TokenType {
     STRING_LITERAL,
     RAW_STRING_LITERAL,
@@ -10,6 +11,7 @@ enum class TokenType {
     OTHER
 }
 
+/** Ein Token mit Text, Offsets, Zeile und Spalte (Anfang und Ende). */
 data class Token(
     val type: TokenType,
     val text: String,
@@ -31,6 +33,7 @@ class SourceLexer(private val content: String) {
     private var line = 1
     private var col = 1
 
+    /** Zerlegt den Quelltext in Tokens. */
     fun tokenize(): List<Token> {
         val tokens = mutableListOf<Token>()
         while (pos < content.length) {
