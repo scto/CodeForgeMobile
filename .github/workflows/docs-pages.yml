@@ -1,0 +1,84 @@
+name: Docs (GitHub Pages)
+
+# Baut die Projektdokumentation (MkDocs Material, Mermaid) und die API-Referenz (Dokka, alle Module) und
+# veröffentlicht beides auf GitHub Pages: /  = Handbücher, /api/ = KDoc.
+# Einmalig: Settings -> Pages -> Source = "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "**/*.kt"
+      - "gradle/libs.versions.toml"
+      - ".github/workflows/docs-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Android-SDK-Plattform 36 sicherstellen
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "sdk.dir=$SDK" > local.properties
+          if [ ! -d "$SDK/platforms/android-36" ]; then
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+            "$SDK/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+          fi
+
+      - name: Modulgraph aktualisieren
+        run: python3 scripts/gen-module-graph.py
+
+      - name: API-Referenz (Dokka)
+        run: |
+          chmod +x gradlew
+          ./gradlew dokkaGenerate --stacktrace
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Handbücher (MkDocs)
+        run: |
+          pip install mkdocs-material "mkdocs<2"
+          mkdocs build --site-dir site
+          mkdir -p site/api
+          cp -r build/dokka/html/. site/api/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,35 @@
+site_name: CodeForge Mobile
+site_description: Dokumentation der Android-IDE CodeForge Mobile
+repo_url: https://github.com/scto/CodeForgeMobile
+docs_dir: docs
+site_dir: site
+theme:
+  name: material
+  language: de
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: { icon: material/weather-night, name: Dunkles Design }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: { icon: material/weather-sunny, name: Helles Design }
+markdown_extensions:
+  - tables
+  - admonition
+  - toc: { permalink: true }
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+nav:
+  - Start: index.md
+  - Anwenderhandbuch: user/Anwenderhandbuch.md
+  - User Guide: user/UserGuide.md
+  - Entwicklerhandbuch: dev/DeveloperGuide.md
+  - Modulgraph: dev/module-graph.md
+  - APK: apk/APK-Dokumentation.md
+  - API-Referenz: api/index.html
+# Dateien in docs/, die nicht zur Seite gehören (Skripte, Rohberichte ohne Navigation) erzeugen nur Hinweise
+validation:
+  links: { not_found: ignore, absolute_links: ignore, unrecognized_links: ignore }
