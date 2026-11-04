@@ -102,6 +102,7 @@ import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 import java.io.File
 
+/** Route des Signing-Bildschirms. */
 @Composable
 fun SigningRoute(
     modifier: Modifier = Modifier,
@@ -117,6 +118,7 @@ fun SigningRoute(
     )
 }
 
+/** Signing-Bildschirm mit Reitern für Keystores, Zuordnung und Signieren. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SigningScreen(

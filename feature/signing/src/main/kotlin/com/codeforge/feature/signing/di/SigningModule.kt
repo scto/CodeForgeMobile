@@ -9,10 +9,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/** Hilt-Modul des Signings. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class SigningModule {
 
+    /** Bindet die Implementierung. */
     @Binds
     @Singleton
     abstract fun bindSigningRepository(

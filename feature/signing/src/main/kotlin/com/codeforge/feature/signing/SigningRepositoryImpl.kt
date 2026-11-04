@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
+/** Verwaltet Keystores und signiert APKs mit `keytool` und `apksigner`. */
 @Singleton
 open class SigningRepositoryImpl internal constructor(
     private val keystoresDir: File,
@@ -191,6 +192,7 @@ open class SigningRepositoryImpl internal constructor(
     }
 
     // Testbarer Launcher
+    /** Startet Prozesse (in Tests ersetzbar). */
     internal var processLauncher: (command: List<String>, env: Map<String, String>, workingDir: File) -> Process = { cmd, env, dir ->
         ProcessBuilder(cmd).apply {
             directory(dir)
@@ -556,6 +558,7 @@ open class SigningRepositoryImpl internal constructor(
         )
     }
 
+    /** Pfad zu `keytool` oder `null`. */
     internal open fun resolveKeytoolBinary(): File? {
         val candidates = mutableListOf<File>()
 
@@ -580,6 +583,7 @@ open class SigningRepositoryImpl internal constructor(
         return candidates.firstOrNull { it.isFile && it.canExecute() }
     }
 
+    /** Pfad zu `apksigner` oder `null`. */
     internal open fun resolveApksignerBinary(): File? {
         val candidates = mutableListOf<File>()
 

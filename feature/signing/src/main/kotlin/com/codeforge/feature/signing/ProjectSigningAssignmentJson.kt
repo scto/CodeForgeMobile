@@ -9,6 +9,7 @@ import com.codeforge.core.domain.model.ProjectSigningAssignment
  */
 internal object ProjectSigningAssignmentJson {
 
+    /** Serialisiert die Zuordnungen von Projekten zu Keystores als JSON. */
     fun toJson(assignments: List<ProjectSigningAssignment>): String {
         val sb = StringBuilder()
         sb.append("[\n")
@@ -25,6 +26,7 @@ internal object ProjectSigningAssignmentJson {
         return sb.toString()
     }
 
+    /** Liest die Zuordnungen aus JSON (ungültige Einträge werden ignoriert). */
     fun fromJson(json: String): List<ProjectSigningAssignment> {
         val trimmed = json.trim()
         if (trimmed.isEmpty() || trimmed == "[]") return emptyList()

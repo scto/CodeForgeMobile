@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** ViewModel des Signing-Bildschirms. */
 @HiltViewModel
 class SigningViewModel @Inject constructor(
     private val signingRepository: SigningRepository,
@@ -43,6 +44,7 @@ class SigningViewModel @Inject constructor(
             isApksignerAvailable = signingRepository.isApksignerAvailable()
         )
     )
+    /** UI-Zustand. */
     val uiState: StateFlow<SigningUiState> = _uiState.asStateFlow()
 
     init {
@@ -64,6 +66,7 @@ class SigningViewModel @Inject constructor(
         refreshKeystores()
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onIntent(intent: SigningUiIntent) {
         when (intent) {
             is SigningUiIntent.SelectTab -> _uiState.update { it.copy(activeTab = intent.tab) }
