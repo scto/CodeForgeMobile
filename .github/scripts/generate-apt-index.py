@@ -106,6 +106,7 @@ th,td{{text-align:left;padding:7px 9px;border-bottom:1px solid var(--ln);vertica
 th{{background:var(--hd);position:sticky;top:0}} .n{{white-space:nowrap;text-align:right}}
 .d{{color:var(--mu);font-size:.82em;margin-top:2px}} .tag{{font-size:.75em;background:var(--hd);border:1px solid var(--ln);border-radius:4px;padding:0 5px}}
 </style></head><body><main>
+<p class="m"><a href="https://scto.github.io/CodeForgeMobile/">CodeForge Mobile</a> · <a href="https://scto.github.io/CodeForgeMobile/store/">Store</a> · <a href="https://scto.github.io/CodeForgeMobile/apt/">APT-Repo</a> · <a href="https://scto.github.io/CodeForgeMobile/user/Anwenderhandbuch/">Doku</a></p>
 <h1>CodeForge APT-Repo</h1>
 <p class="m">{len(rows)} Pakete · Stand {now} · Distribution <code>{html.escape(dist)}</code></p>
 <p>Quelle: <code>{html.escape(src)}</code> · Schlüssel: <a href="codeforge.asc">codeforge.asc</a> · <a href="dists/{html.escape(dist)}/Release">Release</a>{' · <a href="large-packages.txt">große Pakete</a>' if large else ''}</p>

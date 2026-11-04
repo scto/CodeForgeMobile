@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (zentrale Seite)
+- `scto.github.io/CodeForgeMobile` ist jetzt die zentrale Seite: Start (App-Vorstellung, Screenshots hell/dunkel), Store, APT-Repo, Dokumentation und API-Referenz in einem Menü. Store und APT-Repo werden live aus `store.json` bzw. `dists/stable/main/binary-*/Packages` angezeigt. Die Maschinen-URLs von Katalog und APT-Repo bleiben unverändert (in App und Bootstrap fest eingetragen). Store- und APT-Seite verlinken zurück.
+
 ### Hinzugefügt (Dokumentation)
 - **KDoc für die gesamte öffentliche API** (Klassen, Schnittstellen, Funktionen, Properties) in allen Modulen unter `core`, `libs`, `feature` und `app`; die Abdeckung misst `scripts/kdoc-gap.py` (Stand in `docs/dev/kdoc-status.md`: 0 von 3902 offen). Nicht erfasst: `build-logic`, `examples`, Tests.
 - **Dokka 2 + Mermaid** im Versionskatalog (`dokka`, `dokka-mermaid-plugin`); `./gradlew dokkaGenerate` erzeugt die API-Referenz (`build/dokka/html`), `scripts/gen-module-graph.py` den Modulgraphen.

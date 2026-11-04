@@ -23,12 +23,15 @@ theme:
       toggle: { icon: material/weather-sunny, name: Helles Design }
   features:
     - navigation.instant
+    - navigation.tabs
     - navigation.top
     - navigation.sections
     - content.code.copy
     - search.highlight
 extra_css:
   - stylesheets/store.css
+extra_javascript:
+  - javascripts/portal.js
 markdown_extensions:
   - attr_list
   - md_in_html
@@ -42,13 +45,16 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Start: index.md
-  - Anwenderhandbuch: user/Anwenderhandbuch.md
-  - User Guide: user/UserGuide.md
-  - Entwicklerhandbuch: dev/DeveloperGuide.md
-  - Modulgraph: dev/module-graph.md
-  - APK: apk/APK-Dokumentation.md
-  - Release Notes 3.0.0: release-notes/3.0.0.md
-  - Release Notes 3.0.0 (EN): release-notes/3.0.0.en.md
+  - Store: store.md
+  - APT-Repo: apt.md
+  - Dokumentation:
+      - Anwenderhandbuch: user/Anwenderhandbuch.md
+      - User Guide: user/UserGuide.md
+      - Entwicklerhandbuch: dev/DeveloperGuide.md
+      - Modulgraph: dev/module-graph.md
+      - APK: apk/APK-Dokumentation.md
+      - Release Notes 3.0.0: release-notes/3.0.0.md
+      - Release Notes 3.0.0 (EN): release-notes/3.0.0.en.md
   - API-Referenz: api/index.html
 # Dateien in docs/, die nicht zur Seite gehören (Skripte, Rohberichte ohne Navigation) erzeugen nur Hinweise
 validation:

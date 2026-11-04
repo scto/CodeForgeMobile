@@ -95,3 +95,18 @@ body { background: var(--cf-bg); color: var(--cf-text); }
 @media (hover: hover) { .cf-card { transition: transform .15s, box-shadow .15s; } .cf-card:hover { transform: translateY(-2px); } }
 @media (pointer: coarse) { .md-typeset .md-button { padding: .75em 1.4em; } .md-nav__link { padding: .7rem 1rem; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+
+/* Zentrale Seite: Store- und APT-Ansicht (docs/javascripts/portal.js) */
+.cf-search { width: 100%; box-sizing: border-box; padding: 12px 16px; margin: 0 0 12px; border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 28px; background: var(--md-default-bg-color); color: var(--md-default-fg-color); font: inherit; }
+.cf-search:focus-visible { outline: 2px solid var(--md-primary-fg-color); outline-offset: 2px; }
+.cf-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.cf-chip { border: 1px solid var(--md-default-fg-color--lightest); background: transparent; color: var(--md-default-fg-color);
+  border-radius: 20px; padding: 6px 14px; font: inherit; font-size: .8rem; cursor: pointer; }
+.cf-chip[aria-pressed="true"] { background: var(--md-primary-fg-color); color: var(--md-primary-bg-color); border-color: transparent; }
+.cf-muted { color: var(--md-default-fg-color--light); } .cf-small { font-size: .75em; }
+.cf-error { color: var(--md-typeset-a-color); font-weight: 600; }
+.cf-sha { font-size: .7rem; }
+.cf-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.cf-table-wrap { overflow-x: auto; }
+.cf-card h3 { margin-top: 0; }

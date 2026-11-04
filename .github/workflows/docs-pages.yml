@@ -1,7 +1,8 @@
 name: Docs (GitHub Pages)
 
 # Baut die Projektdokumentation (MkDocs Material, Mermaid) und die API-Referenz (Dokka, alle Module) und
-# veröffentlicht beides auf GitHub Pages: /  = Handbücher, /api/ = KDoc.
+# veröffentlicht beides auf GitHub Pages (zentrale Seite): / = Start, /store/, /apt/, Handbücher; /api/ = KDoc.
+# Store-Katalog und APT-Repo bleiben unter ihren bisherigen URLs (fest in App und Bootstrap eingetragen); die Seite lädt sie live.
 # Einmalig: Settings -> Pages -> Source = "GitHub Actions".
 
 on:

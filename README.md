@@ -19,6 +19,8 @@ A native Android IDE featuring **Sora Editor**, a **Termux-based shell** (JDK, A
 
 </div>
 
+**Website:** [scto.github.io/CodeForgeMobile](https://scto.github.io/CodeForgeMobile/) – App, Store, APT-Repo and documentation in one place.
+
 ---
 
 > ⚠️ **Development status:** The code was written without an Android SDK/Gradle run. There is **no verified build yet**; only pure JVM logic (Git, code tools, layout model) is tested. See [STATUS.md](STATUS.md) for details.
