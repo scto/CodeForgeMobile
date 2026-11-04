@@ -9,6 +9,7 @@ des Projekts. Version Catalog: `../gradle/libs.versions.toml` (auch hier als `li
 | `codeforge.android.library` | `AndroidLibraryConventionPlugin` | `com.android.library` + Kotlin; compileSdk/minSdk, Java 17, optional `consumer-rules.pro`/`proguard-rules.pro` |
 | `codeforge.android.library.compose` | `AndroidLibraryComposeConventionPlugin` | wie `…library` + Compose-Compiler-Plugin, `buildFeatures.compose`, BOM, `ui`, `material3`, `lifecycle-viewmodel-compose` |
 | `codeforge.android.hilt` | `AndroidHiltConventionPlugin` | KSP + Hilt-Plugin, `hilt-android`, `hilt-compiler` |
+| `codeforge.android.signing` | `AndroidSigningConventionPlugin` | Release-Signatur aus `keystore.properties`/`CODEFORGE_*`-Variablen, Fallback Debug-Schlüssel mit Warnung, bei `CI=true` hart (siehe `docs/dev/Signing.md`) |
 | `codeforge.kotlin.library` | `KotlinLibraryConventionPlugin` | reines JVM-Modul (`kotlin("jvm")`), Java/JVM-Target 17 |
 | `codeforge.quality` | `QualityConventionPlugin` | ktlint (`.editorconfig`), derzeit `ignoreFailures = true` |
 | `codeforge.terminal.bootstrap` | `TerminalBootstrapPackagesPlugin` | Task `embedTerminalBootstrap`: lädt Bootstrap-Zips, schreibt `termux-bootstrap-zip.S` (nur `:libs:termux-app`) |

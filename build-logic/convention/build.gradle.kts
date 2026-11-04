@@ -50,6 +50,10 @@ gradlePlugin {
             id = "codeforge.kotlin.library"
             implementationClass = "KotlinLibraryConventionPlugin"
         }
+        register("androidSigning") {
+            id = "codeforge.android.signing"
+            implementationClass = "AndroidSigningConventionPlugin"
+        }
         register("quality") {
             id = "codeforge.quality"
             implementationClass = "QualityConventionPlugin"

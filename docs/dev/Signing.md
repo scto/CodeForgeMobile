@@ -11,6 +11,18 @@ Debug-Schlüssel signiert (installierbar, aber nicht für die Veröffentlichung)
 | Alias | `keyAlias` | `CODEFORGE_KEY_ALIAS` | `CODEFORGE_KEY_ALIAS` |
 | Schlüssel-Passwort | `keyPassword` | `CODEFORGE_KEY_PASSWORD` | `CODEFORGE_KEY_PASSWORD` |
 
+## Convention-Plugin `codeforge.android.signing`
+
+Die Logik steckt in `build-logic` (`AndroidSigningConventionPlugin`, Hilfsfunktion `loadReleaseSigning()` in
+`Signing.kt`); `app/build.gradle.kts` wendet nur `alias(libs.plugins.codeforge.android.signing)` an.
+
+- Quellen je Wert: erst `keystore.properties`, dann Umgebungsvariable (Tabelle oben).
+- Unvollständiger Satz oder fehlende Keystore-Datei → Build bricht mit Hinweis ab.
+- Gar nichts gesetzt → `release` wird mit dem Debug-Schlüssel signiert, dazu eine Warnung.
+- Mit `CI=true` (GitHub Actions setzt das) oder `-Pcodeforge.signing.required=true` bricht stattdessen jeder
+  Release-Build (`assemble`/`bundle`/`package…Release`) ab. Debug-Builds sind nie betroffen.
+- Mit `./gradlew :app:signingReport` siehst du, welche Konfiguration `release` verwendet.
+
 ## 1. Schlüssel erzeugen (einmalig)
 
 ```bash

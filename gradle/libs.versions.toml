@@ -178,6 +178,7 @@ codeforge-android-application = { id = "codeforge.android.application" }
 codeforge-android-library = { id = "codeforge.android.library" }
 codeforge-android-library-compose = { id = "codeforge.android.library.compose" }
 codeforge-android-hilt = { id = "codeforge.android.hilt" }
+codeforge-android-signing = { id = "codeforge.android.signing" }
 codeforge-kotlin-library = { id = "codeforge.kotlin.library" }
 codeforge-quality = { id = "codeforge.quality" }
 codeforge-terminal-bootstrap = { id = "codeforge.terminal.bootstrap" }
