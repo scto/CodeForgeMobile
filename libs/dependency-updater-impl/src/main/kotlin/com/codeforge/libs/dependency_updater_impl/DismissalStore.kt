@@ -8,7 +8,9 @@ import java.io.File
 
 /** Persistente „Dismiss“-Markierungen pro Projekt (Schlüssel = [com.codeforge.libs.dependency_updater_api.DependencyUpdate.key]). */
 interface DismissalStore {
+    /** Liefert die ignorierten Update-Schlüssel des Projekts. */
     fun dismissed(rootPath: String): Set<String>
+    /** Merkt den Schlüssel [key] als ignoriert. */
     fun add(rootPath: String, key: String)
 }
 

@@ -8,6 +8,7 @@ import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import com.codeforge.libs.dependency_updater_api.LibraryCoordinate
 import com.codeforge.libs.indexing_api.RepositoryScope
 
+/** Berechnet aus den Kandidaten und den verfügbaren Versionen die möglichen Updates. */
 object UpdateCalculator {
 
     /**

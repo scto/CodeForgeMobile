@@ -8,8 +8,10 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import java.io.File
 
+/** Ersetzt den Bereich `[start, end)`; [expected] muss dort noch stehen. */
 data class TextEdit(val start: Int, val end: Int, val expected: String, val replacement: String)
 
+/** Wendet Textänderungen an Versionsstellen an. */
 object VersionApplier {
 
     /** Wendet [edits] an; bricht ohne Änderung ab, wenn eine Stelle nicht mehr [TextEdit.expected] enthält oder sich Edits überlappen. */
@@ -32,6 +34,7 @@ object VersionApplier {
     }
 }
 
+/** Schreibt Dateien atomar. */
 object AtomicFiles {
     /** Schreibt über eine Temp-Datei im selben Ordner + Rename; Fallback: direktes Überschreiben. */
     fun write(file: File, text: String) {

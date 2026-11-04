@@ -25,7 +25,9 @@ data class RawUsage(
     val literal: VersionLiteral
 )
 
+/** Hilfen für Gradle-Plugin-Koordinaten. */
 object GradlePlugins {
+    /** Marker-Artefakt `<id>:<id>.gradle.plugin` zu einer Plugin-ID. */
     fun marker(pluginId: String) = LibraryCoordinate(pluginId, "$pluginId.gradle.plugin")
 }
 

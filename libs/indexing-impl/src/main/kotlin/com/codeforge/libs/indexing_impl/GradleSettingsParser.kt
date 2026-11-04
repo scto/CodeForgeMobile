@@ -28,6 +28,7 @@ object GradleSettingsParser {
     )
     private val catalogFromRegex = Regex("""\bfrom\s*\(\s*files\s*\(\s*["']([^"']+)["']""")
 
+    /** Liest Projektname, Module und Kataloge aus `settings.gradle(.kts)`. */
     fun parse(text: String): ParsedSettings {
         val masked = GradleSourceUtils.maskComments(text)
 

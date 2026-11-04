@@ -19,6 +19,7 @@ object ProjectScanner {
 
     const val MAX_FILES = 50_000
 
+    /** Listet alle Dateien unterhalb von [root] (ohne Build- und VCS-Ordner). */
     fun scan(root: File): List<IndexedFile> {
         val result = ArrayList<IndexedFile>()
         walk(root, root, result)
@@ -46,6 +47,7 @@ object ProjectScanner {
         }
     }
 
+    /** Ordnet eine Datei anhand ihres relativen Pfads einer Art zu. */
     fun classify(relativePath: String): IndexedFileKind {
         val name = relativePath.substringAfterLast('/')
         return when {

@@ -84,6 +84,7 @@ object VersionComparator : Comparator<String> {
         }
     }
 
+    /** Reifegrad der Version (der unreifste Qualifier gewinnt). */
     fun stabilityOf(version: String): Stability {
         var result = Stability.STABLE
         for (part in tokenize(version)) {
@@ -101,6 +102,7 @@ object VersionComparator : Comparator<String> {
     }
 }
 
+/** Regeln, welche Versionen als Update in Frage kommen. */
 object UpdatePolicy {
 
     /** Dynamische/nicht auflösbare Versionen (`+`, Ranges, `latest.*`, Variablen) werden nie aktualisiert. */

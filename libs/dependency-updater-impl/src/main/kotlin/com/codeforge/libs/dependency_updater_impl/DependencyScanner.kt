@@ -12,6 +12,7 @@ import com.codeforge.libs.indexing_api.ProjectIndex
 import com.codeforge.libs.indexing_api.RepositoryScope
 import com.codeforge.libs.indexing_api.WellKnownRepositories
 
+/** Eine verwendete Koordinate mit Repository-Bereich und Plugin-Kennzeichen. */
 data class CoordinateUsage(val coordinate: LibraryCoordinate, val scope: RepositoryScope, val isPlugin: Boolean)
 
 /**
@@ -24,6 +25,7 @@ data class Candidate(
     val locations: List<DependencyLocation>
 )
 
+/** Sammelt aus dem Projektindex die zu prüfenden Versionsstellen (Katalog und Build-Dateien). */
 object DependencyScanner {
 
     /**
@@ -83,6 +85,7 @@ object DependencyScanner {
     }
 }
 
+/** Wählt die Repositories, in denen nach Versionen gesucht wird. */
 object RepositorySelector {
     /** Deklarierte Repositories des [scope] (in Deklarationsreihenfolge), sonst Gradle-Defaults. */
     fun reposFor(index: ProjectIndex, scope: RepositoryScope): List<MavenRepository> {

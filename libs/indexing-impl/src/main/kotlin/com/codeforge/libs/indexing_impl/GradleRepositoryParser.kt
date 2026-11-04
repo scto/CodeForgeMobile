@@ -21,6 +21,7 @@ object GradleRepositoryParser {
     private val mavenCallRegex = Regex("""\bmaven\s*\(\s*(?:url\s*=\s*)?(?:uri\s*\(\s*)?["']([^"']+)["']""")
     private val urlInBlockRegex = Regex("""(?:\burl\s*=?\s*|\bsetUrl\s*\(\s*)(?:uri\s*\(\s*)?["']([^"']+)["']""")
 
+    /** Liest die deklarierten Repositories aus einer Gradle-Datei. */
     fun parse(text: String, declaredIn: String): List<RepositoryDeclaration> {
         val masked = GradleSourceUtils.maskComments(text)
         val pluginScopes = GradleSourceUtils.findBlocks(masked, "pluginManagement") +

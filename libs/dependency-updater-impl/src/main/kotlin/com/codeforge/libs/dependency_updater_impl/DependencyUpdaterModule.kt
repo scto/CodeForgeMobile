@@ -15,14 +15,17 @@ import dagger.hilt.components.SingletonComponent
 import java.io.File
 import javax.inject.Singleton
 
+/** Hilt-Modul des Dependency-Updaters. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DependencyUpdaterModule {
 
+    /** Bindet das Update-Repository. */
     @Binds
     @Singleton
     abstract fun bindRepository(impl: DependencyUpdateRepositoryImpl): DependencyUpdateRepository
 
+    /** Bindet den Maven-Metadaten-Client. */
     @Binds
     @Singleton
     abstract fun bindMetadataClient(impl: HttpMavenMetadataClient): MavenMetadataClient

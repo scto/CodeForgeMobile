@@ -19,6 +19,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+/** Standard-Indexer: baut den Index, cacht ihn je Projektwurzel und meldet ihn als Flow. */
 @Singleton
 class ProjectIndexerImpl internal constructor(
     private val ioDispatcher: CoroutineDispatcher

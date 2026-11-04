@@ -15,8 +15,10 @@ interface ProjectIndexer {
     /** Emittiert den jeweils aktuellen Index des Projekts (`null`, solange nicht indexiert). */
     fun observe(rootPath: String): Flow<ProjectIndex?>
 
+    /** Zuletzt gecachter Index oder `null`. */
     fun cached(rootPath: String): ProjectIndex?
 
+    /** Indexiert das Projekt (oder liefert den Cache, wenn [forceRefresh] nicht gesetzt ist). */
     suspend fun index(rootPath: String, forceRefresh: Boolean = false): Result<ProjectIndex>
 
     /** Verwirft den gecachten Index (z. B. nach Dateisystem-Änderungen). */

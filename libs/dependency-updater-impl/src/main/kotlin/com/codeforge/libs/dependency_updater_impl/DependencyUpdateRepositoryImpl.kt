@@ -39,6 +39,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+/**
+ * Standardimplementierung der Abhängigkeitsprüfung: Scan, Abfrage der Maven-Metadaten, Merken ignorierter Updates und Schreiben der neuen Versionen.
+ */
 @Singleton
 class DependencyUpdateRepositoryImpl internal constructor(
     private val indexer: ProjectIndexer,

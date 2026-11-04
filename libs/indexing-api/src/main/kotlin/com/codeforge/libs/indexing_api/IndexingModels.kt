@@ -8,6 +8,7 @@
  */
 package com.codeforge.libs.indexing_api
 
+/** Art einer indexierten Datei. */
 enum class IndexedFileKind {
     KOTLIN_SOURCE,
     JAVA_SOURCE,
@@ -21,6 +22,7 @@ enum class IndexedFileKind {
     OTHER
 }
 
+/** Eine indexierte Datei (Pfad, relativer Pfad, Größe, Änderungszeit, Art). */
 data class IndexedFile(
     val path: String,
     val relativePath: String,
@@ -28,6 +30,7 @@ data class IndexedFile(
     val lastModified: Long,
     val kind: IndexedFileKind
 ) {
+    /** Dateiname ohne Verzeichnis. */
     val name: String get() = relativePath.substringAfterLast('/')
 }
 
@@ -41,10 +44,13 @@ data class GradleModule(
     /** Absoluter Pfad zu `build.gradle(.kts)` des Moduls, `null` wenn keine Build-Datei existiert. */
     val buildFile: String?
 ) {
+    /** Ob es das Root-Projekt ist. */
     val isRoot: Boolean get() = gradlePath == ":"
+    /** Kurzname des Moduls. */
     val name: String get() = if (isRoot) ":" else gradlePath.substringAfterLast(':')
 }
 
+/** Bereich, für den ein Repository gilt: Plugins oder Abhängigkeiten. */
 enum class RepositoryScope {
     /** `pluginManagement { repositories { } }` und `buildscript { repositories { } }` */
     PLUGINS,
@@ -59,12 +65,17 @@ data class MavenRepository(val name: String, val url: String) {
     }
 }
 
+/** Häufig verwendete Repositories. */
 object WellKnownRepositories {
+    /** Google Maven. */
     val GOOGLE = MavenRepository("google", "https://dl.google.com/dl/android/maven2/")
+    /** Maven Central. */
     val MAVEN_CENTRAL = MavenRepository("mavenCentral", "https://repo.maven.apache.org/maven2/")
+    /** Gradle Plugin Portal. */
     val GRADLE_PLUGIN_PORTAL = MavenRepository("gradlePluginPortal", "https://plugins.gradle.org/m2/")
 }
 
+/** Deklaration eines Repositories mit Bereich und Datei. */
 data class RepositoryDeclaration(
     val repository: MavenRepository,
     val scope: RepositoryScope,
@@ -72,6 +83,7 @@ data class RepositoryDeclaration(
     val declaredIn: String
 )
 
+/** Ergebnis der Indexierung: Dateien, Module, Kataloge, Repositories und Zeitpunkt. */
 data class ProjectIndex(
     val rootPath: String,
     val rootProjectName: String,
@@ -84,12 +96,15 @@ data class ProjectIndex(
     val repositories: List<RepositoryDeclaration>,
     val indexedAtMillis: Long
 ) {
+    /** Ob das Projekt einen Version Catalog hat. */
     val hasVersionCatalog: Boolean get() = versionCatalogs.isNotEmpty()
 
     /** Alle Build-Dateien aller Module (inkl. Root), ohne Duplikate, in Modul-Reihenfolge. */
     val buildFiles: List<String> get() = modules.mapNotNull { it.buildFile }.distinct()
 
+    /** Alle Dateien der Art [kind]. */
     fun filesOfKind(kind: IndexedFileKind): List<IndexedFile> = files.filter { it.kind == kind }
 
+    /** Alle Dateien mit dem Namen [fileName]. */
     fun findByName(fileName: String): List<IndexedFile> = files.filter { it.name == fileName }
 }

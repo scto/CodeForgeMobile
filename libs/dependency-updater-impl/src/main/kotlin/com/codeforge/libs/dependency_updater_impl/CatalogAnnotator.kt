@@ -11,6 +11,7 @@ import java.io.File
 /** Ordnet Updates Zeilen einer im Editor geöffneten Datei zu (anhand des Live-Textes). */
 object FileAnnotator {
 
+    /** Liefert die Update-Hinweise für die Zeilen der Datei [filePath] anhand des aktuellen Texts. */
     fun annotate(filePath: String, text: String, updates: List<DependencyUpdate>): List<FileUpdateAnnotation> {
         if (updates.isEmpty()) return emptyList()
         val name = filePath.substringAfterLast('/').substringAfterLast('\\')

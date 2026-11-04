@@ -6,8 +6,10 @@ package com.codeforge.libs.dependency_updater_api
 
 import kotlinx.coroutines.flow.Flow
 
+/** Prüft Projekte auf neuere Versionen von Bibliotheken und Plugins und wendet Updates an. */
 interface DependencyUpdateRepository {
 
+    /** Beobachtet den Update-Zustand des Projekts. */
     fun observe(rootPath: String): Flow<ProjectUpdateState>
 
     /**

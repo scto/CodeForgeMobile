@@ -81,6 +81,7 @@ object GradleBuildParser {
     private val kotlinPluginRegex = Regex("""\bkotlin\s*\(\s*(["'])([\w\-]+)\1\s*\)\s+version\s*\(?\s*(["'])([^"']+)\3""")
     private val variableRef = Regex("""^\$\{?(\w+)}?$""")
 
+    /** Findet Versionsangaben in einer Gradle-Datei (Groovy/Kotlin-DSL); Variablen werden über [variables] aufgelöst. */
     fun parse(filePath: String, text: String, variables: VariableIndex = VariableIndex.EMPTY): List<RawUsage> {
         val masked = GradleSourceUtils.maskComments(text)
         val lineStarts = GradleSourceUtils.lineStartOffsets(text)

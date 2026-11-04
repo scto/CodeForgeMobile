@@ -6,6 +6,7 @@ package com.codeforge.libs.dependency_updater_api
 
 /** Maven-Koordinate ohne Version. Gradle-Plugins werden über ihr Marker-Artefakt `<id>:<id>.gradle.plugin` abgebildet. */
 data class LibraryCoordinate(val group: String, val name: String) {
+    /** Schlüssel `group:name`. */
     val key: String get() = "$group:$name"
     override fun toString(): String = key
 }
@@ -45,14 +46,17 @@ data class DependencyUpdate(
             else -> coordinates[0].displayKey(isPlugin) + " +${coordinates.size - 1}"
         }
 
+    /** Anzeige `alt -> neu`. */
     val label: String get() = "$currentVersion -> $newVersion"
 }
 
 private fun LibraryCoordinate.displayKey(isPlugin: Boolean): String =
     if (isPlugin && name == "$group.gradle.plugin") group else key
 
+/** Zustand der Prüfung. */
 enum class CheckStatus { IDLE, CHECKING, FAILED }
 
+/** Zustand der Update-Prüfung eines Projekts (Status, Updates, ignorierte und zurückgestellte Schlüssel, Fehler). */
 data class ProjectUpdateState(
     val rootPath: String,
     val status: CheckStatus = CheckStatus.IDLE,
@@ -71,6 +75,7 @@ data class ProjectUpdateState(
     val promptable: List<DependencyUpdate> get() = pending.filter { it.key !in snoozedKeys }
 }
 
+/** Ergebnis des Anwendens: angewendete und fehlgeschlagene Updates und geänderte Dateien. */
 data class ApplyResult(
     val applied: List<DependencyUpdate>,
     val failed: List<Pair<DependencyUpdate, String>>,

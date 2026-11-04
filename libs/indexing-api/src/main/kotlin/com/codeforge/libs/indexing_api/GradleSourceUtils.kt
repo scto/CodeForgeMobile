@@ -12,6 +12,7 @@
  */
 package com.codeforge.libs.indexing_api
 
+/** Textwerkzeuge für Gradle-Dateien (Kommentare maskieren, Zeilenanfänge). */
 object GradleSourceUtils {
 
     /**

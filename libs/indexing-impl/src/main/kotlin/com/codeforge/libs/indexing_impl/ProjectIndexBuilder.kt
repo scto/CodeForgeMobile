@@ -16,6 +16,7 @@ import java.io.File
 /** Baut einen [ProjectIndex] (blockierend, ohne Coroutines — direkt unit-testbar). */
 object ProjectIndexBuilder {
 
+    /** Baut den Index für [rootPath]; [nowMillis] ist der Zeitstempel. */
     fun build(rootPath: String, nowMillis: Long = System.currentTimeMillis()): ProjectIndex {
         val root = File(rootPath).absoluteFile.normalize()
         require(root.isDirectory) { Res.string(R.string.index_projektordner_existiert_nicht, root.path) }
