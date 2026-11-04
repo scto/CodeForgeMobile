@@ -30,8 +30,11 @@ data class LayoutNode(
     val firstAttrInline: Boolean = false,
     val sourceRange: IntRange? = null,
 ) {
+    /** Wert des Attributs oder `null`. */
     fun attr(name: String): String? = attributes[name]
+    /** Widget-Beschreibung aus dem Katalog. */
     val widget: WidgetDef? get() = WidgetCatalog.find(tag)
+    /** Ob der Knoten Kinder aufnehmen kann. */
     val isContainer: Boolean get() = widget?.isContainer ?: children.isNotEmpty()
 }
 

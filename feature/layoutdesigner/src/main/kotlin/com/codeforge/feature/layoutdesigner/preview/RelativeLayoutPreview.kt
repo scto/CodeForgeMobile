@@ -33,6 +33,7 @@ private data class PlacedBox(
     val height: Int,
 )
 
+/** Zeichnet einen RelativeLayout-Container. */
 @Composable
 internal fun RelativeView(
     container: LayoutNode,

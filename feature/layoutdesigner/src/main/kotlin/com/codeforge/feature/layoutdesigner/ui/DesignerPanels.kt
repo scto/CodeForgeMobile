@@ -306,6 +306,7 @@ internal fun TreePanel(
 private enum class AttrGroup {
     LAYOUT, MARGINS, TEXT, APPEARANCE, BEHAVIOR, CONSTRAINTS, OTHER;
 
+    /** Beschriftung als String-Ressource. */
     @StringRes
     fun labelRes(): Int = when (this) {
         LAYOUT -> R.string.layout_group_layout

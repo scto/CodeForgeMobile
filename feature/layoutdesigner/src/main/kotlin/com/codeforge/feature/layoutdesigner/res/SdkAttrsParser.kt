@@ -8,6 +8,7 @@ import java.io.File
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
+/** Attributdefinition aus `attrs.xml` des SDK. */
 data class SdkAttrDef(
     val name: String,
     val kind: AttrKind,
@@ -15,6 +16,7 @@ data class SdkAttrDef(
     val options: List<String>,
 )
 
+/** Liest Attribute aus dem Android-SDK. */
 class SdkAttrsParser {
 
     private val styleablesCache = mutableMapOf<String, List<AttrSpec>>()
@@ -89,6 +91,7 @@ class SdkAttrsParser {
         return result
     }
 
+    /** Attribute eines Styleables. */
     fun getAttrsFor(styleableName: String): List<AttrSpec> = styleablesCache[styleableName] ?: emptyList()
 
     companion object {

@@ -22,17 +22,21 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** ViewModel der Layout-Dateiliste. */
 @HiltViewModel
 class LayoutFilesViewModel @Inject constructor(
     private val fileSyncBridge: FileSyncBridge,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LayoutFilesUiState())
+    /** UI-Zustand. */
     val state: StateFlow<LayoutFilesUiState> = _state.asStateFlow()
 
     private val _effects = Channel<LayoutFilesUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects = _effects.receiveAsFlow()
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: LayoutFilesUiEvent) {
         when (event) {
             is LayoutFilesUiEvent.Initialize -> if (_state.value.rootPath != event.rootPath) {

@@ -19,6 +19,7 @@ import org.w3c.dom.Node
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
+/** Liest Ressourcen (Strings, Farben, Maße, Styles) des Projekts. */
 class ResourceRepository(
     private val resDirs: List<File>,
 ) {

@@ -5,7 +5,9 @@ import com.codeforge.feature.layoutdesigner.model.LayoutNode
 import com.codeforge.feature.layoutdesigner.xml.LayoutXml
 import java.io.File
 
+/** Ergebnis beim Auflösen eines `<include>`. */
 sealed interface IncludedLayoutResult {
+    /** Gefunden und gelesen. */
     data class Success(
         val layoutName: String,
         val file: File,
@@ -13,12 +15,17 @@ sealed interface IncludedLayoutResult {
         val mergedRoot: LayoutNode,
     ) : IncludedLayoutResult
 
+    /** Zyklus entdeckt. */
     data class CycleDetected(val layoutName: String, val path: String) : IncludedLayoutResult
+    /** Verschachtelungstiefe überschritten. */
     data class DepthLimitExceeded(val layoutName: String) : IncludedLayoutResult
+    /** Nicht gefunden. */
     data class NotFound(val layoutName: String) : IncludedLayoutResult
+    /** Lesefehler. */
     data class ParseError(val layoutName: String, val message: String) : IncludedLayoutResult
 }
 
+/** Löst `<include>`-Layouts auf (mit Zyklen- und Tiefenschutz). */
 class IncludeResolver(
     private val resDirs: List<File>,
 ) {

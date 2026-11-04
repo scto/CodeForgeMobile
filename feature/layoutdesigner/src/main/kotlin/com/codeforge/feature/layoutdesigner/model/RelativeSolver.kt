@@ -7,6 +7,7 @@
  */
 package com.codeforge.feature.layoutdesigner.model
 
+/** RelativeLayout-Angaben eines Knotens. */
 data class RelativeNodeSpec(
     val uid: Int,
     val id: String?,
@@ -29,6 +30,7 @@ data class RelativeNodeSpec(
     val alignBottomId: String? = null,
 )
 
+/** Berechnete Positionen und Warnungen. */
 data class RelativeSolveResult(
     val orderedNodes: List<RelativeNodeSpec>,
     val hasCycle: Boolean,
@@ -36,6 +38,7 @@ data class RelativeSolveResult(
     val missingTargets: List<String> = emptyList(),
 )
 
+/** Löst RelativeLayout-Regeln zu Positionen auf. */
 object RelativeSolver {
 
     private val relativeTargetAttrs = listOf(
@@ -52,6 +55,7 @@ object RelativeSolver {
         "android:layout_alignBaseline",
     )
 
+    /** Berechnet die Positionen der Kinder. */
     fun solve(container: LayoutNode): RelativeSolveResult {
         val siblingIds = container.children.mapNotNull { it.attr("android:id")?.let(::stripId) }.toSet()
         val specs = container.children.map { child -> mapChild(child) }

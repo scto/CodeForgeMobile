@@ -6,6 +6,7 @@ package com.codeforge.feature.layoutdesigner.files
 
 import androidx.compose.runtime.Immutable
 
+/** Eine gefundene Layout-Datei. */
 @Immutable
 data class LayoutFileEntry(
     val path: String,
@@ -13,6 +14,7 @@ data class LayoutFileEntry(
     val relativePath: String,
 )
 
+/** Zustand der Layout-Dateiliste. */
 @Immutable
 data class LayoutFilesUiState(
     val rootPath: String = "",
@@ -28,18 +30,30 @@ data class LayoutFilesUiState(
     val createError: String? = null,
 )
 
+/** Aktionen der Layout-Dateiliste. */
 sealed interface LayoutFilesUiEvent {
+    /** Wurzelordner setzen und laden. */
     data class Initialize(val rootPath: String) : LayoutFilesUiEvent
+    /** Neu einlesen. */
     data object Refresh : LayoutFilesUiEvent
+    /** Anlegen-Dialog öffnen. */
     data object ShowCreate : LayoutFilesUiEvent
+    /** Anlegen-Dialog schließen. */
     data object DismissCreate : LayoutFilesUiEvent
+    /** Name geändert. */
     data class NameChanged(val value: String) : LayoutFilesUiEvent
+    /** Vorlage gewählt. */
     data class TemplateSelected(val template: com.codeforge.feature.layoutdesigner.model.LayoutTemplate) : LayoutFilesUiEvent
+    /** Ressourcenordner gewählt. */
     data class ResDirSelected(val value: String) : LayoutFilesUiEvent
+    /** Anlegen bestätigt. */
     data object ConfirmCreate : LayoutFilesUiEvent
+    /** Datei öffnen. */
     data class Open(val path: String) : LayoutFilesUiEvent
 }
 
+/** Einmalige Effekte. */
 sealed interface LayoutFilesUiEffect {
+    /** Designer öffnen. */
     data class OpenDesigner(val path: String) : LayoutFilesUiEffect
 }

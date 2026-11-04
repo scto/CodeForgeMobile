@@ -12,6 +12,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import java.io.File
 
+/** FileProvider zum Teilen von Layout-Dateien. */
 class LayoutDesignerFileProvider : FileProvider() {
 
     companion object {

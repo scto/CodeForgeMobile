@@ -8,10 +8,12 @@ package com.codeforge.feature.layoutdesigner.files
 
 import java.io.File
 
+/** Sucht Layout-Dateien in `res/layout*`. */
 object LayoutScanner {
 
     private val skipDirs = setOf("build", ".git", ".gradle", ".idea", "node_modules", "out")
     private const val MAX_DEPTH = 10
+    /** Gültiger Layout-Name. */
     val nameRegex = Regex("^[a-z][a-z0-9_]*$")
 
     /** Alle Ordner namens `res` unterhalb von `src/<variant>`; relative Pfade. */
@@ -26,6 +28,7 @@ object LayoutScanner {
         return result.sorted()
     }
 
+    /** Alle Layouts unter [root]. */
     fun findLayouts(root: File): List<LayoutFileEntry> {
         val result = ArrayList<LayoutFileEntry>()
         walk(root, 0) { dir ->

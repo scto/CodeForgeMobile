@@ -18,8 +18,10 @@ import org.w3c.dom.Node
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
+/** Liest Vektor-Drawables. */
 object VectorDrawableParser {
 
+    /** Wandelt XML in einen [ImageVector]; `null` bei Fehler. */
     fun parse(inputStream: InputStream): ImageVector? {
         val factory = DocumentBuilderFactory.newInstance().apply {
             isNamespaceAware = false

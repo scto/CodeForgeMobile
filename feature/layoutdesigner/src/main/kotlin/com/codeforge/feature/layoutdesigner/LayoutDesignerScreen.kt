@@ -114,6 +114,7 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.roundToInt
 
+/** Route des Layout-Designers. */
 @Composable
 fun LayoutDesignerRoute(
     filePath: String,

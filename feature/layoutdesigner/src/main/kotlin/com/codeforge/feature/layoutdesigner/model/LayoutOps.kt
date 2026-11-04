@@ -7,14 +7,17 @@
  */
 package com.codeforge.feature.layoutdesigner.model
 
+/** Sucht den Knoten mit der UID im Teilbaum. */
 fun LayoutNode.find(uid: Int): LayoutNode? {
     if (this.uid == uid) return this
     for (c in children) c.find(uid)?.let { return it }
     return null
 }
 
+/** Sucht den Knoten mit der UID. */
 fun LayoutDocument.find(uid: Int): LayoutNode? = root.find(uid)
 
+/** Elternknoten oder `null`. */
 fun LayoutDocument.parentOf(uid: Int): LayoutNode? {
     fun walk(n: LayoutNode): LayoutNode? {
         if (n.children.any { it.uid == uid }) return n
@@ -24,6 +27,7 @@ fun LayoutDocument.parentOf(uid: Int): LayoutNode? {
     return walk(root)
 }
 
+/** Ob der Knoten ein Nachkomme von [ancestorUid] ist. */
 fun LayoutDocument.isDescendantOf(candidateUid: Int, ancestorUid: Int): Boolean {
     val ancestor = find(ancestorUid) ?: return false
     return ancestor.find(candidateUid) != null && candidateUid != ancestorUid
@@ -59,6 +63,7 @@ fun LayoutDocument.freshId(tag: String): String {
     return "@+id/$base$n"
 }
 
+/** Ergebnis des Hinzufügens (neues Dokument, UID). */
 data class AddResult(val document: LayoutDocument, val newUid: Int?)
 
 /** Fügt ein Widget aus der Palette am Ende des passenden Containers ein. */
@@ -145,14 +150,21 @@ fun LayoutDocument.moveNode(uid: Int, newParentUid: Int, index: Int): LayoutDocu
     return copy(root = updatedRoot)
 }
 
+/** Nutzlast beim Ziehen. */
 sealed interface DragPayload {
+    /** Neues Widget aus der Palette. */
     data class NewWidget(val entry: PaletteEntry) : DragPayload
+    /** Vorhandene Knoten. */
     data class ExistingNodes(val uids: Set<Int>) : DragPayload
 }
 
+/** Urteil über ein Ablageziel. */
 sealed interface DropVerdict {
+    /** Erlaubt. */
     data object Allowed : DropVerdict
+    /** Erlaubt mit Warnung. */
     data class Warning(val reason: String) : DropVerdict
+    /** Abgelehnt. */
     data class Rejected(val reason: String) : DropVerdict
 }
 
@@ -271,8 +283,10 @@ fun LayoutDocument.unwrap(uid: Int): LayoutDocument {
     return copy(root = updatedRoot)
 }
 
+/** Attribut, das im neuen Container nicht passt. */
 data class IncompatibleAttribute(val nodeUid: Int, val attributeName: String, val reason: String)
 
+/** Attribute der Kinder, die nach einem Wechsel zu [newTag] nicht mehr passen. */
 fun LayoutDocument.findIncompatibleChildAttributes(containerUid: Int, newTag: String): List<IncompatibleAttribute> {
     val container = find(containerUid) ?: return emptyList()
     val oldTag = container.tag
@@ -383,7 +397,9 @@ fun LayoutDocument.renameId(uid: Int, newId: String): LayoutDocument {
     return copy(root = walk(root))
 }
 
+/** Verweis auf eine entfernte ID. */
 data class DanglingReference(val sourceUid: Int, val sourceTag: String, val attributeName: String, val referencedId: String)
+/** Ergebnis des Entfernens samt verwaister Verweise. */
 data class RemoveWithReferencesResult(val document: LayoutDocument, val danglingReferences: List<DanglingReference>)
 
 /** Löscht [uid] und meldet hängende Verweise; bei [clearReferences] werden diese bereinigt. */
@@ -449,6 +465,7 @@ fun LayoutDocument.removeWithReferences(uid: Int, clearReferences: Boolean = fal
     return RemoveWithReferencesResult(newDoc, dangling)
 }
 
+/** Entfernt Knoten. */
 fun LayoutDocument.removeNodes(uids: Set<Int>): LayoutDocument {
     if (uids.isEmpty() || root.uid in uids) return this
     fun strip(n: LayoutNode): LayoutNode =
@@ -456,6 +473,7 @@ fun LayoutDocument.removeNodes(uids: Set<Int>): LayoutDocument {
     return copy(root = strip(root))
 }
 
+/** Dupliziert Knoten. */
 fun LayoutDocument.duplicateNodes(uids: Set<Int>): AddResult {
     if (uids.isEmpty() || root.uid in uids) return AddResult(this, null)
     var current = this
@@ -468,6 +486,7 @@ fun LayoutDocument.duplicateNodes(uids: Set<Int>): AddResult {
     return AddResult(current, lastNewUid)
 }
 
+/** Entfernt einen Knoten. */
 fun LayoutDocument.remove(uid: Int): LayoutDocument {
     if (uid == root.uid) return this
     fun strip(n: LayoutNode): LayoutNode =

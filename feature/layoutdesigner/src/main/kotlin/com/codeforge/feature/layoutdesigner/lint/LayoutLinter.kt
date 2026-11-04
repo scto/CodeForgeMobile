@@ -10,15 +10,19 @@ import com.codeforge.feature.layoutdesigner.model.setAttribute
 import com.codeforge.feature.layoutdesigner.model.unwrap
 import com.codeforge.feature.layoutdesigner.res.ResourceRepository
 
+/** Schweregrad eines Problems. */
 enum class IssueSeverity {
     ERROR,
     WARNING,
     INFO
 }
 
+/** Schnellkorrektur zu einem Problem. */
 sealed interface QuickFix {
+    /** Beschriftung. */
     val title: String
 
+    /** Attribut setzen. */
     data class SetAttribute(
         override val title: String,
         val targetUid: Int,
@@ -26,12 +30,14 @@ sealed interface QuickFix {
         val value: String
     ) : QuickFix
 
+    /** Attribut entfernen. */
     data class RemoveAttribute(
         override val title: String,
         val targetUid: Int,
         val name: String
     ) : QuickFix
 
+    /** Attribut ersetzen. */
     data class ReplaceAttribute(
         override val title: String,
         val targetUid: Int,
@@ -40,6 +46,7 @@ sealed interface QuickFix {
         val newValue: String? = null
     ) : QuickFix
 
+    /** Wert in Ressource auslagern. */
     data class ExtractResource(
         override val title: String,
         val targetUid: Int,
@@ -47,12 +54,14 @@ sealed interface QuickFix {
         val rawValue: String
     ) : QuickFix
 
+    /** Überflüssigen Container auflösen. */
     data class UnwrapContainer(
         override val title: String,
         val targetUid: Int
     ) : QuickFix
 }
 
+/** Gefundenes Problem. */
 data class LayoutIssue(
     val uid: Int,
     val severity: IssueSeverity,
@@ -61,8 +70,10 @@ data class LayoutIssue(
     val quickFix: QuickFix? = null
 )
 
+/** Prüft Layouts auf typische Fehler (Zugänglichkeit, Größen, Constraints, Hartkodiertes). */
 object LayoutLinter {
 
+    /** Prüft das Dokument und liefert die Probleme. */
     fun lint(
         document: LayoutDocument,
         resourceRepository: ResourceRepository? = null

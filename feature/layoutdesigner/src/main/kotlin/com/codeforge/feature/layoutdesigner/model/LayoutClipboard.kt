@@ -10,6 +10,7 @@ package com.codeforge.feature.layoutdesigner.model
 import com.codeforge.feature.layoutdesigner.xml.LayoutParseException
 import com.codeforge.feature.layoutdesigner.xml.LayoutXml
 
+/** Interne Zwischenablage für Layout-Knoten. */
 object LayoutClipboard {
 
     /**

@@ -37,6 +37,7 @@ import com.codeforge.feature.layoutdesigner.model.ConstraintTarget
 import com.codeforge.feature.layoutdesigner.model.DimensionSpec
 import com.codeforge.feature.layoutdesigner.model.LayoutNode
 
+/** Zeichnet einen ConstraintLayout-Container. */
 @Composable
 internal fun ConstraintView(
     container: LayoutNode,

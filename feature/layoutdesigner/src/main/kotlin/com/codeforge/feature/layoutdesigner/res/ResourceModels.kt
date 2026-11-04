@@ -6,6 +6,7 @@
  */
 package com.codeforge.feature.layoutdesigner.res
 
+/** Ressourcen-Konfiguration (Ordner und Qualifizierer). */
 data class ResourceConfig(
     val isNight: Boolean = false,
     val language: String = "en",
@@ -15,10 +16,12 @@ data class ResourceConfig(
     val apiLevel: Int = 34,
 )
 
+/** Ressourcentyp. */
 enum class ResType {
     STRING, COLOR, DIMEN, INTEGER, BOOL, DRAWABLE, STYLE, ARRAY
 }
 
+/** Eintrag einer Ressource. */
 data class ResourceEntry(
     val type: ResType,
     val name: String,
@@ -27,11 +30,13 @@ data class ResourceEntry(
     val sourceFile: String = "",
 )
 
+/** Eintrag eines Styles. */
 data class StyleItem(
     val name: String,
     val value: String,
 )
 
+/** Style mit Eltern und Einträgen. */
 data class StyleDef(
     val name: String,
     val parent: String?,

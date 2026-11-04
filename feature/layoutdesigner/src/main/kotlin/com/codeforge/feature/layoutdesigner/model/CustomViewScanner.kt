@@ -2,6 +2,7 @@ package com.codeforge.feature.layoutdesigner.model
 
 import java.io.File
 
+/** Gefundene eigene View-Klasse. */
 data class CustomViewInfo(
     val qualifiedName: String,
     val simpleName: String,
@@ -9,6 +10,7 @@ data class CustomViewInfo(
     val sourceFile: File,
 )
 
+/** Sucht eigene Views im Quellcode. */
 class CustomViewScanner {
 
     private val viewBaseTypes = setOf(

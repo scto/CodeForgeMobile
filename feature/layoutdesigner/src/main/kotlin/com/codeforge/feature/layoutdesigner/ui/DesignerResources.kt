@@ -29,6 +29,7 @@ import com.codeforge.feature.layoutdesigner.DevicePreset
 import com.codeforge.feature.layoutdesigner.DesignerTab
 import com.codeforge.feature.layoutdesigner.model.WidgetCategory
 
+/** Beschriftung eines Paletteneintrags. */
 @StringRes
 internal fun paletteLabel(key: String): Int = when (key) {
     "linear_vertical" -> R.string.layout_w_linear_vertical
@@ -58,6 +59,7 @@ internal fun paletteLabel(key: String): Int = when (key) {
     else -> R.string.layout_w_space
 }
 
+/** Symbol eines Paletteneintrags. */
 internal fun paletteIcon(key: String): ImageVector = when (key) {
     "linear_vertical" -> Icons.Filled.ViewAgenda
     "linear_horizontal" -> Icons.Filled.ViewColumn
@@ -86,6 +88,7 @@ internal fun paletteIcon(key: String): ImageVector = when (key) {
     else -> Icons.Filled.Widgets
 }
 
+/** Beschriftung einer Kategorie. */
 @StringRes
 internal fun categoryLabel(category: WidgetCategory): Int = when (category) {
     WidgetCategory.LAYOUT -> R.string.layout_cat_layout
@@ -97,6 +100,7 @@ internal fun categoryLabel(category: WidgetCategory): Int = when (category) {
     WidgetCategory.PROJECT -> R.string.layout_cat_project
 }
 
+/** Beschriftung einer Gerätevorgabe. */
 @StringRes
 internal fun deviceLabel(device: DevicePreset): Int = when (device) {
     DevicePreset.PHONE -> R.string.layout_device_phone
@@ -105,6 +109,7 @@ internal fun deviceLabel(device: DevicePreset): Int = when (device) {
     DevicePreset.TABLET_10 -> R.string.layout_device_tablet10
 }
 
+/** Beschriftung eines Reiters. */
 @StringRes
 internal fun tabLabel(tab: DesignerTab): Int = when (tab) {
     DesignerTab.PREVIEW -> R.string.layout_tab_preview

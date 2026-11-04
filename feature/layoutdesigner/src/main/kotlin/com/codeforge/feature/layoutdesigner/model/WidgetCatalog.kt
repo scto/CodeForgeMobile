@@ -10,6 +10,7 @@ enum class AttrKind {
     BOOLEAN, FLAG, REFERENCE, FLOAT, INTEGER, ID
 }
 
+/** Beschreibung eines Attributs. */
 data class AttrSpec(
     val name: String,
     val kind: AttrKind,
@@ -24,6 +25,7 @@ data class WidgetDef(
     val attrs: List<AttrSpec> = emptyList(),
 )
 
+/** Kategorie in der Palette. */
 enum class WidgetCategory { LAYOUT, TEXT, BUTTON, INPUT, MEDIA, OTHER, PROJECT }
 
 /** Eintrag der Palette; [key] dient der UI zur Zuordnung des lokalisierten Namens. */
@@ -34,6 +36,7 @@ data class PaletteEntry(
     val defaults: Map<String, String>,
 )
 
+/** Katalog bekannter Widgets und Attribute. */
 object WidgetCatalog {
 
     private const val WRAP = "wrap_content"
@@ -225,6 +228,7 @@ object WidgetCatalog {
 
     private val byTag: Map<String, WidgetDef> = widgets.associateBy { it.tag }
 
+    /** Widget zum Tag oder `null`. */
     fun find(tag: String): WidgetDef? = byTag[tag]
 
     /** Attribute für die Eigenschaftenliste: allgemeine + widget-spezifische + vom Elternteil abhängige. */
@@ -312,6 +316,7 @@ object WidgetCatalog {
         "android:layout_height" to MATCH,
     ).apply { putAll(more) }
 
+    /** Einträge der Palette. */
     val palette: List<PaletteEntry> = listOf(
         PaletteEntry("linear_vertical", "LinearLayout", WidgetCategory.LAYOUT, fillDefaults("android:orientation" to "vertical")),
         PaletteEntry("linear_horizontal", "LinearLayout", WidgetCategory.LAYOUT, linkedMapOf("android:layout_width" to MATCH, "android:layout_height" to WRAP, "android:orientation" to "horizontal")),

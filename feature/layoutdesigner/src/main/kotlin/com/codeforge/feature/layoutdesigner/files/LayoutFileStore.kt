@@ -19,10 +19,13 @@ import kotlinx.coroutines.withContext
  * Abstraktion für das Lesen und atomare Schreiben von Layout-Dateien.
  */
 interface LayoutFileStore {
+    /** Liest die Datei. */
     suspend fun readText(path: String): String
+    /** Schreibt die Datei atomar (Temporärdatei, dann Umbenennen). */
     suspend fun writeAtomically(path: String, content: String)
 }
 
+/** Dateizugriff auf dem Dateisystem. */
 @Singleton
 class DefaultLayoutFileStore @Inject constructor() : LayoutFileStore {
 
@@ -55,10 +58,12 @@ class DefaultLayoutFileStore @Inject constructor() : LayoutFileStore {
     }
 }
 
+/** Hilt-Modul für den Dateizugriff. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class LayoutFileStoreModule {
 
+    /** Bindet [DefaultLayoutFileStore]. */
     @Binds
     @Singleton
     abstract fun bindLayoutFileStore(impl: DefaultLayoutFileStore): LayoutFileStore

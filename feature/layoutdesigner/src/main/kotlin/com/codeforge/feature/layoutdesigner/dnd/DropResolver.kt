@@ -15,24 +15,33 @@ import com.codeforge.feature.layoutdesigner.model.flatten
 import com.codeforge.feature.layoutdesigner.model.parentOf
 import kotlin.math.roundToInt
 
+/** Rechteck in Pixeln. */
 data class DesignerRect(
     val left: Float,
     val top: Float,
     val right: Float,
     val bottom: Float,
 ) {
+    /** Breite. */
     val width: Float get() = (right - left).coerceAtLeast(0f)
+    /** Höhe. */
     val height: Float get() = (bottom - top).coerceAtLeast(0f)
+    /** Mitte (x). */
     val centerX: Float get() = left + width / 2f
+    /** Mitte (y). */
     val centerY: Float get() = top + height / 2f
 
+    /** Ob der Punkt im Rechteck liegt. */
     fun contains(x: Float, y: Float): Boolean =
         x in left..right && y in top..bottom
 }
 
+/** Punkt in Pixeln. */
 data class DesignerOffset(val x: Float, val y: Float)
 
+/** Anzeige des Ablageziels. */
 sealed interface DropIndicator {
+    /** Einfügelinie. */
     data class Line(
         val startX: Float,
         val startY: Float,
@@ -40,9 +49,11 @@ sealed interface DropIndicator {
         val endY: Float,
     ) : DropIndicator
 
+    /** Hervorgehobener Container. */
     data class HighlightContainer(val rect: DesignerRect) : DropIndicator
 }
 
+/** Ablageziel (Elternknoten, Position, Anzeige, Urteil). */
 data class DropTarget(
     val parentUid: Int,
     val index: Int,
@@ -51,8 +62,10 @@ data class DropTarget(
     val suggestedAttributes: Map<String, String> = emptyMap(),
 )
 
+/** Bestimmt das Ablageziel zu einer Zeigerposition. */
 object DropResolver {
 
+    /** Ermittelt das Ablageziel; `null`, wenn keines passt. */
     fun resolveDrop(
         document: LayoutDocument,
         boundsMap: Map<Int, DesignerRect>,

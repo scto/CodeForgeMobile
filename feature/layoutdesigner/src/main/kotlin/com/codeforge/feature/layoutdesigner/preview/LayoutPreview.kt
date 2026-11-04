@@ -112,6 +112,7 @@ import com.codeforge.feature.layoutdesigner.ui.ResizeHandles
 import com.codeforge.feature.layoutdesigner.ui.ZoomControls
 import kotlin.math.roundToInt
 
+/** Gemeinsamer Zustand beim Zeichnen der Vorschau. */
 @Immutable
 internal class PreviewContext(
     val selectedUid: Int?,
@@ -134,6 +135,7 @@ fun isApproximatedTag(tag: String): Boolean =
     (tag !in setOf("LinearLayout", "FrameLayout", "ScrollView", "HorizontalScrollView", "RelativeLayout", "include", "merge", "ViewStub") &&
      !tag.endsWith("ConstraintLayout") && !tag.endsWith("FragmentContainerView") && tag != "fragment" && tag.contains('.'))
 
+/** Zeichnet die Vorschau des Layouts mit Auswahl, Überlagerungen und Ziehen. */
 @Composable
 fun LayoutPreview(
     document: LayoutDocument,
@@ -351,6 +353,7 @@ fun LayoutPreview(
     }
 }
 
+/** Zeichnet einen Knoten. */
 @Composable
 internal fun NodeView(node: LayoutNode, ctx: PreviewContext, scopeModifier: Modifier) {
     if (node.tag == "requestFocus" || node.tag == "tag") return

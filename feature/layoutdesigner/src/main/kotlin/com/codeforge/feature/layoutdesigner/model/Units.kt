@@ -29,10 +29,13 @@ fun parseColorArgb(value: String?): Long? {
     }
 }
 
+/** Größenmodus. */
 enum class SizeMode { MATCH_PARENT, WRAP_CONTENT, FIXED }
 
+/** Größe als Modus und dp-Wert. */
 data class SizeSpec(val mode: SizeMode, val dp: Float = 0f)
 
+/** Liest `match_parent`, `wrap_content` oder `…dp`. */
 fun parseSize(value: String?): SizeSpec = when (value?.trim()) {
     "match_parent", "fill_parent" -> SizeSpec(SizeMode.MATCH_PARENT)
     "wrap_content", null, "" -> SizeSpec(SizeMode.WRAP_CONTENT)

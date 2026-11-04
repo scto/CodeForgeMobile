@@ -1,5 +1,6 @@
 package com.codeforge.feature.layoutdesigner.model
 
+/** Vorlagen für neue Layouts. */
 enum class LayoutTemplate(val displayName: String) {
     EMPTY_CONSTRAINT("Leer (ConstraintLayout)"),
     EMPTY_LINEAR("Leer (LinearLayout vertikal)"),
@@ -7,6 +8,7 @@ enum class LayoutTemplate(val displayName: String) {
     FORM("Formular (zwei Eingabefelder + Button)"),
     SCROLL_PAGE("Scroll-Seite mit Toolbar");
 
+    /** XML der Vorlage. */
     fun xml(): String = when (this) {
         EMPTY_CONSTRAINT -> """<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"

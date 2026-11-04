@@ -66,6 +66,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** ViewModel des Layout-Designers: Laden, Bearbeiten mit Rückgängig/Wiederholen, XML, Lint, Varianten, Speichern. */
 @HiltViewModel
 class LayoutDesignerViewModel @Inject constructor(
     private val openFileBridge: OpenFileRequestBridge,
@@ -74,7 +75,9 @@ class LayoutDesignerViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
+    /** Dispatcher für Datei-Zugriffe (Tests). */
     internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    /** Dispatcher für Berechnungen (Tests). */
     internal var computeDispatcher: CoroutineDispatcher = Dispatchers.Default
 
     internal constructor(
@@ -99,9 +102,11 @@ class LayoutDesignerViewModel @Inject constructor(
     }
 
     private val _state = MutableStateFlow(LayoutDesignerUiState())
+    /** UI-Zustand. */
     val state: StateFlow<LayoutDesignerUiState> = _state.asStateFlow()
 
     private val _effects = Channel<LayoutDesignerUiEffect>(Channel.BUFFERED)
+    /** Einmalige Effekte. */
     val effects = _effects.receiveAsFlow()
 
     private val undoStack = ArrayDeque<LayoutDocument>()
@@ -175,6 +180,7 @@ class LayoutDesignerViewModel @Inject constructor(
         }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: LayoutDesignerUiEvent) {
         when (event) {
             is LayoutDesignerUiEvent.Load -> load(event.filePath)

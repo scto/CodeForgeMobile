@@ -17,6 +17,7 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.xml.sax.InputSource
 
+/** XML konnte nicht gelesen werden. */
 class LayoutParseException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 private const val NS_ANDROID = "http://schemas.android.com/apk/res/android"
@@ -24,6 +25,7 @@ private const val NS_APP = "http://schemas.android.com/apk/res-auto"
 private const val NS_TOOLS = "http://schemas.android.com/tools"
 private val FIRST_ATTRS = listOf("android:id", "android:layout_width", "android:layout_height")
 
+/** Liest und schreibt Layout-XML. */
 object LayoutXml {
 
     /** @throws LayoutParseException bei ungültigem XML oder fehlendem Wurzelelement. */
@@ -217,6 +219,7 @@ object LayoutXml {
         return !whitespace.contains('\n')
     }
 
+    /** Schreibt das Dokument als XML, optional formatiert. */
     fun write(document: LayoutDocument, reformat: Boolean = document.reformatOnSave): String {
         val prefixes = LinkedHashSet<String>()
         fun collect(n: LayoutNode) {

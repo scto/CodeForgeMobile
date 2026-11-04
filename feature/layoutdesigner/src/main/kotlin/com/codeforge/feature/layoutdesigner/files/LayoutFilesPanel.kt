@@ -43,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Panel mit der Liste der Layout-Dateien des Projekts. */
 @Composable
 fun LayoutFilesPanel(
     rootPath: String,

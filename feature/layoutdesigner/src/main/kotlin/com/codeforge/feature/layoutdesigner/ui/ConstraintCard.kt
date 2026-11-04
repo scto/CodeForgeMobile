@@ -44,6 +44,7 @@ import com.codeforge.feature.layoutdesigner.model.ConstraintAnchor
 import com.codeforge.feature.layoutdesigner.model.ConstraintTarget
 import com.codeforge.feature.layoutdesigner.model.LayoutNode
 
+/** Karte zum Bearbeiten der Constraints. */
 @Composable
 fun ConstraintCard(
     node: LayoutNode,

@@ -9,6 +9,7 @@ package com.codeforge.feature.layoutdesigner.model
 
 import kotlin.math.roundToInt
 
+/** Liest ConstraintLayout-Attribute in ein Modell. */
 object ConstraintMapper {
 
     private val supportedLinkAttrs = mapOf(
@@ -27,6 +28,7 @@ object ConstraintMapper {
         "layout_constraintRight_toRightOf" to Pair(ConstraintAnchor.END, ConstraintAnchor.END),
     )
 
+    /** Wandelt einen Container in sein Constraint-Modell. */
     fun mapContainer(container: LayoutNode): ConstraintContainerModel {
         val siblingIds = container.children.mapNotNull { it.attr("android:id")?.let(::stripId) }.toSet()
         val mappedChildren = mutableListOf<NodeConstraintSpec>()
