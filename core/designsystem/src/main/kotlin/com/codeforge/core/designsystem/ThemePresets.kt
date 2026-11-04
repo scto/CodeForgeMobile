@@ -4,6 +4,7 @@ package com.codeforge.core.designsystem
 import androidx.annotation.StringRes
 import com.codeforge.core.resources.R
 
+/** Ein Preset aus Primär-, Sekundär- und Tertiärfarbe (Hex). */
 data class ThemePreset(
     val id: String,
     @StringRes val labelRes: Int,
@@ -34,6 +35,7 @@ object ThemePresets {
     val monochrome = ThemePreset("monochrome", R.string.theme_preset_monochrome, "#424242", "#616161", "#757575")
     val violet = ThemePreset("violet", R.string.theme_preset_violet, "#6A1B9A", "#8E24AA", "#5E35B1")
 
+    /** Alle Presets. */
     val all = listOf(
         monokai,
         darcula,
@@ -52,5 +54,6 @@ object ThemePresets {
         violet
     )
 
+    /** Findet das Preset zur [id]. */
     fun findById(id: String): ThemePreset? = all.find { it.id == id }
 }

@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Verwaltet den Workspace-Ordner `.cfm` eines Projekts und trägt ihn in `.git/info/exclude` ein. */
 @Singleton
 class WorkspaceRepositoryImpl @Inject constructor() : WorkspaceRepository {
 

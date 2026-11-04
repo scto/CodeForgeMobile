@@ -21,6 +21,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/** Liest den Abhängigkeitsgraphen über Gradle und cacht ihn je Modul. */
 @Singleton
 class DependencyGraphRepositoryImpl @Inject constructor(
     private val gradleBuildRepository: GradleBuildRepository,
@@ -180,6 +181,7 @@ class DependencyGraphRepositoryImpl @Inject constructor(
         }
     }
 
+    /** Prüfsumme der Build-Dateien eines Moduls; ändert sie sich, ist der Cache ungültig. */
     fun calculateBuildFilesChecksum(projectRoot: String, moduleName: String): String {
         val rootDir = File(projectRoot)
         val filesToCheck = mutableListOf<File>()

@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/** Schreibt Abstürze als Textdatei in das Crash-Verzeichnis und begrenzt deren Anzahl. */
 object CfmCrashHandler {
 
     private val fileDateFormat = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US)

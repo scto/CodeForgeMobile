@@ -1,5 +1,6 @@
 package com.codeforge.core.common
 
+/** Werte, die in die Platzhalter des Datei-Kopfes eingesetzt werden. */
 data class FileHeaderContext(
     val filename: String,
     val moduleName: String? = null,
@@ -10,8 +11,10 @@ data class FileHeaderContext(
     val projectName: String? = null
 )
 
+/** Erzeugt Datei-Kopfzeilen (Kommentarblock) aus Vorlagen. */
 object FileHeaderRenderer {
 
+    /** Standardvorlage für die Dateiendung; `null` bei Formaten ohne Kopf (z. B. JSON). */
     fun getDefaultTemplate(extension: String): String? {
         val ext = extension.lowercase().removePrefix(".")
         return when (ext) {
@@ -46,6 +49,7 @@ object FileHeaderRenderer {
         }
     }
 
+    /** Rendert den Kopf zur Endung; `null`, wenn keine Vorlage existiert. */
     fun render(extension: String, context: FileHeaderContext, customTemplate: String? = null): String? {
         val rawTemplate = customTemplate ?: getDefaultTemplate(extension) ?: return null
 
@@ -84,6 +88,7 @@ object FileHeaderRenderer {
         return if (lines.isEmpty()) null else lines.joinToString("\n")
     }
 
+    /** Setzt den Kopf vor den Inhalt, sofern er nicht schon vorhanden ist. */
     fun applyHeaderToContent(content: String, extension: String, context: FileHeaderContext, customTemplate: String? = null): String {
         val header = render(extension, context, customTemplate) ?: return content
         val ext = extension.lowercase().removePrefix(".")

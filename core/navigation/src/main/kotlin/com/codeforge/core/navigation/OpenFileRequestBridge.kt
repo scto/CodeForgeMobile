@@ -22,17 +22,21 @@ import javax.inject.Singleton
 /** Sprungziel in einer Datei (1-basierte [line]/[column], [length] Zeichen markieren). */
 data class JumpTarget(val path: String, val line: Int, val column: Int, val length: Int)
 
+/** Wünsche, Dateien im Editor zu öffnen. */
 interface OpenFileRequestBridge {
+    /** Pfade, die geöffnet werden sollen. */
     val openRequests: SharedFlow<String>
 
     /** Wird NACH [openRequests] für dieselbe Datei emittiert; der Editor positioniert den Cursor. */
     val jumpRequests: SharedFlow<JumpTarget>
+    /** Fordert das Öffnen von [path] an. */
     suspend fun requestOpen(path: String)
 
     /** Öffnet [path] und springt zur Position (z. B. Treffer der Projektsuche). */
     suspend fun requestOpenAt(path: String, line: Int, column: Int, length: Int = 0)
 }
 
+/** Standardimplementierung. */
 @Singleton
 class OpenFileRequestBridgeImpl @Inject constructor() : OpenFileRequestBridge {
     private val _openRequests = MutableSharedFlow<String>(extraBufferCapacity = 4)

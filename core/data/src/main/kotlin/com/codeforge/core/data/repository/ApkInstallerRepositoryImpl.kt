@@ -30,6 +30,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
+/** Installiert APKs über den `PackageInstaller` und meldet Status und Ergebnis. */
 @Singleton
 class ApkInstallerRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,

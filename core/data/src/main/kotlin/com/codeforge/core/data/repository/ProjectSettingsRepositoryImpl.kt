@@ -13,6 +13,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Liest und schreibt die Projekteinstellungen (Build-Typen) in `.codeforge/project-settings.json`. */
 @Singleton
 class ProjectSettingsRepositoryImpl @Inject constructor() : ProjectSettingsRepository {
 

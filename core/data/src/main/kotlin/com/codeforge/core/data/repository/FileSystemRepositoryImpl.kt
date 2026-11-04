@@ -12,6 +12,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Dateisystem-Zugriff über `java.io.File`. */
 @Singleton
 class FileSystemRepositoryImpl @Inject constructor() : FileSystemRepository {
 

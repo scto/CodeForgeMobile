@@ -78,6 +78,7 @@ class ComposeSourceAnalyzerImpl @Inject constructor() : ComposeSourceAnalyzer {
         return results
     }
 
+    /** Liest die Optionen einer `@Preview`-Annotation (z. B. Größe, Hintergrundfarbe) aus [args]. */
     internal fun parsePreviewOptions(args: String): PreviewOptions {
         fun int(name: String) = Regex("""\b$name\s*=\s*(\d+)""").find(args)?.groupValues?.get(1)?.toIntOrNull()
         val color = Regex("""\bbackgroundColor\s*=\s*(0[xX][0-9A-Fa-f]+|\d+)L?""").find(args)?.groupValues?.get(1)?.let {

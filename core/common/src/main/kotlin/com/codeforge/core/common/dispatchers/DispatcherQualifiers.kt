@@ -17,10 +17,12 @@ import javax.inject.Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class IoDispatcher
 
+/** Qualifier für den Default-Dispatcher. */
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class DefaultDispatcher
 
+/** Qualifier für den Main-Dispatcher. */
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class MainDispatcher

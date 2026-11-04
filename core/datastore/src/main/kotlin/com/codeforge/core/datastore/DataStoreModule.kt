@@ -15,10 +15,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
+/** Hilt-Modul für den DataStore der App-Einstellungen. */
 @Module
 @InstallIn(SingletonComponent::class)
 object DataStoreModule {
 
+    /** Stellt den DataStore (`app_settings.pb`) bereit. */
     @Provides
     @Singleton
     fun provideAppSettingsDataStore(

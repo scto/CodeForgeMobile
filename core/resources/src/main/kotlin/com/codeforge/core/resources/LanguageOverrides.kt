@@ -25,10 +25,12 @@ object LanguageOverrides {
     /** Aktuelle Überschreibungen (leer = keine). Lesen im Composable abonniert Änderungen. */
     val active: Map<String, String> get() = current
 
+    /** Setzt die Überschreibungen (Ressourcenname auf Text). */
     fun set(strings: Map<String, String>) {
         current = strings
     }
 
+    /** Entfernt alle Überschreibungen. */
     fun clear() = set(emptyMap())
 
     /** Übersetzter und formatierter Text für [id] oder `null` (→ Originaltext verwenden). */

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
+/** Aktive Datei mit Composables (Pfad, Inhalt, Funktionsnamen). */
 data class ActiveComposableFile(
     val path: String,
     val content: String,
@@ -24,10 +25,13 @@ data class ActiveComposableFile(
  * Features und :app dürfen :core:navigation referenzieren.
  */
 interface ActiveComposablePreviewBridge {
+    /** Aktive Datei oder `null`. */
     val activeFile: StateFlow<ActiveComposableFile?>
+    /** Meldet die aktive Datei. */
     fun publish(file: ActiveComposableFile?)
 }
 
+/** Standardimplementierung. */
 @javax.inject.Singleton
 class ActiveComposablePreviewBridgeImpl @Inject constructor() : ActiveComposablePreviewBridge {
     private val _activeFile = MutableStateFlow<ActiveComposableFile?>(null)

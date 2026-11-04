@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
+/** Liest Logcat über den eigenen Prozess, die `READ_LOGS`-Berechtigung oder ADB und puffert die Einträge. */
 @Singleton
 class LogcatRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -40,6 +41,7 @@ class LogcatRepositoryImpl @Inject constructor(
     private val ringBuffer = LogcatRingBuffer(capacity = 50_000)
 
     // Für JVM-Unit-Tests überschreibbar
+    /** Startet einen Prozess; in Tests ersetzbar. */
     internal var processLauncher: (command: List<String>, env: Map<String, String>, workingDir: File) -> Process = { cmd, env, dir ->
         ProcessBuilder(cmd).apply {
             directory(dir)
@@ -48,6 +50,7 @@ class LogcatRepositoryImpl @Inject constructor(
         }.start()
     }
 
+    /** Prüft eine Berechtigung; in Tests ersetzbar. */
     internal var permissionChecker: (String) -> Boolean = { perm ->
         runCatching {
             ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED

@@ -18,6 +18,7 @@ object TestRes {
     private const val STRINGS_PATH = "core/resources/src/main/res/values/strings.xml"
     private const val R_STRING_CLASS = "com.codeforge.core.resources.R\$string"
 
+    /** Installiert den Test-Resolver für [locale] mit den Texten aus [stringsXml]. */
     fun install(locale: String = "en", stringsXml: File = locateStringsXml(locale)) {
         val texts = parse(stringsXml)
         val names = idToName()

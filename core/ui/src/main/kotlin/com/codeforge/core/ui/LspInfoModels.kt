@@ -3,6 +3,7 @@ package com.codeforge.core.ui
 
 import androidx.compose.runtime.Immutable
 
+/** Schweregrad einer Diagnosezeile. */
 enum class LspCheckLevel { OK, WARN, ERROR }
 
 /** Eine Zeile der Diagnose (Tab „Zustand“). */

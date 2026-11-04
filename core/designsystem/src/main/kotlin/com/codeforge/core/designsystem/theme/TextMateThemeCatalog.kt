@@ -3,22 +3,26 @@ package com.codeforge.core.designsystem.theme
 import com.codeforge.core.datastore.proto.ThemeMode
 import java.io.File
 
+/** Ein Editor-Theme (TextMate) mit ID und Anzeigename. */
 data class TextMateThemeItem(
     val id: String,
     val displayName: String,
     val isDark: Boolean = true
 )
 
+/** Verfügbare Editor-Themes: eingebaute und installierte. */
 object TextMateThemeCatalog {
     const val AUTO_THEME_ID = "auto"
     const val DEFAULT_DARK_THEME = "dark_plus"
     const val DEFAULT_LIGHT_THEME = "light_plus"
 
+    /** Eingebaute Themes. */
     val BUNDLED_THEMES: List<TextMateThemeItem> = listOf(
         TextMateThemeItem(DEFAULT_DARK_THEME, "Dark+ (Standard Dunkel)", isDark = true),
         TextMateThemeItem(DEFAULT_LIGHT_THEME, "Light+ (Standard Hell)", isDark = false)
     )
 
+    /** Liefert eingebaute und im Ordner [extensionsThemesDir] gefundene Themes. */
     fun getAvailableThemes(extensionsThemesDir: File? = null): List<TextMateThemeItem> {
         val result = mutableListOf<TextMateThemeItem>()
         result.addAll(BUNDLED_THEMES)

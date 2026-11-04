@@ -35,8 +35,10 @@ class CfmLogManager(
     @Volatile
     private var logcatProcess: Process? = null
 
+    /** Ob die Protokollierung aktiv ist. */
     val isEnabled: Boolean get() = enabled.get()
 
+    /** Schaltet die Protokollierung ein oder aus. */
     fun setEnabled(value: Boolean) {
         val was = enabled.getAndSet(value)
         if (value && !was) {
@@ -54,6 +56,7 @@ class CfmLogManager(
         runCatching { dir.isDirectory || dir.mkdirs() }.getOrDefault(false) && dir.canWrite()
     }
 
+    /** Alle Protokolldateien (`cfm-*.log`). */
     fun listLogFiles(): List<File> {
         val dirs = listOfNotNull(primaryLogDir, fallbackLogDir).distinct()
         return dirs.flatMap { d ->
@@ -61,6 +64,7 @@ class CfmLogManager(
         }.sortedByDescending { it.lastModified() }
     }
 
+    /** Gesamtgröße aller Protokolldateien in Bytes. */
     fun totalSizeBytes(): Long = listLogFiles().sumOf { it.length() }
 
     /** Löscht alle Log-Dateien (Crash-Logs bleiben unberührt). */
@@ -84,6 +88,7 @@ class CfmLogManager(
         append(sb.toString())
     }
 
+    /** Hängt eine Zeile an die Tagesdatei an und rotiert bei Überschreiten der Maximalgröße. */
     internal fun append(line: String) {
         try {
             synchronized(lock) {
@@ -101,6 +106,7 @@ class CfmLogManager(
         }
     }
 
+    /** Löscht Protokolle, die älter als die Aufbewahrungsfrist sind. */
     internal fun prune() {
         val limit = clock() - CfmLogger.RETENTION_DAYS * 24L * 60 * 60 * 1000
         runCatching { listLogFiles().filter { it.lastModified() < limit }.forEach { it.delete() } }

@@ -42,6 +42,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 
+/** Führt KI-Aufrufe über den passenden Anbieter aus, schwärzt Geheimnisse im Kontext und verwaltet Schlüssel im Geheimnisspeicher. */
 @Singleton
 class AiRepositoryImpl internal constructor(
     private val store: KeyValueStore,

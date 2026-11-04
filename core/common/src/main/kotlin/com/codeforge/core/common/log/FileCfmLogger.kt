@@ -15,6 +15,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+/** Schreibt Protokolle asynchron in Dateien und spiegelt sie optional nach Logcat. */
 class FileCfmLogger(
     private val logDirectoryProvider: () -> File?,
     private val mirrorToAndroidLog: Boolean = true,

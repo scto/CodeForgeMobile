@@ -23,6 +23,7 @@ import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Formatiert Code über den eingebauten Formatter oder ein Formatter-Plugin. */
 @Singleton
 class CodeFormatterRepositoryImpl @Inject constructor(
     private val lspClient: LspClientRepository,

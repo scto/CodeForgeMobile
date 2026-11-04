@@ -13,6 +13,7 @@ package com.codeforge.core.common.result
 
 suspend fun <T> resultOf(block: suspend () -> T): Result<T> = runCatching { block() }
 
+/** Wandelt den Erfolgswert um und lässt Fehler unverändert. */
 inline fun <T, R> Result<T>.mapResult(transform: (T) -> R): Result<R> =
     fold(onSuccess = { Result.success(transform(it)) }, onFailure = { Result.failure(it) })
 

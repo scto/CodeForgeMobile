@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 
+/** Obere Leiste für Einstellungsseiten mit Titel, Zurück-Pfeil und optionalen Aktionen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsTopBar(
@@ -45,6 +46,7 @@ fun SettingsTopBar(
     )
 }
 
+/** Wie oben, mit eigenen Farben. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsTopBar(

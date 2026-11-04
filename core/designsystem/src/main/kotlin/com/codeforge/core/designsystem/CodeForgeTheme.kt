@@ -17,6 +17,7 @@ import com.codeforge.core.domain.extension.ExtensionIconTheme
 import com.codeforge.core.domain.extension.GrammarContribution
 import com.codeforge.core.domain.extension.Resolved
 
+/** Ob dynamische Farben (Material You) verfügbar sind (Android 12 oder neuer). */
 fun supportsDynamicColor(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
 /** Löst den Dunkelmodus der App-Einstellung auf; [systemDark] = Systemzustand bei ThemeMode.SYSTEM. */
@@ -42,6 +43,15 @@ fun ThemeConfig.findExtensionTheme(available: List<ExtensionColorTheme>): Extens
         null
     }
 
+/**
+ * App-Theme: wählt Farbschema (Plugin, dynamisch, Preset oder eigene Palette), Typografie, Editor-Theme und Icon-Theme.
+ *
+ * @param themeState Theme-Einstellungen.
+ * @param extensionTheme Aktives Plugin-Farbschema.
+ * @param iconTheme Aktives Plugin-Icon-Theme.
+ * @param grammars Aktive Grammatiken.
+ * @param content Inhalt.
+ */
 @Composable
 fun CodeForgeTheme(
     themeState: ThemeConfig,

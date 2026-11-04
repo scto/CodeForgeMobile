@@ -15,11 +15,15 @@ data class TestRunRequest(
     val testFilter: String? = null
 )
 
+/** Wünsche, Tests zu starten. */
 interface TestRunRequestBridge {
+    /** Anforderungen zum Testlauf. */
     val runRequests: SharedFlow<TestRunRequest>
+    /** Fordert einen Testlauf an (Modul und Filter optional). */
     suspend fun requestRunTest(moduleGradlePath: String? = null, testFilter: String? = null)
 }
 
+/** Standardimplementierung. */
 @Singleton
 class TestRunRequestBridgeImpl @Inject constructor() : TestRunRequestBridge {
     private val _runRequests = MutableSharedFlow<TestRunRequest>(extraBufferCapacity = 4)

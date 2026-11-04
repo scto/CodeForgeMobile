@@ -8,6 +8,7 @@ import java.util.Locale
 /** Formatierung für den Info-Dialog; sprachneutral (Einheiten-Kürzel), Datumsformat folgt der Gerätesprache. */
 object LspInfoFormat {
 
+    /** Bytes menschenlesbar (B, KB, MB, GB, TB). */
     fun bytes(value: Long, locale: Locale = Locale.getDefault()): String {
         if (value < 1024) return "$value B"
         val units = listOf("KB", "MB", "GB", "TB")
@@ -32,6 +33,7 @@ object LspInfoFormat {
         }
     }
 
+    /** Datum und Uhrzeit in der Gerätesprache. */
     fun dateTime(epochMillis: Long, locale: Locale = Locale.getDefault()): String =
         DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale).format(Date(epochMillis))
 }

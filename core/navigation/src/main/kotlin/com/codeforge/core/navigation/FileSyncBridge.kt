@@ -28,11 +28,15 @@ import javax.inject.Singleton
  * [directory] = `true`: [paths] enthält Ordner, gespeichert wird alles darunter.
  */
 class FlushRequest(val paths: Set<String>, val directory: Boolean = false) {
+    /** Wird abgeschlossen, wenn der Editor gespeichert hat. */
     val done: CompletableDeferred<Unit> = CompletableDeferred()
 }
 
+/** Abstimmung zwischen Editor und anderen Modulen über Dateiänderungen (Speichern, externe Änderungen). */
 interface FileSyncBridge {
+    /** Aufforderungen an den Editor, ungespeicherte Puffer zu speichern. */
     val flushRequests: SharedFlow<FlushRequest>
+    /** Pfade, die außerhalb des Editors geändert wurden. */
     val externalChanges: SharedFlow<Set<String>>
 
     /** Ein ganzer Ordner hat sich geändert (Git-Checkout, Pull, Reset …) → offene Tabs darunter neu laden. */
@@ -41,19 +45,23 @@ interface FileSyncBridge {
     /** Wartet (max. ~5 s), bis der Editor gespeichert hat; kehrt sofort zurück, wenn kein Editor lauscht. */
     suspend fun requestFlush(paths: Set<String>)
 
+    /** Meldet externe Änderungen an den Pfaden. */
     suspend fun notifyExternalChange(paths: Collection<String>)
 
     /** Wie [requestFlush], aber für alle offenen Dateien unterhalb von [directory]. */
     suspend fun requestFlushDirectory(directory: String)
 
+    /** Meldet die Änderung eines Ordners. */
     suspend fun notifyDirectoryChange(directory: String)
 
     /** Der Editor hat [path] gespeichert (z. B. für Git-Status im Dateibaum). Standard: ohne Wirkung (Fakes). */
     val savedFiles: SharedFlow<String> get() = MutableSharedFlow()
 
+    /** Meldet, dass [path] gespeichert wurde. */
     suspend fun notifyFileSaved(path: String) {}
 }
 
+/** Standardimplementierung. */
 @Singleton
 class FileSyncBridgeImpl @Inject constructor() : FileSyncBridge {
     private val _flushRequests = MutableSharedFlow<FlushRequest>(extraBufferCapacity = 8)

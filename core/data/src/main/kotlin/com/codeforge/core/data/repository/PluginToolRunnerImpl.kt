@@ -28,6 +28,7 @@ class PluginToolRunnerImpl @Inject constructor(
     private val contributionRepository: ContributionRepository
 ) : PluginToolRunner {
 
+    /** Dispatcher für Ein-/Ausgabe; in Tests ersetzbar. */
     internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
     override suspend fun missingRequirements(pluginId: String): List<RequirementContribution> =
@@ -140,6 +141,7 @@ class PluginToolRunnerImpl @Inject constructor(
             .map { File(it, program) }
             .firstOrNull { it.isFile && it.canExecute() }?.absolutePath
 
+    /** Ob das Programm im Termux-`bin` oder im `PATH` ausführbar ist. */
     internal fun isAvailable(program: String): Boolean = resolve(program) != null
 
     private fun termuxEnvironment(): Map<String, String> = mapOf(

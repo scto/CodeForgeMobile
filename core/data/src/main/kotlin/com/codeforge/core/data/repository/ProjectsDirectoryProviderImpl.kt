@@ -12,6 +12,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Bestimmt das Projektverzeichnis (externer Speicher, sonst App-Speicher). */
 @Singleton
 open class ProjectsDirectoryProviderImpl @Inject constructor(
     @ApplicationContext private val context: Context

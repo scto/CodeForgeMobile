@@ -23,6 +23,7 @@ internal object IconBitmapCache {
     private val cache = object : LruCache<String, ImageBitmap>(256) {}
     private val missing = java.util.Collections.synchronizedSet(HashSet<String>())
 
+    /** Lädt das Bild unter [path] (Cache) oder `null`. */
     fun get(path: String): ImageBitmap? {
         cache.get(path)?.let { return it }
         if (path in missing) return null

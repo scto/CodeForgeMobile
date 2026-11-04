@@ -53,6 +53,7 @@ private fun buildColorScheme(primaryHex: String, secondaryHex: String, tertiaryH
     }
 }
 
+/** Typografie der App. */
 val CodeForgeTypography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,

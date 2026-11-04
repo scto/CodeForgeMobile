@@ -20,18 +20,24 @@ import kotlinx.coroutines.withContext
 
 /** Minimaler Key-Value-Speicher (SharedPreferences in Produktion, Map in Tests). */
 internal interface KeyValueStore {
+    /** Liest den Wert zu [key] oder `null`. */
     fun get(key: String): String?
+    /** Speichert [value] unter [key]. */
     fun put(key: String, value: String)
+    /** Entfernt den Wert zu [key]. */
     fun remove(key: String)
 }
 
+/** [KeyValueStore] auf Basis von `SharedPreferences`. */
 internal class SharedPreferencesStore(private val prefs: SharedPreferences) : KeyValueStore {
     override fun get(key: String): String? = prefs.getString(key, null)
     override fun put(key: String, value: String) = prefs.edit().putString(key, value).apply()
     override fun remove(key: String) = prefs.edit().remove(key).apply()
 }
 
+/** Ver- und Entschlüsselung von Geheimnissen. */
 internal interface SecretBox {
+    /** Verschlüsselt [plain] und liefert den kodierten Text. */
     fun encrypt(plain: String): String
 
     /** `null`, wenn nicht entschlüsselbar (z. B. Schlüssel nach Gerätewechsel/Reset ungültig). */

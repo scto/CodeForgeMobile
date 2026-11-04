@@ -15,9 +15,11 @@ sealed interface UiText {
     @Immutable
     data class Plain(val value: String) : UiText
 
+    /** Text aus einer String-Ressource mit Argumenten. */
     @Immutable
     data class Resource(@StringRes val id: Int, val args: List<Any> = emptyList()) : UiText
 
+    /** Text aus einer Plural-Ressource. */
     @Immutable
     data class Plural(@PluralsRes val id: Int, val quantity: Int, val args: List<Any> = emptyList()) : UiText
 

@@ -42,6 +42,7 @@ internal class JGitCloneProgressMonitor(
 
     override fun showDuration(enabled: Boolean) = Unit
 
+    /** Bricht den Klonvorgang ab. */
     fun cancel() {
         cancelled = true
     }

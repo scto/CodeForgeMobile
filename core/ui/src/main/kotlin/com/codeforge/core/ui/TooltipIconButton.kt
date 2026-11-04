@@ -17,6 +17,7 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
+/** Icon-Button mit Tooltip [label] (lange Berührung). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TooltipIconButton(

@@ -74,6 +74,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Git-Operationen auf Basis von JGit (Status, Commit, Branches, Merge, Remote, Clone). */
 @Singleton
 class GitRepositoryImpl @Inject constructor(
     private val settings: GitSettingsRepository,

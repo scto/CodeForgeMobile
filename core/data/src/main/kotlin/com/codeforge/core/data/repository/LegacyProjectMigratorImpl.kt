@@ -20,6 +20,7 @@ import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Übernimmt Projekte aus dem älteren Speicherort in das aktuelle Projektverzeichnis (mit ZIP-Sicherung). */
 @Singleton
 class LegacyProjectMigratorImpl @Inject constructor(
     @ApplicationContext private val context: Context,

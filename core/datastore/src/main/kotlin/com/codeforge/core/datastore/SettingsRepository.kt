@@ -23,8 +23,10 @@ import javax.inject.Singleton
 class SettingsRepository @Inject constructor(
     private val dataStore: DataStore<AppSettings>
 ) {
+    /** Alle App-Einstellungen als Flow. */
     val appSettings: Flow<AppSettings> = dataStore.data
 
+    /** Ändert die Theme-Einstellungen. */
     suspend fun updateTheme(transform: (ThemeConfig) -> ThemeConfig) {
         dataStore.updateData { current ->
             current.toBuilder()
@@ -33,6 +35,7 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Ändert die Editor-Einstellungen. */
     suspend fun updateEditor(transform: (EditorConfig) -> EditorConfig) {
         dataStore.updateData { current ->
             current.toBuilder()
@@ -41,6 +44,7 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Ändert die Debug-Einstellungen. */
     suspend fun updateDebug(transform: (DebugConfig) -> DebugConfig) {
         dataStore.updateData { current ->
             current.toBuilder()
@@ -49,18 +53,21 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Ändert die Git-Einstellungen. */
     suspend fun updateGit(transform: (com.codeforge.core.datastore.proto.GitConfig) -> com.codeforge.core.datastore.proto.GitConfig) {
         dataStore.updateData { current ->
             current.toBuilder().setGit(transform(current.git)).build()
         }
     }
 
+    /** Ändert die Dateibaum-Einstellungen. */
     suspend fun updateFileTree(transform: (com.codeforge.core.datastore.proto.FileTreeConfig) -> com.codeforge.core.datastore.proto.FileTreeConfig) {
         dataStore.updateData { current ->
             current.toBuilder().setFileTree(transform(current.fileTree)).build()
         }
     }
 
+    /** Ändert die Terminal-Einstellungen. */
     suspend fun updateTerminal(transform: (TerminalConfig) -> TerminalConfig) {
         dataStore.updateData { current ->
             current.toBuilder()
@@ -69,6 +76,7 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Ändert die Wizard-Einstellungen. */
     suspend fun updateWizard(transform: (WizardConfig) -> WizardConfig) {
         dataStore.updateData { current ->
             current.toBuilder()
@@ -77,6 +85,7 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Ändert die Datei-Kopf-Einstellungen. */
     suspend fun updateFileHeader(transform: (FileHeaderConfig) -> FileHeaderConfig) {
         dataStore.updateData { current ->
             current.toBuilder()
@@ -85,6 +94,7 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Merkt, ob das Onboarding abgeschlossen ist. */
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.updateData { current ->
             current.toBuilder()
@@ -93,10 +103,12 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Ob der x2c-Hinweis für das Projekt abgelehnt wurde. */
     fun isX2cDismissed(projectPath: String): Flow<Boolean> = appSettings.map { settings ->
         settings.migration.x2CDismissedProjectsList.contains(projectPath)
     }
 
+    /** Merkt, dass der x2c-Hinweis für das Projekt abgelehnt wurde. */
     suspend fun setX2cDismissed(projectPath: String, dismissed: Boolean) {
         dataStore.updateData { current ->
             val existing = current.migration.x2CDismissedProjectsList.toMutableSet()
@@ -115,10 +127,12 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Ob der j2k-Hinweis für das Projekt abgelehnt wurde. */
     fun isJ2kDismissed(projectPath: String): Flow<Boolean> = appSettings.map { settings ->
         settings.migration.j2KDismissedProjectsList.contains(projectPath)
     }
 
+    /** Merkt, dass der j2k-Hinweis für das Projekt abgelehnt wurde. */
     suspend fun setJ2kDismissed(projectPath: String, dismissed: Boolean) {
         dataStore.updateData { current ->
             val existing = current.migration.j2KDismissedProjectsList.toMutableSet()

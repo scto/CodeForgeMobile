@@ -28,6 +28,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Verwaltet eingebaute und eigene Snippets (JSON im [storageDir]). */
 @Singleton
 class SnippetRepositoryImpl(
     private val storageDir: File,

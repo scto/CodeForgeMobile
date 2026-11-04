@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Ergebnis eines Prozesses: Exit-Code, Ausgaben und Zeitüberschreitung. */
 data class ProcessExecutionResult(
     val exitCode: Int,
     val stdout: String,
@@ -14,7 +15,9 @@ data class ProcessExecutionResult(
     val timedOut: Boolean = false
 )
 
+/** Führt externe Programme aus. */
 interface ProcessExecutor {
+    /** Startet [command] und wartet höchstens [timeoutSeconds] Sekunden. */
     suspend fun execute(
         command: List<String>,
         stdin: String? = null,
@@ -22,9 +25,11 @@ interface ProcessExecutor {
         environment: Map<String, String> = emptyMap()
     ): ProcessExecutionResult
 
+    /** Pfad des Programms [name] im `PATH` oder in [extraPaths]; `null`, wenn nicht gefunden. */
     fun findExecutable(name: String, extraPaths: List<String> = emptyList()): String?
 }
 
+/** Standardimplementierung auf Basis von `ProcessBuilder`. */
 @Singleton
 class DefaultProcessExecutor @Inject constructor() : ProcessExecutor {
 

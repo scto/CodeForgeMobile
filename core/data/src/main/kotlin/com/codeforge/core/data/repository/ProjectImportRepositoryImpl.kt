@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.flowOn
 import java.io.File
 import javax.inject.Inject
 
+/** Importiert Projekte über den Storage Access Framework in einen lokalen Ordner. */
 class ProjectImportRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val projectsDirectoryProvider: ProjectsDirectoryProvider
