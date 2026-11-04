@@ -40,6 +40,7 @@ import com.codeforge.core.ui.SettingsTopBar
 
 private data class SettingsEntry(@StringRes val labelRes: Int, val icon: ImageVector, val onClick: () -> Unit)
 
+/** Route der Einstellungsübersicht mit Einstiegen in alle Bereiche. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsHubRoute(

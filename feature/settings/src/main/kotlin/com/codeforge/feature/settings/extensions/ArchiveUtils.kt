@@ -9,6 +9,7 @@ import java.nio.file.Files
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipInputStream
 
+/** Entpackt Archive (ZIP, TAR.GZ, GZ) sicher. */
 object ArchiveUtils {
 
     /**

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** ViewModel der Erweiterungen (Liste, Installation, Updates, Info). */
 @HiltViewModel
 class ExtensionsViewModel @Inject constructor(
     private val extensionsManager: ExtensionsManager,
@@ -24,6 +25,7 @@ class ExtensionsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExtensionsUiState())
+    /** UI-Zustand. */
     val uiState: StateFlow<ExtensionsUiState> = _uiState.asStateFlow()
 
     init {
@@ -55,6 +57,7 @@ class ExtensionsViewModel @Inject constructor(
         viewModelScope.launch { setUpdate(pkg.id, UpdateUiState.Done(updateChecker.check(pkg))) }
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: ExtensionsUiEvent) {
         when (event) {
             is ExtensionsUiEvent.Refresh -> loadExtensions()

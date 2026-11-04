@@ -60,6 +60,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Angaben zur App: Versionsname, Build-Nummer und ob es ein Debug-Build ist. */
 @Immutable
 data class AboutInfo(val versionName: String, val versionCode: Long, val isDebug: Boolean = false)
 
@@ -71,10 +72,14 @@ fun loadAboutInfo(context: Context): AboutInfo = runCatching {
     AboutInfo(info.versionName ?: "?", code, debug)
 }.getOrDefault(AboutInfo("?", 0L))
 
+/** Adresse des Quellcodes auf GitHub. */
 const val ABOUT_SOURCE_URL = "https://github.com/scto/CodeForgeMobile"
+/** Adresse der Fehlermeldungen (Issues). */
 const val ABOUT_ISSUES_URL = "$ABOUT_SOURCE_URL/issues"
+/** Adresse der Releases. */
 const val ABOUT_RELEASES_URL = "$ABOUT_SOURCE_URL/releases"
 
+/** Route „Über die App“: liest die Paketdaten und zeigt den Bildschirm. */
 @Composable
 fun AboutSettingsRoute(
     modifier: Modifier = Modifier,
@@ -85,6 +90,13 @@ fun AboutSettingsRoute(
     AboutSettingsScreen(modifier = modifier, info = info, onBack = onBack)
 }
 
+/**
+ * Bildschirm „Über die App“ mit Kopfkarte, Links und weiteren Angaben.
+ *
+ * @param modifier Modifier.
+ * @param info Anzuzeigende App-Daten.
+ * @param onBack Zurück-Aktion.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutSettingsScreen(

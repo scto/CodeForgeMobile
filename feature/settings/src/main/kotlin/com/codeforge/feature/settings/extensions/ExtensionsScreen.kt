@@ -57,6 +57,7 @@ import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 import com.codeforge.core.ui.embeddedAwareInsets
 
+/** Route der Erweiterungen. */
 @Composable
 fun ExtensionsRoute(
     modifier: Modifier = Modifier,
@@ -74,6 +75,7 @@ fun ExtensionsRoute(
     )
 }
 
+/** Bildschirm der Erweiterungen: Liste, Details, Info und Installation. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExtensionsScreen(

@@ -9,6 +9,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Ermittelt den Startbefehl eines Language-Servers aus installierten Erweiterungen und Plugins. */
 @Singleton
 class LspServerResolverImpl @Inject constructor(
     private val extensionsManager: ExtensionsManager,

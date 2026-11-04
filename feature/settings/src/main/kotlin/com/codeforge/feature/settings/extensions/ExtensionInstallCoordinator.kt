@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Fortschritt einer Installation (Status und Anteil 0–1). */
 @Immutable
 data class ExtensionInstallProgress(
     val pkg: LspExtensionPackage,
@@ -28,6 +29,7 @@ data class ExtensionInstallProgress(
     val progress: Float
 )
 
+/** Ergebnis einer Installation (Datei oder Fehler). */
 @Immutable
 data class ExtensionInstallOutcome(
     val pkg: LspExtensionPackage,
@@ -36,6 +38,7 @@ data class ExtensionInstallOutcome(
 
 /** Startet den Vordergrunddienst, solange Installationen laufen (austauschbar für Tests). */
 fun interface ExtensionInstallServiceStarter {
+    /** Startet den Vordergrunddienst. */
     fun start()
 }
 
@@ -75,6 +78,7 @@ class ExtensionInstallCoordinator internal constructor(
     /** Ergebnis je abgeschlossener Installation (nicht bei Abbruch). */
     val outcomes: SharedFlow<ExtensionInstallOutcome> = _outcomes.asSharedFlow()
 
+    /** Startet die Installation, sofern nicht schon eine läuft. */
     fun install(pkg: LspExtensionPackage) {
         val started = synchronized(this) {
             if (_active.value.containsKey(pkg.id)) {

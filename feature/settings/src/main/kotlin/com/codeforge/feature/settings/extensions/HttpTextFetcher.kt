@@ -10,9 +10,11 @@ import javax.inject.Singleton
 
 /** Lädt kleine Textantworten (JSON/HTML) per HTTPS; Fehler kommen als [Result.failure]. */
 fun interface HttpTextFetcher {
+    /** Lädt den Text unter [url]. */
     suspend fun fetch(url: String): Result<String>
 }
 
+/** Standardimplementierung über HTTPS (folgt Weiterleitungen). */
 @Singleton
 class DefaultHttpTextFetcher @Inject constructor() : HttpTextFetcher {
     override suspend fun fetch(url: String): Result<String> = withContext(Dispatchers.IO) {

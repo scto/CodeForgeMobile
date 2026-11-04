@@ -10,7 +10,9 @@ import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Lädt Dateien herunter. */
 fun interface FileDownloader {
+    /** Lädt [url] nach [destination] und meldet den Fortschritt. */
     suspend fun download(
         url: String,
         destination: File,
@@ -18,6 +20,7 @@ fun interface FileDownloader {
     ): Result<File>
 }
 
+/** Lädt Dateien per HTTPS. */
 @Singleton
 class HttpFileDownloader @Inject constructor() : FileDownloader {
 

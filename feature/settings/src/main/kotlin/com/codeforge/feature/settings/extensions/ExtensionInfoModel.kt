@@ -22,6 +22,7 @@ internal object ExtensionInfoModel {
         else -> setOf(pkg.id)
     }
 
+    /** Baut das Modell des Info-Dialogs für eine Erweiterung. */
     fun build(item: ExtensionUiItem, info: LspServerInfo?): LspInfoModel {
         val pkg = item.pkg
         val source = when (val s = pkg.source) {
@@ -97,6 +98,7 @@ internal object ExtensionInfoModel {
         }
     }
 
+    /** Wandelt Laufzeitdaten in die Anzeige um; `null`, wenn der Server nicht läuft. */
     fun runtime(stats: LspRuntimeStats?): LspRuntimeInfo? = stats?.let {
         LspRuntimeInfo(
             running = it.state == LspServerState.RUNNING || it.state == LspServerState.STARTING,

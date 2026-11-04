@@ -34,6 +34,7 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 
+/** Route der Debug-Einstellungen. */
 @Composable
 fun DebugSettingsRoute(
     modifier: Modifier = Modifier,
@@ -44,6 +45,7 @@ fun DebugSettingsRoute(
     DebugSettingsScreen(modifier = modifier, uiState = uiState, onBack = onBack, onEvent = viewModel::onEvent)
 }
 
+/** Bildschirm der Debug-Einstellungen. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DebugSettingsScreen(
@@ -129,6 +131,7 @@ internal fun DebugSettingsScreen(
     }
 }
 
+/** Formatiert eine Größe in Bytes lesbar. */
 internal fun formatSize(bytes: Long): String = when {
     bytes < 1024 -> "$bytes B"
     bytes < 1024 * 1024 -> "%.1f KiB".format(bytes / 1024.0)

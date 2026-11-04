@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** ViewModel der Debug-Einstellungen (Protokollierung ein/aus, Löschen, Statistik). */
 @HiltViewModel
 class DebugSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
@@ -25,6 +26,7 @@ class DebugSettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DebugSettingsUiState(logEnabled = logManager.isEnabled))
+    /** UI-Zustand. */
     val uiState: StateFlow<DebugSettingsUiState> = _uiState.asStateFlow()
 
     init {
@@ -36,6 +38,7 @@ class DebugSettingsViewModel @Inject constructor(
         refreshStats()
     }
 
+    /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: DebugSettingsUiEvent) {
         when (event) {
             is DebugSettingsUiEvent.LogEnabledChanged -> viewModelScope.launch {

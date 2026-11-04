@@ -104,7 +104,9 @@ data class HelpSection(
     val entries: List<HelpEntry>,
 )
 
+/** Inhalte der Hilfe. */
 object HelpCatalog {
+    /** Abschnitte der Hilfe. */
     val sections: List<HelpSection> = listOf(
         HelpSection(
             titleRes = R.string.help_s_header,
@@ -209,6 +211,7 @@ object HelpCatalog {
     )
 }
 
+/** Route der Hilfe. */
 @Composable
 fun HelpRoute(
     modifier: Modifier = Modifier,
@@ -217,6 +220,7 @@ fun HelpRoute(
     HelpScreen(modifier = modifier, sections = HelpCatalog.sections, onBack = onBack)
 }
 
+/** Bildschirm der Hilfe. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HelpScreen(

@@ -4,6 +4,7 @@ package com.codeforge.feature.settings.extensions
 import androidx.annotation.StringRes
 import com.codeforge.core.resources.R
 
+/** Archivformat eines Downloads. */
 enum class ExtensionArchiveType(val extension: String) {
     ZIP("zip"),
     TAR_GZ("tar.gz"),
@@ -12,6 +13,7 @@ enum class ExtensionArchiveType(val extension: String) {
     BINARY("bin")
 }
 
+/** Installationsstatus einer Erweiterung. */
 enum class ExtensionStatus {
     NOT_INSTALLED,
     DOWNLOADING,
@@ -22,19 +24,24 @@ enum class ExtensionStatus {
     ERROR
 }
 
+/** Quelle einer Erweiterung. */
 sealed interface ExtensionSource {
+    /** Download mit URL, SHA-256 und Archivformat. */
     data class Download(
         val url: String,
         val sha256: String,
+        /** Archivformat oder `null`. */
         val archiveType: ExtensionArchiveType
     ) : ExtensionSource
 
+    /** Termux-Paket mit Paket- und Programmname. */
     data class TermuxPackage(
         val packageName: String,
         val binaryName: String
     ) : ExtensionSource
 }
 
+/** Beschreibung einer Erweiterung (ID, Namen, Version, Sprache, Quelle, Voraussetzungen). */
 data class LspExtensionPackage(
     val id: String,
     @StringRes val nameRes: Int,
@@ -77,13 +84,18 @@ data class LspExtensionPackage(
         executableRelativePath = executableRelativePath
     )
 
+    /** Download-Adresse oder `null`. */
     val downloadUrl: String? get() = (source as? ExtensionSource.Download)?.url
+    /** Erwartete SHA-256-Summe oder `null`. */
     val expectedSha256: String? get() = (source as? ExtensionSource.Download)?.sha256
     val archiveType: ExtensionArchiveType? get() = (source as? ExtensionSource.Download)?.archiveType
+    /** Ob die Quelle ein Termux-Paket ist. */
     val isTermuxPackage: Boolean get() = source is ExtensionSource.TermuxPackage
+    /** Ob die Quelle ein Download ist. */
     val isDownloadable: Boolean get() = source is ExtensionSource.Download
 }
 
+/** Katalog der eingebauten Erweiterungen. */
 object LspExtensionCatalog {
     /**
      * Kotlin Language Server (fwcd/kotlin-language-server)
@@ -310,6 +322,7 @@ object LspExtensionCatalog {
         executableRelativePath = "package/out/cli.js"
     )
 
+    /** Alle Erweiterungen. */
     val ALL: List<LspExtensionPackage> = listOf(
         kotlinLanguageServer,
         jdtls,
@@ -323,5 +336,6 @@ object LspExtensionCatalog {
         bashLanguageServer
     )
 
+    /** Erweiterung zur [id] oder `null`. */
     fun findById(id: String): LspExtensionPackage? = ALL.find { it.id == id }
 }

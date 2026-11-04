@@ -13,6 +13,9 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Installiert, prüft und entfernt Erweiterungen (Language-Server): Download mit SHA-256-Prüfung, Entpacken, Termux-Pakete und Voraussetzungen.
+ */
 @Singleton
 class ExtensionsManager internal constructor(
     private val baseDir: File,
@@ -63,10 +66,13 @@ class ExtensionsManager internal constructor(
             File(prefix, "bin")
         }
 
+    /** Alle bekannten Erweiterungen. */
     fun getCatalog(): List<LspExtensionPackage> = LspExtensionCatalog.ALL
 
+    /** Installationsordner einer Erweiterung. */
     fun getExtensionDirectory(pkg: LspExtensionPackage): File = File(baseDir, pkg.id)
 
+    /** Ausführbare Datei der Erweiterung oder `null`, wenn nicht installiert. */
     fun getExecutableFile(pkg: LspExtensionPackage): File? {
         return when (val source = pkg.source) {
             is ExtensionSource.TermuxPackage -> {
@@ -86,10 +92,12 @@ class ExtensionsManager internal constructor(
         }
     }
 
+    /** Ob die Erweiterung installiert ist. */
     fun isInstalled(pkg: LspExtensionPackage): Boolean {
         return getExecutableFile(pkg) != null
     }
 
+    /** Ersetzt den npm-Aufruf (Tests). */
     var customNpmRunner: (suspend (packageDir: File) -> Result<Unit>)? = null
 
     /**
@@ -116,6 +124,13 @@ class ExtensionsManager internal constructor(
         return missing
     }
 
+    /**
+     * Installiert die Erweiterung (Voraussetzungen, Download, Prüfung, Entpacken).
+     *
+     * @param pkg Zu installierende Erweiterung.
+     * @param onProgress Meldet Anteil (0–1) und Status.
+     * @return Ausführbare Datei oder Fehler.
+     */
     suspend fun install(
         pkg: LspExtensionPackage,
         onProgress: (progress: Float, status: ExtensionStatus) -> Unit = { _, _ -> }
@@ -265,6 +280,7 @@ class ExtensionsManager internal constructor(
         }
     }
 
+    /** Deinstalliert die Erweiterung. */
     suspend fun uninstall(pkg: LspExtensionPackage): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             if (pkg.source is ExtensionSource.Download) {

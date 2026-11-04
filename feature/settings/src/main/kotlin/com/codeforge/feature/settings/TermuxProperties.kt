@@ -16,6 +16,7 @@ object TermuxPropertiesText {
         return if (idx > 0) t.substring(0, idx).trim() else null
     }
 
+    /** Liest den letzten Wert von [key] oder `null`. */
     fun get(text: String, key: String): String? =
         text.lineSequence().lastOrNull { keyOf(it) == key }?.substringAfter('=')?.trim()
 
@@ -39,9 +40,11 @@ object TermuxPropertiesText {
 
 /** Liest/schreibt `~/.termux/termux.properties`; Änderungen gelten für neue Terminal-Sitzungen. */
 class TermuxPropertiesStore(private val file: File = defaultFile()) {
+    /** Liest den Wert von [key] aus der Datei. */
     fun read(key: String): String? =
         runCatching { if (file.isFile) TermuxPropertiesText.get(file.readText(), key) else null }.getOrNull()
 
+    /** Schreibt [key] (`null` entfernt ihn); `true` bei Erfolg. */
     fun write(key: String, value: String?): Boolean = runCatching {
         val old = if (file.isFile) file.readText() else ""
         file.parentFile?.mkdirs()

@@ -18,6 +18,7 @@ class LspUpdateChecker internal constructor(
     @Inject constructor(fetcher: DefaultHttpTextFetcher, manager: ExtensionsManager) :
         this(fetcher as HttpTextFetcher, manager)
 
+    /** Prüft, ob für [pkg] eine neuere Version existiert (npm, GitHub oder Termux/apt). */
     suspend fun check(pkg: LspExtensionPackage): UpdateCheckResult {
         val info = LspServerInfoCatalog.of(pkg.id) ?: return UpdateCheckResult.Failed("keine Update-Quelle")
         return when (val src = info.update) {

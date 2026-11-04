@@ -23,12 +23,17 @@ sealed interface LspUpdateSource {
     data class TermuxApt(val packageName: String) : LspUpdateSource
 }
 
+/** Ergebnis der Update-Prüfung. */
 sealed interface UpdateCheckResult {
+    /** Aktuell. */
     data class UpToDate(val current: String, val latest: String) : UpdateCheckResult
+    /** Neuere Version verfügbar. */
     data class UpdateAvailable(val current: String, val latest: String) : UpdateCheckResult
+    /** Prüfung fehlgeschlagen. */
     data class Failed(val reason: String) : UpdateCheckResult
 }
 
+/** Vergleich von Versionsnummern. */
 object VersionCompare {
     /** Zerlegt "v1.2.3-beta" in [1,2,3]; nicht-numerische Teile werden ignoriert. */
     fun parts(version: String): List<Int> =
@@ -47,12 +52,15 @@ object VersionCompare {
     }
 }
 
+/** Liest Versionen aus den Antworten von npm und GitHub. */
 object UpdateParsers {
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
+    /** Neueste Version aus der npm-Antwort. */
     fun npmLatest(body: String): String? =
         runCatching { json.parseToJsonElement(body).jsonObject["version"]?.jsonPrimitive?.contentOrNull }.getOrNull()
 
+    /** Tag des neuesten Releases aus der GitHub-Antwort. */
     fun githubReleaseTag(body: String): String? =
         runCatching { json.parseToJsonElement(body).jsonObject["tag_name"]?.jsonPrimitive?.contentOrNull }.getOrNull()
 

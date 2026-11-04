@@ -16,10 +16,13 @@ data class LspServerInfo(
     @StringRes val capabilitiesRes: Int,
     @StringRes val limitationsRes: Int,
 ) {
+    /** Adresse des Repositories auf GitHub. */
     val repoUrl: String get() = "https://github.com/$repoSlug"
 }
 
+/** Hintergrundinformationen zu den Servern (Projekt, Lizenz, Update-Quelle). */
 object LspServerInfoCatalog {
+    /** Alle Einträge. */
     val ALL: List<LspServerInfo> = listOf(
         LspServerInfo(
             packageId = "kotlin-language-server",
@@ -133,5 +136,6 @@ object LspServerInfoCatalog {
         ),
     )
 
+    /** Eintrag zur Paket-ID oder `null`. */
     fun of(packageId: String): LspServerInfo? = ALL.firstOrNull { it.packageId == packageId }
 }
