@@ -91,7 +91,7 @@ def main():
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     src = f"deb {apt_url or '<APT-URL>'} {dist} main"
     page = f"""<!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="de"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=https://scto.github.io/CodeForgeMobile/apt/"><link rel="canonical" href="https://scto.github.io/CodeForgeMobile/apt/"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CodeForge APT-Repo</title>
 <style>
 :root{{--bg:#fff;--fg:#1b1d22;--mu:#5d6370;--ln:#dfe2e8;--ac:#2a5bd7;--hd:#f3f5f9}}
