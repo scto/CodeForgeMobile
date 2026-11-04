@@ -17,6 +17,7 @@ internal class XmlElement(
     val line: Int,
     var parent: XmlElement? = null
 ) {
+    /** Kindelemente. */
     val children: MutableList<XmlElement> = mutableListOf()
     private val consumed = HashSet<String>()
 
@@ -26,14 +27,18 @@ internal class XmlElement(
         return attrs[name]
     }
 
+    /** Liest ein Attribut, ohne es als behandelt zu markieren. */
     fun peek(name: String): String? = attrs[name]
 
+    /** Markiert ein Attribut als behandelt. */
     fun markConsumed(name: String) {
         consumed += name
     }
 
+    /** Attribute, die noch nicht behandelt wurden. */
     fun unconsumed(): List<String> = attrs.keys.filter { it !in consumed }
 
+    /** Tag ohne Package (`Button` statt `android.widget.Button`). */
     val shortTag: String get() = tag.substringAfterLast('.')
 }
 
@@ -44,6 +49,7 @@ internal object LayoutXmlParser {
     private const val NS_TOOLS = "http://schemas.android.com/tools"
     private val COMMENT = Regex("<!--.*?-->", RegexOption.DOT_MATCHES_ALL)
 
+    /** Parst Layout-XML zu einem Elementbaum; leeres XML löst eine Ausnahme aus. */
     fun parse(xml: String): XmlElement {
         require(xml.isNotBlank()) { "XML ist leer" }
         val scan = COMMENT.replace(xml) { m -> m.value.map { if (it == '\n') '\n' else ' ' }.joinToString("") }

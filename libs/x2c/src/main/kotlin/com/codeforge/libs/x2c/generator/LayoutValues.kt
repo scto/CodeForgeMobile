@@ -3,9 +3,11 @@ package com.codeforge.libs.x2c.generator
 /** Umrechnung von Android-Attributwerten in Kotlin-Ausdrücke. Rein, ohne Zustand. */
 internal object LayoutValues {
 
+    /** Wandelt `snake_case`, `kebab-case` oder Punktnamen in PascalCase. */
     fun pascal(name: String): String =
         name.split('_', '-', '.').filter { it.isNotEmpty() }.joinToString("") { it.replaceFirstChar { c -> c.uppercaseChar() } }
 
+    /** Wandelt den Namen in camelCase. */
     fun camel(name: String): String = pascal(name).replaceFirstChar { it.lowercaseChar() }
 
     /** `@+id/btn_submit` / `@id/btn_submit` -> `btn_submit`; sonst null. */
@@ -25,9 +27,11 @@ internal object LayoutValues {
         return m.groupValues[1].toDouble() to m.groupValues[2].ifEmpty { "" }
     }
 
+    /** Zahl als Kotlin-Literal (ganzzahlig ohne Nachkommastellen). */
     fun numberLiteral(d: Double): String =
         if (d == Math.floor(d) && !d.isInfinite()) d.toLong().toString() else d.toString()
 
+    /** Zahl als Kotlin-Float-Literal (`1f`, `1.5f`). */
     fun floatLiteral(d: Double): String =
         if (d == Math.floor(d) && !d.isInfinite()) "${d.toLong()}f" else "${d}f"
 
@@ -47,6 +51,7 @@ internal object LayoutValues {
         return "Color(0x${full.uppercase()})"
     }
 
+    /** Android-Standardfarben (Name auf Kotlin-Ausdruck). */
     val ANDROID_COLORS = mapOf(
         "white" to "Color.White",
         "black" to "Color.Black",

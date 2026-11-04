@@ -8,6 +8,7 @@ import com.codeforge.core.domain.repository.ComposeEntryWirer
 
 /** Kriterien der Stufe 2 an einer Stelle (Dialog und Bericht zeigen sie an). */
 object Stage2Criteria {
+    /** Regeln, die eine Klasse für die automatische Umstellung erfüllen muss. */
     val RULES: List<String> = listOf(
         "Kotlin-Datei (Java: Task 50 zuerst, wird nie angefasst)",
         "genau eine Klasse mit bekannter Basisklasse (AppCompatActivity, ComponentActivity, FragmentActivity, Fragment)",
@@ -18,6 +19,7 @@ object Stage2Criteria {
     )
 }
 
+/** Stellt einfache Kotlin-Activities und -Fragmente von `setContentView`/`inflate` auf Compose um. */
 class ComposeEntryWirerImpl : ComposeEntryWirer {
 
     override fun wire(fileName: String, content: String, target: WireTarget): ComposeWireResult {

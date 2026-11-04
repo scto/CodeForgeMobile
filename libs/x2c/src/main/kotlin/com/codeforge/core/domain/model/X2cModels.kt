@@ -20,12 +20,14 @@ data class X2cOptions(
     val buildBaselineFirst: Boolean = false
 )
 
+/** Einstufung eines Layouts: automatisch umwandelbar, umwandelbar mit Hinweisen oder nicht umwandelbar. */
 enum class LayoutClassification {
     AUTOMATIC,
     WITH_NOTES,
     NOT_CONVERTIBLE
 }
 
+/** Eine Verwendung eines Layouts im Code (Datei, Zeile, Art, angesprochene View-IDs, Hinweise, Eignung für Stufe 2). */
 data class LayoutUsage(
     val filePath: String,
     val lineNumber: Int,
@@ -35,6 +37,9 @@ data class LayoutUsage(
     val notes: List<String> = emptyList()
 )
 
+/**
+ * Plan-Eintrag zu einem Layout: Datei, Einstufung mit Grund, Wurzel-Tag, deklarierte und tatsächlich genutzte View-IDs, Verwendungen und Varianten.
+ */
 data class LayoutPlanEntry(
     val relativePath: String,
     val layoutName: String,
@@ -87,6 +92,7 @@ data class ComposeScanResult(
     val qualifiesForAutoPrompt: Boolean = false
 )
 
+/** Ergebnis der Umwandlung einer Layoutdatei. */
 enum class X2cFileStatus {
     GENERATED,
     GENERATED_WITH_NOTES,
@@ -94,6 +100,7 @@ enum class X2cFileStatus {
     FAILED
 }
 
+/** Ergebnis je Layoutdatei: Quell-XML, erzeugte Compose-Datei, Status, TODO-Anzahl, Hinweise und Fehlertext. */
 data class X2cFileResult(
     val sourceXmlPath: String,
     val outputComposePath: String?,
@@ -103,21 +110,35 @@ data class X2cFileResult(
     val errorMessage: String? = null
 )
 
+/** Fortschritt der Migration (für die UI). */
 sealed interface X2cProgress {
+    /** Nichts läuft. */
     data object Idle : X2cProgress
+    /** Das Projekt wird analysiert. */
     data class Analyzing(val message: String) : X2cProgress
+    /** Das Backup wird erstellt. */
     data class CreatingBackup(val projectPath: String) : X2cProgress
+    /** Die Compose-Build-Konfiguration wird vorbereitet. */
     data class PreparingBuild(val message: String) : X2cProgress
+    /** Composables werden erzeugt (aktuell/gesamt). */
     data class GeneratingComposables(val current: Int, val total: Int, val currentLayout: String) : X2cProgress
+    /** Activities und Fragmente werden auf Compose umgestellt (aktuell/gesamt). */
     data class WiringActivities(val current: Int, val total: Int, val currentClass: String) : X2cProgress
+    /** Das Theme wird erzeugt. */
     data class GeneratingTheme(val message: String) : X2cProgress
+    /** Änderungen werden angewendet. */
     data class ApplyingChanges(val message: String) : X2cProgress
+    /** Änderungen werden zurückgenommen. */
     data class RollingBack(val message: String) : X2cProgress
+    /** Der Build wird zur Prüfung ausgeführt. */
     data class VerifyingBuild(val task: String) : X2cProgress
+    /** Fertig; enthält den Bericht. */
     data class Completed(val report: X2cReport) : X2cProgress
+    /** Fehlgeschlagen. */
     data class Failed(val error: String) : X2cProgress
 }
 
+/** Bericht einer Migration: Zählwerte, Backup- und Journalpfad sowie Ergebnisse je Datei. */
 data class X2cReport(
     val projectPath: String,
     val timestampEpochMillis: Long,
@@ -211,6 +232,7 @@ data class ThemeDetection(
     val family: String? = null
 )
 
+/** Ergebnis der Theme-Erzeugung (Dateien, Name, Quell-Style, Hinweise, Überspringgrund). */
 data class ThemeGenerationResult(
     val files: List<com.codeforge.core.domain.repository.GeneratedComposeFile> = emptyList(),
     /** Name der erzeugten Theme-Composable (z. B. `AppTheme`); null, wenn nichts erzeugt wurde. */
@@ -225,6 +247,7 @@ data class ThemeGenerationResult(
 
 /** Task 52.9: Eine geplante Dateiänderung (Pfade relativ zum Projekt, `/`-getrennt). */
 sealed interface PlannedChange {
+    /** Pfad der Datei relativ zum Projekt (mit `/` getrennt). */
     val relativePath: String
 
     /** Neue Datei; existiert sie schon, wird sie übersprungen (außer `overwrite` ist bestätigt). */
@@ -237,10 +260,13 @@ sealed interface PlannedChange {
     data class Delete(override val relativePath: String) : PlannedChange
 }
 
+/** Art der Änderung im Journal. */
 enum class JournalAction { CREATED, MODIFIED, DELETED }
 
+/** Zustand eines Journals. */
 enum class JournalStatus { IN_PROGRESS, COMPLETE, ROLLED_BACK, ROLLBACK_FAILED, UNDONE }
 
+/** Journal-Eintrag zu einer Datei mit Hashes vor und nach der Änderung. */
 data class JournalEntry(
     val action: JournalAction,
     val relativePath: String,
@@ -248,6 +274,7 @@ data class JournalEntry(
     val hashAfter: String? = null
 )
 
+/** Journal einer Migration: Version, Zeitpunkt, Backup, Status und Einträge; Grundlage fürs Zurücknehmen. */
 data class X2cJournal(
     val version: Int = 1,
     val timestampEpochMillis: Long,
@@ -258,6 +285,7 @@ data class X2cJournal(
     val createdDirs: List<String> = emptyList()
 )
 
+/** Ergebnis des Anwendens: Journalpfad, Journal und übersprungene bestehende Dateien. */
 data class ApplyResult(
     val journalPath: String,
     val journal: X2cJournal,
@@ -265,8 +293,10 @@ data class ApplyResult(
     val skippedExisting: List<String> = emptyList()
 )
 
+/** Entscheidung bei Dateien, die nach der Migration geändert wurden: behalten, überschreiben oder als `.orig` sichern. */
 enum class UndoConflictPolicy { KEEP, OVERWRITE, SAVE_AS_ORIG }
 
+/** Ergebnis des Zurücknehmens: wiederhergestellte, gelöschte, behaltene, gesicherte und bereits originale Dateien. */
 data class UndoResult(
     val restored: List<String> = emptyList(),
     val deleted: List<String> = emptyList(),
@@ -283,11 +313,13 @@ data class XmlRemovalSelection(
     val kept: Map<String, String>
 )
 
+/** Für die Migration angelegter Git-Zweig und der vorherige Zweig. */
 data class GitBranchInfo(val branch: String, val previousBranch: String?)
 
 /** Task 52.10 */
 enum class X2cBuildStepStatus { SUCCESS, FAILED, SKIPPED }
 
+/** Ein Build-Problem mit Schweregrad, Position und Meldung; [preExisting] markiert Fehler, die vor der Migration bestanden. */
 data class X2cBuildProblem(
     val severity: String,
     val path: String?,
@@ -299,6 +331,7 @@ data class X2cBuildProblem(
     val preExisting: Boolean = false
 )
 
+/** Ergebnis eines Build-Schritts: Tasks, Status, Probleme und Ausgabeende. */
 data class X2cBuildStepResult(
     val tasks: List<String>,
     val status: X2cBuildStepStatus,

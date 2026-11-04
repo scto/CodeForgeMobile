@@ -24,11 +24,13 @@ class LayoutUsageAnalyzerImpl : LayoutUsageAnalyzer {
         )
         private val FRAGMENT_CLASS = Regex("""class\s+\w+[^{=]*(?::|\bextends\b)\s*[^{]*\bFragment\b""")
 
+        /** Layoutname (`snake_case`) in PascalCase. */
         fun pascal(layoutName: String): String =
             layoutName.split('_').filter { it.isNotEmpty() }.joinToString("") { part ->
                 part.replaceFirstChar { it.uppercaseChar() }
             }
 
+        /** View-ID (`snake_case`) in camelCase. */
         fun camel(id: String): String {
             val p = pascal(id)
             return p.replaceFirstChar { it.lowercaseChar() }

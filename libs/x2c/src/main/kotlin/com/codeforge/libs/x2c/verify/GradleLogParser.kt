@@ -12,6 +12,7 @@ internal object GradleLogParser {
     private val AAPT = Regex("""^(?:ERROR:\s+)?((?:[A-Za-z]:)?[\\/][^:\r\n]+):(\d+)(?::(\d+))?:\s*(?:AAPT:\s*)?(error|warning)?:?\s*(.*)$""")
     private val WENT_WRONG = Regex("""^\* What went wrong:""")
 
+    /** Parst ein Gradle-Log zu Build-Problemen (Kotlin, Java, AAPT) mit Pfaden relativ zu [projectDir]. */
     fun parse(log: String, projectDir: File): List<X2cBuildProblem> {
         val out = mutableListOf<X2cBuildProblem>()
         var task: String? = null

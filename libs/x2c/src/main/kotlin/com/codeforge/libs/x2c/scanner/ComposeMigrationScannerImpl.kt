@@ -16,11 +16,13 @@ import java.io.StringReader
 import javax.xml.XMLConstants
 import javax.xml.parsers.SAXParserFactory
 
+/** Scannt ein Projekt nach Layouts, Compose-Nutzung und Migrationsmöglichkeiten. */
 class ComposeMigrationScannerImpl(
     private val usageAnalyzer: LayoutUsageAnalyzer = LayoutUsageAnalyzerImpl()
 ) : ComposeMigrationScanner {
 
     companion object {
+        /** Ordner, die beim Scannen ignoriert werden. */
         val EXCLUDED_DIRS = setOf(
             "build", ".gradle", "Backup", ".git", ".cxx",
             "node_modules", "out", ".idea", ".agents", ".cfm"

@@ -336,6 +336,7 @@ class X2cChangeApplierImpl(private val clock: () -> Long = System::currentTimeMi
         writeAtomic(file, MiniJson.write(map).toByteArray())
     }
 
+    /** Liest das Journal aus [file]. */
     internal fun readJournal(file: File): X2cJournal {
         @Suppress("UNCHECKED_CAST")
         val m = MiniJson.parse(file.readText()) as? Map<String, Any?> ?: error("Journal ist kein Objekt")

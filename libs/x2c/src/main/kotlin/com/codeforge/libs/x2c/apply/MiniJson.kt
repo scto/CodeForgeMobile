@@ -3,6 +3,7 @@ package com.codeforge.libs.x2c.apply
 /** Kleiner, strenger JSON-Leser/-Schreiber nur für das Journal (Objekte, Arrays, Strings, Zahlen, null). */
 internal object MiniJson {
 
+    /** Schreibt [value] (Map, Liste, String, Zahl, Boolean oder `null`) als eingerücktes JSON. */
     fun write(value: Any?, indent: String = ""): String = buildString { append(value, indent) }
 
     private fun StringBuilder.append(v: Any?, indent: String) {
@@ -50,6 +51,7 @@ internal object MiniJson {
         append('"')
     }
 
+    /** Liest JSON-Text zu Map, Liste, String, Zahl, Boolean oder `null`; ungültige Eingabe löst eine Ausnahme aus. */
     fun parse(text: String): Any? {
         val p = Parser(text)
         p.ws()

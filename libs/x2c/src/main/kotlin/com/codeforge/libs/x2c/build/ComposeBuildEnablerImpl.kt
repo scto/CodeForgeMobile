@@ -24,11 +24,17 @@ class ComposeBuildEnablerImpl(
 ) : ComposeBuildEnabler {
 
     companion object {
+        /** Offiziell empfohlene minimale SDK-Version für Compose. */
         const val OFFICIAL_MIN_SDK = 21
+        /** Standardversion der Compose-BOM. */
         const val DEFAULT_BOM = "2024.10.01"
+        /** Standardversion von Kotlin. */
         const val DEFAULT_KOTLIN = "2.0.21"
+        /** Standardversion von `activity-compose`. */
         const val DEFAULT_ACTIVITY_COMPOSE = "1.9.3"
+        /** Standardversion von `constraintlayout-compose`. */
         const val DEFAULT_CONSTRAINT_LAYOUT_COMPOSE = "1.1.0"
+        /** Quelle der Setup-Angaben. */
         const val OFFICIAL_SETUP_DOC_URL = "https://developer.android.com/jetpack/compose/setup (Stand: 2024-10-25)"
     }
 

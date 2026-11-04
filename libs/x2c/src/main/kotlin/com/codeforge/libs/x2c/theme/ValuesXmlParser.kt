@@ -7,12 +7,15 @@ import java.io.StringReader
 import javax.xml.XMLConstants
 import javax.xml.parsers.SAXParserFactory
 
+/** Ein Style mit Name, Parent und Items. */
 internal data class StyleDef(val name: String, val parent: String?, val items: Map<String, String>)
 
+/** Gelesene Werte: Farben und Styles. */
 internal data class ValuesDoc(val colors: Map<String, String>, val styles: List<StyleDef>)
 
 /** Liest `<color>` und `<style>/<item>` aus einer values-Datei (SAX, ohne DTD/Entities). */
 internal object ValuesXmlParser {
+    /** Parst eine `values`-XML-Datei. */
     fun parse(xml: String): ValuesDoc {
         val colors = LinkedHashMap<String, String>()
         val styles = mutableListOf<StyleDef>()

@@ -11,9 +11,11 @@ import java.util.Locale
 /** Task 52.10: Bericht als Markdown (`Backup/x2c-report-<ts>.md`). Pur, ohne Geheimnisse. */
 object X2cReportWriter {
 
+    /** Dateiname des Berichts zum Zeitpunkt [timestampEpochMillis]. */
     fun fileName(timestampEpochMillis: Long): String =
         "x2c-report-" + SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date(timestampEpochMillis)) + ".md"
 
+    /** Rendert den Bericht als Markdown. */
     fun render(r: X2cReport): String {
         val sb = StringBuilder()
         fun h(t: String) { sb.appendLine().appendLine("## $t").appendLine() }

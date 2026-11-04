@@ -7,6 +7,7 @@ import com.codeforge.core.domain.repository.ComposeThemeGenerator
 import com.codeforge.core.domain.repository.GeneratedComposeFile
 import com.codeforge.libs.x2c.generator.LayoutValues
 
+/** Erzeugt `Color.kt` und `Theme.kt` aus XML-Farben und Themes (nur neue Dateien). */
 class ComposeThemeGeneratorImpl : ComposeThemeGenerator {
 
     private class Role(val attr: String, val param: String, val const: String)

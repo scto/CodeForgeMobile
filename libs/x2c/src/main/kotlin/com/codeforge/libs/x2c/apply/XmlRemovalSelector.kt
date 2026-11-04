@@ -14,6 +14,13 @@ import com.codeforge.libs.x2c.analysis.LayoutUsageAnalyzerImpl
  */
 class XmlRemovalSelector(private val analyzer: LayoutUsageAnalyzer = LayoutUsageAnalyzerImpl()) {
 
+    /**
+     * Bestimmt, welche umgewandelten Layouts entfernt werden dürfen.
+     *
+     * @param projectPath Projektordner.
+     * @param plan Migrationsplan.
+     * @param convertedLayouts Namen der umgewandelten Layouts.
+     */
     suspend fun select(projectPath: String, plan: X2cPlan, convertedLayouts: Set<String>): XmlRemovalSelection {
         val pathsByName = plan.layouts.groupBy { it.layoutName }.mapValues { (_, l) -> l.map { it.relativePath } }
         val candidates = convertedLayouts.filter { it in pathsByName }.toMutableSet()

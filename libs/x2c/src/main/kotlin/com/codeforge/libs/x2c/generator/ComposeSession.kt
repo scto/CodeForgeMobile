@@ -44,6 +44,7 @@ internal class ComposeSession(
 
     // ---------------------------------------------------------------- Ausgabe
 
+    /** Erzeugt die Compose-Datei für [composableName]. */
     fun generate(composableName: String): GeneratedComposeFile {
         val body = if (root.shortTag == "merge") {
             notes += "merge: Inhalt wird ohne eigenen Container ausgegeben; der Parameter `modifier` ist ungenutzt"
@@ -1294,6 +1295,7 @@ internal class ComposeSession(
 
 /** Namenskonventionen für erzeugte Composables. */
 object LayoutNames {
+    /** Leitet den Namen des Composables aus dem Layoutnamen ab (`activity_` wird zu `…Screen`). */
     fun composableName(layoutName: String): String {
         val n = layoutName
         val name = when {

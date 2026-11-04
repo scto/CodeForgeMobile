@@ -20,6 +20,7 @@ import com.codeforge.core.domain.model.WireTarget
 import com.codeforge.core.domain.model.X2cReport
 import kotlinx.coroutines.flow.StateFlow
 
+/** Erzeugte Compose-Datei: Package, Composable-Name, Zielpfad, Quelltext, TODO-Anzahl und Hinweise. */
 data class GeneratedComposeFile(
     val packageName: String,
     val composableName: String,
@@ -29,7 +30,17 @@ data class GeneratedComposeFile(
     val notes: List<String> = emptyList()
 )
 
+/** Wandelt Layout-XML in Compose-Quelltext um. */
 interface LayoutToComposeGenerator {
+    /**
+     * Erzeugt das Composable.
+     *
+     * @param xmlContent Inhalt der Layoutdatei.
+     * @param layoutName Name des Layouts.
+     * @param targetPackage Package der erzeugten Datei.
+     * @param touchedViewIds IDs, die der Code anspricht (werden zu Parametern).
+     * @param context Zusätzlicher Kontext (z. B. Quellpfad).
+     */
     suspend fun generateComposable(
         xmlContent: String,
         layoutName: String,
@@ -39,7 +50,9 @@ interface LayoutToComposeGenerator {
     ): Result<GeneratedComposeFile>
 }
 
+/** Sucht Verwendungen von Layouts im Projekt. */
 interface LayoutUsageAnalyzer {
+    /** Findet alle Verwendungen des Layouts [layoutName] in [projectPath]. */
     suspend fun findUsages(projectPath: String, layoutName: String): List<LayoutUsage>
 
     /**
@@ -47,9 +60,11 @@ interface LayoutUsageAnalyzer {
      * [layoutIds]: Layoutname -> IDs, die das Layout deklariert (für `referencedViewIds`).
      */
     suspend fun findAllUsages(projectPath: String, layoutIds: Map<String, Set<String>>): Map<String, List<LayoutUsage>>
+    /** Findet verbleibende View-Referenzen (z. B. `findViewById`, Binding) im Projekt. */
     suspend fun findRemainingViewReferences(projectPath: String): List<String>
 }
 
+/** Ergebnis der Voraussetzungsprüfung für Compose (minSdk, Java, Kotlin, AGP) mit Fehlern und Warnungen. */
 data class PrerequisitesCheckResult(
     val isMinSdkSatisfied: Boolean,
     val detectedMinSdk: Int?,
@@ -63,6 +78,7 @@ data class PrerequisitesCheckResult(
     val warnings: List<String> = emptyList()
 )
 
+/** Ergebnis des Aktivierens von Compose: geänderte Dateien, Hinweise, Abhängigkeiten und verwendete Versionen. */
 data class BuildEnableResult(
     val modifiedFiles: List<String>,
     val notes: List<String>,
@@ -71,8 +87,11 @@ data class BuildEnableResult(
     val composeBomUsed: String
 )
 
+/** Schaltet Compose in den Gradle-Dateien eines Projekts frei. */
 interface ComposeBuildEnabler {
+    /** Prüft, ob das Projekt die Voraussetzungen für Compose erfüllt. */
     suspend fun checkPrerequisites(projectPath: String): Result<PrerequisitesCheckResult>
+    /** Aktiviert Compose im Projekt (Build-Dateien, Version Catalog, Activities). */
     suspend fun enableComposeInProject(
         projectPath: String,
         useVersionCatalog: Boolean,
@@ -82,22 +101,35 @@ interface ComposeBuildEnabler {
     ): Result<BuildEnableResult>
 }
 
+/** Untersucht ein Projekt auf umwandelbare Layouts. */
 interface ComposeMigrationScanner {
+    /** Scannt das Projekt. */
     suspend fun scanProject(projectPath: String): ComposeScanResult
+    /** Erstellt den Migrationsplan; [preselectedLayout] wählt ein Layout vor. */
     suspend fun createPlan(projectPath: String, preselectedLayout: String? = null): X2cPlan
 }
 
+/** Sichert Projekte vor der Migration und stellt sie bei Bedarf wieder her. */
 interface X2cBackupRepository {
+    /** Erstellt ein ZIP-Backup und liefert dessen Pfad. */
     suspend fun createBackup(projectPath: String, includeGit: Boolean = true): String
+    /** Stellt das Projekt vollständig aus dem Backup wieder her. */
     suspend fun restoreBackup(projectPath: String, backupZipPath: String): Boolean
+    /** Stellt eine einzelne Datei aus dem Backup wieder her. */
     suspend fun restoreFile(projectPath: String, backupZipPath: String, relativeFilePath: String): Boolean
+    /** Nimmt die Änderungen anhand des Journals zurück. */
     suspend fun rollbackWithJournal(projectPath: String, journalPath: String): Boolean
 }
 
+/** Fassade der Migration von XML-Layouts nach Compose. */
 interface X2cRepository {
+    /** Aktueller Fortschritt. */
     val progress: StateFlow<X2cProgress>
+    /** Analysiert das Projekt und liefert den Plan. */
     suspend fun analyzeProject(projectPath: String): X2cPlan
+    /** Führt die Migration mit den [options] aus und liefert den Bericht. */
     suspend fun executeMigration(projectPath: String, options: X2cOptions): X2cReport
+    /** Nimmt die Migration anhand des Journals zurück. */
     suspend fun undoMigration(projectPath: String, journalPath: String): Boolean
 
     /** Wie [undoMigration], aber mit Entscheidung bei Dateien, die der Benutzer danach geändert hat. */
@@ -106,6 +138,7 @@ interface X2cRepository {
         journalPath: String,
         onConflict: suspend (relativePath: String) -> UndoConflictPolicy
     ): Result<UndoResult>
+    /** Bricht eine laufende Migration ab (alle Änderungen werden zurückgenommen). */
     fun cancelMigration()
 }
 
@@ -114,11 +147,13 @@ interface X2cRepository {
  * Rein (Text rein, Text raus), schreibt nichts; Anwenden und Journal macht 52.9.
  */
 interface ComposeEntryWirer {
+    /** Stellt eine Activity oder ein Fragment auf Compose um; liefert den neuen Text oder den Grund für das Überspringen. */
     fun wire(fileName: String, content: String, target: WireTarget): ComposeWireResult
 }
 
 /** Task 52.8: erzeugt `ui/theme/Color.kt` und `Theme.kt` aus XML-Farben und -Themes; nur neue Dateien, nie `themes.xml`. */
 interface ComposeThemeGenerator {
+    /** Erkennt das App-Theme in den XML-Quellen. */
     fun detect(sources: ThemeSources): ThemeDetection
 
     /**
@@ -142,6 +177,7 @@ interface ChangeRecorder {
     fun touch(relativePath: String, alreadyChanged: Boolean = false)
 }
 
+/** Wendet geplante Dateiänderungen atomar an und führt ein Journal zum Zurücknehmen. */
 interface X2cChangeApplier {
     /**
      * Ablauf: Pfade und Voraussetzungen prüfen (nichts geändert) → Journal schreiben → Änderungen atomar je Datei →
@@ -185,6 +221,14 @@ interface GitBranchCommitter {
  * aus Task 28; [com.codeforge.libs.x2c.verify.ProcessX2cBuildChecker] startet `./gradlew` direkt (JVM, Termux).
  */
 interface X2cBuildChecker {
+    /**
+     * Führt Gradle-Tasks aus und liefert Ergebnis samt Problemen mit Datei und Zeile.
+     *
+     * @param projectPath Projektordner.
+     * @param tasks Auszuführende Tasks.
+     * @param onOutput Wird mit Ausgabezeilen aufgerufen.
+     * @param isCancelled Liefert `true`, wenn abgebrochen werden soll.
+     */
     suspend fun runTasks(
         projectPath: String,
         tasks: List<String>,

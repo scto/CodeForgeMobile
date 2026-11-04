@@ -27,6 +27,7 @@ class X2cBackupRepositoryImpl(
 ) : X2cBackupRepository {
 
     companion object {
+        /** Ordner, die nicht ins Backup gehören (Build-Ausgaben, Caches). */
         val DEFAULT_EXCLUDES = setOf(
             "Backup", "build", ".gradle", ".cxx", "node_modules", "out"
         )
