@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Folder
@@ -66,12 +67,14 @@ import com.codeforge.feature.filetree.FileTreeRoute
 import com.codeforge.feature.git.GitPanel
 import com.codeforge.feature.layoutdesigner.files.LayoutFilesPanel
 import com.codeforge.feature.modulemaker.ModuleMakerRoute
+import com.codeforge.feature.agent.AgentRoute
 import com.codeforge.feature.search.SearchRoute
 
 /** Bereiche der Drawer-Leiste. [isPanel] = false → öffnet stattdessen eine Route. */
 enum class DrawerSection(@StringRes val labelRes: Int, val icon: ImageVector, val isPanel: Boolean = true) {
     FILES(R.string.drawer_files, Icons.Filled.Folder),
     SEARCH(R.string.drawer_search, Icons.Filled.Search),
+    AGENT(R.string.drawer_agent, Icons.Filled.AutoAwesome),
     GIT(R.string.common_git, Icons.Filled.Source),
     MODULES(R.string.drawer_modules, Icons.Filled.CreateNewFolder),
     LAYOUTS(R.string.drawer_layouts, Icons.Filled.GridView),
@@ -166,6 +169,7 @@ fun WorkspaceDrawer(
                             onMatchOpened = onCloseDrawer,
                             onMessage = { message = it },
                         )
+                        DrawerSection.AGENT -> AgentRoute(rootPath = rootPath)
                         DrawerSection.GIT -> GitPanel(
                             repoPath = rootPath,
                             onFileOpened = onCloseDrawer,

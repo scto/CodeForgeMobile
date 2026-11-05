@@ -2,26 +2,26 @@
 
 Automatisch erzeugt mit `python3 scripts/gen-module-graph.py` — nicht von Hand ändern.
 
-69 Module, 313 direkte Projektabhängigkeiten.
+70 Module, 322 direkte Projektabhängigkeiten.
 
 ## Schichten (aggregiert)
 
 ```mermaid
 flowchart TD
     app["App (1)"]
-    feature["Feature-Module (25)"]
+    feature["Feature-Module (26)"]
     core["Core (9)"]
     libs["Bibliotheken (libs) (21)"]
     examples["Beispiel-Plugins (12)"]
     templates["Templates (1)"]
     app -->|8| core
-    app -->|25| feature
+    app -->|26| feature
     app -->|13| libs
     core -->|4| libs
     examples -->|10| core
     examples -->|20| libs
-    feature -->|144| core
-    feature -->|24| libs
+    feature -->|150| core
+    feature -->|26| libs
     libs -->|23| core
     templates -->|1| libs
 ```
@@ -32,7 +32,7 @@ flowchart TD
 
 | Modul | hängt ab von |
 |---|---|
-| `:app` | `:core:common`, `:core:data`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:feature:assetstudio`, `:feature:build`, `:feature:composepreview`, `:feature:debug`, `:feature:dependencies`, `:feature:dependencyupdates`, `:feature:editor`, `:feature:filetree`, `:feature:git`, `:feature:hardcodedstrings`, `:feature:j2k`, `:feature:layoutdesigner`, `:feature:modulemaker`, `:feature:onboarding`, `:feature:plugins`, `:feature:projectsettings`, `:feature:projectwizard`, `:feature:sdkmanager`, `:feature:search`, `:feature:settings`, `:feature:signing`, `:feature:terminal`, `:feature:themebuilder`, `:feature:welcome`, `:feature:x2c`, `:libs:ai-client`, `:libs:dependency-updater-api`, `:libs:dependency-updater-impl`, `:libs:gradle-tooling-bridge`, `:libs:indexing-api`, `:libs:indexing-impl`, `:libs:lsp-client`, `:libs:plugin-api`, `:libs:plugin-impl`, `:libs:template-engine`, `:libs:terminal-engine`, `:libs:termux-app`, `:libs:x2c` |
+| `:app` | `:core:common`, `:core:data`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:feature:agent`, `:feature:assetstudio`, `:feature:build`, `:feature:composepreview`, `:feature:debug`, `:feature:dependencies`, `:feature:dependencyupdates`, `:feature:editor`, `:feature:filetree`, `:feature:git`, `:feature:hardcodedstrings`, `:feature:j2k`, `:feature:layoutdesigner`, `:feature:modulemaker`, `:feature:onboarding`, `:feature:plugins`, `:feature:projectsettings`, `:feature:projectwizard`, `:feature:sdkmanager`, `:feature:search`, `:feature:settings`, `:feature:signing`, `:feature:terminal`, `:feature:themebuilder`, `:feature:welcome`, `:feature:x2c`, `:libs:ai-client`, `:libs:dependency-updater-api`, `:libs:dependency-updater-impl`, `:libs:gradle-tooling-bridge`, `:libs:indexing-api`, `:libs:indexing-impl`, `:libs:lsp-client`, `:libs:plugin-api`, `:libs:plugin-impl`, `:libs:template-engine`, `:libs:terminal-engine`, `:libs:termux-app`, `:libs:x2c` |
 
 ### Feature-Module
 
@@ -47,6 +47,7 @@ flowchart TD
 | `:feature:terminal` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:libs:terminal-engine` |
 | `:feature:sdkmanager` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui` |
 | `:feature:layoutdesigner` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui` |
+| `:feature:agent` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:agent`, `:libs:ai-client` |
 | `:feature:assetstudio` | `:core:designsystem`, `:core:domain`, `:core:resources`, `:core:ui` |
 | `:feature:themebuilder` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui` |
 | `:feature:git` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui` |
@@ -139,6 +140,7 @@ flowchart LR
     app --> n_core_navigation[":core:navigation"]
     app --> n_core_resources[":core:resources"]
     app --> n_core_ui[":core:ui"]
+    app --> n_feature_agent[":feature:agent"]
     app --> n_feature_assetstudio[":feature:assetstudio"]
     app --> n_feature_build[":feature:build"]
     app --> n_feature_composepreview[":feature:composepreview"]

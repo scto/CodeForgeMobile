@@ -86,6 +86,7 @@ dependencies {
     implementation(project(":feature:assetstudio"))
     implementation(project(":feature:themebuilder"))
     implementation(project(":feature:git"))
+    implementation(project(":feature:agent"))
     implementation(project(":feature:search"))
     implementation(project(":feature:modulemaker"))
     implementation(project(":feature:hardcodedstrings"))

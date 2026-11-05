@@ -1,0 +1,93 @@
+/**
+ * Modul: :feature:agent
+ * @author Thomas Schmid
+ *
+ * Zustand, Aktionen und Einmal-Effekte des KI-Agenten.
+ */
+package com.codeforge.feature.agent
+
+import androidx.compose.runtime.Immutable
+import com.codeforge.libs.agent.PermissionMode
+
+/** Fortschritt eines Werkzeugaufrufs in der Chat-Liste. */
+enum class ToolCallStatus { RUNNING, OK, ERROR, DENIED }
+
+/** Eintrag der Chat-Liste; [id] ist je Sitzung eindeutig (stabile Keys in der `LazyColumn`). */
+@Immutable
+sealed interface AgentChatItem {
+    /** Eindeutige ID. */
+    val id: Long
+
+    /** Nachricht des Nutzers. */
+    data class User(override val id: Long, val text: String) : AgentChatItem
+
+    /** Antwort des Agenten (wächst während des Streams). */
+    data class Assistant(override val id: Long, val text: String) : AgentChatItem
+
+    /** Werkzeugaufruf mit lesbarer Kurzfassung [summary] und gekürztem Ergebnis [detail]. */
+    data class ToolCall(
+        override val id: Long,
+        val callId: String,
+        val summary: String,
+        val status: ToolCallStatus,
+        val detail: String = "",
+    ) : AgentChatItem
+
+    /** Hinweis oder Fehler. */
+    data class Notice(override val id: Long, val text: String, val isError: Boolean) : AgentChatItem
+
+    /** Zusammenfassung der Dateiänderungen eines Zuges; [reverted] = bereits rückgängig gemacht. */
+    data class Changes(
+        override val id: Long,
+        val turnId: Long,
+        val paths: List<String>,
+        val reverted: Boolean = false,
+    ) : AgentChatItem
+}
+
+/** Offene Freigabeanfrage für einen schreibenden/ausführenden Werkzeugaufruf. */
+@Immutable
+data class PendingApproval(val toolName: String, val summary: String)
+
+/** Eintrag der Aufgabenliste des Agenten. */
+@Immutable
+data class AgentTodo(val content: String, val status: String)
+
+/** UI-Zustand des Agenten-Panels. */
+@Immutable
+data class AgentUiState(
+    val items: List<AgentChatItem> = emptyList(),
+    val input: String = "",
+    val mode: PermissionMode = PermissionMode.ASK_EACH,
+    val running: Boolean = false,
+    val pendingApproval: PendingApproval? = null,
+    val todos: List<AgentTodo> = emptyList(),
+    val rootPath: String = "",
+)
+
+/** Aktionen des Nutzers. */
+sealed interface AgentUiEvent {
+    /** Panel für das Projekt [rootPath] öffnen (wechselt der Pfad, beginnt ein neuer Chat). */
+    data class Initialize(val rootPath: String) : AgentUiEvent
+
+    /** Eingabetext geändert. */
+    data class InputChanged(val value: String) : AgentUiEvent
+
+    /** Eingabe senden. */
+    data object Send : AgentUiEvent
+
+    /** Lauf abbrechen. */
+    data object Stop : AgentUiEvent
+
+    /** Berechtigungsmodus wechseln. */
+    data class ModeChanged(val mode: PermissionMode) : AgentUiEvent
+
+    /** Freigabe erteilen ([allow] = true) oder ablehnen. */
+    data class Decide(val allow: Boolean) : AgentUiEvent
+
+    /** Änderungen des Zuges [turnId] rückgängig machen. */
+    data class Revert(val turnId: Long) : AgentUiEvent
+
+    /** Neuen Chat beginnen (Verlauf verwerfen). */
+    data object NewChat : AgentUiEvent
+}

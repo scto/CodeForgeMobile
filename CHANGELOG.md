@@ -13,7 +13,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Hinzugefügt (KI-Agent, Grundlage)
 - Neues Modul `:libs:agent`: provider-neutrale Agentenschleife (`AgentLoop`, `Flow<AgentEvent>`) mit Werkzeugen (`read_file`, `list_dir`, `search_text`, `create_file`, `edit_file`, `delete_path`, `get_diagnostics`, `todo_write`), Berechtigungsmodi (Nachfragen / Automatisch / Nur Plan), Checkpoints je Turn mit Revert (`CheckpointWorkspace`) und Verlaufskompaktierung (`HistoryCompactor`). Reine JVM-Logik, 26 Unit-Tests.
-- `:libs:ai-client`: `AnthropicAgentClient` (Streaming-Werkzeugaufrufe der Anthropic-Messages-API, Retry bei 429/5xx) plus testbare `AnthropicAgentWire` (Request-Body, SSE-Zusammensetzung inkl. `input_json_delta`). Noch nicht in die App-Oberfläche eingebunden.
+- `:libs:ai-client`: `AnthropicAgentClient` (Streaming-Werkzeugaufrufe der Anthropic-Messages-API, Retry bei 429/5xx) plus testbare `AnthropicAgentWire` (Request-Body, SSE-Zusammensetzung inkl. `input_json_delta`). 
+### Hinzugefügt (KI-Agent, App)
+- Neues Modul `:feature:agent` und Drawer-Bereich „Agent“: Chat-Panel mit Werkzeugstatus, Aufgabenliste, Berechtigungsmodus (Fragen / Auto / Plan), Freigabe-Karte für schreibende Aktionen und „Änderungen zurücknehmen“ pro Zug. Läuft vorerst nur mit Anthropic (API-Schlüssel unter Einstellungen → KI); respektiert das Tageslimit.
+- `FileAgentWorkspace` (`:libs:agent`): Dateizugriff nur innerhalb des Projekts (Pfad- und Symlink-Schutz, atomares Schreiben, Größenlimit, Suche ohne Build-Ordner/Binärdateien). `SyncingAgentWorkspace` speichert offene Editor-Puffer vor dem Lesen und meldet Änderungen an den Editor; `get_diagnostics` liefert die LSP-Diagnosen offener Dateien.
+- Der Verlauf liegt nur im Speicher (kein Neustart-Persistenz), Chat startet beim Projektwechsel neu.
 
 ## [3.0.4] - 2026-11-05
 

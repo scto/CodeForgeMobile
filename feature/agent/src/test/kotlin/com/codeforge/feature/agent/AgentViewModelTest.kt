@@ -1,0 +1,207 @@
+package com.codeforge.feature.agent
+
+import com.codeforge.core.domain.ai.AiChatMessage
+import com.codeforge.core.domain.ai.AiChatOptions
+import com.codeforge.core.domain.ai.AiPrivacyPolicy
+import com.codeforge.core.domain.ai.AiProviderType
+import com.codeforge.core.domain.repository.AiRepository
+import com.codeforge.core.domain.repository.LspClientRepository
+import com.codeforge.core.navigation.FileSyncBridge
+import com.codeforge.core.navigation.FlushRequest
+import com.codeforge.libs.agent.LlmClient
+import com.codeforge.libs.agent.LlmRequest
+import com.codeforge.libs.agent.LlmStreamEvent
+import com.codeforge.libs.agent.PermissionMode
+import com.codeforge.libs.agent.StopReason
+import java.io.File
+import java.lang.reflect.Proxy
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class AgentViewModelTest {
+    private val tmp = kotlin.io.path.createTempDirectory("agentvm").toFile()
+    private val options = MutableStateFlow(AiChatOptions(AiProviderType.ANTHROPIC, "m", apiKey = "sk-ant-x"))
+
+    private val repo = object : AiRepository {
+        var count = 0
+        override fun getAiOptions(): Flow<AiChatOptions> = options
+        override suspend fun saveAiOptions(options: AiChatOptions) {}
+        override suspend fun getProviderOptions(provider: AiProviderType) = options.value
+        override suspend fun saveProviderOptions(options: AiChatOptions) {}
+        override fun getPrivacyPolicy(): Flow<AiPrivacyPolicy> = flowOf(AiPrivacyPolicy.ALWAYS_ASK)
+        override suspend fun savePrivacyPolicy(policy: AiPrivacyPolicy) {}
+        override fun getDailyLimit(): Flow<Int> = flowOf(0)
+        override suspend fun saveDailyLimit(limit: Int) {}
+        override fun getTodayRequestCount(): Flow<Int> = flowOf(count)
+        override suspend fun incrementTodayRequestCount() { count++ }
+        override fun getHistory(projectId: String): Flow<List<AiChatMessage>> = flowOf(emptyList())
+        override suspend fun saveHistory(projectId: String, history: List<AiChatMessage>) {}
+        override suspend fun clearHistory(projectId: String) {}
+    }
+
+    // Nur `diagnostics` wird benutzt; alles andere wäre ein Fehler im Test.
+    private val lsp: LspClientRepository = Proxy.newProxyInstance(
+        javaClass.classLoader,
+        arrayOf(LspClientRepository::class.java),
+    ) { _, method, _ ->
+        if (method.name == "getDiagnostics") flow<Any> { } else error("unerwarteter Aufruf: ${method.name}")
+    } as LspClientRepository
+
+    private val sync = object : FileSyncBridge {
+        override val flushRequests = MutableSharedFlow<FlushRequest>()
+        override val externalChanges = MutableSharedFlow<Set<String>>()
+        override val directoryChanges = MutableSharedFlow<String>()
+        override suspend fun requestFlush(paths: Set<String>) {}
+        override suspend fun notifyExternalChange(paths: Collection<String>) {}
+        override suspend fun requestFlushDirectory(directory: String) {}
+        override suspend fun notifyDirectoryChange(directory: String) {}
+    }
+
+    /** Antwort 1: Datei anlegen; Antwort 2: Text. */
+    private class ScriptedClient(private val steps: List<List<LlmStreamEvent>>) : LlmClient {
+        private var i = 0
+        override fun stream(request: LlmRequest): Flow<LlmStreamEvent> = flowOf(*steps[i++.coerceAtMost(steps.lastIndex)].toTypedArray())
+    }
+
+    private fun createFileThenAnswer() = ScriptedClient(
+        listOf(
+            listOf(
+                LlmStreamEvent.ToolCallCompleted("t1", "create_file", buildJsonObject { put("path", "neu.txt"); put("content", "hallo") }),
+                LlmStreamEvent.Completed(StopReason.TOOL_USE),
+            ),
+            listOf(LlmStreamEvent.TextDelta("Fertig."), LlmStreamEvent.Completed(StopReason.END_TURN)),
+        ),
+    )
+
+    private fun vm(client: LlmClient) = AgentViewModel(repo, lsp, sync) { client }.also {
+        it.onEvent(AgentUiEvent.Initialize(tmp.path))
+    }
+
+    @Before
+    fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+        tmp.deleteRecursively()
+    }
+
+    /** Dateizugriffe laufen auf Dispatchers.IO: auf den Zielzustand warten (höchstens 10 s). */
+    private fun AgentViewModel.await(condition: (AgentUiState) -> Boolean) {
+        val end = System.nanoTime() + 10_000_000_000L
+        while (!condition(state.value) && System.nanoTime() < end) Thread.sleep(10)
+        assertTrue("Zustand nicht erreicht: ${state.value}", condition(state.value))
+    }
+
+    private fun AgentViewModel.awaitIdle() = await { !it.running && it.pendingApproval == null }
+
+    private fun AgentViewModel.ask(text: String) {
+        onEvent(AgentUiEvent.InputChanged(text))
+        onEvent(AgentUiEvent.Send)
+    }
+
+    @Test
+    fun `Auto-Modus schreibt Datei, zeigt Werkzeugaufruf, Antwort und Aenderungen`() {
+        val vm = vm(createFileThenAnswer())
+        vm.onEvent(AgentUiEvent.ModeChanged(PermissionMode.AUTO_ACCEPT))
+        vm.ask("lege neu.txt an")
+        vm.awaitIdle()
+        val s = vm.state.value
+        assertFalse(s.running)
+        assertEquals("hallo", File(tmp, "neu.txt").readText())
+        assertTrue(s.items.any { it is AgentChatItem.ToolCall && it.status == ToolCallStatus.OK })
+        assertTrue(s.items.any { it is AgentChatItem.Assistant && it.text == "Fertig." })
+        assertEquals(listOf("neu.txt"), s.items.filterIsInstance<AgentChatItem.Changes>().single().paths)
+        assertEquals(1, repo.count)
+    }
+
+    @Test
+    fun `Revert loescht die neu angelegte Datei wieder`() {
+        val vm = vm(createFileThenAnswer())
+        vm.onEvent(AgentUiEvent.ModeChanged(PermissionMode.AUTO_ACCEPT))
+        vm.ask("x")
+        vm.awaitIdle()
+        val changes = vm.state.value.items.filterIsInstance<AgentChatItem.Changes>().single()
+        vm.onEvent(AgentUiEvent.Revert(changes.turnId))
+        vm.await { st -> st.items.filterIsInstance<AgentChatItem.Changes>().single().reverted }
+        assertFalse(File(tmp, "neu.txt").exists())
+        assertTrue(vm.state.value.items.filterIsInstance<AgentChatItem.Changes>().single().reverted)
+    }
+
+    @Test
+    fun `Plan-Modus lehnt Schreiben ab und aendert nichts`() {
+        val vm = vm(createFileThenAnswer())
+        vm.onEvent(AgentUiEvent.ModeChanged(PermissionMode.PLAN_ONLY))
+        vm.ask("x")
+        vm.awaitIdle()
+        assertFalse(File(tmp, "neu.txt").exists())
+        assertTrue(vm.state.value.items.any { it is AgentChatItem.ToolCall && it.status == ToolCallStatus.DENIED })
+        assertTrue(vm.state.value.items.none { it is AgentChatItem.Changes })
+    }
+
+    @Test
+    fun `Fragen-Modus wartet auf Freigabe, Erlauben fuehrt aus`() {
+        val vm = vm(createFileThenAnswer())
+        vm.ask("x")
+        vm.await { it.pendingApproval != null }
+        assertTrue(vm.state.value.running)
+        assertEquals("create_file", vm.state.value.pendingApproval?.toolName)
+        assertFalse(File(tmp, "neu.txt").exists())
+        vm.onEvent(AgentUiEvent.Decide(true))
+        vm.awaitIdle()
+        assertTrue(File(tmp, "neu.txt").exists())
+        assertFalse(vm.state.value.running)
+        assertEquals(null, vm.state.value.pendingApproval)
+    }
+
+    @Test
+    fun `Fragen-Modus Ablehnen laesst die Datei weg`() {
+        val vm = vm(createFileThenAnswer())
+        vm.ask("x")
+        vm.await { it.pendingApproval != null }
+        vm.onEvent(AgentUiEvent.Decide(false))
+        vm.awaitIdle()
+        assertFalse(File(tmp, "neu.txt").exists())
+        assertTrue(vm.state.value.items.any { it is AgentChatItem.ToolCall && it.status == ToolCallStatus.DENIED })
+    }
+
+    @Test
+    fun `ohne Schluessel oder mit anderem Anbieter gibt es eine Fehlermeldung statt eines Laufs`() {
+        options.value = options.value.copy(apiKey = "")
+        val vm = vm(createFileThenAnswer())
+        vm.ask("x")
+        assertTrue(vm.state.value.items.single().let { it is AgentChatItem.Notice && it.isError })
+        assertEquals(0, repo.count)
+        options.value = AiChatOptions(AiProviderType.OPENAI, "m", apiKey = "k")
+        vm.ask("y")
+        assertEquals(2, vm.state.value.items.size)
+    }
+
+    @Test
+    fun `Neuer Chat verwirft Verlauf`() {
+        val vm = vm(createFileThenAnswer())
+        vm.onEvent(AgentUiEvent.ModeChanged(PermissionMode.AUTO_ACCEPT))
+        vm.ask("x")
+        vm.awaitIdle()
+        vm.onEvent(AgentUiEvent.NewChat)
+        assertTrue(vm.state.value.items.isEmpty())
+        assertEquals(PermissionMode.AUTO_ACCEPT, vm.state.value.mode)
+    }
+}
