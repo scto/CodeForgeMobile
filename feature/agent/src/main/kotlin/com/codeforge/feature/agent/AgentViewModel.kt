@@ -17,6 +17,7 @@ import com.codeforge.core.domain.agent.AgentAttachment
 import com.codeforge.libs.agent.AgentEvent
 import com.codeforge.libs.agent.AgentHistoryStore
 import com.codeforge.libs.agent.AgentLoop
+import com.codeforge.libs.agent.ProjectContext
 import com.codeforge.libs.agent.AgentMessage
 import com.codeforge.libs.agent.AgentPermissionPolicy
 import com.codeforge.libs.agent.AgentSystemPrompt
@@ -264,14 +265,16 @@ class AgentViewModel @Inject constructor(
             addItem { AgentChatItem.User(it, text) }
             turnId = current.checkpoint.beginTurn()
 
-            val registry = registryFor(current)!!
+            val context = withContext(Dispatchers.IO) { ProjectContext.load(current.root) }
+            val registry = AgentToolRegistry(current.builtins + mcp.tools.value + context.tools())
             val notes = mcp.serverNotes()
             val loop = AgentLoop(
                 llm = llmFactory.create(options),
                 tools = registry,
                 policy = policy,
                 systemPrompt = AgentSystemPrompt.default(current.root.name) +
-                    if (notes.isBlank()) "" else "\n\n<mcp-server-notes>\n$notes\n</mcp-server-notes>",
+                    (if (notes.isBlank()) "" else "\n\n<mcp-server-notes>\n$notes\n</mcp-server-notes>") +
+                    context.promptSection(),
             )
             var streamingId: Long? = null
             loop.run(history, text).collect { event ->
