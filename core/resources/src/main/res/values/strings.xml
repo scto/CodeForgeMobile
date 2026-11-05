@@ -2364,7 +2364,7 @@
     <string name="agent_error_generic">Agent error: %1$s</string>
     <string name="agent_connections_title">Connections (MCP)</string>
     <string name="agent_close">Close</string>
-    <string name="agent_connections_hint">MCP servers give the agent more tools. HTTP servers (URL) work everywhere; local servers (e.g. npx -y @modelcontextprotocol/server-filesystem .) run in the Termux environment. Tools of MCP servers always ask for approval unless the server marks them read-only. Servers from the project\'s .mcp.json stay off until you approve them.</string>
+    <string name="agent_connections_hint">MCP servers give the agent more tools. HTTP servers (URL) work everywhere; local servers (e.g. npx -y @modelcontextprotocol/server-filesystem .) run in the Termux environment. Tools of MCP servers always ask for approval unless the server marks them read-only. Servers from the .mcp.json of the project stay off until you approve them.</string>
     <string name="agent_connections_empty">No servers yet.</string>
     <string name="agent_connections_add">Add server</string>
     <string name="agent_connections_target">URL (https://…) or command</string>
