@@ -2362,4 +2362,23 @@
     <string name="agent_error_no_key">No API key set. Add one under Settings → AI.</string>
     <string name="agent_error_daily_limit">Daily limit of %1$d AI requests reached.</string>
     <string name="agent_error_generic">Agent error: %1$s</string>
+    <string name="agent_connections_title">Connections (MCP)</string>
+    <string name="agent_close">Close</string>
+    <string name="agent_connections_hint">MCP servers give the agent more tools. HTTP servers (URL) work everywhere; local servers (e.g. npx -y @modelcontextprotocol/server-filesystem .) run in the Termux environment. Tools of MCP servers always ask for approval unless the server marks them read-only. Servers from the project\'s .mcp.json stay off until you approve them.</string>
+    <string name="agent_connections_empty">No servers yet.</string>
+    <string name="agent_connections_add">Add server</string>
+    <string name="agent_connections_target">URL (https://…) or command</string>
+    <string name="agent_connections_name">Name (optional)</string>
+    <string name="agent_connections_token">Access token (optional)</string>
+    <string name="agent_connections_add_button">Add</string>
+    <string name="agent_mcp_ready">Connected · %1$d tools</string>
+    <string name="agent_mcp_connecting">Connecting…</string>
+    <string name="agent_mcp_disabled">Disabled</string>
+    <string name="agent_mcp_needs_trust">From the project – not approved yet</string>
+    <string name="agent_mcp_failed">Failed: %1$s</string>
+    <string name="agent_mcp_trust">Approve</string>
+    <string name="agent_mcp_reconnect">Retry</string>
+    <string name="agent_mcp_enable">Enable</string>
+    <string name="agent_mcp_disable">Disable</string>
+    <string name="agent_mcp_remove">Remove</string>
 </resources>

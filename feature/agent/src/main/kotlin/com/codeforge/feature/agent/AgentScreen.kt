@@ -24,8 +24,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.libs.agent.PermissionMode
+import com.codeforge.libs.mcp.McpStatus
 
 /** Einstieg des Panels; [rootPath] ist der Projektstamm. */
 @Composable
@@ -106,6 +109,7 @@ fun AgentScreen(
         state.pendingApproval?.let { ApprovalCard(it, onEvent) }
         InputRow(state, onEvent)
     }
+    if (state.showConnections) ConnectionsDialog(state, onEvent)
 }
 
 @Composable
@@ -113,6 +117,9 @@ private fun Header(state: AgentUiState, onEvent: (AgentUiEvent) -> Unit) {
     Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringRes(R.string.agent_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            IconButton(onClick = { onEvent(AgentUiEvent.ShowConnections(true)) }) {
+                Icon(Icons.Filled.Extension, contentDescription = stringRes(R.string.agent_connections_title))
+            }
             IconButton(onClick = { onEvent(AgentUiEvent.NewChat) }, enabled = !state.running) {
                 Icon(Icons.Filled.Add, contentDescription = stringRes(R.string.agent_new_chat))
             }
@@ -300,3 +307,73 @@ private fun InputRow(state: AgentUiState, onEvent: (AgentUiEvent) -> Unit) {
 }
 
 private const val MAX_LISTED_PATHS = 8
+
+@Composable
+private fun ConnectionsDialog(state: AgentUiState, onEvent: (AgentUiEvent) -> Unit) {
+    var target by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var token by rememberSaveable { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = { onEvent(AgentUiEvent.ShowConnections(false)) },
+        title = { Text(stringRes(R.string.agent_connections_title)) },
+        confirmButton = { TextButton(onClick = { onEvent(AgentUiEvent.ShowConnections(false)) }) { Text(stringRes(R.string.agent_close)) } },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringRes(R.string.agent_connections_hint), style = MaterialTheme.typography.bodySmall)
+                if (state.mcpServers.isEmpty()) {
+                    Text(stringRes(R.string.agent_connections_empty), style = MaterialTheme.typography.bodySmall)
+                }
+                state.mcpServers.forEach { server -> McpServerRow(server, onEvent) }
+                Text(stringRes(R.string.agent_connections_add), style = MaterialTheme.typography.labelLarge)
+                OutlinedTextField(target, { target = it }, label = { Text(stringRes(R.string.agent_connections_target)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(name, { name = it }, label = { Text(stringRes(R.string.agent_connections_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(token, { token = it }, label = { Text(stringRes(R.string.agent_connections_token)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                TextButton(
+                    enabled = target.isNotBlank(),
+                    onClick = {
+                        onEvent(AgentUiEvent.AddMcpServer(target, name, token))
+                        target = ""
+                        name = ""
+                        token = ""
+                    },
+                ) { Text(stringRes(R.string.agent_connections_add_button)) }
+            }
+        },
+    )
+}
+
+@Composable
+private fun McpServerRow(server: McpServerUi, onEvent: (AgentUiEvent) -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(10.dp)) {
+            Text(server.name + if (server.fromProject) " · .mcp.json" else "", style = MaterialTheme.typography.labelLarge)
+            Text(server.target, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+            val status = when (server.status) {
+                McpStatus.READY -> stringRes(R.string.agent_mcp_ready, server.toolCount)
+                McpStatus.CONNECTING -> stringRes(R.string.agent_mcp_connecting)
+                McpStatus.DISABLED -> stringRes(R.string.agent_mcp_disabled)
+                McpStatus.NEEDS_TRUST -> stringRes(R.string.agent_mcp_needs_trust)
+                McpStatus.FAILED -> stringRes(R.string.agent_mcp_failed, server.message.orEmpty())
+            }
+            Text(
+                status,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (server.status == McpStatus.FAILED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row {
+                if (server.status == McpStatus.NEEDS_TRUST) {
+                    TextButton(onClick = { onEvent(AgentUiEvent.TrustMcpServer(server.name)) }) { Text(stringRes(R.string.agent_mcp_trust)) }
+                }
+                if (server.status == McpStatus.FAILED) {
+                    TextButton(onClick = { onEvent(AgentUiEvent.ReconnectMcpServer(server.name)) }) { Text(stringRes(R.string.agent_mcp_reconnect)) }
+                }
+                if (!server.fromProject) {
+                    TextButton(onClick = { onEvent(AgentUiEvent.ToggleMcpServer(server.name)) }) {
+                        Text(stringRes(if (server.status == McpStatus.DISABLED) R.string.agent_mcp_enable else R.string.agent_mcp_disable))
+                    }
+                    TextButton(onClick = { onEvent(AgentUiEvent.RemoveMcpServer(server.name)) }) { Text(stringRes(R.string.agent_mcp_remove)) }
+                }
+            }
+        }
+    }
+}

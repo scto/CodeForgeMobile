@@ -2,7 +2,7 @@
 
 Automatisch erzeugt mit `python3 scripts/gen-module-graph.py` — nicht von Hand ändern.
 
-71 Module, 323 direkte Projektabhängigkeiten.
+71 Module, 325 direkte Projektabhängigkeiten.
 
 ## Schichten (aggregiert)
 
@@ -21,7 +21,7 @@ flowchart TD
     examples -->|10| core
     examples -->|20| libs
     feature -->|150| core
-    feature -->|26| libs
+    feature -->|28| libs
     libs -->|23| core
     templates -->|1| libs
 ```
@@ -47,7 +47,7 @@ flowchart TD
 | `:feature:terminal` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:libs:terminal-engine` |
 | `:feature:sdkmanager` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui` |
 | `:feature:layoutdesigner` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui` |
-| `:feature:agent` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:agent`, `:libs:ai-client` |
+| `:feature:agent` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:agent`, `:libs:ai-client`, `:libs:mcp`, `:libs:terminal-engine` |
 | `:feature:assetstudio` | `:core:designsystem`, `:core:domain`, `:core:resources`, `:core:ui` |
 | `:feature:themebuilder` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui` |
 | `:feature:git` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui` |

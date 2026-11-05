@@ -8,6 +8,7 @@ package com.codeforge.feature.agent
 
 import androidx.compose.runtime.Immutable
 import com.codeforge.libs.agent.PermissionMode
+import com.codeforge.libs.mcp.McpStatus
 
 /** Fortschritt eines Werkzeugaufrufs in der Chat-Liste. */
 enum class ToolCallStatus { RUNNING, OK, ERROR, DENIED }
@@ -60,6 +61,17 @@ data class PendingApproval(val toolName: String, val summary: String, val previe
 @Immutable
 data class AgentTodo(val content: String, val status: String)
 
+/** Ein MCP-Server in der Verbindungsliste; [fromProject] = stammt aus der `.mcp.json` des Projekts. */
+@Immutable
+data class McpServerUi(
+    val name: String,
+    val target: String,
+    val status: McpStatus,
+    val toolCount: Int,
+    val message: String?,
+    val fromProject: Boolean,
+)
+
 /** UI-Zustand des Agenten-Panels. */
 @Immutable
 data class AgentUiState(
@@ -70,6 +82,8 @@ data class AgentUiState(
     val pendingApproval: PendingApproval? = null,
     val todos: List<AgentTodo> = emptyList(),
     val rootPath: String = "",
+    val mcpServers: List<McpServerUi> = emptyList(),
+    val showConnections: Boolean = false,
 )
 
 /** Aktionen des Nutzers. */
@@ -97,4 +111,25 @@ sealed interface AgentUiEvent {
 
     /** Neuen Chat beginnen (Verlauf verwerfen). */
     data object NewChat : AgentUiEvent
+
+    /** Verbindungsliste (MCP) ein- oder ausblenden. */
+    data class ShowConnections(val show: Boolean) : AgentUiEvent
+
+    /**
+     * MCP-Server hinzufügen: [target] ist eine URL (`https://…`, HTTP) oder eine Befehlszeile (stdio, durch Leerzeichen getrennt);
+     * [token] wird bei URLs als `Authorization: Bearer …` gesendet.
+     */
+    data class AddMcpServer(val target: String, val name: String, val token: String) : AgentUiEvent
+
+    /** App-Server entfernen. */
+    data class RemoveMcpServer(val name: String) : AgentUiEvent
+
+    /** App-Server aktivieren/deaktivieren. */
+    data class ToggleMcpServer(val name: String) : AgentUiEvent
+
+    /** Projekt-Server freigeben. */
+    data class TrustMcpServer(val name: String) : AgentUiEvent
+
+    /** Server neu verbinden. */
+    data class ReconnectMcpServer(val name: String) : AgentUiEvent
 }

@@ -75,6 +75,11 @@ class AgentViewModelTest {
     }
 
     private val gradle = FakeGradle()
+    private val connDir = File(tmp.parentFile, tmp.name + "_conn")
+    private val connections = AgentConnections(connDir)
+    private val mcp = com.codeforge.libs.mcp.McpManager(
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.Default),
+    ) { throw java.io.IOException("kein Netz im Test") }
     private val store = com.codeforge.libs.agent.AgentHistoryStore(File(tmp.parentFile, tmp.name + "_hist"))
 
     /** Antwort 1: Datei anlegen; Antwort 2: Text. */
@@ -93,7 +98,7 @@ class AgentViewModelTest {
         ),
     )
 
-    private fun vm(client: LlmClient) = AgentViewModel(repo, lsp, sync, gradle, store) { client }.also {
+    private fun vm(client: LlmClient) = AgentViewModel(repo, lsp, sync, gradle, store, mcp, connections) { client }.also {
         it.onEvent(AgentUiEvent.Initialize(tmp.path))
     }
 
@@ -105,6 +110,7 @@ class AgentViewModelTest {
         Dispatchers.resetMain()
         tmp.deleteRecursively()
         File(tmp.parentFile, tmp.name + "_hist").deleteRecursively()
+        connDir.deleteRecursively()
     }
 
     /** Dateizugriffe laufen auf Dispatchers.IO: auf den Zielzustand warten (höchstens 10 s). */
@@ -235,5 +241,30 @@ class AgentViewModelTest {
         val gone = System.nanoTime() + 5_000_000_000L
         while (store.load(tmp.path).isNotEmpty() && System.nanoTime() < gone) Thread.sleep(10)
         assertTrue(store.load(tmp.path).isEmpty())
+    }
+
+    @Test
+    fun `MCP-Server hinzufuegen speichert, meldet Zustand, Entfernen loescht`() {
+        val vm = vm(createFileThenAnswer())
+        vm.onEvent(AgentUiEvent.AddMcpServer("https://example.com/mcp", "", " tok "))
+        vm.await { st -> st.mcpServers.any { it.name == "example" && it.status == com.codeforge.libs.mcp.McpStatus.FAILED } }
+        val saved = connections.appServers().single()
+        assertEquals("Bearer tok", saved.headers["Authorization"])
+        vm.onEvent(AgentUiEvent.AddMcpServer("npx -y @scope/files-server /data", "", ""))
+        vm.await { st -> st.mcpServers.size == 2 }
+        assertEquals("files-server", connections.appServers().last().name)
+        vm.onEvent(AgentUiEvent.RemoveMcpServer("example"))
+        vm.await { st -> st.mcpServers.size == 1 }
+        vm.onEvent(AgentUiEvent.ToggleMcpServer("files-server"))
+        vm.await { st -> st.mcpServers.single().status == com.codeforge.libs.mcp.McpStatus.DISABLED }
+    }
+
+    @Test
+    fun `Projekt-Server aus mcp_json brauchen Freigabe`() {
+        File(tmp, ".mcp.json").writeText("""{"mcpServers":{"proj":{"url":"https://proj.example/mcp"}}}""")
+        val vm = vm(createFileThenAnswer())
+        vm.await { st -> st.mcpServers.any { it.name == "proj" && it.status == com.codeforge.libs.mcp.McpStatus.NEEDS_TRUST } }
+        vm.onEvent(AgentUiEvent.TrustMcpServer("proj"))
+        vm.await { st -> st.mcpServers.single { it.name == "proj" }.status == com.codeforge.libs.mcp.McpStatus.FAILED }
     }
 }

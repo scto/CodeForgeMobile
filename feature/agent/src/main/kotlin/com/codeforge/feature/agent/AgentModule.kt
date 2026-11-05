@@ -8,6 +8,11 @@ import com.codeforge.core.domain.ai.AiChatOptions
 import com.codeforge.libs.agent.LlmClient
 import com.codeforge.core.domain.ai.AiProviderType
 import com.codeforge.libs.ai_client.AnthropicAgentClient
+import com.codeforge.libs.mcp.DefaultMcpTransportFactory
+import com.codeforge.libs.mcp.McpManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import com.codeforge.libs.ai_client.GeminiAgentClient
 import com.codeforge.libs.ai_client.OpenAiAgentClient
 import android.content.Context
@@ -45,4 +50,16 @@ object AgentModule {
     @Singleton
     fun provideHistoryStore(@ApplicationContext context: Context): AgentHistoryStore =
         AgentHistoryStore(File(context.filesDir, "agent_history"))
+
+    /** Konfiguration der MCP-Verbindungen unter `files/agent`. */
+    @Provides
+    @Singleton
+    fun provideConnections(@ApplicationContext context: Context): AgentConnections =
+        AgentConnections(File(context.filesDir, "agent"))
+
+    /** Ein Manager für die ganze App; stdio-Server laufen in der Termux-Umgebung. */
+    @Provides
+    @Singleton
+    fun provideMcpManager(): McpManager =
+        McpManager(CoroutineScope(SupervisorJob() + Dispatchers.Default), DefaultMcpTransportFactory(TermuxMcpLauncher))
 }

@@ -16,6 +16,8 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":libs:agent"))
     implementation(project(":libs:ai-client"))
+    implementation(project(":libs:mcp"))
+    implementation(project(":libs:terminal-engine"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

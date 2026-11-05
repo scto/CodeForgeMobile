@@ -19,6 +19,7 @@ import com.codeforge.libs.agent.AgentLoop
 import com.codeforge.libs.agent.AgentMessage
 import com.codeforge.libs.agent.AgentPermissionPolicy
 import com.codeforge.libs.agent.AgentSystemPrompt
+import com.codeforge.libs.agent.AgentTool
 import com.codeforge.libs.agent.AgentToolRegistry
 import com.codeforge.libs.agent.BuiltinTools
 import com.codeforge.libs.agent.CheckpointWorkspace
@@ -28,6 +29,10 @@ import com.codeforge.libs.agent.PermissionMode
 import com.codeforge.libs.agent.TextDiff
 import com.codeforge.libs.agent.TodoStore
 import com.codeforge.libs.agent.ToolApprover
+import com.codeforge.libs.mcp.McpManager
+import com.codeforge.libs.mcp.McpServerConfig
+import com.codeforge.libs.mcp.McpSource
+import com.codeforge.libs.mcp.McpTransportKind
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import javax.inject.Inject
@@ -52,6 +57,8 @@ class AgentViewModel @Inject constructor(
     private val fileSync: FileSyncBridge,
     private val gradle: GradleBuildRepository,
     private val historyStore: AgentHistoryStore,
+    private val mcp: McpManager,
+    private val connections: AgentConnections,
     private val llmFactory: AgentLlmFactory,
 ) : ViewModel() {
 
@@ -83,10 +90,28 @@ class AgentViewModel @Inject constructor(
     private var nextId = 1L
 
     /** Alles, was an einem Chat hängt: Checkpoints, Werkzeuge, Aufgabenliste. */
-    private class Session(val root: File, val checkpoint: CheckpointWorkspace, val tools: AgentToolRegistry, val todos: TodoStore)
+    private class Session(val root: File, val checkpoint: CheckpointWorkspace, val builtins: List<AgentTool>, val todos: TodoStore)
 
     init {
         viewModelScope.launch { lspClient.diagnostics.collect { (path, list) -> diagnostics.update(path, list) } }
+        viewModelScope.launch {
+            mcp.servers.collect { list ->
+                _state.update { st ->
+                    st.copy(
+                        mcpServers = list.map {
+                            McpServerUi(
+                                name = it.entry.config.name,
+                                target = it.entry.config.url ?: (listOfNotNull(it.entry.config.command) + it.entry.config.args).joinToString(" "),
+                                status = it.status,
+                                toolCount = it.toolCount,
+                                message = it.message,
+                                fromProject = it.entry.source == McpSource.PROJECT,
+                            )
+                        },
+                    )
+                }
+            }
+        }
     }
 
     /** Verarbeitet eine Aktion des Nutzers. */
@@ -102,11 +127,70 @@ class AgentViewModel @Inject constructor(
             }
             is AgentUiEvent.Decide -> approval?.complete(event.allow)
             is AgentUiEvent.Revert -> revert(event.turnId)
+            is AgentUiEvent.ShowConnections -> _state.update { it.copy(showConnections = event.show) }
+            is AgentUiEvent.AddMcpServer -> addMcpServer(event)
+            is AgentUiEvent.RemoveMcpServer -> changeAppServers { l -> l.filter { it.name != event.name } }
+            is AgentUiEvent.ToggleMcpServer -> changeAppServers { l -> l.map { if (it.name == event.name) it.copy(disabled = !it.disabled) else it } }
+            is AgentUiEvent.TrustMcpServer -> trustMcpServer(event.name)
+            is AgentUiEvent.ReconnectMcpServer -> viewModelScope.launch(Dispatchers.IO) { mcp.reconnect(event.name) }
             AgentUiEvent.NewChat -> {
                 val root = _state.value.rootPath
                 startChat(root, restore = false)
                 if (root.isNotEmpty()) viewModelScope.launch(Dispatchers.IO) { historyStore.clear(root) }
             }
+        }
+    }
+
+    /** Eingebaute Werkzeuge plus die der verbundenen MCP-Server (Stand zum Zeitpunkt des Aufrufs). */
+    private fun registryFor(session: Session?): AgentToolRegistry? =
+        session?.let { AgentToolRegistry(it.builtins + mcp.tools.value) }
+
+    private fun syncMcp(rootPath: String = _state.value.rootPath) {
+        viewModelScope.launch(Dispatchers.IO) {
+            mcp.setEntries(connections.entries(rootPath.takeIf { it.isNotEmpty() }?.let(::File)))
+        }
+    }
+
+    private fun addMcpServer(event: AgentUiEvent.AddMcpServer) {
+        val target = event.target.trim()
+        if (target.isEmpty()) return
+        val isUrl = target.startsWith("http://") || target.startsWith("https://")
+        val token = event.token.trim()
+        val config = if (isUrl) {
+            val host = runCatching { java.net.URI(target).host }.getOrNull().orEmpty()
+            McpServerConfig(
+                name = event.name.trim().ifEmpty { host.removePrefix("www.").substringBefore('.').ifEmpty { "server" } },
+                transport = McpTransportKind.HTTP,
+                url = target,
+                headers = if (token.isEmpty()) emptyMap() else mapOf("Authorization" to if (token.startsWith("Bearer ", ignoreCase = true)) token else "Bearer $token"),
+            )
+        } else {
+            val parts = target.split(Regex("\\s+"))
+            McpServerConfig(
+                name = event.name.trim().ifEmpty { parts.drop(1).firstOrNull { !it.startsWith("-") }?.substringAfterLast('/')?.ifEmpty { null } ?: parts[0] },
+                transport = McpTransportKind.STDIO,
+                command = parts[0],
+                args = parts.drop(1),
+            )
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            connections.saveAppServers(connections.appServers().filter { it.name != config.name } + config)
+            syncMcp()
+        }
+    }
+
+    private fun changeAppServers(transform: (List<McpServerConfig>) -> List<McpServerConfig>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            connections.saveAppServers(transform(connections.appServers()))
+            syncMcp()
+        }
+    }
+
+    private fun trustMcpServer(name: String) {
+        val root = _state.value.rootPath.takeIf { it.isNotEmpty() }?.let(::File) ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            connections.projectServers(root).firstOrNull { it.name == name }?.let(connections::trust)
+            syncMcp()
         }
     }
 
@@ -116,8 +200,9 @@ class AgentViewModel @Inject constructor(
         history = emptyList()
         nextId = 1L
         session = if (rootPath.isEmpty()) null else newSession(File(rootPath))
-        _state.value = AgentUiState(rootPath = rootPath, mode = policy.mode)
+        _state.value = AgentUiState(rootPath = rootPath, mode = policy.mode, mcpServers = _state.value.mcpServers, showConnections = _state.value.showConnections)
         if (restore && rootPath.isNotEmpty()) restoreHistory(rootPath)
+        syncMcp(rootPath)
     }
 
     /** Lädt den gespeicherten Verlauf im Hintergrund; ein inzwischen gestarteter Lauf oder Projektwechsel hat Vorrang. */
@@ -126,7 +211,7 @@ class AgentViewModel @Inject constructor(
         viewModelScope.launch {
             val saved = withContext(Dispatchers.IO) { historyStore.load(rootPath) }
             if (saved.isEmpty() || session !== current || _state.value.items.isNotEmpty() || _state.value.running) return@launch
-            val items = AgentTranscript.toItems(saved) { name, args -> current?.tools?.get(name)?.describeCall(args) ?: name }
+            val items = AgentTranscript.toItems(saved) { name, args -> registryFor(current)?.get(name)?.describeCall(args) ?: name }
             history = saved
             nextId = (items.maxOfOrNull { it.id } ?: 0L) + 1
             _state.update { it.copy(items = items) }
@@ -141,7 +226,7 @@ class AgentViewModel @Inject constructor(
         val files = FileAgentWorkspace(root) { path -> diagnostics.query(root, path) }
         val checkpoint = CheckpointWorkspace(SyncingAgentWorkspace(files, root, fileSync))
         val todos = TodoStore()
-        return Session(root, checkpoint, AgentToolRegistry(BuiltinTools.create(checkpoint, todos, GradleAgentBuildRunner(gradle, root))), todos)
+        return Session(root, checkpoint, BuiltinTools.create(checkpoint, todos, GradleAgentBuildRunner(gradle, root)), todos)
     }
 
     private fun send() {
@@ -171,11 +256,14 @@ class AgentViewModel @Inject constructor(
             addItem { AgentChatItem.User(it, text) }
             turnId = current.checkpoint.beginTurn()
 
+            val registry = registryFor(current)!!
+            val notes = mcp.serverNotes()
             val loop = AgentLoop(
                 llm = llmFactory.create(options),
-                tools = current.tools,
+                tools = registry,
                 policy = policy,
-                systemPrompt = AgentSystemPrompt.default(current.root.name),
+                systemPrompt = AgentSystemPrompt.default(current.root.name) +
+                    if (notes.isBlank()) "" else "\n\n<mcp-server-notes>\n$notes\n</mcp-server-notes>",
             )
             var streamingId: Long? = null
             loop.run(history, text).collect { event ->
@@ -186,7 +274,7 @@ class AgentViewModel @Inject constructor(
                     }
                     is AgentEvent.ToolCallStarted -> {
                         streamingId = null
-                        val summary = current.tools.get(event.name)?.describeCall(event.arguments) ?: event.name
+                        val summary = registry.get(event.name)?.describeCall(event.arguments) ?: event.name
                         addItem { AgentChatItem.ToolCall(it, event.id, summary, ToolCallStatus.RUNNING) }
                     }
                     is AgentEvent.ToolCallFinished -> {

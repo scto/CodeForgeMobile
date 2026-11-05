@@ -2362,4 +2362,23 @@
     <string name="agent_error_no_key">Kein API-Schlüssel hinterlegt. Unter Einstellungen → KI eintragen.</string>
     <string name="agent_error_daily_limit">Tageslimit von %1$d KI-Anfragen erreicht.</string>
     <string name="agent_error_generic">Agent-Fehler: %1$s</string>
+    <string name="agent_connections_title">Verbindungen (MCP)</string>
+    <string name="agent_close">Schließen</string>
+    <string name="agent_connections_hint">MCP-Server geben dem Agenten weitere Werkzeuge. HTTP-Server (URL) laufen überall; lokale Server (z. B. npx -y @modelcontextprotocol/server-filesystem .) in der Termux-Umgebung. Werkzeuge von MCP-Servern verlangen immer eine Freigabe, außer der Server markiert sie als schreibgeschützt. Server aus der .mcp.json des Projekts bleiben aus, bis du sie freigibst.</string>
+    <string name="agent_connections_empty">Noch keine Server.</string>
+    <string name="agent_connections_add">Server hinzufügen</string>
+    <string name="agent_connections_target">URL (https://…) oder Befehl</string>
+    <string name="agent_connections_name">Name (optional)</string>
+    <string name="agent_connections_token">Zugriffstoken (optional)</string>
+    <string name="agent_connections_add_button">Hinzufügen</string>
+    <string name="agent_mcp_ready">Verbunden · %1$d Werkzeuge</string>
+    <string name="agent_mcp_connecting">Verbinde …</string>
+    <string name="agent_mcp_disabled">Deaktiviert</string>
+    <string name="agent_mcp_needs_trust">Aus dem Projekt – noch nicht freigegeben</string>
+    <string name="agent_mcp_failed">Fehlgeschlagen: %1$s</string>
+    <string name="agent_mcp_trust">Freigeben</string>
+    <string name="agent_mcp_reconnect">Erneut versuchen</string>
+    <string name="agent_mcp_enable">Aktivieren</string>
+    <string name="agent_mcp_disable">Deaktivieren</string>
+    <string name="agent_mcp_remove">Entfernen</string>
 </resources>
