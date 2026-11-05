@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.0.4] - 2026-11-05
+
 ### Behoben (Release-Build / Editor)
 - TextMate-Highlighting fiel in der R8-Release-APK auf Klartext zurück („Abstract classes can't be instantiated … Class name: de.b“, „Language with … scope name not found“): sora-editor liest `languages.json` per Gson-Reflection, R8 hatte die Klassen umbenannt. Keep-Regeln für `io.github.rosemoe.sora.langs.textmate`, `org.eclipse.tm4e`, `org.joni`, `org.jcodings` in `feature/editor/consumer-rules.pro`.
 
