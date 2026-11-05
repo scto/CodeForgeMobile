@@ -21,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,6 +32,13 @@ import javax.inject.Singleton
 class TermuxScriptSdkRepository @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : SdkRepository {
+
+    /**
+     * Installationen laufen nacheinander: Mehrere gleichzeitige `codeforge-env install` (z. B. zwei Platforms aus
+     * der Mehrfachauswahl) starten parallel den `sdkmanager` im selben SDK-Verzeichnis und beschädigen sich
+     * gegenseitig (Platform-Ordner ohne `android.jar`). Wartende Pakete zeigen 0 % bis sie an der Reihe sind.
+     */
+    private val installLock = Mutex()
 
     override suspend fun sdkRootPath(): String? =
         TermuxEnvironment.sdkRoot.takeIf { TermuxEnvironment.isBootstrapInstalled() }
@@ -77,6 +86,11 @@ class TermuxScriptSdkRepository @Inject constructor(
             return@flow
         }
         prepare().onFailure { emit(SdkInstallEvent.Error(it)); return@flow }
+        emit(SdkInstallEvent.Progress(0, Res.string(R.string.common_installation_wartet)))
+        installLock.withLock { runInstall(packagePath) }
+    }.flowOn(Dispatchers.IO).trackedAs("SDK $packagePath")
+
+    private suspend fun kotlinx.coroutines.flow.FlowCollector<SdkInstallEvent>.runInstall(packagePath: String) {
         var failure: String? = null
         var succeeded = false
         try {
@@ -97,7 +111,7 @@ class TermuxScriptSdkRepository @Inject constructor(
         } catch (e: Exception) {
             emit(SdkInstallEvent.Error(e))
         }
-    }.flowOn(Dispatchers.IO).trackedAs("SDK $packagePath")
+    }
 
     override suspend fun uninstallSdkTool(packagePath: String): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {

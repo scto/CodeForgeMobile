@@ -224,7 +224,13 @@ installed_path() { # id
     archive)
       [ -n "$dest" ] && [ -d "$SDK_ROOT/$dest" ] && printf '%s' "$SDK_ROOT/$dest" ;;
     sdkmanager)
-      local p="$SDK_ROOT/${src//;//}"; [ -d "$p" ] && printf '%s' "$p" ;;
+      # Platform nur mit android.jar als installiert werten: ein abgebrochener/paralleler sdkmanager-Lauf
+      # hinterlässt sonst einen leeren Ordner (Compose-Vorschau: "Android-Plattform fehlt").
+      local p="$SDK_ROOT/${src//;//}"
+      case "$src" in
+        platforms\;*) [ -f "$p/android.jar" ] && printf '%s' "$p" ;;
+        *) [ -d "$p" ] && printf '%s' "$p" ;;
+      esac ;;
   esac
   return 0
 }
@@ -767,10 +773,23 @@ do_install() { # id
         entry_exists 'cmdline-tools;latest' || die "cmdline-tools nicht konfiguriert (TOOLS_REPO leer?): CMDLINE_TOOLS_URL und CMDLINE_TOOLS_SHA256 in $CONF setzen"
         say "cmdline-tools fehlen — installiere sie zuerst"; ( do_install 'cmdline-tools;latest' ) || exit 1
       fi
-      progress 10 "sdkmanager installiert $(format_component_id "$src") …"
       export JAVA_HOME="${JAVA_HOME:-$(first_jdk)}"
+      # Nur ein sdkmanager gleichzeitig je SDK-Verzeichnis (Sperre per mkdir; verwaiste Sperre nach 30 min verfallen)
+      local sdklock="$SDK_ROOT/.cf-sdkmanager.lock" waited=0
+      mkdir -p "$SDK_ROOT"
+      while ! mkdir "$sdklock" 2>/dev/null; do
+        if [ -n "$(find "$sdklock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then rm -rf "$sdklock"; continue; fi
+        if [ $((waited % 15)) -eq 0 ]; then progress 0 "Wartet auf anderen sdkmanager-Lauf …"; fi
+        sleep 2; waited=$((waited + 2))
+      done
+      trap 'rm -rf "$sdklock"' EXIT INT TERM
+      progress 10 "sdkmanager installiert $(format_component_id "$src") …"
+      rm -rf "$SDK_ROOT/${src//;//}" 2>/dev/null   # halbe Reste eines früheren Abbruchs entfernen
       yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "$src" >/dev/null 2>&1 \
         || die "sdkmanager konnte $src nicht installieren"
+      [ -f "$SDK_ROOT/${src//;//}/android.jar" ] || [ "${src#platforms;}" = "$src" ] \
+        || die "sdkmanager meldete Erfolg, aber $src enthält keine android.jar"
+      rm -rf "$sdklock"; trap - EXIT INT TERM
       ;;
     cmake)
       progress 5 "Installiere cmake und ninja …"

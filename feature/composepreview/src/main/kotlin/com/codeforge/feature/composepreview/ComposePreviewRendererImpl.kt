@@ -18,6 +18,7 @@ import com.codeforge.core.domain.model.PreviewRenderResult
 import com.codeforge.core.domain.model.PreviewThemeMode
 import com.codeforge.core.domain.repository.CompilerRuntimeProvider
 import com.codeforge.core.domain.repository.ComposePreviewRenderer
+import com.codeforge.core.domain.model.ToolItem
 import com.codeforge.core.domain.repository.SdkRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -254,13 +255,14 @@ class ComposePreviewRendererImpl @Inject internal constructor(
     private suspend fun resolveAndroidPlatformJar(): File? {
         val packages = sdkRepository.listAvailablePackages().getOrNull() ?: return null
 
-        val latestPlatform = packages
+        // Mehrere Platforms können nebeneinander installiert sein; maßgeblich ist die neueste, die eine
+        // lesbare android.jar enthält (ein unvollständiger Ordner darf eine ältere, vollständige nicht verdecken).
+        return packages
             .filter { it.isInstalled && it.id.startsWith("platforms;android-") && it.path != null }
-            .maxWithOrNull(compareBy(VersionComparator) { it.version })
-            ?: return null
-
-        val androidJar = File(latestPlatform.path!!, "android.jar")
-        return androidJar.takeIf { it.isFile }
+            .sortedWith(compareByDescending<ToolItem, String>(VersionComparator) { it.version })
+            .asSequence()
+            .map { File(it.path!!, "android.jar") }
+            .firstOrNull { it.isFile && it.length() > 0 }
     }
 
     private suspend fun resolveD8BinaryPath(): String? {

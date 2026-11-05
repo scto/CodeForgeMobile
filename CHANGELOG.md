@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Release-Build / Editor)
+- TextMate-Highlighting fiel in der R8-Release-APK auf Klartext zurück („Abstract classes can't be instantiated … Class name: de.b“, „Language with … scope name not found“): sora-editor liest `languages.json` per Gson-Reflection, R8 hatte die Klassen umbenannt. Keep-Regeln für `io.github.rosemoe.sora.langs.textmate`, `org.eclipse.tm4e`, `org.joni`, `org.jcodings` in `feature/editor/consumer-rules.pro`.
+
+### Behoben (SDK / Compose-Vorschau)
+- Mehrere Platforms gleichzeitig installieren (Mehrfachauswahl im SDK-Manager) startete parallele `sdkmanager`-Läufe im selben SDK-Verzeichnis; es blieben Platform-Ordner ohne `android.jar` zurück und die Compose-Vorschau meldete „Android-Plattform fehlt“. Jetzt: Installationen laufen nacheinander (`TermuxScriptSdkRepository`, wartende Pakete zeigen „Wartet auf andere Installation …“), `codeforge-env` sperrt den `sdkmanager` (mkdir-Sperre), wertet eine Platform nur mit `android.jar` als installiert und entfernt halbe Reste vor der Installation.
+- Compose-Vorschau nimmt die neueste Platform, die eine lesbare `android.jar` hat, statt nur die neueste installierte.
+
 ## [3.0.3] - 2026-11-04
 
 ### Geändert

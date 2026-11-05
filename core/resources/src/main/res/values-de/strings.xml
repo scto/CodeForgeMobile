@@ -16,6 +16,7 @@
     <string name="common_erneut_versuchen">Erneut versuchen</string>
     <string name="common_ersetzen_durch">Ersetzen durch</string>
     <string name="common_git">Git</string>
+    <string name="common_installation_wartet">Wartet auf andere Installation …</string>
     <string name="common_installation_fehlgeschlagen">Installation fehlgeschlagen.</string>
     <string name="common_installiert">%1$s installiert.</string>
     <string name="common_keine_treffer">Keine Treffer</string>
