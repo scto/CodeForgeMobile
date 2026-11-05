@@ -6,7 +6,10 @@ package com.codeforge.feature.agent
 
 import com.codeforge.core.domain.ai.AiChatOptions
 import com.codeforge.libs.agent.LlmClient
+import com.codeforge.core.domain.ai.AiProviderType
 import com.codeforge.libs.ai_client.AnthropicAgentClient
+import com.codeforge.libs.ai_client.GeminiAgentClient
+import com.codeforge.libs.ai_client.OpenAiAgentClient
 import android.content.Context
 import com.codeforge.libs.agent.AgentHistoryStore
 import dagger.Module
@@ -27,9 +30,15 @@ fun interface AgentLlmFactory {
 @Module
 @InstallIn(SingletonComponent::class)
 object AgentModule {
-    /** Anthropic ist bisher der einzige Anbieter mit Werkzeugaufrufen. */
+    /** Wählt den Client nach Anbieter. */
     @Provides
-    fun provideLlmFactory(): AgentLlmFactory = AgentLlmFactory { AnthropicAgentClient(it) }
+    fun provideLlmFactory(): AgentLlmFactory = AgentLlmFactory { options ->
+        when (options.provider) {
+            AiProviderType.ANTHROPIC -> AnthropicAgentClient(options)
+            AiProviderType.OPENAI -> OpenAiAgentClient(options)
+            AiProviderType.GEMINI -> GeminiAgentClient(options)
+        }
+    }
 
     /** Verlauf je Projekt unter `files/agent_history`. */
     @Provides

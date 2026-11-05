@@ -190,13 +190,14 @@ class AgentViewModelTest {
     }
 
     @Test
-    fun `ohne Schluessel oder mit anderem Anbieter gibt es eine Fehlermeldung statt eines Laufs`() {
+    fun `ohne Schluessel gibt es eine Fehlermeldung statt eines Laufs`() {
         options.value = options.value.copy(apiKey = "")
         val vm = vm(createFileThenAnswer())
         vm.ask("x")
         assertTrue(vm.state.value.items.single().let { it is AgentChatItem.Notice && it.isError })
         assertEquals(0, repo.count)
-        options.value = AiChatOptions(AiProviderType.OPENAI, "m", apiKey = "k")
+        // OpenAI-kompatibler lokaler Server ohne Schlüssel ist erlaubt, ohne Basis-URL nicht.
+        options.value = AiChatOptions(AiProviderType.OPENAI, "m", apiKey = "")
         vm.ask("y")
         assertEquals(2, vm.state.value.items.size)
     }

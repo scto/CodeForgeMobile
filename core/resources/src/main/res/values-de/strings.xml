@@ -2360,7 +2360,6 @@
     <string name="agent_finish_truncated">Die Antwort wurde abgeschnitten (Token-Limit). Bitte den Agenten weitermachen lassen.</string>
     <string name="agent_finish_max_steps">Schrittlimit erreicht. Bitte den Agenten weitermachen lassen.</string>
     <string name="agent_error_no_key">Kein API-Schlüssel hinterlegt. Unter Einstellungen → KI eintragen.</string>
-    <string name="agent_error_provider_unsupported">Der Agent unterstützt derzeit nur Anthropic (Claude). Anbieter unter Einstellungen → KI wechseln.</string>
     <string name="agent_error_daily_limit">Tageslimit von %1$d KI-Anfragen erreicht.</string>
     <string name="agent_error_generic">Agent-Fehler: %1$s</string>
 </resources>

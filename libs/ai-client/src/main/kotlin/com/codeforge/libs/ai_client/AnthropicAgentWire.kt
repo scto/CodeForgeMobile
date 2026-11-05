@@ -74,7 +74,7 @@ internal object AnthropicAgentWire {
     }
 
     /** Setzt den SSE-Strom einer Antwort zu [LlmStreamEvent]s zusammen (Werkzeugargumente kommen als Teilstücke). */
-    class StreamAssembler {
+    class StreamAssembler : SseAssembler {
         private class Block(val id: String, val name: String, val args: StringBuilder = StringBuilder())
 
         private val blocks = HashMap<Int, Block>()
@@ -83,7 +83,7 @@ internal object AnthropicAgentWire {
         private var stop = StopReason.END_TURN
 
         /** Verarbeitet ein SSE-Ereignis und liefert die daraus entstehenden Ereignisse (oft keines). */
-        fun accept(event: RawSseEvent): List<LlmStreamEvent> {
+        override fun accept(event: RawSseEvent): List<LlmStreamEvent> {
             if (event.data.isBlank()) return emptyList()
             val root = try {
                 json.parseToJsonElement(event.data).jsonObject

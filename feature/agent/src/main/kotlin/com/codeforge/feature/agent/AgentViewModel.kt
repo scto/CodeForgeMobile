@@ -158,8 +158,9 @@ class AgentViewModel @Inject constructor(
         try {
             val options = aiRepository.getAiOptions().first()
             val problem = when {
-                options.apiKey.isBlank() -> Res.string(R.string.agent_error_no_key)
-                options.provider != AiProviderType.ANTHROPIC -> Res.string(R.string.agent_error_provider_unsupported)
+                // Lokale OpenAI-kompatible Server (eigene Basis-URL) laufen auch ohne Schlüssel.
+                options.apiKey.isBlank() && !(options.provider == AiProviderType.OPENAI && !options.baseUrl.isNullOrBlank()) ->
+                    Res.string(R.string.agent_error_no_key)
                 else -> dailyLimitProblem()
             }
             if (problem != null) {

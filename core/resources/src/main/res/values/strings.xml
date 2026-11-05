@@ -2360,7 +2360,6 @@
     <string name="agent_finish_truncated">The answer was cut off (token limit). Ask the agent to continue.</string>
     <string name="agent_finish_max_steps">Step limit reached. Ask the agent to continue.</string>
     <string name="agent_error_no_key">No API key set. Add one under Settings → AI.</string>
-    <string name="agent_error_provider_unsupported">The agent currently supports Anthropic (Claude) only. Switch the provider under Settings → AI.</string>
     <string name="agent_error_daily_limit">Daily limit of %1$d AI requests reached.</string>
     <string name="agent_error_generic">Agent error: %1$s</string>
 </resources>
