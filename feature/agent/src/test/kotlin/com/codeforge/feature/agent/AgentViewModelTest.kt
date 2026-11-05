@@ -130,7 +130,9 @@ class AgentViewModelTest {
         assertEquals("hallo", File(tmp, "neu.txt").readText())
         assertTrue(s.items.any { it is AgentChatItem.ToolCall && it.status == ToolCallStatus.OK })
         assertTrue(s.items.any { it is AgentChatItem.Assistant && it.text == "Fertig." })
-        assertEquals(listOf("neu.txt"), s.items.filterIsInstance<AgentChatItem.Changes>().single().paths)
+        val changes = s.items.filterIsInstance<AgentChatItem.Changes>().single()
+        assertEquals(listOf("neu.txt"), changes.paths)
+        assertTrue(changes.files.single().diff.contains("+hallo"))
         assertEquals(1, repo.count)
     }
 
@@ -165,6 +167,7 @@ class AgentViewModelTest {
         vm.await { it.pendingApproval != null }
         assertTrue(vm.state.value.running)
         assertEquals("create_file", vm.state.value.pendingApproval?.toolName)
+        assertTrue(vm.state.value.pendingApproval?.preview?.contains("+hallo") == true)
         assertFalse(File(tmp, "neu.txt").exists())
         vm.onEvent(AgentUiEvent.Decide(true))
         vm.awaitIdle()

@@ -40,14 +40,21 @@ sealed interface AgentChatItem {
     data class Changes(
         override val id: Long,
         val turnId: Long,
-        val paths: List<String>,
+        val files: List<ChangedFile>,
         val reverted: Boolean = false,
-    ) : AgentChatItem
+    ) : AgentChatItem {
+        /** Pfade der geänderten Dateien. */
+        val paths: List<String> get() = files.map { it.path }
+    }
 }
+
+/** Geänderte Datei eines Zuges mit Unified-[diff] (leer bei Binär-/Riesendateien). */
+@Immutable
+data class ChangedFile(val path: String, val diff: String)
 
 /** Offene Freigabeanfrage für einen schreibenden/ausführenden Werkzeugaufruf. */
 @Immutable
-data class PendingApproval(val toolName: String, val summary: String)
+data class PendingApproval(val toolName: String, val summary: String, val preview: String? = null)
 
 /** Eintrag der Aufgabenliste des Agenten. */
 @Immutable

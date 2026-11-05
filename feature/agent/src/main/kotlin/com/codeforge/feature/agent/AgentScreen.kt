@@ -7,6 +7,11 @@
  */
 package com.codeforge.feature.agent
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +39,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -167,10 +179,8 @@ private fun ChatItem(item: AgentChatItem, running: Boolean, onEvent: (AgentUiEve
         is AgentChatItem.Changes -> Card(modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(10.dp)) {
                 Text(stringRes(R.string.agent_changes_title, item.paths.size), style = MaterialTheme.typography.labelLarge)
-                item.paths.take(MAX_LISTED_PATHS).forEach {
-                    Text(it, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
-                }
-                if (item.paths.size > MAX_LISTED_PATHS) Text("… +${item.paths.size - MAX_LISTED_PATHS}", style = MaterialTheme.typography.bodySmall)
+                item.files.take(MAX_LISTED_PATHS).forEach { file -> ChangedFileRow(file) }
+                if (item.files.size > MAX_LISTED_PATHS) Text("… +${item.files.size - MAX_LISTED_PATHS}", style = MaterialTheme.typography.bodySmall)
                 if (item.reverted) {
                     Text(stringRes(R.string.agent_reverted), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                 } else {
@@ -181,6 +191,54 @@ private fun ChatItem(item: AgentChatItem, running: Boolean, onEvent: (AgentUiEve
             }
         }
     }
+}
+
+@Composable
+private fun ChangedFileRow(file: ChangedFile) {
+    var expanded by rememberSaveable(file.path) { mutableStateOf(false) }
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            (if (expanded) "▾ " else "▸ ") + file.path,
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 11.sp,
+            modifier = Modifier.clickable(enabled = file.diff.isNotEmpty()) { expanded = !expanded }.padding(vertical = 2.dp),
+        )
+        if (expanded) DiffView(file.diff)
+    }
+}
+
+/** Unified-Diff mit farbigen Plus-/Minus-Zeilen, waagerecht scrollbar und in der Höhe begrenzt. */
+@Composable
+private fun DiffView(diff: String, modifier: Modifier = Modifier) {
+    val added = MaterialTheme.colorScheme.primary
+    val removed = MaterialTheme.colorScheme.error
+    val hunk = MaterialTheme.colorScheme.tertiary
+    val text = remember(diff, added, removed, hunk) {
+        buildAnnotatedString {
+            diff.lines().forEachIndexed { i, line ->
+                if (i > 0) append('\n')
+                val color = when {
+                    line.startsWith("@@") -> hunk
+                    line.startsWith("+") -> added
+                    line.startsWith("-") -> removed
+                    else -> null
+                }
+                if (color != null) withStyle(SpanStyle(color = color)) { append(line) } else append(line)
+            }
+        }
+    }
+    Text(
+        text,
+        fontFamily = FontFamily.Monospace,
+        fontSize = 11.sp,
+        softWrap = false,
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(max = 240.dp)
+            .verticalScroll(rememberScrollState())
+            .horizontalScroll(rememberScrollState()),
+    )
 }
 
 @Composable
@@ -206,6 +264,7 @@ private fun ApprovalCard(approval: PendingApproval, onEvent: (AgentUiEvent) -> U
         Column(Modifier.padding(10.dp)) {
             Text(stringRes(R.string.agent_approval_title), style = MaterialTheme.typography.labelLarge)
             Text(approval.summary, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+            approval.preview?.let { DiffView(it, Modifier.padding(top = 6.dp)) }
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 TextButton(onClick = { onEvent(AgentUiEvent.Decide(false)) }) { Text(stringRes(R.string.agent_deny)) }
                 TextButton(onClick = { onEvent(AgentUiEvent.Decide(true)) }) { Text(stringRes(R.string.agent_approve)) }

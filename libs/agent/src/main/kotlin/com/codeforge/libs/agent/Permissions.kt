@@ -21,7 +21,13 @@ enum class PermissionMode {
 }
 
 /** Freigabeanfrage an den Nutzer. */
-data class ApprovalRequest(val toolName: String, val kind: ToolKind, val summary: String, val arguments: JsonObject)
+data class ApprovalRequest(
+    val toolName: String,
+    val kind: ToolKind,
+    val summary: String,
+    val arguments: JsonObject,
+    val preview: String? = null,
+)
 
 /** Fragt den Nutzer; `true` = erlaubt. Läuft suspendierend, bis die Antwort da ist. */
 fun interface ToolApprover {
@@ -60,7 +66,7 @@ class AgentPermissionPolicy(
             PermissionMode.PLAN_ONLY ->
                 PolicyVerdict.Denied("Plan-Modus: '${tool.name}' ist nicht erlaubt. Beschreibe stattdessen, was du ändern würdest.")
             PermissionMode.ASK_EACH ->
-                if (approver.approve(ApprovalRequest(tool.name, tool.kind, tool.describeCall(arguments), arguments))) {
+                if (approver.approve(ApprovalRequest(tool.name, tool.kind, tool.describeCall(arguments), arguments, runCatching { tool.preview(arguments) }.getOrNull()))) {
                     PolicyVerdict.Allowed
                 } else {
                     PolicyVerdict.Denied("Der Nutzer hat '${tool.name}' abgelehnt. Frage nach, wie du vorgehen sollst.")

@@ -24,6 +24,7 @@ import com.codeforge.libs.agent.CheckpointWorkspace
 import com.codeforge.libs.agent.FileAgentWorkspace
 import com.codeforge.libs.agent.FinishReason
 import com.codeforge.libs.agent.PermissionMode
+import com.codeforge.libs.agent.TextDiff
 import com.codeforge.libs.agent.TodoStore
 import com.codeforge.libs.agent.ToolApprover
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,7 +64,7 @@ class AgentViewModel @Inject constructor(
         approver = ToolApprover { request ->
             val decision = CompletableDeferred<Boolean>()
             approval = decision
-            _state.update { it.copy(pendingApproval = PendingApproval(request.toolName, request.summary)) }
+            _state.update { it.copy(pendingApproval = PendingApproval(request.toolName, request.summary, request.preview)) }
             try {
                 decision.await()
             } finally {
@@ -218,7 +219,7 @@ class AgentViewModel @Inject constructor(
     private suspend fun publishChanges(current: Session, turnId: Long) {
         val changed = runCatching { current.checkpoint.changes(turnId) }.getOrDefault(emptyList())
         if (changed.isNotEmpty()) {
-            addItem { AgentChatItem.Changes(it, turnId, changed.map { c -> c.path }) }
+            addItem { AgentChatItem.Changes(it, turnId, changed.map { c -> ChangedFile(c.path, TextDiff.unified(c.before, c.after)) }) }
         }
     }
 

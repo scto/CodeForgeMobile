@@ -135,6 +135,11 @@ object BuiltinTools {
             return ToolResult("Datei geschrieben: $path (${content.lines().size} Zeilen)")
         }
 
+        override suspend fun preview(arguments: JsonObject): String? {
+            val path = normalizeProjectPath(arguments.requireString("path"))
+            return TextDiff.unified(ws.readFile(path), arguments.requireString("content")).ifEmpty { null }
+        }
+
         override fun describeCall(arguments: JsonObject) = "Datei anlegen: ${arguments.optString("path")}"
     }
 
@@ -167,6 +172,16 @@ object BuiltinTools {
             }
             ws.writeFile(path, if (all) text.replace(old, new) else text.replaceFirst(old, new))
             return ToolResult("Datei bearbeitet: $path ($count Ersetzung${if (count == 1) "" else "en"})")
+        }
+
+        override suspend fun preview(arguments: JsonObject): String? {
+            val path = normalizeProjectPath(arguments.requireString("path"))
+            val old = arguments.requireString("old_string")
+            val text = ws.readFile(path) ?: return null
+            if (old.isEmpty() || !text.contains(old)) return null
+            val new = arguments.requireString("new_string")
+            val after = if (arguments.optBoolean("replace_all") == true) text.replace(old, new) else text.replaceFirst(old, new)
+            return TextDiff.unified(text, after).ifEmpty { null }
         }
 
         override fun describeCall(arguments: JsonObject) = "Datei ändern: ${arguments.optString("path")}"

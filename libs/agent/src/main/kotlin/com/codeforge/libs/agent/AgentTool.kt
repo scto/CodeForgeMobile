@@ -52,6 +52,9 @@ interface AgentTool {
     /** Kurzer Satz für die Freigabeabfrage, z. B. „Datei app/Foo.kt ändern“. */
     fun describeCall(arguments: JsonObject): String = name
 
+    /** Vorschau der geplanten Wirkung (z. B. Unified-Diff) für die Freigabe; `null`, wenn es keine gibt. Darf nichts ändern. */
+    suspend fun preview(arguments: JsonObject): String? = null
+
     /** Führt das Werkzeug aus. Fehler dürfen als Exception oder [ToolResult.error] gemeldet werden. */
     suspend fun execute(arguments: JsonObject): ToolResult
 }
