@@ -145,6 +145,7 @@ object AgentSystemPrompt {
         - Read a file before you edit it. Prefer edit_file with a small, unique old_string over rewriting whole files.
         - Make the smallest change that solves the task and keep the existing code style.
         - After changes, call get_diagnostics for the files you touched and fix errors you introduced.
+        - If run_gradle is available, use targeted compile/test tasks (a full build is slow on a phone) and fix the reported errors.
         - For multi-step work keep a short todo list with todo_write.
         - If a tool call is denied, do not retry it unchanged; explain what you wanted to do and ask.
         - You cannot run builds or shell commands unless a tool for it is listed.

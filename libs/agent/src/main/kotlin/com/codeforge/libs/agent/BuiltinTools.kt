@@ -33,10 +33,15 @@ object BuiltinTools {
     private const val MAX_SEARCH_RESULTS = 100
 
     /** Erzeugt alle Werkzeuge für [workspace]; [todos] hält den Stand von `todo_write`. */
-    fun create(workspace: AgentWorkspace, todos: TodoStore = TodoStore()): List<AgentTool> = listOf(
+    fun create(
+        workspace: AgentWorkspace,
+        todos: TodoStore = TodoStore(),
+        buildRunner: AgentBuildRunner? = null,
+    ): List<AgentTool> = listOfNotNull(
         ReadFile(workspace), ListDir(workspace), SearchText(workspace),
         CreateFile(workspace), EditFile(workspace), DeletePath(workspace),
         GetDiagnostics(workspace), TodoWrite(todos),
+        buildRunner?.let { RunGradleTool(it) },
     )
 
     private class ReadFile(private val ws: AgentWorkspace) : AgentTool {

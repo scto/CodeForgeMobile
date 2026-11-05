@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.domain.ai.AiProviderType
 import com.codeforge.core.domain.repository.AiRepository
+import com.codeforge.core.domain.repository.GradleBuildRepository
 import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.navigation.FileSyncBridge
 import com.codeforge.core.resources.R
@@ -46,6 +47,7 @@ class AgentViewModel @Inject constructor(
     private val aiRepository: AiRepository,
     lspClient: LspClientRepository,
     private val fileSync: FileSyncBridge,
+    private val gradle: GradleBuildRepository,
     private val llmFactory: AgentLlmFactory,
 ) : ViewModel() {
 
@@ -113,7 +115,7 @@ class AgentViewModel @Inject constructor(
         val files = FileAgentWorkspace(root) { path -> diagnostics.query(root, path) }
         val checkpoint = CheckpointWorkspace(SyncingAgentWorkspace(files, root, fileSync))
         val todos = TodoStore()
-        return Session(root, checkpoint, AgentToolRegistry(BuiltinTools.create(checkpoint, todos)), todos)
+        return Session(root, checkpoint, AgentToolRegistry(BuiltinTools.create(checkpoint, todos, GradleAgentBuildRunner(gradle, root))), todos)
     }
 
     private fun send() {

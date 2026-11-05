@@ -74,6 +74,8 @@ class AgentViewModelTest {
         override suspend fun notifyDirectoryChange(directory: String) {}
     }
 
+    private val gradle = FakeGradle()
+
     /** Antwort 1: Datei anlegen; Antwort 2: Text. */
     private class ScriptedClient(private val steps: List<List<LlmStreamEvent>>) : LlmClient {
         private var i = 0
@@ -90,7 +92,7 @@ class AgentViewModelTest {
         ),
     )
 
-    private fun vm(client: LlmClient) = AgentViewModel(repo, lsp, sync) { client }.also {
+    private fun vm(client: LlmClient) = AgentViewModel(repo, lsp, sync, gradle) { client }.also {
         it.onEvent(AgentUiEvent.Initialize(tmp.path))
     }
 
