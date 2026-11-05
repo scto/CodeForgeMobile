@@ -709,7 +709,27 @@ cmdline_from_sdk_archive() {
   [ -x "$dest/bin/sdkmanager" ]
 }
 
+# Nur eine Installation gleichzeitig je SDK-Verzeichnis: parallele Läufe (Mehrfachauswahl im SDK-Manager, zweites
+# Terminal) überschreiben sich sonst gegenseitig (sdkmanager, platform-tools, build-tools). Sperre per mkdir;
+# verwaiste Sperren verfallen nach 30 Minuten. Verschachtelte Aufrufe (cmdline-tools für sdkmanager) laufen durch.
 do_install() { # id
+  if [ "${CF_INSTALL_LOCK_HELD:-0}" = 1 ]; then _do_install "$@"; return $?; fi
+  local lock="$SDK_ROOT/.cf-install.lock" waited=0 rc
+  mkdir -p "$SDK_ROOT"
+  while ! mkdir "$lock" 2>/dev/null; do
+    if [ -n "$(find "$lock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then rm -rf "$lock"; continue; fi
+    if [ $((waited % 20)) -eq 0 ]; then progress 0 "Wartet auf andere Installation …"; fi
+    sleep 2; waited=$((waited + 2))
+  done
+  trap 'rm -rf "$lock"' EXIT INT TERM
+  CF_INSTALL_LOCK_HELD=1
+  _do_install "$@"; rc=$?
+  CF_INSTALL_LOCK_HELD=0
+  rm -rf "$lock"; trap - EXIT INT TERM
+  return $rc
+}
+
+_do_install() { # id
   local id=$1 kind ver src sha dest extra strip=0 url file tp=""
   if ! entry_exists "$id"; then
     case "$id" in
@@ -774,22 +794,13 @@ do_install() { # id
         say "cmdline-tools fehlen — installiere sie zuerst"; ( do_install 'cmdline-tools;latest' ) || exit 1
       fi
       export JAVA_HOME="${JAVA_HOME:-$(first_jdk)}"
-      # Nur ein sdkmanager gleichzeitig je SDK-Verzeichnis (Sperre per mkdir; verwaiste Sperre nach 30 min verfallen)
-      local sdklock="$SDK_ROOT/.cf-sdkmanager.lock" waited=0
-      mkdir -p "$SDK_ROOT"
-      while ! mkdir "$sdklock" 2>/dev/null; do
-        if [ -n "$(find "$sdklock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then rm -rf "$sdklock"; continue; fi
-        if [ $((waited % 15)) -eq 0 ]; then progress 0 "Wartet auf anderen sdkmanager-Lauf …"; fi
-        sleep 2; waited=$((waited + 2))
-      done
-      trap 'rm -rf "$sdklock"' EXIT INT TERM
       progress 10 "sdkmanager installiert $(format_component_id "$src") …"
       rm -rf "$SDK_ROOT/${src//;//}" 2>/dev/null   # halbe Reste eines früheren Abbruchs entfernen
       yes 2>/dev/null | "$sm" --sdk_root="$SDK_ROOT" "$src" >/dev/null 2>&1 \
         || die "sdkmanager konnte $src nicht installieren"
       [ -f "$SDK_ROOT/${src//;//}/android.jar" ] || [ "${src#platforms;}" = "$src" ] \
         || die "sdkmanager meldete Erfolg, aber $src enthält keine android.jar"
-      rm -rf "$sdklock"; trap - EXIT INT TERM
+
       ;;
     cmake)
       progress 5 "Installiere cmake und ninja …"
@@ -921,6 +932,8 @@ do_install() { # id
       if [ -n "$fpt" ]; then
         mkdir -p "$SDK_ROOT/platform-tools"; cp -a "$(dirname "$fpt")"/. "$SDK_ROOT/platform-tools"/
         find "$SDK_ROOT/platform-tools" -maxdepth 1 -type f ! -name '*.properties' -exec chmod +x {} + 2>/dev/null
+        # Marke wie bei ghptfull: sonst gilt platform-tools als nicht installiert und das ganze Archiv wird erneut geladen
+        printf '%s' "$ver" > "$SDK_ROOT/platform-tools/.cf-version"
       fi
       rm -rf "$fx"
       [ -f "$bdir/source.properties" ] || printf 'Pkg.Desc = Android SDK Build-Tools %s (%s)\nPkg.Revision = %s\n' "$ver" "$CF_ARCH" "$ver" > "$bdir/source.properties"
@@ -1247,20 +1260,29 @@ do_setup() {
   local steps=("jdk;$jdk" 'cmdline-tools;latest' "build-tools;$sdk" "platform-tools;$sdk" "platforms;android-$platform")
   [ "$want_ndk" = 1 ] && steps+=("ndk;$ndk")
   [ "$want_cmake" = 1 ] && steps+=("cmake;$cmake")
-  local total=${#steps[@]} i=0 id label
+  local total=${#steps[@]} i=0 id label failed=() cmdline_ok=1
   for id in "${steps[@]}"; do
     i=$((i+1))
     label=$(format_component_id "$id")
     if ! entry_exists "$id"; then say "Überspringe $label (nicht im Manifest)"; continue; fi
     if [ -n "$(installed_path "$id")" ]; then say "$label bereits installiert"; continue; fi
+    # Platforms kommen vom sdkmanager aus den cmdline-tools: ohne sie ist der Versuch sinnlos
+    if [ "$cmdline_ok" = 0 ] && [ "$(entry_field "$id" 3)" = sdkmanager ]; then
+      say "Überspringe $label (cmdline-tools fehlen)"; failed+=("$label"); continue
+    fi
     say "== ($i/$total) $label =="
     if ! ( CURRENT_SETUP_RETRY_CMD="" do_install "$id" ); then
-      err "Einrichtung abgebrochen bei $label ($id)"
-      say "Logdatei: $LOG_FILE"
-      say "Erneut versuchen: $retry_cmd"
-      exit 1
+      err "$label ($id) fehlgeschlagen – mache mit den übrigen Komponenten weiter"
+      failed+=("$label")
+      [ "$id" = 'cmdline-tools;latest' ] && cmdline_ok=0
     fi
   done
+  if [ ${#failed[@]} -gt 0 ]; then
+    err "Nicht eingerichtet: ${failed[*]}"
+    say "Logdatei: $LOG_FILE"
+    say "Erneut versuchen: $retry_cmd"
+    SETUP_FAILED=1
+  fi
   # Basis-Werkzeuge außerhalb des SDK: Gradle, Kotlin-Compiler, git/zip/unzip.
   # Jedes Werkzeug einzeln: bereits vorhandene werden übersprungen, Fehler brechen mit Hinweis ab.
   setup_tool() { # <befehl> <anzeigename> <paket…>
@@ -1282,6 +1304,7 @@ do_setup() {
     setup_tool unzip "unzip" unzip
   fi
   write_env "$jdk" "$( [ "$want_ndk" = 1 ] && echo "ndk;$ndk")" "$( [ "$want_cmake" = 1 ] && echo "cmake;$cmake")"
+  if [ "${SETUP_FAILED:-0}" = 1 ]; then err "Einrichtung unvollständig (siehe oben)"; exit 1; fi
   progress 100 "Umgebung eingerichtet"
   say "Neue Shell öffnen oder 'source $ENV_FILE' ausführen."
   ok setup

@@ -17,6 +17,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Behoben (SDK / Compose-Vorschau)
 - Mehrere Platforms gleichzeitig installieren (Mehrfachauswahl im SDK-Manager) startete parallele `sdkmanager`-Läufe im selben SDK-Verzeichnis; es blieben Platform-Ordner ohne `android.jar` zurück und die Compose-Vorschau meldete „Android-Plattform fehlt“. Jetzt: Installationen laufen nacheinander (`TermuxScriptSdkRepository`, wartende Pakete zeigen „Wartet auf andere Installation …“), `codeforge-env` sperrt den `sdkmanager` (mkdir-Sperre), wertet eine Platform nur mit `android.jar` als installiert und entfernt halbe Reste vor der Installation.
 - Compose-Vorschau nimmt die neueste Platform, die eine lesbare `android.jar` hat, statt nur die neueste installierte.
+- `codeforge-env`: **eine** Installationssperre für alle Komponenten (Platforms, platform-tools, build-tools, NDK, CMake) statt nur für den `sdkmanager`; parallel gestartete Installationen warten aufeinander (Test: `scripts/test_codeforge_env_lock.sh`).
+- `codeforge-env setup` bricht nicht mehr beim ersten Fehler ab: die übrigen Komponenten (Platforms, NDK, CMake …) werden trotzdem installiert, am Ende steht eine Liste der fehlgeschlagenen und der Exit-Code 1 (Platforms entfallen nur, wenn die cmdline-tools fehlen). Vorher blieb nach einem Fehler bei platform-tools alles Weitere uninstalliert.
+- Das vollständige SDK-Archiv (`ghsdkfull`) schreibt beim Kopieren der platform-tools die Versionsmarke `.cf-version`; ohne sie galten platform-tools als „nicht installiert“ und das mehrere hundert MB große Archiv wurde im Setup ein zweites Mal geladen.
 
 ## [3.0.3] - 2026-11-04
 
