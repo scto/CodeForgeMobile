@@ -13,6 +13,7 @@ import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.navigation.FileSyncBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import com.codeforge.core.domain.agent.AgentAttachment
 import com.codeforge.libs.agent.AgentEvent
 import com.codeforge.libs.agent.AgentHistoryStore
 import com.codeforge.libs.agent.AgentLoop
@@ -119,6 +120,12 @@ class AgentViewModel @Inject constructor(
         when (event) {
             is AgentUiEvent.Initialize -> if (_state.value.rootPath != event.rootPath) startChat(event.rootPath, restore = true)
             is AgentUiEvent.InputChanged -> _state.update { it.copy(input = event.value) }
+            is AgentUiEvent.Attach -> _state.update { st ->
+                st.copy(attachments = (st.attachments.filter { it != event.attachment } + event.attachment).takeLast(MAX_ATTACHMENTS))
+            }
+            is AgentUiEvent.RemoveAttachment -> _state.update { st ->
+                st.copy(attachments = st.attachments.filterIndexed { i, _ -> i != event.index })
+            }
             AgentUiEvent.Send -> send()
             AgentUiEvent.Stop -> job?.cancel()
             is AgentUiEvent.ModeChanged -> {
@@ -234,8 +241,9 @@ class AgentViewModel @Inject constructor(
         val text = s.input.trim()
         val current = session
         if (text.isEmpty() || s.running || current == null) return
-        _state.update { it.copy(running = true, input = "") }
-        job = viewModelScope.launch { runTurn(current, text) }
+        val message = AgentAttachment.compose(s.attachments, text)
+        _state.update { it.copy(running = true, input = "", attachments = emptyList()) }
+        job = viewModelScope.launch { runTurn(current, message) }
     }
 
     private suspend fun runTurn(current: Session, text: String) {
@@ -375,5 +383,6 @@ class AgentViewModel @Inject constructor(
 
     private companion object {
         const val DETAIL_MAX = 600
+        const val MAX_ATTACHMENTS = 5
     }
 }

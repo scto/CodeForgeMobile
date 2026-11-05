@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.EditNote
@@ -44,6 +45,7 @@ fun AiQuickActionsSheet(
     onDismiss: () -> Unit,
     onActionSelected: (AiQuickActionType) -> Unit,
     hasError: Boolean = false,
+    onAskAgent: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -60,6 +62,14 @@ fun AiQuickActionsSheet(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
+
+            if (onAskAgent != null) {
+                QuickActionItem(
+                    icon = Icons.Default.AutoAwesome,
+                    title = stringRes(R.string.ai_quick_action_ask_agent),
+                    onClick = onAskAgent
+                )
+            }
 
             QuickActionItem(
                 icon = Icons.Default.HelpOutline,

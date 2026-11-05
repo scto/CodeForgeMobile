@@ -15,6 +15,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Neues Modul `:libs:agent`: provider-neutrale Agentenschleife (`AgentLoop`, `Flow<AgentEvent>`) mit Werkzeugen (`read_file`, `list_dir`, `search_text`, `create_file`, `edit_file`, `delete_path`, `get_diagnostics`, `todo_write`), Berechtigungsmodi (Nachfragen / Automatisch / Nur Plan), Checkpoints je Turn mit Revert (`CheckpointWorkspace`) und Verlaufskompaktierung (`HistoryCompactor`). Reine JVM-Logik, 26 Unit-Tests.
 - `:libs:ai-client`: `OpenAiAgentClient` (Chat Completions, `max_completion_tokens` nur gegen api.openai.com) und `GeminiAgentClient` (Funktionsaufrufe; `thoughtSignature` von Gemini 3 wird in der Aufruf-ID mitgeführt) auf gemeinsamer SSE-Transportschicht, je mit Wire-Tests.
 - `:libs:ai-client`: `AnthropicAgentClient` (Streaming-Werkzeugaufrufe der Anthropic-Messages-API, Retry bei 429/5xx) plus testbare `AnthropicAgentWire` (Request-Body, SSE-Zusammensetzung inkl. `input_json_delta`). 
+### Hinzugefügt (KI-Agent, Editor)
+- Editor-Schnellaktion „Im Agenten fragen“: Auswahl (oder ganze Datei) wird als Anhang-Chip an die nächste Agent-Nachricht gehängt, das Agent-Panel öffnet sich automatisch.
+
 ### Hinzugefügt (KI-Agent, MCP)
 - `:libs:mcp`: MCP-Client (Streamable HTTP, Legacy-SSE mit Fallback, stdio über Termux), `.mcp.json`/`mcpServers`-Format kompatibel mit Claude Code und Cursor.
 - Agent-Panel: Verbindungsdialog zum Hinzufügen, Aktivieren, Entfernen und Freigeben von MCP-Servern. MCP-Tools laufen durch dieselbe Freigabe-Pipeline (Standard: Rückfrage, `readOnlyHint` = lesend). Projekt-Server aus `.mcp.json` brauchen eine Freigabe. Kein OAuth; Token nur als Header.

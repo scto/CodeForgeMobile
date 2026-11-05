@@ -1633,6 +1633,8 @@
     <string name="ai_quick_action_write_tests">Tests schreiben</string>
     <string name="ai_quick_action_rewrite">Umschreiben mit Anweisung</string>
     <string name="ai_quick_action_kdoc">Dokumentation (KDoc) erzeugen</string>
+    <string name="ai_quick_action_ask_agent">Im Agenten fragen (mit Auswahl)</string>
+    <string name="agent_attachment_remove">Anhang entfernen</string>
     <string name="ai_quick_actions">Schnellaktionen</string>
     <string name="ai_chat_title">KI-Chat</string>
     <string name="ai_chat_placeholder">Frage stellen oder Änderung beschreiben…</string>

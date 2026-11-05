@@ -143,6 +143,8 @@ fun EditorRoute(
     /** Projektwurzel des Workspaces — aktiviert Dependency-Update-Chips im Versionskatalog. */
     projectRootPath: String? = null,
     onNavigate: (String) -> Unit,
+    /** Übergibt Auswahl oder Datei an den KI-Agenten; `null` blendet die Aktion aus. */
+    onAskAgent: ((com.codeforge.core.domain.agent.AgentAttachment) -> Unit)? = null,
     viewModel: EditorViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -572,7 +574,26 @@ fun EditorRoute(
             onActionSelected = { action ->
                 viewModel.onEvent(EditorUiEvent.TriggerAiQuickAction(action, selText, cursorLine))
             },
-            hasError = uiState.activeDiagnostics.isNotEmpty()
+            hasError = uiState.activeDiagnostics.isNotEmpty(),
+            onAskAgent = onAskAgent?.let { ask ->
+                {
+                    val path = uiState.activeFile?.path
+                    if (path != null) {
+                        val full = controller?.currentText().orEmpty()
+                        val range = if (selected) controller?.selection() else null
+                        val attachment = if (range != null && range.second > range.first) {
+                            val (st, en) = range.first.coerceIn(0, full.length) to range.second.coerceIn(0, full.length)
+                            val first = full.take(st).count { it == '\n' } + 1
+                            val last = first + full.substring(st, en).trimEnd('\n').count { it == '\n' }
+                            com.codeforge.core.domain.agent.AgentAttachment(path, first, last, full.substring(st, en))
+                        } else {
+                            com.codeforge.core.domain.agent.AgentAttachment(path)
+                        }
+                        ask(attachment)
+                    }
+                    viewModel.onEvent(EditorUiEvent.ToggleAiQuickActions(false))
+                }
+            },
         )
     }
 

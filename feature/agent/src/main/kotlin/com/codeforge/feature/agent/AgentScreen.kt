@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -40,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.codeforge.core.domain.agent.AgentAttachment
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,10 +67,18 @@ import com.codeforge.libs.mcp.McpStatus
 fun AgentRoute(
     rootPath: String,
     modifier: Modifier = Modifier,
+    attachment: AgentAttachment? = null,
+    onAttachmentConsumed: () -> Unit = {},
     viewModel: AgentViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
     LaunchedEffect(rootPath) { viewModel.onEvent(AgentUiEvent.Initialize(rootPath)) }
+    LaunchedEffect(attachment) {
+        if (attachment != null) {
+            viewModel.onEvent(AgentUiEvent.Attach(attachment))
+            onAttachmentConsumed()
+        }
+    }
     AgentScreen(state = state, onEvent = viewModel::onEvent, modifier = modifier)
 }
 
@@ -282,6 +292,27 @@ private fun ApprovalCard(approval: PendingApproval, onEvent: (AgentUiEvent) -> U
 
 @Composable
 private fun InputRow(state: AgentUiState, onEvent: (AgentUiEvent) -> Unit) {
+    if (state.attachments.isNotEmpty()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            state.attachments.forEachIndexed { index, att ->
+                androidx.compose.material3.InputChip(
+                    selected = false,
+                    onClick = { onEvent(AgentUiEvent.RemoveAttachment(index)) },
+                    label = { Text(att.label, maxLines = 1) },
+                    trailingIcon = {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = stringRes(R.string.agent_attachment_remove),
+                            modifier = Modifier.size(16.dp),
+                        )
+                    },
+                )
+            }
+        }
+    }
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

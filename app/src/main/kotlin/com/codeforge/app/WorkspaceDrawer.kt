@@ -98,6 +98,9 @@ fun WorkspaceDrawer(
     onConvertLayout: (path: String?) -> Unit = {},
     /** true = dauerhaft sichtbar (Expanded-Breite): feste Breite, keine runden Ecken. */
     permanent: Boolean = false,
+    /** Vom Editor übergebener Kontext: öffnet das Agent-Panel und hängt ihn an die nächste Nachricht. */
+    agentAttachment: com.codeforge.core.domain.agent.AgentAttachment? = null,
+    onAgentAttachmentConsumed: () -> Unit = {},
 ) {
     // Eigene Surface statt ModalDrawerSheet: dessen Maximalbreite (360 dp) ist für Git-Graph
     // und Trefferlisten zu schmal.
@@ -105,6 +108,7 @@ fun WorkspaceDrawer(
     val drawerWidth = if (permanent) PermanentDrawerWidth else minOf(screenWidth * 0.92f, MaxDrawerWidth)
 
     var selected by rememberSaveable { mutableStateOf(DrawerSection.FILES) }
+    LaunchedEffect(agentAttachment) { if (agentAttachment != null) selected = DrawerSection.AGENT }
     val snackbar = remember { SnackbarHostState() }
     var message by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(message) {
@@ -169,7 +173,11 @@ fun WorkspaceDrawer(
                             onMatchOpened = onCloseDrawer,
                             onMessage = { message = it },
                         )
-                        DrawerSection.AGENT -> AgentRoute(rootPath = rootPath)
+                        DrawerSection.AGENT -> AgentRoute(
+                            rootPath = rootPath,
+                            attachment = agentAttachment,
+                            onAttachmentConsumed = onAgentAttachmentConsumed,
+                        )
                         DrawerSection.GIT -> GitPanel(
                             repoPath = rootPath,
                             onFileOpened = onCloseDrawer,

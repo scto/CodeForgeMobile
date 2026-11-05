@@ -1633,6 +1633,8 @@
     <string name="ai_quick_action_write_tests">Write tests</string>
     <string name="ai_quick_action_rewrite">Rewrite with instruction</string>
     <string name="ai_quick_action_kdoc">Generate documentation (KDoc)</string>
+    <string name="ai_quick_action_ask_agent">Ask the agent (with selection)</string>
+    <string name="agent_attachment_remove">Remove attachment</string>
     <string name="ai_quick_actions">Quick Actions</string>
     <string name="ai_chat_title">AI Chat</string>
     <string name="ai_chat_placeholder">Ask a question or describe changes…</string>

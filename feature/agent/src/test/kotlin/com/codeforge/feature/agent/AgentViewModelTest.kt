@@ -267,4 +267,19 @@ class AgentViewModelTest {
         vm.onEvent(AgentUiEvent.TrustMcpServer("proj"))
         vm.await { st -> st.mcpServers.single { it.name == "proj" }.status == com.codeforge.libs.mcp.McpStatus.FAILED }
     }
+
+    @Test
+    fun `Anhaenge werden gemerkt, entfernt und mit dem Senden geleert`() {
+        val vm = vm(createFileThenAnswer())
+        val a = com.codeforge.core.domain.agent.AgentAttachment("/p/A.kt", 1, 2, "code")
+        vm.onEvent(AgentUiEvent.Attach(a))
+        vm.onEvent(AgentUiEvent.Attach(a))
+        vm.onEvent(AgentUiEvent.Attach(com.codeforge.core.domain.agent.AgentAttachment("/p/B.kt")))
+        vm.await { st -> st.attachments.size == 2 }
+        vm.onEvent(AgentUiEvent.RemoveAttachment(1))
+        vm.await { st -> st.attachments.size == 1 }
+        vm.onEvent(AgentUiEvent.InputChanged("erklaere"))
+        vm.onEvent(AgentUiEvent.Send)
+        vm.await { st -> st.attachments.isEmpty() && st.items.any { it is AgentChatItem.User && it.text.contains("[Auszug: /p/A.kt") } }
+    }
 }

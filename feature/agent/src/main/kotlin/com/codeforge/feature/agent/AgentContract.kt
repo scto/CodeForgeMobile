@@ -7,6 +7,7 @@
 package com.codeforge.feature.agent
 
 import androidx.compose.runtime.Immutable
+import com.codeforge.core.domain.agent.AgentAttachment
 import com.codeforge.libs.agent.PermissionMode
 import com.codeforge.libs.mcp.McpStatus
 
@@ -84,6 +85,7 @@ data class AgentUiState(
     val rootPath: String = "",
     val mcpServers: List<McpServerUi> = emptyList(),
     val showConnections: Boolean = false,
+    val attachments: List<AgentAttachment> = emptyList(),
 )
 
 /** Aktionen des Nutzers. */
@@ -132,4 +134,10 @@ sealed interface AgentUiEvent {
 
     /** Server neu verbinden. */
     data class ReconnectMcpServer(val name: String) : AgentUiEvent
+
+    /** Auswahl/Datei aus dem Editor als Anhang der nächsten Nachricht vormerken. */
+    data class Attach(val attachment: AgentAttachment) : AgentUiEvent
+
+    /** Vorgemerkten Anhang entfernen. */
+    data class RemoveAttachment(val index: Int) : AgentUiEvent
 }

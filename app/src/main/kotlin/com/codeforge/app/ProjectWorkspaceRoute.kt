@@ -92,6 +92,7 @@ fun ProjectWorkspaceRoute(
 ) {
     val permanentDrawer = rememberIsExpandedWidth()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var agentAttachment by remember { mutableStateOf<com.codeforge.core.domain.agent.AgentAttachment?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     val bridgeViewModel: ComposablePreviewBridgeViewModel = hiltViewModel()
@@ -267,7 +268,14 @@ fun ProjectWorkspaceRoute(
                     .consumeWindowInsets(padding)
                     .imePadding(),
                 hasComposables = activeFile?.composableFunctionNames?.isNotEmpty() == true,
-                editorContent = { EditorRoute(projectRootPath = rootPath, onNavigate = safeNavigate) },
+                editorContent = { EditorRoute(
+                        projectRootPath = rootPath,
+                        onNavigate = safeNavigate,
+                        onAskAgent = { attachment ->
+                            agentAttachment = attachment
+                            if (!permanentDrawer) coroutineScope.launch { drawerState.open() }
+                        },
+                    ) },
                 previewContent = { ComposePreviewRoute() }
             )
         }
@@ -290,7 +298,9 @@ fun ProjectWorkspaceRoute(
                         )
                     )
                 },
-                permanent = true
+                permanent = true,
+                agentAttachment = agentAttachment,
+                onAgentAttachmentConsumed = { agentAttachment = null },
             )
             workspaceContent(
                 Modifier
@@ -320,7 +330,9 @@ fun ProjectWorkspaceRoute(
                                 preselectedLayout = layoutPath
                             )
                         )
-                    }
+                    },
+                    agentAttachment = agentAttachment,
+                    onAgentAttachmentConsumed = { agentAttachment = null },
                 )
             }
         ) {
