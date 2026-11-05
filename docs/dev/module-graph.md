@@ -2,7 +2,7 @@
 
 Automatisch erzeugt mit `python3 scripts/gen-module-graph.py` — nicht von Hand ändern.
 
-66 Module, 312 direkte Projektabhängigkeiten.
+69 Module, 313 direkte Projektabhängigkeiten.
 
 ## Schichten (aggregiert)
 
@@ -11,8 +11,8 @@ flowchart TD
     app["App (1)"]
     feature["Feature-Module (25)"]
     core["Core (9)"]
-    libs["Bibliotheken (libs) (20)"]
-    examples["Beispiel-Plugins (10)"]
+    libs["Bibliotheken (libs) (21)"]
+    examples["Beispiel-Plugins (12)"]
     templates["Templates (1)"]
     app -->|8| core
     app -->|25| feature
@@ -95,7 +95,8 @@ flowchart TD
 | `:libs:dependency-updater-impl` | `:core:resources`, `:libs:dependency-updater-api`, `:libs:indexing-api`, `:libs:indexing-impl` |
 | `:libs:code-tools` | – |
 | `:libs:hardcoded-strings` | – |
-| `:libs:ai-client` | `:core:common`, `:core:domain`, `:core:resources`, `:core:testing` |
+| `:libs:agent` | – |
+| `:libs:ai-client` | `:core:common`, `:core:domain`, `:core:resources`, `:core:testing`, `:libs:agent` |
 | `:libs:j2k` | – |
 | `:libs:x2c` | – |
 | `:libs:termux-emulator` | – |
@@ -117,6 +118,8 @@ flowchart TD
 | `:examples:toml-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
 | `:examples:kmp-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
 | `:examples:python-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
+| `:examples:guide-commit-notes` | – |
+| `:examples:guide-commit-notes` | – |
 
 ### Templates
 

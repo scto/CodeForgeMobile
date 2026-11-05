@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:resources"))
     implementation(project(":core:domain"))
     implementation(project(":core:common"))
+    api(project(":libs:agent"))
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.hilt.android)
