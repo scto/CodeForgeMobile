@@ -19,7 +19,7 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - `FileAgentWorkspace` (`:libs:agent`): Dateizugriff nur innerhalb des Projekts (Pfad- und Symlink-Schutz, atomares Schreiben, Größenlimit, Suche ohne Build-Ordner/Binärdateien). `SyncingAgentWorkspace` speichert offene Editor-Puffer vor dem Lesen und meldet Änderungen an den Editor; `get_diagnostics` liefert die LSP-Diagnosen offener Dateien.
 - Werkzeug `run_gradle` (Art „Ausführen“, braucht im Modus „Fragen“ Freigabe): führt Gradle-Tasks über die vorhandene Build-Anbindung aus und liefert Erfolg bzw. die Compilerfehler mit Datei und Zeile zurück; Task-Argumente werden gegen Shell-Zeichen geprüft, Zeitlimit 20 min, Abbruch des Agenten beendet auch den Gradle-Lauf.
 - Diff-Vorschau: Die Freigabe-Karte zeigt bei `create_file`/`edit_file` den Unified-Diff der geplanten Änderung (`TextDiff`, `AgentTool.preview`), die Änderungskarte klappbare Diffs je Datei.
-- Der Verlauf liegt nur im Speicher (kein Neustart-Persistenz), Chat startet beim Projektwechsel neu.
+- Der Chat-Verlauf wird je Projekt gespeichert (`AgentHistoryStore`, alte Werkzeugergebnisse gekürzt) und beim Öffnen wiederhergestellt; „Neuer Chat“ löscht ihn. Änderungs-/Revert-Karten werden nicht wiederhergestellt (Checkpoints leben nur im Speicher).
 
 ## [3.0.4] - 2026-11-05
 

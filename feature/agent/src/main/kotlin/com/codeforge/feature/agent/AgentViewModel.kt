@@ -14,6 +14,7 @@ import com.codeforge.core.navigation.FileSyncBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.libs.agent.AgentEvent
+import com.codeforge.libs.agent.AgentHistoryStore
 import com.codeforge.libs.agent.AgentLoop
 import com.codeforge.libs.agent.AgentMessage
 import com.codeforge.libs.agent.AgentPermissionPolicy
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -49,6 +51,7 @@ class AgentViewModel @Inject constructor(
     lspClient: LspClientRepository,
     private val fileSync: FileSyncBridge,
     private val gradle: GradleBuildRepository,
+    private val historyStore: AgentHistoryStore,
     private val llmFactory: AgentLlmFactory,
 ) : ViewModel() {
 
@@ -89,7 +92,7 @@ class AgentViewModel @Inject constructor(
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: AgentUiEvent) {
         when (event) {
-            is AgentUiEvent.Initialize -> if (_state.value.rootPath != event.rootPath) startChat(event.rootPath)
+            is AgentUiEvent.Initialize -> if (_state.value.rootPath != event.rootPath) startChat(event.rootPath, restore = true)
             is AgentUiEvent.InputChanged -> _state.update { it.copy(input = event.value) }
             AgentUiEvent.Send -> send()
             AgentUiEvent.Stop -> job?.cancel()
@@ -99,17 +102,39 @@ class AgentViewModel @Inject constructor(
             }
             is AgentUiEvent.Decide -> approval?.complete(event.allow)
             is AgentUiEvent.Revert -> revert(event.turnId)
-            AgentUiEvent.NewChat -> startChat(_state.value.rootPath)
+            AgentUiEvent.NewChat -> {
+                val root = _state.value.rootPath
+                startChat(root, restore = false)
+                if (root.isNotEmpty()) viewModelScope.launch(Dispatchers.IO) { historyStore.clear(root) }
+            }
         }
     }
 
-    private fun startChat(rootPath: String) {
+    private fun startChat(rootPath: String, restore: Boolean) {
         job?.cancel()
         approval?.complete(false)
         history = emptyList()
         nextId = 1L
         session = if (rootPath.isEmpty()) null else newSession(File(rootPath))
         _state.value = AgentUiState(rootPath = rootPath, mode = policy.mode)
+        if (restore && rootPath.isNotEmpty()) restoreHistory(rootPath)
+    }
+
+    /** Lädt den gespeicherten Verlauf im Hintergrund; ein inzwischen gestarteter Lauf oder Projektwechsel hat Vorrang. */
+    private fun restoreHistory(rootPath: String) {
+        val current = session
+        viewModelScope.launch {
+            val saved = withContext(Dispatchers.IO) { historyStore.load(rootPath) }
+            if (saved.isEmpty() || session !== current || _state.value.items.isNotEmpty() || _state.value.running) return@launch
+            val items = AgentTranscript.toItems(saved) { name, args -> current?.tools?.get(name)?.describeCall(args) ?: name }
+            history = saved
+            nextId = (items.maxOfOrNull { it.id } ?: 0L) + 1
+            _state.update { it.copy(items = items) }
+        }
+    }
+
+    private fun persist(rootPath: String, messages: List<AgentMessage>) {
+        viewModelScope.launch(Dispatchers.IO + NonCancellable) { historyStore.save(rootPath, messages) }
     }
 
     private fun newSession(root: File): Session {
@@ -185,6 +210,7 @@ class AgentViewModel @Inject constructor(
                     is AgentEvent.Usage -> Unit
                     is AgentEvent.Finished -> {
                         history = event.messages
+                        persist(current.root.path, history)
                         when (event.reason) {
                             FinishReason.END_TURN -> Unit
                             FinishReason.TRUNCATED -> addItem { AgentChatItem.Notice(it, Res.string(R.string.agent_finish_truncated), false) }
@@ -193,6 +219,7 @@ class AgentViewModel @Inject constructor(
                     }
                     is AgentEvent.Failed -> {
                         history = event.messages
+                        persist(current.root.path, history)
                         addItem { AgentChatItem.Notice(it, event.message, isError = true) }
                     }
                 }

@@ -75,6 +75,7 @@ class AgentViewModelTest {
     }
 
     private val gradle = FakeGradle()
+    private val store = com.codeforge.libs.agent.AgentHistoryStore(File(tmp.parentFile, tmp.name + "_hist"))
 
     /** Antwort 1: Datei anlegen; Antwort 2: Text. */
     private class ScriptedClient(private val steps: List<List<LlmStreamEvent>>) : LlmClient {
@@ -92,7 +93,7 @@ class AgentViewModelTest {
         ),
     )
 
-    private fun vm(client: LlmClient) = AgentViewModel(repo, lsp, sync, gradle) { client }.also {
+    private fun vm(client: LlmClient) = AgentViewModel(repo, lsp, sync, gradle, store) { client }.also {
         it.onEvent(AgentUiEvent.Initialize(tmp.path))
     }
 
@@ -103,6 +104,7 @@ class AgentViewModelTest {
     fun tearDown() {
         Dispatchers.resetMain()
         tmp.deleteRecursively()
+        File(tmp.parentFile, tmp.name + "_hist").deleteRecursively()
     }
 
     /** Dateizugriffe laufen auf Dispatchers.IO: auf den Zielzustand warten (höchstens 10 s). */
@@ -208,5 +210,29 @@ class AgentViewModelTest {
         vm.onEvent(AgentUiEvent.NewChat)
         assertTrue(vm.state.value.items.isEmpty())
         assertEquals(PermissionMode.AUTO_ACCEPT, vm.state.value.mode)
+    }
+
+    @Test
+    fun `Verlauf wird gespeichert und beim Oeffnen des Projekts wiederhergestellt`() {
+        val first = vm(createFileThenAnswer())
+        first.onEvent(AgentUiEvent.ModeChanged(PermissionMode.AUTO_ACCEPT))
+        first.ask("lege neu.txt an")
+        first.awaitIdle()
+        // Speichern läuft asynchron auf IO.
+        val end = System.nanoTime() + 5_000_000_000L
+        while (store.load(tmp.path).isEmpty() && System.nanoTime() < end) Thread.sleep(10)
+
+        val second = vm(createFileThenAnswer())
+        second.await { it.items.isNotEmpty() }
+        val items = second.state.value.items
+        assertTrue(items.first() is AgentChatItem.User)
+        assertTrue(items.any { it is AgentChatItem.ToolCall && it.status == ToolCallStatus.OK })
+        assertTrue(items.any { it is AgentChatItem.Assistant && it.text == "Fertig." })
+        assertTrue(items.none { it is AgentChatItem.Changes })
+
+        second.onEvent(AgentUiEvent.NewChat)
+        val gone = System.nanoTime() + 5_000_000_000L
+        while (store.load(tmp.path).isNotEmpty() && System.nanoTime() < gone) Thread.sleep(10)
+        assertTrue(store.load(tmp.path).isEmpty())
     }
 }
