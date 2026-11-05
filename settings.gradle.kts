@@ -73,6 +73,7 @@ include(
     ":libs:dependency-updater-impl",
     ":libs:code-tools",
     ":libs:hardcoded-strings",
+    ":libs:agent",
     ":libs:ai-client",
     ":libs:j2k",
     ":libs:x2c",
