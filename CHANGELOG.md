@@ -17,7 +17,7 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - `:libs:ai-client`: `AnthropicAgentClient` (Streaming-Werkzeugaufrufe der Anthropic-Messages-API, Retry bei 429/5xx) plus testbare `AnthropicAgentWire` (Request-Body, SSE-Zusammensetzung inkl. `input_json_delta`). 
 ### Hinzugefügt (KI-Agent, Projektkontext)
 - Der Agent lädt Projektregeln aus `AGENTS.md`, `CLAUDE.md` oder `.codeforge/AGENT.md` (max. 8000 Zeichen) in den System-Prompt.
-- Skills: `.codeforge/skills/<name>/SKILL.md` und `.claude/skills/<name>/SKILL.md` (Frontmatter `name`/`description`). Der Prompt listet nur Name und Beschreibung, der volle Text kommt über das lesende Werkzeug `use_skill`. Wird bei jeder Nachricht neu gelesen.
+- Skills: `.codeforge/skills/<name>/SKILL.md` und `.claude/skills/<name>/SKILL.md` (Frontmatter `name`/`description`). Der Prompt listet nur Name und Beschreibung, der volle Text kommt über das lesende Werkzeug `use_skill`. Wird bei jeder Nachricht neu gelesen. Regeln und Skills eines Projekts gelten erst nach Freigabe im Panel (an den Inhalt gebunden; bei Änderung erneut).
 
 ### Hinzugefügt (KI-Agent, Editor)
 - Editor-Schnellaktion „Im Agenten fragen“: Auswahl (oder ganze Datei) wird als Anhang-Chip an die nächste Agent-Nachricht gehängt, das Agent-Panel öffnet sich automatisch.

@@ -282,4 +282,14 @@ class AgentViewModelTest {
         vm.onEvent(AgentUiEvent.Send)
         vm.await { st -> st.attachments.isEmpty() && st.items.any { it is AgentChatItem.User && it.text.contains("[Auszug: /p/A.kt") } }
     }
+
+    @Test
+    fun `Projektregeln brauchen Freigabe und gelten danach`() {
+        File(tmp, "AGENTS.md").writeText("Nutze Tabs.")
+        val vm = vm(createFileThenAnswer())
+        vm.await { st -> st.untrustedContext == "Regeln" }
+        vm.onEvent(AgentUiEvent.TrustContext)
+        vm.await { st -> st.untrustedContext == null }
+        assertTrue(connections.isContextTrusted(tmp, com.codeforge.libs.agent.ProjectContext.load(tmp).fingerprint()))
+    }
 }

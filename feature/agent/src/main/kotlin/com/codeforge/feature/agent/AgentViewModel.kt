@@ -127,6 +127,7 @@ class AgentViewModel @Inject constructor(
             is AgentUiEvent.RemoveAttachment -> _state.update { st ->
                 st.copy(attachments = st.attachments.filterIndexed { i, _ -> i != event.index })
             }
+            AgentUiEvent.TrustContext -> trustContext()
             AgentUiEvent.Send -> send()
             AgentUiEvent.Stop -> job?.cancel()
             is AgentUiEvent.ModeChanged -> {
@@ -211,6 +212,25 @@ class AgentViewModel @Inject constructor(
         _state.value = AgentUiState(rootPath = rootPath, mode = policy.mode, mcpServers = _state.value.mcpServers, showConnections = _state.value.showConnections)
         if (restore && rootPath.isNotEmpty()) restoreHistory(rootPath)
         syncMcp(rootPath)
+        if (rootPath.isNotEmpty()) viewModelScope.launch { loadContext(File(rootPath)) }
+    }
+
+    /** Lädt Regeln/Skills; unfreigegebener Inhalt wird gemeldet und für diesen Zug ignoriert. */
+    private suspend fun loadContext(root: File): ProjectContext = withContext(Dispatchers.IO) {
+        val ctx = ProjectContext.load(root)
+        val trusted = ctx.isEmpty || connections.isContextTrusted(root, ctx.fingerprint())
+        val pending = if (trusted) null else ctx.summary()
+        if (_state.value.rootPath == root.path && _state.value.untrustedContext != pending) _state.update { it.copy(untrustedContext = pending) }
+        if (trusted) ctx else ProjectContext.EMPTY
+    }
+
+    private fun trustContext() {
+        val root = session?.root ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val ctx = ProjectContext.load(root)
+            connections.trustContext(root, ctx.fingerprint())
+            _state.update { it.copy(untrustedContext = null) }
+        }
     }
 
     /** Lädt den gespeicherten Verlauf im Hintergrund; ein inzwischen gestarteter Lauf oder Projektwechsel hat Vorrang. */
@@ -265,7 +285,7 @@ class AgentViewModel @Inject constructor(
             addItem { AgentChatItem.User(it, text) }
             turnId = current.checkpoint.beginTurn()
 
-            val context = withContext(Dispatchers.IO) { ProjectContext.load(current.root) }
+            val context = loadContext(current.root)
             val registry = AgentToolRegistry(current.builtins + mcp.tools.value + context.tools())
             val notes = mcp.serverNotes()
             val loop = AgentLoop(

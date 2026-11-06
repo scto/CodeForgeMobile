@@ -116,6 +116,19 @@ fun AgentScreen(
             }
         }
         if (state.todos.isNotEmpty()) TodoStrip(state.todos)
+        state.untrustedContext?.let { summary ->
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+            ) {
+                Column(Modifier.padding(10.dp)) {
+                    Text(stringRes(R.string.agent_context_untrusted, summary), style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = { onEvent(AgentUiEvent.TrustContext) }, modifier = Modifier.align(Alignment.End)) {
+                        Text(stringRes(R.string.agent_context_trust))
+                    }
+                }
+            }
+        }
         state.pendingApproval?.let { ApprovalCard(it, onEvent) }
         InputRow(state, onEvent)
     }

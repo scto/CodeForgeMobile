@@ -60,4 +60,21 @@ class AgentConnections(private val dir: File) {
         val project = root?.let(::projectServers).orEmpty().map { McpServerEntry(it, McpSource.PROJECT, trusted = key(it) in ok) }
         return app + project
     }
+
+    private val contextTrustFile get() = File(dir, "context-trust.json")
+
+    private fun contextKey(root: File, fingerprint: String) = runCatching { root.canonicalPath }.getOrDefault(root.path) + "|" + fingerprint
+
+    private fun trustedContexts(): Set<String> = contextTrustFile.takeIf { it.isFile }
+        ?.let { runCatching { Json.parseToJsonElement(it.readText()).jsonArray.mapNotNull { e -> (e as? JsonPrimitive)?.contentOrNull } }.getOrNull() }
+        .orEmpty().toSet()
+
+    /** `true`, wenn Regeln/Skills mit [fingerprint] im Projekt [root] freigegeben wurden. */
+    fun isContextTrusted(root: File, fingerprint: String): Boolean = contextKey(root, fingerprint) in trustedContexts()
+
+    /** Gibt Regeln/Skills mit [fingerprint] im Projekt [root] frei. */
+    fun trustContext(root: File, fingerprint: String) {
+        dir.mkdirs()
+        contextTrustFile.writeText(JsonArray((trustedContexts() + contextKey(root, fingerprint)).sorted().map { JsonPrimitive(it) }).toString())
+    }
 }

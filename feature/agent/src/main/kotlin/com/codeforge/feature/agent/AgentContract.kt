@@ -86,6 +86,8 @@ data class AgentUiState(
     val mcpServers: List<McpServerUi> = emptyList(),
     val showConnections: Boolean = false,
     val attachments: List<AgentAttachment> = emptyList(),
+    /** Kurzbeschreibung gefundener, noch nicht freigegebener Projektregeln/Skills; `null` = nichts offen. */
+    val untrustedContext: String? = null,
 )
 
 /** Aktionen des Nutzers. */
@@ -140,4 +142,7 @@ sealed interface AgentUiEvent {
 
     /** Vorgemerkten Anhang entfernen. */
     data class RemoveAttachment(val index: Int) : AgentUiEvent
+
+    /** Gefundene Projektregeln/Skills freigeben. */
+    data object TrustContext : AgentUiEvent
 }

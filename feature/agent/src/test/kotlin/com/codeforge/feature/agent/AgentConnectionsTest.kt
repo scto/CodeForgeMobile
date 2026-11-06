@@ -56,4 +56,12 @@ class AgentConnectionsTest {
     fun `shellQuote schuetzt einfache Anfuehrungszeichen`() {
         assertEquals("'a'\\''b'", TermuxMcpLauncher.shellQuote("a'b"))
     }
+
+    @Test
+    fun `Projektkontext ist an Inhalt gebunden`() {
+        assertFalse(conn.isContextTrusted(project, "abc"))
+        conn.trustContext(project, "abc")
+        assertTrue(conn.isContextTrusted(project, "abc"))
+        assertFalse(conn.isContextTrusted(project, "abd"))
+    }
 }

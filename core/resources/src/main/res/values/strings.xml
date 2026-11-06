@@ -1634,6 +1634,8 @@
     <string name="ai_quick_action_rewrite">Rewrite with instruction</string>
     <string name="ai_quick_action_kdoc">Generate documentation (KDoc)</string>
     <string name="ai_quick_action_ask_agent">Ask the agent (with selection)</string>
+    <string name="agent_context_untrusted">Project rules/skills found (%1$s). The agent ignores them until you approve.</string>
+    <string name="agent_context_trust">Approve</string>
     <string name="agent_attachment_remove">Remove attachment</string>
     <string name="ai_quick_actions">Quick Actions</string>
     <string name="ai_chat_title">AI Chat</string>

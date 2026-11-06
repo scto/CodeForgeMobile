@@ -31,6 +31,23 @@ class ProjectContext(val instructions: String, val skills: List<AgentSkill>) {
         }
     }
 
+    /** `true`, wenn weder Regeln noch Skills vorhanden sind. */
+    val isEmpty: Boolean get() = instructions.isBlank() && skills.isEmpty()
+
+    /** Kurzbeschreibung für die Freigabeabfrage, z. B. „Regeln, 2 Skills“. */
+    fun summary(): String = listOfNotNull(
+        "Regeln".takeIf { instructions.isNotBlank() },
+        "${skills.size} Skills".takeIf { skills.isNotEmpty() },
+    ).joinToString(", ")
+
+    /** SHA-256 über Regeln und Skills; ändert sich der Inhalt, ist neu freizugeben. */
+    fun fingerprint(): String {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        md.update(instructions.toByteArray())
+        skills.forEach { md.update("\u0000${it.name}\u0000${it.description}\u0000${it.body}".toByteArray()) }
+        return md.digest().joinToString("") { "%02x".format(it) }
+    }
+
     /** Werkzeuge, die der Kontext beisteuert (derzeit `use_skill`, nur wenn Skills existieren). */
     fun tools(): List<AgentTool> = if (skills.isEmpty()) emptyList() else listOf(UseSkillTool(skills))
 
