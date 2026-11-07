@@ -13,6 +13,7 @@ import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.navigation.FileSyncBridge
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import android.util.Log
 import com.codeforge.core.domain.agent.AgentAttachment
 import com.codeforge.libs.agent.AgentEvent
 import com.codeforge.libs.agent.AgentHistoryStore
@@ -261,7 +262,11 @@ class AgentViewModel @Inject constructor(
         val s = _state.value
         val text = s.input.trim()
         val current = session
-        if (text.isEmpty() || s.running || current == null) return
+        if (text.isEmpty() || s.running) return
+        if (current == null) {
+            addItem { AgentChatItem.Notice(it, Res.string(R.string.agent_error_no_project), isError = true) }
+            return
+        }
         val message = AgentAttachment.compose(s.attachments, text)
         _state.update { it.copy(running = true, input = "", attachments = emptyList()) }
         job = viewModelScope.launch { runTurn(current, message) }
@@ -270,6 +275,7 @@ class AgentViewModel @Inject constructor(
     private suspend fun runTurn(current: Session, text: String) {
         var turnId: Long? = null
         try {
+            addItem { AgentChatItem.User(it, text) }
             val options = aiRepository.getAiOptions().first()
             val problem = when {
                 // Lokale OpenAI-kompatible Server (eigene Basis-URL) laufen auch ohne Schlüssel.
@@ -282,7 +288,6 @@ class AgentViewModel @Inject constructor(
                 return
             }
             aiRepository.incrementTodayRequestCount()
-            addItem { AgentChatItem.User(it, text) }
             turnId = current.checkpoint.beginTurn()
 
             val context = loadContext(current.root)
@@ -340,6 +345,7 @@ class AgentViewModel @Inject constructor(
                     is AgentEvent.Failed -> {
                         history = event.messages
                         persist(current.root.path, history)
+                        Log.w(TAG, "Agent-Zug fehlgeschlagen: ${event.message}")
                         addItem { AgentChatItem.Notice(it, event.message, isError = true) }
                     }
                 }
@@ -348,6 +354,7 @@ class AgentViewModel @Inject constructor(
             withContext(NonCancellable) { addItem { AgentChatItem.Notice(it, Res.string(R.string.agent_cancelled), false) } }
             throw e
         } catch (e: Exception) {
+            Log.e(TAG, "Agent-Zug abgebrochen", e)
             addItem { AgentChatItem.Notice(it, Res.string(R.string.agent_error_generic, e.message ?: e.toString()), true) }
         } finally {
             withContext(NonCancellable) {
@@ -407,5 +414,6 @@ class AgentViewModel @Inject constructor(
     private companion object {
         const val DETAIL_MAX = 600
         const val MAX_ATTACHMENTS = 5
+        private const val TAG = "CodeForgeAgent"
     }
 }

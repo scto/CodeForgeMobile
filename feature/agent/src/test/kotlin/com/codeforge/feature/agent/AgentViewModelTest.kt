@@ -200,12 +200,13 @@ class AgentViewModelTest {
         options.value = options.value.copy(apiKey = "")
         val vm = vm(createFileThenAnswer())
         vm.ask("x")
-        assertTrue(vm.state.value.items.single().let { it is AgentChatItem.Notice && it.isError })
+        assertTrue(vm.state.value.items.first() is AgentChatItem.User)
+        assertTrue(vm.state.value.items.last().let { it is AgentChatItem.Notice && it.isError })
         assertEquals(0, repo.count)
         // OpenAI-kompatibler lokaler Server ohne Schlüssel ist erlaubt, ohne Basis-URL nicht.
         options.value = AiChatOptions(AiProviderType.OPENAI, "m", apiKey = "")
         vm.ask("y")
-        assertEquals(2, vm.state.value.items.size)
+        assertEquals(4, vm.state.value.items.size)
     }
 
     @Test
@@ -291,5 +292,14 @@ class AgentViewModelTest {
         vm.onEvent(AgentUiEvent.TrustContext)
         vm.await { st -> st.untrustedContext == null }
         assertTrue(connections.isContextTrusted(tmp, com.codeforge.libs.agent.ProjectContext.load(tmp).fingerprint()))
+    }
+
+    @Test
+    fun `ohne Projekt meldet Senden einen Fehler statt still nichts zu tun`() {
+        val vm = vm(createFileThenAnswer())
+        vm.onEvent(AgentUiEvent.Initialize(""))
+        vm.onEvent(AgentUiEvent.InputChanged("hallo"))
+        vm.onEvent(AgentUiEvent.Send)
+        vm.await { st -> st.items.any { it is AgentChatItem.Notice && it.isError } }
     }
 }
