@@ -69,6 +69,13 @@ fun AppBuildGradle(
         if (useKts) "buildFeatures { viewBinding = true }" else "buildFeatures { viewBinding true }"
     }
 
+    // Compose-Vorschau (AGP 9) braucht kompilierte Android-Ressourcen; AGP schließt sie in Unit-Tests standardmäßig aus.
+    val testOptions = when {
+        !enableCompose -> ""
+        useKts -> "testOptions { unitTests.isIncludeAndroidResources = true }"
+        else -> "testOptions { unitTests.includeAndroidResources = true }"
+    }
+
     val ndkVersionStr = if (enableNdkBuild) {
         if (useKts) "ndkVersion = \"29.0.14206865\"" else "ndkVersion '29.0.14206865'"
     } else {
@@ -94,6 +101,7 @@ fun AppBuildGradle(
             plugins,
             ndkVersionStr,
             buildFeatures,
+            testOptions,
             ndkBlock,
             depsBlock
         )
@@ -104,6 +112,7 @@ fun AppBuildGradle(
             plugins,
             ndkVersionStr,
             buildFeatures,
+            testOptions,
             ndkBlock,
             depsBlock
         )
@@ -117,6 +126,7 @@ fun AppBuildGradleKotlin(
     plugins: String,
     ndkVersionStr: String,
     buildFeatures: String,
+    testOptions: String,
     ndkBlock: String,
     depsBlock: String
 ): String = """
@@ -139,6 +149,8 @@ fun AppBuildGradleKotlin(
 
         $buildFeatures
 
+        $testOptions
+
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
@@ -159,6 +171,7 @@ fun AppBuildGradleGroovy(
     plugins: String,
     ndkVersionStr: String,
     buildFeatures: String,
+    testOptions: String,
     ndkBlock: String,
     depsBlock: String
 ): String = """
@@ -180,6 +193,8 @@ fun AppBuildGradleGroovy(
         }
 
         $buildFeatures
+
+        $testOptions
 
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_17

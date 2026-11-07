@@ -138,6 +138,8 @@ class ProjectGeneratorTest {
         assertTrue(!catalog.contains("org.jetbrains.kotlin.android"))
         val app = File(target, "app/build.gradle.kts").readText()
         assertTrue(app.contains("libs.plugins.kotlin.compose"))
+        // Compose-Vorschau (AGP 9) verlangt Android-Ressourcen in Unit-Tests
+        assertTrue(app.contains("testOptions { unitTests.isIncludeAndroidResources = true }"))
         assertTrue(!app.contains("kotlin.android") && !app.contains("kotlinOptions"))
         assertTrue(!File(target, "build.gradle.kts").readText().contains("kotlin.android"))
         out.deleteRecursively()
