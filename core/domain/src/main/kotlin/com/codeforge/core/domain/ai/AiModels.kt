@@ -94,10 +94,9 @@ enum class AiProviderType(
         defaultBaseUrl = "https://generativelanguage.googleapis.com",
         defaultModel = "gemini-3.6-flash",
         // Stand ai.google.dev/gemini-api/docs/models (Nov 2026). 2.0-Modelle und gemini-3-pro-preview sind abgeschaltet;
-        // 2.5 läuft nur noch für Bestandsnutzer. Die Live-Liste (fetchAvailableModels) ergänzt/ersetzt diese Vorschläge.
+        // 2.5 läuft nur noch für Bestandsnutzer. Die Live-Liste (fetchAvailableModels) ergänzt/ersetzt diese Vorschläge. gemini-3.8-flash und gemini-4-argon
+        // wurden entfernt: auf Thomas' Schlüssel nicht erreichbar (Timeout); nur bestätigte Modelle vorschlagen.
         suggestedModels = listOf(
-            "gemini-4-argon",
-            "gemini-3.8-flash",
             "gemini-3.6-flash",
             "gemini-3.5-flash-lite",
             "gemini-3.1-flash-lite",
