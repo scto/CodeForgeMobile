@@ -85,6 +85,7 @@ class AiProviderDetectionTest {
     @org.junit.Test
     fun detectsProviderFromKeyPrefix() {
         org.junit.Assert.assertEquals(AiProviderType.GEMINI, AiProviderType.detectFromKey(" AIzaSyABC "))
+        org.junit.Assert.assertEquals(AiProviderType.GEMINI, AiProviderType.detectFromKey("AQ.Ab8RN6x"))
         org.junit.Assert.assertEquals(AiProviderType.ANTHROPIC, AiProviderType.detectFromKey("sk-ant-api03-x"))
         org.junit.Assert.assertNull(AiProviderType.detectFromKey("sk-proj-123"))
     }

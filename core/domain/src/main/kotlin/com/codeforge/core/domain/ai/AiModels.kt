@@ -111,11 +111,11 @@ enum class AiProviderType(
     );
 
     companion object {
-        /** Erkennt den Anbieter am Schlüssel-Präfix (Gemini `AIza…`, Anthropic `sk-ant-…`), sonst `null`. */
+        /** Erkennt den Anbieter am Schlüssel-Präfix (Gemini `AIza…` oder das neue `AQ.…`, Anthropic `sk-ant-…`), sonst `null`. */
         fun detectFromKey(rawKey: String): AiProviderType? {
             val key = rawKey.trim()
             return when {
-                key.startsWith("AIza") -> GEMINI
+                key.startsWith("AIza") || key.startsWith("AQ.") -> GEMINI
                 key.startsWith("sk-ant-") -> ANTHROPIC
                 else -> null
             }
