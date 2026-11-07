@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout CodeForgeMobile
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Runner vorbereiten (GPG & Werkzeuge)
         uses: ./.github/actions/prepare-runner
@@ -46,7 +46,7 @@ jobs:
           gpg_passphrase: ${{ secrets.CODEFORGE_GPG_PASSPHRASE }}
 
       - name: gh-pages Zweig laden
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ inputs.target_repo }}
           ref: gh-pages

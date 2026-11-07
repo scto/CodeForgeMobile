@@ -48,7 +48,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Eingaben prüfen
         env:
@@ -59,14 +59,15 @@ jobs:
             || { echo "::error::retention_days muss 1-90 sein (war: $IN_RETENTION)"; exit 1; }
 
       - name: JDK 21 einrichten
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Gradle einrichten (Cache)
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
         with:
+          cache-provider: basic
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Android-SDK-Plattform 36 sicherstellen
@@ -115,7 +116,7 @@ jobs:
           echo "short_sha=${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
 
       - name: Artefakt hochladen
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: codeforgemobile-debug-${{ steps.apk.outputs.short_sha }}
           path: |
@@ -126,7 +127,7 @@ jobs:
 
       - name: Build-Berichte bei Fehlern sichern
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-reports-${{ steps.apk.outputs.short_sha || github.run_id }}
           path: |
