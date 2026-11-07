@@ -4,6 +4,7 @@ package com.codeforge.feature.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.datastore.SettingsRepository
+import com.codeforge.core.domain.repository.SdkSetupOptions
 import com.codeforge.core.domain.repository.TermuxEnvironmentRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -73,15 +74,6 @@ class OnboardingViewModel @Inject constructor(
             OnboardingUiEvent.PermissionsContinueClicked ->
                 _uiState.update { it.copy(step = OnboardingStep.SETUP) }
 
-            is OnboardingUiEvent.JdkSelected ->
-                _uiState.update { it.copy(sdkOptions = it.sdkOptions.copy(jdk = event.version)) }
-            is OnboardingUiEvent.NdkSelected ->
-                _uiState.update { it.copy(sdkOptions = it.sdkOptions.copy(ndk = event.version)) }
-            is OnboardingUiEvent.InstallNdkChanged ->
-                _uiState.update { it.copy(sdkOptions = it.sdkOptions.copy(installNdk = event.install)) }
-            is OnboardingUiEvent.InstallCmakeChanged ->
-                _uiState.update { it.copy(sdkOptions = it.sdkOptions.copy(installCmake = event.install)) }
-
             OnboardingUiEvent.StartSetupClicked, OnboardingUiEvent.RetrySetupClicked -> startSetup()
             is OnboardingUiEvent.TermuxBootstrapSetupCompleted -> onBootstrapDone(event)
         }
@@ -108,7 +100,7 @@ class OnboardingViewModel @Inject constructor(
     private suspend fun completeOnboarding() {
         _uiState.update { it.copy(setupPhase = SetupPhase.DONE) }
         settingsRepository.setOnboardingCompleted(true)
-        _effect.send(OnboardingUiEffect.NavigateToSetupTerminal(_uiState.value.sdkOptions.toCommand()))
+        _effect.send(OnboardingUiEffect.NavigateToSetupTerminal(SdkSetupOptions().toCommand()))
     }
 
     private fun fail(message: String) =

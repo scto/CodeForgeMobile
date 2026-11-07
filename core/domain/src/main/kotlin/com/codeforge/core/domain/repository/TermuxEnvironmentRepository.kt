@@ -8,34 +8,28 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 
 /**
- * Auswahl für das einmalige Einrichten der Entwicklungsumgebung (`codeforge-env setup`).
- * Die Werte sind fest vorgegebene Auswahllisten der UI, werden aber trotzdem validiert,
- * weil sie als Shell-Argumente ins Terminal geschrieben werden.
+ * Feste Zielumgebung der Ersteinrichtung: JDK 21, Android-SDK (cmdline-tools, platform-tools,
+ * build-tools 37, Plattform 36), NDK r29 und CMake 4.1.2. Es gibt keine Auswahl mehr; die Werte werden
+ * trotzdem validiert, weil sie als Shell-Argumente ins Terminal geschrieben werden.
  */
 data class SdkSetupOptions(
     val jdk: String = "21",
+    val sdk: String = "37.0.0",
+    val platform: String = "36",
     val ndk: String = "r29",
-    val cmake: String = "4.1.2",
-    val installNdk: Boolean = true,
-    val installCmake: Boolean = true,
+    val cmake: String = DEFAULT_CMAKE,
 ) {
     init {
-        require(listOf(jdk, ndk, cmake).all { SAFE.matches(it) }) { Res.string(R.string.domain_ungueltige_versionsangabe) }
+        require(listOf(jdk, sdk, platform, ndk, cmake).all { SAFE.matches(it) }) { Res.string(R.string.domain_ungueltige_versionsangabe) }
     }
 
     /** Kommandozeile für die Termux-Shell. */
-    fun toCommand(scriptName: String = "codeforge-env"): String = buildString {
-        append(scriptName).append(" setup --jdk ").append(jdk)
-        if (installNdk) append(" --ndk ").append(ndk) else append(" --no-ndk")
-        if (installCmake) append(" --cmake ").append(cmake) else append(" --no-cmake")
-    }
+    fun toCommand(scriptName: String = "codeforge-env"): String =
+        "$scriptName setup --jdk $jdk --sdk $sdk --platform $platform --ndk $ndk --cmake $cmake"
 
     companion object {
         private val SAFE = Regex("^[0-9A-Za-z.]{1,16}$")
-        /** Auswählbare JDK-Hauptversionen. */
-        val JDK_CHOICES = listOf("17", "21")
-        /** Auswählbare NDK-Versionen. */
-        val NDK_CHOICES = listOf("r29", "r28c", "r27d")
+
         /** Standardversion von CMake. */
         const val DEFAULT_CMAKE = "4.1.2"
     }

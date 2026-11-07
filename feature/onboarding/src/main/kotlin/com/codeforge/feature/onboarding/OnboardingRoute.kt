@@ -195,13 +195,8 @@ fun OnboardingRoute(
                 )
 
                 OnboardingStep.SETUP -> SetupScreen(
-                    options = uiState.sdkOptions,
                     setupPhase = uiState.setupPhase,
                     setupErrorMessage = uiState.setupErrorMessage,
-                    onJdkSelected = { viewModel.onEvent(OnboardingUiEvent.JdkSelected(it)) },
-                    onNdkSelected = { viewModel.onEvent(OnboardingUiEvent.NdkSelected(it)) },
-                    onInstallNdkChanged = { viewModel.onEvent(OnboardingUiEvent.InstallNdkChanged(it)) },
-                    onInstallCmakeChanged = { viewModel.onEvent(OnboardingUiEvent.InstallCmakeChanged(it)) },
                     onStartSetup = { viewModel.onEvent(OnboardingUiEvent.StartSetupClicked) },
                     onRetry = { viewModel.onEvent(OnboardingUiEvent.RetrySetupClicked) }
                 )
