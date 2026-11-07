@@ -17,6 +17,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Neues Modul `:libs:agent`: provider-neutrale Agentenschleife (`AgentLoop`, `Flow<AgentEvent>`) mit Werkzeugen (`read_file`, `list_dir`, `search_text`, `create_file`, `edit_file`, `delete_path`, `get_diagnostics`, `todo_write`), Berechtigungsmodi (Nachfragen / Automatisch / Nur Plan), Checkpoints je Turn mit Revert (`CheckpointWorkspace`) und Verlaufskompaktierung (`HistoryCompactor`). Reine JVM-Logik, 26 Unit-Tests.
 - `:libs:ai-client`: `OpenAiAgentClient` (Chat Completions, `max_completion_tokens` nur gegen api.openai.com) und `GeminiAgentClient` (Funktionsaufrufe; `thoughtSignature` von Gemini 3 wird in der Aufruf-ID mitgeführt) auf gemeinsamer SSE-Transportschicht, je mit Wire-Tests.
 - `:libs:ai-client`: `AnthropicAgentClient` (Streaming-Werkzeugaufrufe der Anthropic-Messages-API, Retry bei 429/5xx) plus testbare `AnthropicAgentWire` (Request-Body, SSE-Zusammensetzung inkl. `input_json_delta`). 
+### Behoben (Onboarding)
+- „Loslegen“ sprang zum Onboarding zurück: Android beendet die App, sobald „Zugriff auf alle Dateien“ erteilt wird, und der Zustand ging verloren. Seite und Schritt überleben jetzt den Prozesstod.
+- Die Berechtigungen sind die letzte Seite der Einführung. Die letzte Infoseite zeigt „Weiter zu den Berechtigungen“, „Loslegen“ gibt es erst dort und nur mit Speicherzugriff und App-Installation (Benachrichtigungen bleiben optional). „Überspringen“ entfällt.
+
 ### Behoben (Projektvorlagen)
 - Compose-Vorlagen setzen `testOptions.unitTests.isIncludeAndroidResources = true`, sonst bricht AGP 9 beim Ausführen von `tasks` mit „Compose Preview failed … Android resources are excluded from unit tests“ ab.
 

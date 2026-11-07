@@ -32,4 +32,6 @@ dependencies {
     // TermuxInstaller (Bootstrap entpacken); Hilt-Bindings kommen aus :libs:terminal-engine
     implementation(project(":libs:terminal-engine"))
     implementation(project(":libs:termux-app"))
+
+    testImplementation(libs.junit)
 }

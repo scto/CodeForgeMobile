@@ -47,13 +47,15 @@ fun PermissionScreen(
     onRequestStorage: () -> Unit,
     onRequestInstallPackages: () -> Unit,
     onRequestNotification: () -> Unit,
-    onContinue: () -> Unit
+    onContinue: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val requiredGranted = storageGranted && installPackagesGranted
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp)
+            .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
         Text(stringRes(R.string.onboarding_berechtigungen), style = MaterialTheme.typography.headlineSmall)
         Text(
@@ -100,14 +102,23 @@ fun PermissionScreen(
             onRequest = onRequestNotification
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (!requiredGranted) {
+            Text(
+                stringRes(R.string.onboarding_pflicht_berechtigungen_hinweis),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
 
         Button(
             onClick = onContinue,
             modifier = Modifier.fillMaxWidth(),
-            enabled = storageGranted
+            enabled = requiredGranted
         ) {
-            Text(stringRes(R.string.onboarding_weiter))
+            Text(stringRes(R.string.onboarding_loslegen))
         }
     }
 }

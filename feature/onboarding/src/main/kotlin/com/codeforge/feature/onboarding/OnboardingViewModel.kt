@@ -1,6 +1,7 @@
 // Modul: :feature:onboarding
 package com.codeforge.feature.onboarding
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.datastore.SettingsRepository
@@ -29,10 +30,18 @@ import javax.inject.Inject
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val termuxEnvironment: TermuxEnvironmentRepository
+    private val termuxEnvironment: TermuxEnvironmentRepository,
+    // Überlebt den Prozesstod: Android beendet die App, wenn „Zugriff auf alle Dateien“ erteilt wird.
+    private val savedState: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(OnboardingUiState())
+    private val _uiState = MutableStateFlow(
+        OnboardingUiState(
+            step = savedState.get<Boolean>(KEY_SETUP_STEP)?.let { if (it) OnboardingStep.SETUP else OnboardingStep.INTRO }
+                ?: OnboardingStep.INTRO,
+            currentIntroPage = savedState.get<Int>(KEY_INTRO_PAGE) ?: 0
+        )
+    )
     /** UI-Zustand. */
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
@@ -43,14 +52,9 @@ class OnboardingViewModel @Inject constructor(
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: OnboardingUiEvent) {
         when (event) {
-            is OnboardingUiEvent.IntroPageChanged ->
+            is OnboardingUiEvent.IntroPageChanged -> {
+                savedState[KEY_INTRO_PAGE] = event.page
                 _uiState.update { it.copy(currentIntroPage = event.page) }
-
-            OnboardingUiEvent.IntroFinished -> {
-                _uiState.update { it.copy(step = OnboardingStep.PERMISSIONS) }
-                if (!_uiState.value.storagePermissionGranted) {
-                    send(OnboardingUiEffect.RequestStoragePermission)
-                }
             }
 
             is OnboardingUiEvent.StoragePermissionResult ->
@@ -72,7 +76,10 @@ class OnboardingViewModel @Inject constructor(
                 }
 
             OnboardingUiEvent.PermissionsContinueClicked ->
-                _uiState.update { it.copy(step = OnboardingStep.SETUP) }
+                if (_uiState.value.requiredPermissionsGranted) {
+                    savedState[KEY_SETUP_STEP] = true
+                    _uiState.update { it.copy(step = OnboardingStep.SETUP) }
+                }
 
             OnboardingUiEvent.StartSetupClicked, OnboardingUiEvent.RetrySetupClicked -> startSetup()
             is OnboardingUiEvent.TermuxBootstrapSetupCompleted -> onBootstrapDone(event)
@@ -108,5 +115,10 @@ class OnboardingViewModel @Inject constructor(
 
     private fun send(effect: OnboardingUiEffect) {
         viewModelScope.launch { _effect.send(effect) }
+    }
+
+    private companion object {
+        const val KEY_INTRO_PAGE = "intro_page"
+        const val KEY_SETUP_STEP = "setup_step"
     }
 }

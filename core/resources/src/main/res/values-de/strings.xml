@@ -612,6 +612,9 @@
     <string name="onboarding_speicherzugriff">Dateizugriff (alle Dateien)</string>
     <string name="onboarding_termux_bootstrap_konnte_nicht_eingeric">Termux-Bootstrap konnte nicht eingerichtet werden.</string>
     <string name="onboarding_umgebung_bereit_das_terminal_oeffnet">Umgebung bereit — das Terminal öffnet sich ✓</string>
+    <string name="onboarding_weiter_wischen">Weiter wischen</string>
+    <string name="onboarding_weiter_zu_berechtigungen">Weiter zu den Berechtigungen</string>
+    <string name="onboarding_pflicht_berechtigungen_hinweis">Erteile Speicherzugriff und App-Installation, um loszulegen.</string>
     <string name="onboarding_weiter">Weiter</string>
     <string name="onboarding_zum_oeffnen_erstellen_und_bearbeiten">Erforderlich zum Öffnen, Erstellen und Bearbeiten von Projekten im Gerätespeicher (MANAGE_EXTERNAL_STORAGE).</string>
 

@@ -4,7 +4,7 @@ package com.codeforge.feature.onboarding
 import androidx.compose.runtime.Immutable
 
 /** Schritte der Einrichtung. */
-enum class OnboardingStep { INTRO, PERMISSIONS, SETUP }
+enum class OnboardingStep { INTRO, SETUP }
 
 /** Einrichtung: Termux-Bootstrap entpacken → Setup-Skript bereitstellen → Terminal öffnet und führt es aus. */
 enum class SetupPhase { IDLE, INSTALLING_TERMUX, PREPARING_SCRIPT, DONE, FAILED }
@@ -21,14 +21,15 @@ data class OnboardingUiState(
     val notificationPermissionGranted: Boolean = false,
     val setupPhase: SetupPhase = SetupPhase.IDLE,
     val setupErrorMessage: String? = null
-)
+) {
+    /** `true`, wenn alle für den Start nötigen Berechtigungen (Speicher, Apps installieren) erteilt sind. */
+    val requiredPermissionsGranted: Boolean get() = storagePermissionGranted && installPackagesGranted
+}
 
 /** Aktionen der Einrichtung. */
 sealed interface OnboardingUiEvent {
     /** Einführungsseite gewechselt. */
     data class IntroPageChanged(val page: Int) : OnboardingUiEvent
-    /** Einführung beendet. */
-    data object IntroFinished : OnboardingUiEvent
     /** Ergebnis der Speicherberechtigung. */
     data class StoragePermissionResult(val granted: Boolean) : OnboardingUiEvent
     /** Ergebnis der Berechtigung zum Installieren von Paketen. */
@@ -41,7 +42,7 @@ sealed interface OnboardingUiEvent {
         val installPackagesGranted: Boolean,
         val notificationGranted: Boolean
     ) : OnboardingUiEvent
-    /** Weiter nach den Berechtigungen. */
+    /** „Loslegen“ nach den Berechtigungen (nur mit allen erforderlichen Berechtigungen wirksam). */
     data object PermissionsContinueClicked : OnboardingUiEvent
 
     /** Von der UI-Schicht gemeldet, nachdem `TermuxInstaller.setupBootstrapIfNeeded` fertig ist. */

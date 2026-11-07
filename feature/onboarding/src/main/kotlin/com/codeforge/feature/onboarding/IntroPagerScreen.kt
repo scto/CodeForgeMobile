@@ -15,11 +15,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.SettingsSuggest
 import androidx.compose.material.icons.filled.Terminal
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,6 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -64,21 +66,34 @@ private val introPages = listOf(
     )
 )
 
-/** Einführung als Seitenfolge. */
+/**
+ * Einführung als Seitenfolge: vier Infoseiten, danach als letzte Seite die Berechtigungen.
+ * „Loslegen“ gibt es nur dort und erst, wenn Speicher und App-Installation erteilt sind.
+ */
 @Composable
 fun IntroPagerScreen(
     currentPage: Int,
     onPageChanged: (Int) -> Unit,
-    onFinished: () -> Unit
+    storageGranted: Boolean,
+    installPackagesGranted: Boolean,
+    deletePackagesInfo: Boolean,
+    notificationGranted: Boolean,
+    onRequestStorage: () -> Unit,
+    onRequestInstallPackages: () -> Unit,
+    onRequestNotification: () -> Unit,
+    onStart: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val pagerState = rememberPagerState(initialPage = currentPage) { introPages.size }
+    val pageCount = introPages.size + 1
+    val pagerState = rememberPagerState(initialPage = currentPage.coerceIn(0, pageCount - 1)) { pageCount }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState.currentPage) {
         onPageChanged(pagerState.currentPage)
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -91,20 +106,43 @@ fun IntroPagerScreen(
             state = pagerState,
             modifier = Modifier.weight(1f).fillMaxWidth()
         ) { page ->
-            IntroPageContent(introPages[page])
+            if (page < introPages.size) {
+                IntroPageContent(introPages[page])
+            } else {
+                PermissionScreen(
+                    storageGranted = storageGranted,
+                    installPackagesGranted = installPackagesGranted,
+                    deletePackagesInfo = deletePackagesInfo,
+                    notificationGranted = notificationGranted,
+                    onRequestStorage = onRequestStorage,
+                    onRequestInstallPackages = onRequestInstallPackages,
+                    onRequestNotification = onRequestNotification,
+                    onContinue = onStart
+                )
+            }
         }
 
-        PagerIndicator(pagerState = pagerState, pageCount = introPages.size)
+        PagerIndicator(pagerState = pagerState, pageCount = pageCount)
 
-        Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
-            if (pagerState.currentPage == introPages.lastIndex) {
-                Button(onClick = onFinished, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringRes(CoreR.string.onboarding_loslegen))
-                }
-            } else {
-                TextButton(onClick = onFinished, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringRes(CoreR.string.common_ueberspringen))
-                }
+        // Auf den Infoseiten zeigt ein Hinweis, dass es weiterführt; auf der letzten Infoseite nennt er die Berechtigungen.
+        if (pagerState.currentPage < pageCount - 1) {
+            val next = pagerState.currentPage + 1
+            val toPermissions = next == pageCount - 1
+            TextButton(
+                onClick = { scope.launch { pagerState.animateScrollToPage(next) } },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+            ) {
+                Text(
+                    stringRes(
+                        if (toPermissions) CoreR.string.onboarding_weiter_zu_berechtigungen
+                        else CoreR.string.onboarding_weiter_wischen
+                    )
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 8.dp).size(18.dp)
+                )
             }
         }
     }
@@ -160,7 +198,11 @@ private fun PagerIndicator(pagerState: PagerState, pageCount: Int) {
 private fun IntroPagerScreenLightPreview() {
     CodeForgeTheme(themeState = ThemeConfig.newBuilder().setMode(ThemeMode.LIGHT).build()) {
         Surface(color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
-            IntroPagerScreen(currentPage = 0, onPageChanged = {}, onFinished = {})
+            IntroPagerScreen(
+                currentPage = 3, onPageChanged = {}, storageGranted = false, installPackagesGranted = false,
+                deletePackagesInfo = true, notificationGranted = false, onRequestStorage = {},
+                onRequestInstallPackages = {}, onRequestNotification = {}, onStart = {}
+            )
         }
     }
 }
@@ -170,7 +212,11 @@ private fun IntroPagerScreenLightPreview() {
 private fun IntroPagerScreenDarkPreview() {
     CodeForgeTheme(themeState = ThemeConfig.newBuilder().setMode(ThemeMode.DARK).build()) {
         Surface(color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
-            IntroPagerScreen(currentPage = 0, onPageChanged = {}, onFinished = {})
+            IntroPagerScreen(
+                currentPage = 3, onPageChanged = {}, storageGranted = false, installPackagesGranted = false,
+                deletePackagesInfo = true, notificationGranted = false, onRequestStorage = {},
+                onRequestInstallPackages = {}, onRequestNotification = {}, onStart = {}
+            )
         }
     }
 }

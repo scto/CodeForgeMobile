@@ -180,10 +180,6 @@ fun OnboardingRoute(
                 OnboardingStep.INTRO -> IntroPagerScreen(
                     currentPage = uiState.currentIntroPage,
                     onPageChanged = { page -> viewModel.onEvent(OnboardingUiEvent.IntroPageChanged(page)) },
-                    onFinished = { viewModel.onEvent(OnboardingUiEvent.IntroFinished) }
-                )
-
-                OnboardingStep.PERMISSIONS -> PermissionScreen(
                     storageGranted = uiState.storagePermissionGranted,
                     installPackagesGranted = uiState.installPackagesGranted,
                     deletePackagesInfo = uiState.deletePackagesInfo,
@@ -191,7 +187,7 @@ fun OnboardingRoute(
                     onRequestStorage = ::requestStoragePermission,
                     onRequestInstallPackages = ::requestInstallPackagesPermission,
                     onRequestNotification = ::requestNotificationPermission,
-                    onContinue = { viewModel.onEvent(OnboardingUiEvent.PermissionsContinueClicked) }
+                    onStart = { viewModel.onEvent(OnboardingUiEvent.PermissionsContinueClicked) }
                 )
 
                 OnboardingStep.SETUP -> SetupScreen(

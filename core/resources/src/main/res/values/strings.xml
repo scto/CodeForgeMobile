@@ -612,6 +612,9 @@
     <string name="onboarding_speicherzugriff">All files access</string>
     <string name="onboarding_termux_bootstrap_konnte_nicht_eingeric">Termux bootstrap could not be set up.</string>
     <string name="onboarding_umgebung_bereit_das_terminal_oeffnet">Environment ready — terminal is opening ✓</string>
+    <string name="onboarding_weiter_wischen">Swipe to continue</string>
+    <string name="onboarding_weiter_zu_berechtigungen">Continue to permissions</string>
+    <string name="onboarding_pflicht_berechtigungen_hinweis">Grant storage access and app installation to get started.</string>
     <string name="onboarding_weiter">Next</string>
     <string name="onboarding_zum_oeffnen_erstellen_und_bearbeiten">Required for opening, creating, and editing projects across device storage (MANAGE_EXTERNAL_STORAGE).</string>
 
