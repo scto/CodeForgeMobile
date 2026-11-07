@@ -216,6 +216,9 @@ class GeminiClient @Inject constructor() {
      * @return Erfolg mit kurzer Rückmeldung oder Fehler mit nutzerlesbarer Meldung.
      */
     suspend fun testConnection(options: AiChatOptions): Result<String> {
+        // Zuerst die Modellliste: bei falschem Schlüssel oder unbekanntem Modell sofort eine klare Meldung statt Timeout.
+        val available = fetchModels(options).getOrElse { return Result.failure(it) }
+        missingModelMessage(options.model, available)?.let { return Result.failure(IOException(it)) }
         val testOptions = options.copy(maxTokens = 5)
         val msg = AiChatMessage(id = "test", role = AiRole.USER, content = "Ping")
         var responseText = ""
@@ -276,6 +279,16 @@ class GeminiClient @Inject constructor() {
             Result.failure(e)
         } finally {
             connection?.disconnect()
+        }
+    }
+
+    companion object {
+        /** Meldung, wenn [model] nicht in [available] steht; `null`, wenn es verfügbar ist oder die Liste leer bleibt. */
+        internal fun missingModelMessage(model: String, available: List<String>): String? {
+            val wanted = model.trim().removePrefix("models/")
+            if (wanted.isEmpty() || available.isEmpty() || wanted in available) return null
+            val hints = available.filter { "flash" in it && "tts" !in it && "image" !in it }.ifEmpty { available }.take(5)
+            return Res.string(R.string.ai_error_model_unavailable, wanted, hints.joinToString(", "))
         }
     }
 }

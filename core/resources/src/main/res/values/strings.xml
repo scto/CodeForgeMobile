@@ -1929,6 +1929,7 @@
     <string name="build_sheet_schliessen">Close</string>
     <string name="ai_error_bad_url">Invalid server address. Please check the base URL in the AI settings.</string>
     <string name="ai_error_dns">Server name could not be resolved (DNS/Internet).</string>
+    <string name="ai_error_model_unavailable">The model “%1$s” is not available for this key. Available, for example: %2$s</string>
     <string name="ai_error_timeout">The server did not respond in time.</string>
     <string name="ai_error_tls">Secure connection failed (certificate or device time).</string>
     <string name="ai_error_connect">Connection to the server was refused or blocked.</string>

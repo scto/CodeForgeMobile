@@ -1929,6 +1929,7 @@
     <string name="build_sheet_schliessen">Schließen</string>
     <string name="ai_error_bad_url">Ungültige Serveradresse. Bitte die Basis-URL in den KI-Einstellungen prüfen.</string>
     <string name="ai_error_dns">Servername konnte nicht aufgelöst werden (DNS/Internet).</string>
+    <string name="ai_error_model_unavailable">Das Modell „%1$s“ ist für diesen Schlüssel nicht verfügbar. Verfügbar sind z. B.: %2$s</string>
     <string name="ai_error_timeout">Der Server hat nicht rechtzeitig geantwortet.</string>
     <string name="ai_error_tls">Sichere Verbindung fehlgeschlagen (Zertifikat oder Gerätezeit).</string>
     <string name="ai_error_connect">Verbindung zum Server wurde abgelehnt oder blockiert.</string>
