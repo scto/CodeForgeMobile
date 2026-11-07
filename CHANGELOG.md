@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.0.5] - 2026-11-07
+
 ### Hinzugefügt (KI-Agent, Grundlage)
 - Neues Modul `:libs:agent`: provider-neutrale Agentenschleife (`AgentLoop`, `Flow<AgentEvent>`) mit Werkzeugen (`read_file`, `list_dir`, `search_text`, `create_file`, `edit_file`, `delete_path`, `get_diagnostics`, `todo_write`), Berechtigungsmodi (Nachfragen / Automatisch / Nur Plan), Checkpoints je Turn mit Revert (`CheckpointWorkspace`) und Verlaufskompaktierung (`HistoryCompactor`). Reine JVM-Logik, 26 Unit-Tests.
 - `:libs:ai-client`: `OpenAiAgentClient` (Chat Completions, `max_completion_tokens` nur gegen api.openai.com) und `GeminiAgentClient` (Funktionsaufrufe; `thoughtSignature` von Gemini 3 wird in der Aufruf-ID mitgeführt) auf gemeinsamer SSE-Transportschicht, je mit Wire-Tests.

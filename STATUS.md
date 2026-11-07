@@ -1,6 +1,6 @@
 # 📊 Aktueller Status
 
-**Version:** 3.0.4 (`versionCode 30004`) · **Stand:** 2026-10-18 · **Module:** 43 · **Kotlin-Dateien:** ~330 · **Strings:** 848 (Englisch Standard, Deutsch `values-de`)
+**Version:** 3.0.5 (`versionCode 30005`) · **Stand:** 2026-10-18 · **Module:** 43 · **Kotlin-Dateien:** ~330 · **Strings:** 848 (Englisch Standard, Deutsch `values-de`)
 
 > ✅ **Build:** `./gradlew assembleDebug` läuft laut Inhaber (Stand 2026-10-16, on-device in Termux aarch64) ohne Fehler; die Verifikationsberichte zu Task 08–15 liegen in `docs/*-verification.md`.
 > ⚠️ **Noch nicht geprüft:** Verhalten auf dem Gerät (Bootstrap-Installation, W^X unter `targetSdk 28`, Layouts, Tastatur, LSP). Checkliste: `docs/device-test-checklist.md` (28 Testfälle, alle „ungeprüft“). Aufträge: `agy-tasks/README.md`.

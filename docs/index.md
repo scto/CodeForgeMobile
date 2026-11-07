@@ -66,4 +66,4 @@ Anwenderhandbuch (DE), User Guide (EN), Entwicklerhandbuch mit Modulgraph, APK-D
 Die Bilder entstehen aus Compose-Screenshot-Tests mit Beispieldaten; Schriften und Systemleisten können auf einem Gerät abweichen.
 
 !!! warning "Entwicklungsstand"
-    Die Release-Pipeline läuft, die Release-APK ist aber noch nicht auf Geräten geprüft. Stand und offene Punkte: [Release Notes 3.0.4](release-notes/3.0.4.md).
+    Die Release-Pipeline läuft, die Release-APK ist aber noch nicht auf Geräten geprüft. Stand und offene Punkte: [Release Notes 3.0.5](release-notes/3.0.5.md).
