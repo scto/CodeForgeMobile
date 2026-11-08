@@ -216,9 +216,11 @@ class GeminiClient @Inject constructor() {
      * @return Erfolg mit kurzer Rückmeldung oder Fehler mit nutzerlesbarer Meldung.
      */
     suspend fun testConnection(options: AiChatOptions): Result<String> {
-        // Zuerst die Modellliste: bei falschem Schlüssel oder unbekanntem Modell sofort eine klare Meldung statt Timeout.
-        val available = fetchModels(options).getOrElse { return Result.failure(it) }
-        missingModelMessage(options.model, available)?.let { return Result.failure(IOException(it)) }
+        // Zuerst die vollständige Modellliste: ein unbekanntes Modell wird sofort gemeldet statt als Timeout.
+        // Schlägt die Liste selbst fehl (Netz, Schlüsselbeschränkung), entscheidet die eigentliche Testanfrage.
+        fetchModels(options).getOrNull()?.let { available ->
+            missingModelMessage(options.model, available)?.let { return Result.failure(IOException(it)) }
+        }
         val testOptions = options.copy(maxTokens = 5)
         val msg = AiChatMessage(id = "test", role = AiRole.USER, content = "Ping")
         var responseText = ""
@@ -250,39 +252,44 @@ class GeminiClient @Inject constructor() {
      */
     suspend fun fetchModels(options: AiChatOptions): Result<List<String>> = withContext(Dispatchers.IO) {
         val baseUrl = AiHttpSupport.normalizeBaseUrl(options.baseUrl, "https://generativelanguage.googleapis.com", listOf("/v1beta", "/v1"))
-        val url = URL("$baseUrl/v1beta/models")
-
-        var connection: HttpURLConnection? = null
+        val key = AiHttpSupport.cleanKey(options.apiKey)
+        val models = LinkedHashSet<String>()
+        var pageToken: String? = null
         try {
-            connection = (url.openConnection() as HttpURLConnection).apply {
-                connectTimeout = 10_000
-                readTimeout = 15_000
-                requestMethod = "GET"
-                setRequestProperty("Accept", "application/json")
-                setRequestProperty("x-goog-api-key", AiHttpSupport.cleanKey(options.apiKey))
+            // Die Liste ist seitenweise (Standard 50 Einträge): alle Seiten lesen, sonst fehlen Modelle.
+            repeat(MAX_MODEL_PAGES) {
+                val query = "pageSize=1000" + (pageToken?.let { "&pageToken=" + java.net.URLEncoder.encode(it, "UTF-8") } ?: "")
+                val connection = (URL("$baseUrl/v1beta/models?$query").openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 10_000
+                    readTimeout = 15_000
+                    requestMethod = "GET"
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("x-goog-api-key", key)
+                }
+                try {
+                    if (connection.responseCode !in 200..299) {
+                        return@withContext Result.failure(IOException("HTTP ${connection.responseCode}"))
+                    }
+                    val root = json.parseToJsonElement(connection.inputStream.bufferedReader().use { it.readText() }).jsonObject
+                    root["models"]?.jsonArray?.forEach {
+                        val name = it.jsonObject["name"]?.jsonPrimitive?.content ?: return@forEach
+                        models += name.removePrefix("models/")
+                    }
+                    pageToken = root["nextPageToken"]?.jsonPrimitive?.content?.takeIf { it.isNotEmpty() }
+                } finally {
+                    connection.disconnect()
+                }
+                if (pageToken == null) return@withContext Result.success(models.sorted())
             }
-
-            if (connection.responseCode !in 200..299) {
-                return@withContext Result.failure(IOException("HTTP ${connection.responseCode}"))
-            }
-
-            val text = connection.inputStream.bufferedReader().use { it.readText() }
-            val root = json.parseToJsonElement(text).jsonObject
-            val list = root["models"]?.jsonArray
-            val models = list?.mapNotNull {
-                val name = it.jsonObject["name"]?.jsonPrimitive?.content ?: return@mapNotNull null
-                name.removePrefix("models/")
-            }?.sorted() ?: emptyList()
-
-            Result.success(models)
+            Result.success(models.sorted())
         } catch (e: Exception) {
             Result.failure(e)
-        } finally {
-            connection?.disconnect()
         }
     }
 
     companion object {
+        private const val MAX_MODEL_PAGES = 10
+
         /** Meldung, wenn [model] nicht in [available] steht; `null`, wenn es verfügbar ist oder die Liste leer bleibt. */
         internal fun missingModelMessage(model: String, available: List<String>): String? {
             val wanted = model.trim().removePrefix("models/")
