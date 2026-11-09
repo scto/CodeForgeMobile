@@ -2407,4 +2407,6 @@
     <string name="lsp_manage_open_store">Open Store</string>
     <string name="plugins_aktiv">Active</string>
     <string name="plugins_deaktiviert">Disabled</string>
+    <string name="store_filter_all">All</string>
+    <string name="store_filter_installed">Installed</string>
 </resources>

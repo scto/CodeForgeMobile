@@ -114,6 +114,7 @@ class StoreViewModel @Inject constructor(
             is StoreUiEvent.Install -> install(event.item)
             is StoreUiEvent.InstallServer -> installServer(event.item)
             is StoreUiEvent.Uninstall -> uninstall(event.item)
+            is StoreUiEvent.ShowMessage -> _uiState.update { it.copy(message = event.text) }
             StoreUiEvent.MessageShown -> _uiState.update { it.copy(message = null) }
         }
     }

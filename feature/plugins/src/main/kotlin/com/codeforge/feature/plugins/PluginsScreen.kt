@@ -351,3 +351,77 @@ private fun RequirementDialogView(dialog: RequirementDialog, onEvent: (PluginsUi
         )
     }
 }
+
+
+/**
+ * Verwaltung der installierten Plugins ohne eigenes Gerüst (Aktivieren, Hinweise, Voraussetzungen, Info, Entfernen,
+ * Sideload aus Datei). Wird im Store hinter dem Filter „Installiert“ eingebettet.
+ */
+@Composable
+fun InstalledPluginsPanel(
+    modifier: Modifier = Modifier,
+    onMessage: (String) -> Unit = {},
+    viewModel: PluginsViewModel = hiltViewModel(),
+) {
+    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        uri ?: return@rememberLauncherForActivityResult
+        val cached = copyToCacheFile(context, uri) ?: return@rememberLauncherForActivityResult
+        viewModel.onEvent(PluginsUiEvent.InstallFromFile(cached.path))
+    }
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            if (effect is PluginsUiEffect.ShowSnackbar) onMessage(effect.message)
+        }
+    }
+    uiState.requirementDialog?.let { RequirementDialogView(it, viewModel::onEvent) }
+    uiState.infoDialog?.let { info ->
+        com.codeforge.core.ui.LspInfoDialog(
+            model = info.model,
+            runtime = info.runtime,
+            onDismiss = { viewModel.onEvent(PluginsUiEvent.InfoDismissed) },
+        )
+    }
+    Column(modifier = modifier.fillMaxSize()) {
+        uiState.installProgressPercent?.let { percent ->
+            LinearProgressIndicator(progress = { percent / 100f }, modifier = Modifier.fillMaxWidth())
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp),
+        ) {
+            item(key = "sideload") {
+                androidx.compose.material3.OutlinedButton(
+                    onClick = { picker.launch(arrayOf("application/zip", "application/octet-stream")) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringRes(R.string.plugins_plugin_installieren))
+                }
+            }
+            if (uiState.isLoading) {
+                item(key = "loading") { CircularProgressIndicator(modifier = Modifier.padding(24.dp)) }
+            } else if (uiState.plugins.isEmpty()) {
+                item(key = "empty") {
+                    Text(
+                        stringRes(R.string.plugins_keine_plugins_installiert_tippe_oben),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(vertical = 16.dp),
+                    )
+                }
+            } else {
+                items(uiState.plugins, key = { it.id }) { plugin ->
+                    PluginRow(
+                        plugin = plugin,
+                        isLoaded = plugin.id in uiState.loadedPluginIds,
+                        missing = uiState.missingRequirements[plugin.id].orEmpty(),
+                        issues = uiState.issues[plugin.id].orEmpty(),
+                        onEvent = viewModel::onEvent,
+                    )
+                }
+            }
+        }
+    }
+}

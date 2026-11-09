@@ -25,9 +25,16 @@ data class StoreUiState(
     /** Einmalige Rückmeldung (fertiger Text) für die Snackbar. */
     val message: String? = null,
 ) {
-    /** Gewählte Kategorie, sonst die erste. */
-    val selectedCategory: StoreCategory?
-        get() = catalog?.categories?.let { cats -> cats.firstOrNull { it.id == selectedCategoryId } ?: cats.firstOrNull() }
+    /** Gewählter Filter: [FILTER_ALL] (Standard), [FILTER_INSTALLED] oder eine Kategorie-ID. */
+    val filter: String
+        get() = selectedCategoryId ?: FILTER_ALL
+
+    companion object {
+        /** Alle Einträge des Katalogs. */
+        const val FILTER_ALL = "__all__"
+        /** Installierte Plugins (Verwaltung: Aktivieren, Entfernen, Sideload). */
+        const val FILTER_INSTALLED = "__installed__"
+    }
 }
 
 /** Aktionen im Store. */
@@ -42,6 +49,8 @@ sealed interface StoreUiEvent {
     data class InstallServer(val item: StoreItem) : StoreUiEvent
     /** Eintrag entfernen (Plugin und – bei Sprachservern – das Server-Programm). */
     data class Uninstall(val item: StoreItem) : StoreUiEvent
+    /** Meldung (z. B. aus der Plugin-Verwaltung) anzeigen. */
+    data class ShowMessage(val text: String) : StoreUiEvent
     /** Meldung wurde angezeigt. */
     data object MessageShown : StoreUiEvent
 }

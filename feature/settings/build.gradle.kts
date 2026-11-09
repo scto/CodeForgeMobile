@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:datastore"))
     implementation(project(":libs:terminal-engine"))
+    implementation(project(":feature:plugins"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

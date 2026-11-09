@@ -23,9 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -121,20 +119,13 @@ private fun StoreContent(
     onEvent: (StoreUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val selected = uiState.selectedCategory
-    val selectedIndex = catalog.categories.indexOfFirst { it.id == selected?.id }.coerceAtLeast(0)
+    val filter = uiState.filter
     Column(modifier = modifier.fillMaxSize()) {
-        if (catalog.categories.isNotEmpty()) {
-            ScrollableTabRow(selectedTabIndex = selectedIndex, edgePadding = 8.dp) {
-                catalog.categories.forEachIndexed { index, cat ->
-                    Tab(
-                        selected = index == selectedIndex,
-                        onClick = { onEvent(StoreUiEvent.SelectCategory(cat.id)) },
-                        text = { Text(cat.title, maxLines = 1) },
-                    )
-                }
-            }
-        }
+        StoreFilterChips(
+            categories = catalog.categories,
+            selected = filter,
+            onSelect = { onEvent(StoreUiEvent.SelectCategory(it)) },
+        )
         val note = when {
             uiState.cachedAt != null -> stringRes(R.string.store_offline_cached, uiState.cachedAt)
             catalog.updated.isNotBlank() -> stringRes(R.string.store_updated, catalog.updated)
@@ -148,7 +139,11 @@ private fun StoreContent(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
         }
-        val entries = selected?.let { catalog.itemsOf(it.id) }.orEmpty()
+        val entries = when (filter) {
+            StoreUiState.FILTER_ALL -> catalog.items
+            StoreUiState.FILTER_INSTALLED -> emptyList()
+            else -> catalog.itemsOf(filter)
+        }
         var pendingTool by remember { androidx.compose.runtime.mutableStateOf<StoreItem?>(null) }
         pendingTool?.let { tool ->
             androidx.compose.material3.AlertDialog(
@@ -166,7 +161,9 @@ private fun StoreContent(
                 },
             )
         }
-        if (entries.isEmpty()) {
+        if (filter == StoreUiState.FILTER_INSTALLED) {
+            com.codeforge.feature.plugins.InstalledPluginsPanel(onMessage = { onEvent(StoreUiEvent.ShowMessage(it)) })
+        } else if (entries.isEmpty()) {
             Text(stringRes(R.string.store_empty_category), modifier = Modifier.padding(16.dp))
         } else {
             LazyColumn(
@@ -287,6 +284,34 @@ private fun StoreItemCard(
                     OutlinedButton(onClick = { runCatching { uriHandler.openUri(url) } }) { Text(stringRes(R.string.store_open_page)) }
                 }
             }
+        }
+    }
+}
+
+
+/** Filterleiste: Alle, Installiert und die Kategorien des Katalogs. */
+@Composable
+private fun StoreFilterChips(
+    categories: List<StoreCategory>,
+    selected: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val chips = listOf(
+        StoreCategory(StoreUiState.FILTER_ALL, stringRes(R.string.store_filter_all)),
+        StoreCategory(StoreUiState.FILTER_INSTALLED, stringRes(R.string.store_filter_installed)),
+    ) + categories
+    androidx.compose.foundation.lazy.LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(chips, key = { it.id }) { chip ->
+            androidx.compose.material3.FilterChip(
+                selected = chip.id == selected,
+                onClick = { onSelect(chip.id) },
+                label = { Text(chip.title, maxLines = 1) },
+            )
         }
     }
 }

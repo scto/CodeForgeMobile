@@ -39,6 +39,7 @@ import com.codeforge.feature.settings.AiSettingsRoute
 import com.codeforge.feature.settings.DebugSettingsRoute
 import com.codeforge.feature.settings.EditorSettingsRoute
 import com.codeforge.feature.settings.extensions.ExtensionsRoute
+import com.codeforge.feature.settings.store.StoreRoute
 import com.codeforge.feature.settings.GitSettingsRoute
 import com.codeforge.feature.settings.HelpRoute
 import com.codeforge.feature.settings.SettingsHubRoute
@@ -236,7 +237,7 @@ fun CodeForgeNavHost(
             )
         }
         composable(Routes.SETTINGS_STORE) {
-            ExtensionsHubRoute(initialTab = ExtensionsHubTab.STORE, onBack = { navigateBackOrStart() })
+            StoreRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_HELP) {
             HelpRoute(onBack = { navigateBackOrStart() })
