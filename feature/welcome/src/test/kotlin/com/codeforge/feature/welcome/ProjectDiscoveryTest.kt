@@ -38,4 +38,21 @@ class ProjectDiscoveryTest {
         assertEquals(listOf("B", "A"), merged.map { it.name })
         assertEquals(500L, merged.first { it.name == "A" }.lastOpenedEpochMillis)
     }
+
+    @Test fun `deleteProject loescht Unterordner im Stamm`() {
+        val proj = java.io.File(tmp.root, "App").apply { mkdirs() }
+        java.io.File(proj, "a/b").mkdirs(); java.io.File(proj, "a/b/f.txt").writeText("x")
+        assertTrue(ProjectDiscovery.deleteProject(tmp.root, proj))
+        assertTrue(!proj.exists())
+    }
+
+    @Test fun `deleteProject verweigert Stamm, Aussenstehende und Ausbrueche`() {
+        val root = java.io.File(tmp.root, "root").apply { mkdirs() }
+        val outside = java.io.File(tmp.root, "outside").apply { mkdirs() }
+        java.io.File(root, "x").mkdirs()
+        assertTrue(!ProjectDiscovery.deleteProject(root, root))
+        assertTrue(!ProjectDiscovery.deleteProject(root, outside))
+        assertTrue(!ProjectDiscovery.deleteProject(root, java.io.File(root, "x/../../outside")))
+        assertTrue(outside.exists() && root.exists())
+    }
 }

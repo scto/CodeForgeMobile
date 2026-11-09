@@ -2391,4 +2391,9 @@
     <string name="plugins_issue_host_too_old">Not loaded: requires CodeForge %1$s or newer (installed: %2$s).</string>
     <string name="plugins_issue_dependency_missing">Not loaded: required plugin \'%1$s\' is not installed.</string>
     <string name="plugins_issue_dependency_disabled">Not loaded: required plugin \'%1$s\' is disabled.</string>
+    <string name="welcome_projekt_loeschen">Delete project</string>
+    <string name="welcome_projekt_loeschen_titel">Delete \'%1$s\'?</string>
+    <string name="welcome_projekt_loeschen_text">The folder %1$s and all of its files will be permanently deleted. This cannot be undone.</string>
+    <string name="welcome_projekt_geloescht">\'%1$s\' deleted</string>
+    <string name="welcome_projekt_loeschen_fehlgeschlagen">The project could not be deleted</string>
 </resources>

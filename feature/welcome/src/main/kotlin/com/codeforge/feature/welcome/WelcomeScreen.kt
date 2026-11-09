@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -204,7 +205,8 @@ private fun WelcomeScreen(
                         },
                         onOpenProject = { onEvent(WelcomeUiEvent.RecentProjectOpened(it.id)) },
                         onOpenSettings = { onEvent(WelcomeUiEvent.RecentProjectSettingsClicked(it.id)) },
-                        onRemoveProject = { onEvent(WelcomeUiEvent.RecentProjectRemoved(it.id)) }
+                        onRemoveProject = { onEvent(WelcomeUiEvent.RecentProjectRemoved(it.id)) },
+                        onDeleteProject = { onEvent(WelcomeUiEvent.RecentProjectDeleteRequested(it.id)) }
                     )
                 }
             }
@@ -218,15 +220,38 @@ private fun WelcomeScreen(
                         project = selectedProject,
                         onOpen = { onEvent(WelcomeUiEvent.RecentProjectOpened(selectedProject.id)) },
                         onSettings = { onEvent(WelcomeUiEvent.RecentProjectSettingsClicked(selectedProject.id)) },
+                        canRemove = ProjectDiscovery.normalize(selectedProject.path) !in uiState.autoListedPaths,
                         onRemove = {
                             onEvent(WelcomeUiEvent.RecentProjectRemoved(selectedProject.id))
                             scope.launch { navigator.navigateBack() }
-                        }
+                        },
+                        onDelete = if (ProjectDiscovery.normalize(selectedProject.path) in uiState.autoListedPaths) {
+                            { onEvent(WelcomeUiEvent.RecentProjectDeleteRequested(selectedProject.id)) }
+                        } else null
                     )
                 }
             }
         }
     )
+
+    uiState.pendingDelete?.let { project ->
+        AlertDialog(
+            onDismissRequest = { onEvent(WelcomeUiEvent.DeleteProjectDismissed) },
+            title = { Text(stringRes(R.string.welcome_projekt_loeschen_titel, project.name)) },
+            text = { Text(stringRes(R.string.welcome_projekt_loeschen_text, project.path)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { onEvent(WelcomeUiEvent.DeleteProjectConfirmed) },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringRes(R.string.welcome_projekt_loeschen)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { onEvent(WelcomeUiEvent.DeleteProjectDismissed) }) {
+                    Text(stringRes(R.string.common_abbrechen))
+                }
+            }
+        )
+    }
 
     if (uiState.pendingCrashLog != null) {
         AlertDialog(
@@ -326,7 +351,8 @@ private fun WelcomeListContent(
     onProjectClick: (RecentProject) -> Unit,
     onOpenProject: (RecentProject) -> Unit,
     onOpenSettings: (RecentProject) -> Unit,
-    onRemoveProject: (RecentProject) -> Unit
+    onRemoveProject: (RecentProject) -> Unit,
+    onDeleteProject: (RecentProject) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 160.dp),
@@ -472,13 +498,16 @@ private fun WelcomeListContent(
             }
         } else {
             items(uiState.recentProjects, key = { it.id }, span = { GridItemSpan(maxLineSpan) }) { project ->
+                // Projekte im Projektstamm sind automatisch gelistet: nur löschbar; andere nur aus der Liste entfernbar.
+                val canRemoveFromList = ProjectDiscovery.normalize(project.path) !in uiState.autoListedPaths
                 RecentProjectCard(
                     project = project,
                     onClick = { onProjectClick(project) },
                     onOpen = { onOpenProject(project) },
                     onSettings = { onOpenSettings(project) },
                     onRemove = { onRemoveProject(project) },
-                    canRemove = ProjectDiscovery.normalize(project.path) !in uiState.autoListedPaths
+                    canRemove = canRemoveFromList,
+                    onDelete = if (!canRemoveFromList) ({ onDeleteProject(project) }) else null
                 )
             }
         }
@@ -492,7 +521,8 @@ private fun RecentProjectCard(
     onOpen: () -> Unit,
     onSettings: () -> Unit,
     onRemove: () -> Unit,
-    canRemove: Boolean = true
+    canRemove: Boolean = true,
+    onDelete: (() -> Unit)? = null
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val initials = getProjectInitials(project.name)
@@ -588,6 +618,15 @@ private fun RecentProjectCard(
                             onSettings()
                         }
                     )
+                    if (onDelete != null) {
+                        DropdownMenuItem(
+                            text = { Text(stringRes(R.string.welcome_projekt_loeschen)) },
+                            onClick = {
+                                menuExpanded = false
+                                onDelete()
+                            }
+                        )
+                    }
                     if (canRemove) {
                         DropdownMenuItem(
                             text = { Text(stringRes(R.string.welcome_aus_liste_entfernen)) },
@@ -608,7 +647,9 @@ private fun RecentProjectDetailPane(
     project: RecentProject,
     onOpen: () -> Unit,
     onSettings: () -> Unit,
-    onRemove: () -> Unit
+    canRemove: Boolean,
+    onRemove: () -> Unit,
+    onDelete: (() -> Unit)?
 ) {
     val relativeTime = formatRelativeTime(project.lastOpenedEpochMillis)
 
@@ -667,11 +708,22 @@ private fun RecentProjectDetailPane(
                 Text(stringRes(R.string.welcome_projekteinstellungen))
             }
             Spacer(modifier = Modifier.height(8.dp))
-            TextButton(
-                onClick = onRemove,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringRes(R.string.welcome_aus_liste_entfernen))
+            if (canRemove) {
+                TextButton(
+                    onClick = onRemove,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringRes(R.string.welcome_aus_liste_entfernen))
+                }
+            }
+            if (onDelete != null) {
+                TextButton(
+                    onClick = onDelete,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringRes(R.string.welcome_projekt_loeschen))
+                }
             }
         }
     }

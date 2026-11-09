@@ -76,6 +76,13 @@ fun AppBuildGradle(
         else -> "testOptions { unitTests.includeAndroidResources = true }"
     }
 
+    // Die Vorschau-Aufgaben werden für jede Variante (auch release) angelegt und verlangen deren Unit-Tests;
+    // ohne diese Zeile bricht schon `:tasks` mit „Unit tests are disabled for this variant“ ab.
+    val componentsBlock = when {
+        !enableCompose -> ""
+        else -> "androidComponents { beforeVariants { builder -> builder.enableUnitTest = true } }"
+    }
+
     val ndkVersionStr = if (enableNdkBuild) {
         if (useKts) "ndkVersion = \"29.0.14206865\"" else "ndkVersion '29.0.14206865'"
     } else {
@@ -103,7 +110,8 @@ fun AppBuildGradle(
             buildFeatures,
             testOptions,
             ndkBlock,
-            depsBlock
+            depsBlock,
+            componentsBlock
         )
     } else {
         AppBuildGradleGroovy(
@@ -114,7 +122,8 @@ fun AppBuildGradle(
             buildFeatures,
             testOptions,
             ndkBlock,
-            depsBlock
+            depsBlock,
+            componentsBlock
         )
     }
 }
@@ -128,7 +137,8 @@ fun AppBuildGradleKotlin(
     buildFeatures: String,
     testOptions: String,
     ndkBlock: String,
-    depsBlock: String
+    depsBlock: String,
+    componentsBlock: String = ""
 ): String = """
     plugins {
         $plugins
@@ -159,6 +169,8 @@ fun AppBuildGradleKotlin(
         $ndkBlock
     }
 
+    $componentsBlock
+
     dependencies {
         $depsBlock
     }
@@ -173,7 +185,8 @@ fun AppBuildGradleGroovy(
     buildFeatures: String,
     testOptions: String,
     ndkBlock: String,
-    depsBlock: String
+    depsBlock: String,
+    componentsBlock: String = ""
 ): String = """
     plugins {
         $plugins
@@ -203,6 +216,8 @@ fun AppBuildGradleGroovy(
 
         $ndkBlock
     }
+
+    $componentsBlock
 
     dependencies {
         $depsBlock

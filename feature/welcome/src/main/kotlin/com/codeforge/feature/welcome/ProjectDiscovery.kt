@@ -48,6 +48,20 @@ internal object ProjectDiscovery {
     fun autoListedPaths(discovered: List<RecentProject>): Set<String> =
         discovered.mapTo(HashSet()) { normalize(it.path) }
 
+    /** `true`, wenn [project] ein echter Unterordner von [root] ist (nie der Stamm selbst, nie außerhalb). */
+    fun isInsideRoot(root: File, project: File): Boolean {
+        val r = runCatching { root.canonicalFile }.getOrNull() ?: return false
+        val p = runCatching { project.canonicalFile }.getOrNull() ?: return false
+        return p != r && p.path.startsWith(r.path + File.separator)
+    }
+
+    /** Löscht den Projektordner samt Inhalt, aber nur innerhalb von [root]. Liefert `true`, wenn er danach nicht mehr existiert. */
+    fun deleteProject(root: File, project: File): Boolean {
+        if (!isInsideRoot(root, project)) return false
+        project.deleteRecursively()
+        return !project.exists()
+    }
+
     /** Normalisiert den Pfad für den Vergleich. */
     fun normalize(path: String): String =
         runCatching { File(path).canonicalPath }.getOrDefault(path)

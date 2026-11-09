@@ -339,7 +339,19 @@ fun CodeForgeNavHost(
             val rootPath = backStackEntry.arguments?.getString("rootPath").orEmpty()
             ProjectWorkspaceRoute(
                 rootPath = rootPath,
-                onNavigate = { route -> navController.navigate(route) },
+                onNavigate = { route ->
+                    if (route == Routes.WELCOME) {
+                        // Projekt schließen = zur vorhandenen Startseite zurückkehren, nicht eine zweite darüberlegen
+                        // (sonst führt Zurück wieder ins Projekt).
+                        if (!navController.popBackStack(Routes.WELCOME, inclusive = false)) {
+                            navController.navigate(Routes.WELCOME) {
+                                popUpTo(navController.graph.id) { inclusive = true }
+                            }
+                        }
+                    } else {
+                        navController.navigate(route)
+                    }
+                },
                 onOpenGitSettings = { navController.navigate(Routes.SETTINGS_GIT) }
             )
         }

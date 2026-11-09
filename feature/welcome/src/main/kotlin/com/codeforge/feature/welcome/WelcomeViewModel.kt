@@ -114,6 +114,10 @@ class WelcomeViewModel @Inject constructor(
                 _uiState.update { it.copy(selectedProjectId = event.projectId) }
             is WelcomeUiEvent.RecentProjectOpened -> openRecentProject(event.projectId)
             is WelcomeUiEvent.RecentProjectRemoved -> removeRecentProject(event.projectId)
+            is WelcomeUiEvent.RecentProjectDeleteRequested ->
+                _uiState.update { s -> s.copy(pendingDelete = s.recentProjects.find { it.id == event.projectId }) }
+            WelcomeUiEvent.DeleteProjectDismissed -> _uiState.update { it.copy(pendingDelete = null) }
+            WelcomeUiEvent.DeleteProjectConfirmed -> deletePendingProject()
             is WelcomeUiEvent.RecentProjectSettingsClicked -> openProjectSettings(event.projectId)
 
             // Task 55 Crash-Log Events
@@ -203,6 +207,25 @@ class WelcomeViewModel @Inject constructor(
         // Projekte im Projektstamm werden immer automatisch gelistet – Entfernen wäre wirkungslos.
         if (project != null && ProjectDiscovery.normalize(project.path) in _uiState.value.autoListedPaths) return@launch
         recentProjectsRepository.remove(projectId)
+    }
+
+    /** Löscht den Ordner des bestätigten Projekts (nur im Projektstamm) und entfernt es aus der Liste. */
+    private fun deletePendingProject() {
+        val project = _uiState.value.pendingDelete ?: return
+        _uiState.update { it.copy(pendingDelete = null) }
+        viewModelScope.launch {
+            val root = projectsDirectoryProvider?.getProjectsRoot()
+            val deleted = root != null && withContext(Dispatchers.IO) {
+                ProjectDiscovery.deleteProject(root, File(project.path))
+            }
+            if (deleted) {
+                recentProjectsRepository.remove(project.id)
+                refreshDiscoveredProjects()
+                _effect.emit(WelcomeUiEffect.ShowSnackbar(Res.string(R.string.welcome_projekt_geloescht, project.name)))
+            } else {
+                _effect.emit(WelcomeUiEffect.ShowSnackbar(Res.string(R.string.welcome_projekt_loeschen_fehlgeschlagen)))
+            }
+        }
     }
 
     private fun emit(effect: WelcomeUiEffect) = viewModelScope.launch {

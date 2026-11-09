@@ -13,6 +13,8 @@ data class WelcomeUiState(
     /** Normalisierte Pfade der automatisch aus dem Projektstamm gelisteten Projekte (nicht entfernbar). */
     val autoListedPaths: Set<String> = emptySet(),
     val isLoading: Boolean = true,
+    /** Projekt, für das gerade die Löschbestätigung angezeigt wird. */
+    val pendingDelete: RecentProject? = null,
 
     // Task 55: Crash-Bericht Dialog
     val pendingCrashLog: File? = null,
@@ -44,6 +46,12 @@ sealed interface WelcomeUiEvent {
     data class RecentProjectOpened(val projectId: String) : WelcomeUiEvent
     /** Projekt aus der Liste entfernt. */
     data class RecentProjectRemoved(val projectId: String) : WelcomeUiEvent
+    /** „Projekt löschen“ gewählt: Bestätigung anzeigen. */
+    data class RecentProjectDeleteRequested(val projectId: String) : WelcomeUiEvent
+    /** Löschen bestätigt: Projektordner wird gelöscht. */
+    data object DeleteProjectConfirmed : WelcomeUiEvent
+    /** Löschen abgebrochen. */
+    data object DeleteProjectDismissed : WelcomeUiEvent
     /** Projekteinstellungen öffnen. */
     data class RecentProjectSettingsClicked(val projectId: String) : WelcomeUiEvent
 

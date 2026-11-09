@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+- Startseite: Projekte im Projektstamm lassen sich wieder entfernen – neu „Projekt löschen“ mit Bestätigungsdialog (löscht den Ordner, nur innerhalb des Projektstamms); „Aus Liste entfernen“ bleibt für Projekte außerhalb.
+- „Projekt schließen“/Zurück: Die Startseite wird nicht mehr zusätzlich über das Projekt gelegt; Zurück führt nicht mehr ins Projekt zurück.
+- Compose-Vorlage: Unit-Tests werden für alle Varianten aktiviert, damit die Compose-Vorschau-Aufgaben auch für release angelegt werden können (`:tasks` brach ab).
+
 ### Hinzugefügt (Plugins)
 - Manifest: `minHostVersion` und `dependsOn`. Zu neue Plugins werden bei der Installation abgelehnt (installierte Version bleibt, Rollback bei Fehlern); inkompatible oder von fehlenden/deaktivierten Plugins abhängige Plugins werden nicht geladen und im Plugins-Bildschirm mit Grund angezeigt.
 - Erweiterungspunkte für den KI-Agenten: `contributes.agentTools` (Plugin-Werkzeuge) und `contributes.mcpServers` (MCP-Server, bis zur Freigabe unvertraut); Berechtigungen `agent` + `shell`, nur per Sideload.

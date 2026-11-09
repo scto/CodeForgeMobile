@@ -2391,4 +2391,9 @@
     <string name="plugins_issue_host_too_old">Nicht geladen: benötigt CodeForge %1$s oder neuer (installiert: %2$s).</string>
     <string name="plugins_issue_dependency_missing">Nicht geladen: benötigtes Plugin \'%1$s\' ist nicht installiert.</string>
     <string name="plugins_issue_dependency_disabled">Nicht geladen: benötigtes Plugin \'%1$s\' ist deaktiviert.</string>
+    <string name="welcome_projekt_loeschen">Projekt löschen</string>
+    <string name="welcome_projekt_loeschen_titel">\'%1$s\' löschen?</string>
+    <string name="welcome_projekt_loeschen_text">Der Ordner %1$s und alle Dateien darin werden endgültig gelöscht. Das lässt sich nicht rückgängig machen.</string>
+    <string name="welcome_projekt_geloescht">\'%1$s\' gelöscht</string>
+    <string name="welcome_projekt_loeschen_fehlgeschlagen">Das Projekt konnte nicht gelöscht werden</string>
 </resources>
