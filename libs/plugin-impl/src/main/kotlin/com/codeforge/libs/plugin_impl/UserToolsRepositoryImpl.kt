@@ -47,9 +47,12 @@ class UserToolsRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun setFormatterEnabled(pluginId: String, formatterId: String, enabled: Boolean) = mutate {
+    override suspend fun setFormatterEnabled(pluginId: String, formatterId: String, enabled: Boolean, label: String) = mutate {
         val key = UserTools.formatterKey(pluginId, formatterId)
-        it.copy(disabledFormatters = if (enabled) it.disabledFormatters - key else it.disabledFormatters + key)
+        it.copy(
+            disabledFormatters = if (enabled) it.disabledFormatters - key else it.disabledFormatters + key,
+            disabledLabels = if (enabled) it.disabledLabels - key else it.disabledLabels + (key to label),
+        )
     }
 
     private suspend fun mutate(change: (UserTools) -> UserTools) = withContext(Dispatchers.IO) {
@@ -72,6 +75,7 @@ class UserToolsRepositoryImpl @Inject constructor(
                 )
             },
             disabledFormatters = o.optJSONArray("disabled")?.strings().orEmpty().toSet(),
+            disabledLabels = o.optJSONObject("disabledLabels")?.let { l -> l.keys().asSequence().associateWith { l.getString(it) } }.orEmpty(),
         )
     }.getOrDefault(UserTools())
 
@@ -84,6 +88,7 @@ class UserToolsRepositoryImpl @Inject constructor(
                 .put("fileNames", JSONArray(it.fileNames)).put("command", JSONArray(it.command)).put("timeout", it.timeoutSeconds)
         }))
         .put("disabled", JSONArray(t.disabledFormatters.toList()))
+        .put("disabledLabels", JSONObject(t.disabledLabels as Map<*, *>))
 
     private fun JSONArray?.objects(): List<JSONObject> = if (this == null) emptyList() else (0 until length()).map { getJSONObject(it) }
     private fun JSONArray.strings(): List<String> = (0 until length()).map { getString(it) }

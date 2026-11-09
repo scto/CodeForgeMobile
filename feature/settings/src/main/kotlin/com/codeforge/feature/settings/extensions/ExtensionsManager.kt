@@ -109,9 +109,24 @@ class ExtensionsManager internal constructor(
     fun checkMissingRequirements(pkg: LspExtensionPackage): List<String> {
         val missing = mutableListOf<String>()
         for (req in pkg.requires) {
-            if (LspDependencies.checkBinaries(req).none { hasBinary(it) }) missing.add(req)
+            if (LspDependencies.checkBinaries(req).none { hasBinary(it) } || (isJavaRequirement(req) && !hasSupportedJdk())) {
+                missing.add(req)
+            }
         }
         return missing
+    }
+
+    private fun isJavaRequirement(req: String): Boolean = req == "java" || req.startsWith("openjdk")
+
+    /**
+     * Der eingebettete Compiler des Kotlin-Sprachservers kann Java 22+ nicht lesen. Existiert `lib/jvm`, muss dort ein
+     * JDK 17–21 liegen; fehlt der Ordner (andere Layouts, Tests), zählt wie bisher jedes `java`.
+     */
+    private fun hasSupportedJdk(): Boolean {
+        val jvmDir = File(termuxBinDir.parentFile, "lib/jvm")
+        val dirs = jvmDir.listFiles { f -> f.isDirectory } ?: return true
+        val versions = dirs.mapNotNull { Regex("(\\d+)").find(it.name)?.value?.toIntOrNull() }
+        return versions.isEmpty() || versions.any { it in 17..21 }
     }
 
     /**

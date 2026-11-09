@@ -14,6 +14,8 @@ data class UserTools(
     val lspServers: List<LspServerContribution> = emptyList(),
     val formatters: List<FormatterContribution> = emptyList(),
     val disabledFormatters: Set<String> = emptySet(),
+    /** Anzeigenamen ausgeschalteter Formatierer (Schlüssel wie in [disabledFormatters]), damit sie lesbar bleiben. */
+    val disabledLabels: Map<String, String> = emptyMap(),
 ) {
     companion object {
         /** Pseudo-Plugin-ID der Nutzer-Werkzeuge. */
@@ -42,7 +44,7 @@ interface UserToolsRepository {
     suspend fun removeFormatter(id: String)
 
     /** Schaltet einen Formatierer (Plugin oder Nutzer) ein oder aus. */
-    suspend fun setFormatterEnabled(pluginId: String, formatterId: String, enabled: Boolean)
+    suspend fun setFormatterEnabled(pluginId: String, formatterId: String, enabled: Boolean, label: String = formatterId)
 }
 
 /** Fügt Nutzer-Werkzeuge hinzu und entfernt ausgeschaltete Formatierer; Plugin-Beiträge gewinnen bei gleicher ID. */

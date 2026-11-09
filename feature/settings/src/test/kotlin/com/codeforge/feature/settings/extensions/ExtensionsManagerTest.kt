@@ -431,3 +431,33 @@ class ExtensionsManagerTest {
         return gzippedOut.toByteArray()
     }
 }
+
+class ExtensionsManagerJdkTest {
+    @get:org.junit.Rule
+    val tempFolder = org.junit.rules.TemporaryFolder()
+
+    private fun manager(jvmDirs: List<String>): ExtensionsManager {
+        val prefix = tempFolder.newFolder("prefix")
+        val bin = File(prefix, "bin").apply { mkdirs() }
+        File(bin, "java").apply { writeText("#!/bin/sh"); setExecutable(true) }
+        jvmDirs.forEach { File(prefix, "lib/jvm/$it").mkdirs() }
+        return ExtensionsManager(
+            baseDir = tempFolder.newFolder("ext"),
+            downloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) },
+            customTermuxBinDir = bin,
+            systemPath = { null },
+        )
+    }
+
+    @Test
+    fun `nur JDK 25 gilt fuer den Kotlin-Sprachserver als fehlend`() {
+        val missing = manager(listOf("java-25-openjdk")).checkMissingRequirements(LspExtensionCatalog.kotlinLanguageServer)
+        assertTrue(missing.contains("openjdk-17"))
+    }
+
+    @Test
+    fun `JDK 21 genuegt`() {
+        val missing = manager(listOf("java-25-openjdk", "java-21-openjdk")).checkMissingRequirements(LspExtensionCatalog.kotlinLanguageServer)
+        assertFalse(missing.contains("openjdk-17"))
+    }
+}

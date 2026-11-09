@@ -46,7 +46,7 @@ sealed interface UserToolsEvent {
     /** Selbst angelegten Formatierer entfernen. */
     data class RemoveFormatter(val id: String) : UserToolsEvent
     /** Formatierer ein-/ausschalten. */
-    data class SetFormatterEnabled(val pluginId: String, val id: String, val enabled: Boolean) : UserToolsEvent
+    data class SetFormatterEnabled(val pluginId: String, val id: String, val enabled: Boolean, val label: String = id) : UserToolsEvent
 }
 
 /** ViewModel für externe Sprachserver und Formatierer. */
@@ -69,7 +69,7 @@ class UserToolsViewModel @Inject constructor(
         val off = disabledPlugin.map { key ->
             val pid = key.substringBefore(':')
             val fid = key.substringAfter(':')
-            FormatterRow(pid, FormatterContribution(fid, fid, emptyList(), emptyList(), listOf(fid)), enabled = false)
+            FormatterRow(pid, FormatterContribution(fid, user.disabledLabels[key] ?: fid, emptyList(), emptyList(), listOf(fid)), enabled = false)
         }
         UserToolsUiState(lspServers = user.lspServers, formatters = plugin + own + off)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserToolsUiState())
@@ -82,7 +82,7 @@ class UserToolsViewModel @Inject constructor(
                 is UserToolsEvent.RemoveLsp -> repository.removeLspServer(event.id)
                 is UserToolsEvent.SaveFormatter -> repository.saveFormatter(event.formatter)
                 is UserToolsEvent.RemoveFormatter -> repository.removeFormatter(event.id)
-                is UserToolsEvent.SetFormatterEnabled -> repository.setFormatterEnabled(event.pluginId, event.id, event.enabled)
+                is UserToolsEvent.SetFormatterEnabled -> repository.setFormatterEnabled(event.pluginId, event.id, event.enabled, event.label)
             }
         }
     }

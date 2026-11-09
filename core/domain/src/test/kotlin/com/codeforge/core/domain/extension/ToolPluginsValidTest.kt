@@ -17,7 +17,7 @@ class ToolPluginsValidTest {
 
     @Test
     fun `alle Tool-Plugins sind gueltig, deklarativ und haben Publisher codeforge`() {
-        assertEquals(28, manifests.size)
+        assertEquals(29, manifests.size)
         manifests.forEach { (dirName, m) ->
             assertEquals(dirName, m.id)
             assertEquals("codeforge", m.publisher)
@@ -50,7 +50,7 @@ class ToolPluginsValidTest {
     @Test
     fun `Werkzeug-Plugins haben shell-Berechtigung, Skript und python als Voraussetzung`() {
         val tools = manifests.values.filter { it.id.endsWith(".tool") }
-        assertEquals(8, tools.size)
+        assertEquals(9, tools.size)
         tools.forEach { m ->
             assertTrue(m.id, PluginPermissions.SHELL in m.permissions)
             val dir = File(src, m.id)

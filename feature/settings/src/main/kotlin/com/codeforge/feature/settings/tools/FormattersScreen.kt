@@ -77,7 +77,7 @@ fun FormattersScreen(
                                 Text(listOf(origin, exts).filter { it.isNotBlank() }.joinToString(" · "),
                                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            Switch(checked = row.enabled, onCheckedChange = { onEvent(UserToolsEvent.SetFormatterEnabled(row.pluginId, row.formatter.id, it)) })
+                            Switch(checked = row.enabled, onCheckedChange = { onEvent(UserToolsEvent.SetFormatterEnabled(row.pluginId, row.formatter.id, it, row.formatter.label)) })
                         }
                         if (row.isUser) {
                             Text(row.formatter.command.joinToString(" "), style = MaterialTheme.typography.labelSmall,

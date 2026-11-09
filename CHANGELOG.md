@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+- Kotlin-Sprachserver: Die Java-Voraussetzung gilt nur als erfüllt, wenn unter `lib/jvm` ein JDK 17–21 liegt (der eingebettete Compiler kann Java 22+ nicht lesen); mit nur JDK 25 wird `openjdk-17` nachinstalliert, `findJavaHome` wählt dann die passende Version.
+- „Formatierer verwalten“: ausgeschaltete Plugin-Formatierer behalten ihren Namen.
+- `ToolPluginsValidTest` kennt das README-Werkzeug (29 Plugins, 9 Werkzeuge).
+
 ### Geändert (Compose-Preview, Tests)
 - Compose-Preview: Nachbardateien werden einmal vorkompiliert und gecached (neueste 6 Stände); bei Änderungen an der Zieldatei wird nur diese kompiliert. Scheitert das (z. B. Zyklus), gilt der bisherige Gesamtlauf; Fehlschläge werden nicht erneut versucht. Logcat (`CFPreviewPerf`) zeigt „Nachbarn vorkompiliert“ und einen Hinweis, wenn der Daemon nicht verfügbar ist.
 - `ExtensionsManagerTest`: PATH des Rechners ist injizierbar (`systemPath`), der Test ist nicht mehr von installiertem rust-analyzer abhängig.
