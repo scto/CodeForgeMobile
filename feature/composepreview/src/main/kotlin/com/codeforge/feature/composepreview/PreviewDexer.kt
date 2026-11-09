@@ -25,9 +25,23 @@ internal data class DexResult(val success: Boolean, val dexFile: File?, val erro
 internal class PreviewDexer {
 
     /** Wandelt Klassen mit D8 in DEX. */
-    fun dex(classFiles: List<File>, outputDir: File, d8BinaryPath: String): DexResult {
+    suspend fun dex(classFiles: List<File>, outputDir: File, d8BinaryPath: String): DexResult {
         outputDir.mkdirs()
+        dexWarm(classFiles, outputDir, d8BinaryPath)?.let { return it }
+        return dexProcess(classFiles, outputDir, d8BinaryPath)
+    }
 
+    /** Schneller Weg: D8 im warmen Daemon; `null` bei jedem Problem (dann Einzelprozess). */
+    private suspend fun dexWarm(classFiles: List<File>, outputDir: File, d8BinaryPath: String): DexResult? {
+        val d8Jar = File(File(d8BinaryPath).parentFile, "lib/d8.jar").takeIf { it.isFile } ?: return null
+        val kotlinLib = File(TermuxEnvironment.prefix, "opt/kotlin/lib").takeIf { File(it, "kotlin-compiler.jar").isFile } ?: return null
+        val args = listOf("--min-api", "26", "--debug", "--output", outputDir.absolutePath) + classFiles.map { it.absolutePath }
+        val run = KotlincDaemon.shared.dex(kotlinLib, d8Jar, args, 120_000L) ?: return null
+        val dexFile = File(outputDir, "classes.dex").takeIf { it.isFile }
+        return if (run.exitCode == 0 && dexFile != null) DexResult(true, dexFile, run.output) else null
+    }
+
+    private fun dexProcess(classFiles: List<File>, outputDir: File, d8BinaryPath: String): DexResult {
         return try {
             val command = buildList {
                 add(d8BinaryPath)

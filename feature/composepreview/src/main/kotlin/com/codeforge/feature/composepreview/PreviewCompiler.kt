@@ -13,6 +13,9 @@ internal data class CompileResult(val success: Boolean, val outputDir: File, val
  * Schnittstelle für den On-Device-Kotlin-Compiler der Compose-Vorschau.
  */
 internal interface PreviewCompiling {
+    /** Optional: Compiler im Voraus aufwärmen (Standard: nichts). */
+    suspend fun prewarm() {}
+
     /** Kompiliert die Quelldatei. */
     suspend fun compile(
         sourceFiles: List<File>,

@@ -56,4 +56,7 @@ interface ComposePreviewRenderer {
         /** `true` = Zwischenspeicher umgehen (Neu rendern). */
         forceRefresh: Boolean = false
     ): Result<PreviewRenderResult>
+
+    /** Wärmt den Compiler im Voraus auf (Standard: nichts). */
+    suspend fun prewarm() {}
 }

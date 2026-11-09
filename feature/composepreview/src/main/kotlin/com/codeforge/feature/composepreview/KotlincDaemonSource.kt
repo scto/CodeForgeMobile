@@ -20,6 +20,30 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class KotlincDaemon {
+    /** D8 als Bibliothek (kein System.exit): 0 = ok, 1 = Fehler (Meldung in ps). */
+    static int runD8(String jar, String[] args, PrintStream ps, Map<String, URLClassLoader> loaders) {
+        try {
+            URLClassLoader cl = loaders.get(jar);
+            if (cl == null) {
+                cl = new URLClassLoader(new URL[] { new File(jar).toURI().toURL() }, ClassLoader.getPlatformClassLoader());
+                loaders.put(jar, cl);
+            }
+            Class<?> originC = Class.forName("com.android.tools.r8.origin.Origin", true, cl);
+            Object unknown = originC.getMethod("unknown").invoke(null);
+            Class<?> cmdC = Class.forName("com.android.tools.r8.D8Command", true, cl);
+            Object builder = cmdC.getMethod("parse", String[].class, originC).invoke(null, args, unknown);
+            Method build = builder.getClass().getMethod("build");
+            build.setAccessible(true);
+            Object command = build.invoke(builder);
+            Class.forName("com.android.tools.r8.D8", true, cl).getMethod("run", cmdC).invoke(null, command);
+            return 0;
+        } catch (Throwable t) {
+            Throwable c = t.getCause() != null ? t.getCause() : t;
+            ps.println(c);
+            return 1;
+        }
+    }
+
     public static void main(String[] a) throws Exception {
         File lib = new File(a[0]);
         File[] jars = lib.listFiles((d, n) -> n.endsWith(".jar") && !n.startsWith("compose-compiler-plugin"));
@@ -36,6 +60,7 @@ public class KotlincDaemon {
         PrintStream proto = new PrintStream(new FileOutputStream(FileDescriptor.out), true, "UTF-8");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
         proto.println("\u0002READY");
+        Map<String, URLClassLoader> d8Loaders = new HashMap<>();
         String line;
         while ((line = in.readLine()) != null) {
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
@@ -44,10 +69,15 @@ public class KotlincDaemon {
             System.setOut(ps); System.setErr(ps);
             int code;
             try {
-                Object compiler = k.getDeclaredConstructor().newInstance();
-                Object r = exec.invoke(compiler, ps, line.split("\u0001", -1));
-                try { code = (Integer) r.getClass().getMethod("getCode").invoke(r); }
-                catch (Exception e) { code = ((Enum<?>) r).ordinal(); }
+                String[] parts = line.split("\u0001", -1);
+                if (parts.length > 2 && parts[0].equals("D8")) {
+                    code = runD8(parts[1], Arrays.copyOfRange(parts, 2, parts.length), ps, d8Loaders);
+                } else {
+                    Object compiler = k.getDeclaredConstructor().newInstance();
+                    Object r = exec.invoke(compiler, ps, parts);
+                    try { code = (Integer) r.getClass().getMethod("getCode").invoke(r); }
+                    catch (Exception e) { code = ((Enum<?>) r).ordinal(); }
+                }
             } catch (Throwable t) {
                 Throwable c = t.getCause() != null ? t.getCause() : t;
                 c.printStackTrace(ps);

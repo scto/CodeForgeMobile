@@ -37,6 +37,15 @@ internal class KotlincDaemon(
     private var lastUse = 0L
     private var idleWatcher: Thread? = null
 
+    /** Startet den Daemon im Voraus (ohne Anfrage); `false`, wenn nicht möglich. */
+    suspend fun prewarm(kotlincLibDir: File): Boolean = mutex.withLock {
+        runCatching { ensureStarted(kotlincLibDir) != null }.getOrDefault(false)
+    }
+
+    /** Wandelt Klassen mit D8 (`d8.jar` der Build-Tools) im warmen Prozess in DEX um. */
+    suspend fun dex(kotlincLibDir: File, d8Jar: File, args: List<String>, timeoutMillis: Long): DaemonRun? =
+        run(kotlincLibDir, listOf("D8", d8Jar.absolutePath) + args, timeoutMillis)
+
     /** Führt `kotlinc`-Argumente (ohne Binärpfad) aus, oder liefert `null`, wenn der Daemon nicht nutzbar ist. */
     suspend fun run(kotlincLibDir: File, args: List<String>, timeoutMillis: Long): DaemonRun? = mutex.withLock {
         try {
@@ -126,8 +135,10 @@ internal class KotlincDaemon(
         return home?.let { File(it, "bin/java") }?.takeIf { it.canExecute() }?.absolutePath
     }
 
-    private companion object {
-        const val READY_MARK = "\u0002READY"
-        const val EXIT_MARK = "\u0002EXIT:"
+    companion object {
+        /** Gemeinsame Instanz für Compiler und Dexer (ein warmer Prozess). */
+        val shared = KotlincDaemon()
+        private const val READY_MARK = "\u0002READY"
+        private const val EXIT_MARK = "\u0002EXIT:"
     }
 }

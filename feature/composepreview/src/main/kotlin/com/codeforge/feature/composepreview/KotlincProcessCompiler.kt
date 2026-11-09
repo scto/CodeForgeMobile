@@ -22,10 +22,16 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
     var timeoutMillis: Long = 120_000L
     /** Warmen Compiler-Daemon nutzen (Fallback auf Einzelprozess bei jedem Problem). */
     var useDaemon: Boolean = true
-    private val daemon = KotlincDaemon()
+    private val daemon = KotlincDaemon.shared
 
     /** Maximaler Heap des Prozesses. */
     var maxHeapMemory: String = "768m"
+
+    override suspend fun prewarm() {
+        if (!useDaemon) return
+        val libDir = File(resolveKotlincBinary()?.parentFile?.parentFile, "lib")
+        if (File(libDir, "kotlin-compiler.jar").isFile) daemon.prewarm(libDir)
+    }
 
     override suspend fun compile(
         sourceFiles: List<File>,

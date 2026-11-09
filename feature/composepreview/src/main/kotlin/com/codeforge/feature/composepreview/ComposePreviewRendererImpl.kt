@@ -46,6 +46,10 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ClassLoader>?): Boolean = size > 4
     }
 
+    override suspend fun prewarm() {
+        runCatching { compiler.prewarm() }
+    }
+
     override suspend fun render(
         filePath: String,
         sourceCode: String,
@@ -263,9 +267,21 @@ class ComposePreviewRendererImpl @Inject internal constructor(
             )
         }
 
-        val classFiles = (classesDir.walkTopDown() + (siblingClassesDir?.walkTopDown() ?: emptySequence()))
-            .filter { it.extension == "class" }.toList()
-        if (classFiles.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
+        val targetClasses = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
+        // Nachbarn: einmal dexen und als fertige DEX-Datei einmischen (D8 mischt sie nur noch); sonst .class-Dateien.
+        val siblingInputs: List<File> = siblingClassesDir?.let { dir ->
+            val dexDir = File(dir, "sibling-dex")
+            val cachedDex = File(dexDir, "classes.dex")
+            if (!cachedDex.isFile) {
+                val siblingClasses = dir.walkTopDown().filter { it.extension == "class" }.toList()
+                dexDir.deleteRecursively()
+                val r = dexer.dex(siblingClasses, dexDir, d8Path)
+                if (!r.success) dexDir.deleteRecursively()
+            }
+            if (cachedDex.isFile) listOf(cachedDex) else dir.walkTopDown().filter { it.extension == "class" }.toList()
+        }.orEmpty()
+        val classFiles = targetClasses + siblingInputs
+        if (targetClasses.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
 
         val tDex0 = android.os.SystemClock.elapsedRealtime()
         val dexOutputDir = File(workDir, "dex")

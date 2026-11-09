@@ -20,7 +20,15 @@ class LspServerResolverImpl @Inject constructor(
         val pkg = findPackageForLanguage(languageId)
         if (pkg == null || !extensionsManager.isInstalled(pkg)) return resolveContributed(languageId)
 
-        val env = TermuxEnvironment.environment()
+        val env = TermuxEnvironment.environment().let { base ->
+            // Kotlin-LS: ein Server-Prozess im Hintergrund – SerialGC (keine GC-Threads) und kein Perf-Data-Mapping
+            // sparen RAM/Startzeit auf dem Telefon. Eigene Werte des Nutzers bleiben erhalten.
+            if (pkg.id == "kotlin-language-server") {
+                base + ("KOTLIN_LANGUAGE_SERVER_OPTS" to listOfNotNull(
+                    base["KOTLIN_LANGUAGE_SERVER_OPTS"], "-XX:+UseSerialGC", "-XX:-UsePerfData"
+                ).joinToString(" "))
+            } else base
+        }
         val extensionDir = extensionsManager.getExtensionDirectory(pkg)
         val termuxBin = File(TermuxEnvironment.prefix, "bin")
 

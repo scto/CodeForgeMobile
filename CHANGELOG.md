@@ -11,6 +11,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Compose-Preview, LSP: weitere Tempo-Schritte)
+- `d8` läuft im selben warmen Daemon wie `kotlinc` (`D8Command` aus `build-tools/lib/d8.jar`, ohne `System.exit`). Sandbox-Test: erster Lauf 0,9 s, Folgeläufe 0,02 s; bei jedem Fehler Rückfall auf den `d8`-Prozess.
+- Die DEX-Datei der vorkompilierten Nachbarn wird einmal erzeugt, gecached und beim Dexen der Zieldatei nur noch eingemischt.
+- Vorwärmen: Der Compiler-Daemon startet, sobald eine Datei mit Composables aktiv wird (`ComposePreviewRenderer.prewarm()`).
+- Kotlin-LS startet mit `-XX:+UseSerialGC -XX:-UsePerfData` (`KOTLIN_LANGUAGE_SERVER_OPTS`, vorhandene Werte bleiben).
+
 ### Behoben
 - Kotlin-Sprachserver: Die Java-Voraussetzung gilt nur als erfüllt, wenn unter `lib/jvm` ein JDK 17–21 liegt (der eingebettete Compiler kann Java 22+ nicht lesen); mit nur JDK 25 wird `openjdk-17` nachinstalliert, `findJavaHome` wählt dann die passende Version.
 - „Formatierer verwalten“: ausgeschaltete Plugin-Formatierer behalten ihren Namen.

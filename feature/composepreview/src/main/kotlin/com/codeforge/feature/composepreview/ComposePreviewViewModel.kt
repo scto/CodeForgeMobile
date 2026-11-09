@@ -71,6 +71,9 @@ class ComposePreviewViewModel @Inject constructor(
             return
         }
 
+        // Compiler schon während der Vorbereitung (SDK-Suche, Quellauflösung) hochfahren.
+        viewModelScope.launch { composePreviewRenderer.prewarm() }
+
         val candidates = composeSourceAnalyzer.findComposables(file.content)
         val selected = candidates.firstOrNull { it.hasPreviewAnnotation }?.functionName
             ?: candidates.firstOrNull { !it.hasParameters }?.functionName
