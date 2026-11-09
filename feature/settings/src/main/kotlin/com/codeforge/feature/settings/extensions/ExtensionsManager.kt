@@ -20,7 +20,9 @@ import javax.inject.Singleton
 class ExtensionsManager internal constructor(
     private val baseDir: File,
     private val downloader: FileDownloader,
-    private val customTermuxBinDir: File? = null
+    private val customTermuxBinDir: File? = null,
+    /** PATH des Prozesses (Tests ersetzen ihn, damit installierte Werkzeuge des Entwicklungsrechners nicht erkannt werden). */
+    private val systemPath: () -> String? = { System.getenv("PATH") }
 ) {
 
     @Inject
@@ -324,7 +326,7 @@ class ExtensionsManager internal constructor(
     }
 
     private fun findBinaryOnPath(name: String): File? {
-        val pathEnv = System.getenv("PATH") ?: return null
+        val pathEnv = systemPath() ?: return null
         for (dir in pathEnv.split(':')) {
             if (dir.isBlank()) continue
             val candidate = File(dir, name)

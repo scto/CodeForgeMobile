@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Compose-Preview, Tests)
+- Compose-Preview: Nachbardateien werden einmal vorkompiliert und gecached (neueste 6 Stände); bei Änderungen an der Zieldatei wird nur diese kompiliert. Scheitert das (z. B. Zyklus), gilt der bisherige Gesamtlauf; Fehlschläge werden nicht erneut versucht. Logcat (`CFPreviewPerf`) zeigt „Nachbarn vorkompiliert“ und einen Hinweis, wenn der Daemon nicht verfügbar ist.
+- `ExtensionsManagerTest`: PATH des Rechners ist injizierbar (`systemPath`), der Test ist nicht mehr von installiertem rust-analyzer abhängig.
+
 ### Hinzugefügt (Compose-Preview: warmer Compiler)
 - `KotlincDaemon`: hält eine JVM mit geladenem Kotlin-Compiler warm (Java-Source-Launcher, keine vorgebaute JAR). Folgeläufe sparen JVM-Start und Klassenladen; Idle-Ende nach 2 min, Neustart nach 40 Läufen oder Fehler/Abbruch. Jeder Fehler fällt auf den bisherigen Einzelprozess zurück (`useDaemon`).
 - Im Sandbox-Test mit Kotlin 2.1.21: erster Lauf 3,5 s, Folgeläufe 0,4 s (triviale Datei, ohne Compose).

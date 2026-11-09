@@ -194,12 +194,34 @@ class ComposePreviewRendererImpl @Inject internal constructor(
 
         val primaryFiles = listOf(preparedTargetFile) + preparedSiblingFiles
         val tCompile0 = android.os.SystemClock.elapsedRealtime()
-        var compileResult = compiler.compile(
-            sourceFiles = primaryFiles,
-            outputDir = classesDir,
-            runtimeClasspathJars = runtimeJars,
-            androidPlatformJar = androidPlatformJar
-        )
+
+        // Schneller Weg: Nachbardateien einmal vorkompilieren (Cache), dann nur die Zieldatei. Scheitert das
+        // (z. B. weil Nachbarn die Zieldatei referenzieren), gilt der bisherige Gesamtlauf.
+        var siblingClassesDir: File? = null
+        var compileResult: CompileResult? = null
+        if (preparedSiblingFiles.isNotEmpty()) {
+            siblingClassesDir = precompileSiblings(preparedSiblingFiles, runtimeJars, androidPlatformJar)
+            if (siblingClassesDir != null) {
+                val fast = compiler.compile(
+                    sourceFiles = listOf(preparedTargetFile),
+                    outputDir = classesDir,
+                    runtimeClasspathJars = runtimeJars + siblingClassesDir,
+                    androidPlatformJar = androidPlatformJar
+                )
+                if (fast.success) compileResult = fast else {
+                    classesDir.deleteRecursively(); classesDir.mkdirs(); siblingClassesDir = null
+                }
+            }
+        }
+        if (compileResult == null) {
+            compileResult = compiler.compile(
+                sourceFiles = primaryFiles,
+                outputDir = classesDir,
+                runtimeClasspathJars = runtimeJars,
+                androidPlatformJar = androidPlatformJar
+            )
+        }
+        android.util.Log.i("CFPreviewPerf", "Nachbarn vorkompiliert=${siblingClassesDir != null}")
 
         var isFallbackTheme = false
         var fallbackReason: String? = null
@@ -227,6 +249,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
 
                 if (fallbackResult.success) {
                     compileResult = fallbackResult
+                    siblingClassesDir = null
                     isFallbackTheme = true
                     fallbackReason = reason
                     compiledFiles = listOf(preparedTargetFile.name)
@@ -240,7 +263,8 @@ class ComposePreviewRendererImpl @Inject internal constructor(
             )
         }
 
-        val classFiles = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
+        val classFiles = (classesDir.walkTopDown() + (siblingClassesDir?.walkTopDown() ?: emptySequence()))
+            .filter { it.extension == "class" }.toList()
         if (classFiles.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
 
         val tDex0 = android.os.SystemClock.elapsedRealtime()
@@ -258,6 +282,36 @@ class ComposePreviewRendererImpl @Inject internal constructor(
 
         val cached = buildCache.store(buildKey, dexFile, resolvedSources.targetClassName, compiledFiles, isFallbackTheme, fallbackReason)
         return cached ?: CachedBuild(dexFile, resolvedSources.targetClassName, compiledFiles, isFallbackTheme, fallbackReason)
+    }
+
+    /** Nachbarn, deren Vorkompilierung scheitert (z. B. Zyklus zur Zieldatei), nicht bei jedem Lauf neu versuchen. */
+    private val siblingFailures = java.util.Collections.synchronizedSet(HashSet<String>())
+
+    /** Kompiliert die Nachbardateien allein und cached die `.class`-Dateien; `null` bei Fehlschlag. */
+    private suspend fun precompileSiblings(
+        siblings: List<File>,
+        runtimeJars: List<File>,
+        androidPlatformJar: File
+    ): File? {
+        val key = PreviewCacheKey.of(
+            "siblings",
+            siblings.joinToString("\n") { it.name + "\u0001" + runCatching { it.readText() }.getOrDefault("") },
+            runtimeJars.joinToString { it.name + ":" + it.length() }, androidPlatformJar.path
+        )
+        if (key in siblingFailures) return null
+        val root = File(context.cacheDir, "compose_preview_siblings").apply { mkdirs() }
+        val dir = File(root, key)
+        val done = File(dir, ".complete")
+        if (done.isFile) { dir.setLastModified(System.currentTimeMillis()); return dir }
+        dir.deleteRecursively(); dir.mkdirs()
+        val result = compiler.compile(
+            sourceFiles = siblings, outputDir = dir, runtimeClasspathJars = runtimeJars, androidPlatformJar = androidPlatformJar
+        )
+        if (!result.success) { dir.deleteRecursively(); siblingFailures += key; return null }
+        done.writeText("ok")
+        // Platz begrenzen: neueste 6 Stände behalten.
+        root.listFiles()?.filter { it.isDirectory }?.sortedByDescending { it.lastModified() }?.drop(6)?.forEach { it.deleteRecursively() }
+        return dir
     }
 
     private fun Bitmap.toPngBytes(): ByteArray = ByteArrayOutputStream().use { stream ->

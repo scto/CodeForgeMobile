@@ -66,7 +66,11 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
         // Schneller Weg: warmer Daemon. Nur wenn die Compiler-JARs neben dem Binary liegen; sonst/bei Fehlern Einzelprozess.
         val libDir = File(kotlincBin.parentFile?.parentFile, "lib")
         if (useDaemon && File(libDir, "kotlin-compiler.jar").isFile) {
-            daemon.run(libDir, command.drop(1), timeoutMillis)?.let { run ->
+            val daemonRun = daemon.run(libDir, command.drop(1), timeoutMillis)
+            if (daemonRun == null) {
+                runCatching { android.util.Log.w("CFPreviewPerf", "kotlinc-Daemon nicht verfügbar, nutze Einzelprozess") }
+            }
+            daemonRun?.let { run ->
                 val classFiles = outputDir.walkTopDown().filter { it.extension == "class" }.toList()
                 val ok = run.exitCode == 0 && classFiles.isNotEmpty()
                 return@withContext CompileResult(

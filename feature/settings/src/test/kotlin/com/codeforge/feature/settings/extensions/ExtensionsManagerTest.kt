@@ -46,7 +46,7 @@ class ExtensionsManagerTest {
             Result.success(dest)
         }
 
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader)
+        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader, systemPath = { null })
 
         assertFalse(manager.isInstalled(testPackage))
 
@@ -93,7 +93,7 @@ class ExtensionsManagerTest {
             Result.success(dest)
         }
 
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader)
+        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader, systemPath = { null })
 
         assertFalse(manager.isInstalled(testPackage))
 
@@ -137,7 +137,7 @@ class ExtensionsManagerTest {
             Result.success(dest)
         }
 
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader)
+        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader, systemPath = { null })
 
         assertFalse(manager.isInstalled(testPackage))
 
@@ -177,7 +177,7 @@ class ExtensionsManagerTest {
             Result.success(dest)
         }
 
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader)
+        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader, systemPath = { null })
         val result = manager.install(testPackage)
 
         assertTrue("Install should fail due to SHA-256 mismatch", result.isFailure)
@@ -199,7 +199,8 @@ class ExtensionsManagerTest {
         val manager = ExtensionsManager(
             baseDir = baseDir,
             downloader = dummyDownloader,
-            customTermuxBinDir = fakeTermuxBin
+            customTermuxBinDir = fakeTermuxBin,
+            systemPath = { null }
         )
 
         // clangd is installed in fakeTermuxBin
@@ -249,7 +250,7 @@ class ExtensionsManagerTest {
             Result.success(dest)
         }
 
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader)
+        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader, systemPath = { null })
         assertFalse(manager.isInstalled(testPackage))
 
         val installResult = manager.install(testPackage)
@@ -290,7 +291,7 @@ class ExtensionsManagerTest {
             Result.success(dest)
         }
 
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader)
+        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader, systemPath = { null })
         var npmInvoked = false
         manager.customNpmRunner = { pkgDir ->
             npmInvoked = true
@@ -334,7 +335,7 @@ class ExtensionsManagerTest {
             Result.success(dest)
         }
 
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader)
+        val manager = ExtensionsManager(baseDir = baseDir, downloader = mockDownloader, systemPath = { null })
         manager.customNpmRunner = {
             Result.failure(IllegalStateException("npm error simulated"))
         }
