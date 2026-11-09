@@ -1262,6 +1262,13 @@ do_setup() {
   [ "$want_ndk" = 1 ] && steps+=("ndk;$ndk")
   [ "$want_cmake" = 1 ] && steps+=("cmake;$cmake")
   local total=${#steps[@]} i=0 id label failed=() cmdline_ok=1
+  # Gesamtzahl der Schritte (SDK-Komponenten + Werkzeuge) für „(n/N)“ und Prozentanzeige.
+  local tool_total=0
+  [ "$want_gradle" = 1 ] && tool_total=$((tool_total+1))
+  [ "$want_kotlin" = 1 ] && tool_total=$((tool_total+1))
+  [ "$want_web" = 1 ] && tool_total=$((tool_total+3))
+  [ "$want_extras" = 1 ] && tool_total=$((tool_total+3))
+  local grand=$((total+tool_total)) tool_i=0
   for id in "${steps[@]}"; do
     i=$((i+1))
     label=$(format_component_id "$id")
@@ -1271,7 +1278,8 @@ do_setup() {
     if [ "$cmdline_ok" = 0 ] && [ "$(entry_field "$id" 3)" = sdkmanager ]; then
       say "Überspringe $label (cmdline-tools fehlen)"; failed+=("$label"); continue
     fi
-    say "== ($i/$total) $label =="
+    progress $(( (i-1)*95/grand )) "($i/$grand) $label"
+    say "== ($i/$grand) $label =="
     if ! ( CURRENT_SETUP_RETRY_CMD="" do_install "$id" ); then
       err "$label ($id) fehlgeschlagen – mache mit den übrigen Komponenten weiter"
       failed+=("$label")
@@ -1288,8 +1296,10 @@ do_setup() {
   # Jedes Werkzeug einzeln: bereits vorhandene werden übersprungen, Fehler brechen mit Hinweis ab.
   setup_tool() { # <befehl> <anzeigename> <paket…>
     local bin=$1 label=$2; shift 2
-    if command -v "$bin" >/dev/null 2>&1; then say "$label bereits installiert"; return 0; fi
-    say "== $label =="
+    tool_i=$((tool_i+1))
+    if command -v "$bin" >/dev/null 2>&1; then say "($((total+tool_i))/$grand) $label bereits installiert"; return 0; fi
+    progress $(( (total+tool_i-1)*95/grand )) "($((total+tool_i))/$grand) $label"
+    say "== ($((total+tool_i))/$grand) $label =="
     if ! ( CURRENT_SETUP_RETRY_CMD="" pkg_install "$@" ); then
       err "Einrichtung abgebrochen bei $label"
       say "Logdatei: $LOG_FILE"
@@ -1302,9 +1312,11 @@ do_setup() {
   if [ "$want_web" = 1 ]; then
     setup_tool python "Python" python
     setup_tool node "Node.js (inkl. npm)" nodejs
-    if command -v tsc >/dev/null 2>&1; then say "TypeScript bereits installiert"
+    tool_i=$((tool_i+1))
+    if command -v tsc >/dev/null 2>&1; then say "($((total+tool_i))/$grand) TypeScript bereits installiert"
     else
-      say "== TypeScript =="
+      progress $(( (total+tool_i-1)*95/grand )) "($((total+tool_i))/$grand) TypeScript"
+      say "== ($((total+tool_i))/$grand) TypeScript =="
       if ! npm install -g typescript >>"$LOG_FILE" 2>&1; then
         err "Einrichtung abgebrochen bei TypeScript (npm install -g typescript)"
         say "Logdatei: $LOG_FILE"

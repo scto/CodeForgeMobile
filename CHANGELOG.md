@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Ersteinrichtung: Fortschritt)
+- `codeforge-env setup` zählt jetzt über alle Schritte (SDK-Komponenten und Werkzeuge): „== (9/15) Python ==“ statt getrennter Zähler, und meldet einen Gesamtfortschritt in Prozent (`CFSDK|PROGRESS`).
+
 ### Geändert (Compose-Preview, LSP: weitere Tempo-Schritte)
 - `d8` läuft im selben warmen Daemon wie `kotlinc` (`D8Command` aus `build-tools/lib/d8.jar`, ohne `System.exit`). Sandbox-Test: erster Lauf 0,9 s, Folgeläufe 0,02 s; bei jedem Fehler Rückfall auf den `d8`-Prozess.
 - Die DEX-Datei der vorkompilierten Nachbarn wird einmal erzeugt, gecached und beim Dexen der Zieldatei nur noch eingemischt.
