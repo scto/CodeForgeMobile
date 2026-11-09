@@ -1106,7 +1106,7 @@
 
     <!-- Extensions Manager (Task 16 Item 4) -->
     <string name="settings_hub_extensions">Erweiterungen (LSP)</string>
-    <string name="extensions_hub_title">Erweiterungen</string>
+    <string name="extensions_hub_title">Store</string>
     <string name="extensions_hub_tab_installed">Installiert</string>
     <string name="extensions_hub_tab_servers">Sprachserver</string>
     <string name="extensions_hub_tab_store">Store</string>
@@ -2396,4 +2396,15 @@
     <string name="welcome_projekt_loeschen_text">Der Ordner %1$s und alle Dateien darin werden endgültig gelöscht. Das lässt sich nicht rückgängig machen.</string>
     <string name="welcome_projekt_geloescht">\'%1$s\' gelöscht</string>
     <string name="welcome_projekt_loeschen_fehlgeschlagen">Das Projekt konnte nicht gelöscht werden</string>
+    <string name="store_remove">Entfernen</string>
+    <string name="store_removed">\'%1$s\' entfernt</string>
+    <string name="store_category_lsp">Sprachserver</string>
+    <string name="settings_editor_lsp_section">Sprachserver</string>
+    <string name="settings_editor_lsp_manage">Sprachserver verwalten</string>
+    <string name="settings_editor_lsp_manage_desc">Installierte Server, Status, Updates. Neue kommen aus dem Store.</string>
+    <string name="lsp_manage_title">Sprachserver</string>
+    <string name="lsp_manage_store_hint">Weitere Sprachserver im Store installieren</string>
+    <string name="lsp_manage_open_store">Store öffnen</string>
+    <string name="plugins_aktiv">Aktiv</string>
+    <string name="plugins_deaktiviert">Deaktiviert</string>
 </resources>

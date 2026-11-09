@@ -63,6 +63,8 @@ fun ExtensionsRoute(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     embedded: Boolean = false,
+    installedOnly: Boolean = false,
+    onOpenStore: (() -> Unit)? = null,
     viewModel: ExtensionsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -71,7 +73,9 @@ fun ExtensionsRoute(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         onBack = onBack,
-        embedded = embedded
+        embedded = embedded,
+        installedOnly = installedOnly,
+        onOpenStore = onOpenStore
     )
 }
 
@@ -83,7 +87,9 @@ fun ExtensionsScreen(
     uiState: ExtensionsUiState,
     onEvent: (ExtensionsUiEvent) -> Unit,
     onBack: () -> Unit,
-    embedded: Boolean = false
+    embedded: Boolean = false,
+    installedOnly: Boolean = false,
+    onOpenStore: (() -> Unit)? = null
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -118,7 +124,7 @@ fun ExtensionsScreen(
         topBar = {
             if (!embedded) {
                 SettingsTopBar(
-                    title = stringRes(R.string.extensions_title),
+                    title = stringRes(if (installedOnly) R.string.lsp_manage_title else R.string.extensions_title),
                     onBack = onBack
                 )
             }
@@ -132,7 +138,10 @@ fun ExtensionsScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(uiState.extensions, key = { it.pkg.id }) { item ->
+            val shown = if (installedOnly) {
+                uiState.extensions.filter { it.isInstalled || it.status != ExtensionStatus.NOT_INSTALLED }
+            } else uiState.extensions
+            items(shown, key = { it.pkg.id }) { item ->
                 ExtensionCard(
                     item = item,
                     onInstall = { onEvent(ExtensionsUiEvent.InstallClicked(item.pkg)) },
@@ -141,6 +150,21 @@ fun ExtensionsScreen(
                     onDetails = { onEvent(ExtensionsUiEvent.OpenDetails(item.pkg)) },
                     onInfo = { onEvent(ExtensionsUiEvent.OpenInfo(item.pkg)) }
                 )
+            }
+            if (installedOnly && onOpenStore != null) {
+                item(key = "store-hint") {
+                    Card(modifier = Modifier.fillMaxWidth(), onClick = onOpenStore) {
+                        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                            Text(stringRes(R.string.lsp_manage_store_hint), style = MaterialTheme.typography.bodyMedium)
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                stringRes(R.string.lsp_manage_open_store),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
             }
         }
     }

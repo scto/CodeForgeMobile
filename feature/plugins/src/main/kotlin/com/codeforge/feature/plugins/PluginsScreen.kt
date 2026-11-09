@@ -207,7 +207,12 @@ private fun PluginRow(
                         stringRes(
                             R.string.plugins_version_status,
                             plugin.version,
-                            if (isLoaded) stringRes(R.string.plugins_geladen) else stringRes(R.string.plugins_nicht_geladen)
+                            when {
+                                // Deklarative Plugins haben keinen Code zu laden: Anzeige = aktiviert oder nicht.
+                                plugin.isDeclarativeOnly -> stringRes(if (plugin.isEnabled) R.string.plugins_aktiv else R.string.plugins_deaktiviert)
+                                isLoaded -> stringRes(R.string.plugins_geladen)
+                                else -> stringRes(R.string.plugins_nicht_geladen)
+                            }
                         ),
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -221,7 +226,7 @@ private fun PluginRow(
             if (plugin.contributionKinds.isNotEmpty() || plugin.permissions.isNotEmpty() || plugin.packMembers.isNotEmpty()) {
                 val none = stringRes(R.string.plugins_none)
                 val kind = stringRes(
-                    if (plugin.contributionKinds.isEmpty() || plugin.permissions.isNotEmpty()) R.string.plugins_kind_code
+                    if (!plugin.isDeclarativeOnly) R.string.plugins_kind_code
                     else R.string.plugins_kind_declarative
                 )
                 val kinds = (plugin.contributionKinds + plugin.packMembers.map { "→ $it" })

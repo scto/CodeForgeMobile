@@ -59,6 +59,7 @@ fun EditorSettingsRoute(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
     onNavigateToSnippets: () -> Unit = {},
+    onNavigateToLsp: () -> Unit = {},
     viewModel: EditorSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -67,6 +68,7 @@ fun EditorSettingsRoute(
         uiState = uiState,
         onBack = onBack,
         onNavigateToSnippets = onNavigateToSnippets,
+        onNavigateToLsp = onNavigateToLsp,
         onEvent = viewModel::onEvent
     )
 }
@@ -78,6 +80,7 @@ private fun EditorSettingsScreen(
     uiState: EditorSettingsUiState,
     onBack: () -> Unit = {},
     onNavigateToSnippets: () -> Unit = {},
+    onNavigateToLsp: () -> Unit = {},
     onEvent: (EditorSettingsUiEvent) -> Unit
 ) {
     Scaffold(
@@ -111,6 +114,32 @@ private fun EditorSettingsScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = stringRes(R.string.settings_editor_snippets)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- SPRACHSERVER ---
+            Text(
+                stringRes(R.string.settings_editor_lsp_section),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            )
+            Card(modifier = Modifier.fillMaxWidth(), onClick = onNavigateToLsp) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringRes(R.string.settings_editor_lsp_manage), style = MaterialTheme.typography.titleMedium)
+                        Text(stringRes(R.string.settings_editor_lsp_manage_desc), style = MaterialTheme.typography.bodySmall)
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = stringRes(R.string.settings_editor_lsp_manage)
                     )
                 }
             }

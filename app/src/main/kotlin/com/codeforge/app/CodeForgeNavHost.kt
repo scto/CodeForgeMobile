@@ -38,6 +38,7 @@ import com.codeforge.feature.settings.AboutSettingsRoute
 import com.codeforge.feature.settings.AiSettingsRoute
 import com.codeforge.feature.settings.DebugSettingsRoute
 import com.codeforge.feature.settings.EditorSettingsRoute
+import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.settings.GitSettingsRoute
 import com.codeforge.feature.settings.HelpRoute
 import com.codeforge.feature.settings.SettingsHubRoute
@@ -62,7 +63,7 @@ internal object Routes {
     const val SETTINGS_SIGNING = "settings_signing"
     const val SETTINGS_TERMINAL = "settings_terminal"
     const val SETTINGS_SDK_MANAGER = "settings_sdk_manager"
-    const val SETTINGS_PLUGINS = "settings_plugins"
+    const val SETTINGS_LSP = "settings_lsp"
     const val SETTINGS_GIT = "settings_git"
     const val SETTINGS_DEBUG = "settings_debug"
     const val SETTINGS_AI = "settings_ai"
@@ -70,7 +71,6 @@ internal object Routes {
     const val SETTINGS_STORE = "settings_store"
     const val SETTINGS_ABOUT = "settings_about"
     const val SETTINGS_BASTI = "settings_basti"
-    const val EXTENSIONS = "extensions"
     const val TERMINAL = "terminal"
     const val TERMINAL_PATTERN = "terminal?initialCommand={initialCommand}"
     const val PROJECT_WORKSPACE_PATTERN = "workspace/{rootPath}"
@@ -203,9 +203,7 @@ fun CodeForgeNavHost(
                 onNavigateToEditor = { navController.navigate(Routes.SETTINGS_EDITOR) },
                 onNavigateToTerminal = { navController.navigate(Routes.SETTINGS_TERMINAL) },
                 onNavigateToSdkManager = { navController.navigate(Routes.SETTINGS_SDK_MANAGER) },
-                onNavigateToPlugins = { navController.navigate(Routes.SETTINGS_PLUGINS) },
                 onNavigateToGit = { navController.navigate(Routes.SETTINGS_GIT) },
-                onNavigateToExtensions = { navController.navigate(Routes.EXTENSIONS) },
                 onNavigateToSigning = { navController.navigate(Routes.SETTINGS_SIGNING) },
                 onNavigateToDebug = { navController.navigate(Routes.SETTINGS_DEBUG) },
                 onNavigateToAi = { navController.navigate(Routes.SETTINGS_AI) },
@@ -223,7 +221,8 @@ fun CodeForgeNavHost(
         composable(Routes.SETTINGS_EDITOR) {
             EditorSettingsRoute(
                 onBack = { navigateBackOrStart() },
-                onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) }
+                onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) },
+                onNavigateToLsp = { navController.navigate(Routes.SETTINGS_LSP) }
             )
         }
         composable(Routes.SETTINGS_SNIPPETS) {
@@ -274,11 +273,13 @@ fun CodeForgeNavHost(
                 onBack = { navigateBackOrStart() }
             )
         }
-        composable(Routes.SETTINGS_PLUGINS) {
-            ExtensionsHubRoute(initialTab = ExtensionsHubTab.INSTALLED, onBack = { navigateBackOrStart() })
-        }
-        composable(Routes.EXTENSIONS) {
-            ExtensionsHubRoute(initialTab = ExtensionsHubTab.SERVERS, onBack = { navigateBackOrStart() })
+        composable(Routes.SETTINGS_LSP) {
+            // Liste der installierten Sprachserver (Editor → Sprachserver verwalten); Neues kommt aus dem Store.
+            ExtensionsRoute(
+                onBack = { navigateBackOrStart() },
+                installedOnly = true,
+                onOpenStore = { navController.navigate(Routes.SETTINGS_STORE) }
+            )
         }
         composable(
             route = Routes.TERMINAL_PATTERN,

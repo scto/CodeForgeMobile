@@ -177,7 +177,9 @@ private fun StoreContent(
                 items(entries, key = { it.id }) { entry ->
                     StoreItemCard(
                         item = entry,
-                        installed = entry.id in uiState.installedPluginIds,
+                        installed = entry.id in uiState.installedPluginIds ||
+                            (entry.extensionId != null && uiState.serverStates[entry.id] == LspServerState.PRESENT),
+                        onUninstall = { onEvent(StoreUiEvent.Uninstall(entry)) },
                         serverState = uiState.serverStates[entry.id],
                         installingServer = entry.id in uiState.installingServerIds,
                         onInstallServer = { onEvent(StoreUiEvent.InstallServer(entry)) },
@@ -196,6 +198,7 @@ private fun StoreContent(
 private fun StoreItemCard(
     item: StoreItem,
     installed: Boolean,
+    onUninstall: () -> Unit,
     serverState: LspServerState?,
     installingServer: Boolean,
     onInstallServer: () -> Unit,
@@ -247,25 +250,36 @@ private fun StoreItemCard(
             }
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (installed && serverState == LspServerState.MISSING) {
-                    Button(onClick = onInstallServer, enabled = !installingServer) {
-                        Text(stringRes(if (installingServer) R.string.store_installing else R.string.store_server_install))
+                val isServer = serverState != null
+                val installable = item.isInstallablePlugin || item.extensionId != null
+                when {
+                    // Sprachserver: ein Knopf für Plugin + Server-Programm + Voraussetzungen, ein Knopf zum Entfernen.
+                    isServer && installable && !(installed && serverState != LspServerState.MISSING) -> {
+                        val busy = installing || installingServer
+                        Button(onClick = onInstall, enabled = !busy && !installBusy) {
+                            Text(stringRes(if (busy) R.string.store_installing else R.string.store_install))
+                        }
                     }
-                }
-                if (item.isInstallablePlugin) {
-                    Button(onClick = onInstall, enabled = !installBusy) {
-                        Text(
-                            stringRes(
-                                when {
-                                    installing -> R.string.store_installing
-                                    installed -> R.string.store_reinstall
-                                    else -> R.string.store_install
-                                }
+                    isServer && installed -> OutlinedButton(onClick = onUninstall, enabled = !installingServer && !installBusy) {
+                        Text(stringRes(R.string.store_remove))
+                    }
+                    item.isInstallablePlugin -> {
+                        Button(onClick = onInstall, enabled = !installBusy) {
+                            Text(
+                                stringRes(
+                                    when {
+                                        installing -> R.string.store_installing
+                                        installed -> R.string.store_reinstall
+                                        else -> R.string.store_install
+                                    }
+                                )
                             )
-                        )
+                        }
+                        if (installed) OutlinedButton(onClick = onUninstall, enabled = !installBusy) {
+                            Text(stringRes(R.string.store_remove))
+                        }
                     }
-                } else {
-                    item.downloadUrl?.let { url ->
+                    else -> item.downloadUrl?.let { url ->
                         Button(onClick = { runCatching { uriHandler.openUri(url) } }) { Text(stringRes(R.string.store_download)) }
                     }
                 }

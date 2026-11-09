@@ -25,6 +25,8 @@ data class StoreItem(
     val homepageUrl: String?,
     val downloadUrl: String?,
     val sha256: String?,
+    /** Paket-ID eines lokal gelisteten Sprachservers (nur Server-Programm, kein Plugin); sonst `null`. */
+    val extensionId: String? = null,
 ) {
     /**
      * Direkt installierbar: deklarative Kategorie (Theme, Icons, Sprache, Grammatik, Snippets, LSP, Bundle),
@@ -39,6 +41,8 @@ data class StoreItem(
         get() = categoryId in DECLARATIVE_CATEGORIES && sha256 != null && downloadUrl?.startsWith("https://") == true
 
     companion object {
+        /** Kategorie der Sprachserver (Store-Plugins und lokale Server werden hier zusammengeführt). */
+        const val LSP_CATEGORY = "lsp"
         const val PLUGIN_CATEGORY = "plugin"
         const val TOOL_CATEGORY = "tool"
         val DECLARATIVE_CATEGORIES = setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle", TOOL_CATEGORY)

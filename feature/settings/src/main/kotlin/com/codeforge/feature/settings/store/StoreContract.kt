@@ -40,6 +40,8 @@ sealed interface StoreUiEvent {
     data class Install(val item: StoreItem) : StoreUiEvent
     /** Server-Programm eines Eintrags installieren. */
     data class InstallServer(val item: StoreItem) : StoreUiEvent
+    /** Eintrag entfernen (Plugin und – bei Sprachservern – das Server-Programm). */
+    data class Uninstall(val item: StoreItem) : StoreUiEvent
     /** Meldung wurde angezeigt. */
     data object MessageShown : StoreUiEvent
 }

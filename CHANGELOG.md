@@ -11,6 +11,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Store, Sprachserver)
+- Einstellungen: nur noch ein Eintrag „Store“ (Reiter Installiert | Store); „Plugins“ und „Erweiterungen (LSP)“ entfallen.
+- Store: Kategorie „Sprachserver“ führt Store-Plugins und lokale Server (Kotlin LS, JDT LS, LemMinX …) zusammen. Ein Knopf „Installieren“ erledigt Plugin, Server-Programm und Voraussetzungen; „Entfernen“ löscht beides. Auch andere installierte Store-Einträge lassen sich dort entfernen.
+- Editor-Einstellungen: Abschnitt „Sprachserver“ mit „Sprachserver verwalten“ (installierte Server, Info, Update, Entfernen; Link in den Store).
+- Plugin-Liste: deklarative Plugins zeigen „Aktiv/Deaktiviert“ statt „Nicht geladen“; „Code-Plugin“ nur noch für Plugins mit Code.
+
 ### Behoben
 - JAVA_HOME: bevorzugt JDK 21 (Ziel des Terminal-Setups) statt des höchsten installierten JDK. Mit zusätzlich installiertem JDK 25 stürzte der Kotlin Language Server sofort ab (`IllegalArgumentException: 25.0.4`).
 - Startseite: Projekte im Projektstamm lassen sich wieder entfernen – neu „Projekt löschen“ mit Bestätigungsdialog (löscht den Ordner, nur innerhalb des Projektstamms); „Aus Liste entfernen“ bleibt für Projekte außerhalb.

@@ -1106,7 +1106,7 @@
 
     <!-- Extensions Manager (Task 16 Item 4) -->
     <string name="settings_hub_extensions">Extensions (LSP)</string>
-    <string name="extensions_hub_title">Extensions</string>
+    <string name="extensions_hub_title">Store</string>
     <string name="extensions_hub_tab_installed">Installed</string>
     <string name="extensions_hub_tab_servers">Language servers</string>
     <string name="extensions_hub_tab_store">Store</string>
@@ -2396,4 +2396,15 @@
     <string name="welcome_projekt_loeschen_text">The folder %1$s and all of its files will be permanently deleted. This cannot be undone.</string>
     <string name="welcome_projekt_geloescht">\'%1$s\' deleted</string>
     <string name="welcome_projekt_loeschen_fehlgeschlagen">The project could not be deleted</string>
+    <string name="store_remove">Remove</string>
+    <string name="store_removed">\'%1$s\' removed</string>
+    <string name="store_category_lsp">Language servers</string>
+    <string name="settings_editor_lsp_section">Language servers</string>
+    <string name="settings_editor_lsp_manage">Manage language servers</string>
+    <string name="settings_editor_lsp_manage_desc">Installed servers, status, updates. New ones come from the Store.</string>
+    <string name="lsp_manage_title">Language servers</string>
+    <string name="lsp_manage_store_hint">Install more language servers in the Store</string>
+    <string name="lsp_manage_open_store">Open Store</string>
+    <string name="plugins_aktiv">Active</string>
+    <string name="plugins_deaktiviert">Disabled</string>
 </resources>

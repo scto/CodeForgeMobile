@@ -2,7 +2,7 @@
  * Modul: :app
  * @author Thomas Schmid
  *
- * Gemeinsamer Einstieg für Plugins, Sprachserver und Store (Reiter statt dreier getrennter Seiten).
+ * Gemeinsamer Einstieg für Store und installierte Erweiterungen (zwei Reiter statt dreier getrennter Seiten).
  */
 package com.codeforge.app
 
@@ -24,13 +24,12 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
 import com.codeforge.feature.plugins.PluginsRoute
-import com.codeforge.feature.settings.extensions.ExtensionsRoute
 import com.codeforge.feature.settings.store.StoreRoute
 
 /** Reiter der Erweiterungen. */
-enum class ExtensionsHubTab { INSTALLED, SERVERS, STORE }
+enum class ExtensionsHubTab { INSTALLED, STORE }
 
-/** Route der Erweiterungen (Installiert, Server, Store). */
+/** Route des Stores (Reiter Installiert und Store; Sprachserver stehen im Store, Verwaltung unter Editor). */
 @Composable
 fun ExtensionsHubRoute(
     initialTab: ExtensionsHubTab,
@@ -41,7 +40,6 @@ fun ExtensionsHubRoute(
     val tabs = ExtensionsHubTab.entries
     val labels = listOf(
         stringRes(R.string.extensions_hub_tab_installed),
-        stringRes(R.string.extensions_hub_tab_servers),
         stringRes(R.string.extensions_hub_tab_store),
     )
     Scaffold(
@@ -57,7 +55,6 @@ fun ExtensionsHubRoute(
             Box(Modifier.fillMaxSize()) {
                 when (tabs[selected]) {
                     ExtensionsHubTab.INSTALLED -> PluginsRoute(onBack = onBack, embedded = true)
-                    ExtensionsHubTab.SERVERS -> ExtensionsRoute(onBack = onBack, embedded = true)
                     ExtensionsHubTab.STORE -> StoreRoute(onBack = onBack, embedded = true)
                 }
             }
