@@ -20,6 +20,10 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
 
     /** Zeitlimit in ms. */
     var timeoutMillis: Long = 120_000L
+    /** Warmen Compiler-Daemon nutzen (Fallback auf Einzelprozess bei jedem Problem). */
+    var useDaemon: Boolean = true
+    private val daemon = KotlincDaemon()
+
     /** Maximaler Heap des Prozesses. */
     var maxHeapMemory: String = "768m"
 
@@ -58,6 +62,20 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
             sourceFiles = sourceFiles,
             outputDir = outputDir
         )
+
+        // Schneller Weg: warmer Daemon. Nur wenn die Compiler-JARs neben dem Binary liegen; sonst/bei Fehlern Einzelprozess.
+        val libDir = File(kotlincBin.parentFile?.parentFile, "lib")
+        if (useDaemon && File(libDir, "kotlin-compiler.jar").isFile) {
+            daemon.run(libDir, command.drop(1), timeoutMillis)?.let { run ->
+                val classFiles = outputDir.walkTopDown().filter { it.extension == "class" }.toList()
+                val ok = run.exitCode == 0 && classFiles.isNotEmpty()
+                return@withContext CompileResult(
+                    success = ok,
+                    outputDir = outputDir,
+                    errorMessages = if (ok) emptyList() else KotlincOutputParser.parseErrors(run.output)
+                )
+            }
+        }
 
         val workingDirectory = sourceFiles.firstOrNull()?.parentFile ?: File(TermuxEnvironment.home)
         val env = TermuxEnvironment.environment().toMutableMap().apply {

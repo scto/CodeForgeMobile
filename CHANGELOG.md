@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Compose-Preview: warmer Compiler)
+- `KotlincDaemon`: hält eine JVM mit geladenem Kotlin-Compiler warm (Java-Source-Launcher, keine vorgebaute JAR). Folgeläufe sparen JVM-Start und Klassenladen; Idle-Ende nach 2 min, Neustart nach 40 Läufen oder Fehler/Abbruch. Jeder Fehler fällt auf den bisherigen Einzelprozess zurück (`useDaemon`).
+- Im Sandbox-Test mit Kotlin 2.1.21: erster Lauf 3,5 s, Folgeläufe 0,4 s (triviale Datei, ohne Compose).
+
 ### Geändert (Compose-Preview-Tempo)
 - Messung: Logcat-Tag `CFPreviewPerf` zeigt je Render vorbereiten / kotlinc / d8 / laden+rendern / gesamt und ob der Build aus dem Cache kam.
 - `kotlinc`: `-nowarn` und keine Laufzeit-Assertions; JVM-Kurzläuferprofil (C1, SerialGC, CDS) für `kotlinc` und `d8`.
