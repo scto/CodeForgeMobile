@@ -65,9 +65,14 @@ class LspRpcConnection(
     }
 
     private suspend fun readLoop() {
-        while (readerJob?.isActive == true) {
-            val message = readMessage(input) ?: break
-            dispatch(message)
+        try {
+            while (readerJob?.isActive == true) {
+                val message = readMessage(input) ?: break
+                dispatch(message)
+            }
+        } catch (_: java.io.IOException) {
+            // Strom wurde von close() geschlossen (z. B. Projektwechsel) oder der Server ist weg: Lesen endet leise.
+            // Ohne diesen Fang beendet die unbehandelte Ausnahme im IO-Worker die ganze App.
         }
     }
 
