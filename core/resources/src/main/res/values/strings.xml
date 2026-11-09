@@ -2233,7 +2233,7 @@
     <string name="lspinfo_section_diagnosis">Diagnostics</string>
     <string name="lspinfo_check_installed">Program present</string>
     <string name="lspinfo_check_installed_ok">Found at %1$s</string>
-    <string name="lspinfo_check_installed_fail">Not installed yet – set it up with \"Install\".</string>
+    <string name="lspinfo_check_installed_fail">Not installed yet – set it up with “Install”.</string>
     <string name="lspinfo_check_exec">Executable</string>
     <string name="lspinfo_check_exec_ok">Execute permission set</string>
     <string name="lspinfo_check_exec_fail">File is not executable.</string>
@@ -2276,7 +2276,7 @@
     <string name="lspinfo_plugin_enabled_ok">The server is available in the editor</string>
     <string name="lspinfo_plugin_enabled_fail">Plugin is disabled – the server will not start.</string>
     <string name="lspinfo_plugin_no_server">No server definition found (enable the plugin).</string>
-    <string name="lspinfo_plugin_requires_fail">Missing: %1$s – set up via \"Install prerequisites\".</string>
+    <string name="lspinfo_plugin_requires_fail">Missing: %1$s – set up via “Install prerequisites”.</string>
     <string name="lspinfo_plugin_source">Plugin %1$s</string>
 
     <!-- Asset Studio -->
