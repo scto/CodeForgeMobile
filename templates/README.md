@@ -12,6 +12,7 @@ Je Ordner eine lauffähige Minimalvorlage. Ausführliche Anleitung: `docs/extens
 | `lsp-server` | deklarativ | Language-Server-Anbindung |
 | `formatter` | deklarativ | Externer Formatierer (stdin → stdout) |
 | `extension-pack` | deklarativ | Bundle aus mehreren Plugins |
+| `agent-tool` | deklarativ (nur Sideload) | Werkzeuge für den KI-Agenten (`agentTools`) |
 | `code-plugin` | Code (Gradle) | Befehle, Menüs, Ereignisse |
 
 ## Bauen

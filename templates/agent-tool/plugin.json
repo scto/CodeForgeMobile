@@ -1,0 +1,30 @@
+{
+  "id": "com.example.agent-tools",
+  "name": "Agent-Werkzeuge (Beispiel)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "minHostVersion": "3.0.5",
+  "publisher": "example",
+  "description": "Zwei Werkzeuge für den KI-Agenten: Zeilen zählen und TODOs suchen",
+  "permissions": ["agent", "shell"],
+  "contributes": {
+    "agentTools": [
+      {
+        "id": "count_lines",
+        "description": "Zählt die Zeilen einer Datei im Projekt",
+        "kind": "read",
+        "inputDescription": "Relativer Dateipfad im Projekt, z. B. app/src/main/Main.kt",
+        "command": ["sh", "${pluginDir}/count_lines.sh", "${projectDir}", "${input}"],
+        "timeoutSeconds": 20
+      },
+      {
+        "id": "find_todos",
+        "description": "Listet TODO/FIXME-Kommentare im Projekt (Datei:Zeile:Text)",
+        "kind": "read",
+        "inputDescription": "Optionaler Unterordner, leer = ganzes Projekt",
+        "command": ["sh", "${pluginDir}/find_todos.sh", "${projectDir}", "${input}"],
+        "timeoutSeconds": 30
+      }
+    ]
+  }
+}

@@ -18,6 +18,10 @@ def referenced_paths(manifest):
     for kind in ("colorThemes", "iconThemes", "languagePacks", "grammars", "snippets"):
         for item in c.get(kind, []):
             yield item["path"]
+    for tool in c.get("agentTools", []):  # Skripte unter ${pluginDir}
+        for part in tool["command"]:
+            if part.startswith("${pluginDir}/"):
+                yield part[len("${pluginDir}/"):]
 
 
 def check(folder):

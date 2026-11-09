@@ -42,4 +42,14 @@ class TemplatesValidTest {
         }
         assertTrue(manifest("code-plugin").entryPointClass != null)
     }
+
+    @Test
+    fun `Agent-Vorlage ist gueltig, Skripte existieren und der Store lehnt sie ab`() {
+        val m = manifest("agent-tool")
+        assertEquals(listOf("count_lines", "find_todos"), m.contributes.agentTools.map { it.id })
+        m.contributes.agentTools.flatMap { it.command }.filter { it.startsWith("\${pluginDir}/") }
+            .forEach { assertTrue(it, file("agent-tool", it.removePrefix("\${pluginDir}/")).isFile) }
+        val files = File(dir, "agent-tool").walkTopDown().filter { it.isFile }.map { it.relativeTo(File(dir, "agent-tool")).path }.toList()
+        assertTrue(DeclarativeOnly.violation(files, m) != null)
+    }
 }
