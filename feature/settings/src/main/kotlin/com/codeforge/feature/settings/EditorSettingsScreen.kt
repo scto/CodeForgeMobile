@@ -60,6 +60,7 @@ fun EditorSettingsRoute(
     onBack: () -> Unit = {},
     onNavigateToSnippets: () -> Unit = {},
     onNavigateToLsp: () -> Unit = {},
+    onNavigateToFormatters: () -> Unit = {},
     viewModel: EditorSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -69,6 +70,7 @@ fun EditorSettingsRoute(
         onBack = onBack,
         onNavigateToSnippets = onNavigateToSnippets,
         onNavigateToLsp = onNavigateToLsp,
+        onNavigateToFormatters = onNavigateToFormatters,
         onEvent = viewModel::onEvent
     )
 }
@@ -81,6 +83,7 @@ private fun EditorSettingsScreen(
     onBack: () -> Unit = {},
     onNavigateToSnippets: () -> Unit = {},
     onNavigateToLsp: () -> Unit = {},
+    onNavigateToFormatters: () -> Unit = {},
     onEvent: (EditorSettingsUiEvent) -> Unit
 ) {
     Scaffold(
@@ -431,6 +434,23 @@ private fun EditorSettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // --- FORMAT BEIM SPEICHERN ---
+            Card(modifier = Modifier.fillMaxWidth(), onClick = onNavigateToFormatters) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(stringRes(R.string.user_formatters_title), style = MaterialTheme.typography.titleMedium)
+                        Text(stringRes(R.string.user_formatters_desc), style = MaterialTheme.typography.bodySmall)
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = stringRes(R.string.user_formatters_title)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
             SectionHeader(
                 title = stringRes(R.string.settings_editor_section_format),
                 onReset = { onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.FORMAT_ON_SAVE)) }

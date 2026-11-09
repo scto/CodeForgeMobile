@@ -41,7 +41,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,10 +67,14 @@ fun ExtensionsRoute(
     embedded: Boolean = false,
     installedOnly: Boolean = false,
     onOpenStore: (() -> Unit)? = null,
-    viewModel: ExtensionsViewModel = hiltViewModel()
+    viewModel: ExtensionsViewModel = hiltViewModel(),
+    userToolsViewModel: com.codeforge.feature.settings.tools.UserToolsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val userTools by userToolsViewModel.uiState.collectAsState()
     ExtensionsScreen(
+        userTools = userTools,
+        onUserToolsEvent = userToolsViewModel::onEvent,
         modifier = modifier,
         uiState = uiState,
         onEvent = viewModel::onEvent,
@@ -89,8 +95,15 @@ fun ExtensionsScreen(
     onBack: () -> Unit,
     embedded: Boolean = false,
     installedOnly: Boolean = false,
-    onOpenStore: (() -> Unit)? = null
+    onOpenStore: (() -> Unit)? = null,
+    userTools: com.codeforge.feature.settings.tools.UserToolsUiState = com.codeforge.feature.settings.tools.UserToolsUiState(),
+    onUserToolsEvent: (com.codeforge.feature.settings.tools.UserToolsEvent) -> Unit = {}
 ) {
+    var addingLsp by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    if (addingLsp) com.codeforge.feature.settings.tools.ExternalLspDialog(
+        onDismiss = { addingLsp = false },
+        onSave = { addingLsp = false; onUserToolsEvent(com.codeforge.feature.settings.tools.UserToolsEvent.SaveLsp(it)) }
+    )
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.snackbarMessage) {
@@ -129,7 +142,14 @@ fun ExtensionsScreen(
                 )
             }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (installedOnly) androidx.compose.material3.ExtendedFloatingActionButton(
+                onClick = { addingLsp = true },
+                icon = { androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Add, null) },
+                text = { Text(stringRes(R.string.user_lsp_add)) }
+            )
+        }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -150,6 +170,23 @@ fun ExtensionsScreen(
                     onDetails = { onEvent(ExtensionsUiEvent.OpenDetails(item.pkg)) },
                     onInfo = { onEvent(ExtensionsUiEvent.OpenInfo(item.pkg)) }
                 )
+            }
+            if (installedOnly) {
+                items(userTools.lspServers, key = { "user-" + it.id }) { server ->
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                            Text(server.label, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                stringRes(R.string.user_lsp_summary, server.languages.joinToString(), server.command.joinToString(" ")),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            androidx.compose.material3.TextButton(onClick = {
+                                onUserToolsEvent(com.codeforge.feature.settings.tools.UserToolsEvent.RemoveLsp(server.id))
+                            }) { Text(stringRes(R.string.common_entfernen)) }
+                        }
+                    }
+                }
             }
             if (installedOnly && onOpenStore != null) {
                 item(key = "store-hint") {

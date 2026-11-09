@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Externer LSP, Formatierer)
+- Editor → Sprachserver verwalten: „+ Externer LSP“ trägt einen eigenen Sprachserver (Name, Sprachen, Kommando) ein; er wird wie Plugin-Server gestartet und lässt sich entfernen.
+- Editor → „Formatierer verwalten“: Formatierer von Plugins und eigene (Endungen + Kommando, Inhalt über stdin) ein-/ausschalten, anlegen, löschen.
+- Gespeichert in `user-tools.json`; `UserToolsRepository` (core:domain) wird in `ContributionRepository` eingemischt.
+
+### Geändert (Store)
+- Store: eine Liste mit Filter-Chips „Alle · Installiert · Kategorien“ statt zweier Reiter; unter „Installiert“ liegt die Plugin-Verwaltung (Schalter, Hinweise, Voraussetzungen, Info, Entfernen, Sideload).
+
 ### Geändert (Ersteinrichtung)
 - Terminal-Ersteinrichtung (`codeforge-env setup`) installiert zusätzlich Python, Node.js (inkl. npm) und TypeScript (`npm install -g typescript`); mit `--no-web` oder `--minimal` abwählbar.
 

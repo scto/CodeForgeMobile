@@ -30,8 +30,15 @@ abstract class PluginApiModule {
     @Binds
     @Singleton
     abstract fun bindContributionRepository(
-        impl: PluginRepositoryImpl
+        impl: MergedContributionRepository
     ): ContributionRepository
+
+    /** Bindet die Nutzer-Werkzeuge (externe Sprachserver, Formatierer). */
+    @Binds
+    @Singleton
+    abstract fun bindUserToolsRepository(
+        impl: UserToolsRepositoryImpl
+    ): com.codeforge.core.domain.extension.UserToolsRepository
 
     /** Bindet das Repository für Plugin-Farbschemata und Sprachpakete. */
     @Binds

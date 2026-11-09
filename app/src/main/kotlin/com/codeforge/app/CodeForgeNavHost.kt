@@ -65,6 +65,7 @@ internal object Routes {
     const val SETTINGS_TERMINAL = "settings_terminal"
     const val SETTINGS_SDK_MANAGER = "settings_sdk_manager"
     const val SETTINGS_LSP = "settings_lsp"
+    const val SETTINGS_FORMATTERS = "settings_formatters"
     const val SETTINGS_GIT = "settings_git"
     const val SETTINGS_DEBUG = "settings_debug"
     const val SETTINGS_AI = "settings_ai"
@@ -223,7 +224,8 @@ fun CodeForgeNavHost(
             EditorSettingsRoute(
                 onBack = { navigateBackOrStart() },
                 onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) },
-                onNavigateToLsp = { navController.navigate(Routes.SETTINGS_LSP) }
+                onNavigateToLsp = { navController.navigate(Routes.SETTINGS_LSP) },
+                onNavigateToFormatters = { navController.navigate(Routes.SETTINGS_FORMATTERS) }
             )
         }
         composable(Routes.SETTINGS_SNIPPETS) {
@@ -273,6 +275,9 @@ fun CodeForgeNavHost(
             GitSettingsRoute(
                 onBack = { navigateBackOrStart() }
             )
+        }
+        composable(Routes.SETTINGS_FORMATTERS) {
+            com.codeforge.feature.settings.tools.FormattersRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_LSP) {
             // Liste der installierten Sprachserver (Editor → Sprachserver verwalten); Neues kommt aus dem Store.

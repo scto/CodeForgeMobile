@@ -2409,4 +2409,20 @@
     <string name="plugins_deaktiviert">Deaktiviert</string>
     <string name="store_filter_all">Alle</string>
     <string name="store_filter_installed">Installiert</string>
+    <string name="user_lsp_title">Externer Sprachserver</string>
+    <string name="user_lsp_hint">Eigenen Sprachserver (stdio) eintragen. Das Programm muss bereits installiert sein.</string>
+    <string name="user_tool_name">Name</string>
+    <string name="user_lsp_languages">Sprachen (z. B. kotlin, java)</string>
+    <string name="user_lsp_command">Kommando (z. B. mein-server --stdio)</string>
+    <string name="user_lsp_add">Externer LSP</string>
+    <string name="user_lsp_summary">Sprachen: %1$s · %2$s</string>
+    <string name="user_formatter_title">Formatierer hinzufügen</string>
+    <string name="user_formatter_hint">Der Dateiinhalt geht per stdin an das Programm, das Ergebnis kommt von stdout. ${file} steht für den Dateipfad.</string>
+    <string name="user_formatter_extensions">Dateiendungen (z. B. js, ts)</string>
+    <string name="user_formatter_add">Formatierer</string>
+    <string name="user_formatters_title">Formatierer verwalten</string>
+    <string name="user_formatters_desc">Formatierer von Plugins und eigene ein- und ausschalten</string>
+    <string name="user_formatters_intro">Formatierer von Plugins und eigene Programme. Ausgeschaltete werden beim Formatieren übersprungen.</string>
+    <string name="user_formatters_empty">Noch keine Formatierer. Plugins bringen welche mit, oder lege einen eigenen an.</string>
+    <string name="user_origin_own">Eigener</string>
 </resources>
