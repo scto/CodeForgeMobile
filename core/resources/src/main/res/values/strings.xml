@@ -2216,7 +2216,7 @@
     <string name="app_import_kopieren">Copy to CodeForgeMobileProjects</string>
     <string name="app_import_kopieren_hinweis">Creates a copy in the projects root. Also works with cloud folders.</string>
     <string name="app_import_lokal_nicht_aufloesbar">This folder is not on local storage and cannot be opened in place. Please copy it instead.</string>
-    <string name="app_import_lokal_berechtigung">Opening in place needs \"All files access\". Grant it in Android settings or copy the project.</string>
+    <string name="app_import_lokal_berechtigung">Opening in place needs “All files access”. Grant it in Android settings or copy the project.</string>
     <string name="lspinfo_button">Info</string>
     <string name="lspinfo_close">Close</string>
     <string name="lspinfo_tab_status">Status</string>
