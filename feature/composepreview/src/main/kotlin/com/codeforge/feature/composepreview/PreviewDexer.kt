@@ -31,6 +31,11 @@ internal class PreviewDexer {
         return try {
             val command = buildList {
                 add(d8BinaryPath)
+                // minSdk der App = 26: weniger Desugaring-Arbeit; Debug-Modus spart Optimierungsläufe.
+                add("--min-api"); add("26")
+                add("--debug")
+                add("-JXmx512m")
+                SHORT_RUN_JVM_FLAGS.split(' ').forEach { add("-J$it") }
                 add("--output")
                 add(outputDir.absolutePath)
                 addAll(classFiles.map { it.absolutePath })

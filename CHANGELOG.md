@@ -11,6 +11,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Compose-Preview-Tempo)
+- Messung: Logcat-Tag `CFPreviewPerf` zeigt je Render vorbereiten / kotlinc / d8 / laden+rendern / gesamt und ob der Build aus dem Cache kam.
+- `kotlinc`: `-nowarn` und keine Laufzeit-Assertions; JVM-Kurzläuferprofil (C1, SerialGC, CDS) für `kotlinc` und `d8`.
+- `d8`: `--min-api 26`, `--debug` (weniger Desugaring/Optimierung).
+- Abbruch einer Coroutine beendet jetzt auch den `kotlinc`-Prozess.
+
 ### Hinzugefügt (Externer LSP, Formatierer)
 - Editor → Sprachserver verwalten: „+ Externer LSP“ trägt einen eigenen Sprachserver (Name, Sprachen, Kommando) ein; er wird wie Plugin-Server gestartet und lässt sich entfernen.
 - Editor → „Formatierer verwalten“: Formatierer von Plugins und eigene (Endungen + Kommando, Inhalt über stdin) ein-/ausschalten, anlegen, löschen.

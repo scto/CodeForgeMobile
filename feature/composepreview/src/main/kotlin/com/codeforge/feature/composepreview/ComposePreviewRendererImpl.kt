@@ -56,6 +56,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         forceRefresh: Boolean
     ): Result<PreviewRenderResult> = withContext(Dispatchers.Default) {
         runCatching {
+            val t0 = android.os.SystemClock.elapsedRealtime()
             val runtimeDir = compilerRuntimeProvider.ensureInstalled(onPreparingRuntime).getOrThrow()
 
             val workDir = File(context.cacheDir, "compose_preview/${System.currentTimeMillis()}")
@@ -87,8 +88,11 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                 if (!forceRefresh) resultCache.get(resultKey)?.let { return@runCatching it }
 
                 if (forceRefresh) synchronized(loaders) { loaders.remove(buildKey) }
-                val build = (if (forceRefresh) null else buildCache.lookup(buildKey))
+                val tResolved = android.os.SystemClock.elapsedRealtime()
+                val cachedBuild = if (forceRefresh) null else buildCache.lookup(buildKey)
+                val build = cachedBuild
                     ?: buildDex(buildKey, workDir, filePath, sourceCode, resolvedSources, runtimeJars, androidPlatformJar, d8Path)
+                val tBuilt = android.os.SystemClock.elapsedRealtime()
                 val dexFile = build.dexFile
                 val compiledFiles = build.compiledFiles
                 val isFallbackTheme = build.isFallbackTheme
@@ -129,6 +133,12 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     ReflectiveComposableHost(targetMethod, onError = onError)
                 }
 
+                val tRendered = android.os.SystemClock.elapsedRealtime()
+                android.util.Log.i(
+                    "CFPreviewPerf",
+                    "vorbereiten=${tResolved - t0}ms build=${tBuilt - tResolved}ms (${if (cachedBuild != null) "Cache" else "neu"}) " +
+                        "laden+rendern=${tRendered - tBuilt}ms gesamt=${tRendered - t0}ms"
+                )
                 PreviewRenderResult(
                     functionName = functionName,
                     imageBytes = bitmap.toPngBytes(),
@@ -183,6 +193,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         }
 
         val primaryFiles = listOf(preparedTargetFile) + preparedSiblingFiles
+        val tCompile0 = android.os.SystemClock.elapsedRealtime()
         var compileResult = compiler.compile(
             sourceFiles = primaryFiles,
             outputDir = classesDir,
@@ -232,8 +243,13 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         val classFiles = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
         if (classFiles.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
 
+        val tDex0 = android.os.SystemClock.elapsedRealtime()
         val dexOutputDir = File(workDir, "dex")
         val dexResult = dexer.dex(classFiles, dexOutputDir, d8Path)
+        android.util.Log.i(
+            "CFPreviewPerf",
+            "kotlinc=${tDex0 - tCompile0}ms d8=${android.os.SystemClock.elapsedRealtime() - tDex0}ms Dateien=${primaryFiles.size} Klassen=${classFiles.size}"
+        )
         val dexFile = dexResult.dexFile
         if (!dexResult.success || dexFile == null) {
             error(Res.string(R.string.composepreview_dexing_fehlgeschlagen, dexResult.errorOutput))

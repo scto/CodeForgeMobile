@@ -61,7 +61,7 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
 
         val workingDirectory = sourceFiles.firstOrNull()?.parentFile ?: File(TermuxEnvironment.home)
         val env = TermuxEnvironment.environment().toMutableMap().apply {
-            put("JAVA_OPTS", "-Xmx$maxHeapMemory -Djansi.passthrough=true")
+            put("JAVA_OPTS", "-Xmx$maxHeapMemory -Djansi.passthrough=true $SHORT_RUN_JVM_FLAGS")
             put("JAVA_TOOL_OPTIONS", "")
         }
 
@@ -88,7 +88,16 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
             process.inputStream.bufferedReader().use { it.readText() }
         }
 
-        val completed = process.waitFor(timeoutMillis, java.util.concurrent.TimeUnit.MILLISECONDS)
+        // Bricht die Coroutine ab (z. B. neuer Tastendruck), muss auch der Prozess sterben: sonst läuft die JVM weiter.
+        val completed = try {
+            kotlinx.coroutines.runInterruptible(Dispatchers.IO) {
+                process.waitFor(timeoutMillis, java.util.concurrent.TimeUnit.MILLISECONDS)
+            }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            process.destroyForcibly()
+            outputDeferred.cancel()
+            throw e
+        }
 
         if (!completed) {
             process.destroyForcibly()
@@ -142,6 +151,11 @@ internal open class KotlincProcessCompiler @Inject constructor() : PreviewCompil
         add(kotlincBin.absolutePath)
         add("-no-stdlib")
         add("-no-reflect")
+        // Vorschau braucht keine Laufzeitprüfungen und keine Warnungen: weniger Bytecode, weniger Ausgabe.
+        add("-nowarn")
+        add("-Xno-call-assertions")
+        add("-Xno-param-assertions")
+        add("-Xno-receiver-assertions")
         add("-Xplugin=${pluginJar.absolutePath}")
         add("-classpath")
         add(classpath)
@@ -236,3 +250,9 @@ internal object KotlincOutputParser {
         }
     }
 }
+
+/**
+ * Kurzläufer-Profil für die JVM von `kotlinc`/`d8`: nur C1 (schnellerer Start), Serial-GC (keine GC-Threads),
+ * kein Perf-Data-Mapping, Class-Data-Sharing wo vorhanden.
+ */
+internal const val SHORT_RUN_JVM_FLAGS = "-XX:TieredStopAtLevel=1 -XX:+UseSerialGC -XX:-UsePerfData -Xshare:auto"
