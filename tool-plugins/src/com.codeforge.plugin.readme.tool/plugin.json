@@ -1,0 +1,48 @@
+{
+  "id": "com.codeforge.plugin.readme.tool",
+  "name": "README-Generator (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Erzeugt eine README.md aus dem Projekt (Name, Module, Technik, SDK-Werte, Build-Befehle, Lizenz) auf Deutsch oder Englisch. Eine vorhandene README.md bleibt unangetastet (dann entsteht README.generated.md). Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "generate",
+        "label": "README.md erstellen",
+        "description": "Sprache wählen; Inhalt aus den Gradle-Dateien abgeleitet",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 30,
+        "prompt": {
+          "label": "Sprache",
+          "default": "de",
+          "options": [
+            {
+              "value": "de",
+              "label": "Deutsch"
+            },
+            {
+              "value": "en",
+              "label": "English"
+            }
+          ]
+        }
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

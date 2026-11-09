@@ -88,6 +88,9 @@ MODE_PROMPT = {"label": "Modus", "default": "check", "options": [
 FIX_PROMPT = {"label": "Modus", "default": "check", "options": [
     {"value": "check", "label": "Prüfen – nur Bericht, nichts ändern"},
     {"value": "fix", "label": "Korrigieren – Dateien formatieren"}]}
+README_PROMPT = {"label": "Sprache", "default": "de", "options": [
+    {"value": "de", "label": "Deutsch"},
+    {"value": "en", "label": "English"}]}
 LICENSE_PROMPT = {"label": "Lizenz", "default": "mit", "options": [
     {"value": "mit", "label": "MIT"},
     {"value": "bsd2", "label": "BSD 2-Clause"},
@@ -121,6 +124,9 @@ TOOLS = [
     ("license", "LICENSE-Generator", "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, GPL-2.0, GPL-3.0, Unlicense) – Auswahl per Dropdown. Der GPL-Volltext wird von gnu.org geladen (Internet nötig). Apache-2.0 ist nicht enthalten.",
      "generate", "LICENSE schreiben", "Lizenz im Dropdown wählen und Namen des Urhebers eintragen", "license.py",
      LICENSE_PROMPT, "Eine vorhandene LICENSE-Datei wird überschrieben.", [PY], 30),
+    ("readme", "README-Generator", "Erzeugt eine README.md aus dem Projekt (Name, Module, Technik, SDK-Werte, Build-Befehle, Lizenz) auf Deutsch oder Englisch. Eine vorhandene README.md bleibt unangetastet (dann entsteht README.generated.md).",
+     "generate", "README.md erstellen", "Sprache wählen; Inhalt aus den Gradle-Dateien abgeleitet", "readme.py",
+     README_PROMPT, None, [PY], 30),
     ("project-clean", "Projekt bereinigen", "Löscht Build-Artefakte (build/, .gradle/, .kotlin/, .cxx/, captures/, *.iml) und zeigt die freigegebene Größe.",
      "clean", "Build-Artefakte löschen", "Bericht oder Löschen (Prüfen/Anwenden)", "project_clean.py",
      MODE_PROMPT, None, [PY], 120),
