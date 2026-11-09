@@ -12,6 +12,7 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Behoben
+- JAVA_HOME: bevorzugt JDK 21 (Ziel des Terminal-Setups) statt des höchsten installierten JDK. Mit zusätzlich installiertem JDK 25 stürzte der Kotlin Language Server sofort ab (`IllegalArgumentException: 25.0.4`).
 - Startseite: Projekte im Projektstamm lassen sich wieder entfernen – neu „Projekt löschen“ mit Bestätigungsdialog (löscht den Ordner, nur innerhalb des Projektstamms); „Aus Liste entfernen“ bleibt für Projekte außerhalb.
 - „Projekt schließen“/Zurück: Die Startseite wird nicht mehr zusätzlich über das Projekt gelegt; Zurück führt nicht mehr ins Projekt zurück.
 - Compose-Vorlage: Unit-Tests werden für alle Varianten aktiviert, damit die Compose-Vorschau-Aufgaben auch für release angelegt werden können (`:tasks` brach ab).

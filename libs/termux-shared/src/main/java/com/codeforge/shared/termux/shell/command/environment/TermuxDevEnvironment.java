@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * <ul>
  *   <li>ANDROID_HOME = {@code $PREFIX/opt/android-sdk} (AndroidIDE: {@code $HOME/android-sdk}) – das ist
  *       der Root, den das Skript {@code codeforge-env} befüllt ({@code TermuxEnvironment.sdkRoot}).</li>
- *   <li>JAVA_HOME = höchste installierte {@code $PREFIX/lib/jvm/java-N-openjdk} (AndroidIDE: fest
+ *   <li>JAVA_HOME = bevorzugt {@code $PREFIX/lib/jvm/java-21-openjdk}, sonst das höchste darunter (AndroidIDE: fest
  *       java-21); wird nur gesetzt, wenn ein JDK existiert.</li>
  *   <li>PROJECTS = {@code <filesDir>/projects} (= {@code TemplateEngineRepository.defaultProjectsDirectory()}).</li>
  *   <li>HOME wird nicht erneut gesetzt (macht {@link TermuxShellEnvironment}).</li>
@@ -140,23 +140,41 @@ public final class TermuxDevEnvironment {
         return TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/lib/jvm/java-" + version + "-openjdk";
     }
 
-    /** Höchste installierte JDK ({@code bin/java} vorhanden) oder {@code null}. */
+    /** JDK-Hauptversion, die bevorzugt wird (Ziel des Terminal-Setups und höchste, die der Kotlin Language Server versteht). */
+    static final int PREFERRED_JDK = 21;
+
+    /**
+     * Zu verwendendes JDK ({@code bin/java} vorhanden) oder {@code null}: {@value #PREFERRED_JDK}, sonst das höchste
+     * darunter (z. B. 17), erst danach das niedrigste neuere. Das höchste JDK zu nehmen war falsch: neben 21 installierte
+     * Pakete (z. B. openjdk-25) ließen den Kotlin Language Server mit „IllegalArgumentException: 25.0.4“ abstürzen.
+     */
     @Nullable
     public static String findJavaHome() {
         File[] dirs = new File(TermuxConstants.TERMUX_PREFIX_DIR_PATH + "/lib/jvm").listFiles();
         if (dirs == null) return null;
-        int best = -1;
-        File bestDir = null;
+        java.util.Map<Integer, File> found = new java.util.TreeMap<>();
         for (File dir : dirs) {
             Matcher m = JDK_DIR.matcher(dir.getName());
             if (!m.matches() || !new File(dir, "bin/java").isFile()) continue;
-            int version = Integer.parseInt(m.group(1));
-            if (version > best) {
-                best = version;
-                bestDir = dir;
+            found.put(Integer.parseInt(m.group(1)), dir);
+        }
+        Integer pick = pickJdkVersion(found.keySet());
+        return pick == null ? null : found.get(pick).getAbsolutePath();
+    }
+
+    /** Wählt die JDK-Hauptversion nach der Regel von {@link #findJavaHome()}; {@code null} bei leerer Menge. */
+    @Nullable
+    static Integer pickJdkVersion(java.util.Collection<Integer> versions) {
+        Integer below = null;
+        Integer above = null;
+        for (Integer v : versions) {
+            if (v <= PREFERRED_JDK) {
+                if (below == null || v > below) below = v;
+            } else if (above == null || v < above) {
+                above = v;
             }
         }
-        return bestDir == null ? null : bestDir.getAbsolutePath();
+        return below != null ? below : above;
     }
 
     /**
