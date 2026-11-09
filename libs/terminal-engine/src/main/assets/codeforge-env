@@ -15,7 +15,7 @@
 #   upgrade                      aktualisiert alle installierten Pakete (update + Upgrade)
 #   search <begriff>             sucht Pakete im Repo
 #   remove <paket> [paket …]     entfernt Repo-Pakete
-#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 4.1.2]   (Standard: JDK 21, CMake 4.1.2)
+#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 4.1.2] [--no-web]   (Standard: JDK 21, CMake 4.1.2, Python, Node.js/npm, TypeScript)
 #         [--no-ndk] [--no-cmake] [--no-gradle] [--no-kotlin] [--no-extras] [--minimal]
 #                                Basis-Setup für Android-Entwicklung (ohne Optionen alles):
 #                                JDK, cmdline-tools, build-tools, platform-tools, Plattform, NDK, CMake/Ninja,
@@ -1231,7 +1231,7 @@ do_setup() {
   local setup_args="$*"
   local retry_cmd="codeforge-env setup${setup_args:+ $setup_args}"
   CURRENT_SETUP_RETRY_CMD="$retry_cmd"
-  local jdk=21 ndk=r29 cmake=4.1.2 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=1 want_kotlin=1 want_extras=1
+  local jdk=21 ndk=r29 cmake=4.1.2 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=1 want_kotlin=1 want_extras=1 want_web=1
   while [ $# -gt 0 ]; do
     case "$1" in
       --jdk) jdk=$2; shift 2 ;; --ndk) ndk=$2; shift 2 ;; --cmake) cmake=$2; shift 2 ;;
@@ -1239,8 +1239,9 @@ do_setup() {
       --no-ndk) want_ndk=0; shift ;; --no-cmake) want_cmake=0; shift ;;
       --gradle) want_gradle=1; shift ;; --no-gradle) want_gradle=0; shift ;;
       --kotlin) want_kotlin=1; shift ;; --no-kotlin) want_kotlin=0; shift ;;
+      --web) want_web=1; shift ;; --no-web) want_web=0; shift ;;
       --extras) want_extras=1; shift ;; --no-extras) want_extras=0; shift ;;
-      --minimal) want_gradle=0; want_kotlin=0; want_extras=0; shift ;;
+      --minimal) want_gradle=0; want_kotlin=0; want_extras=0; want_web=0; shift ;;
       *) die "Unbekannte Option: $1" ;;
     esac
   done
@@ -1298,6 +1299,20 @@ do_setup() {
   }
   [ "$want_gradle" = 1 ] && setup_tool gradle "Gradle" gradle
   [ "$want_kotlin" = 1 ] && setup_tool kotlinc "Kotlin-Compiler" kotlin
+  if [ "$want_web" = 1 ]; then
+    setup_tool python "Python" python
+    setup_tool node "Node.js (inkl. npm)" nodejs
+    if command -v tsc >/dev/null 2>&1; then say "TypeScript bereits installiert"
+    else
+      say "== TypeScript =="
+      if ! npm install -g typescript >>"$LOG_FILE" 2>&1; then
+        err "Einrichtung abgebrochen bei TypeScript (npm install -g typescript)"
+        say "Logdatei: $LOG_FILE"
+        say "Erneut versuchen: $retry_cmd"
+        exit 1
+      fi
+    fi
+  fi
   if [ "$want_extras" = 1 ]; then
     setup_tool git "git" git
     setup_tool zip "zip" zip

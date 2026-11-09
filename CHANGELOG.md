@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Ersteinrichtung)
+- Terminal-Ersteinrichtung (`codeforge-env setup`) installiert zusätzlich Python, Node.js (inkl. npm) und TypeScript (`npm install -g typescript`); mit `--no-web` oder `--minimal` abwählbar.
+
 ### Geändert (Store, Sprachserver)
 - Einstellungen: nur noch ein Eintrag „Store“ (Reiter Installiert | Store); „Plugins“ und „Erweiterungen (LSP)“ entfallen.
 - Store: Kategorie „Sprachserver“ führt Store-Plugins und lokale Server (Kotlin LS, JDT LS, LemMinX …) zusammen. Ein Knopf „Installieren“ erledigt Plugin, Server-Programm und Voraussetzungen; „Entfernen“ löscht beides. Auch andere installierte Store-Einträge lassen sich dort entfernen.
