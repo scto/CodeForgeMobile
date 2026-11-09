@@ -41,6 +41,9 @@ internal class PluginRegistry(private val registryFile: File) {
                     contributionKinds = obj.optJSONArray("contributionKinds")?.let { a -> (0 until a.length()).map { a.getString(it) } }
                         ?: emptyList(),
                     packMembers = obj.optJSONArray("packMembers")?.let { a -> (0 until a.length()).map { a.getString(it) } }
+                        ?: emptyList(),
+                    minHostVersion = obj.optString("minHostVersion", ""),
+                    dependsOn = obj.optJSONArray("dependsOn")?.let { a -> (0 until a.length()).map { a.getString(it) } }
                         ?: emptyList()
                 )
             }
@@ -68,6 +71,8 @@ internal class PluginRegistry(private val registryFile: File) {
                     put("permissions", JSONArray(plugin.permissions.toList()))
                     put("contributionKinds", JSONArray(plugin.contributionKinds))
                     put("packMembers", JSONArray(plugin.packMembers))
+                    put("minHostVersion", plugin.minHostVersion)
+                    put("dependsOn", JSONArray(plugin.dependsOn))
                 }
             )
         }

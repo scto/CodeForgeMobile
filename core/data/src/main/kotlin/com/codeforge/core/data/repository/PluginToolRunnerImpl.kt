@@ -52,8 +52,10 @@ class PluginToolRunnerImpl @Inject constructor(
     }.flowOn(ioDispatcher)
 
     override fun run(pluginId: String, toolId: String, projectDir: String, input: String): Flow<ToolRunEvent> = channelFlow {
-        val hit = contributionRepository.contributions.value.tools
-            .firstOrNull { it.pluginId == pluginId && it.item.id == toolId }
+        val active = contributionRepository.contributions.value
+        val hit = active.tools.firstOrNull { it.pluginId == pluginId && it.item.id == toolId }
+            ?: active.agentTools.firstOrNull { it.pluginId == pluginId && it.item.id == toolId }
+                ?.let { com.codeforge.core.domain.extension.Resolved(it.pluginId, it.pluginDir, it.item.asTool()) }
         if (hit == null) {
             send(ToolRunEvent.Line("Werkzeug nicht gefunden: $pluginId/$toolId"))
             send(ToolRunEvent.Finished(-1))

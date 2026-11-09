@@ -5,6 +5,7 @@
 package com.codeforge.feature.plugins
 
 import androidx.compose.runtime.Immutable
+import com.codeforge.core.domain.extension.PluginIssue
 import com.codeforge.core.domain.extension.RequirementContribution
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.ui.LspInfoModel
@@ -15,6 +16,8 @@ import com.codeforge.core.ui.LspRuntimeInfo
 data class PluginsUiState(
     val plugins: List<InstalledPlugin> = emptyList(),
     val loadedPluginIds: Set<String> = emptySet(),
+    /** Inkompatibilitäten je Plugin-ID (zu alte App, fehlende/deaktivierte Abhängigkeit); solche Plugins werden nicht geladen. */
+    val issues: Map<String, List<PluginIssue>> = emptyMap(),
     val installProgressPercent: Int? = null,
     val isLoading: Boolean = true,
     /** Noch nicht installierte Programme je aktiviertem Plugin (`contributes.requires`). */

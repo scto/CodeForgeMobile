@@ -8,6 +8,8 @@ import android.content.Context
 import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.DeclarativeOnly
+import com.codeforge.core.domain.extension.PluginCompatibility
+import com.codeforge.core.domain.extension.PluginIssue
 import com.codeforge.core.domain.extension.PluginManifestParser
 import com.codeforge.core.domain.extension.kinds
 import com.codeforge.core.domain.model.InstalledPlugin
@@ -51,6 +53,10 @@ class PluginRepositoryImpl @Inject constructor(
     hooks: PluginHooks
 ) : PluginRepository, ContributionRepository {
 
+    override val hostVersion: String = runCatching {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+    }.getOrNull().orEmpty()
+
     private val pluginsDir = File(context.filesDir, "plugins")
     private val registry = PluginRegistry(File(pluginsDir, "registry.json"))
     private val runtime = PluginRuntime(context, lspClientRepository, hooks)
@@ -66,13 +72,21 @@ class PluginRepositoryImpl @Inject constructor(
 
     /** Liest die Manifeste aller aktivierten Plugins neu ein (deklarativ, unabhängig davon, ob Plugin-Code lädt). */
     private fun refreshContributions() {
-        val entries = _installedPlugins.value.filter { it.isEnabled }.mapNotNull { plugin ->
+        val entries = _installedPlugins.value.filter { it.isEnabled && issuesOf(it).isEmpty() }.mapNotNull { plugin ->
             val dir = File(pluginsDir, plugin.id)
             val manifestFile = File(dir, "plugin.json").takeIf { it.isFile } ?: return@mapNotNull null
             PluginManifestParser.parse(manifestFile.readText()).getOrNull()?.let { it to dir.absolutePath }
         }
         _contributions.value = ActiveContributions.of(entries)
     }
+
+    /** Probleme eines installierten Plugins gegen die aktuelle App-Version und den Bestand. */
+    private fun issuesOf(plugin: InstalledPlugin): List<PluginIssue> = PluginCompatibility.check(
+        minHostVersion = plugin.minHostVersion,
+        dependsOn = plugin.dependsOn,
+        hostVersion = hostVersion.ifBlank { Int.MAX_VALUE.toString() },
+        installed = _installedPlugins.value.associate { it.id to it.isEnabled },
+    )
 
     init {
         pluginsDir.mkdirs()
@@ -89,6 +103,7 @@ class PluginRepositoryImpl @Inject constructor(
     }
 
     private fun attemptLoad(plugin: InstalledPlugin) {
+        if (issuesOf(plugin).isNotEmpty()) return // inkompatibel: bleibt installiert, wird aber nicht geladen
         if (plugin.isDeclarativeOnly) return // nichts zu laden, Contributions werden deklarativ gelesen
         runtime.load(plugin, File(pluginsDir, plugin.id))
             .onSuccess { _loadedPluginIds.update { it + plugin.id } }
@@ -143,13 +158,28 @@ class PluginRepositoryImpl @Inject constructor(
                 DeclarativeOnly.violation(files, manifest, allowTools)?.let { error("Nur deklarative Plugins erlaubt: $it") }
             }
 
+            // Zu neue Anforderung: vor jeder Änderung ablehnen, die installierte Version bleibt unangetastet.
+            if (manifest.minHostVersion.isNotBlank() && hostVersion.isNotBlank() &&
+                PluginCompatibility.compareVersions(hostVersion, manifest.minHostVersion) < 0
+            ) {
+                error("Plugin $id benötigt CodeForge ${manifest.minHostVersion} oder neuer (installiert: $hostVersion)")
+            }
+
             val finalDir = File(pluginsDir, id)
-            if (finalDir.exists()) {
+            // Rollback: die alte Version wird nur beiseitegelegt und bei einem Fehler wiederhergestellt.
+            val backupDir = File(pluginsDir, "_bak_$id")
+            val hadOld = finalDir.exists()
+            if (hadOld) {
                 runtime.unload(id)
                 _loadedPluginIds.update { it - id }
-                finalDir.deleteRecursively()
+                backupDir.deleteRecursively()
+                if (!finalDir.renameTo(backupDir)) error(Res.string(R.string.plugin_konnte_plugin_verzeichnis_nicht_finali))
             }
-            if (!tempDir.renameTo(finalDir)) error(Res.string(R.string.plugin_konnte_plugin_verzeichnis_nicht_finali))
+            if (!tempDir.renameTo(finalDir)) {
+                if (hadOld) backupDir.renameTo(finalDir)
+                error(Res.string(R.string.plugin_konnte_plugin_verzeichnis_nicht_finali))
+            }
+            backupDir.deleteRecursively()
 
             val plugin = InstalledPlugin(
                 id = id,
@@ -162,7 +192,9 @@ class PluginRepositoryImpl @Inject constructor(
                 publisher = manifest.publisher,
                 permissions = manifest.permissions,
                 contributionKinds = manifest.contributes.kinds(),
-                packMembers = manifest.contributes.extensionPack
+                packMembers = manifest.contributes.extensionPack,
+                minHostVersion = manifest.minHostVersion,
+                dependsOn = manifest.dependsOn
             )
 
             val updated = _installedPlugins.value.filterNot { it.id == id } + plugin
@@ -188,6 +220,7 @@ class PluginRepositoryImpl @Inject constructor(
                 ?: error(Res.string(R.string.plugin_plugin_nicht_gefunden, pluginId))
 
             if (enabled) {
+                issuesOf(plugin).firstOrNull()?.let { error(it.describe()) }
                 if (!plugin.isDeclarativeOnly) {
                     runtime.load(plugin, File(pluginsDir, pluginId)).getOrThrow()
                     _loadedPluginIds.update { it + pluginId }
@@ -224,6 +257,12 @@ class PluginRepositoryImpl @Inject constructor(
             _installedPlugins.value = updated
             refreshContributions()
         }
+    }
+
+    private fun PluginIssue.describe(): String = when (this) {
+        is PluginIssue.HostTooOld -> "Benötigt CodeForge $required oder neuer (installiert: $actual)"
+        is PluginIssue.DependencyMissing -> "Benötigtes Plugin fehlt: $pluginId"
+        is PluginIssue.DependencyDisabled -> "Benötigtes Plugin ist deaktiviert: $pluginId"
     }
 
     private fun countZipEntries(file: File): Int {

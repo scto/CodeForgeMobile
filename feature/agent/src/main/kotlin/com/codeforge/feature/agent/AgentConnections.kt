@@ -41,6 +41,10 @@ class AgentConnections(private val dir: File) {
     fun projectServers(root: File): List<McpServerConfig> =
         File(root, ".mcp.json").takeIf { it.isFile }?.let { McpServerConfig.parseFile(it.readText()) }.orEmpty()
 
+    /** MCP-Server aus aktiven Plugins (`contributes.mcpServers`); wie Projekt-Server unvertraut, bis der Nutzer sie freigibt. */
+    @Volatile
+    var pluginServers: List<McpServerConfig> = emptyList()
+
     private fun key(c: McpServerConfig) = c.name + "|" + c.identity
 
     private fun trusted(): Set<String> = trustFile.takeIf { it.isFile }
@@ -58,7 +62,8 @@ class AgentConnections(private val dir: File) {
         val ok = trusted()
         val app = appServers().map { McpServerEntry(it, McpSource.APP, trusted = true) }
         val project = root?.let(::projectServers).orEmpty().map { McpServerEntry(it, McpSource.PROJECT, trusted = key(it) in ok) }
-        return app + project
+        val plugins = pluginServers.map { McpServerEntry(it, McpSource.PROJECT, trusted = key(it) in ok) }
+        return app + project + plugins
     }
 
     private val contextTrustFile get() = File(dir, "context-trust.json")

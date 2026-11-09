@@ -32,6 +32,8 @@ import com.codeforge.libs.agent.PermissionMode
 import com.codeforge.libs.agent.TextDiff
 import com.codeforge.libs.agent.TodoStore
 import com.codeforge.libs.agent.ToolApprover
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.PluginToolRunner
 import com.codeforge.libs.mcp.McpManager
 import com.codeforge.libs.mcp.McpServerConfig
 import com.codeforge.libs.mcp.McpSource
@@ -62,6 +64,8 @@ class AgentViewModel @Inject constructor(
     private val historyStore: AgentHistoryStore,
     private val mcp: McpManager,
     private val connections: AgentConnections,
+    private val contributionRepository: ContributionRepository? = null,
+    private val pluginToolRunner: PluginToolRunner? = null,
     private val llmFactory: AgentLlmFactory,
 ) : ViewModel() {
 
@@ -96,6 +100,14 @@ class AgentViewModel @Inject constructor(
     private class Session(val root: File, val checkpoint: CheckpointWorkspace, val builtins: List<AgentTool>, val todos: TodoStore)
 
     init {
+        contributionRepository?.let { repo ->
+            viewModelScope.launch {
+                repo.contributions.collect { active ->
+                    connections.pluginServers = PluginAgentTools.mcpServers(active)
+                    syncMcp()
+                }
+            }
+        }
         viewModelScope.launch { lspClient.diagnostics.collect { (path, list) -> diagnostics.update(path, list) } }
         viewModelScope.launch {
             mcp.servers.collect { list ->
@@ -153,7 +165,14 @@ class AgentViewModel @Inject constructor(
 
     /** Eingebaute Werkzeuge plus die der verbundenen MCP-Server (Stand zum Zeitpunkt des Aufrufs). */
     private fun registryFor(session: Session?): AgentToolRegistry? =
-        session?.let { AgentToolRegistry(it.builtins + mcp.tools.value) }
+        session?.let { AgentToolRegistry(it.builtins + mcp.tools.value + pluginTools(it.root)) }
+
+    /** Agent-Werkzeuge aktiver Plugins (`contributes.agentTools`) für das Projekt [root]. */
+    private fun pluginTools(root: File): List<AgentTool> {
+        val repo = contributionRepository ?: return emptyList()
+        val runner = pluginToolRunner ?: return emptyList()
+        return PluginAgentTools.tools(repo.contributions.value, runner, root.path)
+    }
 
     private fun syncMcp(rootPath: String = _state.value.rootPath) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -199,7 +218,7 @@ class AgentViewModel @Inject constructor(
     private fun trustMcpServer(name: String) {
         val root = _state.value.rootPath.takeIf { it.isNotEmpty() }?.let(::File) ?: return
         viewModelScope.launch(Dispatchers.IO) {
-            connections.projectServers(root).firstOrNull { it.name == name }?.let(connections::trust)
+            (connections.projectServers(root) + connections.pluginServers).firstOrNull { it.name == name }?.let(connections::trust)
             syncMcp()
         }
     }
@@ -291,7 +310,7 @@ class AgentViewModel @Inject constructor(
             turnId = current.checkpoint.beginTurn()
 
             val context = loadContext(current.root)
-            val registry = AgentToolRegistry(current.builtins + mcp.tools.value + context.tools())
+            val registry = AgentToolRegistry(current.builtins + mcp.tools.value + pluginTools(current.root) + context.tools())
             val notes = mcp.serverNotes()
             val loop = AgentLoop(
                 llm = llmFactory.create(options),

@@ -11,6 +11,14 @@ plugins {
     alias(libs.plugins.roborazzi) apply false
     // Dokka im Root: aggregiert die API-Doku aller Module (./gradlew dokkaGenerate -> build/dokka/html)
     alias(libs.plugins.dokka)
+    // Binary-Compatibility-Validator: friert die öffentliche API des Plugin-SDK (:libs:plugin-api) in libs/plugin-api/api/ ein.
+    // Änderung beabsichtigt → `./gradlew :libs:plugin-api:apiDump` ausführen und die .api-Datei mit committen.
+    alias(libs.plugins.binary.compatibility.validator)
+}
+
+apiValidation {
+    // Nur das SDK ist ein Vertrag mit Plugin-Autoren; alle anderen Module sind App-intern.
+    ignoredProjects.addAll(subprojects.map { it.name }.filter { it != "plugin-api" })
 }
 
 // Dokka auf jedes Kotlin-Modul anwenden und in die Aggregation aufnehmen; Mermaid-Diagramme in KDoc ```mermaid.

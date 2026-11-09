@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugins)
+- Manifest: `minHostVersion` und `dependsOn`. Zu neue Plugins werden bei der Installation abgelehnt (installierte Version bleibt, Rollback bei Fehlern); inkompatible oder von fehlenden/deaktivierten Plugins abhängige Plugins werden nicht geladen und im Plugins-Bildschirm mit Grund angezeigt.
+- Erweiterungspunkte für den KI-Agenten: `contributes.agentTools` (Plugin-Werkzeuge) und `contributes.mcpServers` (MCP-Server, bis zur Freigabe unvertraut); Berechtigungen `agent` + `shell`, nur per Sideload.
+- Plugin-SDK-API-Baseline (Binary-Compatibility-Validator) für `:libs:plugin-api`; `apiCheck` läuft in den Build-Workflows.
+
 ## [3.0.5] - 2026-11-07
 
 ### Hinzugefügt (KI-Agent, Grundlage)

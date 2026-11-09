@@ -7,6 +7,7 @@ package com.codeforge.feature.plugins
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.PluginCompatibility
 import com.codeforge.core.domain.extension.PluginToolRunner
 import com.codeforge.core.domain.extension.ToolRunEvent
 import com.codeforge.core.domain.model.PluginInstallEvent
@@ -56,7 +57,16 @@ class PluginsViewModel @Inject constructor(
             pluginRepository.loadedPluginIds
         ) { plugins, loadedIds -> plugins to loadedIds }
             .onEach { (plugins, loadedIds) ->
-                _uiState.update { it.copy(plugins = plugins, loadedPluginIds = loadedIds, isLoading = false) }
+                val enabledById = plugins.associate { p -> p.id to p.isEnabled }
+                val issues = plugins.associate { p ->
+                    p.id to PluginCompatibility.check(
+                        minHostVersion = p.minHostVersion,
+                        dependsOn = p.dependsOn,
+                        hostVersion = pluginRepository.hostVersion.ifBlank { Int.MAX_VALUE.toString() },
+                        installed = enabledById,
+                    )
+                }.filterValues { it.isNotEmpty() }
+                _uiState.update { it.copy(plugins = plugins, loadedPluginIds = loadedIds, issues = issues, isLoading = false) }
             }
             .launchIn(viewModelScope)
     }

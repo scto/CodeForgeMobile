@@ -2388,4 +2388,7 @@
     <string name="agent_mcp_enable">Enable</string>
     <string name="agent_mcp_disable">Disable</string>
     <string name="agent_mcp_remove">Remove</string>
+    <string name="plugins_issue_host_too_old">Not loaded: requires CodeForge %1$s or newer (installed: %2$s).</string>
+    <string name="plugins_issue_dependency_missing">Not loaded: required plugin \'%1$s\' is not installed.</string>
+    <string name="plugins_issue_dependency_disabled">Not loaded: required plugin \'%1$s\' is disabled.</string>
 </resources>

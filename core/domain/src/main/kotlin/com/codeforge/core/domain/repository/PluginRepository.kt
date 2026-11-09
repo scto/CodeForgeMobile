@@ -17,6 +17,9 @@ interface PluginRepository {
     /** Installierte Plugins. */
     val installedPlugins: Flow<List<InstalledPlugin>>
 
+    /** `versionName` der App, gegen die `minHostVersion` geprüft wird; leer = unbekannt (keine Prüfung). */
+    val hostVersion: String get() = ""
+
     /** Zur Laufzeit tatsächlich geladene Plugin-IDs (nicht persistiert, geräteweit pro Prozess). */
     val loadedPluginIds: StateFlow<Set<String>>
 

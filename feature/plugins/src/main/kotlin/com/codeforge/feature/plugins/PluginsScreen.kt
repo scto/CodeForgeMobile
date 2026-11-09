@@ -177,6 +177,7 @@ private fun PluginsScreen(
                         plugin = plugin,
                         isLoaded = plugin.id in uiState.loadedPluginIds,
                         missing = uiState.missingRequirements[plugin.id].orEmpty(),
+                        issues = uiState.issues[plugin.id].orEmpty(),
                         onEvent = onEvent
                     )
                 }
@@ -190,6 +191,7 @@ private fun PluginRow(
     plugin: InstalledPlugin,
     isLoaded: Boolean,
     missing: List<com.codeforge.core.domain.extension.RequirementContribution>,
+    issues: List<com.codeforge.core.domain.extension.PluginIssue>,
     onEvent: (PluginsUiEvent) -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
@@ -238,6 +240,22 @@ private fun PluginRow(
                 Text(
                     plugin.description,
                     style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            issues.forEach { issue ->
+                Text(
+                    when (issue) {
+                        is com.codeforge.core.domain.extension.PluginIssue.HostTooOld ->
+                            stringRes(R.string.plugins_issue_host_too_old, issue.required, issue.actual)
+                        is com.codeforge.core.domain.extension.PluginIssue.DependencyMissing ->
+                            stringRes(R.string.plugins_issue_dependency_missing, issue.pluginId)
+                        is com.codeforge.core.domain.extension.PluginIssue.DependencyDisabled ->
+                            stringRes(R.string.plugins_issue_dependency_disabled, issue.pluginId)
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }

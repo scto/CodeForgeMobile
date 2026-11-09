@@ -39,9 +39,21 @@ object PluginManifestParser {
         val unknown = permissions - PluginPermissions.ALL
         require(unknown.isEmpty()) { "Unbekannte Berechtigungen: ${unknown.joinToString()}" }
 
+        val minHostVersion = root.string("minHostVersion").orEmpty()
+        require(minHostVersion.isEmpty() || Regex("\\d+(\\.\\d+)*([-+][A-Za-z0-9.]+)?").matches(minHostVersion)) {
+            "Ungültige minHostVersion: $minHostVersion"
+        }
+        val dependsOn = root.stringList("dependsOn")
+        require(dependsOn.all { ID_REGEX.matches(it) && !it.contains("..") }) { "dependsOn enthält eine ungültige Plugin-ID" }
+        require(id !in dependsOn) { "Ein Plugin kann nicht von sich selbst abhängen" }
+
         val parsedContributes = parseContributes(root["contributes"] as? JsonObject)
         require(parsedContributes.tools.isEmpty() || PluginPermissions.SHELL in permissions) {
             "contributes.tools benötigt die Berechtigung '${PluginPermissions.SHELL}'"
+        }
+        require((parsedContributes.agentTools.isEmpty() && parsedContributes.mcpServers.isEmpty()) ||
+            (PluginPermissions.AGENT in permissions && PluginPermissions.SHELL in permissions)) {
+            "contributes.agentTools/mcpServers benötigen die Berechtigungen '${PluginPermissions.AGENT}' und '${PluginPermissions.SHELL}'"
         }
         PluginManifest(
             id = id,
@@ -52,6 +64,8 @@ object PluginManifestParser {
             apiVersion = apiVersion,
             entryPointClass = root.string("entryPointClass")?.takeIf { it.isNotBlank() },
             permissions = permissions,
+            minHostVersion = minHostVersion,
+            dependsOn = dependsOn,
             contributes = parsedContributes
         )
     }
@@ -148,6 +162,35 @@ object PluginManifestParser {
                     timeoutSeconds = timeout
                 )
             },
+            agentTools = obj.objects("agentTools").map {
+                val command = it.stringList("command")
+                require(command.isNotEmpty() && command.first().isNotBlank()) { "agentTools: 'command' darf nicht leer sein" }
+                val timeout = (it["timeoutSeconds"] as? JsonPrimitive)?.intOrNull ?: 60
+                require(timeout in 1..600) { "agentTools: 'timeoutSeconds' muss 1..600 sein" }
+                val id = it.req("id")
+                require(Regex("[a-z0-9_]{1,40}").matches(id)) { "agentTools: ID '$id' muss aus a-z, 0-9, _ bestehen (max. 40)" }
+                AgentToolContribution(
+                    id = id,
+                    description = it.req("description"),
+                    command = command,
+                    kind = when (it.string("kind")?.lowercase()) {
+                        null, "execute" -> AgentToolKind.EXECUTE
+                        "read" -> AgentToolKind.READ
+                        else -> throw IllegalArgumentException("agentTools: 'kind' muss read oder execute sein")
+                    },
+                    inputDescription = it.string("inputDescription").orEmpty(),
+                    timeoutSeconds = timeout
+                )
+            }.also { list -> require(list.map { t -> t.id }.toSet().size == list.size) { "agentTools: doppelte IDs" } },
+            mcpServers = obj.objects("mcpServers").map {
+                val url = it.string("url")?.takeIf { u -> u.isNotBlank() }
+                val cmd = it.string("command")?.takeIf { c -> c.isNotBlank() }
+                require((url == null) != (cmd == null)) { "mcpServers: genau eines von 'url' oder 'command' angeben" }
+                val name = it.req("name")
+                require(Regex("[A-Za-z0-9_-]{1,32}").matches(name)) { "mcpServers: ungültiger Name '$name'" }
+                require(url == null || url.startsWith("https://") || url.startsWith("http://")) { "mcpServers: 'url' muss http(s) sein" }
+                McpServerContribution(name = name, url = url, command = cmd, args = it.stringList("args"))
+            }.also { list -> require(list.map { s -> s.name }.toSet().size == list.size) { "mcpServers: doppelte Namen" } },
             requires = obj.objects("requires").map {
                 val manager = RequirementManager.of(it.req("manager"))
                     ?: throw IllegalArgumentException("requires: 'manager' muss pkg, npm oder pip sein")

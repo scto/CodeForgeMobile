@@ -24,9 +24,11 @@ object PluginPermissions {
     const val SHELL = "shell"
     /** Auf Language-Server zugreifen. */
     const val LSP = "lsp"
+    /** Werkzeuge und MCP-Server für den KI-Agenten beisteuern (zusätzlich zu [SHELL], da sie Programme starten). */
+    const val AGENT = "agent"
 
     /** Menge aller bekannten Berechtigungen. */
-    val ALL: Set<String> = setOf(COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP)
+    val ALL: Set<String> = setOf(COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT)
 }
 
 /**
@@ -41,6 +43,10 @@ data class PluginManifest(
     val apiVersion: Int = 1,
     val entryPointClass: String? = null,
     val permissions: Set<String> = emptySet(),
+    /** Mindestversion der App (`versionName`); leer = keine Einschränkung. */
+    val minHostVersion: String = "",
+    /** IDs von Plugins, die installiert und aktiviert sein müssen. */
+    val dependsOn: List<String> = emptyList(),
     val contributes: Contributes = Contributes()
 ) {
     /** true, wenn das Plugin keinen ausführbaren Code mitbringt (im Store erlaubt). */
@@ -61,13 +67,18 @@ data class Contributes(
     /** Aufrufbare Werkzeuge im „PT"-Menü des Dateibaums (führen Programme aus → nur Sideload, Berechtigung `shell`). */
     val tools: List<ToolContribution> = emptyList(),
     /** Programme, die dieses Plugin benötigt und die die App nach Bestätigung installieren kann. */
-    val requires: List<RequirementContribution> = emptyList()
+    val requires: List<RequirementContribution> = emptyList(),
+    /** Werkzeuge, die der KI-Agent aufrufen darf (Berechtigungen `agent` + `shell`, nur Sideload). */
+    val agentTools: List<AgentToolContribution> = emptyList(),
+    /** MCP-Server, die der Agent nach Freigabe durch den Nutzer verbindet (Berechtigungen `agent` + `shell`). */
+    val mcpServers: List<McpServerContribution> = emptyList()
 ) {
     /** Ob das Plugin keinerlei Contributions enthält. */
     val isEmpty: Boolean
         get() = colorThemes.isEmpty() && iconThemes.isEmpty() && languagePacks.isEmpty() &&
             grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty() &&
-            formatters.isEmpty() && tools.isEmpty() && requires.isEmpty()
+            formatters.isEmpty() && tools.isEmpty() && requires.isEmpty() &&
+            agentTools.isEmpty() && mcpServers.isEmpty()
 }
 
 /** Farbschema: [path] zeigt auf eine JSON-Datei (siehe docs/extensions.md) relativ zum Plugin-Verzeichnis. */
@@ -186,6 +197,36 @@ data class ToolContribution(
     val timeoutSeconds: Int = 120
 )
 
+/** Wirkungsart eines Agent-Werkzeugs aus einem Plugin; EXECUTE verlangt die Freigabe im Agenten. */
+enum class AgentToolKind { READ, EXECUTE }
+
+/**
+ * Werkzeug für den KI-Agenten. Das Modell liefert genau einen Text-Parameter `input`, der `${input}` im [command] ersetzt
+ * (jedes Listenelement bleibt ein Argument, keine Shell). Weitere Platzhalter: `${projectDir}`, `${pluginDir}`, `${home}`.
+ * [inputDescription] erklärt dem Modell, was in `input` stehen soll.
+ */
+data class AgentToolContribution(
+    val id: String,
+    val description: String,
+    val command: List<String>,
+    val kind: AgentToolKind = AgentToolKind.EXECUTE,
+    val inputDescription: String = "",
+    val timeoutSeconds: Int = 60
+) {
+    /** Dasselbe Werkzeug als [ToolContribution], damit der gemeinsame Runner es starten kann. */
+    fun asTool(): ToolContribution = ToolContribution(
+        id = id, label = id, description = description, command = command, timeoutSeconds = timeoutSeconds
+    )
+}
+
+/** MCP-Server eines Plugins: entweder [url] (HTTP) oder [command] + [args] (stdio). Läuft erst nach Freigabe. */
+data class McpServerContribution(
+    val name: String,
+    val url: String? = null,
+    val command: String? = null,
+    val args: List<String> = emptyList()
+)
+
 /** Paketmanager, über den ein Plugin Voraussetzungen anfordern kann. */
 enum class RequirementManager(val id: String) {
     PKG("pkg"), NPM("npm"), PIP("pip");
@@ -218,4 +259,6 @@ fun Contributes.kinds(): List<String> = buildList {
     if (formatters.isNotEmpty()) add("formatters")
     if (tools.isNotEmpty()) add("tools")
     if (requires.isNotEmpty()) add("requires")
+    if (agentTools.isNotEmpty()) add("agentTools")
+    if (mcpServers.isNotEmpty()) add("mcpServers")
 }

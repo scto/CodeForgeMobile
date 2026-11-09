@@ -84,7 +84,7 @@ jobs:
         if: inputs.run_tests == true
         run: |
           chmod +x gradlew
-          ./gradlew testDebugUnitTest --stacktrace
+          ./gradlew testDebugUnitTest :libs:plugin-api:apiCheck --stacktrace
 
       - name: Debug-APK bauen
         run: |

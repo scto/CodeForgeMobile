@@ -180,6 +180,42 @@ class MyPlugin : CodeForgePlugin {
 * **Grenzen:** max. 100 Befehle/Menüeinträge je Plugin, Titel ≤ 120 Zeichen, Nachrichten ≤ 500 Zeichen, Befehl wird nach 60 s abgebrochen.
 * Beim Deaktivieren/Deinstallieren/Fehlschlagen von `onLoad` werden alle Registrierungen des Plugins entfernt.
 
+## Kompatibilität (`minHostVersion`, `dependsOn`)
+
+```json
+"minHostVersion": "3.1.0",
+"dependsOn": ["codeforge.python-tools"]
+```
+
+* `minHostVersion`: Mindestversion der App (`versionName`, numerisch je Segment verglichen). Ist die App älter, wird die **Installation abgelehnt**; eine bereits installierte Version bleibt unangetastet. Wird die App später ersetzt, bleibt das Plugin installiert, aber ungeladen, und der Plugins-Bildschirm nennt den Grund.
+* `dependsOn`: IDs von Plugins, die installiert **und aktiviert** sein müssen. Fehlt eines, wird das Plugin nicht geladen und nicht aktivierbar; der Plugins-Bildschirm zeigt das fehlende bzw. deaktivierte Plugin.
+* Beim Aktualisieren wird die alte Version erst beiseitegelegt und bei einem Fehler wiederhergestellt (Rollback).
+
+## Beiträge für den KI-Agenten (`agentTools`, `mcpServers`)
+
+Berechtigungen `agent` **und** `shell`; nur per Sideload (der Store lehnt sie ab).
+
+```json
+"permissions": ["agent", "shell"],
+"contributes": {
+  "agentTools": [
+    { "id": "lint", "description": "Prüft eine Datei", "kind": "read",
+      "inputDescription": "Relativer Dateipfad", "command": ["mylint", "${input}"], "timeoutSeconds": 60 }
+  ],
+  "mcpServers": [
+    { "name": "docs", "url": "https://example.org/mcp" },
+    { "name": "local", "command": "node", "args": ["${pluginDir}/server.js"] }
+  ]
+}
+```
+
+* `agentTools`: Das Modell sieht `plugin_<plugin>_<id>` mit einem Text-Parameter `input`, der `${input}` ersetzt (jedes Listenelement bleibt ein Argument, keine Shell; weitere Platzhalter `${projectDir}`, `${pluginDir}`, `${home}`). `kind: "read"` läuft ohne Rückfrage, `execute` (Standard) folgt dem Berechtigungsmodus des Agenten.
+* `mcpServers`: Verbindung als `<plugin>-<name>`; wie Server aus `.mcp.json` **unvertraut**, bis der Nutzer sie im Verbindungs-Panel freigibt.
+
+## Plugin-SDK-API (`:libs:plugin-api`)
+
+Die öffentliche Binär-API des SDK ist in `libs/plugin-api/api/plugin-api.api` eingefroren (Binary-Compatibility-Validator). `./gradlew :libs:plugin-api:apiCheck` läuft in CI; eine beabsichtigte Änderung wird mit `./gradlew :libs:plugin-api:apiDump` übernommen und die Datei mit committet.
+
 ## Sicherheit
 
 * ZIP-Einträge werden gegen Zip-Slip geprüft; Contribution-Dateien dürfen das Plugin-Verzeichnis nicht verlassen (kanonischer Pfad).
@@ -197,6 +233,7 @@ class MyPlugin : CodeForgePlugin {
 | `snippets` | umgesetzt (Phase 5), schreibgeschützt |
 | `formatters` | umgesetzt: stdin→stdout über externes Programm, nicht auf Gerät getestet |
 | `tools` | umgesetzt: PT-Menü im Dateibaum, Live-Ausgabe, nur Sideload; nicht auf Gerät getestet |
+| `agentTools` / `mcpServers` | umgesetzt (Sideload); nicht auf Gerät getestet |
 | `requires` | umgesetzt: Prüfung + Installation nach Bestätigung (Plugins-Bildschirm, PT-Menü); nicht auf Gerät getestet |
 | `extensionPack` | umgesetzt (Phase 5/7): Store installiert fehlende Mitglieder aus dem Katalog (Tiefe ≤ 4) |
 | Store-Policy | umgesetzt (Phase 7): nur deklarative Kategorien (`theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `bundle`); `installFromFile(declarativeOnly = true)` lehnt Archive mit `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge ab; Code-Plugins nur per Sideload |

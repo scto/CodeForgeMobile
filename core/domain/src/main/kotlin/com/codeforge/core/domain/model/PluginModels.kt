@@ -18,7 +18,11 @@ data class InstalledPlugin(
     /** Namen der beigesteuerten Contribution-Arten (z. B. "colorThemes"), für die Anzeige. */
     val contributionKinds: List<String> = emptyList(),
     /** IDs der Plugins, die dieses Bundle (`extensionPack`) zusammenfasst. */
-    val packMembers: List<String> = emptyList()
+    val packMembers: List<String> = emptyList(),
+    /** Mindestversion der App; leer = keine Einschränkung. */
+    val minHostVersion: String = "",
+    /** IDs der Plugins, von denen dieses abhängt. */
+    val dependsOn: List<String> = emptyList()
 ) {
     /** Ob das Plugin keinen ausführbaren Code enthält. */
     val isDeclarativeOnly: Boolean get() = entryPointClass == null
