@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Einstellungen: Paketmanager)
+- Neuer Screen „Paketmanager“ (Einstellungen → Paketmanager) nach dem Vorbild des SDK-Managers: zeigt das APT-Repo (`scto/terminal-packages-codeforge`) samt der großen Pakete (`large-packages`), mit Suche, Filtern (Alle/Installiert/Updates/Große Pakete), Installieren, Aktualisieren, Entfernen (mit Bestätigung), „Paketlisten aktualisieren“ und „Alle aktualisieren“. Systempakete (`termux-*`, `apt`, `bash` …) sind vor dem Entfernen geschützt.
+- `codeforge-env pkglist` (Zeilen `CFSDK|PKG|…`), `PackageRepository` (:core:domain) und `TermuxScriptPackageRepository` (:libs:terminal-engine); Tests: `scripts/test_codeforge_env_pkglist.sh`, `SdkScriptProtocolTest`, `PackageManagerViewModelTest`.
+
 ### Geändert (Ersteinrichtung: Fortschritt)
 - `codeforge-env setup` zählt jetzt über alle Schritte (SDK-Komponenten und Werkzeuge): „== (9/15) Python ==“ statt getrennter Zähler, und meldet einen Gesamtfortschritt in Prozent (`CFSDK|PROGRESS`).
 

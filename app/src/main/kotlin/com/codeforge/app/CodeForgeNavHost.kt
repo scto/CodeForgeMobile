@@ -71,6 +71,7 @@ internal object Routes {
     const val SETTINGS_AI = "settings_ai"
     const val SETTINGS_HELP = "settings_help"
     const val SETTINGS_STORE = "settings_store"
+    const val SETTINGS_PACKAGES = "settings_packages"
     const val SETTINGS_ABOUT = "settings_about"
     const val SETTINGS_BASTI = "settings_basti"
     const val TERMINAL = "terminal"
@@ -212,7 +213,8 @@ fun CodeForgeNavHost(
                 onNavigateToHelp = { navController.navigate(Routes.SETTINGS_HELP) },
                 onNavigateToAbout = { navController.navigate(Routes.SETTINGS_ABOUT) },
                 onNavigateToBasti = { navController.navigate(Routes.SETTINGS_BASTI) },
-                onNavigateToStore = { navController.navigate(Routes.SETTINGS_STORE) }
+                onNavigateToStore = { navController.navigate(Routes.SETTINGS_STORE) },
+                onNavigateToPackages = { navController.navigate(Routes.SETTINGS_PACKAGES) }
             )
         }
         composable(Routes.SETTINGS_THEME) {
@@ -240,6 +242,9 @@ fun CodeForgeNavHost(
         }
         composable(Routes.SETTINGS_STORE) {
             StoreRoute(onBack = { navigateBackOrStart() })
+        }
+        composable(Routes.SETTINGS_PACKAGES) {
+            com.codeforge.feature.settings.packages.PackageManagerRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_HELP) {
             HelpRoute(onBack = { navigateBackOrStart() })

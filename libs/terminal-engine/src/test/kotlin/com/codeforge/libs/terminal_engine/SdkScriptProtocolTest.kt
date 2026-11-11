@@ -28,4 +28,22 @@ class SdkScriptProtocolTest {
         assertFalse(SdkScriptProtocol.isSafeId("a;rm -rf /"))
         assertFalse(SdkScriptProtocol.isSafeId("x'y"))
     }
+
+    @Test fun parsesPackageLines() {
+        assertEquals(
+            SdkScriptLine.Pkg("git", "2.1", "2.2", 812, "U", "Distributed | VCS"),
+            SdkScriptProtocol.parse("CFSDK|PKG|git|2.1|2.2|812|U|Distributed | VCS"),
+        )
+        assertEquals(
+            SdkScriptLine.Pkg("jq", null, "1.7", 0, "", ""),
+            SdkScriptProtocol.parse("CFSDK|PKG|jq||1.7|0||"),
+        )
+    }
+
+    @Test fun rejectsUnsafePackageNames() {
+        assertNull(SdkScriptProtocol.parse("CFSDK|PKG|a;rm|1|1|1||x"))
+        assertTrue(SdkScriptProtocol.isSafePackageName("libc++_x".replace("_", "-")))
+        assertFalse(SdkScriptProtocol.isSafePackageName("-bad"))
+        assertFalse(SdkScriptProtocol.isSafePackageName("a b"))
+    }
 }

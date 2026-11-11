@@ -13,6 +13,7 @@
 #   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 30 MiB über large-packages.txt, sonst per pkg)
 #   update                       aktualisiert die Paketlisten des CodeForgeMobile-APT-Repos
 #   upgrade                      aktualisiert alle installierten Pakete (update + Upgrade)
+#   pkglist                      alle Repo-Pakete mit Version, Größe und Status (für den Paketmanager der App)
 #   search <begriff>             sucht Pakete im Repo
 #   remove <paket> [paket …]     entfernt Repo-Pakete
 #   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 4.1.2] [--no-web]   (Standard: JDK 21, CMake 4.1.2, Python, Node.js/npm, TypeScript)
@@ -28,6 +29,7 @@
 # --machine: maschinenlesbare Zeilen "CFSDK|TYP|…" (für den SDK-Manager der App):
 #   CFSDK|ITEM|id|version|installiert(0/1)|pfad
 #   CFSDK|PROGRESS|prozent|nachricht
+#   CFSDK|PKG|name|installiert|verfügbar|größe_kib|flags(L=groß,U=Update,P=geschützt)|beschreibung
 #   CFSDK|OK|id
 #   CFSDK|ERR|nachricht
 #
@@ -1388,8 +1390,66 @@ do_upgrade() { do_update; apt_run upgrade -y || die "Upgrade fehlgeschlagen (Log
 do_search() { [ $# -ge 1 ] || die "search braucht einen Suchbegriff"; apt-cache search "$@"; }
 do_remove() { [ $# -ge 1 ] || die "remove braucht mindestens einen Paketnamen"; apt_run remove -y "$@" || die "Entfernen fehlgeschlagen: $*"; ok "entfernt: $*"; }
 
+# Paketübersicht des CodeForge-APT-Repos für den Paketmanager der App.
+# Quellen: apt-cache dumpavail (Index), large-packages.txt (große Pakete, nicht im Index), dpkg-query (installiert).
+# Zeilen (--machine): CFSDK|PKG|name|installiert|verfügbar|größe_kib|flags|beschreibung
+#   flags: L = großes Paket (Release-Asset), U = Update verfügbar, P = geschützt (Essential/required/Kernpakete)
+do_pkglist() {
+  local man="$TMP/.cfsdk-large-packages.txt" arch base d
+  d=$(mktemp -d "$TMP/.cfsdk-pkglist.XXXXXX") || die "Kein temporäres Verzeichnis"
+  # shellcheck disable=SC2064
+  trap "rm -rf '$d'" RETURN
+  arch=$(dpkg --print-architecture 2>/dev/null || echo "${CF_ARCH:-aarch64}")
+  base=$(apt_base_url)
+  if [ -n "$base" ] && [ ! -s "$man" ]; then
+    curl -fsSL --max-time 15 "$base/large-packages.txt" >"$man" 2>/dev/null || rm -f "$man"
+  fi
+  # Index -> name, version, größe(KiB), geschützt, beschreibung
+  apt-cache dumpavail 2>/dev/null | awk '
+    BEGIN { RS=""; FS="\n"; OFS="\t" }
+    { n=""; v=""; sz=0; pr=0; ds=""
+      for (i=1; i<=NF; i++) {
+        if ($i ~ /^Package: /) n=substr($i,10)
+        else if ($i ~ /^Version: /) v=substr($i,10)
+        else if ($i ~ /^Installed-Size: /) sz=substr($i,17)+0
+        else if ($i ~ /^Essential: yes/) pr=1
+        else if ($i ~ /^Priority: required/) pr=1
+        else if ($i ~ /^Description: /) ds=substr($i,14)
+      }
+      if (n != "") print n, v, sz, pr, ds
+    }' >"$d/avail.tsv"
+  # Große Pakete: name, version, größe(KiB)
+  : >"$d/large.tsv"
+  [ -s "$man" ] && awk -F'|' -v a="$arch" 'BEGIN{OFS="\t"} ($3==a || $3=="all") && $1!="" {print $1, $2, int($6/1024)}' "$man" >"$d/large.tsv"
+  dpkg-query -W -f='${Package}\t${Version}\t${db:Status-Abbrev}\n' 2>/dev/null | awk -F'\t' 'BEGIN{OFS="\t"} $3 ~ /^ii/ {print $1, $2}' >"$d/inst.tsv"
+  # Zusammenführen: nur Pakete, die das Repo kennt (Index oder große Pakete)
+  # Ausgabe mit Trennzeichen U+001F: `read` verschluckt leere Felder nur bei Leerraum (Tab) als IFS.
+  awk -F'\t' -v OFS="$(printf '\037')" '
+    FILENAME ~ /avail\.tsv$/ { av[$1]=$2; sz[$1]=$3; pr[$1]=$4; ds[$1]=$5; known[$1]=1; next }
+    FILENAME ~ /large\.tsv$/ { av[$1]=$2; if ($3 > 0) sz[$1]=$3; lg[$1]=1; known[$1]=1; next }
+    FILENAME ~ /inst\.tsv$/ { ins[$1]=$2; next }
+    END { for (k in known) {
+            p = pr[k]; if (k ~ /^(termux-|codeforge-env$|apt$|dpkg$|bash$|coreutils$)/) p = 1
+            print k, ins[k], av[k], sz[k]+0, (lg[k] ? 1 : 0), (p ? 1 : 0), ds[k] } }
+  ' "$d/avail.tsv" "$d/large.tsv" "$d/inst.tsv" | sort -t"$(printf '\037')" -k1,1 | {
+    local n i a kb l p desc flags
+    while IFS="$(printf '\037')" read -r n i a kb l p desc; do
+      flags=""
+      [ "$l" = 1 ] && flags="${flags}L"
+      [ "$p" = 1 ] && flags="${flags}P"
+      if [ -n "$i" ] && [ -n "$a" ] && [ "$i" != "$a" ] && dpkg --compare-versions "$a" gt "$i" 2>/dev/null; then flags="${flags}U"; fi
+      if [ "$MACHINE" = 1 ]; then
+        printf 'CFSDK|PKG|%s|%s|%s|%s|%s|%s\n' "$n" "$i" "$a" "$kb" "$flags" "$(clean "$desc")"
+      else
+        printf '%-32s %-14s %-14s %8s KiB %-3s %s\n' "$n" "${i:--}" "${a:--}" "$kb" "$flags" "$desc"
+      fi
+    done
+  }
+}
+
 case "$cmd" in
   list) do_list ;;
+  pkglist) do_pkglist ;;
   install) [ $# -ge 1 ] || die "install braucht eine ID"; do_install "$1" ;;
   uninstall) [ $# -ge 1 ] || die "uninstall braucht eine ID"; do_uninstall "$1" ;;
   pkg) [ $# -ge 1 ] || die "pkg braucht mindestens einen Paketnamen"; check_dpkg_consistency; pkg_install "$@" || exit 1; ok "$*" ;;

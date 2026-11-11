@@ -14,6 +14,11 @@ import com.codeforge.core.resources.Res
 sealed interface SdkScriptLine {
     /** Ein Werkzeug mit Version, Installationsstatus und Pfad. */
     data class Item(val id: String, val version: String, val installed: Boolean, val path: String?) : SdkScriptLine
+    /** Ein Repo-Paket für den Paketmanager (flags: L = groß, U = Update, P = geschützt). */
+    data class Pkg(
+        val name: String, val installed: String?, val available: String?, val sizeKib: Long,
+        val flags: String, val description: String,
+    ) : SdkScriptLine
     /** Installationsfortschritt mit Meldung. */
     data class Progress(val percent: Int, val message: String) : SdkScriptLine
     /** Installation von [id] erfolgreich. */
@@ -36,6 +41,10 @@ object SdkScriptProtocol {
                 id = parts[1], version = parts[2], installed = parts[3] == "1",
                 path = parts.getOrNull(4)?.takeIf { it.isNotBlank() },
             ) else null
+            "PKG" -> if (parts.size >= 7 && isSafePackageName(parts[1])) SdkScriptLine.Pkg(
+                name = parts[1], installed = parts[2].takeIf { it.isNotBlank() }, available = parts[3].takeIf { it.isNotBlank() },
+                sizeKib = parts[4].toLongOrNull() ?: 0L, flags = parts[5], description = parts.drop(6).joinToString("|"),
+            ) else null
             "PROGRESS" -> if (parts.size >= 3) SdkScriptLine.Progress(
                 (parts[1].toIntOrNull() ?: return null).coerceIn(0, 100), parts.drop(2).joinToString("|"),
             ) else null
@@ -47,6 +56,11 @@ object SdkScriptProtocol {
 
     /** Paket-ID muss ins Schema passen, bevor sie an die Shell geht. */
     private val SAFE_ID = Regex("^[A-Za-z0-9][A-Za-z0-9._;\\-]{0,63}$")
+    /** Debian-Paketname (Kleinbuchstaben, Ziffern, `+ . -`). */
+    private val SAFE_PACKAGE = Regex("^[a-z0-9][a-z0-9+.\\-]{0,63}$")
+    /** Ob [name] ein gültiger Paketname ist und an die Shell übergeben werden darf. */
+    fun isSafePackageName(name: String): Boolean = SAFE_PACKAGE.matches(name)
+
     /** Ob [id] nur sichere Zeichen enthält und an das Skript übergeben werden darf. */
     fun isSafeId(id: String): Boolean = SAFE_ID.matches(id)
 }

@@ -2,6 +2,7 @@
 package com.codeforge.libs.terminal_engine
 
 import com.codeforge.core.domain.repository.TermuxEnvironmentRepository
+import com.codeforge.core.domain.repository.PackageRepository
 import com.codeforge.core.domain.repository.SdkRepository
 import com.codeforge.core.domain.repository.TerminalSessionRepository
 import dagger.Binds
@@ -34,4 +35,11 @@ abstract class TerminalEngineModule {
     abstract fun bindSdkRepository(
         impl: TermuxScriptSdkRepository
     ): SdkRepository
+
+    /** Bindet das Paket-Repository (APT-Repo über `codeforge-env`). */
+    @Binds
+    @Singleton
+    abstract fun bindPackageRepository(
+        impl: TermuxScriptPackageRepository
+    ): PackageRepository
 }
