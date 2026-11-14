@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Klonen: Zielordner)
+- Der Klon-Bildschirm las den Standard-Zielordner nur einmal beim Erzeugen des ViewModels. War die Speicherberechtigung dann noch nicht aktiv, blieb der App-interne Ersatzpfad stehen statt `/storage/emulated/0/CodeForgeMobileProjects`. Jetzt wird der Standardpfad bei jedem Sichtbarwerden und direkt vor dem Klonen neu bestimmt, solange der Nutzer ihn nicht selbst geändert hat.
+
 ### Geändert (Compose-Preview: Tippen)
 - Tippänderungen in derselben Datei werden 250 ms gebündelt (`debounce`), Dateiwechsel rendern sofort. Ein neuer Render bricht den laufenden ab; ein abgebrochener Lauf überschreibt den Zustand nicht mehr (der Renderer verschluckt die Cancellation per `runCatching`, daher `ensureActive()`).
 

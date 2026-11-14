@@ -11,6 +11,8 @@ enum class GitClonePhase { IDLE, CLONING, DONE, FAILED }
 data class GitCloneUiState(
     val repositoryUrl: String = "",
     val targetDirectory: String = "",
+    /** true, sobald der Nutzer den Zielordner selbst geändert hat; dann wird er nie automatisch ersetzt. */
+    val targetEdited: Boolean = false,
     val currentTask: String = "",
     val progressPercent: Int = 0,
     val phase: GitClonePhase = GitClonePhase.IDLE,
@@ -23,6 +25,8 @@ sealed interface GitCloneUiEvent {
     data class UrlChanged(val url: String) : GitCloneUiEvent
     /** Der Zielordner wurde geändert. */
     data class TargetDirChanged(val path: String) : GitCloneUiEvent
+    /** Bildschirm wurde (wieder) sichtbar, z. B. nach Erteilen der Speicherberechtigung. */
+    data object ScreenResumed : GitCloneUiEvent
     /** Klonen starten. */
     data object CloneClicked : GitCloneUiEvent
     /** Nach einem Fehler erneut versuchen. */

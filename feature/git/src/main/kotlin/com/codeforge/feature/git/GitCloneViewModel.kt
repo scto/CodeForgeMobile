@@ -47,14 +47,26 @@ class GitCloneViewModel @Inject constructor(
                 _uiState.update { it.copy(repositoryUrl = event.url) }
 
             is GitCloneUiEvent.TargetDirChanged ->
-                _uiState.update { it.copy(targetDirectory = event.path) }
+                _uiState.update { it.copy(targetDirectory = event.path, targetEdited = true) }
 
+            GitCloneUiEvent.ScreenResumed -> refreshDefaultTarget()
             GitCloneUiEvent.CloneClicked -> startClone()
             GitCloneUiEvent.RetryClicked -> startClone()
         }
     }
 
+    /**
+     * Setzt den Standard-Zielordner (`CodeForgeMobileProjects` im externen Speicher) neu, solange der Nutzer ihn
+     * nicht geändert hat. Der Pfad hängt von der Speicherberechtigung ab und darf nicht nur einmal gelesen werden.
+     */
+    private fun refreshDefaultTarget() {
+        _uiState.update { s ->
+            if (s.targetEdited) s else s.copy(targetDirectory = projectsDirectoryProvider.getProjectsRoot().absolutePath)
+        }
+    }
+
     private fun startClone() {
+        refreshDefaultTarget()
         val state = _uiState.value
         if (state.repositoryUrl.isBlank() || state.targetDirectory.isBlank()) {
             _uiState.update { it.copy(phase = GitClonePhase.FAILED, errorMessage = Res.string(R.string.git_url_und_zielverzeichnis_duerfen_nicht)) }

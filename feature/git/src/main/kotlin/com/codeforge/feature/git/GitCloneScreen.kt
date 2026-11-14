@@ -16,6 +16,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -34,6 +35,11 @@ fun GitCloneRoute(
     viewModel: GitCloneViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.onEvent(GitCloneUiEvent.ScreenResumed)
+        onPauseOrDispose { }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
