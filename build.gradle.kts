@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.ktlint) apply false
+    alias(libs.plugins.detekt) apply false
     alias(libs.plugins.roborazzi) apply false
     // Dokka im Root: aggregiert die API-Doku aller Module (./gradlew dokkaGenerate -> build/dokka/html)
     alias(libs.plugins.dokka)

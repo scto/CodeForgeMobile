@@ -26,6 +26,7 @@ dependencies {
     compileOnly(libs.findLibrary("hilt-gradlePlugin").get())
     compileOnly(libs.findLibrary("compose-gradlePlugin").get())
     compileOnly(libs.findLibrary("ktlint-gradlePlugin").get())
+    compileOnly(libs.findLibrary("detekt-gradlePlugin").get())
 }
 
 gradlePlugin {
@@ -57,6 +58,10 @@ gradlePlugin {
         register("quality") {
             id = "codeforge.quality"
             implementationClass = "QualityConventionPlugin"
+        }
+        register("detekt") {
+            id = "codeforge.detekt"
+            implementationClass = "DetektConventionPlugin"
         }
         register("terminalBootstrap") {
             id = "codeforge.terminal.bootstrap"

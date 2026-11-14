@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (build-logic: detekt)
+- Convention-Plugin `codeforge.detekt` (`DetektConventionPlugin`), über `codeforge.quality` in allen Modulen aktiv. Regeln: `config/detekt/detekt.yml` (eine Datei im Projekt-Root für alle Module), Baseline je Modul unter `config/detekt/baseline/<modul>.xml`, sobald vorhanden. Vorerst nur Bericht (`ignoreFailures = true`), wie bei ktlint.
+- `detekt.yml` an das Projekt angepasst: `rootPackage` stammte aus einem anderen Projekt (`com.neonide.studio`) und meldete jede Datei; Paketnamen mit Unterstrich (`libs.terminal_engine`) erlaubt; `@Composable` von `FunctionNaming`, `LongMethod` und `LongParameterList` ausgenommen, `@Inject` von `LongParameterList`, `@Preview` von `UnusedPrivateFunction`.
+
 ### Hinzugefügt (Speicherfreigabe)
 - „Speicher freigeben“ in Build & Run und automatisch bei Speicherdruck (`onTrimMemory`): beendet ungenutzte Sprachserver (nie den der aktiven Datei), leert Vorschau-Caches, stoppt den Compiler-Daemon der Vorschau im Leerlauf; der Gradle-Daemon (`gradlew --stop`) nur auf Knopfdruck. Kein erzwungenes `System.gc()`.
 - `MemoryReleaser` (Hilt-Multibinding) und `ReleaseMemoryUseCase` in :core:domain.
