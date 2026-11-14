@@ -124,6 +124,15 @@ class ProjectGeneratorTest {
         out.deleteRecursively()
     }
 
+    @Test fun composeGroovyHostTests() {
+        val app = gen(ProjectTemplateKind.COMPOSE_ACTIVITY, ProjectLanguage.KOTLIN, false).rel("app/build.gradle").readText()
+        assertTrue(app.contains("beforeVariants(selector().all()) { builder ->"))
+        assertTrue(app.contains("HostTestBuilder.UNIT_TEST_TYPE]?.enable = true"))
+        // Einrückung bleibt erhalten (trimIndent der Vorlage)
+        assertTrue(app.lines().any { it == "    alias(libs.plugins.kotlin.compose)" })
+        assertTrue(app.lines().any { it == "androidComponents {" })
+    }
+
     @Test fun generatedKotlinProjectUsesGradle9AndBuiltInKotlin() {
         val out = File.createTempFile("pwgen_agp9", "").apply { delete(); mkdirs() }
         val target = File(out, "App9").apply { mkdirs() }
@@ -141,7 +150,8 @@ class ProjectGeneratorTest {
         assertTrue(app.contains("libs.plugins.kotlin.compose"))
         // Compose-Vorschau (AGP 9) verlangt Android-Ressourcen in Unit-Tests
         assertTrue(app.contains("testOptions { unitTests.isIncludeAndroidResources = true }"))
-        assertTrue(app.contains("beforeVariants { builder -> builder.enableUnitTest = true }"))
+        assertTrue(app.contains("builder.hostTests[com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE]?.enable = true"))
+        assertTrue(!app.contains("enableUnitTest"))
         assertTrue(!app.contains("kotlin.android") && !app.contains("kotlinOptions"))
         assertTrue(!File(target, "build.gradle.kts").readText().contains("kotlin.android"))
         out.deleteRecursively()

@@ -10,9 +10,18 @@ android {
     compileSdk = 35
     defaultConfig { minSdk = {{minSdk}} }
     buildFeatures { compose = true }
+    // Compose-Vorschau der IDE: Android-Ressourcen in Unit-Tests
+    testOptions { unitTests.isIncludeAndroidResources = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+// Die Vorschau-Aufgaben brauchen Unit-Tests in jeder Variante (auch release).
+androidComponents {
+    beforeVariants { builder ->
+        builder.hostTests[com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
     }
 }
 
@@ -27,4 +36,6 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

@@ -60,7 +60,7 @@ fun AppBuildGradle(
         appendLine("alias(libs.plugins.android.application)")
         // AGP 9: Kotlin ist eingebaut (kein org.jetbrains.kotlin.android-Plugin mehr); jvmTarget folgt
         // compileOptions.targetCompatibility. Nur das Compose-Compiler-Plugin bleibt.
-        if (useKotlin && enableCompose) appendLine("    alias(libs.plugins.kotlin.compose)")
+        if (useKotlin && enableCompose) appendLine("        alias(libs.plugins.kotlin.compose)")
     }.trimEnd()
 
     val buildFeatures = if (enableCompose) {
@@ -77,10 +77,15 @@ fun AppBuildGradle(
     }
 
     // Die Vorschau-Aufgaben werden für jede Variante (auch release) angelegt und verlangen deren Unit-Tests;
-    // ohne diese Zeile bricht schon `:tasks` mit „Unit tests are disabled for this variant“ ab.
-    val componentsBlock = when {
-        !enableCompose -> ""
-        else -> "androidComponents { beforeVariants { builder -> builder.enableUnitTest = true } }"
+    // ohne diesen Block bricht schon `:tasks` mit „Unit tests are disabled for this variant“ ab.
+    // AGP 9: `enableUnitTest` ist ersetzt durch die Host-Tests der Variante. Groovy braucht einen Selektor.
+    // Folgezeilen um 4 Leerzeichen einrücken: die Vorlage wird danach mit trimIndent() ausgerichtet.
+    val componentsBlock = if (enableCompose) {
+        (if (useKts) ANDROID_COMPONENTS_UNIT_TESTS_KTS else ANDROID_COMPONENTS_UNIT_TESTS_GROOVY)
+            .lines()
+            .joinToString("\n    ")
+    } else {
+        ""
     }
 
     val ndkVersionStr = if (enableNdkBuild) {
@@ -221,5 +226,23 @@ fun AppBuildGradleGroovy(
 
     dependencies {
         $depsBlock
+    }
+""".trimIndent()
+
+/** Schaltet die Unit-Tests (Host-Tests) aller Varianten ein; für die Compose-Vorschau nötig (Kotlin-DSL). */
+internal val ANDROID_COMPONENTS_UNIT_TESTS_KTS = """
+    androidComponents {
+        beforeVariants { builder ->
+            builder.hostTests[com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
+        }
+    }
+""".trimIndent()
+
+/** Groovy-Fassung: dort gibt es `beforeVariants` nur mit Selektor. */
+internal val ANDROID_COMPONENTS_UNIT_TESTS_GROOVY = """
+    androidComponents {
+        beforeVariants(selector().all()) { builder ->
+            builder.hostTests[com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
+        }
     }
 """.trimIndent()

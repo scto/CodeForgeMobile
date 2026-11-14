@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Vorlagen: Host-Tests statt enableUnitTest)
+- Compose-Vorlagen schalten die Unit-Tests aller Varianten mit der AGP-9-API ein: `androidComponents { beforeVariants { builder -> builder.hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true } }` statt des veralteten `enableUnitTest`. Groovy-DSL braucht dort einen Selektor (`beforeVariants(selector().all()) { … }`); die bisherige Groovy-Zeile brach mit „Could not find method beforeVariants()“ ab.
+- Eingebaute Compose-Vorlage: Einrückung von `plugins { … }` und des neuen Blocks korrigiert. Beide DSL-Varianten im Sandkasten erzeugt und mit `assembleDebug testReleaseUnitTest` gebaut.
+- Plugin-Vorlage `compose-clean`: `:app` und `:feature:home` mit Host-Test-Block und `unitTests.isIncludeAndroidResources` (Compose-Vorschau), neuer `HomeViewModelTest`; `assembleDebug test` grün.
+
 ### Hinzugefügt (Projektvorlagen als Plugins)
 - **`contributes.projectTemplates`**: Plugins liefern Projektvorlagen für den Projekt-Assistenten – Dateibäume mit Ebenen `common/`, `kotlin/`|`java/`, `kts/`|`groovy/` und Kombination (`kotlin-kts/` …), Platzhalter `{{projectName}}`, `{{packageName}}`, `{{packagePath}}`, `{{minSdk}}` in Pfaden und Textdateien; Binärdateien unverändert. Felder `languages`, `gradleDsl`, `android`, `minSdk`, `icon`. Fehlende Gradle-Wrapper/Version Catalog ergänzt die App; Pfade außerhalb des Projekts brechen ab; nichts aus der Vorlage wird ausgeführt (Store-tauglich).
 - **Projekt-Assistent**: Plugin-Vorlagen erscheinen nach den neun eingebauten (eigener Titel, Beschreibung, Vorschaubild, Hinweis „Vorlage aus Plugin“). Sprache, Gradle-DSL und Mindest-SDK werden auf die Angaben der Vorlage beschränkt; ohne `android` kein Mindest-SDK, DSL-Schalter nur bei beiden DSL. Die eingebauten Vorlagen bleiben in der App (Assistent funktioniert ohne Store/Netz).

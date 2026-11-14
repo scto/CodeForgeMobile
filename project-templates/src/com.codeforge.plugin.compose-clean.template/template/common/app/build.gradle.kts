@@ -26,9 +26,19 @@ android {
 
     buildFeatures { compose = true }
 
+    // Compose-Vorschau der IDE: Android-Ressourcen in Unit-Tests
+    testOptions { unitTests.isIncludeAndroidResources = true }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+// Die Vorschau-Aufgaben brauchen Unit-Tests in jeder Variante (auch release).
+androidComponents {
+    beforeVariants { builder ->
+        builder.hostTests[com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
     }
 }
 
