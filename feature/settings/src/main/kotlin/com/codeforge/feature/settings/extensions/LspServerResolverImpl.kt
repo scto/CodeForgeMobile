@@ -4,6 +4,7 @@ package com.codeforge.feature.settings.extensions
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.model.LspServerLaunch
 import com.codeforge.core.domain.repository.LspServerResolver
+import com.codeforge.core.domain.repository.LspSettingsRepository
 import com.codeforge.libs.terminal_engine.TermuxEnvironment
 import java.io.File
 import javax.inject.Inject
@@ -13,20 +14,22 @@ import javax.inject.Singleton
 @Singleton
 class LspServerResolverImpl @Inject constructor(
     private val extensionsManager: ExtensionsManager,
-    private val contributionRepository: ContributionRepository
+    private val contributionRepository: ContributionRepository,
+    private val lspSettings: LspSettingsRepository
 ) : LspServerResolver {
 
     override suspend fun resolve(languageId: String): LspServerLaunch? {
         val pkg = findPackageForLanguage(languageId)
         if (pkg == null || !extensionsManager.isInstalled(pkg)) return resolveContributed(languageId)
 
+        // Vom Nutzer abgeschaltet: kein Server für diese Sprache (auch kein Ersatz aus Plugins).
+        if (!lspSettings.of(pkg.id).enabled) return null
+
+        val jvmArgs = lspSettings.jvmOptions(pkg.id)?.toArgs().orEmpty()
         val env = TermuxEnvironment.environment().let { base ->
-            // Kotlin-LS: ein Server-Prozess im Hintergrund – SerialGC (keine GC-Threads) und kein Perf-Data-Mapping
-            // sparen RAM/Startzeit auf dem Telefon. Eigene Werte des Nutzers bleiben erhalten.
-            if (pkg.id == "kotlin-language-server") {
-                base + ("KOTLIN_LANGUAGE_SERVER_OPTS" to listOfNotNull(
-                    base["KOTLIN_LANGUAGE_SERVER_OPTS"], "-XX:+UseSerialGC", "-XX:-UsePerfData"
-                ).joinToString(" "))
+            // Kotlin-LS liest seine JVM-Optionen aus der Umgebung; eigene Werte des Nutzers dort bleiben erhalten.
+            if (pkg.id == "kotlin-language-server" && jvmArgs.isNotEmpty()) {
+                base + ("KOTLIN_LANGUAGE_SERVER_OPTS" to (listOfNotNull(base["KOTLIN_LANGUAGE_SERVER_OPTS"]) + jvmArgs).joinToString(" "))
             } else base
         }
         val extensionDir = extensionsManager.getExtensionDirectory(pkg)
@@ -41,10 +44,11 @@ class LspServerResolverImpl @Inject constructor(
                 val exe = extensionsManager.getExecutableFile(pkg) ?: return null
                 val pythonBin = File(termuxBin, "python3").takeIf { it.canExecute() }?.absolutePath
                     ?: File(termuxBin, "python").takeIf { it.canExecute() }?.absolutePath
+                val jvm = jvmArgs.map { "--jvm-arg=$it" }
                 if (pythonBin != null) {
-                    listOf(pythonBin, exe.absolutePath)
+                    listOf(pythonBin, exe.absolutePath) + jvm
                 } else {
-                    listOf(exe.absolutePath)
+                    listOf(exe.absolutePath) + jvm
                 }
             }
             "pyright" -> {
@@ -77,7 +81,7 @@ class LspServerResolverImpl @Inject constructor(
             "lemminx" -> {
                 val jar = extensionsManager.getExecutableFile(pkg) ?: return null
                 val javaBin = File(termuxBin, "java").takeIf { it.canExecute() }?.absolutePath ?: "java"
-                listOf(javaBin, "-jar", jar.absolutePath)
+                listOf(javaBin) + jvmArgs + listOf("-jar", jar.absolutePath)
             }
             "yaml-language-server" -> {
                 val nodeBin = File(termuxBin, "node").takeIf { it.canExecute() }?.absolutePath ?: "node"

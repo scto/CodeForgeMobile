@@ -105,6 +105,35 @@ fun ExtensionsScreen(
         onSave = { addingLsp = false; onUserToolsEvent(com.codeforge.feature.settings.tools.UserToolsEvent.SaveLsp(it)) }
     )
     val snackbarHostState = remember { SnackbarHostState() }
+    var settingsFor by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    var jvmFor by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<String?>(null) }
+
+    uiState.extensions.firstOrNull { it.pkg.id == settingsFor && it.isInstalled }?.let { item ->
+        LspFeatureSheet(
+            item = item,
+            settings = uiState.settingsOf(item.pkg.id),
+            onFeatureChange = { feature, enabled -> onEvent(ExtensionsUiEvent.SetFeature(item.pkg.id, feature, enabled)) },
+            onOpenJvm = { settingsFor = null; jvmFor = item.pkg.id },
+            onInfo = { settingsFor = null; onEvent(ExtensionsUiEvent.OpenInfo(item.pkg)) },
+            onDetails = { settingsFor = null; onEvent(ExtensionsUiEvent.OpenDetails(item.pkg)) },
+            onCheckUpdate = { onEvent(ExtensionsUiEvent.CheckUpdate(item.pkg)) },
+            onUninstall = { settingsFor = null; onEvent(ExtensionsUiEvent.UninstallClicked(item.pkg)) },
+            onDismiss = { settingsFor = null }
+        )
+    }
+    uiState.extensions.firstOrNull { it.pkg.id == jvmFor }?.let { item ->
+        val id = item.pkg.id
+        com.codeforge.feature.settings.common.JvmOptionsSheet(
+            title = stringRes(R.string.jvm_title),
+            subtitle = stringRes(R.string.jvm_applied_next_start),
+            initial = uiState.settingsOf(id).jvm
+                ?: com.codeforge.core.domain.model.LspServerDefaults.jvmFor(id)
+                ?: com.codeforge.core.domain.model.JvmOptions(),
+            onSave = { jvmFor = null; onEvent(ExtensionsUiEvent.SaveJvm(id, it)) },
+            onReset = { jvmFor = null; onEvent(ExtensionsUiEvent.SaveJvm(id, null)) },
+            onDismiss = { jvmFor = null }
+        )
+    }
 
     LaunchedEffect(uiState.snackbarMessage) {
         uiState.snackbarMessage?.let { message ->
@@ -161,7 +190,33 @@ fun ExtensionsScreen(
             val shown = if (installedOnly) {
                 uiState.extensions.filter { it.isInstalled || it.status != ExtensionStatus.NOT_INSTALLED }
             } else uiState.extensions
-            items(shown, key = { it.pkg.id }) { item ->
+            // Sprachserver-Verwaltung: installierte Server als zusammenhängende Liste mit Schalter und Einstellungen.
+            val rows = if (installedOnly) shown.filter { it.isInstalled } else emptyList()
+            val cards = if (installedOnly) shown.filterNot { it.isInstalled } else shown
+            if (rows.isNotEmpty()) {
+                item(key = "ls-header") {
+                    Text(
+                        stringRes(R.string.lspfeat_section),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(start = 16.dp, bottom = 4.dp)
+                    )
+                }
+                item(key = "ls-rows") {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        rows.forEachIndexed { index, item ->
+                            LanguageServerRow(
+                                item = item,
+                                settings = uiState.settingsOf(item.pkg.id),
+                                shape = groupShape(index, rows.size),
+                                onOpenSettings = { settingsFor = item.pkg.id },
+                                onEnabledChange = { onEvent(ExtensionsUiEvent.SetServerEnabled(item.pkg.id, it)) }
+                            )
+                        }
+                    }
+                }
+            }
+            items(cards, key = { it.pkg.id }) { item ->
                 ExtensionCard(
                     item = item,
                     onInstall = { onEvent(ExtensionsUiEvent.InstallClicked(item.pkg)) },
@@ -467,27 +522,18 @@ private fun ExtensionCard(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(stringRes(R.string.extensions_uninstall))
                     }
-                } else {
-                    Button(
-                        onClick = onInstall,
-                        enabled = !isBusy
-                    ) {
-                        if (isBusy) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(stringRes(R.string.extensions_install))
+                }
+            }
+            if (!item.pkg.isTermuxPackage && !item.isInstalled) {
+                Spacer(modifier = Modifier.height(8.dp))
+                FilledTonalButton(onClick = onInstall, enabled = !isBusy, modifier = Modifier.fillMaxWidth()) {
+                    if (isBusy) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    } else {
+                        Icon(imageVector = Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
                     }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(stringRes(R.string.extensions_install))
                 }
             }
         }

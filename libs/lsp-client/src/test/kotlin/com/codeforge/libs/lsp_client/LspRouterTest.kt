@@ -134,4 +134,21 @@ class LspRouterTest {
 
         job.cancel()
     }
+
+    @Test
+    fun `disabled features answer empty without asking the server`() = runBlocking {
+        val off = setOf(
+            com.codeforge.core.domain.model.LspFeature.COMPLETION,
+            com.codeforge.core.domain.model.LspFeature.HOVER,
+            com.codeforge.core.domain.model.LspFeature.FORMATTING
+        )
+        val router = LspClientRepositoryImpl { serverId, feature -> !(serverId == "kotlin-ls" && feature in off) }
+        router.attachSession(
+            LspServerSession(sessionId = "kotlin-ls@/w", serverId = "kotlin-ls", workspaceRootPath = "/w", languageIds = setOf("kotlin"))
+        )
+        val pos = com.codeforge.core.domain.model.LspPosition(0, 0)
+        assertEquals(emptyList<Any>(), router.requestCompletion("/w/A.kt", pos).getOrThrow())
+        assertEquals(null, router.requestHover("/w/A.kt", pos).getOrThrow())
+        assertEquals(true, router.requestFormat("/w/A.kt", "x").isFailure)
+    }
 }

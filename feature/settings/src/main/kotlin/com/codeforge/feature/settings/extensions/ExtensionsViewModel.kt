@@ -21,6 +21,7 @@ class ExtensionsViewModel @Inject constructor(
     private val coordinator: ExtensionInstallCoordinator,
     private val updateChecker: LspUpdateChecker,
     private val settingsRepository: com.codeforge.core.datastore.SettingsRepository,
+    private val lspSettings: com.codeforge.core.domain.repository.LspSettingsRepository,
     private val runtimeStats: com.codeforge.core.domain.model.LspRuntimeStatsProvider? = null
 ) : ViewModel() {
 
@@ -32,6 +33,7 @@ class ExtensionsViewModel @Inject constructor(
         loadExtensions()
         observeInstalls()
         observeLspSettings()
+        viewModelScope.launch { lspSettings.settings.collect { all -> _uiState.update { it.copy(serverSettings = all) } } }
     }
 
     private fun observeLspSettings() {
@@ -60,6 +62,17 @@ class ExtensionsViewModel @Inject constructor(
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: ExtensionsUiEvent) {
         when (event) {
+            is ExtensionsUiEvent.SetServerEnabled ->
+                viewModelScope.launch { lspSettings.update(event.id) { it.copy(enabled = event.enabled) } }
+            is ExtensionsUiEvent.SetFeature -> viewModelScope.launch {
+                lspSettings.update(event.id) {
+                    it.copy(disabledFeatures = if (event.enabled) it.disabledFeatures - event.feature else it.disabledFeatures + event.feature)
+                }
+            }
+            is ExtensionsUiEvent.SaveJvm -> viewModelScope.launch {
+                lspSettings.update(event.id) { it.copy(jvm = event.options) }
+                _uiState.update { it.copy(snackbarMessage = UiText.of(R.string.jvm_saved)) }
+            }
             is ExtensionsUiEvent.Refresh -> loadExtensions()
             is ExtensionsUiEvent.CheckUpdate -> checkUpdate(event.pkg)
             is ExtensionsUiEvent.OpenDetails -> _uiState.update { it.copy(detailId = event.pkg.id) }

@@ -40,11 +40,11 @@ class LspServerResolverTest {
                 )
             )
         }
-        val launch = LspServerResolverImpl(manager, repo).resolve("zig")
+        val launch = LspServerResolverImpl(manager, repo, FakeLspSettings()).resolve("zig")
         assertNotNull(launch)
         assertEquals(listOf(exe.absolutePath, "--stdio"), launch!!.command)
         assertEquals("zls", launch.serverId)
-        assertNull("andere Sprache", LspServerResolverImpl(manager, repo).resolve("pascal"))
+        assertNull("andere Sprache", LspServerResolverImpl(manager, repo, FakeLspSettings()).resolve("pascal"))
     }
 
     @Test
@@ -62,7 +62,7 @@ class LspServerResolverTest {
                 )
             )
         }
-        assertNull(LspServerResolverImpl(manager, repo).resolve("zig"))
+        assertNull(LspServerResolverImpl(manager, repo, FakeLspSettings()).resolve("zig"))
     }
 
 
@@ -74,7 +74,7 @@ class LspServerResolverTest {
         val baseDir = tempFolder.newFolder("extensions_root")
         val dummyDownloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
         val manager = ExtensionsManager(baseDir = baseDir, downloader = dummyDownloader)
-        val resolver = LspServerResolverImpl(manager, NoContributions)
+        val resolver = LspServerResolverImpl(manager, NoContributions, FakeLspSettings())
 
         val result = resolver.resolve("unknown-language-xyz")
         assertNull(result)
@@ -85,7 +85,7 @@ class LspServerResolverTest {
         val baseDir = tempFolder.newFolder("extensions_root_empty")
         val dummyDownloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
         val manager = ExtensionsManager(baseDir = baseDir, downloader = dummyDownloader)
-        val resolver = LspServerResolverImpl(manager, NoContributions)
+        val resolver = LspServerResolverImpl(manager, NoContributions, FakeLspSettings())
 
         assertNull("Uninstalled lemminx should return null", resolver.resolve("xml"))
         assertNull("Uninstalled yaml-ls should return null", resolver.resolve("yaml"))
@@ -128,7 +128,7 @@ class LspServerResolverTest {
             downloader = dummyDownloader,
             customTermuxBinDir = fakeBin
         )
-        val resolver = LspServerResolverImpl(manager, NoContributions)
+        val resolver = LspServerResolverImpl(manager, NoContributions, FakeLspSettings())
 
         // XML -> lemminx
         val xmlLaunch = resolver.resolve("xml")
@@ -162,5 +162,31 @@ class LspServerResolverTest {
         val shLaunch = resolver.resolve("shellscript")
         assertNotNull("Shellscript launch must not be null", shLaunch)
         assertEquals("bash-language-server", shLaunch?.serverId)
+    }
+
+    @Test
+    fun `disabled server is not resolved and jvm options reach the command`() = runBlocking {
+        val baseDir = tempFolder.newFolder("extensions_root_settings")
+        File(baseDir, "lemminx").apply { mkdirs() }.resolve("org.eclipse.lemminx-uber.jar").writeText("jar")
+        val manager = ExtensionsManager(
+            baseDir = baseDir,
+            downloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) },
+            customTermuxBinDir = tempFolder.newFolder("bin_settings")
+        )
+        val settings = FakeLspSettings()
+        val resolver = LspServerResolverImpl(manager, NoContributions, settings)
+
+        // Vorgabe: kleiner Heap und SerialGC vor -jar
+        val default = resolver.resolve("xml")!!.command
+        assertTrue(default.indexOf("-Xmx256m") in 1 until default.indexOf("-jar"))
+
+        settings.update("lemminx") { it.copy(jvm = com.codeforge.core.domain.model.JvmOptions(xmx = "512m", extraFlags = "-Dx=1 ;bad")) }
+        val custom = resolver.resolve("xml")!!.command
+        assertTrue(custom.contains("-Xmx512m"))
+        assertTrue(custom.contains("-Dx=1"))
+        assertTrue(custom.none { it.contains(";") })
+
+        settings.update("lemminx") { it.copy(enabled = false) }
+        assertNull(resolver.resolve("xml"))
     }
 }

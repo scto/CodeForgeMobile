@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.codeforge.core.domain.model.LspFeature
+import com.codeforge.core.domain.repository.LspSettingsRepository
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,7 +37,25 @@ import javax.inject.Singleton
  * Leitet pfadbasierte Anfragen an die zuständige Sitzung weiter.
  */
 @Singleton
-class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
+class LspClientRepositoryImpl(
+    /** Ob eine Fähigkeit für einen Server (Server-ID) genutzt werden darf. */
+    private val allows: (serverId: String, feature: LspFeature) -> Boolean
+) : LspClientRepository {
+
+    @Inject constructor(settings: LspSettingsRepository) : this(settings::allows)
+
+    /** Ohne Einstellungen: alles erlaubt (Tests). */
+    constructor() : this({ _, _ -> true })
+
+    private fun LspServerSession.allows(feature: LspFeature): Boolean = allows(serverId, feature)
+
+    /** Diagnosen nur weiterreichen, wenn sie für den Server eingeschaltet sind (sonst leeren). */
+    private fun publish(sessionId: String, path: String, diags: List<LspDiagnostic>) {
+        val serverId = sessions[sessionId]?.serverId ?: sessionId.substringBefore('@')
+        val shown = if (allows(serverId, LspFeature.DIAGNOSTICS)) diags else emptyList()
+        diagnosticsBySession.computeIfAbsent(sessionId) { ConcurrentHashMap() }[path] = shown
+        _diagnostics.tryEmit(path to shown)
+    }
 
     private val sessions = ConcurrentHashMap<String, LspServerSession>()
     private val documentToSession = ConcurrentHashMap<String, String>()
@@ -63,11 +83,7 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
             sessionId = sessionId,
             serverId = sessionId,
             workspaceRootPath = "",
-            onDiagnostics = { sId, path, diags ->
-                val map = diagnosticsBySession.computeIfAbsent(sId) { ConcurrentHashMap() }
-                map[path] = diags
-                _diagnostics.tryEmit(path to diags)
-            },
+            onDiagnostics = ::publish,
             onApplyEdit = { edit -> applyEditHandler?.invoke(edit) ?: false }
         )
         session.attachConnection(rpcConnection)
@@ -117,11 +133,7 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
             serverId = serverId,
             workspaceRootPath = workspaceRootPath,
             languageIds = languageIds,
-            onDiagnostics = { sId, path, diags ->
-                val map = diagnosticsBySession.computeIfAbsent(sId) { ConcurrentHashMap() }
-                map[path] = diags
-                _diagnostics.tryEmit(path to diags)
-            },
+            onDiagnostics = ::publish,
             onApplyEdit = { edit -> applyEditHandler?.invoke(edit) ?: false }
         )
         sessions[sessionId] = session
@@ -205,24 +217,28 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
     override suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>> {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        if (!session.allows(LspFeature.COMPLETION)) return Result.success(emptyList())
         return session.requestCompletion(path, position)
     }
 
     override suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        if (!session.allows(LspFeature.HOVER)) return Result.success(null)
         return session.requestHover(path, position)
     }
 
     override suspend fun requestFormat(path: String, content: String): Result<String> {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        if (!session.allows(LspFeature.FORMATTING)) return Result.failure(IllegalStateException(Res.string(R.string.lsp_formatting_disabled)))
         return session.requestFormat(path, content)
     }
 
     override suspend fun requestRangeFormat(path: String, content: String, range: LspRange): Result<String> {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        if (!session.allows(LspFeature.FORMATTING)) return Result.failure(IllegalStateException(Res.string(R.string.lsp_formatting_disabled)))
         return session.requestRangeFormat(path, content, range)
     }
 
@@ -233,6 +249,7 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
     ): Result<List<LspCodeAction>> {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        if (!session.allows(LspFeature.CODE_ACTIONS)) return Result.success(emptyList())
         return session.requestCodeActions(path, range, diagnostics)
     }
 
@@ -275,6 +292,7 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
     override suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        if (!session.allows(LspFeature.SIGNATURE_HELP)) return Result.success(null)
         return session.requestSignatureHelp(path, position)
     }
 
@@ -287,6 +305,7 @@ class LspClientRepositoryImpl @Inject constructor() : LspClientRepository {
     override suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        if (!session.allows(LspFeature.INLAY_HINTS)) return Result.success(emptyList())
         return session.requestInlayHints(path, range)
     }
 

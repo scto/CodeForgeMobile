@@ -2472,4 +2472,35 @@
     <string name="sdkmanager_uninstall">Entfernen</string>
     <string name="sdkmanager_uninstall_title">Komponente entfernen?</string>
     <string name="sdkmanager_uninstall_confirm">%1$s wird entfernt.</string>
+    <string name="lsp_formatting_disabled">Formatierung ist für diesen Sprachserver abgeschaltet.</string>
+    <string name="lspfeat_section">Language Server</string>
+    <string name="lspfeat_open_settings">Einstellungen des Servers</string>
+    <string name="lspfeat_sheet_title">%1$s – Funktionen</string>
+    <string name="lspfeat_sheet_subtitle">Einzelne LSP-Fähigkeiten ein- oder ausschalten</string>
+    <string name="lspfeat_server_off">Der Server ist ausgeschaltet. Die Fähigkeiten gelten erst wieder, wenn er eingeschaltet ist.</string>
+    <string name="lspfeat_completion">Code-Vervollständigung</string>
+    <string name="lspfeat_completion_sum">Vorschläge beim Tippen</string>
+    <string name="lspfeat_diagnostics">Diagnosen</string>
+    <string name="lspfeat_diagnostics_sum">Fehler, Warnungen und Hinweise im Code zeigen</string>
+    <string name="lspfeat_hover">Hover-Info</string>
+    <string name="lspfeat_hover_sum">Typ und Dokumentation anzeigen</string>
+    <string name="lspfeat_signature">Signaturhilfe</string>
+    <string name="lspfeat_signature_sum">Parameterhinweise in Funktionsaufrufen</string>
+    <string name="lspfeat_actions">Code-Aktionen</string>
+    <string name="lspfeat_actions_sum">Schnellkorrekturen, Importe und Refactorings</string>
+    <string name="lspfeat_formatting">Formatierung</string>
+    <string name="lspfeat_formatting_sum">Dokumente und Auswahl formatieren</string>
+    <string name="lspfeat_inlay">Inlay-Hinweise</string>
+    <string name="lspfeat_inlay_sum">Typ- und Parameterhinweise im Code</string>
+    <string name="jvm_title">JVM-Optionen</string>
+    <string name="jvm_applied_next_start">Gilt ab dem nächsten Serverstart</string>
+    <string name="jvm_section_memory">SPEICHER</string>
+    <string name="jvm_section_flags">WEITERE FLAGS</string>
+    <string name="jvm_xms">-Xms (Start-Heap)</string>
+    <string name="jvm_xmx">-Xmx (Max-Heap)</string>
+    <string name="jvm_extra_flags">Zusätzliche JVM-Flags</string>
+    <string name="jvm_hint">Größen wie 512m oder 2g; leer = JVM-Standard. Flags durch Leerzeichen trennen.</string>
+    <string name="jvm_invalid">Ungültige Angabe: %1$s</string>
+    <string name="jvm_reset">Zurücksetzen</string>
+    <string name="jvm_saved">JVM-Optionen gespeichert</string>
 </resources>

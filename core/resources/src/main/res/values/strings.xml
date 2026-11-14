@@ -2472,4 +2472,35 @@
     <string name="sdkmanager_uninstall">Uninstall</string>
     <string name="sdkmanager_uninstall_title">Remove component?</string>
     <string name="sdkmanager_uninstall_confirm">%1$s will be removed.</string>
+    <string name="lsp_formatting_disabled">Formatting is turned off for this language server.</string>
+    <string name="lspfeat_section">Language servers</string>
+    <string name="lspfeat_open_settings">Server settings</string>
+    <string name="lspfeat_sheet_title">%1$s features</string>
+    <string name="lspfeat_sheet_subtitle">Enable or disable individual LSP capabilities</string>
+    <string name="lspfeat_server_off">The server is turned off. Capabilities apply again once it is turned on.</string>
+    <string name="lspfeat_completion">Code completion</string>
+    <string name="lspfeat_completion_sum">Suggest completions while typing</string>
+    <string name="lspfeat_diagnostics">Diagnostics</string>
+    <string name="lspfeat_diagnostics_sum">Show errors, warnings and hints inline</string>
+    <string name="lspfeat_hover">Hover info</string>
+    <string name="lspfeat_hover_sum">Show type and documentation</string>
+    <string name="lspfeat_signature">Signature help</string>
+    <string name="lspfeat_signature_sum">Show parameter hints inside function calls</string>
+    <string name="lspfeat_actions">Code actions</string>
+    <string name="lspfeat_actions_sum">Quick fixes, imports and refactors</string>
+    <string name="lspfeat_formatting">Formatting</string>
+    <string name="lspfeat_formatting_sum">Format documents and selections</string>
+    <string name="lspfeat_inlay">Inlay hints</string>
+    <string name="lspfeat_inlay_sum">Show inline type and parameter hints</string>
+    <string name="jvm_title">JVM options</string>
+    <string name="jvm_applied_next_start">Applied on next server start</string>
+    <string name="jvm_section_memory">MEMORY</string>
+    <string name="jvm_section_flags">EXTRA FLAGS</string>
+    <string name="jvm_xms">-Xms (initial heap)</string>
+    <string name="jvm_xmx">-Xmx (max heap)</string>
+    <string name="jvm_extra_flags">Additional JVM flags</string>
+    <string name="jvm_hint">Sizes like 512m or 2g; empty = JVM default. Separate flags with spaces.</string>
+    <string name="jvm_invalid">Invalid value: %1$s</string>
+    <string name="jvm_reset">Reset</string>
+    <string name="jvm_saved">JVM options saved</string>
 </resources>

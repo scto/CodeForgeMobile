@@ -61,6 +61,13 @@ object DataStoreProviderModule {
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
+    /** Bindet: Einstellungen der Language-Server. */
+    @Binds
+    @Singleton
+    abstract fun bindLspSettingsRepository(
+        impl: com.codeforge.core.data.repository.LspSettingsRepositoryImpl
+    ): com.codeforge.core.domain.repository.LspSettingsRepository
+
     /** Bindet: Zuletzt geöffnete Projekte. */
     @Binds
     @Singleton

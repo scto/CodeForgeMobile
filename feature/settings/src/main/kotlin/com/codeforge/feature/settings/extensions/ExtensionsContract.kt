@@ -39,8 +39,14 @@ data class ExtensionsUiState(
     val infoRuntime: LspRuntimeInfo? = null,
     /** Globale Sprachserver-Werte aus den Editor-Einstellungen (Anzeige im Tab „Einstellungen“). */
     val lspMaxSessions: Int = 0,
-    val lspIdleTimeoutMinutes: Int = 0
+    val lspIdleTimeoutMinutes: Int = 0,
+    /** Einstellungen je Server (an/aus, Fähigkeiten, JVM-Optionen). */
+    val serverSettings: Map<String, com.codeforge.core.domain.model.LspServerSettings> = emptyMap()
 ) {
+    /** Einstellungen eines Servers (Standard, wenn nichts gespeichert ist). */
+    fun settingsOf(id: String): com.codeforge.core.domain.model.LspServerSettings =
+        serverSettings[id] ?: com.codeforge.core.domain.model.LspServerSettings()
+
     /** Erweiterung der geöffneten Detailansicht. */
     val detailItem: ExtensionUiItem? get() = extensions.firstOrNull { it.pkg.id == detailId }
     /** Erweiterung des geöffneten Info-Dialogs. */
@@ -63,6 +69,12 @@ sealed interface ExtensionsUiEvent {
     data class OpenInfo(val pkg: LspExtensionPackage) : ExtensionsUiEvent
     /** Info-Dialog schließen. */
     data object CloseInfo : ExtensionsUiEvent
+    /** Server ein- oder ausschalten. */
+    data class SetServerEnabled(val id: String, val enabled: Boolean) : ExtensionsUiEvent
+    /** Einzelne Fähigkeit eines Servers schalten. */
+    data class SetFeature(val id: String, val feature: com.codeforge.core.domain.model.LspFeature, val enabled: Boolean) : ExtensionsUiEvent
+    /** JVM-Optionen speichern; `null` setzt auf die Vorgabe zurück. */
+    data class SaveJvm(val id: String, val options: com.codeforge.core.domain.model.JvmOptions?) : ExtensionsUiEvent
     /** Liste neu laden. */
     data object Refresh : ExtensionsUiEvent
     /** Meldung ausblenden. */
