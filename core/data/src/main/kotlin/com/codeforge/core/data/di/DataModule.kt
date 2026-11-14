@@ -61,6 +61,13 @@ object DataStoreProviderModule {
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
+    /** Bindet: Projektauswertung („Projektinfo“). */
+    @Binds
+    @Singleton
+    abstract fun bindProjectStatsRepository(
+        impl: com.codeforge.core.data.repository.ProjectStatsRepositoryImpl
+    ): com.codeforge.core.domain.repository.ProjectStatsRepository
+
     /** Bindet: Gradle-Einstellungen („Build & Run“). */
     @Binds
     @Singleton

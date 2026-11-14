@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Projektinfo)
+- Neuer Bildschirm „Projektinfo“ (Workspace-Seitenleiste) für das geöffnete Projekt: Hauptsprache, Codezeilen, Quelldateien, Module, Projektart (Android-App/-Bibliothek, Compose, KMP, Kotlin/JVM), Build-System (Gradle KTS/Groovy, Maven, CMake, ndk-build, npm, Cargo …), Erstellungsdatum (erster Commit, sonst Dateisystem bzw. älteste Datei), zuletzt geändert, Größe; Gradle-Wrapper, AGP, Kotlin, compile/target/minSdk, Bibliotheken im Katalog; Git (Branch, Commits, Autoren, erster/letzter Commit); größte Quelldateien.
+- Diagramme: Ring „Codezeilen je Sprache“, gestapelter Balken Code/Kommentare/Leer, Balken „Codezeilen je Modul“.
+- `ProjectStatsRepository` (:core:domain) mit `ProjectStatsAnalyzer` (:core:data): ignoriert Build-/Cache-Ordner und Symlinks, höchstens 50.000 Dateien, Dateien > 2 MiB werden nicht zeilenweise gelesen. Sandbox-Messung an CodeForgeMobile: 2.336 Dateien in 3,3 s.
+
 ### Geändert (Beispiel-Plugins: JDK 21 und Ausgabe nach examples/out)
 - Alle Beispiel-Plugins bauen mit der JDK-21-Toolchain (Bytecode weiter Java 17). Kotlin-, XML- und Java-LSP-Plugin verlangten fest JDK 17 und blieben mit dem vom SDK-Manager installierten JDK 21 stehen: `LspServerSpec.jdkVersions` (statt `requiredJdk`) nimmt das erste vorhandene JDK, Kotlin/XML bevorzugt 21 sonst 17, Java (aktuelle JDT-LS-Snapshots) nur 21; die Startbefehle in `plugin.json` wählen genauso. LSP-Plugins 2.1.0 (kmp-lsp 2.2.0), da sie die geänderte Basis bündeln.
 - `./gradlew :examples:packageAll` baut alle Beispiele nach `examples/out/<modul>/`, auch die Guide-Beispiele (`guide-commit-notes` über das gemeinsame Packaging, die deklarativen über `templates/build.py --out … --prefix guide-`).

@@ -86,6 +86,7 @@ internal object Routes {
     const val HARDCODED_STRINGS_PATTERN = "hardcoded_strings?targetPath={targetPath}&projectRoot={projectRoot}"
     const val DEPENDENCIES_PATTERN = "dependencies?rootPath={rootPath}"
     const val PROJECT_SETTINGS_PATTERN = "project_settings/{projectPath}"
+    const val PROJECT_INFO_PATTERN = "project_info?rootPath={rootPath}"
 
     /** Route der Projekteinstellungen. */
     fun projectSettings(projectPath: String) = "project_settings/${Uri.encode(projectPath)}"
@@ -101,6 +102,7 @@ internal object Routes {
     fun assetStudio(rootPath: String, action: String = "STUDIO") = "asset_studio?rootPath=${Uri.encode(rootPath)}&action=$action"
     /** Route der Abhängigkeitsansicht. */
     fun dependencies(rootPath: String) = "dependencies?rootPath=${Uri.encode(rootPath)}"
+    fun projectInfo(rootPath: String) = "project_info?rootPath=${Uri.encode(rootPath)}"
     /** Route der APK-Analyse (optional mit Vergleichs-APK). */
     fun apkAnalyzer(apkPath: String, comparePath: String? = null): String {
         val base = "apk_analyzer?apkPath=${Uri.encode(apkPath)}"
@@ -432,6 +434,12 @@ fun CodeForgeNavHost(
                     navController.popBackStack()
                 }
             )
+        }
+        composable(
+            route = Routes.PROJECT_INFO_PATTERN,
+            arguments = listOf(navArgument("rootPath") { type = NavType.StringType; defaultValue = "" })
+        ) {
+            com.codeforge.feature.projectsettings.projectinfo.ProjectInfoRoute(onBack = { navController.popBackStack() })
         }
         composable(
             route = Routes.PROJECT_SETTINGS_PATTERN,
