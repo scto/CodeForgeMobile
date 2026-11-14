@@ -8,14 +8,29 @@ Aufruf: python3 icon-plugins/generate.py [ausgabeordner]   (Standard: icon-plugi
 Schreibt Quellordner nach <ausgabe>/src/<id>/ und ZIPs nach <ausgabe>/<id>.zip.
 Benötigt Pillow und DejaVu Sans Bold. Es werden keine Dateien im Repo erzeugt (build/ ist ignoriert).
 """
-import hashlib, json, sys, zipfile
+import hashlib, json, os, sys, zipfile
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+
+try:
+    from PIL import Image, ImageDraw, ImageFont
+except ImportError:
+    sys.exit("icon-plugins: Pillow fehlt. Termux: pkg install python-pillow   sonst: pip install pillow")
 
 ROOT = Path(__file__).resolve().parent
 SIZE, SS = 96, 4            # Zielgröße, Supersampling
 S = SIZE * SS
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+# DejaVu Sans Bold: Debian/Ubuntu, Termux (pkg install ttf-dejavu), Arch/Fedora, macOS (Homebrew); sonst Pillow-Standardschrift.
+_PREFIX = os.environ.get("PREFIX", "")
+FONT_CANDIDATES = [
+    os.environ.get("CODEFORGE_ICON_FONT", ""),
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    f"{_PREFIX}/share/fonts/TTF/DejaVuSans-Bold.ttf",
+    f"{_PREFIX}/share/fonts/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Bold.ttf",
+    "/opt/homebrew/share/fonts/DejaVuSans-Bold.ttf",
+]
+FONT = next((f for f in FONT_CANDIDATES if f and Path(f).is_file()), None)
 
 # key -> (Beschriftung, Basisfarbe). Ein Bild je Schlüssel.
 KINDS = {
@@ -86,7 +101,13 @@ def kind_color(base, mode, tint):
 
 
 def font(size):
-    return ImageFont.truetype(FONT, size)
+    if FONT:
+        return ImageFont.truetype(FONT, size)
+    try:
+        return ImageFont.load_default(size=size)  # Pillow >= 10.1, skalierbar
+    except TypeError:
+        sys.exit("icon-plugins: DejaVu Sans Bold fehlt (Termux: pkg install ttf-dejavu) "
+                 "oder Pillow >= 10.1 installieren; eigener Pfad über CODEFORGE_ICON_FONT")
 
 
 def text(d, xy, label, fill, size):

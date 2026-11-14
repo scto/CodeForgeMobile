@@ -48,7 +48,10 @@ def main(store):
     with tempfile.TemporaryDirectory() as tmp:
         for g in GENERATORS:
             out = Path(tmp) / g
-            subprocess.run([sys.executable, str(REPO / g / "generate.py"), str(out)], check=True, capture_output=True)
+            run = subprocess.run([sys.executable, str(REPO / g / "generate.py"), str(out)], capture_output=True, text=True)
+            if run.returncode != 0:
+                detail = (run.stderr or run.stdout).strip().splitlines()[-15:]
+                raise SystemExit(f"{g}/generate.py fehlgeschlagen (Exit {run.returncode}):\n" + "\n".join(detail))
             for z in sorted(out.glob("*.zip")):
                 if z.name.startswith("codeforge-"):  # Sammelarchive nicht einzeln veröffentlichen
                     continue
