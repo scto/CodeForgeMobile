@@ -53,7 +53,9 @@ enum class AiProviderType(
     val displayName: String,
     val defaultBaseUrl: String,
     val defaultModel: String,
-    val suggestedModels: List<String>
+    val suggestedModels: List<String>,
+    /** Spricht die OpenAI-Chat-Schnittstelle (`/chat/completions`, `/models`) und nutzt deren Client. */
+    val openAiCompatible: Boolean = false
 ) {
     ANTHROPIC(
         id = "anthropic",
@@ -74,6 +76,7 @@ enum class AiProviderType(
         id = "openai",
         displayName = "OpenAI-kompatibel",
         defaultBaseUrl = "https://api.openai.com/v1",
+        openAiCompatible = true,
         defaultModel = "gpt-5-mini",
         suggestedModels = listOf(
             "gpt-5",
@@ -107,15 +110,41 @@ enum class AiProviderType(
             "gemini-2.5-flash",
             "gemini-2.5-flash-lite"
         )
+    ),
+    GROK(
+        id = "grok",
+        displayName = "Grok (xAI)",
+        defaultBaseUrl = "https://api.x.ai/v1",
+        defaultModel = "grok-4-fast",
+        // Vorschläge; „Modelle abrufen“ lädt die Live-Liste von /v1/models.
+        suggestedModels = listOf("grok-4", "grok-4-fast", "grok-code-fast-1", "grok-3-mini"),
+        openAiCompatible = true
+    ),
+    OPENROUTER(
+        id = "openrouter",
+        displayName = "OpenRouter",
+        defaultBaseUrl = "https://openrouter.ai/api/v1",
+        defaultModel = "openrouter/auto",
+        // Vorschläge; OpenRouter listet unter /api/v1/models mehrere hundert Modelle.
+        suggestedModels = listOf(
+            "openrouter/auto",
+            "anthropic/claude-sonnet-4.5",
+            "google/gemini-2.5-flash",
+            "openai/gpt-5-mini",
+            "meta-llama/llama-3.3-70b-instruct"
+        ),
+        openAiCompatible = true
     );
 
     companion object {
-        /** Erkennt den Anbieter am Schlüssel-Präfix (Gemini `AIza…` oder das neue `AQ.…`, Anthropic `sk-ant-…`), sonst `null`. */
+        /** Erkennt den Anbieter am Schlüssel-Präfix (Gemini `AIza…`/`AQ.…`, Anthropic `sk-ant-…`, OpenRouter `sk-or-…`, xAI `xai-…`), sonst `null`. */
         fun detectFromKey(rawKey: String): AiProviderType? {
             val key = rawKey.trim()
             return when {
                 key.startsWith("AIza") || key.startsWith("AQ.") -> GEMINI
                 key.startsWith("sk-ant-") -> ANTHROPIC
+                key.startsWith("sk-or-") -> OPENROUTER
+                key.startsWith("xai-") -> GROK
                 else -> null
             }
         }

@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (KI-Einstellungen: neues Layout, Grok und OpenRouter)
+- KI-Einstellungen in Abschnitten statt einer Karte je Anbieter: Anbieter (Chips, Schlüssel-Symbol bei hinterlegtem Schlüssel), Modell des aktiven Anbieters (Liste mit Häkchen, „Alle anzeigen“ ab 12 Modellen, eigener Modellname, Modelle laden, Verbindung testen), API-Schlüssel aller Anbieter (maskiert, ein-/ausblendbar), Endpunkte aller Anbieter (mit Hinweis und Zurücksetzen), Datenschutz und Tageslimit. Änderungen werden 600 ms nach der letzten Eingabe automatisch gespeichert; die Speichern-Knöpfe entfallen.
+- Neue Anbieter Grok (xAI, `https://api.x.ai/v1`) und OpenRouter (`https://openrouter.ai/api/v1`) über den OpenAI-kompatiblen Client (Chat, Agent, Modellliste); Schlüssel-Erkennung `xai-…` und `sk-or-…`. Endpunkte sind jetzt für alle Anbieter änderbar (die Clients nutzten die Basis-URL bereits).
+
 ### Hinzugefügt (Projektinfo)
 - Neuer Bildschirm „Projektinfo“ (Workspace-Seitenleiste) für das geöffnete Projekt: Hauptsprache, Codezeilen, Quelldateien, Module, Projektart (Android-App/-Bibliothek, Compose, KMP, Kotlin/JVM), Build-System (Gradle KTS/Groovy, Maven, CMake, ndk-build, npm, Cargo …), Erstellungsdatum (erster Commit, sonst Dateisystem bzw. älteste Datei), zuletzt geändert, Größe; Gradle-Wrapper, AGP, Kotlin, compile/target/minSdk, Bibliotheken im Katalog; Git (Branch, Commits, Autoren, erster/letzter Commit); größte Quelldateien.
 - Diagramme: Ring „Codezeilen je Sprache“, gestapelter Balken Code/Kommentare/Leer, Balken „Codezeilen je Modul“.

@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** ViewModel der KI-Einstellungen. */
@@ -25,6 +27,9 @@ class AiSettingsViewModel @Inject constructor(
     private val repository: AiRepository,
     private val aiProvider: AiProvider
 ) : ViewModel() {
+
+    // Laufende verzögerte Speichervorgänge je Anbieter.
+    private val autosaveJobs = mutableMapOf<AiProviderType, Job>()
 
     private val _uiState = MutableStateFlow(AiSettingsUiState())
     /** UI-Zustand. */
@@ -64,6 +69,9 @@ class AiSettingsViewModel @Inject constructor(
             }
             is AiSettingsUiEvent.ModelChanged -> edit(event.provider) { it.copy(model = event.value, test = AiCheckState.Idle) }
             is AiSettingsUiEvent.BaseUrlChanged -> edit(event.provider) { it.copy(baseUrl = event.value, test = AiCheckState.Idle) }
+            is AiSettingsUiEvent.ResetBaseUrl -> edit(event.provider) {
+                it.copy(baseUrl = event.provider.defaultBaseUrl, test = AiCheckState.Idle)
+            }
             is AiSettingsUiEvent.ToggleKeyVisible -> update(event.provider) { it.copy(keyVisible = !it.keyVisible) }
             is AiSettingsUiEvent.ClearKey -> viewModelScope.launch {
                 edit(event.provider) { it.copy(apiKey = "", test = AiCheckState.Idle) }
@@ -108,10 +116,18 @@ class AiSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun edit(provider: AiProviderType, transform: (AiProviderState) -> AiProviderState) =
+    // Ändert die Felder eines Anbieters und speichert kurz nach der letzten Eingabe automatisch.
+    private fun edit(provider: AiProviderType, transform: (AiProviderState) -> AiProviderState) {
         update(provider) { transform(it).copy(dirty = true) }
+        autosaveJobs.remove(provider)?.cancel()
+        autosaveJobs[provider] = viewModelScope.launch {
+            delay(AUTOSAVE_DELAY_MS)
+            save(provider, silent = true)
+        }
+    }
 
     private suspend fun save(provider: AiProviderType, silent: Boolean) {
+        autosaveJobs.remove(provider)?.takeIf { it != kotlinx.coroutines.currentCoroutineContext()[Job] }?.cancel()
         repository.saveProviderOptions(options(provider))
         update(provider) { it.copy(dirty = false) }
         if (!silent) _uiState.update { it.copy(message = AiSettingsMessage.Saved(provider)) }
@@ -151,5 +167,7 @@ class AiSettingsViewModel @Inject constructor(
 
     private companion object {
         const val MAX_DAILY_LIMIT = 100_000
+        /** Wartezeit nach der letzten Eingabe bis zum automatischen Speichern. */
+        const val AUTOSAVE_DELAY_MS = 600L
     }
 }

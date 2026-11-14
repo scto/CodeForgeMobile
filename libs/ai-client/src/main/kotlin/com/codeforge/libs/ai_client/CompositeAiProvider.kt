@@ -18,26 +18,24 @@ class CompositeAiProvider @Inject constructor(
     private val geminiClient: GeminiClient
 ) : AiProvider {
 
-    override fun streamChat(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent> {
-        return when (options.provider) {
+    override fun streamChat(messages: List<AiChatMessage>, options: AiChatOptions): Flow<AiEvent> =
+        when (options.provider) {
             AiProviderType.ANTHROPIC -> anthropicClient.stream(messages, options)
-            AiProviderType.OPENAI -> openAiClient.stream(messages, options)
+            AiProviderType.OPENAI, AiProviderType.GROK, AiProviderType.OPENROUTER -> openAiClient.stream(messages, options)
             AiProviderType.GEMINI -> geminiClient.stream(messages, options)
         }
-    }
 
-    override suspend fun testConnection(options: AiChatOptions): Result<String> {
-        return when (options.provider) {
+    override suspend fun testConnection(options: AiChatOptions): Result<String> =
+        when (options.provider) {
             AiProviderType.ANTHROPIC -> anthropicClient.testConnection(options)
-            AiProviderType.OPENAI -> openAiClient.testConnection(options)
+            AiProviderType.OPENAI, AiProviderType.GROK, AiProviderType.OPENROUTER -> openAiClient.testConnection(options)
             AiProviderType.GEMINI -> geminiClient.testConnection(options)
         }
-    }
 
-    override suspend fun fetchAvailableModels(options: AiChatOptions): Result<List<String>> {
-        return when (options.provider) {
+    override suspend fun fetchAvailableModels(options: AiChatOptions): Result<List<String>> =
+        when (options.provider) {
             AiProviderType.ANTHROPIC -> Result.success(options.provider.suggestedModels)
-            AiProviderType.OPENAI -> {
+            AiProviderType.OPENAI, AiProviderType.GROK, AiProviderType.OPENROUTER -> {
                 val remote = openAiClient.fetchModels(options)
                 if (remote.isSuccess && remote.getOrNull()?.isNotEmpty() == true) {
                     remote
@@ -54,5 +52,4 @@ class CompositeAiProvider @Inject constructor(
                 }
             }
         }
-    }
 }

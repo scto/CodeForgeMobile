@@ -36,8 +36,8 @@ data class AiProviderState(
 ) {
     /** Ob ein API-Schlüssel eingetragen ist. */
     val hasKey: Boolean get() = apiKey.isNotBlank()
-    /** Ob die Basis-URL änderbar ist (nur OpenAI-kompatibel). */
-    val baseUrlEditable: Boolean get() = provider == AiProviderType.OPENAI
+    /** Ob die Basis-URL vom Standard des Anbieters abweicht. */
+    val baseUrlChanged: Boolean get() = baseUrl.trim().trimEnd('/') != provider.defaultBaseUrl.trimEnd('/')
 }
 
 /** Zustand der KI-Einstellungen: Anbieter, aktiver Anbieter, Datenschutz, Tageslimit und Verbrauch. */
@@ -76,6 +76,8 @@ sealed interface AiSettingsUiEvent {
     data class TestConnection(val provider: AiProviderType) : AiSettingsUiEvent
     /** Modellliste vom Anbieter abrufen. */
     data class FetchModels(val provider: AiProviderType) : AiSettingsUiEvent
+    /** Basis-URL auf den Standard des Anbieters zurücksetzen. */
+    data class ResetBaseUrl(val provider: AiProviderType) : AiSettingsUiEvent
     /** Schlüssel löschen. */
     data class ClearKey(val provider: AiProviderType) : AiSettingsUiEvent
     /** Anbieter aktiv schalten. */

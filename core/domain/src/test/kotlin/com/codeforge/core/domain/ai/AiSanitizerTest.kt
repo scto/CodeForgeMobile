@@ -88,5 +88,7 @@ class AiProviderDetectionTest {
         org.junit.Assert.assertEquals(AiProviderType.GEMINI, AiProviderType.detectFromKey("AQ.Ab8RN6x"))
         org.junit.Assert.assertEquals(AiProviderType.ANTHROPIC, AiProviderType.detectFromKey("sk-ant-api03-x"))
         org.junit.Assert.assertNull(AiProviderType.detectFromKey("sk-proj-123"))
+        org.junit.Assert.assertEquals(AiProviderType.OPENROUTER, AiProviderType.detectFromKey("sk-or-v1-abc"))
+        org.junit.Assert.assertEquals(AiProviderType.GROK, AiProviderType.detectFromKey("xai-abc"))
     }
 }

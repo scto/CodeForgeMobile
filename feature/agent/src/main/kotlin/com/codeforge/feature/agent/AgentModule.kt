@@ -40,7 +40,7 @@ object AgentModule {
     fun provideLlmFactory(): AgentLlmFactory = AgentLlmFactory { options ->
         when (options.provider) {
             AiProviderType.ANTHROPIC -> AnthropicAgentClient(options)
-            AiProviderType.OPENAI -> OpenAiAgentClient(options)
+            AiProviderType.OPENAI, AiProviderType.GROK, AiProviderType.OPENROUTER -> OpenAiAgentClient(options)
             AiProviderType.GEMINI -> GeminiAgentClient(options)
         }
     }

@@ -2323,7 +2323,7 @@
     <string name="assetstudio_mode_drawable">Drawable</string>
     <string name="settings_hub_ai">AI providers</string>
     <string name="aiset_title">AI providers &amp; API keys</string>
-    <string name="aiset_keys_hint">API keys are stored encrypted on this device and only sent to the selected provider. Each provider keeps its own key, model and settings.</string>
+    <string name="aiset_keys_hint">API keys are stored encrypted on this device and only sent to the selected provider. Each provider keeps its own key, model and endpoint. Changes are saved automatically.</string>
     <string name="aiset_active">Active</string>
     <string name="aiset_use">Use</string>
     <string name="aiset_saved">%1$s saved</string>
@@ -2618,4 +2618,17 @@
     <string name="projectinfo_section_largest">Largest source files</string>
     <string name="projectinfo_lines_value">%1$s lines</string>
     <string name="projectinfo_analyzed_at">Analyzed: %1$s</string>
+    <string name="aiset_section_provider">Provider</string>
+    <string name="aiset_section_model">Model · %1$s</string>
+    <string name="aiset_section_keys">API keys</string>
+    <string name="aiset_section_endpoints">Endpoints</string>
+    <string name="aiset_section_privacy">Privacy &amp; limit</string>
+    <string name="aiset_custom_model">Custom model name</string>
+    <string name="aiset_models_all">Show all %1$s models</string>
+    <string name="aiset_models_less">Show fewer (%1$s models)</string>
+    <string name="aiset_endpoint">%1$s endpoint</string>
+    <string name="aiset_endpoint_reset">Restore default endpoint</string>
+    <string name="aiset_endpoint_hint_gemini">Appends /v1beta/models/{model}:streamGenerateContent</string>
+    <string name="aiset_endpoint_hint_anthropic">Appends /v1/messages</string>
+    <string name="aiset_endpoint_hint_openai">Change to use Ollama or a custom OpenAI-compatible server (works without a key)</string>
 </resources>

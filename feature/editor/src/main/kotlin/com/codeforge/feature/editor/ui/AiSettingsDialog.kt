@@ -135,7 +135,7 @@ fun AiSettingsDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                if (selectedProvider == AiProviderType.OPENAI) {
+                if (selectedProvider.openAiCompatible) {
                     OutlinedTextField(
                         value = baseUrl,
                         onValueChange = { baseUrl = it },

@@ -2323,7 +2323,7 @@
     <string name="assetstudio_mode_drawable">Drawable</string>
     <string name="settings_hub_ai">KI-Anbieter</string>
     <string name="aiset_title">KI-Anbieter &amp; API-Schlüssel</string>
-    <string name="aiset_keys_hint">API-Schlüssel werden verschlüsselt auf diesem Gerät gespeichert und nur an den gewählten Anbieter gesendet. Jeder Anbieter hat eigenen Schlüssel, Modell und Einstellungen.</string>
+    <string name="aiset_keys_hint">API-Schlüssel werden verschlüsselt auf diesem Gerät gespeichert und nur an den gewählten Anbieter gesendet. Jeder Anbieter hat eigenen Schlüssel, Modell und Endpunkt. Änderungen werden automatisch gespeichert.</string>
     <string name="aiset_active">Aktiv</string>
     <string name="aiset_use">Verwenden</string>
     <string name="aiset_saved">%1$s gespeichert</string>
@@ -2618,4 +2618,17 @@
     <string name="projectinfo_section_largest">Größte Quelldateien</string>
     <string name="projectinfo_lines_value">%1$s Zeilen</string>
     <string name="projectinfo_analyzed_at">Ausgewertet: %1$s</string>
+    <string name="aiset_section_provider">Anbieter</string>
+    <string name="aiset_section_model">Modell · %1$s</string>
+    <string name="aiset_section_keys">API-Schlüssel</string>
+    <string name="aiset_section_endpoints">Endpunkte</string>
+    <string name="aiset_section_privacy">Datenschutz &amp; Limit</string>
+    <string name="aiset_custom_model">Eigener Modellname</string>
+    <string name="aiset_models_all">Alle %1$s Modelle anzeigen</string>
+    <string name="aiset_models_less">Weniger anzeigen (%1$s Modelle)</string>
+    <string name="aiset_endpoint">%1$s-Endpunkt</string>
+    <string name="aiset_endpoint_reset">Standard-Endpunkt wiederherstellen</string>
+    <string name="aiset_endpoint_hint_gemini">Hängt /v1beta/models/{Modell}:streamGenerateContent an</string>
+    <string name="aiset_endpoint_hint_anthropic">Hängt /v1/messages an</string>
+    <string name="aiset_endpoint_hint_openai">Für Ollama oder einen eigenen OpenAI-kompatiblen Server ändern (ohne Schlüssel möglich)</string>
 </resources>

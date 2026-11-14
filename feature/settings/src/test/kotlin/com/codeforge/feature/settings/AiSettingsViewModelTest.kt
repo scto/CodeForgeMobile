@@ -137,4 +137,20 @@ class AiSettingsViewModelTest {
         override suspend fun saveHistory(projectId: String, history: List<AiChatMessage>) {}
         override suspend fun clearHistory(projectId: String) {}
     }
+
+    @Test
+    fun editsAreSavedAutomatically() = runTest {
+        val vm = vm()
+        advanceUntilIdle()
+        vm.onEvent(AiSettingsUiEvent.ApiKeyChanged(AiProviderType.GROK, "xai-1"))
+        vm.onEvent(AiSettingsUiEvent.BaseUrlChanged(AiProviderType.GROK, "https://example.invalid/v1"))
+        advanceUntilIdle()
+        val saved = repo.getProviderOptions(AiProviderType.GROK)
+        assertEquals("xai-1", saved.apiKey)
+        assertEquals("https://example.invalid/v1", saved.baseUrl)
+        assertFalse(vm.uiState.value.providers.first { it.provider == AiProviderType.GROK }.dirty)
+        vm.onEvent(AiSettingsUiEvent.ResetBaseUrl(AiProviderType.GROK))
+        advanceUntilIdle()
+        assertEquals(AiProviderType.GROK.defaultBaseUrl, repo.getProviderOptions(AiProviderType.GROK).baseUrl)
+    }
 }
