@@ -44,11 +44,19 @@ class SdkManagerViewModel @Inject constructor(
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: SdkManagerEvent) {
         when (event) {
-            is SdkManagerEvent.OpenVersionDialog -> openDialog(event.toolType)
-            is SdkManagerEvent.ToggleVersionSelection -> toggleSelection(event.version)
-            SdkManagerEvent.ConfirmVersionDialog -> confirmDialog()
-            SdkManagerEvent.DismissVersionDialog ->
-                _uiState.update { it.copy(openDialogCategory = null, pendingSelection = emptySet()) }
+            is SdkManagerEvent.CategorySelected ->
+                _uiState.update { it.copy(selectedCategory = event.toolType, selectedId = null) }
+            is SdkManagerEvent.ItemSelected ->
+                _uiState.update { it.copy(selectedId = event.id.takeIf { id -> id != it.selectedId }) }
+            SdkManagerEvent.InstallSelected -> installSelected()
+            SdkManagerEvent.UninstallRequested ->
+                _uiState.update { it.copy(pendingUninstallId = it.selectedItem?.takeIf { item -> item.isInstalled }?.id) }
+            SdkManagerEvent.UninstallDismissed -> _uiState.update { it.copy(pendingUninstallId = null) }
+            SdkManagerEvent.UninstallConfirmed -> {
+                val id = _uiState.value.pendingUninstallId ?: return
+                _uiState.update { it.copy(pendingUninstallId = null) }
+                uninstall(id)
+            }
             SdkManagerEvent.RefreshRemoteList -> refresh()
         }
     }
@@ -76,82 +84,45 @@ class SdkManagerViewModel @Inject constructor(
         }
     }
 
-    private fun itemsFor(toolType: ToolType): List<ToolItem> = when (toolType) {
-        ToolType.JDK -> _uiState.value.jdkVersions
-        ToolType.CMDLINE_TOOLS -> _uiState.value.cmdlineToolsVersions
-        ToolType.PLATFORM_TOOLS -> _uiState.value.platformToolsVersions
-        ToolType.BUILD_TOOLS -> _uiState.value.buildToolsVersions
-        ToolType.PLATFORM -> _uiState.value.platformVersions
-        ToolType.NDK -> _uiState.value.ndkVersions
-        ToolType.CMAKE -> _uiState.value.cmakeVersions
-    }
-
-    private fun openDialog(toolType: ToolType) {
-        val installedVersions = itemsFor(toolType).filter { it.isInstalled }.map { it.version }.toSet()
-        _uiState.update { it.copy(openDialogCategory = toolType, pendingSelection = installedVersions) }
-    }
-
-    private fun toggleSelection(version: String) {
-        _uiState.update { state ->
-            val updated = if (version in state.pendingSelection) {
-                state.pendingSelection - version
-            } else {
-                state.pendingSelection + version
-            }
-            state.copy(pendingSelection = updated)
-        }
-    }
-
-    private fun confirmDialog() {
-        val toolType = _uiState.value.openDialogCategory ?: return
-        val previouslyInstalled = itemsFor(toolType).filter { it.isInstalled }.map { it.version }.toSet()
-        val nowSelected = _uiState.value.pendingSelection
-
-        val toInstall = nowSelected - previouslyInstalled
-        val toUninstall = previouslyInstalled - nowSelected
-
-        _uiState.update { it.copy(openDialogCategory = null, pendingSelection = emptySet()) }
-
-        toInstall.forEach { version -> install(toolType, version) }
-        toUninstall.forEach { version -> uninstall(toolType, version) }
-    }
-
-    private fun install(toolType: ToolType, version: String) {
-        val packagePath = packageIdFor(toolType, version)
+    /** Installiert den gewählten Eintrag; ein vorhandener wird zuerst entfernt (Neuinstallation). */
+    private fun installSelected() {
+        val item = _uiState.value.selectedItem ?: return
+        if (item.id in _uiState.value.activeDownloads) return
+        _uiState.update { it.copy(activeDownloads = it.activeDownloads + (item.id to 0)) }
         viewModelScope.launch {
-            sdkRepository.installSdkTool(packagePath).collect { installEvent ->
+            if (item.isInstalled) {
+                sdkRepository.uninstallSdkTool(item.id).onFailure {
+                    _uiState.update { s -> s.copy(activeDownloads = s.activeDownloads - item.id) }
+                    _effect.emit(SdkManagerEffect.ShowSnackbar(it.message ?: Res.string(R.string.common_deinstallation_fehlgeschlagen)))
+                    return@launch
+                }
+            }
+            sdkRepository.installSdkTool(item.id).collect { installEvent ->
                 when (installEvent) {
                     is SdkInstallEvent.Progress ->
-                        _uiState.update { it.copy(activeDownloads = it.activeDownloads + (packagePath to installEvent.percent)) }
+                        _uiState.update { it.copy(activeDownloads = it.activeDownloads + (item.id to installEvent.percent)) }
 
                     is SdkInstallEvent.Success -> {
-                        _uiState.update { it.copy(activeDownloads = it.activeDownloads - packagePath) }
+                        _uiState.update { it.copy(activeDownloads = it.activeDownloads - item.id) }
                         _effect.emit(SdkManagerEffect.ShowSnackbar(Res.string(R.string.common_installiert, installEvent.packagePath)))
                         refresh()
                     }
 
                     is SdkInstallEvent.Error -> {
-                        _uiState.update { it.copy(activeDownloads = it.activeDownloads - packagePath) }
+                        _uiState.update { it.copy(activeDownloads = it.activeDownloads - item.id) }
                         _effect.emit(SdkManagerEffect.ShowSnackbar(installEvent.exception.message ?: Res.string(R.string.common_installation_fehlgeschlagen)))
+                        refresh()
                     }
                 }
             }
         }
     }
 
-    private fun uninstall(toolType: ToolType, version: String) = viewModelScope.launch {
-        val packagePath = packageIdFor(toolType, version)
+    private fun uninstall(packagePath: String) = viewModelScope.launch {
         sdkRepository.uninstallSdkTool(packagePath)
             .onSuccess { refresh() }
             .onFailure { _effect.emit(SdkManagerEffect.ShowSnackbar(it.message ?: Res.string(R.string.common_deinstallation_fehlgeschlagen))) }
     }
-
-    /**
-     * Die Paket-ID kommt vom Skript (`ndk;r29` mit Anzeigeversion `r29`) und ist nicht aus der
-     * Anzeigeversion ableitbar — daher aus der geladenen Liste nachschlagen.
-     */
-    private fun packageIdFor(toolType: ToolType, version: String): String =
-        itemsFor(toolType).firstOrNull { it.version == version }?.id ?: version
 
     private fun categorize(id: String): ToolType = when {
         id.startsWith("jdk;") -> ToolType.JDK

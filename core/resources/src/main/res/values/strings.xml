@@ -2465,4 +2465,11 @@
     <string name="projroot_reset_done">Reset to %1$s</string>
     <string name="projroot_invalid">Path not usable: %1$s</string>
     <string name="projroot_hint">New, imported and cloned projects are placed here. Existing projects are not moved. The log directory (.cfm) switches after an app restart.</string>
+    <string name="sdkmanager_subtitle">Manage Android SDK components</string>
+    <string name="sdkmanager_version">Version %1$s</string>
+    <string name="sdkmanager_install">Install</string>
+    <string name="sdkmanager_reinstall">Reinstall</string>
+    <string name="sdkmanager_uninstall">Uninstall</string>
+    <string name="sdkmanager_uninstall_title">Remove component?</string>
+    <string name="sdkmanager_uninstall_confirm">%1$s will be removed.</string>
 </resources>
