@@ -7,7 +7,7 @@ from pathlib import Path
 PACKS = [
     ("fr", "fr", "Français", [
         "Aa", "Annuler", "Actualiser", "Actuel", "Nom d’utilisateur manquant", "Fichier", "Échec de la désinstallation.", "Éditeur", "Supprimer", "Détecté : %1$s",
-        "Réessayer", "Remplacer par", "Git", "Échec de l’installation.", "%1$s installé.", "Aucun résultat", "Échec du clonage.", "Supprimer", "Nom", "Aucun commit à modifier pour l’instant.",
+        "Réessayer", "Remplacer par", "Git", "En attente d’une autre installation …", "Échec de l’installation.", "%1$s installé.", "Aucun résultat", "Échec du clonage.", "Supprimer", "Nom", "Aucun commit à modifier pour l’instant.",
         "Dossier", "Aperçu", "Projet", "Fermer", "Enregistrer", "L’environnement Termux n’est pas encore configuré (terminez l’introduction).", "Jeton manquant", "Passer", "Renommer", "Mettre à jour",
         "Aperçu", "Mot", "Retour", "Erreur", "Échec de l’action.", "Échec de la suppression.", "Options de l’arborescence", "Mode de tri", "Groupé (dossiers cachés, dossiers, fichiers cachés, fichiers)", "Mélangé (une seule liste)",
         "Trier par", "Nom", "Type", "Taille", "Modifié", "Décroissant", "Affichage", "Fichiers", "Projet", "Module (Android)",
@@ -17,7 +17,7 @@ PACKS = [
         "%1$d éléments", "1 élément", "Aucun élément", "Ouvrir dans l’éditeur", "Chargement…", "Actions du plugin"]),
     ("es", "es", "Español", [
         "Aa", "Cancelar", "Actualizar", "Actual", "Falta el nombre de usuario", "Archivo", "Error al desinstalar.", "Editor", "Quitar", "Detectado: %1$s",
-        "Reintentar", "Reemplazar por", "Git", "Error en la instalación.", "%1$s instalado.", "Sin coincidencias", "Error al clonar.", "Eliminar", "Nombre", "Todavía no hay ningún commit que modificar.",
+        "Reintentar", "Reemplazar por", "Git", "Esperando otra instalación …", "Error en la instalación.", "%1$s instalado.", "Sin coincidencias", "Error al clonar.", "Eliminar", "Nombre", "Todavía no hay ningún commit que modificar.",
         "Carpeta", "Vista previa", "Proyecto", "Cerrar", "Guardar", "El entorno de Termux aún no está configurado (completa la introducción).", "Falta el token", "Omitir", "Renombrar", "Actualizar",
         "Vista previa", "Palabra", "Atrás", "Error", "La acción ha fallado.", "Error al eliminar.", "Opciones del árbol de archivos", "Modo de orden", "Agrupado (carpetas ocultas, carpetas, archivos ocultos, archivos)", "Mezclado (una sola lista)",
         "Ordenar por", "Nombre", "Tipo", "Tamaño", "Modificado", "Descendente", "Vista", "Archivos", "Proyecto", "Módulo (Android)",
@@ -27,7 +27,7 @@ PACKS = [
         "%1$d elementos", "1 elemento", "Sin elementos", "Abrir en el editor", "Cargando…", "Acciones del plugin"]),
     ("it", "it", "Italiano", [
         "Aa", "Annulla", "Aggiorna", "Attuale", "Nome utente mancante", "File", "Disinstallazione non riuscita.", "Editor", "Rimuovi", "Rilevato: %1$s",
-        "Riprova", "Sostituisci con", "Git", "Installazione non riuscita.", "%1$s installato.", "Nessuna corrispondenza", "Clonazione non riuscita.", "Elimina", "Nome", "Nessun commit da modificare.",
+        "Riprova", "Sostituisci con", "Git", "In attesa di un’altra installazione …", "Installazione non riuscita.", "%1$s installato.", "Nessuna corrispondenza", "Clonazione non riuscita.", "Elimina", "Nome", "Nessun commit da modificare.",
         "Cartella", "Anteprima", "Progetto", "Chiudi", "Salva", "L’ambiente Termux non è ancora configurato (completa l’introduzione).", "Token mancante", "Salta", "Rinomina", "Aggiorna",
         "Anteprima", "Parola", "Indietro", "Errore", "Azione non riuscita.", "Eliminazione non riuscita.", "Opzioni dell’albero dei file", "Modalità di ordinamento", "Raggruppato (cartelle nascoste, cartelle, file nascosti, file)", "Misto (un unico elenco)",
         "Ordina per", "Nome", "Tipo", "Dimensione", "Modificato", "Decrescente", "Vista", "File", "Progetto", "Modulo (Android)",
@@ -37,7 +37,7 @@ PACKS = [
         "%1$d elementi", "1 elemento", "Nessun elemento", "Apri nell’editor", "Caricamento…", "Azioni del plugin"]),
     ("pt-BR", "pt-BR", "Português (Brasil)", [
         "Aa", "Cancelar", "Atualizar", "Atual", "Nome de usuário ausente", "Arquivo", "Falha ao desinstalar.", "Editor", "Remover", "Detectado: %1$s",
-        "Tentar novamente", "Substituir por", "Git", "Falha na instalação.", "%1$s instalado.", "Nenhuma correspondência", "Falha ao clonar.", "Excluir", "Nome", "Ainda não há commit para alterar.",
+        "Tentar novamente", "Substituir por", "Git", "Aguardando outra instalação …", "Falha na instalação.", "%1$s instalado.", "Nenhuma correspondência", "Falha ao clonar.", "Excluir", "Nome", "Ainda não há commit para alterar.",
         "Pasta", "Pré-visualização", "Projeto", "Fechar", "Salvar", "O ambiente Termux ainda não foi configurado (conclua a introdução).", "Token ausente", "Pular", "Renomear", "Atualizar",
         "Pré-visualização", "Palavra", "Voltar", "Erro", "A ação falhou.", "Falha ao excluir.", "Opções da árvore de arquivos", "Modo de ordenação", "Agrupado (pastas ocultas, pastas, arquivos ocultos, arquivos)", "Misturado (uma única lista)",
         "Ordenar por", "Nome", "Tipo", "Tamanho", "Modificado", "Decrescente", "Visualização", "Arquivos", "Projeto", "Módulo (Android)",
@@ -47,7 +47,7 @@ PACKS = [
         "%1$d itens", "1 item", "Nenhum item", "Abrir no editor", "Carregando…", "Ações do plugin"]),
     ("nl", "nl", "Nederlands", [
         "Aa", "Annuleren", "Vernieuwen", "Huidig", "Gebruikersnaam ontbreekt", "Bestand", "Verwijderen mislukt.", "Editor", "Verwijderen", "Gedetecteerd: %1$s",
-        "Opnieuw proberen", "Vervangen door", "Git", "Installatie mislukt.", "%1$s geïnstalleerd.", "Geen resultaten", "Klonen mislukt.", "Verwijderen", "Naam", "Nog geen commit om te wijzigen.",
+        "Opnieuw proberen", "Vervangen door", "Git", "Wachten op een andere installatie …", "Installatie mislukt.", "%1$s geïnstalleerd.", "Geen resultaten", "Klonen mislukt.", "Verwijderen", "Naam", "Nog geen commit om te wijzigen.",
         "Map", "Voorbeeld", "Project", "Sluiten", "Opslaan", "De Termux-omgeving is nog niet ingesteld (rond de introductie af).", "Token ontbreekt", "Overslaan", "Hernoemen", "Bijwerken",
         "Voorbeeld", "Woord", "Terug", "Fout", "Actie mislukt.", "Verwijderen mislukt.", "Opties voor bestandsboom", "Sorteermodus", "Gegroepeerd (verborgen mappen, mappen, verborgen bestanden, bestanden)", "Gemengd (één lijst)",
         "Sorteren op", "Naam", "Type", "Grootte", "Gewijzigd", "Aflopend", "Weergave", "Bestanden", "Project", "Module (Android)",
@@ -57,7 +57,7 @@ PACKS = [
         "%1$d items", "1 item", "Geen items", "Openen in editor", "Laden…", "Plugin-acties"]),
     ("pl", "pl", "Polski", [
         "Aa", "Anuluj", "Odśwież", "Bieżący", "Brak nazwy użytkownika", "Plik", "Odinstalowanie nie powiodło się.", "Edytor", "Usuń", "Wykryto: %1$s",
-        "Spróbuj ponownie", "Zamień na", "Git", "Instalacja nie powiodła się.", "Zainstalowano: %1$s.", "Brak dopasowań", "Klonowanie nie powiodło się.", "Usuń", "Nazwa", "Nie ma jeszcze commitu do poprawienia.",
+        "Spróbuj ponownie", "Zamień na", "Git", "Oczekiwanie na inną instalację …", "Instalacja nie powiodła się.", "Zainstalowano: %1$s.", "Brak dopasowań", "Klonowanie nie powiodło się.", "Usuń", "Nazwa", "Nie ma jeszcze commitu do poprawienia.",
         "Folder", "Podgląd", "Projekt", "Zamknij", "Zapisz", "Środowisko Termux nie jest jeszcze skonfigurowane (ukończ wprowadzenie).", "Brak tokenu", "Pomiń", "Zmień nazwę", "Aktualizuj",
         "Podgląd", "Słowo", "Wstecz", "Błąd", "Akcja nie powiodła się.", "Usuwanie nie powiodło się.", "Opcje drzewa plików", "Tryb sortowania", "Grupowane (ukryte foldery, foldery, ukryte pliki, pliki)", "Mieszane (jedna lista)",
         "Sortuj według", "Nazwa", "Typ", "Rozmiar", "Zmodyfikowano", "Malejąco", "Widok", "Pliki", "Projekt", "Moduł (Android)",
@@ -67,7 +67,7 @@ PACKS = [
         "Elementów: %1$d", "1 element", "Brak elementów", "Otwórz w edytorze", "Ładowanie…", "Akcje wtyczki"]),
     ("tr", "tr", "Türkçe", [
         "Aa", "İptal", "Yenile", "Geçerli", "Kullanıcı adı eksik", "Dosya", "Kaldırma başarısız.", "Düzenleyici", "Kaldır", "Algılandı: %1$s",
-        "Yeniden dene", "Şununla değiştir", "Git", "Kurulum başarısız.", "%1$s kuruldu.", "Eşleşme yok", "Klonlama başarısız.", "Sil", "Ad", "Henüz değiştirilecek bir commit yok.",
+        "Yeniden dene", "Şununla değiştir", "Git", "Başka bir kurulum bekleniyor …", "Kurulum başarısız.", "%1$s kuruldu.", "Eşleşme yok", "Klonlama başarısız.", "Sil", "Ad", "Henüz değiştirilecek bir commit yok.",
         "Klasör", "Önizleme", "Proje", "Kapat", "Kaydet", "Termux ortamı henüz kurulmadı (tanıtımı tamamlayın).", "Belirteç eksik", "Atla", "Yeniden adlandır", "Güncelle",
         "Önizleme", "Sözcük", "Geri", "Hata", "İşlem başarısız.", "Silme başarısız.", "Dosya ağacı seçenekleri", "Sıralama modu", "Gruplu (gizli klasörler, klasörler, gizli dosyalar, dosyalar)", "Karışık (tek liste)",
         "Sıralama ölçütü", "Ad", "Tür", "Boyut", "Değiştirilme", "Azalan", "Görünüm", "Dosyalar", "Proje", "Modül (Android)",
@@ -77,7 +77,7 @@ PACKS = [
         "%1$d öğe", "1 öğe", "Öğe yok", "Düzenleyicide aç", "Yükleniyor…", "Eklenti eylemleri"]),
     ("ru", "ru", "Русский", [
         "Aa", "Отмена", "Обновить", "Текущий", "Не указано имя пользователя", "Файл", "Не удалось удалить.", "Редактор", "Удалить", "Обнаружено: %1$s",
-        "Повторить", "Заменить на", "Git", "Не удалось установить.", "%1$s установлено.", "Совпадений нет", "Не удалось клонировать.", "Удалить", "Имя", "Пока нет коммита для изменения.",
+        "Повторить", "Заменить на", "Git", "Ожидание другой установки …", "Не удалось установить.", "%1$s установлено.", "Совпадений нет", "Не удалось клонировать.", "Удалить", "Имя", "Пока нет коммита для изменения.",
         "Папка", "Предпросмотр", "Проект", "Закрыть", "Сохранить", "Среда Termux ещё не настроена (завершите вводный экран).", "Не указан токен", "Пропустить", "Переименовать", "Обновить",
         "Предпросмотр", "Слово", "Назад", "Ошибка", "Не удалось выполнить действие.", "Не удалось удалить.", "Параметры дерева файлов", "Режим сортировки", "По группам (скрытые папки, папки, скрытые файлы, файлы)", "Смешанный (один список)",
         "Сортировать по", "Имя", "Тип", "Размер", "Изменён", "По убыванию", "Вид", "Файлы", "Проект", "Модуль (Android)",
@@ -87,7 +87,7 @@ PACKS = [
         "Элементов: %1$d", "1 элемент", "Нет элементов", "Открыть в редакторе", "Загрузка…", "Действия плагина"]),
     ("ja", "ja", "日本語", [
         "Aa", "キャンセル", "更新", "現在", "ユーザー名がありません", "ファイル", "アンインストールに失敗しました。", "エディター", "削除", "検出: %1$s",
-        "再試行", "置換後", "Git", "インストールに失敗しました。", "%1$s をインストールしました。", "一致する項目がありません", "クローンに失敗しました。", "削除", "名前", "修正できるコミットがまだありません。",
+        "再試行", "置換後", "Git", "別のインストールを待機中…", "インストールに失敗しました。", "%1$s をインストールしました。", "一致する項目がありません", "クローンに失敗しました。", "削除", "名前", "修正できるコミットがまだありません。",
         "フォルダー", "プレビュー", "プロジェクト", "閉じる", "保存", "Termux 環境がまだ設定されていません（オンボーディングを完了してください）。", "トークンがありません", "スキップ", "名前を変更", "アップデート",
         "プレビュー", "単語", "戻る", "エラー", "操作に失敗しました。", "削除に失敗しました。", "ファイルツリーのオプション", "並べ替えモード", "グループ化（隠しフォルダー、フォルダー、隠しファイル、ファイル）", "混合（1つのリスト）",
         "並べ替え基準", "名前", "種類", "サイズ", "更新日時", "降順", "表示", "ファイル", "プロジェクト", "モジュール（Android）",
@@ -97,7 +97,7 @@ PACKS = [
         "%1$d 件", "1 件", "項目がありません", "エディターで開く", "読み込み中…", "プラグインのアクション"]),
     ("zh-CN", "zh-CN", "简体中文", [
         "Aa", "取消", "刷新", "当前", "缺少用户名", "文件", "卸载失败。", "编辑器", "移除", "已检测到：%1$s",
-        "重试", "替换为", "Git", "安装失败。", "已安装 %1$s。", "无匹配项", "克隆失败。", "删除", "名称", "还没有可修改的提交。",
+        "重试", "替换为", "Git", "正在等待其他安装…", "安装失败。", "已安装 %1$s。", "无匹配项", "克隆失败。", "删除", "名称", "还没有可修改的提交。",
         "文件夹", "预览", "项目", "关闭", "保存", "尚未设置 Termux 环境（请先完成引导）。", "缺少令牌", "跳过", "重命名", "更新",
         "预览", "单词", "返回", "错误", "操作失败。", "删除失败。", "文件树选项", "排序模式", "分组（隐藏文件夹、文件夹、隐藏文件、文件）", "混合（单一列表）",
         "排序依据", "名称", "类型", "大小", "修改时间", "降序", "视图", "文件", "项目", "模块（Android）",

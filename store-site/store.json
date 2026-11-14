@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updated": "2026-10-31",
+  "updated": "2026-11-14",
   "categories": [
     {
       "id": "plugin",
@@ -89,7 +89,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ayu-dark.theme.zip",
-      "sha256": "56049f3c07ad3342fbbc7d127a3e565d27835f4297bb05b5e0e53872edc0367b"
+      "sha256": "6553b712da7bc6929607e4f440b966ac6f777076392100f0fed70de57a695c50"
     },
     {
       "id": "com.codeforge.plugin.ayu.theme",
@@ -106,7 +106,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ayu.theme.zip",
-      "sha256": "6f2aba4759ad8fb675ba336215aa7b0835b015e1d0555ad5dc62ca20d671db9e"
+      "sha256": "b129175381ac0263d5cc1e228eaa5753bf93f48208010b304bb6d935ab21e239"
     },
     {
       "id": "com.codeforge.plugin.catppuccin.theme",
@@ -123,7 +123,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.catppuccin.theme.zip",
-      "sha256": "fe8fd76cf864f74794ff91b7ad16ec6c9a36bb62063279010a43621f91b7bbcc"
+      "sha256": "87b2549e7eec3b4d3ae9f8395b2ee05a15fddc45db1eec87b095b774c328c7cb"
     },
     {
       "id": "com.codeforge.plugin.cyberpunk-neon.theme",
@@ -140,7 +140,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.cyberpunk-neon.theme.zip",
-      "sha256": "2395782c7781479be28e52ce26a081452eeb2b4d2913452522099236a5d41f24"
+      "sha256": "42539a909fe851be78a40928c84f19ab2811733be28a5b078d5d506c3a7901fd"
     },
     {
       "id": "com.codeforge.plugin.darcula.theme",
@@ -157,7 +157,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.darcula.theme.zip",
-      "sha256": "65f3131581172bffa5d43cb1055f657fa9c75dacdbf1aa3eee9ddcf6272be8be"
+      "sha256": "135a6309a8cb43d1ae0b67bfaeb392730a62536f89a3717e48e6ffad14b00f16"
     },
     {
       "id": "com.codeforge.plugin.dracula.theme",
@@ -174,7 +174,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.dracula.theme.zip",
-      "sha256": "098e64e193c7bb8f6586399885f423ffedb4b9f926412ab49b72210c321aee0c"
+      "sha256": "ec0f29e113eb307e1e035cd7c56104aecde2e4856910ad475c243fd874db7d34"
     },
     {
       "id": "com.codeforge.plugin.eclipse.theme",
@@ -191,7 +191,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.eclipse.theme.zip",
-      "sha256": "fa638ac1783e878d904d0c4548836e9d19b3963df46250ef2038d8c5d9282046"
+      "sha256": "c0b02cf61390d6ef0ee48b569a8f250c0a4d553f8e582c1fe891f4b906d241a3"
     },
     {
       "id": "com.codeforge.plugin.everforest.theme",
@@ -208,7 +208,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.everforest.theme.zip",
-      "sha256": "d9343f606c2ef5ac77611273776c327bd9f3bf7215dfb31b3227faa67f72f1a3"
+      "sha256": "a6661ca8e67d57dbbf611e73dfadaae01d58dbeea0240e735954fcf86b5db2d4"
     },
     {
       "id": "com.codeforge.plugin.forest.theme",
@@ -225,7 +225,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.forest.theme.zip",
-      "sha256": "de53c15cc9326f31a5c51343e796587a0d71008ec1826dec898b5a6eb5398fba"
+      "sha256": "90576b5663b41d58ce3558d867e189c71b52e4906164bd64a195e4ac5584315c"
     },
     {
       "id": "com.codeforge.plugin.github-light.theme",
@@ -242,7 +242,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.github-light.theme.zip",
-      "sha256": "cecfcc15c29329fda6316bf2725bd25e14853203088aec4751ccbd402f5ebdce"
+      "sha256": "8c073c98ce2620d8fec9e04ed655d99ef4eb864288c177a002d38f39dcefcbce"
     },
     {
       "id": "com.codeforge.plugin.github.theme",
@@ -259,7 +259,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.github.theme.zip",
-      "sha256": "8700119d4431900087f97336f556ac751f2343500f570445e5b5923c9aae001f"
+      "sha256": "b8c31fc95c1b8873cbd0faf9413ea83eaa4812b216d0616ddc665db852bc87aa"
     },
     {
       "id": "com.codeforge.plugin.gruvbox.theme",
@@ -276,7 +276,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.gruvbox.theme.zip",
-      "sha256": "7c0cd59565f954414b8b87dc876305b3522733d7d1de50dfbfdc267fb74211c3"
+      "sha256": "ca1b96cd132e9bc719879c6b89e3102992e7cb694dead4fe2603e12492acf39f"
     },
     {
       "id": "com.codeforge.plugin.kanagawa.theme",
@@ -293,7 +293,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.kanagawa.theme.zip",
-      "sha256": "71f2bf2e2a7ce09a289e6553e7fdf95b9ff2965aa4ae28f887bdbee4d2ebca92"
+      "sha256": "f07f9e203b2a64d6992fdbb989d340fb8d50274346f7fd241705bf2ed5a66913"
     },
     {
       "id": "com.codeforge.plugin.material.theme",
@@ -310,7 +310,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.material.theme.zip",
-      "sha256": "a35eeb09a2d6e627216b8c7180c6e78fda757de7e0bb9ecf6a6f3f29c94e7ae2"
+      "sha256": "68f40aecdf5d18cab1c9543f808dbf4584ca589c1b15a9f8fffd7ffe68c86624"
     },
     {
       "id": "com.codeforge.plugin.monochrome.theme",
@@ -327,7 +327,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.monochrome.theme.zip",
-      "sha256": "c6d63ef945d04101b274e61d05fe50569c73b66d4ca1750801cec6e12d93b076"
+      "sha256": "3cfe99daaacc53e02b1a3e524878df470b0e6ef44e4080b090021eb358e88391"
     },
     {
       "id": "com.codeforge.plugin.monokai.theme",
@@ -344,7 +344,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.monokai.theme.zip",
-      "sha256": "7e1e991c5698544ddec02c01b7f4200178f0f8b69bc6d2d71cbaedb81c06355a"
+      "sha256": "c9282306f82157948130f2611e21cbc47e66ecdb34d470eff43fd4eda8b1e5ed"
     },
     {
       "id": "com.codeforge.plugin.night-owl.theme",
@@ -361,7 +361,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.night-owl.theme.zip",
-      "sha256": "ce5d953de70fb34a7fa2fc9b44bd1ad35a16a4e5891d82a8159891536e8459e5"
+      "sha256": "a6ca62aeee3f415a455399d49238dedc2dacbc81691baf63468838daeb01500b"
     },
     {
       "id": "com.codeforge.plugin.nord.theme",
@@ -378,7 +378,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.nord.theme.zip",
-      "sha256": "b83c9f3e4474dcd810c3c7ee22022282ed2adeb99d8f991da3ba9bc7fe49480f"
+      "sha256": "0d3ab8f3cb619e71ef2a0965cccda66066f785f4c7ab5cda2d5a331309fc4624"
     },
     {
       "id": "com.codeforge.plugin.notepad-plus-plus.theme",
@@ -395,7 +395,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.notepad-plus-plus.theme.zip",
-      "sha256": "385e169f216b38f8bbe91e5b80b828dd6167303e820999ebd2fc19e4034731bf"
+      "sha256": "655183963a4018e1df55abaf3f1e4711321dca1f5abaef1da864266d962dad5c"
     },
     {
       "id": "com.codeforge.plugin.ocean.theme",
@@ -412,7 +412,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ocean.theme.zip",
-      "sha256": "0a1c05cd8c991d8ede22b00502c7da6687b1e6b2a7fc629ab8abb629cf68881f"
+      "sha256": "193b6a9f705997034c2ce56f8240b0647bb3a54250558a29e88de9adb2b5a14a"
     },
     {
       "id": "com.codeforge.plugin.one.theme",
@@ -429,7 +429,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.one.theme.zip",
-      "sha256": "7bef9a17d1323e02cab72d71fbdf9101248a6568289fee1cc53fd2662b39eb75"
+      "sha256": "cbd27eef716916d3b8b48adb77e97a4f546e2f21ae72a772d9e6a434f0242fbc"
     },
     {
       "id": "com.codeforge.plugin.quiet-light.theme",
@@ -446,7 +446,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.quiet-light.theme.zip",
-      "sha256": "780adc3d6614b09845e48b325b47d614f5332336e6e9c02e0025c9c3a26e6eb1"
+      "sha256": "9dcf1e6893ead5a4b12257302fe255bed6a081a4ad2377000273df33f47f452f"
     },
     {
       "id": "com.codeforge.plugin.rose-pine.theme",
@@ -463,7 +463,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.rose-pine.theme.zip",
-      "sha256": "22ca683970a02c8f70e40de4643e8418e1c8892838ba390d869d343146bd9215"
+      "sha256": "bad136c5c8017cc44480591ab50412175f786d58edb37fb2d2c845d452ad9538"
     },
     {
       "id": "com.codeforge.plugin.solarized-dark.theme",
@@ -480,7 +480,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.solarized-dark.theme.zip",
-      "sha256": "a3734a590a2691baab2d073bfa75d3938f2e3b0d0e5fbd1d65528f2bf6af2702"
+      "sha256": "a590bdfaca371157a565a8151c92220fbfb49aa5ef6ffd23b9c69362071d0aa7"
     },
     {
       "id": "com.codeforge.plugin.solarized.theme",
@@ -497,7 +497,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.solarized.theme.zip",
-      "sha256": "e946c2155c56a36a0c42de866d54a624884ac231d4f3610b33b2a9f90385a415"
+      "sha256": "6cb938c9c11e1914182cdaad78d16cc4192a5f39327189fe86160fb0ec06df21"
     },
     {
       "id": "com.codeforge.plugin.sunset.theme",
@@ -514,7 +514,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.sunset.theme.zip",
-      "sha256": "974bb127bcd3c0087a3f89123febed40c2d5465f094e29d62928660da2ed0601"
+      "sha256": "240903bacab2cc9d1553bb78c87e875825ebf3f040cdfeb72d3fe38ace0a4a57"
     },
     {
       "id": "com.codeforge.plugin.tokyo-night.theme",
@@ -531,7 +531,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.tokyo-night.theme.zip",
-      "sha256": "4fc7ea4082558f89a0d50db5b5317ba33f3d0a44ff91044947f5fcbd26b049bb"
+      "sha256": "b0c01b3f5a7321f47b7039805241bfa5693ed453ceb31aa92952a80f5bbd8f57"
     },
     {
       "id": "com.codeforge.plugin.tomorrow.theme",
@@ -548,7 +548,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.tomorrow.theme.zip",
-      "sha256": "0a8b9d29c2385d2a17f6e4a677b651f5e34ac747b322e789d116b9447f1ce064"
+      "sha256": "149dc23e2477bb32e8f598cfff0078c028c961aba516874dfd68fac86db438a0"
     },
     {
       "id": "com.codeforge.plugin.violet.theme",
@@ -565,7 +565,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.violet.theme.zip",
-      "sha256": "7bf14ef8b146a44733b122b33bce11986b22094c48ffa5e5b106a949b5929a00"
+      "sha256": "046bd69bd71427c5795c57f311b26b3445cd19959792d9b283de2673cf8ef350"
     },
     {
       "id": "com.codeforge.plugin.vscode-dark-plus.theme",
@@ -582,7 +582,1010 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.vscode-dark-plus.theme.zip",
-      "sha256": "c3b72fdd5d0799c2232a672f6215cc821a51ed4b95878f09fb5e94e69da057ff"
+      "sha256": "17d72ca01d2c2f7da417d3c3df68c07d872d1eed2b894bb175f6df8845589678"
+    },
+    {
+      "id": "com.codeforge.plugin.aurora.icons",
+      "category": "icons",
+      "name": {
+        "de": "Aurora (Icons)",
+        "en": "Aurora (Icons)"
+      },
+      "summary": {
+        "de": "Modernes helles Icon-Paket: runde Kacheln, violette Ordner.",
+        "en": "Modernes helles Icon-Paket: runde Kacheln, violette Ordner."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.aurora.icons.zip",
+      "sha256": "c72acac74f4fb7fd98e7e391ab77c947c81cdea98990420c60a862f81cd77579"
+    },
+    {
+      "id": "com.codeforge.plugin.coral.icons",
+      "category": "icons",
+      "name": {
+        "de": "Coral (Icons)",
+        "en": "Coral (Icons)"
+      },
+      "summary": {
+        "de": "Modernes helles Icon-Paket: runde Kacheln, korallenrote Ordner.",
+        "en": "Modernes helles Icon-Paket: runde Kacheln, korallenrote Ordner."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.coral.icons.zip",
+      "sha256": "bc44ab46f97e65507911836aa2a166fc6b49ef5a1ffd60a9a300bd302bb7979e"
+    },
+    {
+      "id": "com.codeforge.plugin.ember.icons",
+      "category": "icons",
+      "name": {
+        "de": "Ember (Icons)",
+        "en": "Ember (Icons)"
+      },
+      "summary": {
+        "de": "Klassisches dunkles Icon-Paket mit glutroten Ordnern.",
+        "en": "Klassisches dunkles Icon-Paket mit glutroten Ordnern."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ember.icons.zip",
+      "sha256": "24708b7b9ffa8207fe63cb3fcbc4514a5981c194e032100a36ed98115b7460af"
+    },
+    {
+      "id": "com.codeforge.plugin.frost.icons",
+      "category": "icons",
+      "name": {
+        "de": "Frost (Icons)",
+        "en": "Frost (Icons)"
+      },
+      "summary": {
+        "de": "Klassisches dunkles Icon-Paket mit eisblauen Ordnern.",
+        "en": "Klassisches dunkles Icon-Paket mit eisblauen Ordnern."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.frost.icons.zip",
+      "sha256": "45ea3978cc428fe5d2827821b143d43d05b33b1f16493e93ef643af6856fdce0"
+    },
+    {
+      "id": "com.codeforge.plugin.lagoon.icons",
+      "category": "icons",
+      "name": {
+        "de": "Lagoon (Icons)",
+        "en": "Lagoon (Icons)"
+      },
+      "summary": {
+        "de": "Modernes helles Icon-Paket: runde Kacheln, türkise Ordner.",
+        "en": "Modernes helles Icon-Paket: runde Kacheln, türkise Ordner."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lagoon.icons.zip",
+      "sha256": "f178a57675260983894fcce8d6262a5828a867d9e23103ec302d40f7f382f481"
+    },
+    {
+      "id": "com.codeforge.plugin.meadow.icons",
+      "category": "icons",
+      "name": {
+        "de": "Meadow (Icons)",
+        "en": "Meadow (Icons)"
+      },
+      "summary": {
+        "de": "Klassisches helles Icon-Paket mit grünen Ordnern.",
+        "en": "Klassisches helles Icon-Paket mit grünen Ordnern."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.meadow.icons.zip",
+      "sha256": "96b1e487b51d08051903eab093f0a12e295caaeb5c2836ab269188ffe139b59f"
+    },
+    {
+      "id": "com.codeforge.plugin.neon.icons",
+      "category": "icons",
+      "name": {
+        "de": "Neon (Icons)",
+        "en": "Neon (Icons)"
+      },
+      "summary": {
+        "de": "Modernes dunkles Icon-Paket: Neon-Konturen auf dunklen Kacheln.",
+        "en": "Modernes dunkles Icon-Paket: Neon-Konturen auf dunklen Kacheln."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.neon.icons.zip",
+      "sha256": "99b38319d2955ab78877bbbaa978b7a103d12952a6db90f813f82414d92ecbab"
+    },
+    {
+      "id": "com.codeforge.plugin.obsidian.icons",
+      "category": "icons",
+      "name": {
+        "de": "Obsidian (Icons)",
+        "en": "Obsidian (Icons)"
+      },
+      "summary": {
+        "de": "Modernes dunkles Icon-Paket: ruhige Graustufen mit Akzenten.",
+        "en": "Modernes dunkles Icon-Paket: ruhige Graustufen mit Akzenten."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.obsidian.icons.zip",
+      "sha256": "e83f7086e74fd9f3ff1b54a42b0f0f75f3d424b050e5e56dc84dfd176e494554"
+    },
+    {
+      "id": "com.codeforge.plugin.paper.icons",
+      "category": "icons",
+      "name": {
+        "de": "Paper (Icons)",
+        "en": "Paper (Icons)"
+      },
+      "summary": {
+        "de": "Klassisches helles Icon-Paket: warme Ordner, weiße Seiten.",
+        "en": "Klassisches helles Icon-Paket: warme Ordner, weiße Seiten."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.paper.icons.zip",
+      "sha256": "f78d0de6d240079dd406db71fa9cf39972a050a413696f8f2819562a65b4ebb1"
+    },
+    {
+      "id": "com.codeforge.plugin.sky.icons",
+      "category": "icons",
+      "name": {
+        "de": "Sky (Icons)",
+        "en": "Sky (Icons)"
+      },
+      "summary": {
+        "de": "Klassisches helles Icon-Paket mit blauen Ordnern.",
+        "en": "Klassisches helles Icon-Paket mit blauen Ordnern."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.sky.icons.zip",
+      "sha256": "ea605209738eeb45c5b8bf3f69b4c47baab95de6e475baaa96de2ae9ce96568b"
+    },
+    {
+      "id": "com.codeforge.plugin.slate.icons",
+      "category": "icons",
+      "name": {
+        "de": "Slate (Icons)",
+        "en": "Slate (Icons)"
+      },
+      "summary": {
+        "de": "Klassisches dunkles Icon-Paket mit grauen Ordnern.",
+        "en": "Klassisches dunkles Icon-Paket mit grauen Ordnern."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.slate.icons.zip",
+      "sha256": "386fc4a54530723c95b8156078b303a1bac25a480014f2ea58a2f70fe8e3bba5"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-es.language",
+      "category": "language",
+      "name": {
+        "de": "Español (Sprachpaket)",
+        "en": "Español (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (80 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (80 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-es.language.zip",
+      "sha256": "7e8248879c0a19cb443a3cf1089284ec119a4be6c475540ef9bb925bae4b2fe7"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-fr.language",
+      "category": "language",
+      "name": {
+        "de": "Français (Sprachpaket)",
+        "en": "Français (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (79 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (79 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-fr.language.zip",
+      "sha256": "a1c3acacd13d95d04c0ace0546604bbe4846b913651f9f8cf9312adf88b0fca3"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-it.language",
+      "category": "language",
+      "name": {
+        "de": "Italiano (Sprachpaket)",
+        "en": "Italiano (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (80 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (80 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-it.language.zip",
+      "sha256": "69bc7c1a07943f8d148d570acc7f6f8302c8c0c12dbf9506b0feb27157eeefec"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-ja.language",
+      "category": "language",
+      "name": {
+        "de": "日本語 (Sprachpaket)",
+        "en": "日本語 (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (82 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (82 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-ja.language.zip",
+      "sha256": "8377d1588ea9feaba914efc66ce1d437b1c3f83e829636008d782f604607828a"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-nl.language",
+      "category": "language",
+      "name": {
+        "de": "Nederlands (Sprachpaket)",
+        "en": "Nederlands (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (74 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (74 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-nl.language.zip",
+      "sha256": "079692db51b2229792d0aa79b687cf3012d8461243bd7e2ea87ef451b3340428"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-pl.language",
+      "category": "language",
+      "name": {
+        "de": "Polski (Sprachpaket)",
+        "en": "Polski (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (81 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (81 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-pl.language.zip",
+      "sha256": "3f024d13b567446f3b7d40fc2ae5823f5f06f53af8f0e771363f3a49f71930b8"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-pt-br.language",
+      "category": "language",
+      "name": {
+        "de": "Português (Brasil) (Sprachpaket)",
+        "en": "Português (Brasil) (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (80 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (80 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-pt-br.language.zip",
+      "sha256": "69fedf8ce73fc0790fa0e6731efc819e7b0b18d928f632d34d2eeb467212bcd6"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-ru.language",
+      "category": "language",
+      "name": {
+        "de": "Русский (Sprachpaket)",
+        "en": "Русский (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (82 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (82 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-ru.language.zip",
+      "sha256": "3c5840f84109036205dffa201e6e12499de07270801193b7eb96660195c7c4a6"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-tr.language",
+      "category": "language",
+      "name": {
+        "de": "Türkçe (Sprachpaket)",
+        "en": "Türkçe (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (82 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (82 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-tr.language.zip",
+      "sha256": "3a570708ac5fb2a7be1fcaa5c37f4375a922df96d279f86aae368a664b9a0c96"
+    },
+    {
+      "id": "com.codeforge.plugin.lang-zh-cn.language",
+      "category": "language",
+      "name": {
+        "de": "简体中文 (Sprachpaket)",
+        "en": "简体中文 (Sprachpaket)"
+      },
+      "summary": {
+        "de": "Teilübersetzung der Oberfläche (82 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
+        "en": "Teilübersetzung der Oberfläche (82 Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lang-zh-cn.language.zip",
+      "sha256": "6d7215ed081c30277b035bb1c9457bad19d34bf0c965f0e4c6d7625452238785"
+    },
+    {
+      "id": "com.codeforge.plugin.c.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "C (Grammatik)",
+        "en": "C (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für C (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für C (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.c.grammar.zip",
+      "sha256": "0581db433e7b0848f6324d38f98b6abbd596b573e649e9c8d37746d3c04c9493"
+    },
+    {
+      "id": "com.codeforge.plugin.cmake.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "CMake (Grammatik)",
+        "en": "CMake (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für CMake (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für CMake (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.cmake.grammar.zip",
+      "sha256": "ee80c136555a8627d7623cbd30337cf27cc2912ce2666f3b0aea043da3a88edc"
+    },
+    {
+      "id": "com.codeforge.plugin.cpp.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "C++ (Grammatik)",
+        "en": "C++ (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für C++ (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für C++ (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.cpp.grammar.zip",
+      "sha256": "78d67af5c5450cf1d2549c061dcdd02f5c6f08e39cd31c436f3827bb78ea51ee"
+    },
+    {
+      "id": "com.codeforge.plugin.css.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "CSS (Grammatik)",
+        "en": "CSS (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für CSS (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für CSS (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.css.grammar.zip",
+      "sha256": "d576e01381d09f97bd140748693a1bd170f003332e8061e15d420649cfe91628"
+    },
+    {
+      "id": "com.codeforge.plugin.dart.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Dart (Grammatik)",
+        "en": "Dart (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Dart (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Dart (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.dart.grammar.zip",
+      "sha256": "14478ea374c56546adb5d42339663f25e4e5e135c2c90faf8f0cc6c0c0b988bf"
+    },
+    {
+      "id": "com.codeforge.plugin.dockerfile.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Dockerfile (Grammatik)",
+        "en": "Dockerfile (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Dockerfile (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Dockerfile (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.dockerfile.grammar.zip",
+      "sha256": "c4e15e715e6a5235765d8c5fd895b29bb8be0fa1a78359b0f471ab930a015337"
+    },
+    {
+      "id": "com.codeforge.plugin.go.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Go (Grammatik)",
+        "en": "Go (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Go (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Go (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.go.grammar.zip",
+      "sha256": "cabbc08be1e73ca56fa97e613ae77cb45ecf029a582d5978c82cf4fee6a95efd"
+    },
+    {
+      "id": "com.codeforge.plugin.groovy.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Groovy / Gradle (Grammatik)",
+        "en": "Groovy / Gradle (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Groovy / Gradle (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Groovy / Gradle (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.groovy.grammar.zip",
+      "sha256": "8c2122762722bdb1e6d996689461ae94f3ad1c1af04f77c0aa34dd86fd7cea60"
+    },
+    {
+      "id": "com.codeforge.plugin.html.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "HTML (Grammatik)",
+        "en": "HTML (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für HTML (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für HTML (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.html.grammar.zip",
+      "sha256": "181fea25de05d5e0cb60fba96a5833175e7b0beaf69b589965edd93cd74d94e1"
+    },
+    {
+      "id": "com.codeforge.plugin.javascript.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "JavaScript (Grammatik)",
+        "en": "JavaScript (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für JavaScript (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für JavaScript (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.javascript.grammar.zip",
+      "sha256": "7fbe855df64d074b75688dee4a3a7d20cae173fcceb0df79e12d6b3f13fa43c1"
+    },
+    {
+      "id": "com.codeforge.plugin.lua.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Lua (Grammatik)",
+        "en": "Lua (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Lua (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Lua (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lua.grammar.zip",
+      "sha256": "c2e8e2fced7d193da38eb77566e4577a96cc76df97a3e578aa35c9344c2730f3"
+    },
+    {
+      "id": "com.codeforge.plugin.makefile.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Makefile (Grammatik)",
+        "en": "Makefile (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Makefile (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Makefile (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.makefile.grammar.zip",
+      "sha256": "acc5615a12e9a881c98f28df6690557fcbd55b044252c378fd516229f18e7d4c"
+    },
+    {
+      "id": "com.codeforge.plugin.markdown.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Markdown (Grammatik)",
+        "en": "Markdown (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Markdown (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Markdown (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.markdown.grammar.zip",
+      "sha256": "77e9b45afed55ace9470af1d1133533733cf389a7f345c14d5cdd21463ca2e17"
+    },
+    {
+      "id": "com.codeforge.plugin.php.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "PHP (Grammatik)",
+        "en": "PHP (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für PHP (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für PHP (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.php.grammar.zip",
+      "sha256": "087315745de02213bbfcc1586d07449acca11a7f09923fcbae04a8b81f453059"
+    },
+    {
+      "id": "com.codeforge.plugin.properties.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Properties / INI (Grammatik)",
+        "en": "Properties / INI (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Properties / INI (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Properties / INI (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.properties.grammar.zip",
+      "sha256": "4d75e968d273cdb35185278f5f5fef1097de0a4431dcc4a67b42fa5ddcde0261"
+    },
+    {
+      "id": "com.codeforge.plugin.protobuf.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Protocol Buffers (Grammatik)",
+        "en": "Protocol Buffers (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Protocol Buffers (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Protocol Buffers (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.protobuf.grammar.zip",
+      "sha256": "59909f7e6c5ec765d70d85d1ea2a77b0ee26e9a118c8df73a1387633617f2277"
+    },
+    {
+      "id": "com.codeforge.plugin.python.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Python (Grammatik)",
+        "en": "Python (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Python (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Python (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.python.grammar.zip",
+      "sha256": "7bcb311ae17ca0c4b99634dfda444b592489bafd7a78c51b3f714da6512dddf9"
+    },
+    {
+      "id": "com.codeforge.plugin.ruby.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Ruby (Grammatik)",
+        "en": "Ruby (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Ruby (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Ruby (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ruby.grammar.zip",
+      "sha256": "9f63fce5ef07b75b3d984c3bd2ef8e566467afea27aaaa1d10dff4cd3d5b723c"
+    },
+    {
+      "id": "com.codeforge.plugin.rust.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Rust (Grammatik)",
+        "en": "Rust (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Rust (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Rust (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.rust.grammar.zip",
+      "sha256": "dfb8677c08c235a8342282f979d7489e7ca2a736a909647e847acdcfd1f0434d"
+    },
+    {
+      "id": "com.codeforge.plugin.shellscript.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Shell (Grammatik)",
+        "en": "Shell (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Shell (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Shell (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.shellscript.grammar.zip",
+      "sha256": "5e54e74e1043db4d2f4df12e5542387ef85c18c4868922791b11784e1899ac20"
+    },
+    {
+      "id": "com.codeforge.plugin.sql.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "SQL (Grammatik)",
+        "en": "SQL (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für SQL (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für SQL (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.sql.grammar.zip",
+      "sha256": "2509766798317c15f6b413619ad90438adae37d49a3a0a59991e9435e315d4fd"
+    },
+    {
+      "id": "com.codeforge.plugin.swift.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "Swift (Grammatik)",
+        "en": "Swift (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für Swift (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für Swift (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.swift.grammar.zip",
+      "sha256": "c45f8744a29ce2210021c4c280cacba98ac1e1b8cfafe4cae19450d03a0062e7"
+    },
+    {
+      "id": "com.codeforge.plugin.toml.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "TOML (Grammatik)",
+        "en": "TOML (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für TOML (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für TOML (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.toml.grammar.zip",
+      "sha256": "407decf915e084c4071f819aecd695f98e3d2461f8ba2612a4d9dd93899622b2"
+    },
+    {
+      "id": "com.codeforge.plugin.typescript.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "TypeScript (Grammatik)",
+        "en": "TypeScript (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für TypeScript (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für TypeScript (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.typescript.grammar.zip",
+      "sha256": "ecf65eec7f0724d5eecdba3c2a737b6716ef61376a48d54b49a02059e527a1df"
+    },
+    {
+      "id": "com.codeforge.plugin.yaml.grammar",
+      "category": "grammar",
+      "name": {
+        "de": "YAML (Grammatik)",
+        "en": "YAML (Grammatik)"
+      },
+      "summary": {
+        "de": "Syntaxfärbung für YAML (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik).",
+        "en": "Syntaxfärbung für YAML (vereinfachte TextMate-Grammatik, gilt für Dateien ohne eingebaute Grammatik)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.yaml.grammar.zip",
+      "sha256": "3e2fb5bd8b484ce615c3a1ea1c1f3d2be64b24d19bd8a3c8d3c3e87765d80300"
+    },
+    {
+      "id": "com.codeforge.plugin.c.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "C (Snippets)",
+        "en": "C (Snippets)"
+      },
+      "summary": {
+        "de": "6 Code-Snippets für C.",
+        "en": "6 Code-Snippets für C."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.c.snippets.zip",
+      "sha256": "ada812596e7eb4568b88ebf04ee197069d0a2939c354da2815515d16eda053a2"
+    },
+    {
+      "id": "com.codeforge.plugin.compose.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Jetpack Compose (Snippets)",
+        "en": "Jetpack Compose (Snippets)"
+      },
+      "summary": {
+        "de": "11 Code-Snippets für Jetpack Compose.",
+        "en": "11 Code-Snippets für Jetpack Compose."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.compose.snippets.zip",
+      "sha256": "15f10f663a5361025f711729269575e01a26c38e06f41d01a0405d68d5fd1109"
+    },
+    {
+      "id": "com.codeforge.plugin.cpp.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "C++ (Snippets)",
+        "en": "C++ (Snippets)"
+      },
+      "summary": {
+        "de": "8 Code-Snippets für C++.",
+        "en": "8 Code-Snippets für C++."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.cpp.snippets.zip",
+      "sha256": "b9437eb0777726cd052a343074d343d2b35ca9426194915adecb94305ee6f141"
+    },
+    {
+      "id": "com.codeforge.plugin.dart.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Dart (Snippets)",
+        "en": "Dart (Snippets)"
+      },
+      "summary": {
+        "de": "7 Code-Snippets für Dart.",
+        "en": "7 Code-Snippets für Dart."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.dart.snippets.zip",
+      "sha256": "c72478c6506d84d9200f08eecc6eb25352a1eb456b1a722322d4d49299c12ec9"
+    },
+    {
+      "id": "com.codeforge.plugin.go.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Go (Snippets)",
+        "en": "Go (Snippets)"
+      },
+      "summary": {
+        "de": "9 Code-Snippets für Go.",
+        "en": "9 Code-Snippets für Go."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.go.snippets.zip",
+      "sha256": "2651350b72e8898b0f0e17fc1410e2c913b78c34d5b1ed6c2fa116d0fcc57860"
+    },
+    {
+      "id": "com.codeforge.plugin.java.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Java (Snippets)",
+        "en": "Java (Snippets)"
+      },
+      "summary": {
+        "de": "8 Code-Snippets für Java.",
+        "en": "8 Code-Snippets für Java."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.java.snippets.zip",
+      "sha256": "417f5a2ae56c1001627b17d821f6b7b830dd3bffb3731bb93bb8b3c6c3d35eb2"
+    },
+    {
+      "id": "com.codeforge.plugin.javascript.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "JavaScript (Snippets)",
+        "en": "JavaScript (Snippets)"
+      },
+      "summary": {
+        "de": "9 Code-Snippets für JavaScript.",
+        "en": "9 Code-Snippets für JavaScript."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.javascript.snippets.zip",
+      "sha256": "effa6a050193edcbd1c382a125fc1e78e41054968a359eefc05d39ae14db1380"
+    },
+    {
+      "id": "com.codeforge.plugin.kotlin.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Kotlin (Snippets)",
+        "en": "Kotlin (Snippets)"
+      },
+      "summary": {
+        "de": "12 Code-Snippets für Kotlin.",
+        "en": "12 Code-Snippets für Kotlin."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.kotlin.snippets.zip",
+      "sha256": "21fc80027711609fc6f382ae9f4b095c7716eba40dbd8b97bcbb1ce0b767c41b"
+    },
+    {
+      "id": "com.codeforge.plugin.python.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Python (Snippets)",
+        "en": "Python (Snippets)"
+      },
+      "summary": {
+        "de": "10 Code-Snippets für Python.",
+        "en": "10 Code-Snippets für Python."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.python.snippets.zip",
+      "sha256": "a4b0a2715ef221cb0168fad77b1b19d97dfcfa4e0ea3b41953af1a997988a535"
+    },
+    {
+      "id": "com.codeforge.plugin.rust.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Rust (Snippets)",
+        "en": "Rust (Snippets)"
+      },
+      "summary": {
+        "de": "9 Code-Snippets für Rust.",
+        "en": "9 Code-Snippets für Rust."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.rust.snippets.zip",
+      "sha256": "9eb1ada54842c1a719b2062de3df7778a7433e41214518e1172b2635c3866b6d"
+    },
+    {
+      "id": "com.codeforge.plugin.shellscript.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Shell (Snippets)",
+        "en": "Shell (Snippets)"
+      },
+      "summary": {
+        "de": "8 Code-Snippets für Shell.",
+        "en": "8 Code-Snippets für Shell."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.shellscript.snippets.zip",
+      "sha256": "9c4a861b29c0443cab772a4afeee300482e8d7c6cc9d18a25bfc5faaca244f76"
+    },
+    {
+      "id": "com.codeforge.plugin.typescript.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "TypeScript (Snippets)",
+        "en": "TypeScript (Snippets)"
+      },
+      "summary": {
+        "de": "8 Code-Snippets für TypeScript.",
+        "en": "8 Code-Snippets für TypeScript."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.typescript.snippets.zip",
+      "sha256": "10d183c583ebda448d2c111865fb52e8b872d2497eb278c0e441be4ba6b50a10"
+    },
+    {
+      "id": "com.codeforge.plugin.xml.snippets",
+      "category": "snippets",
+      "name": {
+        "de": "Android XML (Snippets)",
+        "en": "Android XML (Snippets)"
+      },
+      "summary": {
+        "de": "8 Code-Snippets für Android XML.",
+        "en": "8 Code-Snippets für Android XML."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.xml.snippets.zip",
+      "sha256": "a10e49ce94957b474f7cc4eb7bbffee1ed298dcaf2a269b81b26c43dc5442105"
     },
     {
       "id": "com.codeforge.plugin.bash-language-server.lsp",
@@ -599,7 +1602,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.bash-language-server.lsp.zip",
-      "sha256": "a5c3d80acc9b67bb2bc715796a2bdceed482b6ab5db55c5fa3929b4fc2f96b6a"
+      "sha256": "5bfdcb3696b135a94f6866c129a97e4db99951d91ffc6162159efbc26e6c4f7b"
     },
     {
       "id": "com.codeforge.plugin.clangd.lsp",
@@ -616,7 +1619,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.clangd.lsp.zip",
-      "sha256": "2e8dc26fc242484dd9635bd052007b0f6aa2ec3de0eb64a81ff9ef4d4059ca84"
+      "sha256": "f5d18abf757291cb6e82d99ad08afa41071f55290ac9f0c8a1c9b72dce26f7cf"
     },
     {
       "id": "com.codeforge.plugin.dart.lsp",
@@ -633,7 +1636,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.dart.lsp.zip",
-      "sha256": "5717c9d0e51791603dfff1e91cb2df831ae82bfb71c1d97aaf198fccb08812cd"
+      "sha256": "280a99a1cdb73a8ecd383db79dd86f74f993a07c21d00a86af0e32f87b786b71"
     },
     {
       "id": "com.codeforge.plugin.gopls.lsp",
@@ -650,7 +1653,58 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.gopls.lsp.zip",
-      "sha256": "a4ae71ff27aa7ddea2d702515182cb1de6118ea5ceef25651664117055ce573c"
+      "sha256": "3e0d3ee7f75fe6e1581a88ce840e7c5781e6e3c04009ebdebba79e63c3d9a245"
+    },
+    {
+      "id": "com.codeforge.plugin.jdtls.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "Eclipse JDT LS (Java) (Language Server)",
+        "en": "Eclipse JDT LS (Java) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet Eclipse JDT LS (Java) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download jdt-language-server 1.45.0 von eclipse.org, JDK 17, Python).",
+        "en": "Bindet Eclipse JDT LS (Java) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download jdt-language-server 1.45.0 von eclipse.org, JDK 17, Python)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.jdtls.lsp.zip",
+      "sha256": "44d5e1afbe90d9fb2facb83071ab0696c659a862063866afe9090ad578830261"
+    },
+    {
+      "id": "com.codeforge.plugin.kotlin-language-server.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "Kotlin Language Server (Language Server)",
+        "en": "Kotlin Language Server (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet Kotlin Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download server.zip 1.3.11 von GitHub, JDK 17).",
+        "en": "Bindet Kotlin Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download server.zip 1.3.11 von GitHub, JDK 17)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.kotlin-language-server.lsp.zip",
+      "sha256": "e31de41c0e016b17b4553899678f7758a68347fcd3a8a4afff7745d0c2a22f91"
+    },
+    {
+      "id": "com.codeforge.plugin.lemminx.lsp",
+      "category": "lsp",
+      "name": {
+        "de": "LemMinX (XML) (Language Server)",
+        "en": "LemMinX (XML) (Language Server)"
+      },
+      "summary": {
+        "de": "Bindet LemMinX (XML) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download lemminx-uber.jar 0.31.2 von eclipse.org, JDK 17).",
+        "en": "Bindet LemMinX (XML) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download lemminx-uber.jar 0.31.2 von eclipse.org, JDK 17)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.lemminx.lsp.zip",
+      "sha256": "c70bf5baf18431ee68d3066f2a062d515f69ba06f12c6ee83e17b41ddb5a8769"
     },
     {
       "id": "com.codeforge.plugin.neocmakelsp.lsp",
@@ -667,7 +1721,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.neocmakelsp.lsp.zip",
-      "sha256": "55917d62e48a3a5bd976f34b6bf4b09893d83d60aa8ffca1bb697b76610ed5c1"
+      "sha256": "0374b6ce22fec334da2037560f91adefd8a0620a6890b001ced9ebfb1897b4eb"
     },
     {
       "id": "com.codeforge.plugin.pyright.lsp",
@@ -684,7 +1738,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.pyright.lsp.zip",
-      "sha256": "f5f0d6f1916cd35424d1c33f6c35520b33d27704407743c4bd13092628ce8844"
+      "sha256": "13a59f2d598b23424b2faf341c91f77a45297a5c027a7c7179a6eb36e819cf04"
     },
     {
       "id": "com.codeforge.plugin.ruff.lsp",
@@ -701,7 +1755,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ruff.lsp.zip",
-      "sha256": "56be4ef7fa7da4ebb564fc5d0f98d06adb28e63c807e55014c6d7aeef3543bcf"
+      "sha256": "8d8873f6e84dddb60e8b00189a3050d4380c7fe816580612f226d3f2023af841"
     },
     {
       "id": "com.codeforge.plugin.rust-analyzer.lsp",
@@ -718,7 +1772,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.rust-analyzer.lsp.zip",
-      "sha256": "3d3fcbeb34ecaffa8dd75b18e7c881c6f4bdffdf847542946e6ee57848701d5a"
+      "sha256": "be746f38087c687b2f93dec302bdb2b9474af691fb0c819ab8680149d06548ce"
     },
     {
       "id": "com.codeforge.plugin.taplo.lsp",
@@ -735,7 +1789,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.taplo.lsp.zip",
-      "sha256": "f441347b64936a707551f1a967726d894dd1cd7e88466ba486fc0b2696b088d9"
+      "sha256": "a151be89ce19dbb3ac1571752fdb52b6e51308ad4d0e931e58edb6ddd63a3795"
     },
     {
       "id": "com.codeforge.plugin.typescript-language-server.lsp",
@@ -752,7 +1806,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.typescript-language-server.lsp.zip",
-      "sha256": "2e2800308f0ea5cbb4f9154b0eeaa6c3e58c482d7babc6a12535a4e8879fea4e"
+      "sha256": "73a6e72dd26a76e4f3f92256d4ee1019c319966671e580a976ed81815f3a8903"
     },
     {
       "id": "com.codeforge.plugin.web-langservers.lsp",
@@ -769,7 +1823,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.web-langservers.lsp.zip",
-      "sha256": "3f02395e9d97e0c571dfe0fff5a7cc34d5db4403b19bb59c9512f92a1534fe7a"
+      "sha256": "30a009fa1a8d4f3a017eafc5919ca8a989ee9fe3d6b94cce77b7989a80d9d18d"
     },
     {
       "id": "com.codeforge.plugin.yaml-language-server.lsp",
@@ -786,7 +1840,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.yaml-language-server.lsp.zip",
-      "sha256": "2896bc3856ff2d3b541493bf08fb9cf89db33d7a359302d0342ec938f7685540"
+      "sha256": "b647aeedca93b43d7b6b19b5fa712b086a1c2903df648c47d2f6bcf06eb4490a"
     },
     {
       "id": "com.codeforge.plugin.gofmt.formatter",
@@ -803,7 +1857,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.gofmt.formatter.zip",
-      "sha256": "ea2c9e3f78fbc74f366b412b4ebeedaa1acc244c126e0ad00dd6ab2342541d45"
+      "sha256": "40e4a44fb6ca658303eac4f8b4cbffe4fe8ba98c496e75fc06555579894e9c83"
     },
     {
       "id": "com.codeforge.plugin.prettier.formatter",
@@ -820,7 +1874,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.prettier.formatter.zip",
-      "sha256": "7ccf6f8949f12c5762388deda20d916fb348d4b99718a21fea02f0886889e5d1"
+      "sha256": "59efb7eed41b81d2b4c8ce0c26770e64de1434c88674f7e4304acb37310f1c73"
     },
     {
       "id": "com.codeforge.plugin.ruff-format.formatter",
@@ -837,7 +1891,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.ruff-format.formatter.zip",
-      "sha256": "d31be771c2f4ccc725b4c78d64df0df879619cd218611767a68c61f69e1030b1"
+      "sha256": "e05b894489bb29995816ce3727719851abdbb6f5aba18b5297ce46c1d651a123"
     },
     {
       "id": "com.codeforge.plugin.rustfmt.formatter",
@@ -854,7 +1908,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.rustfmt.formatter.zip",
-      "sha256": "93cdb49605e3742c54c4bb81f8f8c1cc62f36d274b7bea5f832d2693bdf4f32e"
+      "sha256": "1d4eec8ab4b25f5900458bbf4d3a3f9d5eb771175d42cad0ce5312dddd116f81"
     },
     {
       "id": "com.codeforge.plugin.shfmt.formatter",
@@ -871,7 +1925,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.shfmt.formatter.zip",
-      "sha256": "2dd0a45366dc0ce140f085fe1af6aad811b66282c424383cb8afb84a1c11a537"
+      "sha256": "ec90b5cb79cc54dc78a64693702fa75cba23b3b7f206ab5b939b1b1d88cf6c0f"
     },
     {
       "id": "com.codeforge.plugin.taplo-format.formatter",
@@ -888,7 +1942,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.taplo-format.formatter.zip",
-      "sha256": "5e358deb9fcf2b742a8c148a54cfba7c953d5b9e661af9beca5081ce0877e13b"
+      "sha256": "f9367dcd67c1dd5d3eacace751463005137837519cbdc27386dfbccbcbe18f72"
     },
     {
       "id": "com.codeforge.plugin.all-formatters.bundle",
@@ -905,7 +1959,58 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-formatters.bundle.zip",
-      "sha256": "202597204d08e349f964538e3da7cb832a7a65baca27befbde806cc7e5639afb"
+      "sha256": "02e1ca383a6f2106aaf2ff43681ec8ef06049e9ef50f9a252d30901ae29aec62"
+    },
+    {
+      "id": "com.codeforge.plugin.all-grammars.bundle",
+      "category": "bundle",
+      "name": {
+        "de": "Alle Grammatiken (Bundle)",
+        "en": "Alle Grammatiken (Bundle)"
+      },
+      "summary": {
+        "de": "Alle Grammatiken von CodeForge als Bundle (25 Pakete).",
+        "en": "Alle Grammatiken von CodeForge als Bundle (25 Pakete)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-grammars.bundle.zip",
+      "sha256": "4a10e71d142b6389d77440559f1942129b84acb14726bcf5d0dbe443944bd164"
+    },
+    {
+      "id": "com.codeforge.plugin.all-icons.bundle",
+      "category": "bundle",
+      "name": {
+        "de": "Alle Icon-Pakete (Bundle)",
+        "en": "Alle Icon-Pakete (Bundle)"
+      },
+      "summary": {
+        "de": "Alle 11 Icon-Pakete von CodeForge als Bundle (3 klassisch hell, 3 klassisch dunkel, 3 modern hell, 2 modern dunkel).",
+        "en": "Alle 11 Icon-Pakete von CodeForge als Bundle (3 klassisch hell, 3 klassisch dunkel, 3 modern hell, 2 modern dunkel)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-icons.bundle.zip",
+      "sha256": "8b567e4f3e85f051007dca155409fcb8183faee1b2d472fc4ba832ab36a585de"
+    },
+    {
+      "id": "com.codeforge.plugin.all-languages.bundle",
+      "category": "bundle",
+      "name": {
+        "de": "Alle Sprachpakete (Bundle)",
+        "en": "Alle Sprachpakete (Bundle)"
+      },
+      "summary": {
+        "de": "Alle Sprachpakete von CodeForge als Bundle (10 Pakete).",
+        "en": "Alle Sprachpakete von CodeForge als Bundle (10 Pakete)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-languages.bundle.zip",
+      "sha256": "7e467f3d739880f1f0727eec21d8d5fa6a04897a4606e8030973890776640005"
     },
     {
       "id": "com.codeforge.plugin.all-lsp-servers.bundle",
@@ -922,7 +2027,41 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-lsp-servers.bundle.zip",
-      "sha256": "4a343005d430f3b1222177da444d888e165aaf37977d06dc72dfb9aef47a0278"
+      "sha256": "ba0be26fcfff52dcbc44d0ea48fd6141dbfe400fbc0f593b563d3edd8a0e3ebf"
+    },
+    {
+      "id": "com.codeforge.plugin.all-snippets.bundle",
+      "category": "bundle",
+      "name": {
+        "de": "Alle Snippets (Bundle)",
+        "en": "Alle Snippets (Bundle)"
+      },
+      "summary": {
+        "de": "Alle Snippets von CodeForge als Bundle (13 Pakete).",
+        "en": "Alle Snippets von CodeForge als Bundle (13 Pakete)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-snippets.bundle.zip",
+      "sha256": "c37d6921c11e78944a8dbe3e198f9fd9d26d9c5a9c16172f41b1e1deee292762"
+    },
+    {
+      "id": "com.codeforge.plugin.all-themes.bundle",
+      "category": "bundle",
+      "name": {
+        "de": "Alle Themes (Bundle)",
+        "en": "Alle Themes (Bundle)"
+      },
+      "summary": {
+        "de": "Alle Farbschemata von CodeForge als Bundle (30 Pakete).",
+        "en": "Alle Farbschemata von CodeForge als Bundle (30 Pakete)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.all-themes.bundle.zip",
+      "sha256": "f5ffe1e732ac468346477082fb6e44b539603f7662cb101ab5302e9e9af15db7"
     },
     {
       "id": "com.codeforge.plugin.androidx-migrate.tool",
@@ -939,7 +2078,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.androidx-migrate.tool.zip",
-      "sha256": "9b618ac63ebd4373e8eba7cac2335845316c6d73e7b5921ea6b9fca9a69ecd28"
+      "sha256": "a28236196314d59d5f4d2faf58c5cd740e37cc0d219fa21e26ab2aac20a5323d"
     },
     {
       "id": "com.codeforge.plugin.catalog-migrate.tool",
@@ -956,7 +2095,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.catalog-migrate.tool.zip",
-      "sha256": "f29d52adf3ad36ae8647e1f15cd026f9378838bb67e78fb2b1e4e5a2ee314258"
+      "sha256": "3afb6eae17616a56ed9056ba774243021cc3549eddf212da8a8090478afd2968"
     },
     {
       "id": "com.codeforge.plugin.format-all.tool",
@@ -973,7 +2112,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.format-all.tool.zip",
-      "sha256": "620d00c669075a9696aafbb709d127b084302b88f24be3c3b151aefc38d49039"
+      "sha256": "9c44d4a0cfdae2ec7ee2f9f5b7ffd1b1e8c1e3a391e3cca6ff3575411d934084"
     },
     {
       "id": "com.codeforge.plugin.gitignore.tool",
@@ -990,7 +2129,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.gitignore.tool.zip",
-      "sha256": "0d435c377f262257501f0c53791887a6fd9049b7962673d88dc19d2809ed17d3"
+      "sha256": "01202c4238df67f7069c0bfb9e2116593b821534a4120b8951e11db11eb21b07"
     },
     {
       "id": "com.codeforge.plugin.license.tool",
@@ -1000,14 +2139,14 @@
         "en": "LICENSE-Generator (Tool)"
       },
       "summary": {
-        "de": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
-        "en": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, Unlicense). Apache-2.0 und GPL sind nicht enthalten. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell)."
+        "de": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, GPL-2.0, GPL-3.0, Unlicense) – Auswahl per Dropdown. Der GPL-Volltext wird von gnu.org geladen (Internet nötig). Apache-2.0 ist nicht enthalten. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
+        "en": "Schreibt eine LICENSE-Datei (MIT, BSD-2, BSD-3, ISC, GPL-2.0, GPL-3.0, Unlicense) – Auswahl per Dropdown. Der GPL-Volltext wird von gnu.org geladen (Internet nötig). Apache-2.0 ist nicht enthalten. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell)."
       },
       "version": "1.0.0",
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.license.tool.zip",
-      "sha256": "f9e0b2ab321a3cee4e69fc4242d9c39737343ca16bc75263dbe6af41fb4cd14c"
+      "sha256": "b903fc60d8ea4c0c9ee146948bfac9d3c7d3545c50cd5bb53a8ea5f831d05c04"
     },
     {
       "id": "com.codeforge.plugin.project-clean.tool",
@@ -1024,7 +2163,24 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.project-clean.tool.zip",
-      "sha256": "8edab4aa977f764ec48c12e29c355769f47053c970ca213e34b5fdcebc274ad3"
+      "sha256": "619ddeb18b52cf0293ae7fc2fbc7f3330f476d8123a478799c9203b6e301a028"
+    },
+    {
+      "id": "com.codeforge.plugin.readme.tool",
+      "category": "tool",
+      "name": {
+        "de": "README-Generator (Tool)",
+        "en": "README-Generator (Tool)"
+      },
+      "summary": {
+        "de": "Erzeugt eine README.md aus dem Projekt (Name, Module, Technik, SDK-Werte, Build-Befehle, Lizenz) auf Deutsch oder Englisch. Eine vorhandene README.md bleibt unangetastet (dann entsteht README.generated.md). Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
+        "en": "Erzeugt eine README.md aus dem Projekt (Name, Module, Technik, SDK-Werte, Build-Befehle, Lizenz) auf Deutsch oder Englisch. Eine vorhandene README.md bleibt unangetastet (dann entsteht README.generated.md). Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell)."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.readme.tool.zip",
+      "sha256": "d17539ae60758bec7bd77db583bd52e5c605b1925ef8e74d4fe7463fd9e99968"
     },
     {
       "id": "com.codeforge.plugin.unused-resources.tool",
@@ -1041,7 +2197,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.unused-resources.tool.zip",
-      "sha256": "57f40864a095205aabf73533a644bf55bc0d4d43d76f6b2fe9b48709b98567d2"
+      "sha256": "1bea18f38fb8cd98a8d118784d8bcb5c72408bffeeba7658e13ff2fd8f4ba465"
     },
     {
       "id": "com.codeforge.plugin.vscode-import.tool",
@@ -1058,7 +2214,7 @@
       "author": "codeforge",
       "homepage": "https://github.com/scto/CodeForgeMobile",
       "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.vscode-import.tool.zip",
-      "sha256": "8104d06c0a7f2ce37c91c0f50e26ef9ecdf0e7f2071417d66dad309b4ba889d4"
+      "sha256": "7745ad8543c05fd2522535c60e8af82f2b4c6b08fe14bdca58a3a01df6bb6d2b"
     }
   ]
 }

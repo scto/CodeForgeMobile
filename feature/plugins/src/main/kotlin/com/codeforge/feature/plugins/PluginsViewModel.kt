@@ -154,6 +154,7 @@ class PluginsViewModel @Inject constructor(
     }
 
     private fun uninstall(event: PluginsUiEvent.Uninstall) = viewModelScope.launch {
+        toolRunner?.releaseDownloads(event.pluginId)
         pluginRepository.uninstall(event.pluginId)
             .onFailure { _effect.emit(PluginsUiEffect.ShowSnackbar(it.message ?: Res.string(R.string.common_deinstallation_fehlgeschlagen))) }
     }

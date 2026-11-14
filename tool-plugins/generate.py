@@ -47,7 +47,23 @@ LSP = [
      "npm install -g vscode-langservers-extracted"),
     ("yaml-language-server", "YAML Language Server", [("yaml-language-server", ["yaml"], ["yaml-language-server", "--stdio"])],
      "npm install -g yaml-language-server"),
+    # JVM-Server: Dateien kommen als Download-Voraussetzung (SHA-256 geprüft) nach ${deps}/<name>.
+    # ${jvmArg} wird je JVM-Option des Nutzers wiederholt, ${jvmArgs} steht für alle (Einstellungen → Sprachserver).
+    ("kotlin-language-server", "Kotlin Language Server",
+     [("kotlin-language-server", ["kotlin"], ["${deps}/kotlin-language-server/server/bin/kotlin-language-server"],
+       {"KOTLIN_LANGUAGE_SERVER_OPTS": "${jvmArgs}"})],
+     "Download server.zip 1.3.11 von GitHub, JDK 17"),
+    ("jdtls", "Eclipse JDT LS (Java)",
+     [("jdtls", ["java"], ["python3", "${deps}/jdtls/bin/jdtls", "--jvm-arg=${jvmArg}"])],
+     "Download jdt-language-server 1.45.0 von eclipse.org, JDK 17, Python"),
+    ("lemminx", "LemMinX (XML)",
+     [("lemminx", ["xml"], ["java", "${jvmArg}", "-jar", "${deps}/lemminx/org.eclipse.lemminx-uber.jar"])],
+     "Download lemminx-uber.jar 0.31.2 von eclipse.org, JDK 17"),
 ]
+
+
+def _dl(name, url, sha256, archive, check):
+    return {"manager": "download", "name": name, "url": url, "sha256": sha256, "archive": archive, "check": check}
 
 
 def _r(manager, name, check=None):
@@ -58,6 +74,7 @@ def _r(manager, name, check=None):
 
 
 NODE = _r("pkg", "nodejs", "node")
+JDK = _r("pkg", "openjdk-17", "java")
 # Voraussetzungen je Plugin-Name (Formatierer und Language Server)
 REQUIRES = {
     "prettier": [NODE, _r("npm", "prettier")],
@@ -78,6 +95,15 @@ REQUIRES = {
     "pyright": [NODE, _r("npm", "pyright", "pyright-langserver")],
     "web-langservers": [NODE, _r("npm", "vscode-langservers-extracted", "vscode-html-language-server")],
     "yaml-language-server": [NODE, _r("npm", "yaml-language-server")],
+    "kotlin-language-server": [JDK, _dl(
+        "kotlin-language-server", "https://github.com/fwcd/kotlin-language-server/releases/download/1.3.11/server.zip",
+        "c65efea1c09d88ddb1fe227d8e2c5dbb3d8dd568453bccbbf2e20dfa2f004dcd", "zip", "server/bin/kotlin-language-server")],
+    "jdtls": [JDK, _r("pkg", "python", "python3"), _dl(
+        "jdtls", "https://download.eclipse.org/jdtls/milestones/1.45.0/jdt-language-server-1.45.0-202502271238.tar.gz",
+        "c09e79e958beb5ce41fb3b5097aec0455298bc88a14c8e41462b57edb2812797", "tar.gz", "bin/jdtls")],
+    "lemminx": [JDK, _dl(
+        "lemminx", "https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar",
+        "f4fde164e785c635e5f86361dbf4b993bfe2c5f83fdb52891d058b7dfc9bcfc8", "file", "org.eclipse.lemminx-uber.jar")],
 }
 
 PY = _r("pkg", "python", "python3")
@@ -170,7 +196,12 @@ def main(out):
         pid = f"com.codeforge.plugin.{name}.lsp"
         lsp_ids.append(pid)
         folder = ROOT / "src" / pid
-        items = [{"id": sid, "label": label, "languages": langs, "command": cmd} for sid, langs, cmd in servers]
+        items = []
+        for sid, langs, cmd, *env in servers:
+            item = {"id": sid, "label": label, "languages": langs, "command": cmd}
+            if env:
+                item["env"] = env[0]
+            items.append(item)
         dump(folder / "plugin.json", manifest(pid, f"{label} (Language Server)",
              f"Bindet {label} ein. Fehlende Programme installiert die App nach Bestätigung (sonst: {install}).",
              {"lspServers": items, "requires": REQUIRES[name]}))

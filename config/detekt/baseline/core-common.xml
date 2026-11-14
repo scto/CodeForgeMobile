@@ -2,6 +2,35 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>BracesOnWhenStatements:ArchiveUtils.kt:ArchiveUtils$when</ID>
+    <ID>CognitiveComplexMethod:ArchiveUtils.kt:ArchiveUtils$fun extractZip: Result&lt;Unit></ID>
+    <ID>CognitiveComplexMethod:ArchiveUtils.kt:ArchiveUtils$private fun extractTarStream</ID>
+    <ID>CognitiveComplexMethod:FileDownloader.kt:HttpFileDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>CyclomaticComplexMethod:ArchiveUtils.kt:ArchiveUtils$private fun extractTarStream</ID>
+    <ID>CyclomaticComplexMethod:FileDownloader.kt:HttpFileDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>DocumentationOverPrivateFunction:ArchiveUtilsTest.kt:ArchiveUtilsTest$private fun createTarGzArchive: ByteArray</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractGz extracts single file and sets executable bit`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractTarGz prevents Symlink escaping destination folder`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractTarGz prevents Tar Slip path traversal and cleans up`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractTarGz successfully extracts files and sets executable mode`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractZip prevents Zip Slip attack and cleans up destination`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractZip successfully extracts nested files and directories`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `calculateSha256 for empty bytes matches known digest`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `calculateSha256 for hello world matches standard SHA-256`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `verifySha256 is case insensitive`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `verifySha256 returns false for non-existent file`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `verifySha256 returns false for wrong hash`</ID>
+    <ID>LongMethod:ArchiveUtils.kt:ArchiveUtils$private fun extractTarStream</ID>
+    <ID>LongMethod:FileDownloader.kt:HttpFileDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>LoopWithTooManyJumpStatements:ArchiveUtils.kt:ArchiveUtils$for</ID>
+    <ID>LoopWithTooManyJumpStatements:ArchiveUtils.kt:ArchiveUtils$while</ID>
+    <ID>LoopWithTooManyJumpStatements:FileDownloader.kt:HttpFileDownloader$while</ID>
+    <ID>TooGenericExceptionCaught:ArchiveUtils.kt:ArchiveUtils$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:FileDownloader.kt:HttpFileDownloader$e: Exception</ID>
+    <ID>UnconditionalJumpStatementInLoop:FileDownloader.kt:HttpFileDownloader$while (true) { val conn = URI(currentUrl).toURL().openConnection() as HttpURLConnection conn.connectTimeout = 15_000 conn.readTimeout = 30_000 conn.instanceFollowRedirects = false conn.setRequestProperty("User-Agent", "CodeForgeMobile/3.0.0") conn.connect() val responseCode = conn.responseCode if (responseCode in listOf( HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_SEE_OTHER, 307, 308 ) ) { if (++redirects > maxRedirects) { conn.disconnect() throw IOException("Too many redirects ($redirects) for $url") } val location = conn.getHeaderField("Location") ?: throw IOException("HTTP redirect $responseCode without Location header") currentUrl = URI(currentUrl).resolve(location).toString() conn.disconnect() continue } if (responseCode !in 200..299) { conn.disconnect() throw IllegalStateException("HTTP error $responseCode while downloading $url") } connection = conn break }</ID>
+    <ID>UnnecessaryParentheses:ArchiveUtils.kt:ArchiveUtils$(mode and 0b000_001_000 != 0)</ID>
+    <ID>UnnecessaryParentheses:ArchiveUtils.kt:ArchiveUtils$(mode and 0b001_000_000 != 0)</ID>
+    <ID>UnnecessaryParentheses:ArchiveUtilsTest.kt:ArchiveUtilsTest$(b.toInt() and 0xFF)</ID>
     <ID>BracesOnIfStatements:FileHeaderRenderer.kt:FileHeaderRenderer$else</ID>
     <ID>BracesOnWhenStatements:FileHeaderRenderer.kt:FileHeaderRenderer$when</ID>
     <ID>CascadingCallWrapping:CfmLogManager.kt:CfmLogManager$append(' ')</ID>

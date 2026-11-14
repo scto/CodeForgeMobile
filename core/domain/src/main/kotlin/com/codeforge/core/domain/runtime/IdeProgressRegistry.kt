@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /** Art eines sichtbaren Vorgangs. */
-enum class IdeProgressKind { INDEXING, GRADLE }
+enum class IdeProgressKind { INDEXING, GRADLE, INSTALL }
 
 /** Ein laufender Vorgang für die Fortschrittsleiste. */
 data class IdeProgress(

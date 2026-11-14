@@ -2178,7 +2178,6 @@
     <string name="store_updated">Catalog date: %1$s</string>
     <string name="store_server_missing">Plugin installed, but the server program is missing.</string>
     <string name="store_server_ready">Plugin and server program installed.</string>
-    <string name="store_server_present_plugin_missing">Server program already installed; the plugin is not.</string>
     <string name="store_server_install">Install server</string>
     <string name="store_server_installed">Server installed: %1$s</string>
     <string name="store_server_install_failed">Server installation failed: %1$s</string>
@@ -2631,4 +2630,14 @@
     <string name="aiset_endpoint_hint_gemini">Appends /v1beta/models/{model}:streamGenerateContent</string>
     <string name="aiset_endpoint_hint_anthropic">Appends /v1/messages</string>
     <string name="aiset_endpoint_hint_openai">Change to use Ollama or a custom OpenAI-compatible server (works without a key)</string>
+    <string name="lsp_requirements_installed">Programs installed. The server starts the next time a file is opened.</string>
+    <string name="lsp_legacy_title">Old language server files</string>
+    <string name="lsp_legacy_text">The built-in language servers have been replaced by plugins. The old files (%1$s) are no longer used.</string>
+    <string name="lsp_legacy_delete">Delete old files</string>
+    <string name="lsp_legacy_deleted">Old language server files deleted.</string>
+    <string name="lsp_install_requirements">Install programs</string>
+    <string name="lsp_missing_programs">Missing: %1$s</string>
+    <string name="lsp_from_plugin">Plugin: %1$s</string>
+    <string name="lsp_none_installed">No language server installed yet. Language servers come as plugins from the Store (category “Language servers”).</string>
+    <string name="flashbar_install">Installing %1$s</string>
 </resources>

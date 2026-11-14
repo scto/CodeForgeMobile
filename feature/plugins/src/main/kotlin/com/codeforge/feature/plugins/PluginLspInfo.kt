@@ -3,6 +3,7 @@ package com.codeforge.feature.plugins
 
 import com.codeforge.core.domain.extension.LspServerContribution
 import com.codeforge.core.domain.extension.RequirementContribution
+import com.codeforge.core.domain.extension.expand
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.domain.model.LspRuntimeStats
 import com.codeforge.core.domain.model.LspServerState
@@ -16,9 +17,11 @@ import com.codeforge.core.ui.LspRuntimeInfo
 import java.io.File
 
 /** Daten des Info-Dialogs für ein Plugin, das Language Server beisteuert. */
-internal object PluginLspInfo {
+object PluginLspInfo {
 
     const val KIND = "lspServers"
+
+    private const val HOME = "/data/data/com.codeforge.app/files/home"
 
     /** Ob das Plugin einen Language-Server beisteuert. */
     fun isLspPlugin(plugin: InstalledPlugin): Boolean = KIND in plugin.contributionKinds
@@ -32,8 +35,13 @@ internal object PluginLspInfo {
             .firstOrNull { it.isFile && it.canExecute() }
     }
 
+    private fun prefix(): String = System.getenv("PREFIX") ?: "/data/data/com.codeforge.app/files/usr"
+
     /** Ordner `bin` der Termux-Umgebung. */
-    fun termuxBin(): File = File(System.getenv("PREFIX") ?: "/data/data/com.codeforge.app/files/usr", "bin")
+    fun termuxBin(): File = File(prefix(), "bin")
+
+    /** Ordner der Download-Voraussetzungen (`${deps}`). */
+    fun depsDir(): File = File(prefix(), com.codeforge.core.domain.extension.RequirementPolicy.DEPS_SUBDIR)
 
     /** Baut das Modell für den Info-Dialog. */
     fun build(
@@ -45,7 +53,7 @@ internal object PluginLspInfo {
         termuxBin: File = termuxBin(),
     ): LspInfoModel {
         val server = servers.firstOrNull()
-        val command = server?.command?.map { it.replace("\${pluginDir}", pluginDir.orEmpty()) }.orEmpty()
+        val command = server?.expand(pluginDir.orEmpty(), HOME, depsDir().absolutePath, emptyList())?.first.orEmpty()
         val binary = command.firstOrNull()?.let { resolveBinary(it, termuxBin) }
         val checks = buildList {
             add(

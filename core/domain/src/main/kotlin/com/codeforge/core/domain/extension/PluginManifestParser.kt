@@ -17,6 +17,8 @@ import kotlinx.serialization.json.intOrNull
 object PluginManifestParser {
 
     private val ID_REGEX = Regex("[A-Za-z0-9][A-Za-z0-9._-]*")
+    private val ENV_KEY = Regex("[A-Z_][A-Z0-9_]{0,63}")
+    private val SHA256 = Regex("[0-9a-f]{64}")
 
     /** Parst und validiert ein Plugin-Manifest (JSON); Fehler werden als Failure geliefert. */
     fun parse(text: String): Result<PluginManifest> = runCatching {
@@ -109,7 +111,10 @@ object PluginManifestParser {
                     label = it.string("label") ?: it.req("id"),
                     languages = languages,
                     command = command,
-                    installScript = it.string("installScript")
+                    installScript = it.string("installScript"),
+                    env = it.stringMap("env").also { env ->
+                        require(env.keys.all { k -> ENV_KEY.matches(k) }) { "lspServers: ungültiger Name in 'env'" }
+                    }
                 )
             },
             extensionPack = obj.stringList("extensionPack"),
@@ -191,17 +196,34 @@ object PluginManifestParser {
                 require(url == null || url.startsWith("https://") || url.startsWith("http://")) { "mcpServers: 'url' muss http(s) sein" }
                 McpServerContribution(name = name, url = url, command = cmd, args = it.stringList("args"))
             }.also { list -> require(list.map { s -> s.name }.toSet().size == list.size) { "mcpServers: doppelte Namen" } },
-            requires = obj.objects("requires").map {
-                val manager = RequirementManager.of(it.req("manager"))
-                    ?: throw IllegalArgumentException("requires: 'manager' muss pkg, npm oder pip sein")
-                val name = it.req("name")
-                require(RequirementPolicy.isValidName(name)) { "requires: ungültiger Paketname '$name'" }
-                val check = it.string("check")?.takeIf { c -> c.isNotBlank() } ?: name.substringAfterLast('/')
-                require(RequirementPolicy.isValidName(check)) { "requires: ungültiger 'check'-Name '$check'" }
-                RequirementContribution(manager, name, check)
-            }
+            requires = obj.objects("requires").map { parseRequirement(it) }
         )
     }
+
+    private fun parseRequirement(obj: JsonObject): RequirementContribution {
+        val manager = RequirementManager.of(obj.req("manager"))
+            ?: throw IllegalArgumentException("requires: 'manager' muss pkg, npm, pip oder download sein")
+        val name = obj.req("name")
+        require(RequirementPolicy.isValidName(name)) { "requires: ungültiger Paketname '$name'" }
+        if (manager != RequirementManager.DOWNLOAD) {
+            val check = obj.string("check")?.takeIf { c -> c.isNotBlank() } ?: name.substringAfterLast('/')
+            require(RequirementPolicy.isValidName(check)) { "requires: ungültiger 'check'-Name '$check'" }
+            return RequirementContribution(manager, name, check)
+        }
+        require(!name.contains('/')) { "requires: Download-Name '$name' darf keinen '/' enthalten" }
+        val url = obj.req("url")
+        require(url.startsWith("https://")) { "requires: 'url' muss https sein" }
+        val sha = obj.req("sha256").lowercase()
+        require(SHA256.matches(sha)) { "requires: 'sha256' muss 64 Hex-Zeichen haben" }
+        val archive = DownloadArchive.fromId(obj.req("archive"))
+            ?: throw IllegalArgumentException("requires: 'archive' muss zip, tar.gz oder file sein")
+        return RequirementContribution(manager, name, obj.relPath("check"), url, sha, archive)
+    }
+
+    private fun JsonObject.stringMap(key: String): Map<String, String> =
+        (this[key] as? JsonObject).orEmpty()
+            .mapNotNull { (k, v) -> (v as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull?.let { k to it } }
+            .toMap()
 
     private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
 

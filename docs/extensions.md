@@ -110,7 +110,18 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 
 ## Language Server (`lspServers`)
 
-`command` darf `${pluginDir}` und `${home}` enthalten. Ein eingebauter, installierter Server hat Vorrang; sonst wird der Plugin-Server für die angegebenen `languages` verwendet. Existiert die ausführbare Datei bei absolutem Pfad nicht, gibt es keinen Server.
+Alle Sprachserver kommen aus Plugins (die App hat keinen eingebauten Katalog mehr). Für eine Sprache gewinnt der erste aktivierte Plugin-Server, den der Nutzer nicht abgeschaltet hat (Einstellungen → Sprachserver).
+
+```json
+{ "id": "jdtls", "label": "Eclipse JDT LS (Java)", "languages": ["java"],
+  "command": ["python3", "${deps}/jdtls/bin/jdtls", "--jvm-arg=${jvmArg}"],
+  "env": { "SOME_OPTS": "${jvmArgs}" } }
+```
+
+* Platzhalter in `command` und `env`: `${pluginDir}`, `${home}`, `${deps}` (Ordner der Downloads aus `requires`, `$PREFIX/opt/plugin-deps`).
+* JVM-Optionen: Ein Element mit `${jvmArg}` wird je Option des Nutzers wiederholt (ohne Optionen entfällt es); `${jvmArgs}` in einem `env`-Wert steht für alle Optionen. Nur Server mit einem dieser Platzhalter zeigen in den Einstellungen „JVM-Optionen“. Vorgaben für `kotlin-language-server`, `jdtls`, `lemminx` liegen in `LspServerDefaults`.
+* Einstellungen (an/aus, Fähigkeiten, JVM) hängen an der Server-`id`; `vscode-*-language-server` teilen sich den Schlüssel `vscode-langservers-extracted`.
+* Existiert das Programm (absoluter Pfad) oder eine Datei unter `${deps}` nicht, gibt es keinen Server. `env`-Werte werden an vorhandene Umgebungswerte angehängt.
 
 ## Formatierer (`formatters`)
 
@@ -132,9 +143,18 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 "requires": [ { "manager": "pkg", "name": "clang", "check": "clangd" }, { "manager": "npm", "name": "pyright", "check": "pyright-langserver" } ]
 ```
 
-* `manager`: `pkg` (Termux-Pakete, `apt-get install -y`), `npm` (`npm install -g`) oder `pip` (`python3 -m pip install`). `check` = Programmname, dessen Vorhandensein geprüft wird (Standard: letztes Segment von `name`).
+* `manager`: `pkg` (Termux-Pakete, `apt-get install -y`), `npm` (`npm install -g`), `pip` (`python3 -m pip install`) oder `download`. `check` = Programmname, dessen Vorhandensein geprüft wird (Standard: letztes Segment von `name`).
+* `download` lädt eine Datei mit Pflicht-Prüfsumme in `${deps}/<name>`:
+
+  ```json
+  { "manager": "download", "name": "lemminx", "archive": "file",
+    "url": "https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar",
+    "sha256": "f4fde164…", "check": "org.eclipse.lemminx-uber.jar" }
+  ```
+
+  `archive`: `zip`, `tar.gz` oder `file`; `check` = relativer Pfad, der danach existieren muss (wird ausführbar gemacht). Die App merkt sich die SHA-256: Liefert ein Plugin-Update eine neue, gilt der Download wieder als fehlend (Update ohne App-Release). Entpackt wird erst in einen Nachbarordner, eine funktionierende alte Version bleibt bei Fehlern erhalten. Beim Deinstallieren werden Downloads gelöscht, die kein anderes aktives Plugin braucht. Im Store nur von `github.com`, `download.eclipse.org`, `registry.npmjs.org`.
 * **Nie automatisch:** Der Plugins-Bildschirm zeigt „Fehlende Programme: …" und installiert erst nach Bestätigung (Live-Ausgabe, abbrechbar). Die Prüfung gilt für aktivierte Plugins. Das PT-Menü fragt vor dem Start eines Werkzeugs genauso nach.
-* Paketnamen werden validiert (keine Optionen wie `-g`, kein `..`). Im **Store** sind nur Pakete einer festen Freigabeliste erlaubt (`RequirementPolicy`: u. a. clang, nodejs, python, golang, rust, ruff, shfmt, taplo, prettier, typescript, pyright …); per Sideload sind beliebige Namen möglich, weil der Nutzer die Liste vor der Installation sieht.
+* Paketnamen werden validiert (keine Optionen wie `-g`, kein `..`). Im **Store** sind nur Pakete einer festen Freigabeliste erlaubt (`RequirementPolicy`: u. a. clang, nodejs, python, openjdk-17, golang, rust, ruff, shfmt, taplo, prettier, typescript, pyright …); per Sideload sind beliebige Namen möglich, weil der Nutzer die Liste vor der Installation sieht.
 * Ersetzt das alte, nie ausgeführte `installScript` (wird weiter gelesen, aber ignoriert).
 
 ## Werkzeuge im PT-Menü (`tools`)

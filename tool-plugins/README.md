@@ -3,7 +3,7 @@
 Plugins (`com.codeforge.plugin.<name>.formatter|lsp|tool`, Publisher `codeforge`), erzeugt von `generate.py`.
 
 * **Formatierer** (6): Prettier, shfmt, Ruff Format, gofmt, rustfmt, Taplo Format. Bundle: `com.codeforge.plugin.all-formatters.bundle`.
-* **Language Server** (12 Plugins, 14 Server): clangd, rust-analyzer, Taplo, gopls, Ruff, neocmakelsp, Dart, Bash, TypeScript/JavaScript, Pyright, HTML/CSS/JSON, YAML. Bundle: `com.codeforge.plugin.all-lsp-servers.bundle`.
+* **Language Server** (15 Plugins, 17 Server): clangd, rust-analyzer, Taplo, gopls, Ruff, neocmakelsp, Dart, Bash, TypeScript/JavaScript, Pyright, HTML/CSS/JSON, YAML, Kotlin Language Server, Eclipse JDT LS, LemMinX. Bundle: `com.codeforge.plugin.all-lsp-servers.bundle`.
 * **Werkzeuge** (9, erscheinen im **PT**-Menü des Dateibaums, Store-Kategorie „Code-Tools“ oder Sideload, Berechtigung `shell`, Skripte in Python):
   * `vscode-import` – VS-Code-Themes und Icon-Packs (.vsix / Ordner / Theme-JSON) → CodeForge-Plugin-ZIP (`cf-plugin-out/`); SVG-Icons brauchen `librsvg`.
   * `androidx-migrate` – `android.support.*`/`android.arch.*` → AndroidX (Imports, Layout-XML, Gradle, `gradle.properties`); Modus `check`/`apply`.
@@ -15,6 +15,6 @@ Plugins (`com.codeforge.plugin.<name>.formatter|lsp|tool`, Publisher `codeforge`
   * `readme` – `README.md` aus dem Projekt erzeugen (Name, Module, Technik, SDK-Werte, Build-Befehle, Lizenz; Deutsch/Englisch). Eine vorhandene README wird nie überschrieben, es entsteht `README.generated.md`.
   * `project-clean` – Build-Artefakte löschen.
 * **`requires`:** Alle Plugins deklarieren ihre Programme; die App prüft und installiert sie nach Bestätigung (Plugins-Bildschirm bzw. PT-Menü).
-* **Nicht enthalten:** Kotlin Language Server, JDT LS und LemMinX – sie brauchen heruntergeladene Dateien (ZIP/JAR) und bleiben im Extensions-Manager der App.
+* **Kotlin LS, JDT LS, LemMinX:** laden ihre Dateien als `requires`-Download (`manager: download`, SHA-256 Pflicht) nach `${deps}/<name>`; JVM-Optionen aus den Einstellungen über `${jvmArg}`/`${jvmArgs}`. Neue Server-Version = neue URL/SHA im Plugin, kein App-Release.
 * **Bauen:** `python3 tool-plugins/generate.py [ausgabeordner]` (gibt je ZIP die SHA-256 aus; zusätzlich `codeforge-tool-plugins-alle.zip` mit allen Werkzeug-Plugins).
 * Die Skripte (`scripts/`) sind mit Beispiel-Projekten im Sandkasten getestet, nicht auf einem Gerät. Änderungsmodi (`apply`/`fix`) vorher mit `check` prüfen und das Projekt committen.

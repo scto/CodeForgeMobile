@@ -1,0 +1,45 @@
+{
+  "id": "com.codeforge.plugin.jdtls.lsp",
+  "name": "Eclipse JDT LS (Java) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet Eclipse JDT LS (Java) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download jdt-language-server 1.45.0 von eclipse.org, JDK 17, Python).",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "jdtls",
+        "label": "Eclipse JDT LS (Java)",
+        "languages": [
+          "java"
+        ],
+        "command": [
+          "python3",
+          "${deps}/jdtls/bin/jdtls",
+          "--jvm-arg=${jvmArg}"
+        ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "openjdk-17",
+        "check": "java"
+      },
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      },
+      {
+        "manager": "download",
+        "name": "jdtls",
+        "url": "https://download.eclipse.org/jdtls/milestones/1.45.0/jdt-language-server-1.45.0-202502271238.tar.gz",
+        "sha256": "c09e79e958beb5ce41fb3b5097aec0455298bc88a14c8e41462b57edb2812797",
+        "archive": "tar.gz",
+        "check": "bin/jdtls"
+      }
+    ]
+  }
+}

@@ -1,4 +1,10 @@
-# Language Server Extensions in CodeForge Mobile
+# Language Server in CodeForge Mobile
+
+> **Stand 2026-11:** Der eingebaute Katalog (`LspExtensionCatalog`, `ExtensionsManager`) ist entfernt. Alle Server
+> kommen als Plugins aus dem Store (`tool-plugins/src/com.codeforge.plugin.<name>.lsp`, Bundle
+> `com.codeforge.plugin.all-lsp-servers.bundle`). Kotlin LS, JDT LS und LemMinX laden ihre Dateien als
+> `requires`-Download mit SHA-256 nach `$PREFIX/opt/plugin-deps/<name>`. Format: `docs/extensions.md`.
+> Die Tabelle unten beschreibt die Server; „Quelle“ ist jetzt die `requires`-Angabe des jeweiligen Plugins.
 
 Dieses Dokument beschreibt die im Extensions-Manager (`:feature:settings`) verfügbaren Language Server, deren Sprach-Zuordnung, Startbefehle und Voraussetzungen.
 

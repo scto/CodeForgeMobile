@@ -174,8 +174,7 @@ private fun StoreContent(
                 items(entries, key = { it.id }) { entry ->
                     StoreItemCard(
                         item = entry,
-                        installed = entry.id in uiState.installedPluginIds ||
-                            (entry.extensionId != null && uiState.serverStates[entry.id] == LspServerState.PRESENT),
+                        installed = entry.id in uiState.installedPluginIds,
                         onUninstall = { onEvent(StoreUiEvent.Uninstall(entry)) },
                         serverState = uiState.serverStates[entry.id],
                         installingServer = entry.id in uiState.installingServerIds,
@@ -226,15 +225,11 @@ private fun StoreItemCard(
                 else LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
             // Das Plugin bindet den Server nur ein: Zustand des Programms getrennt ausweisen.
-            if (serverState != null && (installed || serverState == LspServerState.PRESENT)) {
+            if (serverState != null && installed) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = stringRes(
-                        when {
-                            serverState == LspServerState.MISSING -> R.string.store_server_missing
-                            installed -> R.string.store_server_ready
-                            else -> R.string.store_server_present_plugin_missing
-                        }
+                        if (serverState == LspServerState.MISSING) R.string.store_server_missing else R.string.store_server_ready
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (serverState == LspServerState.MISSING) MaterialTheme.colorScheme.error
@@ -248,12 +243,12 @@ private fun StoreItemCard(
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val isServer = serverState != null
-                val installable = item.isInstallablePlugin || item.extensionId != null
+                val installable = item.isInstallablePlugin
                 when {
                     // Sprachserver: ein Knopf für Plugin + Server-Programm + Voraussetzungen, ein Knopf zum Entfernen.
                     isServer && installable && !(installed && serverState != LspServerState.MISSING) -> {
                         val busy = installing || installingServer
-                        Button(onClick = onInstall, enabled = !busy && !installBusy) {
+                        Button(onClick = if (installed) onInstallServer else onInstall, enabled = !busy && !installBusy) {
                             Text(stringRes(if (busy) R.string.store_installing else R.string.store_install))
                         }
                     }

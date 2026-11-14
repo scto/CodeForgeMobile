@@ -1,5 +1,5 @@
-// Modul: :feature:settings
-package com.codeforge.feature.settings.extensions
+// Modul: :core:common
+package com.codeforge.core.common.io
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

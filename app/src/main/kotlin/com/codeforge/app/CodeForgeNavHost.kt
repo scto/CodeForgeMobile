@@ -300,7 +300,6 @@ fun CodeForgeNavHost(
             // Liste der installierten Sprachserver (Editor → Sprachserver verwalten); Neues kommt aus dem Store.
             ExtensionsRoute(
                 onBack = { navigateBackOrStart() },
-                installedOnly = true,
                 onOpenStore = { navController.navigate(Routes.SETTINGS_STORE) }
             )
         }

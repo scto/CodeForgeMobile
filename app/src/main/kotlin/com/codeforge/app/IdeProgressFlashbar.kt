@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -75,12 +76,23 @@ private fun ProgressLine(item: IdeProgress) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(
-                if (item.kind == IdeProgressKind.INDEXING) Icons.Filled.Search else Icons.Filled.Build,
+                when (item.kind) {
+                    IdeProgressKind.INDEXING -> Icons.Filled.Search
+                    IdeProgressKind.GRADLE -> Icons.Filled.Build
+                    IdeProgressKind.INSTALL -> Icons.Filled.Download
+                },
                 contentDescription = null, tint = onColor, modifier = Modifier.size(16.dp),
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    stringRes(if (item.kind == IdeProgressKind.INDEXING) R.string.flashbar_indexing else R.string.flashbar_gradle, item.title),
+                    stringRes(
+                        when (item.kind) {
+                            IdeProgressKind.INDEXING -> R.string.flashbar_indexing
+                            IdeProgressKind.GRADLE -> R.string.flashbar_gradle
+                            IdeProgressKind.INSTALL -> R.string.flashbar_install
+                        },
+                        item.title
+                    ),
                     style = MaterialTheme.typography.labelLarge, color = onColor, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
                 if (item.detail.isNotBlank()) {

@@ -1,5 +1,7 @@
 package com.codeforge.core.data
 
+import com.codeforge.core.common.io.FileDownloader
+import com.codeforge.core.common.io.Sha256Utils
 import com.codeforge.core.data.repository.PluginToolRunnerImpl
 import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ContributionRepository
@@ -16,20 +18,79 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 
 class PluginToolRunnerImplTest {
 
     @get:Rule val tmp = TemporaryFolder()
 
-    private fun runner(toolJson: String, requires: String = "[]"): PluginToolRunnerImpl {
+    private val jar = "fake-jar".toByteArray()
+    private val jarSha = Sha256Utils.calculateSha256(jar)
+    private val tool = """{"id":"t","command":["true"]}"""
+
+    private val serving = FileDownloader { _, dest, onProgress ->
+        dest.parentFile?.mkdirs()
+        dest.writeBytes(jar)
+        onProgress(jar.size.toLong(), jar.size.toLong())
+        Result.success(dest)
+    }
+
+    private fun downloadReq(sha: String = jarSha) =
+        """[{"manager":"download","name":"lemminx","url":"https://download.eclipse.org/x.jar","sha256":"$sha",""" +
+            """"archive":"file","check":"lemminx.jar"}]"""
+
+    private fun runner(
+        toolJson: String,
+        requires: String = "[]",
+        downloader: FileDownloader = FileDownloader { _, _, _ -> Result.failure(java.io.IOException("offline")) }
+    ): PluginToolRunnerImpl {
         val manifest = PluginManifestParser.parse(
-            """{"id":"p.test","name":"T","version":"1","apiVersion":2,"permissions":["shell"],
-               "contributes":{"tools":[$toolJson],"requires":$requires}}"""
+            """{"id":"p.test","name":"T","version":"1","apiVersion":2,"permissions":["shell"],""" +
+                """"contributes":{"tools":[$toolJson],"requires":$requires}}"""
         ).getOrThrow()
         val flow = MutableStateFlow(ActiveContributions.of(listOf(manifest to "/plugins/p.test")))
-        return PluginToolRunnerImpl(object : ContributionRepository {
-            override val contributions: StateFlow<ActiveContributions> = flow
-        })
+        return PluginToolRunnerImpl(
+            object : ContributionRepository {
+                override val contributions: StateFlow<ActiveContributions> = flow
+            },
+            downloader,
+            File(tmp.root, "deps")
+        )
+    }
+
+    @Test
+    fun downloadIsVerifiedAndFound() = runBlocking {
+        val r = runner(tool, downloadReq(), serving)
+        val missing = r.missingRequirements("p.test")
+        assertEquals(listOf("lemminx"), missing.map { it.name })
+        val events = r.install(missing).toList()
+        assertEquals(0, (events.last() as ToolRunEvent.Finished).exitCode)
+        val file = File(tmp.root, "deps/lemminx/lemminx.jar")
+        assertTrue(file.exists() && file.canExecute())
+        assertTrue(r.missingRequirements("p.test").isEmpty())
+    }
+
+    @Test
+    fun wrongShaLeavesNothing() = runBlocking {
+        val r = runner(tool, downloadReq("0".repeat(64)), serving)
+        val events = r.install(r.missingRequirements("p.test")).toList()
+        assertEquals(1, (events.last() as ToolRunEvent.Finished).exitCode)
+        assertTrue(File(tmp.root, "deps").listFiles().orEmpty().isEmpty())
+    }
+
+    @Test
+    fun uninstallReleasesDownload() = runBlocking {
+        val r = runner(tool, downloadReq(), serving)
+        r.install(r.missingRequirements("p.test")).toList()
+        r.releaseDownloads("p.test")
+        assertTrue(!File(tmp.root, "deps/lemminx").exists())
+    }
+
+    @Test
+    fun newShaCountsAsMissing() = runBlocking {
+        runner(tool, downloadReq(), serving).let { it.install(it.missingRequirements("p.test")).toList() }
+        val updated = runner(tool, downloadReq("a".repeat(64)), serving)
+        assertEquals(1, updated.missingRequirements("p.test").size)
     }
 
     @Test

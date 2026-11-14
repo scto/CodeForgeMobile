@@ -3,9 +3,9 @@ package com.codeforge.feature.settings.store
 
 import com.codeforge.core.domain.model.PluginInstallEvent
 import com.codeforge.core.domain.repository.PluginRepository
-import com.codeforge.feature.settings.extensions.FileDownloader
-import com.codeforge.feature.settings.extensions.HttpFileDownloader
-import com.codeforge.feature.settings.extensions.Sha256Utils
+import com.codeforge.core.common.io.FileDownloader
+import com.codeforge.core.common.io.HttpFileDownloader
+import com.codeforge.core.common.io.Sha256Utils
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File

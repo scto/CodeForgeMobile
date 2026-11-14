@@ -3,100 +3,166 @@ package com.codeforge.feature.settings.extensions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codeforge.core.domain.extension.ActiveContributions
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.PluginToolRunner
+import com.codeforge.core.domain.model.InstalledPlugin
+import com.codeforge.core.domain.model.LspRuntimeStatsProvider
+import com.codeforge.core.domain.model.LspServerDefaults
+import com.codeforge.core.domain.model.LspServerSettings
+import com.codeforge.core.domain.repository.LspSettingsRepository
+import com.codeforge.core.domain.repository.PluginRepository
 import com.codeforge.core.resources.R
-import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.UiText
+import com.codeforge.feature.plugins.PluginLspInfo
+import com.codeforge.feature.plugins.RequirementInstallCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** ViewModel der Erweiterungen (Liste, Installation, Updates, Info). */
+/** ViewModel der Sprachserver-Verwaltung: Server aus Plugins, Einstellungen je Server, Voraussetzungen, Info. */
 @HiltViewModel
 class ExtensionsViewModel @Inject constructor(
-    private val extensionsManager: ExtensionsManager,
-    private val coordinator: ExtensionInstallCoordinator,
-    private val updateChecker: LspUpdateChecker,
-    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository,
-    private val lspSettings: com.codeforge.core.domain.repository.LspSettingsRepository,
-    private val runtimeStats: com.codeforge.core.domain.model.LspRuntimeStatsProvider? = null
+    private val contributionRepository: ContributionRepository,
+    private val pluginRepository: PluginRepository,
+    private val toolRunner: PluginToolRunner,
+    private val installer: RequirementInstallCoordinator,
+    private val lspSettings: LspSettingsRepository,
+    private val legacy: LegacyLspInstalls,
+    private val runtimeStats: LspRuntimeStatsProvider? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExtensionsUiState())
     /** UI-Zustand. */
     val uiState: StateFlow<ExtensionsUiState> = _uiState.asStateFlow()
 
-    init {
-        loadExtensions()
-        observeInstalls()
-        observeLspSettings()
-        viewModelScope.launch { lspSettings.settings.collect { all -> _uiState.update { it.copy(serverSettings = all) } } }
-    }
+    private var infoJob: Job? = null
 
-    private fun observeLspSettings() {
+    init {
         viewModelScope.launch {
-            settingsRepository.appSettings.collect { s ->
-                _uiState.update {
-                    it.copy(
-                        lspMaxSessions = s.editor.lspMaxConcurrentSessions,
-                        lspIdleTimeoutMinutes = s.editor.lspIdleTimeoutMinutes
-                    )
-                }
+            combine(contributionRepository.contributions, pluginRepository.installedPlugins) { c, p -> c to p }
+                .collectLatest { (contributions, plugins) -> refresh(contributions, plugins) }
+        }
+        viewModelScope.launch { lspSettings.settings.collect { all -> _uiState.update { it.copy(serverSettings = all) } } }
+        viewModelScope.launch {
+            installer.active.collect { active ->
+                _uiState.update { s -> s.copy(installing = active.mapValues { (_, v) -> InstallProgressUi(v.lastLine, v.percent) }) }
             }
         }
-    }
-
-    private fun setUpdate(id: String, state: UpdateUiState) {
-        _uiState.update { s -> s.copy(extensions = s.extensions.map { if (it.pkg.id == id) it.copy(update = state) else it }) }
-    }
-
-    private fun checkUpdate(pkg: LspExtensionPackage) {
-        if (_uiState.value.extensions.firstOrNull { it.pkg.id == pkg.id }?.update == UpdateUiState.Checking) return
-        setUpdate(pkg.id, UpdateUiState.Checking)
-        viewModelScope.launch { setUpdate(pkg.id, UpdateUiState.Done(updateChecker.check(pkg))) }
+        viewModelScope.launch { installer.outcomes.collect { onInstalled(it.pluginId, it.success, it.tail) } }
+        viewModelScope.launch { _uiState.update { it.copy(legacyBytes = legacy.sizeBytes()) } }
     }
 
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: ExtensionsUiEvent) {
         when (event) {
-            is ExtensionsUiEvent.SetServerEnabled ->
-                viewModelScope.launch { lspSettings.update(event.id) { it.copy(enabled = event.enabled) } }
-            is ExtensionsUiEvent.SetFeature -> viewModelScope.launch {
-                lspSettings.update(event.id) {
-                    it.copy(disabledFeatures = if (event.enabled) it.disabledFeatures - event.feature else it.disabledFeatures + event.feature)
+            is ExtensionsUiEvent.SetServerEnabled -> {
+                updateSettings(event.key) { it.copy(enabled = event.enabled) }
+            }
+            is ExtensionsUiEvent.SetFeature -> {
+                updateSettings(event.key) {
+                    val features = if (event.enabled) it.disabledFeatures - event.feature else it.disabledFeatures + event.feature
+                    it.copy(disabledFeatures = features)
                 }
             }
-            is ExtensionsUiEvent.SaveJvm -> viewModelScope.launch {
-                lspSettings.update(event.id) { it.copy(jvm = event.options) }
+            is ExtensionsUiEvent.SaveJvm -> {
+                updateSettings(event.key) { it.copy(jvm = event.options) }
                 _uiState.update { it.copy(snackbarMessage = UiText.of(R.string.jvm_saved)) }
             }
-            is ExtensionsUiEvent.Refresh -> loadExtensions()
-            is ExtensionsUiEvent.CheckUpdate -> checkUpdate(event.pkg)
-            is ExtensionsUiEvent.OpenDetails -> _uiState.update { it.copy(detailId = event.pkg.id) }
-            is ExtensionsUiEvent.CloseDetails -> _uiState.update { it.copy(detailId = null) }
-            is ExtensionsUiEvent.OpenInfo -> openInfo(event.pkg)
-            is ExtensionsUiEvent.CloseInfo -> closeInfo()
-            is ExtensionsUiEvent.DismissSnackbar -> _uiState.update { it.copy(snackbarMessage = null) }
-            is ExtensionsUiEvent.InstallClicked -> installPackage(event.pkg)
-            is ExtensionsUiEvent.UninstallClicked -> uninstallPackage(event.pkg)
+            is ExtensionsUiEvent.InstallRequirements -> {
+                val name = _uiState.value.servers.firstOrNull { it.pluginId == event.pluginId }?.pluginName ?: event.pluginId
+                installer.install(event.pluginId, name)
+            }
+            is ExtensionsUiEvent.OpenInfo -> {
+                openInfo(event.key)
+            }
+            ExtensionsUiEvent.CloseInfo -> {
+                closeInfo()
+            }
+            ExtensionsUiEvent.DeleteLegacy -> {
+                deleteLegacy()
+            }
+            ExtensionsUiEvent.DismissSnackbar -> {
+                _uiState.update { it.copy(snackbarMessage = null) }
+            }
         }
     }
 
-    private var infoJob: kotlinx.coroutines.Job? = null
+    private fun updateSettings(key: String, change: (LspServerSettings) -> LspServerSettings) {
+        viewModelScope.launch { lspSettings.update(key, change) }
+    }
 
-    /** Öffnet den Info-Dialog und aktualisiert die Laufzeitdaten alle 2 s, solange er offen ist. */
-    private fun openInfo(pkg: LspExtensionPackage) {
+    private suspend fun refresh(contributions: ActiveContributions, plugins: List<InstalledPlugin>) {
+        val byId = plugins.associateBy { it.id }
+        val missing = contributions.lspServers.map { it.pluginId }.distinct()
+            .associateWith { id -> toolRunner.missingRequirements(id).map { it.name } }
+        val items = contributions.lspServers
+            .groupBy { LspServerDefaults.keyFor(it.item.id) }
+            .map { (key, servers) ->
+                val first = servers.first()
+                val plugin = byId[first.pluginId]
+                LanguageServerItem(
+                    key = key,
+                    label = first.item.label,
+                    languages = servers.flatMap { it.item.languages }.distinct(),
+                    serverIds = servers.map { it.item.id }.toSet(),
+                    pluginId = first.pluginId,
+                    pluginName = plugin?.name ?: first.pluginId,
+                    pluginVersion = plugin?.version.orEmpty(),
+                    acceptsJvmOptions = servers.any { it.item.acceptsJvmOptions },
+                    missing = missing[first.pluginId].orEmpty()
+                )
+            }
+            .sortedBy { it.label.lowercase() }
+        _uiState.update { it.copy(servers = items) }
+    }
+
+    private fun onInstalled(pluginId: String, success: Boolean, tail: List<String>) {
+        viewModelScope.launch {
+            val missing = toolRunner.missingRequirements(pluginId).map { it.name }
+            val message = if (success) {
+                UiText.of(R.string.lsp_requirements_installed)
+            } else {
+                UiText.of(R.string.extensions_error, tail.lastOrNull().orEmpty())
+            }
+            _uiState.update { s ->
+                s.copy(
+                    servers = s.servers.map { if (it.pluginId == pluginId) it.copy(missing = missing) else it },
+                    snackbarMessage = message
+                )
+            }
+        }
+    }
+
+    // Info-Dialog: Zustand und Laufzeitdaten alle 2 s neu, solange er offen ist.
+    private fun openInfo(key: String) {
         infoJob?.cancel()
-        _uiState.update { it.copy(infoId = pkg.id, infoRuntime = null) }
-        loadExtensions() // Installationsstatus und Voraussetzungen frisch lesen
+        _uiState.update { it.copy(infoKey = key, infoModel = null, infoRuntime = null) }
         infoJob = viewModelScope.launch {
             while (true) {
-                val stats = runtimeStats?.statsFor(ExtensionInfoModel.serverIds(pkg))
-                _uiState.update { it.copy(infoRuntime = ExtensionInfoModel.runtime(stats)) }
-                kotlinx.coroutines.delay(2_000)
+                val item = _uiState.value.servers.firstOrNull { it.key == key } ?: break
+                val contributions = contributionRepository.contributions.value
+                val servers = contributions.lspServers.filter { it.pluginId == item.pluginId && it.item.id in item.serverIds }
+                val requires = contributions.requires.filter { it.pluginId == item.pluginId }.map { it.item }
+                val plugin = pluginRepository.installedPlugins.first().firstOrNull { it.id == item.pluginId }
+                if (plugin != null) {
+                    val model = PluginLspInfo.build(
+                        plugin, servers.map { it.item }, servers.firstOrNull()?.pluginDir,
+                        toolRunner.missingRequirements(item.pluginId), requires
+                    )
+                    val stats = runtimeStats?.statsFor(item.serverIds)
+                    _uiState.update { it.copy(infoModel = model, infoRuntime = PluginLspInfo.runtime(stats)) }
+                }
+                delay(INFO_REFRESH_MS)
             }
         }
     }
@@ -104,116 +170,22 @@ class ExtensionsViewModel @Inject constructor(
     private fun closeInfo() {
         infoJob?.cancel()
         infoJob = null
-        _uiState.update { it.copy(infoId = null, infoRuntime = null) }
+        _uiState.update { it.copy(infoKey = null, infoModel = null, infoRuntime = null) }
     }
 
-    private fun loadExtensions() {
-        _uiState.update { it.copy(isRefreshing = true) }
-        val catalog = extensionsManager.getCatalog()
-        val previous = _uiState.value.extensions.associate { it.pkg.id to it.update }
-        val items = catalog.map { pkg ->
-            val installedFile = extensionsManager.getExecutableFile(pkg)
-            val missing = extensionsManager.checkMissingRequirements(pkg)
-            val missingOptional = extensionsManager.checkMissingOptionalRequirements(pkg)
-            ExtensionUiItem(
-                pkg = pkg,
-                isInstalled = installedFile != null,
-                installedPath = installedFile?.absolutePath,
-                status = if (installedFile != null) ExtensionStatus.INSTALLED else ExtensionStatus.NOT_INSTALLED,
-                progress = 0f,
-                missingRequirements = missing,
-                missingOptionalRequirements = missingOptional,
-                update = previous[pkg.id] ?: UpdateUiState.Idle
-            )
-        }
-        _uiState.update { it.copy(extensions = applyActive(items, coordinator.active.value), isRefreshing = false) }
-    }
-
-    private fun installPackage(pkg: LspExtensionPackage) {
-        // Läuft im Coordinator + Vordergrunddienst: der Download überlebt Hintergrund und Screen-Wechsel.
-        coordinator.install(pkg)
-    }
-
-    private fun observeInstalls() {
+    private fun deleteLegacy() {
         viewModelScope.launch {
-            coordinator.active.collect { active ->
-                _uiState.update { state -> state.copy(extensions = applyActive(state.extensions, active)) }
-            }
-        }
-        viewModelScope.launch {
-            coordinator.outcomes.collect { outcome ->
-                val pkg = outcome.pkg
-                outcome.result.fold(
-                    onSuccess = {
-                        loadExtensions()
-                        _uiState.update {
-                            it.copy(snackbarMessage = UiText.of(R.string.extensions_install_success, Res.string(pkg.nameRes)))
-                        }
-                    },
-                    onFailure = { error ->
-                        val errorText = error.localizedMessage ?: Res.string(R.string.common_fehler)
-                        _uiState.update { state ->
-                            state.copy(
-                                extensions = state.extensions.map { item ->
-                                    if (item.pkg.id == pkg.id) item.copy(status = ExtensionStatus.ERROR, progress = 0f) else item
-                                },
-                                snackbarMessage = UiText.of(R.string.extensions_error, errorText)
-                            )
-                        }
-                    }
+            val ok = legacy.delete()
+            _uiState.update {
+                it.copy(
+                    legacyBytes = legacy.sizeBytes(),
+                    snackbarMessage = UiText.of(if (ok) R.string.lsp_legacy_deleted else R.string.filetree_loeschen_fehlgeschlagen)
                 )
             }
         }
     }
 
-    /** Legt laufende Installationen über die aus dem Dateisystem gelesene Liste (z. B. nach „Aktualisieren“). */
-    private fun applyActive(
-        items: List<ExtensionUiItem>,
-        active: Map<String, ExtensionInstallProgress>
-    ): List<ExtensionUiItem> = items.map { item ->
-        val running = active[item.pkg.id]
-        when {
-            running != null -> item.copy(status = running.status, progress = running.progress)
-            item.status.isBusy() -> item.copy(
-                status = if (item.isInstalled) ExtensionStatus.INSTALLED else ExtensionStatus.NOT_INSTALLED,
-                progress = 0f
-            )
-            else -> item
-        }
-    }
-
-    private fun ExtensionStatus.isBusy(): Boolean =
-        this == ExtensionStatus.DOWNLOADING || this == ExtensionStatus.VERIFYING ||
-            this == ExtensionStatus.EXTRACTING || this == ExtensionStatus.INSTALLING_DEPENDENCIES
-
-    private fun uninstallPackage(pkg: LspExtensionPackage) {
-        viewModelScope.launch {
-            extensionsManager.uninstall(pkg).fold(
-                onSuccess = {
-                    _uiState.update { state ->
-                        val updated = state.extensions.map { item ->
-                            if (item.pkg.id == pkg.id) {
-                                item.copy(
-                                    isInstalled = false,
-                                    installedPath = null,
-                                    status = ExtensionStatus.NOT_INSTALLED,
-                                    progress = 0f
-                                )
-                            } else item
-                        }
-                        state.copy(
-                            extensions = updated,
-                            snackbarMessage = UiText.of(R.string.extensions_uninstall_success, Res.string(pkg.nameRes))
-                        )
-                    }
-                },
-                onFailure = { error ->
-                    val errorText = error.localizedMessage ?: Res.string(R.string.common_fehler)
-                    _uiState.update { state ->
-                        state.copy(snackbarMessage = UiText.of(R.string.extensions_error, errorText))
-                    }
-                }
-            )
-        }
+    private companion object {
+        const val INFO_REFRESH_MS = 2_000L
     }
 }

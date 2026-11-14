@@ -1,0 +1,41 @@
+{
+  "id": "com.codeforge.plugin.lemminx.lsp",
+  "name": "LemMinX (XML) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet LemMinX (XML) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download lemminx-uber.jar 0.31.2 von eclipse.org, JDK 17).",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "lemminx",
+        "label": "LemMinX (XML)",
+        "languages": [
+          "xml"
+        ],
+        "command": [
+          "java",
+          "${jvmArg}",
+          "-jar",
+          "${deps}/lemminx/org.eclipse.lemminx-uber.jar"
+        ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "openjdk-17",
+        "check": "java"
+      },
+      {
+        "manager": "download",
+        "name": "lemminx",
+        "url": "https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar",
+        "sha256": "f4fde164e785c635e5f86361dbf4b993bfe2c5f83fdb52891d058b7dfc9bcfc8",
+        "archive": "file",
+        "check": "org.eclipse.lemminx-uber.jar"
+      }
+    ]
+  }
+}

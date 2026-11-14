@@ -2,6 +2,10 @@
 package com.codeforge.feature.settings.extensions
 
 import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.LspServerContribution
+import com.codeforge.core.domain.extension.RequirementPolicy
+import com.codeforge.core.domain.extension.expand
+import com.codeforge.core.domain.model.LspServerDefaults
 import com.codeforge.core.domain.model.LspServerLaunch
 import com.codeforge.core.domain.repository.LspServerResolver
 import com.codeforge.core.domain.repository.LspSettingsRepository
@@ -10,142 +14,52 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Ermittelt den Startbefehl eines Language-Servers aus installierten Erweiterungen und Plugins. */
+/**
+ * Ermittelt den Startbefehl eines Language-Servers aus den aktivierten Plugins (`contributes.lspServers`).
+ * Die Einstellungen je Server (an/aus, JVM-Optionen) gelten über [LspServerDefaults.keyFor].
+ */
 @Singleton
-class LspServerResolverImpl @Inject constructor(
-    private val extensionsManager: ExtensionsManager,
+class LspServerResolverImpl internal constructor(
     private val contributionRepository: ContributionRepository,
-    private val lspSettings: LspSettingsRepository
+    private val lspSettings: LspSettingsRepository,
+    private val home: String,
+    private val depsDir: File,
+    private val baseEnvironment: () -> Map<String, String>
 ) : LspServerResolver {
 
+    @Inject
+    constructor(contributionRepository: ContributionRepository, lspSettings: LspSettingsRepository) : this(
+        contributionRepository,
+        lspSettings,
+        TermuxEnvironment.home,
+        File(TermuxEnvironment.prefix, RequirementPolicy.DEPS_SUBDIR),
+        { TermuxEnvironment.environment() }
+    )
+
     override suspend fun resolve(languageId: String): LspServerLaunch? {
-        val pkg = findPackageForLanguage(languageId)
-        if (pkg == null || !extensionsManager.isInstalled(pkg)) return resolveContributed(languageId)
-
-        // Vom Nutzer abgeschaltet: kein Server für diese Sprache (auch kein Ersatz aus Plugins).
-        if (!lspSettings.of(pkg.id).enabled) return null
-
-        val jvmArgs = lspSettings.jvmOptions(pkg.id)?.toArgs().orEmpty()
-        val env = TermuxEnvironment.environment().let { base ->
-            // Kotlin-LS liest seine JVM-Optionen aus der Umgebung; eigene Werte des Nutzers dort bleiben erhalten.
-            if (pkg.id == "kotlin-language-server" && jvmArgs.isNotEmpty()) {
-                base + ("KOTLIN_LANGUAGE_SERVER_OPTS" to (listOfNotNull(base["KOTLIN_LANGUAGE_SERVER_OPTS"]) + jvmArgs).joinToString(" "))
-            } else base
-        }
-        val extensionDir = extensionsManager.getExtensionDirectory(pkg)
-        val termuxBin = File(TermuxEnvironment.prefix, "bin")
-
-        val command: List<String> = when (pkg.id) {
-            "kotlin-language-server" -> {
-                val exe = extensionsManager.getExecutableFile(pkg) ?: return null
-                listOf(exe.absolutePath)
-            }
-            "jdtls" -> {
-                val exe = extensionsManager.getExecutableFile(pkg) ?: return null
-                val pythonBin = File(termuxBin, "python3").takeIf { it.canExecute() }?.absolutePath
-                    ?: File(termuxBin, "python").takeIf { it.canExecute() }?.absolutePath
-                val jvm = jvmArgs.map { "--jvm-arg=$it" }
-                if (pythonBin != null) {
-                    listOf(pythonBin, exe.absolutePath) + jvm
-                } else {
-                    listOf(exe.absolutePath) + jvm
-                }
-            }
-            "pyright" -> {
-                val nodeBin = File(termuxBin, "node").takeIf { it.canExecute() }?.absolutePath ?: "node"
-                val script = File(extensionDir, "package/langserver.index.js").absolutePath
-                listOf(nodeBin, script, "--stdio")
-            }
-            "vscode-langservers-extracted" -> {
-                val nodeBin = File(termuxBin, "node").takeIf { it.canExecute() }?.absolutePath ?: "node"
-                val relScript = when (languageId.lowercase()) {
-                    "css" -> "package/bin/vscode-css-language-server"
-                    "json" -> "package/bin/vscode-json-language-server"
-                    else -> "package/bin/vscode-html-language-server"
-                }
-                val script = File(extensionDir, relScript).absolutePath
-                listOf(nodeBin, script, "--stdio")
-            }
-            "clangd" -> {
-                val exe = extensionsManager.getExecutableFile(pkg)
-                    ?: File(termuxBin, "clangd").takeIf { it.canExecute() }
-                    ?: return null
-                listOf(exe.absolutePath)
-            }
-            "rust-analyzer" -> {
-                val exe = extensionsManager.getExecutableFile(pkg)
-                    ?: File(termuxBin, "rust-analyzer").takeIf { it.canExecute() }
-                    ?: return null
-                listOf(exe.absolutePath)
-            }
-            "lemminx" -> {
-                val jar = extensionsManager.getExecutableFile(pkg) ?: return null
-                val javaBin = File(termuxBin, "java").takeIf { it.canExecute() }?.absolutePath ?: "java"
-                listOf(javaBin) + jvmArgs + listOf("-jar", jar.absolutePath)
-            }
-            "yaml-language-server" -> {
-                val nodeBin = File(termuxBin, "node").takeIf { it.canExecute() }?.absolutePath ?: "node"
-                val script = File(extensionDir, "package/bin/yaml-language-server").absolutePath
-                listOf(nodeBin, script, "--stdio")
-            }
-            "taplo" -> {
-                val exe = extensionsManager.getExecutableFile(pkg)
-                    ?: File(termuxBin, "taplo").takeIf { it.canExecute() }
-                    ?: return null
-                listOf(exe.absolutePath, "lsp", "stdio")
-            }
-            "bash-language-server" -> {
-                val nodeBin = File(termuxBin, "node").takeIf { it.canExecute() }?.absolutePath ?: "node"
-                val script = File(extensionDir, "package/out/cli.js").absolutePath
-                listOf(nodeBin, script, "start")
-            }
-            else -> {
-                val exe = extensionsManager.getExecutableFile(pkg) ?: return null
-                listOf(exe.absolutePath)
-            }
-        }
-
-        val serverId = when (pkg.id) {
-            "vscode-langservers-extracted" -> when (languageId.lowercase()) {
-                "css" -> "vscode-css-language-server"
-                "json" -> "vscode-json-language-server"
-                else -> "vscode-html-language-server"
-            }
-            else -> pkg.id
-        }
-
-        return LspServerLaunch(command = command, env = env, serverId = serverId)
-    }
-
-    /**
-     * Language Server, den ein aktiviertes Plugin deklarativ beisteuert (`contributes.lspServers`).
-     * Platzhalter `${pluginDir}` und `${home}` im Kommando werden ersetzt; existiert die ausführbare
-     * Datei nicht (und ist es ein absoluter Pfad), gibt es keinen Server.
-     */
-    private fun resolveContributed(languageId: String): LspServerLaunch? {
         val wanted = languageId.lowercase()
-        val hit = contributionRepository.contributions.value.lspServers
-            .firstOrNull { r -> r.item.languages.any { it.equals(wanted, ignoreCase = true) } }
-            ?: return null
-        val command = hit.item.command.map {
-            it.replace("${'$'}{pluginDir}", hit.pluginDir).replace("${'$'}{home}", TermuxEnvironment.home)
+        val candidates = contributionRepository.contributions.value.lspServers
+            .filter { r -> r.item.languages.any { it.equals(wanted, ignoreCase = true) } }
+        // Erster eingeschalteter Server, dessen Dateien vorhanden sind; abgeschaltete werden übersprungen.
+        for (hit in candidates) {
+            val key = LspServerDefaults.keyFor(hit.item.id)
+            if (!lspSettings.of(key).enabled) continue
+            launchOf(hit.item, hit.pluginDir, key)?.let { return it }
         }
-        val exe = command.first()
-        if (exe.startsWith("/") && !File(exe).exists()) return null
-        return LspServerLaunch(command = command, env = TermuxEnvironment.environment(), serverId = hit.item.id)
+        return null
     }
 
-    private fun findPackageForLanguage(languageId: String): LspExtensionPackage? = when (languageId.lowercase()) {
-        "kotlin" -> LspExtensionCatalog.kotlinLanguageServer
-        "java" -> LspExtensionCatalog.jdtls
-        "python" -> LspExtensionCatalog.pyright
-        "html", "css", "json" -> LspExtensionCatalog.htmlCssJson
-        "c", "cpp", "c_cpp" -> LspExtensionCatalog.clangd
-        "rust" -> LspExtensionCatalog.rustAnalyzer
-        "xml" -> LspExtensionCatalog.lemminx
-        "yaml", "yml" -> LspExtensionCatalog.yamlLanguageServer
-        "toml" -> LspExtensionCatalog.taplo
-        "shellscript", "bash", "sh" -> LspExtensionCatalog.bashLanguageServer
-        else -> null
+    private suspend fun launchOf(server: LspServerContribution, pluginDir: String, key: String): LspServerLaunch? {
+        val jvmArgs = if (server.acceptsJvmOptions) lspSettings.jvmOptions(key)?.toArgs().orEmpty() else emptyList()
+        val (command, env) = server.expand(pluginDir, home, depsDir.absolutePath, jvmArgs)
+        // Absolute Pfade (Programm oder Downloads unter ${deps}) müssen existieren, sonst startet der Server nicht.
+        val missing = command.withIndex().any { (i, arg) ->
+            arg.startsWith("/") && (i == 0 || arg.startsWith(depsDir.absolutePath)) && !File(arg).exists()
+        }
+        if (command.isEmpty() || missing) return null
+        val base = baseEnvironment()
+        // Eigene Werte des Nutzers in der Umgebung bleiben erhalten (z. B. KOTLIN_LANGUAGE_SERVER_OPTS).
+        val merged = base + env.filterValues { it.isNotBlank() }.mapValues { (k, v) -> listOfNotNull(base[k], v).joinToString(" ") }
+        return LspServerLaunch(command = command, env = merged, serverId = server.id)
     }
 }

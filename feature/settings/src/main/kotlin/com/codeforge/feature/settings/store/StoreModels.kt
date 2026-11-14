@@ -25,8 +25,6 @@ data class StoreItem(
     val homepageUrl: String?,
     val downloadUrl: String?,
     val sha256: String?,
-    /** Paket-ID eines lokal gelisteten Sprachservers (nur Server-Programm, kein Plugin); sonst `null`. */
-    val extensionId: String? = null,
 ) {
     /**
      * Direkt installierbar: deklarative Kategorie (Theme, Icons, Sprache, Grammatik, Snippets, LSP, Bundle),

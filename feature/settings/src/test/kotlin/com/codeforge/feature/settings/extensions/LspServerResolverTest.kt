@@ -4,9 +4,10 @@ package com.codeforge.feature.settings.extensions
 import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.LspServerContribution
+import com.codeforge.core.domain.extension.PluginManifestParser
 import com.codeforge.core.domain.extension.Resolved
+import com.codeforge.core.domain.model.JvmOptions
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -17,176 +18,102 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 
-internal object NoContributions : ContributionRepository {
-    override val contributions: StateFlow<ActiveContributions> = MutableStateFlow(ActiveContributions.EMPTY)
-}
-
 class LspServerResolverTest {
-
-    @Test
-    fun `resolve nutzt von Plugin beigesteuerten Language Server mit Platzhaltern`() = runBlocking {
-        val manager = ExtensionsManager(
-            baseDir = tempFolder.newFolder("ext_contrib"),
-            downloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
-        )
-        val pluginDir = tempFolder.newFolder("plugin_zig")
-        val exe = File(pluginDir, "zls").apply { writeText("#!/bin/sh") }
-        val repo = object : ContributionRepository {
-            override val contributions = MutableStateFlow(
-                ActiveContributions(
-                    lspServers = listOf(
-                        Resolved("p.zig", pluginDir.absolutePath, LspServerContribution("zls", "ZLS", listOf("zig"), listOf("${'$'}{pluginDir}/zls", "--stdio")))
-                    )
-                )
-            )
-        }
-        val launch = LspServerResolverImpl(manager, repo, FakeLspSettings()).resolve("zig")
-        assertNotNull(launch)
-        assertEquals(listOf(exe.absolutePath, "--stdio"), launch!!.command)
-        assertEquals("zls", launch.serverId)
-        assertNull("andere Sprache", LspServerResolverImpl(manager, repo, FakeLspSettings()).resolve("pascal"))
-    }
-
-    @Test
-    fun `beigesteuerter Server mit fehlender Datei liefert null`() = runBlocking {
-        val manager = ExtensionsManager(
-            baseDir = tempFolder.newFolder("ext_contrib2"),
-            downloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
-        )
-        val repo = object : ContributionRepository {
-            override val contributions = MutableStateFlow(
-                ActiveContributions(
-                    lspServers = listOf(
-                        Resolved("p", "/nonexistent", LspServerContribution("x", "X", listOf("zig"), listOf("${'$'}{pluginDir}/missing")))
-                    )
-                )
-            )
-        }
-        assertNull(LspServerResolverImpl(manager, repo, FakeLspSettings()).resolve("zig"))
-    }
-
 
     @get:Rule
     val tempFolder = TemporaryFolder()
 
-    @Test
-    fun `resolve returns null for unknown language`() = runBlocking {
-        val baseDir = tempFolder.newFolder("extensions_root")
-        val dummyDownloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = dummyDownloader)
-        val resolver = LspServerResolverImpl(manager, NoContributions, FakeLspSettings())
+    private val toolPlugins = File("../../tool-plugins/src")
 
-        val result = resolver.resolve("unknown-language-xyz")
-        assertNull(result)
+    private fun repoOf(vararg servers: Resolved<LspServerContribution>) = object : ContributionRepository {
+        override val contributions = MutableStateFlow(ActiveContributions(lspServers = servers.toList()))
+    }
+
+    // Contributions der echten Plugins aus tool-plugins/src.
+    private fun toolPluginRepo(vararg names: String): ContributionRepository {
+        val entries = names.map { name ->
+            val dir = File(toolPlugins, "com.codeforge.plugin.$name.lsp")
+            PluginManifestParser.parse(File(dir, "plugin.json").readText()).getOrThrow() to dir.absolutePath
+        }
+        return object : ContributionRepository {
+            override val contributions = MutableStateFlow(ActiveContributions.of(entries))
+        }
+    }
+
+    private fun resolver(repo: ContributionRepository, settings: FakeLspSettings = FakeLspSettings(), deps: File = tempFolder.root) =
+        LspServerResolverImpl(repo, settings, "/home", deps) { mapOf("PATH" to "/usr/bin", "KOTLIN_LANGUAGE_SERVER_OPTS" to "-Duser=1") }
+
+    @Test
+    fun pluginServerIsResolved() = runBlocking {
+        val pluginDir = tempFolder.newFolder("plugin_zig")
+        val exe = File(pluginDir, "zls").apply { writeText("#!/bin/sh") }
+        val repo = repoOf(Resolved("p.zig", pluginDir.absolutePath, LspServerContribution("zls", "ZLS", listOf("zig"), listOf("${'$'}{pluginDir}/zls", "--stdio"))))
+        val launch = resolver(repo).resolve("zig")
+        assertNotNull(launch)
+        assertEquals(listOf(exe.absolutePath, "--stdio"), launch!!.command)
+        assertEquals("zls", launch.serverId)
+        assertNull("andere Sprache", resolver(repo).resolve("pascal"))
     }
 
     @Test
-    fun `resolve returns null when extension is not installed`() = runBlocking {
-        val baseDir = tempFolder.newFolder("extensions_root_empty")
-        val dummyDownloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
-        val manager = ExtensionsManager(baseDir = baseDir, downloader = dummyDownloader)
-        val resolver = LspServerResolverImpl(manager, NoContributions, FakeLspSettings())
-
-        assertNull("Uninstalled lemminx should return null", resolver.resolve("xml"))
-        assertNull("Uninstalled yaml-ls should return null", resolver.resolve("yaml"))
-        assertNull("Uninstalled taplo should return null", resolver.resolve("toml"))
-        assertNull("Uninstalled bash-ls should return null", resolver.resolve("shellscript"))
+    fun missingFileGivesNull() = runBlocking {
+        val repo = repoOf(Resolved("p", "/nonexistent", LspServerContribution("x", "X", listOf("zig"), listOf("${'$'}{pluginDir}/missing"))))
+        assertNull(resolver(repo).resolve("zig"))
     }
 
     @Test
-    fun `resolve returns expected launch commands for installed extensions`() = runBlocking {
-        val baseDir = tempFolder.newFolder("extensions_root_installed")
-        val fakeBin = tempFolder.newFolder("fake_termux_bin")
-
-        // 1. Mock lemminx installed
-        val lemminxDir = File(baseDir, "lemminx").apply { mkdirs() }
-        val lemminxJar = File(lemminxDir, "org.eclipse.lemminx-uber.jar").apply {
-            writeText("dummy jar content")
-        }
-
-        // 2. Mock yaml-language-server installed
-        val yamlDir = File(baseDir, "yaml-language-server/package/bin").apply { mkdirs() }
-        val yamlScript = File(yamlDir, "yaml-language-server").apply {
-            writeText("#!/usr/bin/env node")
-        }
-
-        // 3. Mock taplo installed in Termux bin
-        val taploBin = File(fakeBin, "taplo").apply {
-            writeText("#!/bin/sh")
-            setExecutable(true)
-        }
-
-        // 4. Mock bash-language-server installed
-        val bashDir = File(baseDir, "bash-language-server/package/out").apply { mkdirs() }
-        val bashScript = File(bashDir, "cli.js").apply {
-            writeText("console.log('bashls');")
-        }
-
-        val dummyDownloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) }
-        val manager = ExtensionsManager(
-            baseDir = baseDir,
-            downloader = dummyDownloader,
-            customTermuxBinDir = fakeBin
-        )
-        val resolver = LspServerResolverImpl(manager, NoContributions, FakeLspSettings())
-
-        // XML -> lemminx
-        val xmlLaunch = resolver.resolve("xml")
-        assertNotNull("XML launch must not be null", xmlLaunch)
-        assertEquals("lemminx", xmlLaunch?.serverId)
-        assertTrue(xmlLaunch!!.command.last().endsWith("org.eclipse.lemminx-uber.jar"))
-        assertTrue(xmlLaunch.command.contains("-jar"))
-
-        // YAML -> yaml-language-server
-        val yamlLaunch = resolver.resolve("yaml")
-        assertNotNull("YAML launch must not be null", yamlLaunch)
-        assertEquals("yaml-language-server", yamlLaunch?.serverId)
-        assertEquals(listOf("node", yamlScript.absolutePath, "--stdio"), yamlLaunch!!.command)
-
-        val ymlLaunch = resolver.resolve("yml")
-        assertNotNull("YML launch must not be null", ymlLaunch)
-        assertEquals("yaml-language-server", ymlLaunch?.serverId)
-
-        // TOML -> taplo
-        val tomlLaunch = resolver.resolve("toml")
-        assertNotNull("TOML launch must not be null", tomlLaunch)
-        assertEquals("taplo", tomlLaunch?.serverId)
-        assertEquals(listOf(taploBin.absolutePath, "lsp", "stdio"), tomlLaunch!!.command)
-
-        // Shell / Bash -> bash-language-server
-        val bashLaunch = resolver.resolve("bash")
-        assertNotNull("Bash launch must not be null", bashLaunch)
-        assertEquals("bash-language-server", bashLaunch?.serverId)
-        assertEquals(listOf("node", bashScript.absolutePath, "start"), bashLaunch!!.command)
-
-        val shLaunch = resolver.resolve("shellscript")
-        assertNotNull("Shellscript launch must not be null", shLaunch)
-        assertEquals("bash-language-server", shLaunch?.serverId)
+    fun noPluginNoServer() = runBlocking {
+        assertNull(resolver(repoOf()).resolve("kotlin"))
     }
 
     @Test
-    fun `disabled server is not resolved and jvm options reach the command`() = runBlocking {
-        val baseDir = tempFolder.newFolder("extensions_root_settings")
-        File(baseDir, "lemminx").apply { mkdirs() }.resolve("org.eclipse.lemminx-uber.jar").writeText("jar")
-        val manager = ExtensionsManager(
-            baseDir = baseDir,
-            downloader = FileDownloader { _, _, _ -> Result.failure(UnsupportedOperationException()) },
-            customTermuxBinDir = tempFolder.newFolder("bin_settings")
-        )
+    fun lemminxJvmAndSwitch() = runBlocking {
+        val repo = toolPluginRepo("lemminx")
         val settings = FakeLspSettings()
-        val resolver = LspServerResolverImpl(manager, NoContributions, settings)
+        assertNull("Download fehlt", resolver(repo, settings).resolve("xml"))
 
-        // Vorgabe: kleiner Heap und SerialGC vor -jar
-        val default = resolver.resolve("xml")!!.command
+        File(tempFolder.root, "lemminx").apply { mkdirs() }.resolve("org.eclipse.lemminx-uber.jar").writeText("jar")
+        val default = resolver(repo, settings).resolve("xml")!!.command
+        assertEquals("java", default.first())
         assertTrue(default.indexOf("-Xmx256m") in 1 until default.indexOf("-jar"))
 
-        settings.update("lemminx") { it.copy(jvm = com.codeforge.core.domain.model.JvmOptions(xmx = "512m", extraFlags = "-Dx=1 ;bad")) }
-        val custom = resolver.resolve("xml")!!.command
+        settings.update("lemminx") { it.copy(jvm = JvmOptions(xmx = "512m", extraFlags = "-Dx=1 ;bad")) }
+        val custom = resolver(repo, settings).resolve("xml")!!.command
         assertTrue(custom.contains("-Xmx512m"))
         assertTrue(custom.contains("-Dx=1"))
         assertTrue(custom.none { it.contains(";") })
 
         settings.update("lemminx") { it.copy(enabled = false) }
-        assertNull(resolver.resolve("xml"))
+        assertNull(resolver(repo, settings).resolve("xml"))
+    }
+
+    @Test
+    fun jdtlsGetsJvmArgFlags() = runBlocking {
+        File(tempFolder.root, "jdtls/bin").apply { mkdirs() }.resolve("jdtls").writeText("#!/usr/bin/env python3")
+        val command = resolver(toolPluginRepo("jdtls")).resolve("java")!!.command
+        assertEquals("python3", command.first())
+        assertTrue(command.contains("--jvm-arg=-XX:+UseSerialGC"))
+    }
+
+    @Test
+    fun kotlinLsGetsJvmViaEnv() = runBlocking {
+        File(tempFolder.root, "kotlin-language-server/server/bin")
+            .apply { mkdirs() }
+            .resolve("kotlin-language-server")
+            .writeText("#!/bin/sh")
+        val launch = resolver(toolPluginRepo("kotlin-language-server")).resolve("kotlin")!!
+        assertEquals(1, launch.command.size)
+        val opts = launch.env.getValue("KOTLIN_LANGUAGE_SERVER_OPTS")
+        assertTrue(opts, opts.startsWith("-Duser=1 ") && opts.contains("-XX:+UseSerialGC"))
+    }
+
+    @Test
+    fun webServersShareSwitch() = runBlocking {
+        val settings = FakeLspSettings()
+        val repo = toolPluginRepo("web-langservers")
+        assertEquals("vscode-css-language-server", resolver(repo, settings).resolve("css")!!.serverId)
+        settings.update("vscode-langservers-extracted") { it.copy(enabled = false) }
+        assertNull(resolver(repo, settings).resolve("css"))
+        assertNull(resolver(repo, settings).resolve("json"))
     }
 }

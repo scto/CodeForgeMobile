@@ -2178,7 +2178,6 @@
     <string name="store_updated">Katalogstand: %1$s</string>
     <string name="store_server_missing">Plugin installiert, aber das Server-Programm fehlt.</string>
     <string name="store_server_ready">Plugin und Server-Programm installiert.</string>
-    <string name="store_server_present_plugin_missing">Server-Programm ist schon installiert, das Plugin noch nicht.</string>
     <string name="store_server_install">Server installieren</string>
     <string name="store_server_installed">Server installiert: %1$s</string>
     <string name="store_server_install_failed">Server-Installation fehlgeschlagen: %1$s</string>
@@ -2631,4 +2630,14 @@
     <string name="aiset_endpoint_hint_gemini">Hängt /v1beta/models/{Modell}:streamGenerateContent an</string>
     <string name="aiset_endpoint_hint_anthropic">Hängt /v1/messages an</string>
     <string name="aiset_endpoint_hint_openai">Für Ollama oder einen eigenen OpenAI-kompatiblen Server ändern (ohne Schlüssel möglich)</string>
+    <string name="lsp_requirements_installed">Programme installiert. Der Server startet beim nächsten Öffnen einer Datei.</string>
+    <string name="lsp_legacy_title">Alte Sprachserver-Dateien</string>
+    <string name="lsp_legacy_text">Die eingebauten Sprachserver wurden durch Plugins ersetzt. Die alten Dateien (%1$s) werden nicht mehr benutzt.</string>
+    <string name="lsp_legacy_delete">Alte Dateien löschen</string>
+    <string name="lsp_legacy_deleted">Alte Sprachserver-Dateien gelöscht.</string>
+    <string name="lsp_install_requirements">Programme installieren</string>
+    <string name="lsp_missing_programs">Fehlt: %1$s</string>
+    <string name="lsp_from_plugin">Plugin: %1$s</string>
+    <string name="lsp_none_installed">Noch kein Sprachserver installiert. Sprachserver kommen als Plugins aus dem Store (Kategorie „Sprachserver“).</string>
+    <string name="flashbar_install">Installiere %1$s</string>
 </resources>

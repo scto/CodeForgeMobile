@@ -1,0 +1,41 @@
+{
+  "id": "com.codeforge.plugin.kotlin-language-server.lsp",
+  "name": "Kotlin Language Server (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet Kotlin Language Server ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download server.zip 1.3.11 von GitHub, JDK 17).",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "kotlin-language-server",
+        "label": "Kotlin Language Server",
+        "languages": [
+          "kotlin"
+        ],
+        "command": [
+          "${deps}/kotlin-language-server/server/bin/kotlin-language-server"
+        ],
+        "env": {
+          "KOTLIN_LANGUAGE_SERVER_OPTS": "${jvmArgs}"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "openjdk-17",
+        "check": "java"
+      },
+      {
+        "manager": "download",
+        "name": "kotlin-language-server",
+        "url": "https://github.com/fwcd/kotlin-language-server/releases/download/1.3.11/server.zip",
+        "sha256": "c65efea1c09d88ddb1fe227d8e2c5dbb3d8dd568453bccbbf2e20dfa2f004dcd",
+        "archive": "zip",
+        "check": "server/bin/kotlin-language-server"
+      }
+    ]
+  }
+}

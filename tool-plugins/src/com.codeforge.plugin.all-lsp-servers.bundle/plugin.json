@@ -19,7 +19,10 @@
       "com.codeforge.plugin.typescript-language-server.lsp",
       "com.codeforge.plugin.pyright.lsp",
       "com.codeforge.plugin.web-langservers.lsp",
-      "com.codeforge.plugin.yaml-language-server.lsp"
+      "com.codeforge.plugin.yaml-language-server.lsp",
+      "com.codeforge.plugin.kotlin-language-server.lsp",
+      "com.codeforge.plugin.jdtls.lsp",
+      "com.codeforge.plugin.lemminx.lsp"
     ]
   }
 }

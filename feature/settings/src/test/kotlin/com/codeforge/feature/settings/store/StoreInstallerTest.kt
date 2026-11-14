@@ -3,8 +3,8 @@ package com.codeforge.feature.settings.store
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.domain.model.PluginInstallEvent
 import com.codeforge.core.domain.repository.PluginRepository
-import com.codeforge.feature.settings.extensions.FileDownloader
-import com.codeforge.feature.settings.extensions.Sha256Utils
+import com.codeforge.core.common.io.FileDownloader
+import com.codeforge.core.common.io.Sha256Utils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

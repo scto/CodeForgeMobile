@@ -4,15 +4,17 @@ package com.codeforge.feature.settings.store
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.content.Context
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.PluginToolRunner
 import com.codeforge.core.domain.repository.PluginRepository
 import com.codeforge.core.resources.R
-import com.codeforge.feature.settings.extensions.ExtensionInstallCoordinator
-import com.codeforge.feature.settings.extensions.ExtensionsManager
+import com.codeforge.feature.plugins.RequirementInstallCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -24,8 +26,9 @@ class StoreViewModel @Inject constructor(
     private val repository: StoreRepository,
     private val installer: StoreInstaller,
     private val plugins: PluginRepository,
-    private val extensionsManager: ExtensionsManager,
-    private val coordinator: ExtensionInstallCoordinator,
+    private val toolRunner: PluginToolRunner,
+    private val contributions: ContributionRepository,
+    private val requirements: RequirementInstallCoordinator,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -42,69 +45,41 @@ class StoreViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            coordinator.active.collect { active ->
-                _uiState.update { it.copy(installingServerIds = serverItemIds(active.keys)) }
+            requirements.active.collect { active ->
+                _uiState.update { it.copy(installingServerIds = active.keys) }
             }
         }
         viewModelScope.launch {
-            coordinator.outcomes.collect { outcome ->
+            requirements.outcomes.collect { outcome ->
                 refreshServerStates()
-                val text = outcome.result.fold(
-                    onSuccess = { context.getString(R.string.store_server_installed, context.getString(outcome.pkg.nameRes)) },
-                    onFailure = { context.getString(R.string.store_server_install_failed, it.message ?: it.javaClass.simpleName) },
-                )
+                val name = _uiState.value.catalog?.items?.firstOrNull { it.id == outcome.pluginId }?.name ?: outcome.pluginId
+                val text = if (outcome.success) context.getString(R.string.store_server_installed, name)
+                else context.getString(R.string.store_server_install_failed, outcome.tail.lastOrNull().orEmpty())
                 _uiState.update { it.copy(message = text) }
             }
         }
     }
 
-    /** Paket-ID des Server-Programms eines Eintrags (lokaler Server oder LSP-Plugin) oder `null`. */
-    private fun extensionIdOf(item: StoreItem): String? = item.extensionId ?: LspPluginLink.extensionIdFor(item.id)
-
     /**
-     * Ergänzt die Kategorie „Sprachserver“ um lokale Server (Kotlin LS, JDT LS, LemMinX …), zu denen der Katalog kein
-     * Plugin hat; so gibt es für jeden Server genau einen Eintrag mit einem Installieren-Knopf.
+     * Gleicht je installiertem LSP-Plugin ab, ob seine Programme (`requires`) vorhanden sind – das Plugin bindet den
+     * Server nur ein.
      */
-    private fun withLocalServers(catalog: StoreCatalog): StoreCatalog {
-        val covered = catalog.items.mapNotNull { LspPluginLink.extensionIdFor(it.id) }.toSet()
-        val local = extensionsManager.getCatalog().filter { it.id !in covered }.map { pkg ->
-            StoreItem(
-                id = "ext:${pkg.id}", categoryId = StoreItem.LSP_CATEGORY,
-                name = context.getString(pkg.nameRes), summary = context.getString(pkg.descriptionRes),
-                version = pkg.version, author = "", homepageUrl = null, downloadUrl = null, sha256 = null,
-                extensionId = pkg.id,
-            )
-        }
-        if (local.isEmpty()) return catalog
-        val categories = if (catalog.categories.any { it.id == StoreItem.LSP_CATEGORY }) catalog.categories
-        else catalog.categories + StoreCategory(StoreItem.LSP_CATEGORY, context.getString(R.string.store_category_lsp))
-        return catalog.copy(categories = categories, items = catalog.items + local)
-    }
-
-    /** Store-Item-IDs (LSP) zu laufenden Extensions-Installationen. */
-    private fun serverItemIds(activePackageIds: Set<String>): Set<String> =
-        _uiState.value.catalog?.items.orEmpty()
-            .filter { extensionIdOf(it) in activePackageIds }
-            .map { it.id }.toSet()
-
-    /** Gleicht je LSP-Eintrag ab, ob das Server-Programm tatsächlich vorhanden ist (nicht nur das Plugin). */
     private fun refreshServerStates() {
         val items = _uiState.value.catalog?.items.orEmpty()
-        val catalog = extensionsManager.getCatalog().associateBy { it.id }
-        val states = buildMap {
-            for (item in items) {
-                val pkg = extensionIdOf(item)?.let(catalog::get) ?: continue
-                put(item.id, if (extensionsManager.isInstalled(pkg)) LspServerState.PRESENT else LspServerState.MISSING)
+        val installed = _uiState.value.installedPluginIds
+        viewModelScope.launch {
+            val states = buildMap {
+                for (item in items) {
+                    if (item.categoryId != StoreItem.LSP_CATEGORY || item.id !in installed) continue
+                    val missing = toolRunner.missingRequirements(item.id)
+                    put(item.id, if (missing.isEmpty()) LspServerState.PRESENT else LspServerState.MISSING)
+                }
             }
+            _uiState.update { it.copy(serverStates = states) }
         }
-        _uiState.update { it.copy(serverStates = states) }
     }
 
-    private fun installServer(item: StoreItem) {
-        val pkg = extensionIdOf(item)
-            ?.let { id -> extensionsManager.getCatalog().firstOrNull { it.id == id } } ?: return
-        coordinator.install(pkg)
-    }
+    private fun installServer(item: StoreItem) = requirements.install(item.id, item.name)
 
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: StoreUiEvent) {
@@ -119,16 +94,14 @@ class StoreViewModel @Inject constructor(
         }
     }
 
-    /** Entfernt Plugin und Server-Programm; Fehler eines Teils werden gemeldet, der andere Teil wird trotzdem entfernt. */
+    /** Entfernt das Plugin samt seinen Downloads (Programme aus Paketmanagern bleiben, andere Werkzeuge nutzen sie evtl.). */
     private fun uninstall(item: StoreItem) {
         viewModelScope.launch {
             val errors = mutableListOf<String>()
-            if (item.extensionId == null && item.id in _uiState.value.installedPluginIds) {
+            if (item.id in _uiState.value.installedPluginIds) {
+                toolRunner.releaseDownloads(item.id)
                 plugins.uninstall(item.id).onFailure { errors += it.message ?: it.javaClass.simpleName }
             }
-            extensionIdOf(item)?.let { id -> extensionsManager.getCatalog().firstOrNull { it.id == id } }
-                ?.takeIf { extensionsManager.isInstalled(it) }
-                ?.let { pkg -> extensionsManager.uninstall(pkg).onFailure { errors += it.message ?: it.javaClass.simpleName } }
             refreshServerStates()
             _uiState.update {
                 it.copy(message = if (errors.isEmpty()) context.getString(R.string.store_removed, item.name)
@@ -138,8 +111,6 @@ class StoreViewModel @Inject constructor(
     }
 
     private fun install(item: StoreItem) {
-        // Lokaler Server ohne Plugin: nur Server-Programm samt Voraussetzungen.
-        if (item.extensionId != null) { installServer(item); return }
         if (_uiState.value.installingId != null) return
         _uiState.update { it.copy(installingId = item.id, installProgress = null) }
         viewModelScope.launch {
@@ -157,10 +128,14 @@ class StoreViewModel @Inject constructor(
             }
             _uiState.update { it.copy(installingId = null, installProgress = null, message = text) }
             refreshServerStates()
-            // Sprachserver: Plugin installiert → Server-Programm und Voraussetzungen im selben Zug nachholen.
-            if (result is StoreInstallResult.Installed && extensionIdOf(item) != null &&
-                _uiState.value.serverStates[item.id] == LspServerState.MISSING
-            ) installServer(item)
+            // Sprachserver: Plugin installiert → fehlende Programme im selben Zug nachholen (ohne fehlende sofort fertig).
+            if (result is StoreInstallResult.Installed && item.categoryId == StoreItem.LSP_CATEGORY) {
+                // Die Contributions des neuen Plugins kommen asynchron an; vorher wären keine Voraussetzungen bekannt.
+                kotlinx.coroutines.withTimeoutOrNull(CONTRIBUTIONS_TIMEOUT_MS) {
+                    contributions.contributions.first { c -> c.lspServers.any { it.pluginId == item.id } }
+                }
+                installServer(item)
+            }
         }
     }
 
@@ -170,8 +145,8 @@ class StoreViewModel @Inject constructor(
             val lang = Locale.getDefault().language
             _uiState.update { state ->
                 when (val result = repository.load(lang)) {
-                    is StoreLoadResult.Online -> state.copy(isLoading = false, catalog = withLocalServers(result.catalog), cachedAt = null)
-                    is StoreLoadResult.Cached -> state.copy(isLoading = false, catalog = withLocalServers(result.catalog), cachedAt = result.cachedAt)
+                    is StoreLoadResult.Online -> state.copy(isLoading = false, catalog = result.catalog, cachedAt = null)
+                    is StoreLoadResult.Cached -> state.copy(isLoading = false, catalog = result.catalog, cachedAt = result.cachedAt)
                     is StoreLoadResult.Failed -> state.copy(
                         isLoading = false, errorMessage = result.message, unsupportedSchema = result.unsupportedSchema,
                     )
@@ -179,5 +154,9 @@ class StoreViewModel @Inject constructor(
             }
             refreshServerStates()
         }
+    }
+
+    private companion object {
+        const val CONTRIBUTIONS_TIMEOUT_MS = 5_000L
     }
 }

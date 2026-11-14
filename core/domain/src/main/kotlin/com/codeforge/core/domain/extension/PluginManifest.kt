@@ -118,16 +118,54 @@ data class SnippetContribution(
 )
 
 /**
- * Deklarativer Language Server. [command] darf die Platzhalter `${pluginDir}` und `${home}` enthalten.
- * [installScript] ist reserviert und wird **noch nicht ausgeführt**; benötigte Programme müssen vorab installiert sein.
+ * Deklarativer Language Server. [command] und die Werte von [env] dürfen `${pluginDir}`, `${home}` und `${deps}`
+ * (Ordner der Downloads aus `requires`, Manager `download`) enthalten. JVM-Server markieren die Stelle für die
+ * JVM-Optionen des Nutzers: Ein Kommando-Element mit `${jvmArg}` wird je Option wiederholt (z. B. `--jvm-arg=${jvmArg}`),
+ * `${jvmArgs}` in einem [env]-Wert steht für alle Optionen, durch Leerzeichen getrennt.
+ * [installScript] ist reserviert und wird **noch nicht ausgeführt**; benötigte Programme kommen über `requires`.
  */
 data class LspServerContribution(
     val id: String,
     val label: String,
     val languages: List<String>,
     val command: List<String>,
-    val installScript: String? = null
-)
+    val installScript: String? = null,
+    val env: Map<String, String> = emptyMap()
+) {
+    /** Ob der Server JVM-Optionen annimmt (Platzhalter `${jvmArg}`/`${jvmArgs}` in Kommando oder Umgebung). */
+    val acceptsJvmOptions: Boolean
+        get() = (command + env.values).any { it.contains(JVM_ARG) || it.contains(JVM_ARGS) }
+
+    /** Platzhalter für Kommandos und Umgebung. */
+    companion object {
+        const val PLUGIN_DIR = "${'$'}{pluginDir}"
+        const val HOME = "${'$'}{home}"
+        const val DEPS = "${'$'}{deps}"
+        const val JVM_ARG = "${'$'}{jvmArg}"
+        const val JVM_ARGS = "${'$'}{jvmArgs}"
+    }
+}
+
+/**
+ * Setzt die Platzhalter eines [LspServerContribution] ein. Elemente mit `${jvmArg}` werden je JVM-Option wiederholt
+ * (ohne Optionen entfallen sie); jedes Element bleibt ein einzelnes Argument (keine Shell).
+ */
+fun LspServerContribution.expand(
+    pluginDir: String,
+    home: String,
+    deps: String,
+    jvmArgs: List<String>
+): Pair<List<String>, Map<String, String>> {
+    fun paths(v: String) = v.replace(LspServerContribution.PLUGIN_DIR, pluginDir)
+        .replace(LspServerContribution.HOME, home)
+        .replace(LspServerContribution.DEPS, deps)
+    val jvmArg = LspServerContribution.JVM_ARG
+    val cmd = command.flatMap { arg ->
+        if (arg.contains(jvmArg)) jvmArgs.map { paths(arg).replace(jvmArg, it) } else listOf(paths(arg))
+    }
+    val environment = env.mapValues { (_, v) -> paths(v).replace(LspServerContribution.JVM_ARGS, jvmArgs.joinToString(" ")).trim() }
+    return cmd to environment
+}
 
 /**
  * Externer Code-Formatierer: Der Editor startet [command], schreibt den Dateiinhalt auf stdin und ersetzt ihn durch stdout.
@@ -227,9 +265,12 @@ data class McpServerContribution(
     val args: List<String> = emptyList()
 )
 
-/** Paketmanager, über den ein Plugin Voraussetzungen anfordern kann. */
+/**
+ * Paketmanager, über den ein Plugin Voraussetzungen anfordern kann. [DOWNLOAD] lädt eine Datei mit SHA-256-Prüfung
+ * in den gemeinsamen Download-Ordner (`${deps}/<name>`) und entpackt sie dort.
+ */
 enum class RequirementManager(val id: String) {
-    PKG("pkg"), NPM("npm"), PIP("pip");
+    PKG("pkg"), NPM("npm"), PIP("pip"), DOWNLOAD("download");
 
     companion object {
         /** Liefert den Manager zur [id] oder `null`. */
@@ -237,14 +278,31 @@ enum class RequirementManager(val id: String) {
     }
 }
 
+/** Format einer Download-Voraussetzung: [FILE] wird unverändert gespeichert (z. B. ein JAR). */
+enum class DownloadArchive(val id: String) {
+    ZIP("zip"), TAR_GZ("tar.gz"), FILE("file");
+
+    companion object {
+        /** Liefert das Format zur [id] oder `null`. */
+        fun fromId(id: String): DownloadArchive? = entries.firstOrNull { it.id == id }
+    }
+}
+
 /**
  * Benötigtes Programm: [name] ist der Paketname beim [manager]; [check] der Programmname, dessen Vorhandensein geprüft wird
  * (Standard: [name]). Installation erst nach Bestätigung durch den Nutzer.
+ *
+ * Bei [RequirementManager.DOWNLOAD] ist [name] der Zielordner unter `${deps}`, [check] der relative Pfad der Datei,
+ * die danach existieren muss (wird ausführbar gemacht), und [url]/[sha256]/[archive] sind Pflicht. Ändert sich [sha256]
+ * (neue Version im Plugin-Update), gilt die Voraussetzung wieder als fehlend.
  */
 data class RequirementContribution(
     val manager: RequirementManager,
     val name: String,
-    val check: String = name
+    val check: String = name,
+    val url: String? = null,
+    val sha256: String? = null,
+    val archive: DownloadArchive? = null
 )
 
 /** Namen der nicht leeren Contribution-Arten, wie sie in `contributes` heißen. */

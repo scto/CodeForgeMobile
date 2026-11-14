@@ -21,10 +21,12 @@ interface LspSettingsRepository {
     /** Ob [feature] für den Server genutzt werden darf. */
     fun allows(serverId: String, feature: LspFeature): Boolean = of(serverId).allows(feature)
 
-    /** Wirksame JVM-Optionen eines Servers (gespeichert, sonst Vorgabe) oder `null`, wenn kein JVM-Server. */
+    /**
+     * Wirksame JVM-Optionen eines Servers: gespeichert, sonst die Vorgabe der bekannten JVM-Server; `null` ohne beides.
+     * Ob ein Server JVM-Optionen annimmt, entscheidet sein Plugin (Platzhalter `${'$'}{jvmArg}`/`${'$'}{jvmArgs}`).
+     */
     fun jvmOptions(serverId: String): JvmOptions? {
         val key = LspServerDefaults.keyFor(serverId)
-        if (key !in LspServerDefaults.JVM_SERVERS) return null
         return of(key).jvm ?: LspServerDefaults.jvmFor(key)
     }
 }

@@ -54,3 +54,6 @@ sealed interface StoreUiEvent {
     /** Meldung wurde angezeigt. */
     data object MessageShown : StoreUiEvent
 }
+
+/** Zustand der Programme eines installierten LSP-Plugins (`requires`). */
+enum class LspServerState { PRESENT, MISSING }

@@ -17,7 +17,7 @@ class ToolPluginsValidTest {
 
     @Test
     fun `alle Tool-Plugins sind gueltig, deklarativ und haben Publisher codeforge`() {
-        assertEquals(29, manifests.size)
+        assertEquals(32, manifests.size)
         manifests.forEach { (dirName, m) ->
             assertEquals(dirName, m.id)
             assertEquals("codeforge", m.publisher)
@@ -39,7 +39,7 @@ class ToolPluginsValidTest {
         val lsp = manifests.values.flatMap { it.contributes.lspServers }
         val fmt = manifests.values.flatMap { it.contributes.formatters }
         assertEquals(6, fmt.size)
-        assertEquals(14, lsp.size)
+        assertEquals(17, lsp.size)
         (lsp.map { it.command } + fmt.map { it.command }).forEach { c ->
             assertTrue(c.toString(), !c.first().startsWith("/") && !c.first().contains("sh -c"))
         }
@@ -66,11 +66,15 @@ class ToolPluginsValidTest {
     @Test
     fun `Formatierer und Language Server deklarieren erlaubte Voraussetzungen`() {
         val withRequires = manifests.values.filter { it.id.endsWith(".formatter") || it.id.endsWith(".lsp") }
-        assertEquals(18, withRequires.size)
+        assertEquals(21, withRequires.size)
         withRequires.forEach { m ->
             assertTrue(m.id, m.contributes.requires.isNotEmpty())
             m.contributes.requires.forEach { assertTrue("${m.id}: ${it.name}", RequirementPolicy.isStoreAllowed(it)) }
         }
+        // JVM-Server laden ihre Dateien als geprüften Download und nehmen JVM-Optionen an.
+        val jvm = withRequires.filter { m -> m.contributes.requires.any { it.manager == RequirementManager.DOWNLOAD } }
+        assertEquals(setOf("kotlin-language-server", "jdtls", "lemminx"), jvm.flatMap { it.contributes.lspServers }.map { it.id }.toSet())
+        jvm.flatMap { it.contributes.lspServers }.forEach { assertTrue(it.id, it.acceptsJvmOptions) }
     }
 
     @Test
