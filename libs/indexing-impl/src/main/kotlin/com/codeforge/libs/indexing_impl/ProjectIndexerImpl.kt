@@ -4,6 +4,8 @@
  */
 package com.codeforge.libs.indexing_impl
 
+import com.codeforge.core.domain.runtime.IdeProgressKind
+import com.codeforge.core.domain.runtime.IdeProgressRegistry
 import com.codeforge.libs.indexing_api.ProjectIndex
 import com.codeforge.libs.indexing_api.ProjectIndexer
 import java.io.File
@@ -39,8 +41,17 @@ class ProjectIndexerImpl internal constructor(
         if (!forceRefresh) state.value?.let { return Result.success(it) }
         return mutex.withLock {
             if (!forceRefresh) state.value?.let { return@withLock Result.success(it) }
-            runCatching { withContext(ioDispatcher) { ProjectIndexBuilder.build(rootPath) } }
-                .onSuccess { state.value = it }
+            // Sichtbar für die Fortschrittsleiste der App: Projektname, aktuelle Datei, Prozent.
+            val progressId = IdeProgressRegistry.begin(IdeProgressKind.INDEXING, File(rootPath).name)
+            try {
+                runCatching {
+                    withContext(ioDispatcher) {
+                        ProjectIndexBuilder.build(rootPath) { file, percent -> IdeProgressRegistry.update(progressId, file, percent) }
+                    }
+                }.onSuccess { state.value = it }
+            } finally {
+                IdeProgressRegistry.end(progressId)
+            }
         }
     }
 

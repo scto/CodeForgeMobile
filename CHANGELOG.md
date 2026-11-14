@@ -11,6 +11,27 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Einstellungen: Build & Run)
+- Neuer Screen „Build & Run“: Gradle-Optionen für jeden Lauf der IDE (`--quiet/--warn/--info/--debug`, `--stacktrace/--full-stacktrace`, `--offline`, `--no-build-cache`, `--no-daemon`, `--continue`, weitere Argumente), eigene Gradle-Installation statt Wrapper, JVM-Optionen des Gradle-Daemons (`-Dorg.gradle.jvmargs`), Build-Cache löschen, `.gradle` des Projekts löschen, alle Gradle-Caches löschen, Wrapper aktualisieren. Löschaktionen fragen nach, laufen nicht während eines Builds und folgen keinen symbolischen Links.
+- `BuildSettingsRepository` (`build-settings.json`), `GradleMaintenanceRepository`; `ProcessGradleBuildRepository` hängt die Optionen an (Angaben im Aufruf selbst haben Vorrang).
+
+### Hinzugefügt (Sprachserver: Schalter, Fähigkeiten, JVM-Optionen)
+- Sprachserver-Screen: installierte Server als Liste mit Ein/Aus-Schalter und Einstellungs-Sheet (Vervollständigung, Diagnosen, Hover, Signaturhilfe, Code-Aktionen, Formatierung, Inlay-Hinweise); für Kotlin-LS, jdtls und LemMinX zusätzlich JVM-Optionen (Heap, Metaspace, Flags). Abgeschaltete Fähigkeiten beantwortet der Client leer, ohne den Server zu fragen; ein abgeschalteter Server wird nicht gestartet.
+- `LspSettingsRepository` (`lsp-settings.json`). JVM-Flags werden streng geprüft (keine Shell-Sonderzeichen), weil Startskripte sie per Shell auswerten.
+- Store-Karte: „Installieren“ als Knopf über die ganze Breite.
+
+### Geändert (SDK-Manager: neues Layout)
+- Reiter-Chips je Kategorie, Versionsliste mit Auswahl und „Installiert“-Badge, Aktionsleiste unten mit „Installieren“/„Neu installieren“/„Entfernen“ (mit Rückfrage). Der bisherige Auswahldialog entfällt.
+
+### Geändert (Debug-Einstellungen: Log-Dateien)
+- Log-Dateien heißen `cfm-JJJJMMTT-HHMMSS.log` (eine je Sitzung; neue Datei ab 10 MiB). Neu: Höchstzahl der Dateien (Standard 20), abgeschlossene Dateien als `.log.zip` ablegen, Export aller Logs als HTML oder XML nach `<Log-Verzeichnis>/export`.
+
+### Hinzugefügt (Fortschrittsleiste)
+- Leiste über allen Bildschirmen für die Projekt-Indexierung (aktuelle Datei, Prozent) und für jeden Gradle-Lauf (Aufruf und laufender Task). `IdeProgressRegistry` in :core:domain. Der Prozentwert der Indexierung zählt Einträge der obersten Projektebene; Gradle liefert keinen Prozentwert.
+
+### Hinzugefügt (Dependency-Updates: Sammelaktionen)
+- Bei mehreren offenen Updates: „Alle später“ und „Alle ignorieren“ (mit Rückfrage, da dauerhaft).
+
 ### Hinzugefügt (Einstellungen: Projektverzeichnis)
 - Neuer Screen „Projektverzeichnis“ (Einstellungen): zeigt den aktiven Projektstamm samt Herkunft (Standard/eigener Pfad) und Warnung bei fehlendem Speicherzugriff; Pfad frei setzen, den Standard `/storage/emulated/0/CodeForgeMobileProjects` per Knopf übernehmen oder zurücksetzen. Der Pfad wird geprüft (absolut, anlegbar, beschreibbar) und in `files/projects_root.txt` gespeichert.
 - `ProjectsDirectoryProvider` erweitert um `getCustomRoot`, `setCustomRoot`, `defaultRoot`, `externalDefaultRoot`; `getProjectsRoot()` bevorzugt den eigenen Pfad und fällt bei Unbenutzbarkeit auf den Standard zurück. Neu, Import und Klonen nutzen ihn automatisch.

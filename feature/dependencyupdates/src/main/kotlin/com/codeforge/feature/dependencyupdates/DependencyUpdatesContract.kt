@@ -26,6 +26,12 @@ sealed interface DependencyUpdatesEvent {
     /** Beim nächsten Öffnen des Projekts erneut fragen. */
     data object AskLater : DependencyUpdatesEvent
 
+    /** Alle offenen Updates zurückstellen: beim nächsten Öffnen des Projekts erneut fragen. */
+    data object AskLaterAll : DependencyUpdatesEvent
+
+    /** Alle offenen Updates dauerhaft ignorieren (pro Bibliothek + Zielversion). */
+    data object DismissAll : DependencyUpdatesEvent
+
     /** Update anwenden. */
     data object Update : DependencyUpdatesEvent
 }

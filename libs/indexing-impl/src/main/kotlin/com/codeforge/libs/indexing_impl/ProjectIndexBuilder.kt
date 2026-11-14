@@ -17,11 +17,15 @@ import java.io.File
 object ProjectIndexBuilder {
 
     /** Baut den Index für [rootPath]; [nowMillis] ist der Zeitstempel. */
-    fun build(rootPath: String, nowMillis: Long = System.currentTimeMillis()): ProjectIndex {
+    fun build(
+        rootPath: String,
+        nowMillis: Long = System.currentTimeMillis(),
+        onProgress: (relativePath: String, percent: Int) -> Unit = { _, _ -> }
+    ): ProjectIndex {
         val root = File(rootPath).absoluteFile.normalize()
         require(root.isDirectory) { Res.string(R.string.index_projektordner_existiert_nicht, root.path) }
 
-        val files = ProjectScanner.scan(root)
+        val files = ProjectScanner.scan(root, onProgress)
         val byRelative = files.associateBy { it.relativePath }
 
         val settingsIndexed: IndexedFile? = byRelative["settings.gradle.kts"] ?: byRelative["settings.gradle"]

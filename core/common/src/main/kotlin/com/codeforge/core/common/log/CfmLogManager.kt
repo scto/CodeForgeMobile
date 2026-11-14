@@ -14,8 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * - Optional ([captureLogcat]) der komplette Logcat des eigenen Prozesses (`logcat --pid`), damit auch
  *   `Log.w/e` aus Bibliotheken und der App im Log landen. Für den eigenen Prozess ist dafür keine
  *   READ_LOGS-Berechtigung nötig.
- * - Dateien: `cfm-yyyyMMdd.log`, Rotation ab [CfmLogger.MAX_LOG_FILE_SIZE_BYTES], Aufbewahrung
- *   [CfmLogger.RETENTION_DAYS] Tage.
+ * - Dateien: `cfm-yyyyMMdd-HHmmss.log` (eine je Sitzung, neue Datei ab [CfmLogger.MAX_LOG_FILE_SIZE_BYTES]),
+ *   Aufbewahrung [CfmLogger.RETENTION_DAYS] Tage und höchstens die eingestellte Anzahl ([configure]).
+ * - Optional werden abgeschlossene Dateien als `.log.zip` abgelegt.
  *
  * Schreibt nur, solange [setEnabled] `true` ist. Wirft nie.
  */
@@ -24,16 +25,42 @@ class CfmLogManager(
     private val fallbackLogDir: File?,
     private val pidProvider: () -> Int = { android.os.Process.myPid() },
     private val clock: () -> Long = System::currentTimeMillis,
-    private val captureLogcat: Boolean = true
+    private val captureLogcat: Boolean = true,
+    /** Führt Aufräumarbeiten (Zippen, Löschen) aus; Standard: eigener Daemon-Thread, in Tests direkt. */
+    private val background: (() -> Unit) -> Unit = { work -> Thread(work, "cfm-log-housekeeping").apply { isDaemon = true }.start() }
 ) : CfmLogger {
 
     private val enabled = AtomicBoolean(false)
     private val lock = Any()
-    private val fileDate = SimpleDateFormat("yyyyMMdd", Locale.US)
+    private val fileDate = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US)
     private val lineDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
 
     @Volatile
     private var logcatProcess: Process? = null
+
+    @Volatile
+    private var maxFiles = CfmLogger.DEFAULT_MAX_LOG_FILES
+
+    @Volatile
+    private var compressClosed = false
+
+    /** Datei der laufenden Sitzung (unter [lock]). */
+    private var activeFile: File? = null
+
+    /** Höchstzahl der Log-Dateien. */
+    val maxLogFiles: Int get() = maxFiles
+
+    /** Ob abgeschlossene Dateien gezippt werden. */
+    val compressesClosedFiles: Boolean get() = compressClosed
+
+    /**
+     * Setzt Höchstzahl ([maxFiles] ≤ 0 = Standard) und Zippen abgeschlossener Dateien und räumt sofort auf.
+     */
+    fun configure(maxFiles: Int, compressClosedFiles: Boolean) {
+        this.maxFiles = (if (maxFiles <= 0) CfmLogger.DEFAULT_MAX_LOG_FILES else maxFiles).coerceIn(1, CfmLogger.MAX_LOG_FILES_LIMIT)
+        compressClosed = compressClosedFiles
+        background { housekeeping() }
+    }
 
     /** Ob die Protokollierung aktiv ist. */
     val isEnabled: Boolean get() = enabled.get()
@@ -42,7 +69,7 @@ class CfmLogManager(
     fun setEnabled(value: Boolean) {
         val was = enabled.getAndSet(value)
         if (value && !was) {
-            prune()
+            synchronized(lock) { activeFile = null } // neue Sitzung = neue Datei mit Datum und Uhrzeit
             append("=== Protokollierung gestartet ===")
             if (captureLogcat) startLogcatCapture()
         } else if (!value && was) {
@@ -88,28 +115,70 @@ class CfmLogManager(
         append(sb.toString())
     }
 
-    /** Hängt eine Zeile an die Tagesdatei an und rotiert bei Überschreiten der Maximalgröße. */
+    /** Hängt eine Zeile an die Sitzungsdatei an; ab der Maximalgröße beginnt eine neue Datei. */
     internal fun append(line: String) {
         try {
+            var rotated = false
             synchronized(lock) {
                 val dir = activeLogDir() ?: return
-                val file = File(dir, "cfm-${fileDate.format(Date(clock()))}.log")
-                if (file.exists() && file.length() >= CfmLogger.MAX_LOG_FILE_SIZE_BYTES) {
-                    val rotated = File(dir, file.name + ".1")
-                    if (rotated.exists()) rotated.delete()
-                    file.renameTo(rotated)
+                var file = activeFile?.takeIf { it.parentFile == dir && it.exists() }
+                if (file == null || file.length() >= CfmLogger.MAX_LOG_FILE_SIZE_BYTES) {
+                    file = newLogFile(dir)
+                    activeFile = file
+                    rotated = true
                 }
                 file.appendText(line + "\n")
             }
+            if (rotated) background { housekeeping() }
         } catch (_: IOException) {
         } catch (_: SecurityException) {
         }
     }
 
-    /** Löscht Protokolle, die älter als die Aufbewahrungsfrist sind. */
+    /** `cfm-<Datum>-<Uhrzeit>.log`; bei Namensgleichheit (gleiche Sekunde) mit laufender Nummer. */
+    private fun newLogFile(dir: File): File {
+        val stamp = fileDate.format(Date(clock()))
+        var file = File(dir, "cfm-$stamp.log")
+        var n = 2
+        while (file.exists() || File(dir, file.name + ".zip").exists()) {
+            file = File(dir, "cfm-$stamp-$n.log")
+            n++
+        }
+        return file
+    }
+
+    /** Zippt abgeschlossene Dateien (falls eingeschaltet) und löscht nach Alter und Höchstzahl. */
+    internal fun housekeeping() {
+        if (compressClosed) compressClosedFiles()
+        prune()
+    }
+
+    /** Legt jede abgeschlossene `.log`-Datei als `.log.zip` ab (Änderungszeit bleibt erhalten). */
+    internal fun compressClosedFiles() {
+        val active = synchronized(lock) { activeFile }
+        listLogFiles().filter { it.name.endsWith(".log") && it != active }.forEach { log ->
+            runCatching {
+                val zip = File(log.parentFile, log.name + ".zip")
+                java.util.zip.ZipOutputStream(zip.outputStream().buffered()).use { out ->
+                    out.putNextEntry(java.util.zip.ZipEntry(log.name).apply { time = log.lastModified() })
+                    log.inputStream().use { it.copyTo(out) }
+                    out.closeEntry()
+                }
+                zip.setLastModified(log.lastModified())
+                log.delete()
+            }
+        }
+    }
+
+    /** Löscht Protokolle, die älter als die Aufbewahrungsfrist sind oder über der Höchstzahl liegen (älteste zuerst). */
     internal fun prune() {
         val limit = clock() - CfmLogger.RETENTION_DAYS * 24L * 60 * 60 * 1000
-        runCatching { listLogFiles().filter { it.lastModified() < limit }.forEach { it.delete() } }
+        runCatching {
+            val active = synchronized(lock) { activeFile }
+            listLogFiles().filter { it.lastModified() < limit && it != active }.forEach { it.delete() }
+            // listLogFiles() ist neueste-zuerst sortiert; die laufende Datei bleibt immer.
+            listLogFiles().filter { it != active }.drop((maxFiles - if (active != null) 1 else 0).coerceAtLeast(0)).forEach { it.delete() }
+        }
     }
 
     private fun startLogcatCapture() {

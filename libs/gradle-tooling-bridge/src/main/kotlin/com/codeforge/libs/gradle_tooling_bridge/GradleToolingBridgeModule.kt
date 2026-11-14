@@ -19,4 +19,11 @@ abstract class GradleToolingBridgeModule {
     abstract fun bindGradleBuildRepository(
         impl: ProcessGradleBuildRepository
     ): GradleBuildRepository
+
+    /** Bindet die Gradle-Aufräumarbeiten. */
+    @Binds
+    @Singleton
+    abstract fun bindGradleMaintenanceRepository(
+        impl: GradleMaintenanceRepositoryImpl
+    ): com.codeforge.core.domain.repository.GradleMaintenanceRepository
 }

@@ -62,4 +62,24 @@ class ProjectIndexBuilderTest {
         assertEquals(IndexedFileKind.KOTLIN_SOURCE, ProjectScanner.classify("a/B.kt"))
         assertEquals(IndexedFileKind.OTHER, ProjectScanner.classify("pom.xml"))
     }
+
+    @Test
+    fun scanReportsProgressUpToHundredPercent() {
+        val root = java.nio.file.Files.createTempDirectory("scan").toFile()
+        try {
+            java.io.File(root, "app/src").mkdirs()
+            repeat(30) { java.io.File(root, "app/src/F$it.kt").writeText("") }
+            java.io.File(root, "settings.gradle.kts").writeText("")
+            java.io.File(root, "build").apply { mkdirs() }.resolve("ignored.bin").writeText("")
+            val seen = ArrayList<Pair<String, Int>>()
+            val files = ProjectScanner.scan(root) { file, percent -> seen += file to percent }
+            org.junit.Assert.assertEquals(31, files.size)
+            org.junit.Assert.assertEquals(100, seen.last().second)
+            org.junit.Assert.assertTrue(seen.map { it.second }.zipWithNext().all { (a, b) -> a <= b })
+            org.junit.Assert.assertTrue(seen.any { it.first.endsWith(".kt") })
+            org.junit.Assert.assertTrue(seen.none { it.first.contains("ignored") })
+        } finally {
+            root.deleteRecursively()
+        }
+    }
 }

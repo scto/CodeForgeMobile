@@ -38,6 +38,9 @@ class DependencyUpdatesViewModel @Inject constructor(
     val uiState: StateFlow<DependencyUpdatesUiState> = _uiState.asStateFlow()
 
     private var startedRoot: String? = null
+
+    /** Alle noch nicht entschiedenen Updates (das erste steht im Dialog). */
+    private var queue: List<DependencyUpdate> = emptyList()
     private var observeJob: Job? = null
 
     /** Schlüssel erfolgreich angewendeter Updates — verhindert kurzes „Wiederauftauchen“ bis zur Neuprüfung. */
@@ -65,6 +68,8 @@ class DependencyUpdatesViewModel @Inject constructor(
         when (event) {
             DependencyUpdatesEvent.Dismiss -> viewModelScope.launch { repository.dismiss(root, update) }
             DependencyUpdatesEvent.AskLater -> repository.snooze(root, update)
+            DependencyUpdatesEvent.AskLaterAll -> queue.forEach { repository.snooze(root, it) }
+            DependencyUpdatesEvent.DismissAll -> queue.let { all -> viewModelScope.launch { all.forEach { repository.dismiss(root, it) } } }
             DependencyUpdatesEvent.Update -> apply(root, update)
         }
     }
@@ -98,6 +103,7 @@ class DependencyUpdatesViewModel @Inject constructor(
     }
 
     private fun publish(queue: List<DependencyUpdate>) {
+        this.queue = queue
         _uiState.update {
             it.copy(
                 current = queue.firstOrNull(),

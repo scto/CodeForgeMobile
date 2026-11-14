@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -150,6 +151,37 @@ fun DependencyUpdateDialog(
                         enabled = !isApplying,
                         onClick = { onEvent(DependencyUpdatesEvent.AskLater) }
                     ) { Text(stringRes(R.string.dependencyupdates_ask_later), maxLines = 1) }
+                }
+                if (remaining > 0) {
+                    // Sammelaktionen für alle offenen Updates. „Alle ignorieren“ ist dauerhaft und fragt daher einmal nach.
+                    var confirmDismissAll by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+                    androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        TextButton(
+                            modifier = Modifier.weight(1f),
+                            enabled = !isApplying,
+                            onClick = {
+                                if (confirmDismissAll) onEvent(DependencyUpdatesEvent.DismissAll) else confirmDismissAll = true
+                            }
+                        ) {
+                            Text(
+                                stringRes(
+                                    if (confirmDismissAll) R.string.dependencyupdates_dismiss_all_confirm else R.string.dependencyupdates_dismiss_all,
+                                    remaining + 1
+                                ),
+                                color = if (confirmDismissAll) MaterialTheme.colorScheme.error else androidx.compose.ui.graphics.Color.Unspecified,
+                                maxLines = 2
+                            )
+                        }
+                        TextButton(
+                            modifier = Modifier.weight(1f),
+                            enabled = !isApplying,
+                            onClick = { onEvent(DependencyUpdatesEvent.AskLaterAll) }
+                        ) { Text(stringRes(R.string.dependencyupdates_ask_later_all, remaining + 1), maxLines = 2) }
+                    }
                 }
             }
         }

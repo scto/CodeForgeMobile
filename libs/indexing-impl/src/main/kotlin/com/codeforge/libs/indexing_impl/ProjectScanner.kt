@@ -19,31 +19,48 @@ object ProjectScanner {
 
     const val MAX_FILES = 50_000
 
-    /** Listet alle Dateien unterhalb von [root] (ohne Build- und VCS-Ordner). */
-    fun scan(root: File): List<IndexedFile> {
+    /** Jede wievielte Datei an die Fortschrittsanzeige gemeldet wird. */
+    const val PROGRESS_EVERY = 25
+
+    /**
+     * Listet alle Dateien unterhalb von [root] (ohne Build- und VCS-Ordner).
+     *
+     * @param onProgress meldet die zuletzt gelesene Datei (relativer Pfad) und den Fortschritt in Prozent. Der
+     *   Prozentwert zählt die erledigten Einträge der obersten Ebene, weil die Gesamtzahl der Dateien vorab unbekannt ist.
+     */
+    fun scan(root: File, onProgress: (relativePath: String, percent: Int) -> Unit = { _, _ -> }): List<IndexedFile> {
         val result = ArrayList<IndexedFile>()
-        walk(root, root, result)
+        val top = root.listFiles().orEmpty()
+        top.forEachIndexed { index, child ->
+            val percent = index * 100 / top.size
+            visit(root, child, result) { relative -> onProgress(relative, percent) }
+        }
+        if (top.isNotEmpty()) onProgress("", 100)
         return result.sortedBy { it.relativePath }
     }
 
-    private fun walk(root: File, dir: File, out: MutableList<IndexedFile>) {
+    private fun walk(root: File, dir: File, out: MutableList<IndexedFile>, onFile: (String) -> Unit) {
         if (out.size >= MAX_FILES) return
         val children = dir.listFiles() ?: return
-        for (child in children) {
-            if (out.size >= MAX_FILES) return
-            if (Files.isSymbolicLink(child.toPath())) continue // Zyklen vermeiden
-            if (child.isDirectory) {
-                if (child.name !in IGNORED_DIRECTORIES) walk(root, child, out)
-            } else if (child.isFile) {
-                val relative = child.relativeTo(root).path.replace(File.separatorChar, '/')
-                out += IndexedFile(
-                    path = child.path,
-                    relativePath = relative,
-                    sizeBytes = child.length(),
-                    lastModified = child.lastModified(),
-                    kind = classify(relative)
-                )
-            }
+        for (child in children) visit(root, child, out, onFile)
+    }
+
+    private fun visit(root: File, child: File, out: MutableList<IndexedFile>, onFile: (String) -> Unit) {
+        if (out.size >= MAX_FILES) return
+        if (Files.isSymbolicLink(child.toPath())) return // Zyklen vermeiden
+        if (child.isDirectory) {
+            if (child.name !in IGNORED_DIRECTORIES) walk(root, child, out, onFile)
+        } else if (child.isFile) {
+            val relative = child.relativeTo(root).path.replace(File.separatorChar, '/')
+            out += IndexedFile(
+                path = child.path,
+                relativePath = relative,
+                sizeBytes = child.length(),
+                lastModified = child.lastModified(),
+                kind = classify(relative)
+            )
+            // Nicht jede Datei melden: die Anzeige braucht keine 50.000 Aktualisierungen.
+            if (out.size % PROGRESS_EVERY == 1) onFile(relative)
         }
     }
 

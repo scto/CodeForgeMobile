@@ -70,10 +70,14 @@ class MainActivity : ComponentActivity() {
             }
 
             CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme, iconTheme = iconTheme, grammars = activeContributions.grammars) {
-                CodeForgeNavHost(
-                    startOnboarding = !settings.onboardingCompleted,
-                    useCompactTerminal = settings.terminal.useCompactTerminal
-                )
+                androidx.compose.foundation.layout.Box {
+                    CodeForgeNavHost(
+                        startOnboarding = !settings.onboardingCompleted,
+                        useCompactTerminal = settings.terminal.useCompactTerminal
+                    )
+                    // Laufende Indexierung und Gradle-Läufe, sichtbar auf jedem Bildschirm.
+                    IdeProgressFlashbar(modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopCenter))
+                }
             }
         }
     }

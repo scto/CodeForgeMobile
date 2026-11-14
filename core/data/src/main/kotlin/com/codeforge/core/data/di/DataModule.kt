@@ -61,6 +61,13 @@ object DataStoreProviderModule {
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
+    /** Bindet: Gradle-Einstellungen („Build & Run“). */
+    @Binds
+    @Singleton
+    abstract fun bindBuildSettingsRepository(
+        impl: com.codeforge.core.data.repository.BuildSettingsRepositoryImpl
+    ): com.codeforge.core.domain.repository.BuildSettingsRepository
+
     /** Bindet: Einstellungen der Language-Server. */
     @Binds
     @Singleton

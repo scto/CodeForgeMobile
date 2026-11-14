@@ -16,6 +16,12 @@ interface CfmLogger {
         const val RETENTION_DAYS = 14
         const val MAX_LOG_FILE_SIZE_BYTES = 10 * 1024 * 1024L // 10 MiB
         const val MAX_CRASH_LOGS = 20
+        /** Standard-Höchstzahl an Log-Dateien. */
+        const val DEFAULT_MAX_LOG_FILES = 20
+        /** Obergrenze der einstellbaren Höchstzahl. */
+        const val MAX_LOG_FILES_LIMIT = 200
+        /** Unterordner für exportierte Protokolle (HTML/XML). */
+        const val EXPORT_DIR_NAME = "export"
     }
 
     /** Debug-Meldung. */

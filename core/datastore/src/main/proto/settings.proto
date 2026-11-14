@@ -124,4 +124,8 @@ message DebugConfig {
   // Standard (false) = Protokollierung AN. Negiert gespeichert, damit der Proto-Default (false)
   // ohne Migration "an" bedeutet.
   bool log_disabled = 1;
+  // Höchstzahl Log-Dateien; 0 = Standard (20).
+  int32 log_max_files = 2;
+  // Abgeschlossene Log-Dateien als .zip ablegen.
+  bool log_compress = 3;
 }

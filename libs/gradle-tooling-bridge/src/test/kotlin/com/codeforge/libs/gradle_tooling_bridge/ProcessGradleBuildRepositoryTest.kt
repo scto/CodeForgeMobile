@@ -189,4 +189,25 @@ class ProcessGradleBuildRepositoryTest {
         assertEquals("storepass123", capturedEnv?.get("CODEFORGE_KEYSTORE_PASSWORD"))
         assertEquals("keypass123", capturedEnv?.get("CODEFORGE_KEY_PASSWORD"))
     }
+
+    @Test
+    fun globalGradleSettingsAreAppendedAndCustomGradleReplacesWrapper() = runBlocking {
+        val gradleHome = tempFolder.newFolder("gradle-dist").apply { File(this, "bin").mkdirs(); File(this, "bin/gradle").writeText("#!/bin/sh") }
+        val settings = com.codeforge.core.domain.model.GradleRunSettings(
+            logLevel = com.codeforge.core.domain.model.GradleLogLevel.INFO,
+            offline = true,
+            customGradleHome = gradleHome.path
+        )
+        val repo = ProcessGradleBuildRepository(fakeContext, parser) { settings }
+        repo.connect(projectDir.absolutePath) // kein gradlew im Projekt: die eigene Installation genügt
+        var seen: List<String> = emptyList()
+        repo.processLauncher = { cmd, _, _ -> seen = cmd; FakeProcess(0, listOf("> Task :app:assemble", "BUILD SUCCESSFUL")) }
+
+        val events = repo.runTask("assembleDebug --quiet").toList()
+
+        assertTrue(events.any { it is BuildEvent.BuildFinished && it.success })
+        assertTrue(seen[1].endsWith("gradle-dist/bin/gradle"))
+        assertEquals(listOf("assembleDebug", "--quiet", "--offline", "--console=plain"), seen.drop(2))
+        assertTrue(com.codeforge.core.domain.runtime.IdeProgressRegistry.items.value.none { it.title == "assembleDebug --quiet" })
+    }
 }

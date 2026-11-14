@@ -15,6 +15,7 @@ android {
 
 dependencies {
     implementation(project(":core:resources"))
+    implementation(project(":core:domain"))
     api(project(":libs:indexing-api"))
     implementation(libs.kotlinx.coroutines.core)
 

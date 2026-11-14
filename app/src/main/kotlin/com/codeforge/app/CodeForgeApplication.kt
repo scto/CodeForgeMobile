@@ -45,6 +45,12 @@ class CodeForgeApplication : Application() {
                 .distinctUntilChanged()
                 .collect { logManager.setEnabled(it) }
         }
+        appScope.launch {
+            settingsRepository.appSettings
+                .map { it.debug.logMaxFiles to it.debug.logCompress }
+                .distinctUntilChanged()
+                .collect { (maxFiles, compress) -> logManager.configure(maxFiles, compress) }
+        }
     }
 
     private fun installCrashHandler() {

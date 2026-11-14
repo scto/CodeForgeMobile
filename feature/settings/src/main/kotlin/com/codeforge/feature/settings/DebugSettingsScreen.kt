@@ -58,6 +58,8 @@ internal fun DebugSettingsScreen(
     val message = uiState.lastMessage?.let { msg ->
         when (msg) {
             is DebugMessage.LogsCleared -> stringRes(R.string.debug_logs_geloescht, msg.count)
+            is DebugMessage.Exported -> stringRes(R.string.debug_export_done, msg.count, msg.directory)
+            is DebugMessage.ExportFailed -> stringRes(R.string.debug_export_failed, msg.reason)
         }
     }
     LaunchedEffect(message) {
@@ -118,6 +120,65 @@ internal fun DebugSettingsScreen(
                         enabled = uiState.logFileCount > 0
                     ) {
                         Text(stringRes(R.string.debug_logs_loeschen))
+                    }
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(stringRes(R.string.debug_files_title), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        stringRes(R.string.debug_files_naming),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringRes(R.string.debug_max_files), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                        OutlinedButton(
+                            onClick = { onEvent(DebugSettingsUiEvent.MaxLogFilesChanged(uiState.maxLogFiles - 1)) },
+                            enabled = uiState.maxLogFiles > 1
+                        ) { Text("−") }
+                        Text(uiState.maxLogFiles.toString(), style = MaterialTheme.typography.titleMedium)
+                        OutlinedButton(
+                            onClick = { onEvent(DebugSettingsUiEvent.MaxLogFilesChanged(uiState.maxLogFiles + 1)) },
+                            enabled = uiState.maxLogFiles < com.codeforge.core.common.log.CfmLogger.MAX_LOG_FILES_LIMIT
+                        ) { Text("+") }
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(stringRes(R.string.debug_compress), style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                stringRes(R.string.debug_compress_sum),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = uiState.compressLogs,
+                            onCheckedChange = { onEvent(DebugSettingsUiEvent.CompressLogsChanged(it)) }
+                        )
+                    }
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringRes(R.string.debug_export_title), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        stringRes(R.string.debug_export_sum),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val canExport = uiState.logFileCount > 0 && !uiState.isExporting
+                        OutlinedButton(
+                            onClick = { onEvent(DebugSettingsUiEvent.ExportLogs(com.codeforge.core.common.log.CfmLogExporter.Format.HTML)) },
+                            enabled = canExport
+                        ) { Text(stringRes(R.string.debug_export_html)) }
+                        OutlinedButton(
+                            onClick = { onEvent(DebugSettingsUiEvent.ExportLogs(com.codeforge.core.common.log.CfmLogExporter.Format.XML)) },
+                            enabled = canExport
+                        ) { Text(stringRes(R.string.debug_export_xml)) }
                     }
                 }
             }

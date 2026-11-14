@@ -12,7 +12,11 @@ import com.codeforge.core.domain.model.ProblemSeverity
 import com.codeforge.core.domain.parser.GradleOutputParser
 import com.codeforge.core.domain.repository.BuildEvent
 import com.codeforge.core.domain.repository.GradleBuildRepository
+import com.codeforge.core.domain.model.GradleRunSettings
+import com.codeforge.core.domain.repository.BuildSettingsRepository
 import com.codeforge.core.domain.runtime.IdeActivityRegistry
+import com.codeforge.core.domain.runtime.IdeProgressKind
+import com.codeforge.core.domain.runtime.IdeProgressRegistry
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.libs.terminal_engine.TermuxEnvironment
@@ -38,10 +42,21 @@ import kotlinx.coroutines.withContext
  * Nutzt [TermuxEnvironment.environment()] für PATH, JAVA_HOME und Gradle-Umgebung.
  */
 @Singleton
-class ProcessGradleBuildRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val outputParser: GradleOutputParser
+class ProcessGradleBuildRepository(
+    private val context: Context,
+    private val outputParser: GradleOutputParser,
+    /** Globale Gradle-Einstellungen („Build & Run“), bei jedem Lauf frisch gelesen. */
+    private val runSettings: () -> GradleRunSettings
 ) : GradleBuildRepository {
+
+    @Inject constructor(
+        @ApplicationContext context: Context,
+        outputParser: GradleOutputParser,
+        buildSettings: BuildSettingsRepository
+    ) : this(context, outputParser, { buildSettings.settings.value })
+
+    /** Ohne Einstellungen (Tests). */
+    constructor(context: Context, outputParser: GradleOutputParser) : this(context, outputParser, { GradleRunSettings() })
 
     private val _currentSession = MutableStateFlow<BuildSession?>(null)
     override val currentSession: StateFlow<BuildSession?> = _currentSession.asStateFlow()
@@ -95,7 +110,11 @@ class ProcessGradleBuildRepository @Inject constructor(
         }
 
         val rootDir = File(root)
-        val gradlewFile = File(rootDir, "gradlew")
+        val settings = runSettings()
+        // Eigene Gradle-Installation (falls gesetzt und vorhanden) statt des Wrappers.
+        val customGradle = settings.customGradleHome.trim().takeIf { it.isNotEmpty() }
+            ?.let { File(it, "bin/gradle") }?.takeIf { it.isFile }
+        val gradlewFile = customGradle ?: File(rootDir, "gradlew")
         if (!gradlewFile.exists()) {
             isBuilding.set(false)
             emit(BuildEvent.BuildFailed(Res.string(R.string.build_gradlew_nicht_gefunden, root)))
@@ -104,7 +123,7 @@ class ProcessGradleBuildRepository @Inject constructor(
 
         // Auf externem Speicher (/storage/emulated/0) gibt es kein Exec-Bit (noexec/FUSE):
         // gradlew wird daher immer über die Shell gestartet, nicht direkt (sonst error=13).
-        if (!gradlewFile.canExecute()) {
+        if (customGradle == null && !gradlewFile.canExecute()) {
             gradlewFile.setExecutable(true, false)
         }
 
@@ -121,6 +140,7 @@ class ProcessGradleBuildRepository @Inject constructor(
 
         // Benachrichtigung (Wakelock/Beenden/Terminals) und Vordergrunddienst kommen aus der App über die Registry.
         val activityId = IdeActivityRegistry.begin("Build $taskName")
+        val progressId = IdeProgressRegistry.begin(IdeProgressKind.GRADLE, taskName)
         BuildForegroundService.onCancelRequested = {
             isCancelled.set(true)
             activeProcess?.destroyForcibly()
@@ -134,6 +154,7 @@ class ProcessGradleBuildRepository @Inject constructor(
             add(TermuxEnvironment.bashPath)
             add(gradlewFile.absolutePath)
             addAll(taskArgs)
+            addAll(settings.toArgs(present = taskArgs))
             add("--console=plain")
         }
 
@@ -150,6 +171,8 @@ class ProcessGradleBuildRepository @Inject constructor(
 
             while (line != null) {
                 outputBuffer.add(line)
+                // „> Task :app:compileDebugKotlin UP-TO-DATE“ → laufender Task für die Fortschrittsleiste
+                if (line.startsWith("> Task ")) IdeProgressRegistry.update(progressId, line.removePrefix("> Task ").substringBefore(' '))
                 emit(BuildEvent.Output(line))
 
                 val problems = parserSession.feedLine(line)
@@ -226,6 +249,7 @@ class ProcessGradleBuildRepository @Inject constructor(
             emit(BuildEvent.BuildFailed(e.message ?: "Build failed with exception"))
         } finally {
             IdeActivityRegistry.end(activityId)
+            IdeProgressRegistry.end(progressId)
             BuildForegroundService.onCancelRequested = null
             activeProcess = null
             isBuilding.set(false)
