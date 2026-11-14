@@ -33,13 +33,41 @@ open class ProjectsDirectoryProviderImpl @Inject constructor(
         }
     }
 
-    override fun getProjectsRoot(): File {
-        val root = if (isExternalStorageUsable()) {
-            File(Environment.getExternalStorageDirectory(), ProjectsDirectoryProvider.PROJECTS_DIR_NAME)
-        } else {
-            // Rückfall ohne Berechtigung: app-spezifischer externer Speicher oder interner Speicher
-            context.getExternalFilesDir("projects") ?: File(context.filesDir, "projects")
+    /** Datei mit dem Nutzer-Override (einfache Textdatei, damit der Zugriff synchron und ohne DataStore bleibt). */
+    private val overrideFile: File get() = File(context.filesDir, OVERRIDE_FILE_NAME)
+
+    override fun getCustomRoot(): String? = runCatching {
+        overrideFile.takeIf { it.isFile }?.readText()?.trim()?.takeIf { it.isNotEmpty() }
+    }.getOrNull()
+
+    override fun setCustomRoot(path: String?): Result<File> = runCatching {
+        val raw = path?.trim().orEmpty()
+        if (raw.isEmpty()) {
+            overrideFile.delete()
+            return@runCatching getProjectsRoot()
         }
+        val dir = File(raw)
+        require(dir.isAbsolute) { "Pfad muss absolut sein: $raw" }
+        val canonical = dir.canonicalFile
+        check(canonical.isDirectory || canonical.mkdirs()) { "Ordner kann nicht angelegt werden: $raw" }
+        check(canonical.canWrite()) { "Ordner ist nicht beschreibbar: $raw" }
+        overrideFile.writeText(canonical.path)
+        canonical
+    }
+
+    override fun defaultRoot(): File = if (isExternalStorageUsable()) {
+        externalDefaultRoot()
+    } else {
+        // Rückfall ohne Berechtigung: app-spezifischer externer Speicher oder interner Speicher
+        context.getExternalFilesDir("projects") ?: File(context.filesDir, "projects")
+    }
+
+    override fun externalDefaultRoot(): File =
+        File(Environment.getExternalStorageDirectory(), ProjectsDirectoryProvider.PROJECTS_DIR_NAME)
+
+    override fun getProjectsRoot(): File {
+        val custom = getCustomRoot()?.let(::File)?.takeIf { (it.isDirectory || it.mkdirs()) && it.canWrite() }
+        val root = custom ?: defaultRoot()
         if (!root.exists()) {
             root.mkdirs()
         }
@@ -74,5 +102,9 @@ open class ProjectsDirectoryProviderImpl @Inject constructor(
         } catch (_: Exception) {
             false
         }
+    }
+
+    private companion object {
+        const val OVERRIDE_FILE_NAME = "projects_root.txt"
     }
 }

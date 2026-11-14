@@ -26,6 +26,23 @@ interface ProjectsDirectoryProvider {
      */
     fun getProjectsRoot(): File
 
+    /** Vom Nutzer gesetzter Projektstamm (absoluter Pfad) oder `null`, wenn der Standard gilt. */
+    fun getCustomRoot(): String? = null
+
+    /**
+     * Setzt einen eigenen Projektstamm oder (bei `null`/leer) zurück auf den Standard.
+     * Schlägt fehl, wenn der Pfad nicht absolut ist oder nicht angelegt/beschrieben werden kann.
+     * Liefert bei Erfolg das neue Stammverzeichnis.
+     */
+    fun setCustomRoot(path: String?): Result<File> =
+        Result.failure(UnsupportedOperationException("Eigener Projektstamm wird nicht unterstützt"))
+
+    /** Standard-Projektstamm ohne Nutzer-Override (extern, sonst App-Speicher). */
+    fun defaultRoot(): File = getProjectsRoot()
+
+    /** Pfad `<externer Speicher>/CodeForgeMobileProjects`, unabhängig von der Berechtigung. */
+    fun externalDefaultRoot(): File = File("/storage/emulated/0/${PROJECTS_DIR_NAME}")
+
     /**
      * Gibt an, ob der primäre externe Speicher nutzbar und beschreibbar ist.
      */

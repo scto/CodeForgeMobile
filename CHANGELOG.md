@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Einstellungen: Projektverzeichnis)
+- Neuer Screen „Projektverzeichnis“ (Einstellungen): zeigt den aktiven Projektstamm samt Herkunft (Standard/eigener Pfad) und Warnung bei fehlendem Speicherzugriff; Pfad frei setzen, den Standard `/storage/emulated/0/CodeForgeMobileProjects` per Knopf übernehmen oder zurücksetzen. Der Pfad wird geprüft (absolut, anlegbar, beschreibbar) und in `files/projects_root.txt` gespeichert.
+- `ProjectsDirectoryProvider` erweitert um `getCustomRoot`, `setCustomRoot`, `defaultRoot`, `externalDefaultRoot`; `getProjectsRoot()` bevorzugt den eigenen Pfad und fällt bei Unbenutzbarkeit auf den Standard zurück. Neu, Import und Klonen nutzen ihn automatisch.
+
 ### Behoben (Klonen: Zielordner)
 - Der Klon-Bildschirm las den Standard-Zielordner nur einmal beim Erzeugen des ViewModels. War die Speicherberechtigung dann noch nicht aktiv, blieb der App-interne Ersatzpfad stehen statt `/storage/emulated/0/CodeForgeMobileProjects`. Jetzt wird der Standardpfad bei jedem Sichtbarwerden und direkt vor dem Klonen neu bestimmt, solange der Nutzer ihn nicht selbst geändert hat.
 

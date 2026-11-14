@@ -2451,4 +2451,18 @@
     <string name="pkgmgr_listen_wartet">Waiting for another package action …</string>
     <string name="pkgmgr_upgrade_wartet">Waiting for another package action …</string>
     <string name="settings_hub_packages">Package manager</string>
+    <string name="settings_hub_projects_root">Projects directory</string>
+    <string name="projroot_title">Projects directory</string>
+    <string name="projroot_current">Current projects directory</string>
+    <string name="projroot_source_custom">Custom path</string>
+    <string name="projroot_source_default">Default</string>
+    <string name="projroot_no_permission">Storage access missing: without “All files access” the app-internal fallback path is used. Grant the permission or set a custom path.</string>
+    <string name="projroot_input_label">Path</string>
+    <string name="projroot_use_external">Use default: %1$s</string>
+    <string name="projroot_apply">Apply</string>
+    <string name="projroot_reset">Reset</string>
+    <string name="projroot_applied">Projects directory: %1$s</string>
+    <string name="projroot_reset_done">Reset to %1$s</string>
+    <string name="projroot_invalid">Path not usable: %1$s</string>
+    <string name="projroot_hint">New, imported and cloned projects are placed here. Existing projects are not moved. The log directory (.cfm) switches after an app restart.</string>
 </resources>

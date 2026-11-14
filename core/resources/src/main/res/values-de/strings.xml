@@ -2451,4 +2451,18 @@
     <string name="pkgmgr_listen_wartet">Wartet auf andere Paketaktion …</string>
     <string name="pkgmgr_upgrade_wartet">Wartet auf andere Paketaktion …</string>
     <string name="settings_hub_packages">Paketmanager</string>
+    <string name="settings_hub_projects_root">Projektverzeichnis</string>
+    <string name="projroot_title">Projektverzeichnis</string>
+    <string name="projroot_current">Aktuelles Projektverzeichnis</string>
+    <string name="projroot_source_custom">Eigener Pfad</string>
+    <string name="projroot_source_default">Standard</string>
+    <string name="projroot_no_permission">Speicherzugriff fehlt: Ohne „Zugriff auf alle Dateien“ gilt der App-interne Ersatzpfad. Berechtigung erteilen oder einen eigenen Pfad setzen.</string>
+    <string name="projroot_input_label">Pfad</string>
+    <string name="projroot_use_external">Standard übernehmen: %1$s</string>
+    <string name="projroot_apply">Übernehmen</string>
+    <string name="projroot_reset">Zurücksetzen</string>
+    <string name="projroot_applied">Projektverzeichnis: %1$s</string>
+    <string name="projroot_reset_done">Zurückgesetzt auf %1$s</string>
+    <string name="projroot_invalid">Pfad nicht nutzbar: %1$s</string>
+    <string name="projroot_hint">Neue, importierte und geklonte Projekte landen hier. Bestehende Projekte werden nicht verschoben. Das Log-Verzeichnis (.cfm) wechselt nach einem App-Neustart.</string>
 </resources>

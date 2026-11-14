@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Key
@@ -60,6 +61,7 @@ fun SettingsHubRoute(
     onNavigateToBasti: () -> Unit = {},
     onNavigateToStore: () -> Unit = {},
     onNavigateToPackages: () -> Unit = {},
+    onNavigateToProjectsRoot: () -> Unit = {},
     onNavigateToAi: () -> Unit = {}
 ) {
     val entries = listOf(
@@ -69,6 +71,7 @@ fun SettingsHubRoute(
         SettingsEntry(R.string.settings_hub_terminal, Icons.Filled.Terminal, onNavigateToTerminal),
         SettingsEntry(R.string.settings_hub_git, Icons.Filled.Source, onNavigateToGit),
         SettingsEntry(R.string.sdkmanager_title, Icons.Filled.SdCard, onNavigateToSdkManager),
+        SettingsEntry(R.string.settings_hub_projects_root, Icons.Filled.Folder, onNavigateToProjectsRoot),
         SettingsEntry(R.string.settings_hub_packages, Icons.Filled.Inventory2, onNavigateToPackages),
         SettingsEntry(R.string.settings_hub_ai, Icons.Filled.AutoAwesome, onNavigateToAi),
         SettingsEntry(R.string.settings_hub_debug, Icons.Filled.BugReport, onNavigateToDebug),

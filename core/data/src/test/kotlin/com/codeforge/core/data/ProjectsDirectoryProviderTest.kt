@@ -84,4 +84,32 @@ class ProjectsDirectoryProviderTest {
         val outsideFile = tempFolder.newFile("outside.txt")
         assertFalse(provider.isSubpathOfProjectsRoot(outsideFile))
     }
+
+    @Test
+    fun `custom root overrides default and can be reset`() {
+        val provider = object : ProjectsDirectoryProviderImpl(fakeContext) {
+            override fun isExternalStorageUsable() = false
+        }
+        assertEquals(testExternalFilesDir.canonicalPath, provider.getProjectsRoot().canonicalPath)
+
+        val custom = File(tempFolder.root, "meine/projekte")
+        val result = provider.setCustomRoot(custom.path)
+        assertTrue(result.isSuccess)
+        assertEquals(custom.canonicalPath, provider.getProjectsRoot().canonicalPath)
+        assertEquals(custom.canonicalPath, provider.getCustomRoot())
+        assertTrue(provider.isSubpathOfProjectsRoot(File(custom, "App")))
+
+        assertTrue(provider.setCustomRoot(null).isSuccess)
+        assertEquals(null, provider.getCustomRoot())
+        assertEquals(testExternalFilesDir.canonicalPath, provider.getProjectsRoot().canonicalPath)
+    }
+
+    @Test
+    fun `custom root rejects relative paths`() {
+        val provider = object : ProjectsDirectoryProviderImpl(fakeContext) {
+            override fun isExternalStorageUsable() = false
+        }
+        assertTrue(provider.setCustomRoot("relativ/pfad").isFailure)
+        assertEquals(null, provider.getCustomRoot())
+    }
 }
