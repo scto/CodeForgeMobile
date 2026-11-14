@@ -13,168 +13,53 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [3.0.6] - 2026-11-14
 
-### Geändert (LSP-Beispiel-Plugins durch deklarative Plugins ersetzt)
-- **Entfernt:** die alten LSP-Code-Plugins unter `examples/` (`cpp-`, `python-`, `bash-`, `toml-`, `yaml-`, `kotlin-`, `java-`, `xml-`, `kmp-lsp-plugin`, `lsp-plugin-common`) samt Gradle-Modulen, `examples/out`-Archiven, detekt-Baselines und `ExamplePluginsValidTest`. `examples/` enthält nur noch `web-search-plugin` und die Leitfaden-Beispiele.
-- **Ersatz** sind die deklarativen Plugins in `tool-plugins/src/*.lsp` (Store-Kategorie „Sprachserver“): C/C++ (`clangd`, jetzt mit `--background-index` wie das alte Beispiel), Python (Pyright, zusätzlich Ruff), Bash, TOML (Taplo), YAML – dazu Kotlin LS, JDT LS, LemMinX und neu **kmp-lsp** (`com.codeforge.plugin.kmp-lsp.lsp`).
-- **`requires` (download):** neue Felder `arch` (`aarch64`, `x86_64`, `arm`, `i686`; Eintrag gilt nur auf dieser CPU) und `stripTopDir` (obersten Archivordner entfernen). kmp-lsp lädt so das passende Termux-Binary aus Release `termux-1` von `scto/kmp-lsp` (SHA-256 geprüft, aarch64-Archiv im Sandkasten nachgeprüft).
-- `store-site/store.json` neu erzeugt (16 Sprachserver-Plugins).
+### Highlights
+- **Sprachserver nur noch als Plugins:** Der eingebaute Server-Katalog ist entfernt. Alle Server kommen aus dem Store
+  (clangd, Pyright, Ruff, Bash, Taplo, YAML, HTML/CSS/JSON, TypeScript, gopls, rust-analyzer, Dart, neocmakelsp,
+  Kotlin LS, JDT LS, LemMinX, kmp-lsp). Neue Server oder Versionen brauchen kein App-Release mehr.
+- **Projektvorlagen als Plugins:** Der Projekt-Assistent zeigt neben den neun eingebauten Vorlagen auch Plugin-Vorlagen.
+  Neu im Store: „Compose · Clean Architecture“ (Multi-Modul, MVI, Hilt) und „Konsolenprogramm (JVM)“ (Kotlin/Java).
+- **KI:** Neue Anbieter Grok und OpenRouter, neu gestaltete KI-Einstellungen, Websuche für den Agenten als Plugin.
+- **Projektinfo:** Sprachen, Codezeilen, Module, Build-System, Git-Daten und Diagramme zum geöffneten Projekt.
 
-### Hinzugefügt (Schalter für J2K und X2C)
-- Einstellungen → Editor → Projekt-Indexierung: „Java → Kotlin (J2K)“ und „XML → Compose (X2C)“ einzeln abschaltbar (Proto `j2k_disabled`, `x2c_disabled`, Standard an; „Zurücksetzen“ schaltet beide wieder ein). J2K aus: kein Scan, kein Dialog beim Öffnen. X2C aus: kein Scan, Symbolleisten-Knöpfe, Eintrag im Dateibaum-Kontextmenü und Knopf in der Layout-Liste ausgeblendet.
-- Die beiden Konverter bleiben eingebaut: Als Plugin gingen Dialoge, Diff-/Ergebnisansicht und Auto-Scan verloren (Code-Plugins haben keine UI-API, `.jar` ist im Store verboten), der Speichergewinn wäre gering.
+### Hinzugefügt
+- Plugins: `requires` mit `manager: "download"` (HTTPS, SHA-256 Pflicht, zip/tar.gz/Datei, je CPU-Architektur,
+  Update über neue Prüfsumme), `lspServers.env`, Platzhalter `${deps}`, `${jvmArg}`, `${jvmArgs}`.
+- Plugins: `contributes.projectTemplates` (Ebenen common/Sprache/DSL, Platzhalter `{{packageName}}` u. a.),
+  Store-Kategorie „Projektvorlagen“, Autoren-Vorlage `templates/project-template`.
+- Einstellungen → Sprachserver: Server der aktiven Plugins mit Schalter, Fähigkeiten (Vervollständigung, Diagnosen,
+  Hover …), JVM-Optionen und „Programme installieren“; Hinweis zum Löschen alter Server-Dateien.
+- Installation von Plugin-Voraussetzungen läuft app-weit weiter (Vordergrunddienst, Fortschrittsleiste).
+- Fortschrittsleiste für Indexierung, Gradle-Läufe und Installationen.
+- Einstellungen: Build & Run (Gradle-Flags als Chips, eigene Gradle-Installation, Daemon-Leerlauf),
+  Paketmanager (APT-Repo), Projektverzeichnis (eigener Projektstamm).
+- Speicher freigeben: manuell und automatisch bei Speicherdruck (ungenutzte Sprachserver, Vorschau-Caches, Daemons).
+- Dependency-Updates: „Alle später“ und „Alle ignorieren“.
+- Editor-Einstellungen: J2K (Java → Kotlin) und X2C (XML → Compose) einzeln abschaltbar.
+- Externer LSP und eigene Formatierer (Editor-Einstellungen).
+- Plugins: `minHostVersion`, `dependsOn`, `agentTools`, `mcpServers`; PT-Werkzeug `readme`.
+- build-logic: detekt-Konvention, Baselines je Modul, streng in CI.
 
-### Geändert (Vorlagen: Host-Tests statt enableUnitTest)
-- Compose-Vorlagen schalten die Unit-Tests aller Varianten mit der AGP-9-API ein: `androidComponents { beforeVariants { builder -> builder.hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true } }` statt des veralteten `enableUnitTest`. Groovy-DSL braucht dort einen Selektor (`beforeVariants(selector().all()) { … }`); die bisherige Groovy-Zeile brach mit „Could not find method beforeVariants()“ ab.
-- Eingebaute Compose-Vorlage: Einrückung von `plugins { … }` und des neuen Blocks korrigiert. Beide DSL-Varianten im Sandkasten erzeugt und mit `assembleDebug testReleaseUnitTest` gebaut.
-- Plugin-Vorlage `compose-clean`: `:app` und `:feature:home` mit Host-Test-Block und `unitTests.isIncludeAndroidResources` (Compose-Vorschau), neuer `HomeViewModelTest`; `assembleDebug test` grün.
-
-### Hinzugefügt (Projektvorlagen als Plugins)
-- **`contributes.projectTemplates`**: Plugins liefern Projektvorlagen für den Projekt-Assistenten – Dateibäume mit Ebenen `common/`, `kotlin/`|`java/`, `kts/`|`groovy/` und Kombination (`kotlin-kts/` …), Platzhalter `{{projectName}}`, `{{packageName}}`, `{{packagePath}}`, `{{minSdk}}` in Pfaden und Textdateien; Binärdateien unverändert. Felder `languages`, `gradleDsl`, `android`, `minSdk`, `icon`. Fehlende Gradle-Wrapper/Version Catalog ergänzt die App; Pfade außerhalb des Projekts brechen ab; nichts aus der Vorlage wird ausgeführt (Store-tauglich).
-- **Projekt-Assistent**: Plugin-Vorlagen erscheinen nach den neun eingebauten (eigener Titel, Beschreibung, Vorschaubild, Hinweis „Vorlage aus Plugin“). Sprache, Gradle-DSL und Mindest-SDK werden auf die Angaben der Vorlage beschränkt; ohne `android` kein Mindest-SDK, DSL-Schalter nur bei beiden DSL. Die eingebauten Vorlagen bleiben in der App (Assistent funktioniert ohne Store/Netz).
-- **Zwei Vorlagen-Plugins** (`project-templates/`, Store-Kategorie „Projektvorlagen“): `compose-clean` (Compose, MVI mit StateFlow, Hilt, Clean Architecture mit `:app`, `:core:domain`, `:core:data`, `:feature:home`, Version Catalog, Unit-Test) und `jvm-cli` (Konsolenprogramm in Kotlin oder Java, KTS oder Groovy, `./gradlew run`, JUnit). Im Sandkasten erzeugt und gebaut: `compose-clean` → `assembleDebug` + Tests mit AGP 9.5.0, Kotlin 2.3.21, KSP 2.3.14, Hilt 2.60.1; `jvm-cli` alle vier Varianten `test run`. Ohne Java-Toolchain (nur `sourceCompatibility`/`jvmTarget` 17), damit ein JDK 17 oder 21 auf dem Gerät reicht.
-- Autoren-Vorlage `templates/project-template`, Doku in `docs/extensions.md`. `store-site/publish.py` baut `project-templates` mit und ergänzt die Kategorie `template` im Katalog.
-
-### Geändert (Sprachserver nur noch als Plugins)
-- **Eingebauter Server-Katalog entfernt** (`LspExtensionCatalog`, `ExtensionsManager`, Installations-Dienst, Update-Prüfung, Detail-Dialog, `LspPluginLink`). Alle Sprachserver kommen aus Plugins (`contributes.lspServers`); der doppelte Weg Katalog ↔ LSP-Plugin entfällt. Neue Server oder Versionen brauchen kein App-Release mehr, nur ein Plugin-Update im Store.
-- Neue Plugins `com.codeforge.plugin.kotlin-language-server.lsp`, `.jdtls.lsp`, `.lemminx.lsp` (im Bundle „Alle Language Server“): gleiche Versionen und SHA-256 wie der alte Katalog.
-- **`requires` mit `manager: "download"`**: Datei per HTTPS laden, SHA-256 prüfen (Pflicht), `zip`/`tar.gz` entpacken oder Datei (`file`) ablegen nach `$PREFIX/opt/plugin-deps/<name>` (Platzhalter `${deps}`). Ersetzen erst nach erfolgreichem Entpacken; neue SHA im Plugin-Update = Download gilt als fehlend. Beim Entfernen eines Plugins werden seine Downloads gelöscht, sofern kein anderes aktives Plugin sie nutzt. Store: nur `github.com`, `download.eclipse.org`, `registry.npmjs.org`; Freigabeliste um `openjdk-17`/`openjdk-21` ergänzt.
-- **`lspServers`**: neues Feld `env`; Platzhalter `${deps}`, `${jvmArg}` (Element je JVM-Option wiederholt, z. B. `--jvm-arg=${jvmArg}`) und `${jvmArgs}` (alle Optionen, für Umgebungsvariablen). Die Einstellungen je Server (Schalter, Fähigkeiten, JVM-Optionen) gelten für Plugin-Server; die IDs der neuen Plugins entsprechen den alten Paket-IDs, gespeicherte Einstellungen bleiben gültig. JVM-Optionen erscheinen bei jedem Server, dessen Plugin `${jvmArg}`/`${jvmArgs}` nutzt.
-- **Einstellungen → Sprachserver** zeigt die Server der aktivierten Plugins (gruppiert, z. B. HTML/CSS/JSON als ein Eintrag) mit Plugin-Name, fehlenden Programmen und „Programme installieren“ (Fortschritt in der Zeile). Hinweis-Karte, wenn noch Dateien des alten Erweiterungs-Managers liegen (Größe, „Alte Dateien löschen“).
-- Installation der Voraussetzungen läuft app-weit (`RequirementInstallCoordinator`): weiter nach Verlassen des Bildschirms, mit Vordergrunddienst und neuer Fortschrittsleisten-Art „Installiere …“. Der Store installiert nach einem LSP-Plugin die fehlenden Programme im selben Zug und zeigt „Programme fehlen“/„bereit“ je installiertem Plugin.
-- `FileDownloader`, `Sha256Utils`, `ArchiveUtils` nach `:core:common` (`com.codeforge.core.common.io`) verschoben. `store-site/store.json` neu erzeugt. Sprachpakete: fehlende Übersetzung für `common_installation_wartet` ergänzt (`content-plugins/generate.py` lief nicht mehr).
-- `store-site/publish.py` zeigt bei einem fehlgeschlagenen Generator dessen Fehlerausgabe. `icon-plugins/generate.py` läuft unter Termux: sucht DejaVu Sans Bold auch unter `$PREFIX/share/fonts` (`pkg install ttf-dejavu`, eigener Pfad über `CODEFORGE_ICON_FONT`), sonst Pillow-Standardschrift (≥ 10.1); fehlt Pillow, kommt ein Hinweis (`pkg install python-pillow`).
-- **Hinweis:** Bisher installierte eingebaute Server werden nicht mehr verwendet. Nach dem Update die gewünschten LSP-Plugins im Store installieren (Programme kommen im selben Schritt); danach die alten Dateien in Einstellungen → Sprachserver löschen. Der Store-Katalog muss dafür mit `store-site/publish.py` veröffentlicht werden.
-
-### Hinzugefügt (Plugin: Websuche für den KI-Agenten)
-- `examples/web-search-plugin`: deklaratives Plugin (kein App-Code) mit den Agent-Werkzeugen `web_search` (DuckDuckGo-HTML-Ergebnisse, bis 8 Treffer mit Titel, Adresse, Auszug; ohne Anzeigen) und `web_fetch` (lesbarer Text einer Seite, höchstens 2 MiB laden, ≈ 12.000 Zeichen). Python-Skript nur mit Standardbibliothek; `requires`: pkg `python`.
-- Schutz: `web_fetch` nur für http/https zu öffentlichen Adressen, auch bei Weiterleitungen (kein localhost, keine privaten Netze, keine Metadaten-Adressen). Beide Werkzeuge sind `execute`: der Agent fragt im Standardmodus vor jedem Aufruf nach, da Anfragen das Gerät verlassen. Nur per Sideload (Agent-Werkzeuge sind im Store nicht erlaubt).
-- `:examples:packageAll` baut auch deklarative Beispiele direkt unter `examples/` (→ `examples/out/web-search-plugin/`); `templates/build.py` packt keine `__pycache__`/`.pyc` mehr. Test: `python3 scripts/test_websearch_plugin.py`.
-
-### Geändert (KI-Einstellungen: neues Layout, Grok und OpenRouter)
-- KI-Einstellungen in Abschnitten statt einer Karte je Anbieter: Anbieter (Chips, Schlüssel-Symbol bei hinterlegtem Schlüssel), Modell des aktiven Anbieters (Liste mit Häkchen, „Alle anzeigen“ ab 12 Modellen, eigener Modellname, Modelle laden, Verbindung testen), API-Schlüssel aller Anbieter (maskiert, ein-/ausblendbar), Endpunkte aller Anbieter (mit Hinweis und Zurücksetzen), Datenschutz und Tageslimit. Änderungen werden 600 ms nach der letzten Eingabe automatisch gespeichert; die Speichern-Knöpfe entfallen.
-- Neue Anbieter Grok (xAI, `https://api.x.ai/v1`) und OpenRouter (`https://openrouter.ai/api/v1`) über den OpenAI-kompatiblen Client (Chat, Agent, Modellliste); Schlüssel-Erkennung `xai-…` und `sk-or-…`. Endpunkte sind jetzt für alle Anbieter änderbar (die Clients nutzten die Basis-URL bereits).
-
-### Hinzugefügt (Projektinfo)
-- Neuer Bildschirm „Projektinfo“ (Workspace-Seitenleiste) für das geöffnete Projekt: Hauptsprache, Codezeilen, Quelldateien, Module, Projektart (Android-App/-Bibliothek, Compose, KMP, Kotlin/JVM), Build-System (Gradle KTS/Groovy, Maven, CMake, ndk-build, npm, Cargo …), Erstellungsdatum (erster Commit, sonst Dateisystem bzw. älteste Datei), zuletzt geändert, Größe; Gradle-Wrapper, AGP, Kotlin, compile/target/minSdk, Bibliotheken im Katalog; Git (Branch, Commits, Autoren, erster/letzter Commit); größte Quelldateien.
-- Diagramme: Ring „Codezeilen je Sprache“, gestapelter Balken Code/Kommentare/Leer, Balken „Codezeilen je Modul“.
-- `ProjectStatsRepository` (:core:domain) mit `ProjectStatsAnalyzer` (:core:data): ignoriert Build-/Cache-Ordner und Symlinks, höchstens 50.000 Dateien, Dateien > 2 MiB werden nicht zeilenweise gelesen. Sandbox-Messung an CodeForgeMobile: 2.336 Dateien in 3,3 s.
-
-### Geändert (Beispiel-Plugins: JDK 21 und Ausgabe nach examples/out)
-- Alle Beispiel-Plugins bauen mit der JDK-21-Toolchain (Bytecode weiter Java 17). Kotlin-, XML- und Java-LSP-Plugin verlangten fest JDK 17 und blieben mit dem vom SDK-Manager installierten JDK 21 stehen: `LspServerSpec.jdkVersions` (statt `requiredJdk`) nimmt das erste vorhandene JDK, Kotlin/XML bevorzugt 21 sonst 17, Java (aktuelle JDT-LS-Snapshots) nur 21; die Startbefehle in `plugin.json` wählen genauso. LSP-Plugins 2.1.0 (kmp-lsp 2.2.0), da sie die geänderte Basis bündeln.
-- `./gradlew :examples:packageAll` baut alle Beispiele nach `examples/out/<modul>/`, auch die Guide-Beispiele (`guide-commit-notes` über das gemeinsame Packaging, die deklarativen über `templates/build.py --out … --prefix guide-`).
-
-### Geändert (Vorlage Code-Plugin: JDK 21)
-- `:templates:code-plugin` kompiliert mit der JDK-21-Toolchain (vorher 17, die in CI und Termux fehlt). Der Bytecode bleibt Java 17 wie im übrigen Projekt und in `:libs:plugin-api`; `compileKotlin`, `dexClasses`, `packagePlugin`, Tests und detekt laufen durch. Die Ausnahme im CI-Schritt für detekt entfällt.
-
-### Geändert (detekt scharf geschaltet)
-- Baseline je Modul unter `config/detekt/baseline/` (62 Dateien; Module ohne Datei haben keinen Bestand). `ignoreFailures = false`: Neue Verstöße lassen `./gradlew detekt` und `check` scheitern; Bestand abbauen mit `./gradlew :<modul>:detektBaseline` nach dem Beheben.
-- `UndocumentedPublicProperty` und `LabeledExpression` abgeschaltet (meldeten Felder von UiState-Klassen bzw. idiomatische `return@withContext`/`return@launch`). KDoc an öffentlichen Klassen und Funktionen bleibt Pflicht.
-- CI (`build-debug-apk.yml`): eigener Schritt „Statische Analyse (detekt)“.
-
-### Geändert (Build & Run: Flag-Auswahl)
-- Gradle-Optionen als Chip-Auswahl: oben die aktiven Flags (Antippen entfernt, sonst „Keine zusätzlichen Flags“), darunter „Häufige Flags“ (`--info --debug --quiet --warn --stacktrace --full-stacktrace --profile --rerun-tasks --no-build-cache --no-daemon --parallel --offline --continue`) und „Eigenes Flag“ mit Plus-Knopf. Log-Stufen und Stacktrace-Arten schließen sich jeweils aus; eigene Flags werden geprüft (keine Shell-Sonderzeichen, Wert mit `=` anhängen).
-
-### Hinzugefügt (build-logic: detekt)
-- Convention-Plugin `codeforge.detekt` (`DetektConventionPlugin`), über `codeforge.quality` in allen Modulen aktiv. Regeln: `config/detekt/detekt.yml` (eine Datei im Projekt-Root für alle Module), Baseline je Modul unter `config/detekt/baseline/<modul>.xml`, sobald vorhanden. Vorerst nur Bericht (`ignoreFailures = true`), wie bei ktlint.
-- `detekt.yml` an das Projekt angepasst: `rootPackage` stammte aus einem anderen Projekt (`com.neonide.studio`) und meldete jede Datei; Paketnamen mit Unterstrich (`libs.terminal_engine`) erlaubt; `@Composable` von `FunctionNaming`, `LongMethod` und `LongParameterList` ausgenommen, `@Inject` von `LongParameterList`, `@Preview` von `UnusedPrivateFunction`.
-
-### Hinzugefügt (Speicherfreigabe)
-- „Speicher freigeben“ in Build & Run und automatisch bei Speicherdruck (`onTrimMemory`): beendet ungenutzte Sprachserver (nie den der aktiven Datei), leert Vorschau-Caches, stoppt den Compiler-Daemon der Vorschau im Leerlauf; der Gradle-Daemon (`gradlew --stop`) nur auf Knopfdruck. Kein erzwungenes `System.gc()`.
-- `MemoryReleaser` (Hilt-Multibinding) und `ReleaseMemoryUseCase` in :core:domain.
-- Build & Run: Leerlaufzeit des Gradle-Daemons (`-Dorg.gradle.daemon.idletimeout`, Standard/5/15/60 min).
-
-### Hinzugefügt (Einstellungen: Build & Run)
-- Neuer Screen „Build & Run“: Gradle-Optionen für jeden Lauf der IDE (`--quiet/--warn/--info/--debug`, `--stacktrace/--full-stacktrace`, `--offline`, `--no-build-cache`, `--no-daemon`, `--continue`, weitere Argumente), eigene Gradle-Installation statt Wrapper, JVM-Optionen des Gradle-Daemons (`-Dorg.gradle.jvmargs`), Build-Cache löschen, `.gradle` des Projekts löschen, alle Gradle-Caches löschen, Wrapper aktualisieren. Löschaktionen fragen nach, laufen nicht während eines Builds und folgen keinen symbolischen Links.
-- `BuildSettingsRepository` (`build-settings.json`), `GradleMaintenanceRepository`; `ProcessGradleBuildRepository` hängt die Optionen an (Angaben im Aufruf selbst haben Vorrang).
-
-### Hinzugefügt (Sprachserver: Schalter, Fähigkeiten, JVM-Optionen)
-- Sprachserver-Screen: installierte Server als Liste mit Ein/Aus-Schalter und Einstellungs-Sheet (Vervollständigung, Diagnosen, Hover, Signaturhilfe, Code-Aktionen, Formatierung, Inlay-Hinweise); für Kotlin-LS, jdtls und LemMinX zusätzlich JVM-Optionen (Heap, Metaspace, Flags). Abgeschaltete Fähigkeiten beantwortet der Client leer, ohne den Server zu fragen; ein abgeschalteter Server wird nicht gestartet.
-- `LspSettingsRepository` (`lsp-settings.json`). JVM-Flags werden streng geprüft (keine Shell-Sonderzeichen), weil Startskripte sie per Shell auswerten.
-- Store-Karte: „Installieren“ als Knopf über die ganze Breite.
-
-### Geändert (SDK-Manager: neues Layout)
-- Reiter-Chips je Kategorie, Versionsliste mit Auswahl und „Installiert“-Badge, Aktionsleiste unten mit „Installieren“/„Neu installieren“/„Entfernen“ (mit Rückfrage). Der bisherige Auswahldialog entfällt.
-
-### Geändert (Debug-Einstellungen: Log-Dateien)
-- Log-Dateien heißen `cfm-JJJJMMTT-HHMMSS.log` (eine je Sitzung; neue Datei ab 10 MiB). Neu: Höchstzahl der Dateien (Standard 20), abgeschlossene Dateien als `.log.zip` ablegen, Export aller Logs als HTML oder XML nach `<Log-Verzeichnis>/export`.
-
-### Hinzugefügt (Fortschrittsleiste)
-- Leiste über allen Bildschirmen für die Projekt-Indexierung (aktuelle Datei, Prozent) und für jeden Gradle-Lauf (Aufruf und laufender Task). `IdeProgressRegistry` in :core:domain. Der Prozentwert der Indexierung zählt Einträge der obersten Projektebene; Gradle liefert keinen Prozentwert.
-
-### Hinzugefügt (Dependency-Updates: Sammelaktionen)
-- Bei mehreren offenen Updates: „Alle später“ und „Alle ignorieren“ (mit Rückfrage, da dauerhaft).
-
-### Hinzugefügt (Einstellungen: Projektverzeichnis)
-- Neuer Screen „Projektverzeichnis“ (Einstellungen): zeigt den aktiven Projektstamm samt Herkunft (Standard/eigener Pfad) und Warnung bei fehlendem Speicherzugriff; Pfad frei setzen, den Standard `/storage/emulated/0/CodeForgeMobileProjects` per Knopf übernehmen oder zurücksetzen. Der Pfad wird geprüft (absolut, anlegbar, beschreibbar) und in `files/projects_root.txt` gespeichert.
-- `ProjectsDirectoryProvider` erweitert um `getCustomRoot`, `setCustomRoot`, `defaultRoot`, `externalDefaultRoot`; `getProjectsRoot()` bevorzugt den eigenen Pfad und fällt bei Unbenutzbarkeit auf den Standard zurück. Neu, Import und Klonen nutzen ihn automatisch.
-
-### Behoben (Klonen: Zielordner)
-- Der Klon-Bildschirm las den Standard-Zielordner nur einmal beim Erzeugen des ViewModels. War die Speicherberechtigung dann noch nicht aktiv, blieb der App-interne Ersatzpfad stehen statt `/storage/emulated/0/CodeForgeMobileProjects`. Jetzt wird der Standardpfad bei jedem Sichtbarwerden und direkt vor dem Klonen neu bestimmt, solange der Nutzer ihn nicht selbst geändert hat.
-
-### Geändert (Compose-Preview: Tippen)
-- Tippänderungen in derselben Datei werden 250 ms gebündelt (`debounce`), Dateiwechsel rendern sofort. Ein neuer Render bricht den laufenden ab; ein abgebrochener Lauf überschreibt den Zustand nicht mehr (der Renderer verschluckt die Cancellation per `runCatching`, daher `ensureActive()`).
-
-### Hinzugefügt (Einstellungen: Paketmanager)
-- Neuer Screen „Paketmanager“ (Einstellungen → Paketmanager) nach dem Vorbild des SDK-Managers: zeigt das APT-Repo (`scto/terminal-packages-codeforge`) samt der großen Pakete (`large-packages`), mit Suche, Filtern (Alle/Installiert/Updates/Große Pakete), Installieren, Aktualisieren, Entfernen (mit Bestätigung), „Paketlisten aktualisieren“ und „Alle aktualisieren“. Systempakete (`termux-*`, `apt`, `bash` …) sind vor dem Entfernen geschützt.
-- `codeforge-env pkglist` (Zeilen `CFSDK|PKG|…`), `PackageRepository` (:core:domain) und `TermuxScriptPackageRepository` (:libs:terminal-engine); Tests: `scripts/test_codeforge_env_pkglist.sh`, `SdkScriptProtocolTest`, `PackageManagerViewModelTest`.
-
-### Geändert (Ersteinrichtung: Fortschritt)
-- `codeforge-env setup` zählt jetzt über alle Schritte (SDK-Komponenten und Werkzeuge): „== (9/15) Python ==“ statt getrennter Zähler, und meldet einen Gesamtfortschritt in Prozent (`CFSDK|PROGRESS`).
-
-### Geändert (Compose-Preview, LSP: weitere Tempo-Schritte)
-- `d8` läuft im selben warmen Daemon wie `kotlinc` (`D8Command` aus `build-tools/lib/d8.jar`, ohne `System.exit`). Sandbox-Test: erster Lauf 0,9 s, Folgeläufe 0,02 s; bei jedem Fehler Rückfall auf den `d8`-Prozess.
-- Die DEX-Datei der vorkompilierten Nachbarn wird einmal erzeugt, gecached und beim Dexen der Zieldatei nur noch eingemischt.
-- Vorwärmen: Der Compiler-Daemon startet, sobald eine Datei mit Composables aktiv wird (`ComposePreviewRenderer.prewarm()`).
-- Kotlin-LS startet mit `-XX:+UseSerialGC -XX:-UsePerfData` (`KOTLIN_LANGUAGE_SERVER_OPTS`, vorhandene Werte bleiben).
+### Geändert
+- KI-Einstellungen in Abschnitten (Anbieter, Modell, API-Schlüssel, Endpunkte, Datenschutz) mit automatischem Speichern.
+- SDK-Manager: Kategorie-Chips, Versionsliste, Aktionsleiste.
+- Debug-Logs: `cfm-JJJJMMTT-HHMMSS.log`, Höchstzahl, ZIP-Ablage, Export als HTML/XML.
+- Store: eine Liste mit Filter-Chips (Alle · Installiert · Kategorien); installiert bei LSP-Plugins fehlende Programme mit.
+- Compose-Vorlagen: Unit-Tests über `hostTests[UNIT_TEST_TYPE]` (AGP 9), Groovy mit Selektor.
+- Compose-Preview deutlich schneller: warmer kotlinc/d8-Daemon, Cache der Nachbardateien, Bündeln beim Tippen.
+- Ersteinrichtung: Gesamtfortschritt, zusätzlich Python, Node.js, TypeScript.
+- Beispiel-Plugins: alte LSP-Code-Plugins entfernt (ersetzt durch Store-Plugins); Vorlage Code-Plugin mit JDK 21.
 
 ### Behoben
-- Kotlin-Sprachserver: Die Java-Voraussetzung gilt nur als erfüllt, wenn unter `lib/jvm` ein JDK 17–21 liegt (der eingebettete Compiler kann Java 22+ nicht lesen); mit nur JDK 25 wird `openjdk-17` nachinstalliert, `findJavaHome` wählt dann die passende Version.
-- „Formatierer verwalten“: ausgeschaltete Plugin-Formatierer behalten ihren Namen.
-- `ToolPluginsValidTest` kennt das README-Werkzeug (29 Plugins, 9 Werkzeuge).
+- Klonen: Zielordner wieder `/storage/emulated/0/CodeForgeMobileProjects`.
+- Kotlin Language Server startete mit installiertem JDK 25 nicht (JAVA_HOME bevorzugt JDK 21).
+- Startseite: Projekte lassen sich wieder löschen; „Projekt schließen“ führt nicht mehr zurück ins Projekt.
+- Groovy-Compose-Vorlage brach mit „Could not find method beforeVariants()“ ab.
+- `store-site/publish.py` lief unter Termux nicht (Icon-Schrift, fehlende Übersetzung im Sprachpaket).
 
-### Geändert (Compose-Preview, Tests)
-- Compose-Preview: Nachbardateien werden einmal vorkompiliert und gecached (neueste 6 Stände); bei Änderungen an der Zieldatei wird nur diese kompiliert. Scheitert das (z. B. Zyklus), gilt der bisherige Gesamtlauf; Fehlschläge werden nicht erneut versucht. Logcat (`CFPreviewPerf`) zeigt „Nachbarn vorkompiliert“ und einen Hinweis, wenn der Daemon nicht verfügbar ist.
-- `ExtensionsManagerTest`: PATH des Rechners ist injizierbar (`systemPath`), der Test ist nicht mehr von installiertem rust-analyzer abhängig.
-
-### Hinzugefügt (Compose-Preview: warmer Compiler)
-- `KotlincDaemon`: hält eine JVM mit geladenem Kotlin-Compiler warm (Java-Source-Launcher, keine vorgebaute JAR). Folgeläufe sparen JVM-Start und Klassenladen; Idle-Ende nach 2 min, Neustart nach 40 Läufen oder Fehler/Abbruch. Jeder Fehler fällt auf den bisherigen Einzelprozess zurück (`useDaemon`).
-- Im Sandbox-Test mit Kotlin 2.1.21: erster Lauf 3,5 s, Folgeläufe 0,4 s (triviale Datei, ohne Compose).
-
-### Geändert (Compose-Preview-Tempo)
-- Messung: Logcat-Tag `CFPreviewPerf` zeigt je Render vorbereiten / kotlinc / d8 / laden+rendern / gesamt und ob der Build aus dem Cache kam.
-- `kotlinc`: `-nowarn` und keine Laufzeit-Assertions; JVM-Kurzläuferprofil (C1, SerialGC, CDS) für `kotlinc` und `d8`.
-- `d8`: `--min-api 26`, `--debug` (weniger Desugaring/Optimierung).
-- Abbruch einer Coroutine beendet jetzt auch den `kotlinc`-Prozess.
-
-### Hinzugefügt (Externer LSP, Formatierer)
-- Editor → Sprachserver verwalten: „+ Externer LSP“ trägt einen eigenen Sprachserver (Name, Sprachen, Kommando) ein; er wird wie Plugin-Server gestartet und lässt sich entfernen.
-- Editor → „Formatierer verwalten“: Formatierer von Plugins und eigene (Endungen + Kommando, Inhalt über stdin) ein-/ausschalten, anlegen, löschen.
-- Gespeichert in `user-tools.json`; `UserToolsRepository` (core:domain) wird in `ContributionRepository` eingemischt.
-
-### Geändert (Store)
-- Store: eine Liste mit Filter-Chips „Alle · Installiert · Kategorien“ statt zweier Reiter; unter „Installiert“ liegt die Plugin-Verwaltung (Schalter, Hinweise, Voraussetzungen, Info, Entfernen, Sideload).
-
-### Geändert (Ersteinrichtung)
-- Terminal-Ersteinrichtung (`codeforge-env setup`) installiert zusätzlich Python, Node.js (inkl. npm) und TypeScript (`npm install -g typescript`); mit `--no-web` oder `--minimal` abwählbar.
-
-### Geändert (Store, Sprachserver)
-- Einstellungen: nur noch ein Eintrag „Store“ (Reiter Installiert | Store); „Plugins“ und „Erweiterungen (LSP)“ entfallen.
-- Store: Kategorie „Sprachserver“ führt Store-Plugins und lokale Server (Kotlin LS, JDT LS, LemMinX …) zusammen. Ein Knopf „Installieren“ erledigt Plugin, Server-Programm und Voraussetzungen; „Entfernen“ löscht beides. Auch andere installierte Store-Einträge lassen sich dort entfernen.
-- Editor-Einstellungen: Abschnitt „Sprachserver“ mit „Sprachserver verwalten“ (installierte Server, Info, Update, Entfernen; Link in den Store).
-- Plugin-Liste: deklarative Plugins zeigen „Aktiv/Deaktiviert“ statt „Nicht geladen“; „Code-Plugin“ nur noch für Plugins mit Code.
-
-### Behoben
-- JAVA_HOME: bevorzugt JDK 21 (Ziel des Terminal-Setups) statt des höchsten installierten JDK. Mit zusätzlich installiertem JDK 25 stürzte der Kotlin Language Server sofort ab (`IllegalArgumentException: 25.0.4`).
-- Startseite: Projekte im Projektstamm lassen sich wieder entfernen – neu „Projekt löschen“ mit Bestätigungsdialog (löscht den Ordner, nur innerhalb des Projektstamms); „Aus Liste entfernen“ bleibt für Projekte außerhalb.
-- „Projekt schließen“/Zurück: Die Startseite wird nicht mehr zusätzlich über das Projekt gelegt; Zurück führt nicht mehr ins Projekt zurück.
-- Compose-Vorlage: Unit-Tests werden für alle Varianten aktiviert, damit die Compose-Vorschau-Aufgaben auch für release angelegt werden können (`:tasks` brach ab).
-
-### Hinzugefügt (Plugins)
-- Manifest: `minHostVersion` und `dependsOn`. Zu neue Plugins werden bei der Installation abgelehnt (installierte Version bleibt, Rollback bei Fehlern); inkompatible oder von fehlenden/deaktivierten Plugins abhängige Plugins werden nicht geladen und im Plugins-Bildschirm mit Grund angezeigt.
-- Erweiterungspunkte für den KI-Agenten: `contributes.agentTools` (Plugin-Werkzeuge) und `contributes.mcpServers` (MCP-Server, bis zur Freigabe unvertraut); Berechtigungen `agent` + `shell`, nur per Sideload.
-- PT-Werkzeug `readme` („README.md erstellen“, Deutsch/Englisch): erzeugt eine README aus den Gradle-Dateien und überschreibt nie eine vorhandene.
-- Vorlage `templates/agent-tool` (Sideload): zwei Agent-Werkzeuge (`count_lines`, `find_todos`) zum Testen der Erweiterungspunkte auf dem Gerät.
-- Plugin-SDK-API-Baseline (Binary-Compatibility-Validator) für `:libs:plugin-api`; `apiCheck` läuft in den Build-Workflows.
+### Hinweis zum Update
+- Bisher eingebaute Sprachserver werden nicht mehr verwendet: gewünschte LSP-Plugins im Store installieren und danach
+  unter Einstellungen → Sprachserver „Alte Dateien löschen“.
 
 ## [3.0.5] - 2026-11-07
 
