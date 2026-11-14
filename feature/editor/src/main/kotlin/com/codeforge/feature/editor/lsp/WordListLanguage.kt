@@ -21,7 +21,10 @@ class WordListLanguage(
     private val delegate: Language,
     private val context: Context,
     private val scope: String
-) : Language by delegate {
+) : Language by delegate, com.codeforge.feature.editor.LanguageWrapper {
+
+    override val inner: Language get() = delegate
+
 
     override fun requireAutoComplete(
         content: ContentReference,

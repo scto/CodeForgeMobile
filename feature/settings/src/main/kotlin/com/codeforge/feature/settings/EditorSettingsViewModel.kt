@@ -49,6 +49,10 @@ class EditorSettingsViewModel internal constructor(
                 stickyScrollEnabled = settings.editor.stickyScrollEnabled,
                 magnifierEnabled = settings.editor.magnifierEnabled,
                 icuWordSelection = !settings.editor.icuWordSelectionDisabled,
+                fontLigatures = !settings.editor.fontLigaturesDisabled,
+                softTabs = !settings.editor.hardTabs,
+                deleteEmptyLineFast = !settings.editor.deleteEmptyLineFastDisabled,
+                backspaceDeletesTab = !settings.editor.backspaceDeletesTabDisabled,
                 symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled,
                 minimapEnabled = settings.editor.minimapEnabled,
                 rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,
@@ -119,6 +123,22 @@ class EditorSettingsViewModel internal constructor(
                 EditorSettingsUiEvent.StickyScrollToggled ->
                     settingsRepository.updateEditor {
                         it.toBuilder().setStickyScrollEnabled(!it.stickyScrollEnabled).build()
+                    }
+
+                EditorSettingsUiEvent.FontLigaturesToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setFontLigaturesDisabled(!it.fontLigaturesDisabled).build() }
+
+                EditorSettingsUiEvent.SoftTabsToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setHardTabs(!it.hardTabs).build() }
+
+                EditorSettingsUiEvent.DeleteEmptyLineFastToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setDeleteEmptyLineFastDisabled(!it.deleteEmptyLineFastDisabled).build()
+                    }
+
+                EditorSettingsUiEvent.BackspaceDeletesTabToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setBackspaceDeletesTabDisabled(!it.backspaceDeletesTabDisabled).build()
                     }
 
                 EditorSettingsUiEvent.IcuWordSelectionToggled ->
@@ -229,6 +249,7 @@ class EditorSettingsViewModel internal constructor(
                                     .setStickyScrollEnabled(true)
                                     .setMagnifierEnabled(true)
                                     .setIcuWordSelectionDisabled(false)
+                                    .setFontLigaturesDisabled(false)
                                     .setMinimapEnabled(true)
                                     .setRainbowBracketsEnabled(true)
                                     .setPinchToZoomEnabled(true)
@@ -246,6 +267,9 @@ class EditorSettingsViewModel internal constructor(
                             settingsRepository.updateEditor {
                                 it.toBuilder()
                                     .setTabSize(4)
+                                    .setHardTabs(false)
+                                    .setDeleteEmptyLineFastDisabled(false)
+                                    .setBackspaceDeletesTabDisabled(false)
                                     .setSymbolPairAutocompleteEnabled(true)
                                     .setDesktopShortcutsEnabled(true)
                                     .setDisableSoftKeyboardWithHardwareKeyboard(false)

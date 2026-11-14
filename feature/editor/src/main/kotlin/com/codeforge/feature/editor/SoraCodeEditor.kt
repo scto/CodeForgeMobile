@@ -79,6 +79,14 @@ data class EditorDisplaySettings(
     val showNonPrintableChars: Boolean = false,
     val stickyScrollEnabled: Boolean = true,
     val magnifierEnabled: Boolean = true,
+    /** Ligaturen der Schrift (z. B. `->`, `!=` in JetBrains Mono) zeichnen. */
+    val fontLigatures: Boolean = true,
+    /** Soft-Tab: Tab-Taste fügt Leerzeichen in Tab-Breite statt `\t` ein. */
+    val softTabs: Boolean = true,
+    /** Leere Zeile mit einem Backspace komplett löschen (inkl. Einrückung). */
+    val deleteEmptyLineFast: Boolean = true,
+    /** Backspace löscht Leerzeichen in Tab-Breite auf einmal. */
+    val backspaceDeletesTab: Boolean = true,
     /** Wortgrenzen für Doppeltipp/langes Drücken per ICU (`android.icu.text.BreakIterator`) statt Zeichenklassen. */
     val icuWordSelection: Boolean = true,
     val symbolPairAutocompleteEnabled: Boolean = true,
@@ -353,6 +361,11 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
         android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
         (if (settings.keyboardSuggestions) 0 else android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS)
     editor.tabWidth = settings.tabSize.coerceAtLeast(1)
+    applyTabPolicy(editor.editorLanguage, hardTabs = !settings.softTabs, tabSize = settings.tabSize.coerceAtLeast(1))
+    editor.isLigatureEnabled = settings.fontLigatures
+    editor.props.deleteEmptyLineFast = settings.deleteEmptyLineFast
+    // -1 = so viele Leerzeichen wie die Tab-Breite (sora-editor), 1 = ein Zeichen
+    editor.props.deleteMultiSpaces = if (settings.backspaceDeletesTab) -1 else 1
     editor.setTextSize(settings.fontSizeSp.coerceIn(6f, 48f))
 
     editor.nonPrintablePaintingFlags = if (settings.showNonPrintableChars) {

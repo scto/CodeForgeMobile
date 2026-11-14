@@ -212,7 +212,14 @@ private fun EditorSettingsScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             EditorToggleRow(
+                title = Res.string(R.string.settings_font_ligatures),
+                description = Res.string(R.string.settings_font_ligatures_desc),
+                checked = uiState.fontLigatures,
+                onToggle = { onEvent(EditorSettingsUiEvent.FontLigaturesToggled) }
+            )
+            EditorToggleRow(
                 title = Res.string(R.string.settings_zeilenumbruch_word_wrap),
+                description = Res.string(R.string.settings_word_wrap_desc),
                 checked = uiState.wordWrap,
                 onToggle = { onEvent(EditorSettingsUiEvent.WordWrapToggled) }
             )
@@ -343,6 +350,24 @@ private fun EditorSettingsScreen(
             }
             Spacer(modifier = Modifier.height(12.dp))
 
+            EditorToggleRow(
+                title = Res.string(R.string.settings_soft_tabs),
+                description = Res.string(R.string.settings_soft_tabs_desc),
+                checked = uiState.softTabs,
+                onToggle = { onEvent(EditorSettingsUiEvent.SoftTabsToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_delete_empty_line_fast),
+                description = Res.string(R.string.settings_delete_empty_line_fast_desc),
+                checked = uiState.deleteEmptyLineFast,
+                onToggle = { onEvent(EditorSettingsUiEvent.DeleteEmptyLineFastToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_backspace_deletes_tab),
+                description = Res.string(R.string.settings_backspace_deletes_tab_desc),
+                checked = uiState.backspaceDeletesTab,
+                onToggle = { onEvent(EditorSettingsUiEvent.BackspaceDeletesTabToggled) }
+            )
             EditorToggleRow(
                 title = Res.string(R.string.settings_klammern_anfuehrungszeichen_automatisc),
                 checked = uiState.symbolPairAutocompleteEnabled,

@@ -103,6 +103,12 @@ message EditorConfig {
   bool x2c_disabled = 33;
   // Wortauswahl (Doppeltipp, langes Drücken) über ICU-Wortgrenzen; invertiert gespeichert (Standard = an).
   bool icu_word_selection_disabled = 34;
+  // Invertiert gespeichert (Standard = an): Ligaturen, leere Zeile per Backspace, Tab-Breite per Backspace.
+  bool font_ligatures_disabled = 35;
+  // false (Standard) = Soft-Tab: Leerzeichen statt \t.
+  bool hard_tabs = 36;
+  bool delete_empty_line_fast_disabled = 37;
+  bool backspace_deletes_tab_disabled = 38;
 }
 
 

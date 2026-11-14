@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Editor: Ligaturen, Soft-Tab, Backspace)
+- Editor-Einstellungen, alle standardmäßig an: „Schriftart-Ligaturen“ (`isLigatureEnabled`), „Soft-Tab benutzen“ (Leerzeichen statt `\t`; gilt für TextMate, Tree-sitter und Klartext über die neue Hülle `TabPolicyLanguage`, TextMate-Einrückung folgt Tab-Breite und Soft-Tab), „Leere Zeilen mit Backspace löschen“ (`props.deleteEmptyLineFast`), „Tab mit Backspace löschen“ (`props.deleteMultiSpaces` = Tab-Breite). Proto invertiert gespeichert (`font_ligatures_disabled`, `hard_tabs`, `delete_empty_line_fast_disabled`, `backspace_deletes_tab_disabled`).
+- Zeilenumbruch, Sticky Scroll und Zeilennummern anheften: Beschreibungen ergänzt bzw. angepasst (die Funktionen gab es schon).
+
 ### Hinzugefügt (Editor: ICU-Wortauswahl)
 - Neuer Schalter „ICU-Bibliothek für die Wortauswahl“ (Editor-Einstellungen, Standard an): Doppeltippen und langes Drücken bestimmen die Wortgrenzen über ICU (`props.useICULibToSelectWords` von sora-editor, intern `android.icu.text.BreakIterator`) – korrekt auch bei CJK/Thai, Zahlen und Emojis. Ohne Zusatzbibliothek (ICU ist ab API 24 im System). Proto `icu_word_selection_disabled` (invertiert, gilt auch für bestehende Installationen).
 - Lupe: Texte angepasst („Lupe aktivieren – vergrößert den Text an der Cursorposition, während Sie Text im Editor auswählen“); die Funktion war schon vorhanden und ist bei neuen Installationen an.

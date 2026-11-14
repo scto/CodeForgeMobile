@@ -52,7 +52,6 @@ enum class EditorLanguageType(val scopeName: String) {
  */
 object EditorLanguageFactory {
 
-    private const val TAG = "EditorLanguageFactory"
 
     /** Erzeugt die Sprache für den Pfad (TextMate, Tree-sitter oder LSP). */
     fun create(
@@ -63,6 +62,15 @@ object EditorLanguageFactory {
         completionProvider: LspCompletionProvider?,
         /** Scope einer Plugin-Grammatik (nur relevant für Dateien ohne eingebaute Grammatik, d. h. [EditorLanguageType.PLAIN]). */
         extensionScope: String? = null
+    ): Language = TabPolicyLanguage(createInner(context, path, languageType, useTreeSitter, completionProvider, extensionScope))
+
+    private fun createInner(
+        context: Context,
+        path: String,
+        languageType: EditorLanguageType,
+        useTreeSitter: Boolean,
+        completionProvider: LspCompletionProvider?,
+        extensionScope: String?
     ): Language {
         // Tree-sitter nur, wenn die Sprache ein Farbschema bekommt: TsLanguage wird unten mit leerem
         // Theme-Block erzeugt -> alle Token in Standardfarbe (kein Highlighting). Bis ein tsTheme-Mapping
@@ -86,19 +94,7 @@ object EditorLanguageFactory {
             null
         }
         val scopeOverride = extensionScope ?: bundledScope
-        val base: Language = if (languageType == EditorLanguageType.PLAIN && scopeOverride != null) {
-            runCatching { TextMateLanguage.create(scopeOverride, true) }
-                .onFailure { Log.w(TAG, "Grammatik '$scopeOverride' nicht nutzbar – Rückfall auf Klartext", it) }
-                .getOrNull() ?: EmptyLanguage()
-        } else if (languageType.hasGrammar) {
-            runCatching { TextMateLanguage.create(languageType.scopeName, true) }
-                .onFailure {
-                    Log.w(TAG, "Keine TextMate-Grammatik für Scope '${languageType.scopeName}' – Rückfall auf Klartext", it)
-                }
-                .getOrNull() ?: EmptyLanguage()
-        } else {
-            EmptyLanguage()
-        }
+        val base = baseLanguage(languageType, scopeOverride)
         val languageId = when (languageType) {
             EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
             EditorLanguageType.JAVA -> "java"
@@ -111,6 +107,21 @@ object EditorLanguageFactory {
             if (wordScope != null && base !is EmptyLanguage) WordListLanguage(base, context, wordScope) else base
         return if (completionProvider != null) LspAwareLanguage(withWords, completionProvider, languageId) else withWords
     }
+}
+
+private const val LANGUAGE_TAG = "EditorLanguageFactory"
+
+// TextMate-Sprache für den Scope oder Klartext (EmptyLanguage), wenn keine Grammatik passt.
+private fun baseLanguage(languageType: EditorLanguageType, scopeOverride: String?): Language {
+    val scope = when {
+        languageType == EditorLanguageType.PLAIN -> scopeOverride
+        languageType.hasGrammar -> languageType.scopeName
+        else -> null
+    } ?: return EmptyLanguage()
+    val textMate = runCatching { TextMateLanguage.create(scope, true) }
+        .onFailure { Log.w(LANGUAGE_TAG, "Grammatik '$scope' nicht nutzbar – Rückfall auf Klartext", it) }
+        .getOrNull()
+    return textMate ?: EmptyLanguage()
 }
 
 /** `true`, sobald TreeSitterLanguageSupport ein tsTheme-Mapping (Farben je Capture) setzt. */

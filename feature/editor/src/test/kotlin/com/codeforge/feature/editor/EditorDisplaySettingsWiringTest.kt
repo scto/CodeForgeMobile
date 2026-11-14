@@ -19,6 +19,10 @@ class EditorDisplaySettingsWiringTest {
         "stickyScrollEnabled" to "EditorStickyScroll.isEnabled",
         "magnifierEnabled" to "Magnifier.isEnabled",
         "icuWordSelection" to "editor.props.useICULibToSelectWords",
+        "fontLigatures" to "editor.isLigatureEnabled",
+        "softTabs" to "TabPolicyLanguage.hardTabs / TextMateLanguage.useTab",
+        "deleteEmptyLineFast" to "editor.props.deleteEmptyLineFast",
+        "backspaceDeletesTab" to "editor.props.deleteMultiSpaces",
         "symbolPairAutocompleteEnabled" to "editor.props.symbolPairAutoCompletion",
         "minimapEnabled" to "EditorMinimap.isEnabled",
         "rainbowBracketsEnabled" to "editor.isHighlightBracketPair / BracketPairs.isEnabled",
@@ -37,6 +41,10 @@ class EditorDisplaySettingsWiringTest {
         "stickyScrollEnabled",
         "magnifierEnabled",
         "icuWordSelection",
+        "fontLigatures",
+        "softTabs",
+        "deleteEmptyLineFast",
+        "backspaceDeletesTab",
         "symbolPairAutocompleteEnabled",
         "minimapEnabled",
         "rainbowBracketsEnabled",
@@ -73,6 +81,8 @@ class EditorDisplaySettingsWiringTest {
         assertTrue(defaultSettings.stickyScrollEnabled)
         assertTrue(defaultSettings.magnifierEnabled)
         assertTrue(defaultSettings.icuWordSelection)
+        assertTrue(defaultSettings.fontLigatures && defaultSettings.softTabs)
+        assertTrue(defaultSettings.deleteEmptyLineFast && defaultSettings.backspaceDeletesTab)
         assertTrue(defaultSettings.symbolPairAutocompleteEnabled)
         assertTrue(defaultSettings.minimapEnabled)
         assertTrue(defaultSettings.rainbowBracketsEnabled)

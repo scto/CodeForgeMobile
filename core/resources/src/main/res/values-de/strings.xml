@@ -706,8 +706,8 @@
     <string name="settings_ungueltige_mail_adresse">Ungültige E-Mail-Adresse</string>
     <string name="settings_vergroesserungsglas_bei_cursor_platzie">Vergrößert den Text an der Cursorposition, während Sie Text im Editor auswählen.</string>
     <string name="settings_wird_als_autor_in_jedem">Wird als Autor in jedem Commit und in neuen Projekten (Initial-Commit) verwendet.</string>
-    <string name="settings_zeigt_den_umschliessenden_code_block">Zeigt den umschließenden Code-Block (Klasse/Funktion) fixiert am oberen Rand.</string>
-    <string name="settings_zeilenumbruch_word_wrap">Zeilenumbruch (Word Wrap)</string>
+    <string name="settings_zeigt_den_umschliessenden_code_block">Zeigt den aktuellen Bereich oben, während im Editor gescrollt wird.</string>
+    <string name="settings_zeilenumbruch_word_wrap">Zeilenumbruch</string>
     <string name="settings_zugang_entfernen">Zugang entfernen</string>
     <string name="settings_zugang_fuer_entfernt">Zugang für %1$s entfernt</string>
     <string name="settings_zugang_fuer_gespeichert">Zugang für %1$s gespeichert</string>
@@ -1939,7 +1939,7 @@
     <string name="settings_line_numbers">Zeilennummern anzeigen</string>
     <string name="settings_line_numbers_desc">Zeilennummern am linken Rand anzeigen.</string>
     <string name="settings_pin_line_numbers">Zeilennummern anheften</string>
-    <string name="settings_pin_line_numbers_desc">Zeilennummern beim horizontalen Scrollen sichtbar halten.</string>
+    <string name="settings_pin_line_numbers_desc">Zeilennummern beim horizontalen Scrollen fest am Rand halten.</string>
     <string name="settings_cursor_animation">Cursor-Animation</string>
     <string name="settings_cursor_animation_desc">Flüssige Cursor-Animation aktivieren.</string>
     <string name="settings_color_previews">Farbvorschauen</string>
@@ -2647,4 +2647,13 @@
     <string name="settings_x2c_enabled_desc">Layouts nach Jetpack Compose umwandeln: Vorschlag beim Öffnen, Knopf in der Symbolleiste, Einträge im Dateibaum und in der Layout-Liste. Aus: alles ausgeblendet.</string>
     <string name="settings_icu_word_selection">ICU-Bibliothek für die Wortauswahl</string>
     <string name="settings_icu_word_selection_desc">Wortgrenzen bei Doppeltippen und langem Drücken mit ICU bestimmen (alle Schriften, Zahlen, Emojis).</string>
+    <string name="settings_font_ligatures">Schriftart-Ligaturen</string>
+    <string name="settings_font_ligatures_desc">Ligaturen der Schrift (z. B. -> oder !=) als ein Zeichen zeichnen.</string>
+    <string name="settings_word_wrap_desc">Lange Zeilen im Editor umbrechen statt horizontal zu scrollen.</string>
+    <string name="settings_soft_tabs">Soft-Tab benutzen</string>
+    <string name="settings_soft_tabs_desc">Leerzeichen statt Tabulator (\\t) einfügen.</string>
+    <string name="settings_delete_empty_line_fast">Leere Zeilen mit Backspace löschen</string>
+    <string name="settings_delete_empty_line_fast_desc">Eine leere Zeile (auch mit Einrückung) mit einem einzigen Backspace entfernen.</string>
+    <string name="settings_backspace_deletes_tab">Tab mit Backspace löschen</string>
+    <string name="settings_backspace_deletes_tab_desc">Backspace löscht so viele Leerzeichen, wie der Tab-Breite entsprechen.</string>
 </resources>

@@ -24,7 +24,10 @@ class LspAwareLanguage(
     private val delegate: Language,
     private val completionProvider: LspCompletionProvider,
     private val languageId: String = ""
-) : Language by delegate {
+) : Language by delegate, com.codeforge.feature.editor.LanguageWrapper {
+
+    override val inner: Language get() = delegate
+
 
     override fun requireAutoComplete(
         content: ContentReference,

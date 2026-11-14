@@ -688,7 +688,7 @@
     <string name="settings_schriftart_asset_pfad">Font (asset path)</string>
     <string name="settings_schriftgroesse">Font size</string>
     <string name="settings_speichern_fehlgeschlagen">Save failed</string>
-    <string name="settings_sticky_scroll">Sticky Scroll</string>
+    <string name="settings_sticky_scroll">Sticky scroll</string>
     <string name="settings_tab_groesse">Tab size</string>
     <string name="settings_terminal">Terminal</string>
     <string name="settings_terminal_ansicht">Terminal view</string>
@@ -706,7 +706,7 @@
     <string name="settings_ungueltige_mail_adresse">Invalid email address</string>
     <string name="settings_vergroesserungsglas_bei_cursor_platzie">Magnify the text at the cursor position while selecting text in the editor.</string>
     <string name="settings_wird_als_autor_in_jedem">Used as author in every commit and in new projects (initial commit). </string>
-    <string name="settings_zeigt_den_umschliessenden_code_block">Shows enclosing code block (class/function) pinned at the top.</string>
+    <string name="settings_zeigt_den_umschliessenden_code_block">Show the current scope at the top while scrolling the editor.</string>
     <string name="settings_zeilenumbruch_word_wrap">Word wrap</string>
     <string name="settings_zugang_entfernen">Remove credential</string>
     <string name="settings_zugang_fuer_entfernt">Credential for %1$s removed</string>
@@ -1939,7 +1939,7 @@
     <string name="settings_line_numbers">Show line numbers</string>
     <string name="settings_line_numbers_desc">Show line numbers in the gutter.</string>
     <string name="settings_pin_line_numbers">Pin line numbers</string>
-    <string name="settings_pin_line_numbers_desc">Keep line numbers visible while scrolling horizontally.</string>
+    <string name="settings_pin_line_numbers_desc">Whether the editor should pin the line number panel when scrolled horizontally.</string>
     <string name="settings_cursor_animation">Cursor animation</string>
     <string name="settings_cursor_animation_desc">Smooth cursor movement animation.</string>
     <string name="settings_color_previews">Color previews</string>
@@ -2647,4 +2647,13 @@
     <string name="settings_x2c_enabled_desc">Convert layouts to Jetpack Compose: suggestion on open, toolbar button, entries in the file tree and layout list. Off: all hidden.</string>
     <string name="settings_icu_word_selection">Use ICU library</string>
     <string name="settings_icu_word_selection_desc">Use the ICU library to retrieve word edges for double-tap and long-press word selection.</string>
+    <string name="settings_font_ligatures">Font ligatures</string>
+    <string name="settings_font_ligatures_desc">Enable or disable font ligatures (e.g. -> or !=).</string>
+    <string name="settings_word_wrap_desc">Wrap long lines in the editor instead of scrolling horizontally.</string>
+    <string name="settings_soft_tabs">Use soft tabs</string>
+    <string name="settings_soft_tabs_desc">Insert spaces instead of a tab character (\\t).</string>
+    <string name="settings_delete_empty_line_fast">Delete empty lines on backspace</string>
+    <string name="settings_delete_empty_line_fast_desc">Delete an empty line (including indentation) with a single backspace.</string>
+    <string name="settings_backspace_deletes_tab">Delete tab with backspace</string>
+    <string name="settings_backspace_deletes_tab_desc">Backspace deletes spaces matching the tab width.</string>
 </resources>

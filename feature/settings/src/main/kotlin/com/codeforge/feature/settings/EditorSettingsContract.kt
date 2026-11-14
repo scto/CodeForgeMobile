@@ -32,6 +32,14 @@ data class EditorSettingsUiState(
     val magnifierEnabled: Boolean = true,
     /** Wortauswahl über ICU-Wortgrenzen. */
     val icuWordSelection: Boolean = true,
+    /** Schriftart-Ligaturen. */
+    val fontLigatures: Boolean = true,
+    /** Leerzeichen statt `\t`. */
+    val softTabs: Boolean = true,
+    /** Leere Zeile mit einem Backspace löschen. */
+    val deleteEmptyLineFast: Boolean = true,
+    /** Backspace löscht Leerzeichen in Tab-Breite. */
+    val backspaceDeletesTab: Boolean = true,
     val symbolPairAutocompleteEnabled: Boolean = true,
     val minimapEnabled: Boolean = true,
     val rainbowBracketsEnabled: Boolean = true,
@@ -91,6 +99,14 @@ sealed interface EditorSettingsUiEvent {
     data object MagnifierToggled : EditorSettingsUiEvent
     /** ICU-Wortauswahl an/aus. */
     data object IcuWordSelectionToggled : EditorSettingsUiEvent
+    /** Ligaturen an/aus. */
+    data object FontLigaturesToggled : EditorSettingsUiEvent
+    /** Soft-Tab an/aus. */
+    data object SoftTabsToggled : EditorSettingsUiEvent
+    /** Leere Zeile per Backspace löschen an/aus. */
+    data object DeleteEmptyLineFastToggled : EditorSettingsUiEvent
+    /** Tab-Breite per Backspace löschen an/aus. */
+    data object BackspaceDeletesTabToggled : EditorSettingsUiEvent
     /** Automatisches Schließen von Klammern und Anführungszeichen umgeschaltet. */
     data object SymbolPairAutocompleteToggled : EditorSettingsUiEvent
     /** Minimap umgeschaltet. */
