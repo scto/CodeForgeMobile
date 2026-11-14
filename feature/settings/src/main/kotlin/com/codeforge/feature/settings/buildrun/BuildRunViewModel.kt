@@ -12,6 +12,8 @@ import com.codeforge.core.domain.repository.BuildSettingsRepository
 import com.codeforge.core.domain.repository.GradleBuildRepository
 import com.codeforge.core.domain.repository.GradleMaintenanceRepository
 import com.codeforge.core.domain.repository.RecentProjectsRepository
+import com.codeforge.core.domain.runtime.MemoryPressure
+import com.codeforge.core.domain.runtime.ReleaseMemoryUseCase
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.feature.settings.formatSize
@@ -34,6 +36,7 @@ class BuildRunViewModel @Inject constructor(
     private val maintenance: GradleMaintenanceRepository,
     private val gradle: GradleBuildRepository,
     private val recentProjects: RecentProjectsRepository,
+    private val releaseMemory: ReleaseMemoryUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -76,10 +79,11 @@ class BuildRunViewModel @Inject constructor(
                 save { it.copy(daemonJvm = event.options) }
                 say(Res.string(R.string.jvm_saved))
             }
+            is BuildRunEvent.SetDaemonIdleMinutes -> save { it.copy(daemonIdleMinutes = event.minutes) }
             is BuildRunEvent.WrapperVersionChanged -> _uiState.update { it.copy(wrapperVersion = event.value) }
             is BuildRunEvent.Request ->
                 // Wrapper-Update löscht nichts und startet direkt; Löschaktionen fragen erst nach.
-                if (event.action == BuildRunAction.UPDATE_WRAPPER) run(event.action)
+                if (event.action == BuildRunAction.UPDATE_WRAPPER || event.action == BuildRunAction.RELEASE_MEMORY) run(event.action)
                 else _uiState.update { it.copy(pendingConfirm = event.action) }
             BuildRunEvent.DismissConfirm -> _uiState.update { it.copy(pendingConfirm = null) }
             BuildRunEvent.Confirm -> {
@@ -118,6 +122,13 @@ class BuildRunViewModel @Inject constructor(
                 BuildRunAction.DELETE_PROJECT_GRADLE -> report(maintenance.deleteProjectGradleDir(state.projectPath))
                 BuildRunAction.DELETE_USER_CACHES -> report(maintenance.deleteUserCaches())
                 BuildRunAction.UPDATE_WRAPPER -> updateWrapper(state.projectPath, state.wrapperVersion.trim())
+                BuildRunAction.RELEASE_MEMORY -> {
+                    val released = releaseMemory(MemoryPressure.MANUAL)
+                    say(
+                        if (released.isEmpty()) Res.string(R.string.memory_nothing)
+                        else Res.string(R.string.memory_released, released.entries.joinToString { "${it.key} (${it.value})" })
+                    )
+                }
             }
             _uiState.update { it.copy(running = null, runningOutput = "") }
         }

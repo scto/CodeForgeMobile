@@ -25,4 +25,9 @@ abstract class LspClientModule {
     abstract fun bindLspRuntimeStatsProvider(
         impl: LspRuntimeStatsProviderImpl
     ): com.codeforge.core.domain.model.LspRuntimeStatsProvider
+
+    /** Sprachserver als Teil der Speicherfreigabe. */
+    @Binds
+    @dagger.multibindings.IntoSet
+    abstract fun bindLspMemoryReleaser(impl: LspMemoryReleaser): com.codeforge.core.domain.runtime.MemoryReleaser
 }

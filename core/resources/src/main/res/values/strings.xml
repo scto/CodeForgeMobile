@@ -2564,4 +2564,15 @@
     <string name="dependencyupdates_ask_later_all">Ask all later (%1$s)</string>
     <string name="dependencyupdates_dismiss_all">Dismiss all (%1$s)</string>
     <string name="dependencyupdates_dismiss_all_confirm">Really dismiss all %1$s?</string>
+    <string name="memory_section">Memory</string>
+    <string name="memory_sum">Stops unused language servers (not the one of the active file), the preview compiler daemon, preview caches and the Gradle daemon. Everything restarts on demand; the first run afterwards takes longer. Under system memory pressure this happens automatically, then without the Gradle daemon.</string>
+    <string name="memory_release">Free memory</string>
+    <string name="memory_released">Released: %1$s</string>
+    <string name="memory_nothing">Nothing to release</string>
+    <string name="memory_lsp">Language servers</string>
+    <string name="memory_preview">Preview</string>
+    <string name="memory_gradle">Gradle daemon</string>
+    <string name="buildrun_idle">Gradle daemon idle time</string>
+    <string name="buildrun_idle_sum">After this time without a build the daemon stops itself and frees its memory. Gradle default: 3 hours.</string>
+    <string name="buildrun_idle_minutes">%1$s min</string>
 </resources>

@@ -82,6 +82,20 @@ internal class KotlincDaemon(
         }
     }
 
+    /**
+     * Beendet den Daemon nur, wenn gerade nichts kompiliert wird. Liefert `true`, wenn ein laufender Daemon beendet wurde.
+     */
+    fun stopIfIdle(): Boolean {
+        if (!mutex.tryLock()) return false
+        return try {
+            val wasRunning = process != null
+            stop()
+            wasRunning
+        } finally {
+            mutex.unlock()
+        }
+    }
+
     /** Beendet den Daemon (idempotent). */
     fun stop() {
         runCatching { writer?.close() }

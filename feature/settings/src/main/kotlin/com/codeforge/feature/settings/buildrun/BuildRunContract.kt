@@ -11,7 +11,7 @@ import com.codeforge.core.domain.model.GradleStacktrace
 import com.codeforge.core.domain.model.JvmOptions
 
 /** Aufräum- und Wartungsaktionen. */
-enum class BuildRunAction { CLEAR_BUILD_CACHE, DELETE_PROJECT_GRADLE, DELETE_USER_CACHES, UPDATE_WRAPPER }
+enum class BuildRunAction { CLEAR_BUILD_CACHE, DELETE_PROJECT_GRADLE, DELETE_USER_CACHES, UPDATE_WRAPPER, RELEASE_MEMORY }
 
 /** Zustand von „Build & Run“. */
 @Immutable
@@ -54,6 +54,8 @@ sealed interface BuildRunEvent {
     data object SaveGradleHome : BuildRunEvent
     /** JVM-Optionen des Gradle-Daemons speichern; `null` = Werte des Projekts. */
     data class SaveDaemonJvm(val options: JvmOptions?) : BuildRunEvent
+    /** Leerlaufzeit des Gradle-Daemons in Minuten (0 = Gradle-Standard). */
+    data class SetDaemonIdleMinutes(val minutes: Int) : BuildRunEvent
     data class WrapperVersionChanged(val value: String) : BuildRunEvent
     /** Aktion anfordern (Löschaktionen fragen erst nach). */
     data class Request(val action: BuildRunAction) : BuildRunEvent

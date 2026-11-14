@@ -46,6 +46,16 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ClassLoader>?): Boolean = size > 4
     }
 
+    /**
+     * Gibt die Speicher-Caches der Vorschau frei (fertige Bilder, geladene Classloader) und liefert deren Anzahl.
+     * Der Build-Cache auf der Platte bleibt, damit die nächste Vorschau nicht neu kompilieren muss.
+     */
+    internal fun releaseMemoryCaches(): Int {
+        val count = synchronized(loaders) { loaders.size.also { loaders.clear() } }
+        resultCache.clear()
+        return count
+    }
+
     override suspend fun prewarm() {
         runCatching { compiler.prewarm() }
     }

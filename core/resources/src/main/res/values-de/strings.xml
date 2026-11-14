@@ -2564,4 +2564,15 @@
     <string name="dependencyupdates_ask_later_all">Alle später (%1$s)</string>
     <string name="dependencyupdates_dismiss_all">Alle ignorieren (%1$s)</string>
     <string name="dependencyupdates_dismiss_all_confirm">Wirklich alle %1$s ignorieren?</string>
+    <string name="memory_section">Speicher</string>
+    <string name="memory_sum">Beendet ungenutzte Sprachserver (nicht den der aktiven Datei), den Compiler-Daemon der Vorschau, Vorschau-Caches und den Gradle-Daemon. Alles startet bei Bedarf neu; der erste Lauf danach dauert länger. Bei Speicherdruck vom System geschieht das automatisch, dann ohne Gradle-Daemon.</string>
+    <string name="memory_release">Speicher freigeben</string>
+    <string name="memory_released">Freigegeben: %1$s</string>
+    <string name="memory_nothing">Nichts freizugeben</string>
+    <string name="memory_lsp">Sprachserver</string>
+    <string name="memory_preview">Vorschau</string>
+    <string name="memory_gradle">Gradle-Daemon</string>
+    <string name="buildrun_idle">Leerlaufzeit des Gradle-Daemons</string>
+    <string name="buildrun_idle_sum">Nach dieser Zeit ohne Build beendet sich der Daemon selbst und gibt seinen Speicher frei. Gradle-Standard: 3 Stunden.</string>
+    <string name="buildrun_idle_minutes">%1$s min</string>
 </resources>

@@ -30,4 +30,9 @@ abstract class ComposePreviewModule {
     @Binds
     @Singleton
     internal abstract fun bindPreviewCompiling(impl: KotlincProcessCompiler): PreviewCompiling
+
+    /** Vorschau als Teil der Speicherfreigabe. */
+    @Binds
+    @dagger.multibindings.IntoSet
+    internal abstract fun bindPreviewMemoryReleaser(impl: PreviewMemoryReleaser): com.codeforge.core.domain.runtime.MemoryReleaser
 }

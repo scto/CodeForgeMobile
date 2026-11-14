@@ -326,6 +326,20 @@ class LspClientRepositoryImpl(
         return session.executeCommand(command, arguments)
     }
 
+    /**
+     * Beendet Sitzungen, die gerade nicht gebraucht werden, und liefert ihre Anzahl. Die Sitzung des aktiven Dokuments
+     * bleibt immer. Ohne [includeOpenDocuments] nur Sitzungen ohne offene Datei; sonst auch solche mit offenen, aber
+     * nicht aktiven Dateien (der Editor startet sie beim Wechsel auf die Datei neu).
+     */
+    suspend fun releaseUnusedSessions(includeOpenDocuments: Boolean): Int {
+        val activeSessionId = _activeDocumentPath.value?.let { documentToSession[it] }
+        val victims = sessions.values.filter { session ->
+            session.sessionId != activeSessionId && (includeOpenDocuments || getOpenDocumentCount(session.sessionId) == 0)
+        }
+        victims.forEach { stopSession(it.sessionId) }
+        return victims.size
+    }
+
     override fun getOpenDocumentCount(sessionId: String): Int =
         sessions[sessionId]?.openDocumentCount ?: 0
 

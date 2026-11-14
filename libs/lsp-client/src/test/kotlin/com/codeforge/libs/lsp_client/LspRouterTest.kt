@@ -151,4 +151,25 @@ class LspRouterTest {
         assertEquals(null, router.requestHover("/w/A.kt", pos).getOrThrow())
         assertEquals(true, router.requestFormat("/w/A.kt", "x").isFailure)
     }
+
+    @Test
+    fun `memory release keeps the active session and spares open documents unless asked`() = runBlocking {
+        val router = LspClientRepositoryImpl()
+        fun session(id: String, lang: String) =
+            LspServerSession(sessionId = "$id@/w", serverId = id, workspaceRootPath = "/w", languageIds = setOf(lang))
+        router.attachSession(session("kotlin-ls", "kotlin"))
+        router.attachSession(session("jdtls", "java"))
+        router.attachSession(session("lemminx", "xml"))
+        router.didOpen("/w/A.kt", "kotlin", "")
+        router.didOpen("/w/B.java", "java", "")
+        router.setActiveDocument("/w/A.kt")
+
+        assertEquals(1, router.releaseUnusedSessions(includeOpenDocuments = false)) // nur lemminx (keine offene Datei)
+        assertNull(router.getSession("lemminx@/w"))
+        assertNotNull(router.getSession("jdtls@/w"))
+
+        assertEquals(1, router.releaseUnusedSessions(includeOpenDocuments = true)) // jdtls: offen, aber nicht aktiv
+        assertNotNull("Sitzung der aktiven Datei bleibt", router.getSession("kotlin-ls@/w"))
+        assertEquals(1, router.getAllSessions().size)
+    }
 }

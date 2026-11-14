@@ -25,8 +25,17 @@ class CodeForgeApplication : Application() {
 
     @Inject lateinit var logManager: CfmLogManager
     @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var releaseMemory: dagger.Lazy<com.codeforge.core.domain.runtime.ReleaseMemoryUseCase>
+
+    /** Zeitpunkt der letzten automatischen Speicherfreigabe (gegen Dauerfeuer bei anhaltendem Druck). */
+    @Volatile private var lastTrimMillis = 0L
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private companion object {
+        /** Mindestabstand zwischen zwei automatischen Speicherfreigaben. */
+        const val TRIM_MIN_INTERVAL_MILLIS = 60_000L
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -35,6 +44,31 @@ class CodeForgeApplication : Application() {
         TermuxApplication.initTermuxApplication(this)
         com.codeforge.app.keepalive.IdeKeepAliveController.start(this)
         com.codeforge.feature.composepreview.PreviewActivityHolder.register(this)
+    }
+
+    /**
+     * Speicherdruck vom System: Hilfsprozesse und Caches abgeben, statt dass Android die App beendet.
+     * `TRIM_MEMORY_UI_HIDDEN` (App nur im Hintergrund) löst nichts aus – Builds laufen dort weiter.
+     */
+    @Suppress("DEPRECATION") // RUNNING_*-Stufen liefert Android 14+ nicht mehr, ältere Geräte schon.
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        val pressure = when {
+            level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL ||
+                level >= android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE ->
+                com.codeforge.core.domain.runtime.MemoryPressure.CRITICAL
+            level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW ||
+                level == android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND ->
+                com.codeforge.core.domain.runtime.MemoryPressure.LOW
+            else -> return
+        }
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastTrimMillis < TRIM_MIN_INTERVAL_MILLIS) return
+        lastTrimMillis = now
+        appScope.launch {
+            val released = runCatching { releaseMemory.get()(pressure) }.getOrDefault(emptyMap())
+            if (released.isNotEmpty()) Log.i("CFMemory", "onTrimMemory($level) → $pressure: $released")
+        }
     }
 
     /** Debug-Einstellungen: Protokollierung nach `.cfm/log` an/aus (Standard: an). */

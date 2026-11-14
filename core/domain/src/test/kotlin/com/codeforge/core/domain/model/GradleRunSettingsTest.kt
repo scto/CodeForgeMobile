@@ -37,4 +37,25 @@ class GradleRunSettingsTest {
         IdeProgressRegistry.end(id)
         assertTrue(IdeProgressRegistry.items.value.none { it.id == id })
     }
+
+    @Test fun daemonIdleTimeoutIsPassedInMilliseconds() {
+        assertEquals(listOf("-Dorg.gradle.daemon.idletimeout=900000"), GradleRunSettings(daemonIdleMinutes = 15).toArgs())
+    }
+
+    @Test fun releaseMemoryCollectsCountsAndSurvivesFailures() = kotlinx.coroutines.runBlocking {
+        fun releaser(name: String, body: (com.codeforge.core.domain.runtime.MemoryPressure) -> Int) =
+            object : com.codeforge.core.domain.runtime.MemoryReleaser {
+                override val label = name
+                override suspend fun release(pressure: com.codeforge.core.domain.runtime.MemoryPressure) = body(pressure)
+            }
+        val useCase = com.codeforge.core.domain.runtime.ReleaseMemoryUseCase(
+            setOf(
+                releaser("lsp") { 2 },
+                releaser("kaputt") { error("boom") },
+                releaser("gradle") { if (it == com.codeforge.core.domain.runtime.MemoryPressure.MANUAL) 1 else 0 },
+            )
+        )
+        assertEquals(mapOf("lsp" to 2), useCase(com.codeforge.core.domain.runtime.MemoryPressure.LOW))
+        assertEquals(mapOf("lsp" to 2, "gradle" to 1), useCase(com.codeforge.core.domain.runtime.MemoryPressure.MANUAL))
+    }
 }

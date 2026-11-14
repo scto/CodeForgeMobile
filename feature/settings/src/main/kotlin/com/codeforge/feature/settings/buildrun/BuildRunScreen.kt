@@ -195,6 +195,25 @@ fun BuildRunScreen(
                 )
                 OutlinedButton(onClick = { jvmSheet = true }, modifier = Modifier.fillMaxWidth()) { Text(stringRes(R.string.buildrun_setup)) }
             }
+            Block {
+                Text(stringRes(R.string.buildrun_idle), style = MaterialTheme.typography.titleSmall)
+                Text(stringRes(R.string.buildrun_idle_sum), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GradleRunSettings.IDLE_CHOICES.forEach { minutes ->
+                        FilterChip(
+                            selected = settings.daemonIdleMinutes == minutes,
+                            onClick = { onEvent(BuildRunEvent.SetDaemonIdleMinutes(minutes)) },
+                            label = { Text(if (minutes == 0) stringRes(R.string.buildrun_default) else stringRes(R.string.buildrun_idle_minutes, minutes)) },
+                        )
+                    }
+                }
+            }
+
+            SectionTitle(R.string.memory_section)
+            Block {
+                Text(stringRes(R.string.memory_sum), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                ActionButton(BuildRunAction.RELEASE_MEMORY, state, enabled = !busy, onEvent = onEvent)
+            }
 
             SectionTitle(R.string.buildrun_section_maintenance)
             Block {
@@ -234,6 +253,7 @@ private val BuildRunAction.titleRes: Int
         BuildRunAction.DELETE_PROJECT_GRADLE -> R.string.buildrun_delete_project_gradle
         BuildRunAction.DELETE_USER_CACHES -> R.string.buildrun_delete_user_caches
         BuildRunAction.UPDATE_WRAPPER -> R.string.buildrun_wrapper_update
+        BuildRunAction.RELEASE_MEMORY -> R.string.memory_release
     }
 
 @Composable

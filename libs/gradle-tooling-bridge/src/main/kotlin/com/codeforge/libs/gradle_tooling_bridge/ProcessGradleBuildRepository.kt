@@ -67,6 +67,11 @@ class ProcessGradleBuildRepository(
     private var projectRootPath: String? = null
     private val extraEnvironment = java.util.concurrent.ConcurrentHashMap<String, String>()
 
+    private companion object {
+        /** Wartezeit auf `gradlew --stop`. */
+        const val STOP_TIMEOUT_SECONDS = 90L
+    }
+
     /** Ausgabe des laufenden Builds (letzte 20.000 Zeilen). */
     val outputBuffer = CircularLineBuffer(maxLines = 20_000)
 
@@ -255,6 +260,34 @@ class ProcessGradleBuildRepository(
             isBuilding.set(false)
         }
     }.flowOn(Dispatchers.IO)
+
+    /**
+     * Beendet die Gradle-Daemons des verbundenen Projekts (`gradlew --stop`), sofern kein Build läuft.
+     * Liefert `true`, wenn der Aufruf erfolgreich war. Der nächste Build startet den Daemon neu.
+     */
+    suspend fun stopDaemons(): Boolean = withContext(Dispatchers.IO) {
+        val root = projectRootPath?.let(::File) ?: return@withContext false
+        if (!isBuilding.compareAndSet(false, true)) return@withContext false
+        try {
+            val custom = runSettings().customGradleHome.trim().takeIf { it.isNotEmpty() }?.let { File(it, "bin/gradle") }?.takeIf { it.isFile }
+            val gradle = custom ?: File(root, "gradlew").takeIf { it.isFile } ?: return@withContext false
+            val process = processLauncher(
+                listOf(TermuxEnvironment.bashPath, gradle.absolutePath, "--stop"),
+                TermuxEnvironment.environment().toMutableMap().apply { putAll(extraEnvironment) },
+                root
+            )
+            // Ausgabe verwerfen, damit der Prozess nicht an einer vollen Pipe hängt.
+            process.inputStream.use { it.readBytes() }
+            if (!process.waitFor(STOP_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)) {
+                process.destroyForcibly()
+                false
+            } else process.exitValue() == 0
+        } catch (_: Exception) {
+            false
+        } finally {
+            isBuilding.set(false)
+        }
+    }
 
     override suspend fun cancelBuild() {
         if (isBuilding.get()) {

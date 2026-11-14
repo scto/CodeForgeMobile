@@ -22,6 +22,8 @@ data class GradleRunSettings(
     val customGradleHome: String = "",
     /** JVM-Optionen des Gradle-Daemons; `null` = Werte aus `gradle.properties` des Projekts. */
     val daemonJvm: JvmOptions? = null,
+    /** Leerlaufzeit in Minuten, nach der sich der Gradle-Daemon beendet; 0 = Gradle-Standard (3 Stunden). */
+    val daemonIdleMinutes: Int = 0,
 ) {
     /**
      * Zusätzliche Kommandozeilen-Argumente. Was der Aufruf in [present] schon selbst enthält, wird nicht doppelt gesetzt;
@@ -35,6 +37,7 @@ data class GradleRunSettings(
         if (noDaemon) add("--no-daemon")
         if (continueOnFailure) add("--continue")
         addAll(extraArgs.split(WHITESPACE).filter(JvmOptions::isValidFlag))
+        if (daemonIdleMinutes > 0) add("-Dorg.gradle.daemon.idletimeout=" + daemonIdleMinutes.coerceAtMost(MAX_IDLE_MINUTES) * 60_000L)
         daemonJvm?.toArgs()?.takeIf { it.isNotEmpty() }?.let { add("-Dorg.gradle.jvmargs=" + it.joinToString(" ")) }
     }.filterNot { it in present }.distinct()
 
@@ -46,6 +49,12 @@ data class GradleRunSettings(
         private val WHITESPACE = Regex("\\s+")
         private val LOG_FLAGS = setOf("--quiet", "-q", "--warn", "-w", "--info", "-i", "--debug", "-d")
         private val STACK_FLAGS = setOf("--stacktrace", "-s", "--full-stacktrace", "-S")
+
+        /** Obergrenze der einstellbaren Leerlaufzeit (ein Tag). */
+        const val MAX_IDLE_MINUTES = 24 * 60
+
+        /** Auswahl der Leerlaufzeiten im Dialog (0 = Gradle-Standard). */
+        val IDLE_CHOICES = listOf(0, 5, 15, 60)
 
         /** Vorgabe der Daemon-JVM-Optionen fürs Telefon (Ausgangswert im Dialog). */
         val DEFAULT_DAEMON_JVM = JvmOptions(xms = "256m", xmx = "1536m", maxMetaspace = "384m", extraFlags = "-XX:+UseSerialGC")

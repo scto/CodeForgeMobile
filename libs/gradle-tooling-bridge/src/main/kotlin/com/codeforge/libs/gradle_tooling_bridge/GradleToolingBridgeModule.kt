@@ -26,4 +26,9 @@ abstract class GradleToolingBridgeModule {
     abstract fun bindGradleMaintenanceRepository(
         impl: GradleMaintenanceRepositoryImpl
     ): com.codeforge.core.domain.repository.GradleMaintenanceRepository
+
+    /** Gradle-Daemon als Teil der Speicherfreigabe. */
+    @Binds
+    @dagger.multibindings.IntoSet
+    abstract fun bindGradleDaemonMemoryReleaser(impl: GradleDaemonMemoryReleaser): com.codeforge.core.domain.runtime.MemoryReleaser
 }

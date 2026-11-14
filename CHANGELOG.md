@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Speicherfreigabe)
+- „Speicher freigeben“ in Build & Run und automatisch bei Speicherdruck (`onTrimMemory`): beendet ungenutzte Sprachserver (nie den der aktiven Datei), leert Vorschau-Caches, stoppt den Compiler-Daemon der Vorschau im Leerlauf; der Gradle-Daemon (`gradlew --stop`) nur auf Knopfdruck. Kein erzwungenes `System.gc()`.
+- `MemoryReleaser` (Hilt-Multibinding) und `ReleaseMemoryUseCase` in :core:domain.
+- Build & Run: Leerlaufzeit des Gradle-Daemons (`-Dorg.gradle.daemon.idletimeout`, Standard/5/15/60 min).
+
 ### Hinzugefügt (Einstellungen: Build & Run)
 - Neuer Screen „Build & Run“: Gradle-Optionen für jeden Lauf der IDE (`--quiet/--warn/--info/--debug`, `--stacktrace/--full-stacktrace`, `--offline`, `--no-build-cache`, `--no-daemon`, `--continue`, weitere Argumente), eigene Gradle-Installation statt Wrapper, JVM-Optionen des Gradle-Daemons (`-Dorg.gradle.jvmargs`), Build-Cache löschen, `.gradle` des Projekts löschen, alle Gradle-Caches löschen, Wrapper aktualisieren. Löschaktionen fragen nach, laufen nicht während eines Builds und folgen keinen symbolischen Links.
 - `BuildSettingsRepository` (`build-settings.json`), `GradleMaintenanceRepository`; `ProcessGradleBuildRepository` hängt die Optionen an (Angaben im Aufruf selbst haben Vorrang).

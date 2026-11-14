@@ -53,6 +53,7 @@ class BuildSettingsRepositoryImpl(private val file: File) : BuildSettingsReposit
         val extraArgs: String = "",
         val gradleHome: String = "",
         val jvm: JvmDto? = null,
+        val idleMinutes: Int = 0,
     )
 
     @Serializable
@@ -61,6 +62,7 @@ class BuildSettingsRepositoryImpl(private val file: File) : BuildSettingsReposit
     private fun GradleRunSettings.toDto() = Dto(
         logLevel.name, stacktrace.name, offline, noBuildCache, noDaemon, continueOnFailure, extraArgs, customGradleHome,
         daemonJvm?.let { JvmDto(it.xms, it.xmx, it.maxMetaspace, it.extraFlags) },
+        daemonIdleMinutes,
     )
 
     private fun Dto.toModel() = GradleRunSettings(
@@ -69,5 +71,6 @@ class BuildSettingsRepositoryImpl(private val file: File) : BuildSettingsReposit
         offline = offline, noBuildCache = noBuildCache, noDaemon = noDaemon, continueOnFailure = continueOnFailure,
         extraArgs = extraArgs, customGradleHome = gradleHome,
         daemonJvm = jvm?.let { JvmOptions(it.xms, it.xmx, it.metaspace, it.flags) },
+        daemonIdleMinutes = idleMinutes.coerceIn(0, GradleRunSettings.MAX_IDLE_MINUTES),
     )
 }
