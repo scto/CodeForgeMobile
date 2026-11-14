@@ -11,8 +11,26 @@ enum class ProjectTemplateKind {
     BOTTOM_NAV_ACTIVITY,
     TABBED_ACTIVITY,
     NO_ANDROIDX_ACTIVITY,
-    COMPOSE_ACTIVITY
+    COMPOSE_ACTIVITY,
+    /** Vorlage aus einem Plugin (`contributes.projectTemplates`), siehe [PluginTemplateRef]. */
+    PLUGIN
 }
+
+/**
+ * Herkunft einer Plugin-Vorlage: [templateDir] ist der absolute Vorlagenordner, [iconFile] das optionale Vorschaubild.
+ * Texte kommen aus dem Plugin (nicht übersetzt).
+ */
+data class PluginTemplateRef(
+    val pluginId: String,
+    val label: String,
+    val description: String,
+    val templateDir: String,
+    val iconFile: String? = null,
+    /** Android-Projekt (Mindest-SDK wählbar) oder z. B. reines JVM-Projekt. */
+    val android: Boolean = true,
+    /** Kleinstes erlaubtes Mindest-SDK oder `null`. */
+    val minSdk: Int? = null
+)
 
 /** Programmiersprache eines neuen Projekts. */
 enum class ProjectLanguage { KOTLIN, JAVA }
@@ -24,7 +42,12 @@ enum class ProjectLanguage { KOTLIN, JAVA }
 data class ProjectTemplateDescriptor(
     val id: String,
     val kind: ProjectTemplateKind,
-    val supportsJava: Boolean = true
+    val supportsJava: Boolean = true,
+    val supportsKotlin: Boolean = true,
+    val supportsKts: Boolean = true,
+    val supportsGroovy: Boolean = true,
+    /** Gesetzt bei [ProjectTemplateKind.PLUGIN]. */
+    val plugin: PluginTemplateRef? = null
 )
 
 /** Alle Eingaben des Wizards für die Projekterzeugung. */

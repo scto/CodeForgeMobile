@@ -27,7 +27,7 @@ data class StoreItem(
     val sha256: String?,
 ) {
     /**
-     * Direkt installierbar: deklarative Kategorie (Theme, Icons, Sprache, Grammatik, Snippets, LSP, Bundle),
+     * Direkt installierbar: deklarative Kategorie (Theme, Icons, Sprache, Grammatik, Snippets, LSP, Projektvorlage, Bundle),
      * HTTPS-Download und SHA-256. Die Item-ID ist die Plugin-ID. Code-Plugins (Kategorie „plugin“) gibt es
      * nur per manuellem Sideload; zusätzlich lehnt die Installation Archive mit ausführbarem Code ab.
      */
@@ -43,7 +43,10 @@ data class StoreItem(
         const val LSP_CATEGORY = "lsp"
         const val PLUGIN_CATEGORY = "plugin"
         const val TOOL_CATEGORY = "tool"
-        val DECLARATIVE_CATEGORIES = setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle", TOOL_CATEGORY)
+        /** Projektvorlagen für den Projekt-Assistenten. */
+        const val TEMPLATE_CATEGORY = "template"
+        val DECLARATIVE_CATEGORIES =
+            setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle", TEMPLATE_CATEGORY, TOOL_CATEGORY)
     }
 }
 

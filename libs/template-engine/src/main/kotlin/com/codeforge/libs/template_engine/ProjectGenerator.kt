@@ -148,6 +148,7 @@ class ProjectGenerator(private val assets: AssetSource) {
             ProjectTemplateKind.TABBED_ACTIVITY -> tabbed(ctx)
             ProjectTemplateKind.NO_ANDROIDX_ACTIVITY -> noAndroidX(ctx)
             ProjectTemplateKind.COMPOSE_ACTIVITY -> compose(ctx)
+            ProjectTemplateKind.PLUGIN -> error("Plugin-Vorlagen erzeugt PluginTemplateGenerator")
         }
         return ProjectHandle(rootPath = projectDir.path, projectName = name, moduleCount = 1)
     }

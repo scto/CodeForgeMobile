@@ -33,7 +33,8 @@ class ProjectGeneratorTest {
     private fun File.sources(): List<File> = walkTopDown().filter { it.extension in setOf("kt", "java") }.toList()
 
     @Test fun everyCombinationProducesCoreFiles() {
-        for (kind in ProjectTemplateKind.values()) for (lang in ProjectLanguage.values()) for (kts in listOf(true, false)) {
+        val kinds = ProjectTemplateKind.entries - ProjectTemplateKind.PLUGIN
+        for (kind in kinds) for (lang in ProjectLanguage.values()) for (kts in listOf(true, false)) {
             if (kind == ProjectTemplateKind.COMPOSE_ACTIVITY && lang == ProjectLanguage.JAVA) continue
             val d = gen(kind, lang, kts)
             val ext = if (kts) ".kts" else ""
@@ -87,7 +88,7 @@ class ProjectGeneratorTest {
     }
 
     @Test fun stringReferencesResolve() {
-        for (kind in ProjectTemplateKind.values()) {
+        for (kind in ProjectTemplateKind.entries - ProjectTemplateKind.PLUGIN) {
             val d = gen(kind, ProjectLanguage.KOTLIN, true)
             val res = d.rel("app/src/main/res")
             val strings = res.walkTopDown().filter { it.name.startsWith("strings") && it.extension == "xml" }

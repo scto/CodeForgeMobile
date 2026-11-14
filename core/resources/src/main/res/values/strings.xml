@@ -2640,4 +2640,5 @@
     <string name="lsp_from_plugin">Plugin: %1$s</string>
     <string name="lsp_none_installed">No language server installed yet. Language servers come as plugins from the Store (category “Language servers”).</string>
     <string name="flashbar_install">Installing %1$s</string>
+    <string name="pw_tpl_plugin">Template from plugin</string>
 </resources>

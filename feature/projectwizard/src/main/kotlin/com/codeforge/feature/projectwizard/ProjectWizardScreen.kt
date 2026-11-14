@@ -3,7 +3,6 @@
 
 package com.codeforge.feature.projectwizard
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.codeforge.core.resources.stringRes
 import androidx.compose.ui.text.input.KeyboardType
@@ -118,21 +116,22 @@ private fun TemplateGrid(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(templates, key = { it.id }) { template ->
-            val ui = template.kind.ui()
             Card(onClick = { onSelect(template) }, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Image(
-                        painter = painterResource(ui.image),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxWidth().height(120.dp),
-                    )
-                    Text(stringRes(ui.title), style = MaterialTheme.typography.titleMedium)
+                    TemplateImage(template, Modifier.fillMaxWidth().height(120.dp))
+                    Text(template.title(), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        stringRes(ui.description),
+                        template.description(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (template.plugin != null) {
+                        Text(
+                            stringRes(CoreR.string.pw_tpl_plugin),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
         }
@@ -153,7 +152,7 @@ private fun ConfigForm(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(stringRes(template.kind.ui().title), style = MaterialTheme.typography.titleLarge)
+        Text(template.title(), style = MaterialTheme.typography.titleLarge)
 
         FormField(
             value = state.projectName,
@@ -200,30 +199,7 @@ private fun ConfigForm(
             )
         }
 
-        Dropdown(
-            label = CoreR.string.pw_field_language,
-            selectedText = if (state.language == ProjectLanguage.KOTLIN) Res.string(CoreR.string.projectwizard_kotlin) else Res.string(CoreR.string.projectwizard_java),
-            options = ProjectLanguage.values().filter { it == ProjectLanguage.KOTLIN || template.supportsJava },
-            optionText = { if (it == ProjectLanguage.KOTLIN) Res.string(CoreR.string.projectwizard_kotlin) else Res.string(CoreR.string.projectwizard_java) },
-            onSelect = { onEvent(ProjectWizardUiEvent.LanguageChanged(it)) },
-            enabled = enabled,
-        )
-        Dropdown(
-            label = CoreR.string.pw_field_min_sdk,
-            selectedText = "API ${state.minSdk}",
-            options = ProjectRequest.MIN_SDK_OPTIONS,
-            optionText = { "API $it" },
-            onSelect = { onEvent(ProjectWizardUiEvent.MinSdkChanged(it)) },
-            enabled = enabled,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Text(stringRes(CoreR.string.pw_field_kts), modifier = Modifier.weight(1f))
-            Switch(
-                checked = state.useKotlinDsl,
-                onCheckedChange = { onEvent(ProjectWizardUiEvent.KotlinDslChanged(it)) },
-                enabled = enabled,
-            )
-        }
+        BuildOptions(state, template, onEvent, enabled)
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Text(stringRes(CoreR.string.pw_field_git), modifier = Modifier.weight(1f))
@@ -253,6 +229,47 @@ private fun ConfigForm(
             } else {
                 Text(stringRes(CoreR.string.pw_create))
             }
+        }
+    }
+}
+
+// Sprache, Mindest-SDK und Gradle-DSL – eingeschränkt auf das, was die Vorlage kann.
+@Composable
+private fun BuildOptions(
+    state: ProjectWizardUiState,
+    template: ProjectTemplateDescriptor,
+    onEvent: (ProjectWizardUiEvent) -> Unit,
+    enabled: Boolean,
+) {
+    Dropdown(
+        label = CoreR.string.pw_field_language,
+        selectedText = if (state.language == ProjectLanguage.KOTLIN) Res.string(CoreR.string.projectwizard_kotlin) else Res.string(CoreR.string.projectwizard_java),
+        options = ProjectLanguage.entries.filter {
+            if (it == ProjectLanguage.KOTLIN) template.supportsKotlin else template.supportsJava
+        },
+        optionText = { if (it == ProjectLanguage.KOTLIN) Res.string(CoreR.string.projectwizard_kotlin) else Res.string(CoreR.string.projectwizard_java) },
+        onSelect = { onEvent(ProjectWizardUiEvent.LanguageChanged(it)) },
+        enabled = enabled,
+    )
+    if (template.plugin?.android != false) {
+        Dropdown(
+            label = CoreR.string.pw_field_min_sdk,
+            selectedText = "API ${state.minSdk}",
+            options = ProjectRequest.MIN_SDK_OPTIONS.filter { it >= (template.plugin?.minSdk ?: 0) },
+            optionText = { "API $it" },
+            onSelect = { onEvent(ProjectWizardUiEvent.MinSdkChanged(it)) },
+            enabled = enabled,
+        )
+    }
+    // Nur umschaltbar, wenn die Vorlage beide Gradle-DSL kennt.
+    if (template.supportsKts && template.supportsGroovy) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(stringRes(CoreR.string.pw_field_kts), modifier = Modifier.weight(1f))
+            Switch(
+                checked = state.useKotlinDsl,
+                onCheckedChange = { onEvent(ProjectWizardUiEvent.KotlinDslChanged(it)) },
+                enabled = enabled,
+            )
         }
     }
 }

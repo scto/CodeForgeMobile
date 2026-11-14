@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 BASE = "https://scto.github.io/codeforge-store"
 HOME = "https://github.com/scto/CodeForgeMobile"
-GENERATORS = ["theme-plugins", "textmate-plugins", "tool-plugins", "icon-plugins", "content-plugins"]
+GENERATORS = ["theme-plugins", "textmate-plugins", "tool-plugins", "icon-plugins", "content-plugins", "project-templates"]
 
 
 def category(manifest):
@@ -23,6 +23,8 @@ def category(manifest):
         return "tool"
     if "lspServers" in c:
         return "lsp"
+    if "projectTemplates" in c:
+        return "template"
     if "formatters" in c:
         return "formatter"
     if "colorThemes" in c:
@@ -94,12 +96,16 @@ def main(store):
             missing = [x for x in m["contributes"]["extensionPack"] if x not in seen]
             if missing:
                 raise SystemExit(f"{it['id']}: Mitglieder fehlen im Katalog: {missing}")
-    order = {c: i for i, c in enumerate(["theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle", "tool", "plugin"])}
+    order = {c: i for i, c in enumerate(["theme", "icons", "language", "grammar", "snippets", "lsp", "template", "formatter", "bundle", "tool", "plugin"])}
     items.sort(key=lambda i: (order[i["category"]], i["id"]))
     cat_file = store / "store.json"
     catalog = json.loads(cat_file.read_text(encoding="utf-8"))
     if not any(c["id"] == "tool" for c in catalog["categories"]):
         catalog["categories"].insert(1, {"id": "tool", "title": {"de": "Code-Tools", "en": "Code tools"}})
+    if not any(c["id"] == "template" for c in catalog["categories"]):
+        ids = [c["id"] for c in catalog["categories"]]
+        at = ids.index("lsp") + 1 if "lsp" in ids else len(ids)
+        catalog["categories"].insert(at, {"id": "template", "title": {"de": "Projektvorlagen", "en": "Project templates"}})
     catalog["items"] = items
     catalog["updated"] = datetime.date.today().isoformat()
     cat_file.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

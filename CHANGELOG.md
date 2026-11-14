@@ -11,6 +11,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Projektvorlagen als Plugins)
+- **`contributes.projectTemplates`**: Plugins liefern Projektvorlagen für den Projekt-Assistenten – Dateibäume mit Ebenen `common/`, `kotlin/`|`java/`, `kts/`|`groovy/` und Kombination (`kotlin-kts/` …), Platzhalter `{{projectName}}`, `{{packageName}}`, `{{packagePath}}`, `{{minSdk}}` in Pfaden und Textdateien; Binärdateien unverändert. Felder `languages`, `gradleDsl`, `android`, `minSdk`, `icon`. Fehlende Gradle-Wrapper/Version Catalog ergänzt die App; Pfade außerhalb des Projekts brechen ab; nichts aus der Vorlage wird ausgeführt (Store-tauglich).
+- **Projekt-Assistent**: Plugin-Vorlagen erscheinen nach den neun eingebauten (eigener Titel, Beschreibung, Vorschaubild, Hinweis „Vorlage aus Plugin“). Sprache, Gradle-DSL und Mindest-SDK werden auf die Angaben der Vorlage beschränkt; ohne `android` kein Mindest-SDK, DSL-Schalter nur bei beiden DSL. Die eingebauten Vorlagen bleiben in der App (Assistent funktioniert ohne Store/Netz).
+- **Zwei Vorlagen-Plugins** (`project-templates/`, Store-Kategorie „Projektvorlagen“): `compose-clean` (Compose, MVI mit StateFlow, Hilt, Clean Architecture mit `:app`, `:core:domain`, `:core:data`, `:feature:home`, Version Catalog, Unit-Test) und `jvm-cli` (Konsolenprogramm in Kotlin oder Java, KTS oder Groovy, `./gradlew run`, JUnit). Im Sandkasten erzeugt und gebaut: `compose-clean` → `assembleDebug` + Tests mit AGP 9.5.0, Kotlin 2.3.21, KSP 2.3.14, Hilt 2.60.1; `jvm-cli` alle vier Varianten `test run`. Ohne Java-Toolchain (nur `sourceCompatibility`/`jvmTarget` 17), damit ein JDK 17 oder 21 auf dem Gerät reicht.
+- Autoren-Vorlage `templates/project-template`, Doku in `docs/extensions.md`. `store-site/publish.py` baut `project-templates` mit und ergänzt die Kategorie `template` im Katalog.
+
 ### Geändert (Sprachserver nur noch als Plugins)
 - **Eingebauter Server-Katalog entfernt** (`LspExtensionCatalog`, `ExtensionsManager`, Installations-Dienst, Update-Prüfung, Detail-Dialog, `LspPluginLink`). Alle Sprachserver kommen aus Plugins (`contributes.lspServers`); der doppelte Weg Katalog ↔ LSP-Plugin entfällt. Neue Server oder Versionen brauchen kein App-Release mehr, nur ein Plugin-Update im Store.
 - Neue Plugins `com.codeforge.plugin.kotlin-language-server.lsp`, `.jdtls.lsp`, `.lemminx.lsp` (im Bundle „Alle Language Server“): gleiche Versionen und SHA-256 wie der alte Katalog.

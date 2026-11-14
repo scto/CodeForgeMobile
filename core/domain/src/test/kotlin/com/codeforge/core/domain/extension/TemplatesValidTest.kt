@@ -35,7 +35,7 @@ class TemplatesValidTest {
 
     @Test
     fun `deklarative Vorlagen bestehen die Store-Pruefung, Code-Plugin nicht`() {
-        val decl = listOf("color-theme", "icon-theme", "language-pack", "grammar", "snippets", "lsp-server", "formatter", "extension-pack")
+        val decl = listOf("color-theme", "icon-theme", "language-pack", "grammar", "snippets", "lsp-server", "formatter", "extension-pack", "project-template")
         decl.forEach { n ->
             val files = File(dir, n).walkTopDown().filter { it.isFile }.map { it.relativeTo(File(dir, n)).path }.toList()
             assertEquals(n, null, DeclarativeOnly.violation(files, manifest(n)))

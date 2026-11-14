@@ -19,6 +19,9 @@ object PluginManifestParser {
     private val ID_REGEX = Regex("[A-Za-z0-9][A-Za-z0-9._-]*")
     private val ENV_KEY = Regex("[A-Z_][A-Z0-9_]{0,63}")
     private val SHA256 = Regex("[0-9a-f]{64}")
+    private val TEMPLATE_LANGUAGES = setOf(ProjectTemplateContribution.LANGUAGE_KOTLIN, ProjectTemplateContribution.LANGUAGE_JAVA)
+    private val TEMPLATE_DSL = setOf(ProjectTemplateContribution.DSL_KTS, ProjectTemplateContribution.DSL_GROOVY)
+    private val MIN_SDK_RANGE = 21..36
 
     /** Parst und validiert ein Plugin-Manifest (JSON); Fehler werden als Failure geliefert. */
     fun parse(text: String): Result<PluginManifest> = runCatching {
@@ -196,7 +199,31 @@ object PluginManifestParser {
                 require(url == null || url.startsWith("https://") || url.startsWith("http://")) { "mcpServers: 'url' muss http(s) sein" }
                 McpServerContribution(name = name, url = url, command = cmd, args = it.stringList("args"))
             }.also { list -> require(list.map { s -> s.name }.toSet().size == list.size) { "mcpServers: doppelte Namen" } },
-            requires = obj.objects("requires").map { parseRequirement(it) }
+            requires = obj.objects("requires").map { parseRequirement(it) },
+            projectTemplates = obj.objects("projectTemplates").map { parseProjectTemplate(it) }
+                .also { list -> require(list.map { t -> t.id }.toSet().size == list.size) { "projectTemplates: doppelte IDs" } }
+        )
+    }
+
+    private fun parseProjectTemplate(obj: JsonObject): ProjectTemplateContribution {
+        val id = obj.req("id")
+        require(ID_REGEX.matches(id)) { "projectTemplates: ungültige ID '$id'" }
+        val languages = obj.stringList("languages").ifEmpty { listOf(ProjectTemplateContribution.LANGUAGE_KOTLIN) }
+        require(languages.all { it in TEMPLATE_LANGUAGES }) { "projectTemplates: 'languages' erlaubt nur kotlin, java" }
+        val dsl = obj.stringList("gradleDsl").ifEmpty { listOf(ProjectTemplateContribution.DSL_KTS) }
+        require(dsl.all { it in TEMPLATE_DSL }) { "projectTemplates: 'gradleDsl' erlaubt nur kts, groovy" }
+        val minSdk = (obj["minSdk"] as? JsonPrimitive)?.intOrNull
+        require(minSdk == null || minSdk in MIN_SDK_RANGE) { "projectTemplates: 'minSdk' außerhalb 21..36" }
+        return ProjectTemplateContribution(
+            id = id,
+            label = obj.req("label"),
+            description = obj.string("description").orEmpty(),
+            path = obj.relPath("path"),
+            languages = languages.distinct(),
+            gradleDsl = dsl.distinct(),
+            android = (obj["android"] as? JsonPrimitive)?.booleanOrNull ?: true,
+            minSdk = minSdk,
+            icon = if (obj.string("icon").isNullOrBlank()) null else obj.relPath("icon")
         )
     }
 

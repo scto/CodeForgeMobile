@@ -7,6 +7,7 @@ import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.domain.model.ProjectInputValidator
 import com.codeforge.core.domain.model.ProjectLanguage
 import com.codeforge.core.domain.model.ProjectRequest
+import com.codeforge.core.domain.model.ProjectTemplateDescriptor
 import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.domain.repository.GitSettingsRepository
 import com.codeforge.core.domain.repository.RecentProjectsRepository
@@ -65,10 +66,10 @@ class ProjectWizardViewModel @Inject constructor(
     fun onEvent(event: ProjectWizardUiEvent) {
         when (event) {
             is ProjectWizardUiEvent.TemplateSelected -> _uiState.update {
-                // Compose kennt nur Kotlin
-                val lang = if (!event.template.supportsJava) ProjectLanguage.KOTLIN else it.language
-                it.copy(selected = event.template, step = WizardStep.CONFIGURE, language = lang, generationError = null)
-                    .withSuggestedPackage().validated()
+                it.copy(selected = event.template, step = WizardStep.CONFIGURE, generationError = null)
+                    .fittedTo(event.template)
+                    .withSuggestedPackage()
+                    .validated()
             }
             is ProjectWizardUiEvent.ProjectNameChanged -> _uiState.update {
                 it.copy(projectName = event.value).withSuggestedPackage().validated()
@@ -93,10 +94,27 @@ class ProjectWizardViewModel @Inject constructor(
         }
     }
 
+    // Sprache, DSL und Mindest-SDK auf das beschränken, was die Vorlage kann (z. B. Compose nur Kotlin).
+    private fun ProjectWizardUiState.fittedTo(template: ProjectTemplateDescriptor): ProjectWizardUiState {
+        val lang = when {
+            language == ProjectLanguage.KOTLIN && !template.supportsKotlin -> ProjectLanguage.JAVA
+            language == ProjectLanguage.JAVA && !template.supportsJava -> ProjectLanguage.KOTLIN
+            else -> language
+        }
+        val kts = when {
+            !template.supportsKts -> false
+            !template.supportsGroovy -> true
+            else -> useKotlinDsl
+        }
+        val floor = template.plugin?.minSdk ?: 0
+        val sdk = if (minSdk >= floor) minSdk else ProjectRequest.MIN_SDK_OPTIONS.firstOrNull { it >= floor } ?: minSdk
+        return copy(language = lang, useKotlinDsl = kts, minSdk = sdk)
+    }
+
     private fun ProjectWizardUiState.withSuggestedPackage(): ProjectWizardUiState {
         val template = selected ?: return this
         if (packageEdited) return this
-        return copy(packageName = ProjectInputValidator.suggestPackageName(template.id, projectName))
+        return copy(packageName = ProjectInputValidator.suggestPackageName(template.id.substringAfterLast('/'), projectName))
     }
 
     private fun ProjectWizardUiState.toRequest(): ProjectRequest? {

@@ -25,7 +25,8 @@ data class ActiveContributions(
     val tools: List<Resolved<ToolContribution>> = emptyList(),
     val requires: List<Resolved<RequirementContribution>> = emptyList(),
     val agentTools: List<Resolved<AgentToolContribution>> = emptyList(),
-    val mcpServers: List<Resolved<McpServerContribution>> = emptyList()
+    val mcpServers: List<Resolved<McpServerContribution>> = emptyList(),
+    val projectTemplates: List<Resolved<ProjectTemplateContribution>> = emptyList()
 ) {
     companion object {
         /** Leere Gesamtsicht ohne Contributions. */
@@ -49,7 +50,9 @@ data class ActiveContributions(
                 tools = entries.flatMap { (m, dir) -> m.contributes.tools.map { Resolved(m.id, dir, it) } },
                 requires = entries.flatMap { (m, dir) -> m.contributes.requires.map { Resolved(m.id, dir, it) } },
                 agentTools = entries.flatMap { (m, dir) -> m.contributes.agentTools.map { Resolved(m.id, dir, it) } },
-                mcpServers = entries.flatMap { (m, dir) -> m.contributes.mcpServers.map { Resolved(m.id, dir, it) } }
+                mcpServers = entries.flatMap { (m, dir) -> m.contributes.mcpServers.map { Resolved(m.id, dir, it) } },
+                // Vorlagen-IDs sind nur je Plugin eindeutig.
+                projectTemplates = entries.flatMap { (m, dir) -> m.contributes.projectTemplates.map { Resolved(m.id, dir, it) } }
             )
         }
     }

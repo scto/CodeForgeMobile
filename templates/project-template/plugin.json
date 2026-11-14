@@ -1,0 +1,26 @@
+{
+  "id": "com.example.mytemplate.template",
+  "name": "Meine Projektvorlage",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "Ich",
+  "description": "Minimale Projektvorlage: Kotlin-Konsolenprogramm (Kotlin-DSL).",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "hello",
+        "label": "Hallo-Welt (Kotlin)",
+        "description": "Kleinstes Kotlin-Projekt mit Gradle",
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false
+      }
+    ]
+  }
+}

@@ -2640,4 +2640,5 @@
     <string name="lsp_from_plugin">Plugin: %1$s</string>
     <string name="lsp_none_installed">Noch kein Sprachserver installiert. Sprachserver kommen als Plugins aus dem Store (Kategorie „Sprachserver“).</string>
     <string name="flashbar_install">Installiere %1$s</string>
+    <string name="pw_tpl_plugin">Vorlage aus Plugin</string>
 </resources>

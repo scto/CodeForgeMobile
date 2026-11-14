@@ -1,10 +1,14 @@
 package com.codeforge.libs.template_engine
 
 import android.content.Context
+import com.codeforge.core.domain.extension.ContributionRepository
+import com.codeforge.core.domain.extension.ProjectTemplateContribution
+import com.codeforge.core.domain.extension.Resolved
 import com.codeforge.core.domain.model.ProjectHandle
 import com.codeforge.core.domain.model.ProjectRequest
 import com.codeforge.core.domain.model.ProjectTemplateDescriptor
 import com.codeforge.core.domain.model.ProjectTemplateKind
+import com.codeforge.core.domain.model.PluginTemplateRef
 import com.codeforge.core.domain.repository.GitRepository
 import com.codeforge.core.domain.repository.ProjectsDirectoryProvider
 import com.codeforge.core.domain.repository.TemplateEngineRepository
@@ -27,11 +31,15 @@ class TemplateEngineRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val git: GitRepository,
     private val projectsDirectoryProvider: ProjectsDirectoryProvider,
+    private val contributions: ContributionRepository,
 ) : TemplateEngineRepository {
 
     private val generator by lazy { ProjectGenerator(AndroidAssetSource(context.assets)) }
+    private val pluginGenerator by lazy { PluginTemplateGenerator(AndroidAssetSource(context.assets)) }
 
-    override suspend fun listTemplates(): List<ProjectTemplateDescriptor> = DESCRIPTORS
+    /** Eingebaute Vorlagen, danach die der aktivierten Plugins. */
+    override suspend fun listTemplates(): List<ProjectTemplateDescriptor> =
+        DESCRIPTORS + contributions.contributions.value.projectTemplates.map { it.toDescriptor() }
 
     override fun defaultProjectsDirectory(): String =
         projectsDirectoryProvider.getProjectsRoot().absolutePath
@@ -43,7 +51,12 @@ class TemplateEngineRepositoryImpl @Inject constructor(
                 require(!projectDir.exists()) { Res.string(R.string.template_verzeichnis_existiert_bereits, projectDir.path) }
                 check(projectDir.mkdirs()) { Res.string(R.string.template_verzeichnis_nicht_anlegbar, projectDir.path) }
                 val handle = try {
-                    generator.generate(request, projectDir)
+                    val plugin = request.template.plugin
+                    if (plugin != null) {
+                        pluginGenerator.generate(request, File(plugin.templateDir), projectDir)
+                    } else {
+                        generator.generate(request, projectDir)
+                    }
                 } catch (t: Throwable) {
                     projectDir.deleteRecursively()
                     throw t
@@ -56,6 +69,27 @@ class TemplateEngineRepositoryImpl @Inject constructor(
                 )
             }
         }
+
+    private fun Resolved<ProjectTemplateContribution>.toDescriptor(): ProjectTemplateDescriptor {
+        val t = item
+        return ProjectTemplateDescriptor(
+            id = "$pluginId/${t.id}",
+            kind = ProjectTemplateKind.PLUGIN,
+            supportsJava = ProjectTemplateContribution.LANGUAGE_JAVA in t.languages,
+            supportsKotlin = ProjectTemplateContribution.LANGUAGE_KOTLIN in t.languages,
+            supportsKts = ProjectTemplateContribution.DSL_KTS in t.gradleDsl,
+            supportsGroovy = ProjectTemplateContribution.DSL_GROOVY in t.gradleDsl,
+            plugin = PluginTemplateRef(
+                pluginId = pluginId,
+                label = t.label,
+                description = t.description,
+                templateDir = File(pluginDir, t.path).path,
+                iconFile = t.icon?.let { File(pluginDir, it).path },
+                android = t.android,
+                minSdk = t.minSdk
+            )
+        )
+    }
 
     private companion object {
         /** Nachricht des ersten Commits. */

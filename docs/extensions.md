@@ -35,7 +35,8 @@ Vorlagen: `templates/`, Anleitung zum Selbermachen: `docs/extension-authoring.md
     "formatters":    [{ "id": "prettier", "label": "Prettier", "extensions": ["js", "ts"], "command": ["prettier", "--stdin-filepath", "${file}"] }],
     "tools":         [{ "id": "clean", "label": "Aufräumen", "command": ["python3", "${pluginDir}/tool.py", "${projectDir}", "${input}"] }],
     "requires":      [{ "manager": "pkg", "name": "python", "check": "python3" }],
-    "extensionPack": ["com.example.icons"]
+    "extensionPack": ["com.example.icons"],
+    "projectTemplates": [{ "id": "hello", "label": "Hallo-Welt", "path": "template", "languages": ["kotlin"], "gradleDsl": ["kts"] }]
   }
 }
 ```
@@ -122,6 +123,19 @@ Alle Sprachserver kommen aus Plugins (die App hat keinen eingebauten Katalog meh
 * JVM-Optionen: Ein Element mit `${jvmArg}` wird je Option des Nutzers wiederholt (ohne Optionen entfällt es); `${jvmArgs}` in einem `env`-Wert steht für alle Optionen. Nur Server mit einem dieser Platzhalter zeigen in den Einstellungen „JVM-Optionen“. Vorgaben für `kotlin-language-server`, `jdtls`, `lemminx` liegen in `LspServerDefaults`.
 * Einstellungen (an/aus, Fähigkeiten, JVM) hängen an der Server-`id`; `vscode-*-language-server` teilen sich den Schlüssel `vscode-langservers-extracted`.
 * Existiert das Programm (absoluter Pfad) oder eine Datei unter `${deps}` nicht, gibt es keinen Server. `env`-Werte werden an vorhandene Umgebungswerte angehängt.
+
+## Projektvorlagen (`projectTemplates`)
+
+```json
+{ "id": "compose-clean", "label": "Compose · Clean Architecture", "description": "…",
+  "path": "template", "languages": ["kotlin"], "gradleDsl": ["kts"], "android": true, "minSdk": 24, "icon": "icon.png" }
+```
+
+* Erscheinen im Projekt-Assistenten nach den eingebauten Vorlagen (Kennzeichnung „Vorlage aus Plugin“). Sprache, Gradle-DSL und Mindest-SDK sind auf die Angaben beschränkt; `android: false` blendet das Mindest-SDK aus.
+* `path` ist ein Ordner mit Ebenen, die nacheinander kopiert werden (spätere überschreiben): `common/`, `kotlin/`|`java/`, `kts/`|`groovy/`, Kombination wie `kotlin-kts/`.
+* Platzhalter in Pfaden und Textdateien: `{{projectName}}`, `{{packageName}}`, `{{packagePath}}`, `{{minSdk}}`; unbekannte bleiben stehen. Binärdateien (kein gültiges UTF-8 oder mit NUL-Byte, > 1 MiB) werden unverändert kopiert. Pfade, die aus dem Projekt herausführen, brechen die Erzeugung ab.
+* Fehlen `gradlew` oder `gradle/libs.versions.toml`, kommen Wrapper bzw. Version Catalog der App dazu. Danach wie bei eingebauten Vorlagen optional `git init` mit erstem Commit.
+* Aus der Vorlage wird nichts ausgeführt; Store-tauglich (deklarativ). Vorlage für Autoren: `templates/project-template`, Beispiele: `project-templates/src`.
 
 ## Formatierer (`formatters`)
 
@@ -259,4 +273,5 @@ Die öffentliche Binär-API des SDK ist in `libs/plugin-api/api/plugin-api.api` 
 | Store-Policy | umgesetzt (Phase 7): nur deklarative Kategorien (`theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `bundle`); `installFromFile(declarativeOnly = true)` lehnt Archive mit `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge ab; Code-Plugins nur per Sideload |
 | Code-Plugin-Hooks | umgesetzt (Phase 6): Befehle, Menüs, Datei-/Git-Ereignisse, Berechtigungen |
 | `lspServers` | umgesetzt (Resolver) |
+| `projectTemplates` | umgesetzt: Projekt-Assistent, Store-Kategorie „Projektvorlagen“; nicht auf Gerät getestet |
 | Geräteprüfung | alles bisher nur per Unit-Test/Kompilierung geprüft, siehe `agy-tasks/61-erweiterungssystem-geraetepruefung.md` |

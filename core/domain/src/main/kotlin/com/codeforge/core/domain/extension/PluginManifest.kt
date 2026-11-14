@@ -71,14 +71,48 @@ data class Contributes(
     /** Werkzeuge, die der KI-Agent aufrufen darf (Berechtigungen `agent` + `shell`, nur Sideload). */
     val agentTools: List<AgentToolContribution> = emptyList(),
     /** MCP-Server, die der Agent nach Freigabe durch den Nutzer verbindet (Berechtigungen `agent` + `shell`). */
-    val mcpServers: List<McpServerContribution> = emptyList()
+    val mcpServers: List<McpServerContribution> = emptyList(),
+    /** Projektvorlagen für den Projekt-Assistenten (Dateibäume mit Platzhaltern, kein Code wird ausgeführt). */
+    val projectTemplates: List<ProjectTemplateContribution> = emptyList()
 ) {
     /** Ob das Plugin keinerlei Contributions enthält. */
     val isEmpty: Boolean
         get() = colorThemes.isEmpty() && iconThemes.isEmpty() && languagePacks.isEmpty() &&
             grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty() &&
             formatters.isEmpty() && tools.isEmpty() && requires.isEmpty() &&
-            agentTools.isEmpty() && mcpServers.isEmpty()
+            agentTools.isEmpty() && mcpServers.isEmpty() && projectTemplates.isEmpty()
+}
+
+/**
+ * Projektvorlage: [path] ist ein Ordner im Plugin mit den Ebenen `common/` (immer), `kotlin/` bzw. `java/`
+ * (gewählte Sprache), `kts/` bzw. `groovy/` (Gradle-DSL) und der Kombination (z. B. `kotlin-kts/`); spätere Ebenen
+ * überschreiben gleichnamige Dateien.
+ * In Pfaden und Textdateien werden `{{projectName}}`, `{{packageName}}`, `{{packagePath}}` und `{{minSdk}}` ersetzt.
+ * Fehlen Gradle-Wrapper oder `gradle/libs.versions.toml`, ergänzt die App ihre eigenen.
+ */
+data class ProjectTemplateContribution(
+    val id: String,
+    val label: String,
+    val description: String = "",
+    val path: String,
+    /** Wählbare Sprachen: `kotlin`, `java`. */
+    val languages: List<String> = listOf(LANGUAGE_KOTLIN),
+    /** Wählbare Gradle-DSL: `kts`, `groovy`. */
+    val gradleDsl: List<String> = listOf(DSL_KTS),
+    /** `false` für Nicht-Android-Projekte (kein Mindest-SDK). */
+    val android: Boolean = true,
+    /** Kleinstes erlaubtes Mindest-SDK. */
+    val minSdk: Int? = null,
+    /** Vorschaubild (PNG/WebP) relativ zum Plugin. */
+    val icon: String? = null
+) {
+    /** Erlaubte Werte. */
+    companion object {
+        const val LANGUAGE_KOTLIN = "kotlin"
+        const val LANGUAGE_JAVA = "java"
+        const val DSL_KTS = "kts"
+        const val DSL_GROOVY = "groovy"
+    }
 }
 
 /** Farbschema: [path] zeigt auf eine JSON-Datei (siehe docs/extensions.md) relativ zum Plugin-Verzeichnis. */
@@ -319,4 +353,5 @@ fun Contributes.kinds(): List<String> = buildList {
     if (requires.isNotEmpty()) add("requires")
     if (agentTools.isNotEmpty()) add("agentTools")
     if (mcpServers.isNotEmpty()) add("mcpServers")
+    if (projectTemplates.isNotEmpty()) add("projectTemplates")
 }
