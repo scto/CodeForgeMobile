@@ -15,12 +15,16 @@ import com.codeforge.core.resources.Res
 import com.codeforge.core.domain.model.PreviewOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 /** ViewModel der Compose-Vorschau. */
@@ -38,8 +42,16 @@ class ComposePreviewViewModel @Inject constructor(
     /** Wird für Re-Render (FunctionSelected/Rerender) benötigt, ohne den Quelltext im UiState zu duplizieren. */
     private var lastActiveFile: ActiveComposableFile? = null
 
+    /** Laufender Render; wird bei neuer Eingabe abgebrochen, damit veraltete Läufe nicht weiterkompilieren. */
+    private var renderJob: Job? = null
+
+    @OptIn(FlowPreview::class)
+    private val activeFileFlow = previewBridge.activeFile
+        // Datei-/Wechsel sofort, Tipp-Änderungen in derselben Datei gebündelt.
+        .debounce { next -> if (next?.path == lastActiveFile?.path) TYPING_DEBOUNCE_MS else 0L }
+
     init {
-        previewBridge.activeFile
+        activeFileFlow
             .onEach(::handleActiveFileChanged)
             .launchIn(viewModelScope)
     }
@@ -94,7 +106,8 @@ class ComposePreviewViewModel @Inject constructor(
         val file = lastActiveFile ?: return
         _uiState.update { it.copy(renderState = PreviewRenderState.PreparingRuntime(0)) }
 
-        viewModelScope.launch {
+        renderJob?.cancel()
+        renderJob = viewModelScope.launch {
             composePreviewRenderer.render(
                 filePath = file.path,
                 sourceCode = file.content,
@@ -114,6 +127,7 @@ class ComposePreviewViewModel @Inject constructor(
                 }
             )
                 .onSuccess { result ->
+                    ensureActive() // abgebrochener (veralteter) Lauf darf den Zustand nicht überschreiben
                     _uiState.update {
                         it.copy(
                             renderState = PreviewRenderState.Rendered(
@@ -127,6 +141,7 @@ class ComposePreviewViewModel @Inject constructor(
                     }
                 }
                 .onFailure { throwable ->
+                    ensureActive() // runCatching im Renderer verschluckt die Cancellation
                     _uiState.update {
                         it.copy(
                             renderState = PreviewRenderState.Failed(
@@ -136,5 +151,10 @@ class ComposePreviewViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    private companion object {
+        /** Wartezeit nach der letzten Tippänderung, bevor neu gerendert wird. */
+        const val TYPING_DEBOUNCE_MS = 250L
     }
 }

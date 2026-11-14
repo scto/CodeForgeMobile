@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Compose-Preview: Tippen)
+- Tippänderungen in derselben Datei werden 250 ms gebündelt (`debounce`), Dateiwechsel rendern sofort. Ein neuer Render bricht den laufenden ab; ein abgebrochener Lauf überschreibt den Zustand nicht mehr (der Renderer verschluckt die Cancellation per `runCatching`, daher `ensureActive()`).
+
 ### Hinzugefügt (Einstellungen: Paketmanager)
 - Neuer Screen „Paketmanager“ (Einstellungen → Paketmanager) nach dem Vorbild des SDK-Managers: zeigt das APT-Repo (`scto/terminal-packages-codeforge`) samt der großen Pakete (`large-packages`), mit Suche, Filtern (Alle/Installiert/Updates/Große Pakete), Installieren, Aktualisieren, Entfernen (mit Bestätigung), „Paketlisten aktualisieren“ und „Alle aktualisieren“. Systempakete (`termux-*`, `apt`, `bash` …) sind vor dem Entfernen geschützt.
 - `codeforge-env pkglist` (Zeilen `CFSDK|PKG|…`), `PackageRepository` (:core:domain) und `TermuxScriptPackageRepository` (:libs:terminal-engine); Tests: `scripts/test_codeforge_env_pkglist.sh`, `SdkScriptProtocolTest`, `PackageManagerViewModelTest`.
