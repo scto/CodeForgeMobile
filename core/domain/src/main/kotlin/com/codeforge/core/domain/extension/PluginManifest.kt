@@ -328,7 +328,9 @@ enum class DownloadArchive(val id: String) {
  *
  * Bei [RequirementManager.DOWNLOAD] ist [name] der Zielordner unter `${deps}`, [check] der relative Pfad der Datei,
  * die danach existieren muss (wird ausführbar gemacht), und [url]/[sha256]/[archive] sind Pflicht. Ändert sich [sha256]
- * (neue Version im Plugin-Update), gilt die Voraussetzung wieder als fehlend.
+ * (neue Version im Plugin-Update), gilt die Voraussetzung wieder als fehlend. [arch] beschränkt einen Eintrag auf eine
+ * CPU-Architektur (`aarch64`, `x86_64`, `arm`, `i686`; mehrere Einträge gleichen Namens je Architektur möglich),
+ * [stripTopDir] entfernt beim Entpacken den einzigen obersten Ordner des Archivs.
  */
 data class RequirementContribution(
     val manager: RequirementManager,
@@ -336,8 +338,13 @@ data class RequirementContribution(
     val check: String = name,
     val url: String? = null,
     val sha256: String? = null,
-    val archive: DownloadArchive? = null
+    val archive: DownloadArchive? = null,
+    val arch: String? = null,
+    val stripTopDir: Boolean = false
 )
+
+/** Ob der Eintrag für die Architektur [cpuArch] gilt (ohne [RequirementContribution.arch]: immer). */
+fun RequirementContribution.appliesTo(cpuArch: String): Boolean = arch == null || arch == cpuArch
 
 /** Namen der nicht leeren Contribution-Arten, wie sie in `contributes` heißen. */
 fun Contributes.kinds(): List<String> = buildList {

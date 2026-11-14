@@ -38,5 +38,5 @@ tasks.register("packageAll") {
     group = "build"
     description = "Baut alle Beispiel-Plugins nach examples/out."
     dependsOn(packageDeclarativeGuides, packageDeclarativeExamples)
-    dependsOn(subprojects.filter { it.buildFile.isFile }.map { "${it.path}:packagePlugin" }.filterNot { it.startsWith(":examples:lsp-plugin-common") })
+    dependsOn(subprojects.filter { it.buildFile.isFile }.map { "${it.path}:packagePlugin" })
 }

@@ -244,7 +244,11 @@ object PluginManifestParser {
         require(SHA256.matches(sha)) { "requires: 'sha256' muss 64 Hex-Zeichen haben" }
         val archive = DownloadArchive.fromId(obj.req("archive"))
             ?: throw IllegalArgumentException("requires: 'archive' muss zip, tar.gz oder file sein")
-        return RequirementContribution(manager, name, obj.relPath("check"), url, sha, archive)
+        val arch = obj.string("arch")?.takeIf { it.isNotBlank() }
+        require(arch == null || arch in RequirementPolicy.ARCHES) { "requires: 'arch' muss aarch64, x86_64, arm oder i686 sein" }
+        val strip = (obj["stripTopDir"] as? JsonPrimitive)?.booleanOrNull ?: false
+        require(!strip || archive != DownloadArchive.FILE) { "requires: 'stripTopDir' nur bei zip oder tar.gz" }
+        return RequirementContribution(manager, name, obj.relPath("check"), url, sha, archive, arch, strip)
     }
 
     private fun JsonObject.stringMap(key: String): Map<String, String> =

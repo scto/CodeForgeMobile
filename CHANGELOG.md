@@ -11,6 +11,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (LSP-Beispiel-Plugins durch deklarative Plugins ersetzt)
+- **Entfernt:** die alten LSP-Code-Plugins unter `examples/` (`cpp-`, `python-`, `bash-`, `toml-`, `yaml-`, `kotlin-`, `java-`, `xml-`, `kmp-lsp-plugin`, `lsp-plugin-common`) samt Gradle-Modulen, `examples/out`-Archiven, detekt-Baselines und `ExamplePluginsValidTest`. `examples/` enthält nur noch `web-search-plugin` und die Leitfaden-Beispiele.
+- **Ersatz** sind die deklarativen Plugins in `tool-plugins/src/*.lsp` (Store-Kategorie „Sprachserver“): C/C++ (`clangd`, jetzt mit `--background-index` wie das alte Beispiel), Python (Pyright, zusätzlich Ruff), Bash, TOML (Taplo), YAML – dazu Kotlin LS, JDT LS, LemMinX und neu **kmp-lsp** (`com.codeforge.plugin.kmp-lsp.lsp`).
+- **`requires` (download):** neue Felder `arch` (`aarch64`, `x86_64`, `arm`, `i686`; Eintrag gilt nur auf dieser CPU) und `stripTopDir` (obersten Archivordner entfernen). kmp-lsp lädt so das passende Termux-Binary aus Release `termux-1` von `scto/kmp-lsp` (SHA-256 geprüft, aarch64-Archiv im Sandkasten nachgeprüft).
+- `store-site/store.json` neu erzeugt (16 Sprachserver-Plugins).
+
 ### Hinzugefügt (Schalter für J2K und X2C)
 - Einstellungen → Editor → Projekt-Indexierung: „Java → Kotlin (J2K)“ und „XML → Compose (X2C)“ einzeln abschaltbar (Proto `j2k_disabled`, `x2c_disabled`, Standard an; „Zurücksetzen“ schaltet beide wieder ein). J2K aus: kein Scan, kein Dialog beim Öffnen. X2C aus: kein Scan, Symbolleisten-Knöpfe, Eintrag im Dateibaum-Kontextmenü und Knopf in der Layout-Liste ausgeblendet.
 - Die beiden Konverter bleiben eingebaut: Als Plugin gingen Dialoge, Diff-/Ergebnisansicht und Auto-Scan verloren (Code-Plugins haben keine UI-API, `.jar` ist im Store verboten), der Speichergewinn wäre gering.

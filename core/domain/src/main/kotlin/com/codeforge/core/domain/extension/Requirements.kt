@@ -29,6 +29,14 @@ object RequirementPolicy {
         RequirementManager.PIP to emptySet()
     )
 
+    private const val AARCH64 = "aarch64"
+    private const val X86_64 = "x86_64"
+    private const val ARM = "arm"
+    private const val I686 = "i686"
+
+    /** Architekturen, die `requires[].arch` annimmt (Termux-Namen). */
+    val ARCHES: Set<String> = setOf(AARCH64, X86_64, ARM, I686)
+
     // Hosts, von denen Store-Plugins Dateien laden dürfen (immer mit SHA-256-Prüfung).
     private val STORE_DOWNLOAD_HOSTS = setOf("github.com", "download.eclipse.org", "registry.npmjs.org")
 
@@ -42,6 +50,14 @@ object RequirementPolicy {
         } else {
             r.name in STORE_ALLOWED[r.manager].orEmpty()
         }
+
+    /** CPU-Architektur des Geräts in Termux-Schreibweise (aus `os.arch`). */
+    fun currentArch(osArch: String = System.getProperty("os.arch").orEmpty()): String = when (val a = osArch.lowercase()) {
+        AARCH64, "arm64" -> AARCH64
+        X86_64, "amd64" -> X86_64
+        "i386", I686, "x86" -> I686
+        else -> if (a.startsWith(ARM)) ARM else a
+    }
 
     private fun hostOf(url: String?): String? =
         url?.removePrefix("https://")?.substringBefore('/')?.substringBefore(':')?.lowercase()

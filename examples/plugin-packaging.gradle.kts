@@ -4,20 +4,10 @@
  *   plugin.json, classes.dex und <modulname>.zip (das installierbare Archiv).
  * Benötigt ANDROID_HOME/ANDROID_SDK_ROOT (build-tools mit d8) und die android.jar einer Plattform.
  */
-val commonProject = project(":examples:lsp-plugin-common")
-
-/** LSP-Plugins bündeln die gemeinsame Basis ins classes.dex; andere Code-Plugins (z. B. guide-commit-notes) nicht. */
-val bundlesCommon: Boolean = configurations.getByName("implementation").dependencies
-    .any { it is ProjectDependency && it.path == commonProject.path }
-
 val dexClasses by tasks.registering(Exec::class) {
     dependsOn("compileKotlin")
-    if (bundlesCommon) dependsOn("${commonProject.path}:compileKotlin")
     val androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
-    val classDirs = listOfNotNull(
-        layout.buildDirectory.dir("classes/kotlin/main"),
-        commonProject.layout.buildDirectory.dir("classes/kotlin/main").takeIf { bundlesCommon }
-    )
+    val classDirs = listOf(layout.buildDirectory.dir("classes/kotlin/main"))
     val dexOutputDir = layout.buildDirectory.dir("dex")
 
     doFirst {

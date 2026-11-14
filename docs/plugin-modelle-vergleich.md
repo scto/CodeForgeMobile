@@ -1,6 +1,10 @@
 # Plugin-Modelle im Vergleich: Code-Plugin (alt) vs. Manifest-Plugin (neu)
 
-Stand: v3.x. Beispiele: `examples/` (acht LSP-Plugins), Vorlagen: `templates/`, Werkzeug-Plugins: `tool-plugins/`.
+Stand: v3.x. Vorlagen: `templates/`, Werkzeug- und Sprachserver-Plugins: `tool-plugins/`.
+
+> **2026-11:** Die LSP-Code-Plugins unter `examples/` (`*-lsp-plugin`, `lsp-plugin-common`) sind entfernt. Alle Sprachserver sind
+> jetzt rein deklarativ (`tool-plugins/src/*.lsp`), Downloads laufen über `requires` mit `manager: download`. Der Vergleich unten
+> bleibt als Begründung stehen.
 
 ## 1. Die zwei Ansätze
 

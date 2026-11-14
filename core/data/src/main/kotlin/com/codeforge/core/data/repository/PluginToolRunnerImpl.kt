@@ -11,6 +11,7 @@ import com.codeforge.core.domain.extension.RequirementContribution
 import com.codeforge.core.domain.extension.RequirementManager
 import com.codeforge.core.domain.extension.RequirementPolicy
 import com.codeforge.core.domain.extension.ToolRunEvent
+import com.codeforge.core.domain.extension.appliesTo
 import com.codeforge.core.domain.extension.expandCommand
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +35,9 @@ class PluginToolRunnerImpl internal constructor(
     private val contributionRepository: ContributionRepository,
     private val downloader: FileDownloader,
     /** Ordner der Download-Voraussetzungen (`${'$'}{deps}`). */
-    private val depsDir: File
+    private val depsDir: File,
+    /** CPU-Architektur für `requires[].arch`; in Tests ersetzbar. */
+    private val cpuArch: String = RequirementPolicy.currentArch()
 ) : PluginToolRunner {
 
     /** Dispatcher für Ein-/Ausgabe; in Tests ersetzbar. */
@@ -49,7 +52,7 @@ class PluginToolRunnerImpl internal constructor(
             contributionRepository.contributions.value.requires
                 .filter { it.pluginId == pluginId }
                 .map { it.item }
-                .filter { !isPresent(it) }
+                .filter { it.appliesTo(cpuArch) && !isPresent(it) }
         }
 
     /** Ob die Voraussetzung erfüllt ist; Downloads zählen nur in der deklarierten Version (SHA-256). */
@@ -61,7 +64,8 @@ class PluginToolRunnerImpl internal constructor(
     }
 
     override suspend fun releaseDownloads(pluginId: String) = withContext(ioDispatcher) {
-        val downloads = contributionRepository.contributions.value.requires.filter { it.item.manager == RequirementManager.DOWNLOAD }
+        val downloads = contributionRepository.contributions.value.requires
+            .filter { it.item.manager == RequirementManager.DOWNLOAD && it.item.appliesTo(cpuArch) }
         val stillUsed = downloads.filter { it.pluginId != pluginId }.map { it.item.name }.toSet()
         downloads.filter { it.pluginId == pluginId && it.item.name !in stillUsed }
             .forEach { File(depsDir, it.item.name).deleteRecursively() }
@@ -185,6 +189,7 @@ class PluginToolRunnerImpl internal constructor(
                 DownloadArchive.TAR_GZ -> ArchiveUtils.extractTarGz(archive, staging).getOrThrow()
                 DownloadArchive.FILE -> archive.copyTo(File(staging, r.check), overwrite = true)
             }
+            if (r.stripTopDir) stripTopDir(staging)
             val main = File(staging, r.check)
             check(main.exists()) { "Nach dem Entpacken fehlt ${r.check}" }
             main.setExecutable(true, false)
@@ -198,6 +203,13 @@ class PluginToolRunnerImpl internal constructor(
             onSuccess = { send(ToolRunEvent.Line("✓ ${r.name}")); 0 },
             onFailure = { send(ToolRunEvent.Line("Download fehlgeschlagen: ${it.message}")); 1 }
         )
+    }
+
+    // Archiv mit genau einem obersten Ordner (z. B. kmp-lsp-termux-aarch64/): dessen Inhalt eine Ebene nach oben.
+    private fun stripTopDir(dir: File) {
+        val top = dir.listFiles().orEmpty().singleOrNull()?.takeIf { it.isDirectory } ?: return
+        top.listFiles().orEmpty().forEach { child -> check(child.renameTo(File(dir, child.name))) { "Verschieben fehlgeschlagen: ${child.name}" } }
+        top.delete()
     }
 
     private fun installCommand(r: RequirementContribution): List<String> = when (r.manager) {

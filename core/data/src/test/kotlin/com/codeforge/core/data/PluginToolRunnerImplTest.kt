@@ -35,6 +35,14 @@ class PluginToolRunnerImplTest {
         Result.success(dest)
     }
 
+    private val zipBytes: ByteArray = java.io.ByteArrayOutputStream().also { bos ->
+        java.util.zip.ZipOutputStream(bos).use { z ->
+            z.putNextEntry(java.util.zip.ZipEntry("kmp-lsp-termux-aarch64/kmp-lsp"))
+            z.write("bin".toByteArray())
+            z.closeEntry()
+        }
+    }.toByteArray()
+
     private fun downloadReq(sha: String = jarSha) =
         """[{"manager":"download","name":"lemminx","url":"https://download.eclipse.org/x.jar","sha256":"$sha",""" +
             """"archive":"file","check":"lemminx.jar"}]"""
@@ -42,7 +50,8 @@ class PluginToolRunnerImplTest {
     private fun runner(
         toolJson: String,
         requires: String = "[]",
-        downloader: FileDownloader = FileDownloader { _, _, _ -> Result.failure(java.io.IOException("offline")) }
+        downloader: FileDownloader = FileDownloader { _, _, _ -> Result.failure(java.io.IOException("offline")) },
+        arch: String = "aarch64"
     ): PluginToolRunnerImpl {
         val manifest = PluginManifestParser.parse(
             """{"id":"p.test","name":"T","version":"1","apiVersion":2,"permissions":["shell"],""" +
@@ -54,7 +63,8 @@ class PluginToolRunnerImplTest {
                 override val contributions: StateFlow<ActiveContributions> = flow
             },
             downloader,
-            File(tmp.root, "deps")
+            File(tmp.root, "deps"),
+            arch
         )
     }
 
@@ -76,6 +86,27 @@ class PluginToolRunnerImplTest {
         val events = r.install(r.missingRequirements("p.test")).toList()
         assertEquals(1, (events.last() as ToolRunEvent.Finished).exitCode)
         assertTrue(File(tmp.root, "deps").listFiles().orEmpty().isEmpty())
+    }
+
+    private fun archReq(arch: String, sha: String) =
+        """{"manager":"download","name":"kmp","url":"https://github.com/x/$arch.zip","sha256":"$sha",""" +
+            """"archive":"zip","check":"kmp-lsp","arch":"$arch","stripTopDir":true}"""
+
+    @Test
+    fun archFilterAndStripTopDir() = runBlocking {
+        val zipSha = Sha256Utils.calculateSha256(zipBytes)
+        val zipServer = FileDownloader { _, dest, _ ->
+            dest.parentFile?.mkdirs()
+            dest.writeBytes(zipBytes)
+            Result.success(dest)
+        }
+        val reqs = "[${archReq("aarch64", zipSha)},${archReq("x86_64", "b".repeat(64))}]"
+        val r = runner(tool, reqs, zipServer, arch = "aarch64")
+        val missing = r.missingRequirements("p.test")
+        assertEquals(listOf("aarch64"), missing.map { it.arch })
+        assertEquals(0, (r.install(missing).toList().last() as ToolRunEvent.Finished).exitCode)
+        assertTrue(File(tmp.root, "deps/kmp/kmp-lsp").canExecute())
+        assertTrue(r.missingRequirements("p.test").isEmpty())
     }
 
     @Test

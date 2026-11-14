@@ -16,7 +16,8 @@
           "cpp"
         ],
         "command": [
-          "clangd"
+          "clangd",
+          "--background-index"
         ]
       }
     ],

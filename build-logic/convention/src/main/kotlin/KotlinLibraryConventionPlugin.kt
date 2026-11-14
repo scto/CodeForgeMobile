@@ -24,7 +24,7 @@ class KotlinLibraryConventionPlugin : Plugin<Project> {
             }
             configureKotlin()
 
-            // Erlaubt reinen JVM-Modulen (z.B. :examples:*-lsp-plugin) Abhängigkeiten
+            // Erlaubt reinen JVM-Modulen (z.B. Code-Plugins unter :examples) Abhängigkeiten
             // auf Android-Bibliotheken (:core:domain, :libs:plugin-api etc.) aufzulösen.
             dependencies.attributesSchema {
                 attribute(KotlinPlatformType.attribute) {

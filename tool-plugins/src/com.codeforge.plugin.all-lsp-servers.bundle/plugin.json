@@ -22,7 +22,8 @@
       "com.codeforge.plugin.yaml-language-server.lsp",
       "com.codeforge.plugin.kotlin-language-server.lsp",
       "com.codeforge.plugin.jdtls.lsp",
-      "com.codeforge.plugin.lemminx.lsp"
+      "com.codeforge.plugin.lemminx.lsp",
+      "com.codeforge.plugin.kmp-lsp.lsp"
     ]
   }
 }

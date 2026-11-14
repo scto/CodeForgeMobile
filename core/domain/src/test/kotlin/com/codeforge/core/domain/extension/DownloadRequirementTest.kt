@@ -37,6 +37,18 @@ class DownloadRequirementTest {
     }
 
     @Test
+    fun archAndStripAreParsed() {
+        val r = manifest(download(extra = ""","arch":"x86_64","stripTopDir":true""")).getOrThrow().contributes.requires.single()
+        assertEquals("x86_64", r.arch)
+        assertTrue(r.stripTopDir)
+        assertTrue(r.appliesTo("x86_64"))
+        assertFalse(r.appliesTo("aarch64"))
+        assertTrue(manifest(download(extra = ""","arch":"mips"""")).isFailure)
+        assertEquals("aarch64", RequirementPolicy.currentArch("arm64"))
+        assertEquals("x86_64", RequirementPolicy.currentArch("amd64"))
+    }
+
+    @Test
     fun storeAllowsKnownHostsOnly() {
         val github = manifest(download()).getOrThrow().contributes.requires.single()
         val other = manifest(download(url = "https://example.com/x.zip")).getOrThrow().contributes.requires.single()

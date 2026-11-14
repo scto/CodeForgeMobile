@@ -27,7 +27,7 @@ FORMATTERS = [
 
 # (name, label, languages, command, install) – `languages` = Sprach-IDs des Editors; mehrere Server je Plugin möglich
 LSP = [
-    ("clangd", "clangd (C/C++)", [("clangd", ["c", "cpp"], ["clangd"])], "pkg install clang"),
+    ("clangd", "clangd (C/C++)", [("clangd", ["c", "cpp"], ["clangd", "--background-index"])], "pkg install clang"),
     ("rust-analyzer", "rust-analyzer (Rust)", [("rust-analyzer", ["rust"], ["rust-analyzer"])], "pkg install rust-analyzer"),
     ("taplo", "Taplo (TOML)", [("taplo", ["toml"], ["taplo", "lsp", "stdio"])], "pkg install taplo"),
     ("gopls", "gopls (Go)", [("gopls", ["go"], ["gopls"])], "pkg install gopls"),
@@ -59,6 +59,11 @@ LSP = [
     ("lemminx", "LemMinX (XML)",
      [("lemminx", ["xml"], ["java", "${jvmArg}", "-jar", "${deps}/lemminx/org.eclipse.lemminx-uber.jar"])],
      "Download lemminx-uber.jar 0.31.2 von eclipse.org, JDK 17"),
+    # Rust-Server (tree-sitter, ohne JVM/Gradle-Import); Alternative zu Kotlin LS/JDT LS – beide schaltet man in
+    # Einstellungen → Sprachserver getrennt ab. Termux-Binary je Architektur aus dem Release termux-1 von scto/kmp-lsp.
+    ("kmp-lsp", "kmp-lsp (Kotlin/Java/Swift)",
+     [("kmp-lsp", ["kotlin", "java", "swift"], ["${deps}/kmp-lsp/kmp-lsp"])],
+     "Download kmp-lsp termux-1 von GitHub (aarch64/x86_64)"),
 ]
 
 
@@ -101,6 +106,13 @@ REQUIRES = {
     "jdtls": [JDK, _r("pkg", "python", "python3"), _dl(
         "jdtls", "https://download.eclipse.org/jdtls/milestones/1.45.0/jdt-language-server-1.45.0-202502271238.tar.gz",
         "c09e79e958beb5ce41fb3b5097aec0455298bc88a14c8e41462b57edb2812797", "tar.gz", "bin/jdtls")],
+    "kmp-lsp": [
+        {**_dl("kmp-lsp", "https://github.com/scto/kmp-lsp/releases/download/termux-1/kmp-lsp-termux-aarch64.tar.gz",
+               "228a955d5a712445683963ef6cc6775855969dbb63e013b07fbb7a08b7c1e352", "tar.gz", "kmp-lsp"),
+         "arch": "aarch64", "stripTopDir": True},
+        {**_dl("kmp-lsp", "https://github.com/scto/kmp-lsp/releases/download/termux-1/kmp-lsp-termux-x86_64.tar.gz",
+               "63ea6880a36705ae4123a10d6e747eaae78c93006fcf542cfecde2a7cec8be73", "tar.gz", "kmp-lsp"),
+         "arch": "x86_64", "stripTopDir": True}],
     "lemminx": [JDK, _dl(
         "lemminx", "https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar",
         "f4fde164e785c635e5f86361dbf4b993bfe2c5f83fdb52891d058b7dfc9bcfc8", "file", "org.eclipse.lemminx-uber.jar")],

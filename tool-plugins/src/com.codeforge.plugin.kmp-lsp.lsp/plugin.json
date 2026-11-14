@@ -1,0 +1,47 @@
+{
+  "id": "com.codeforge.plugin.kmp-lsp.lsp",
+  "name": "kmp-lsp (Kotlin/Java/Swift) (Language Server)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Bindet kmp-lsp (Kotlin/Java/Swift) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download kmp-lsp termux-1 von GitHub (aarch64/x86_64)).",
+  "permissions": [],
+  "contributes": {
+    "lspServers": [
+      {
+        "id": "kmp-lsp",
+        "label": "kmp-lsp (Kotlin/Java/Swift)",
+        "languages": [
+          "kotlin",
+          "java",
+          "swift"
+        ],
+        "command": [
+          "${deps}/kmp-lsp/kmp-lsp"
+        ]
+      }
+    ],
+    "requires": [
+      {
+        "manager": "download",
+        "name": "kmp-lsp",
+        "url": "https://github.com/scto/kmp-lsp/releases/download/termux-1/kmp-lsp-termux-aarch64.tar.gz",
+        "sha256": "228a955d5a712445683963ef6cc6775855969dbb63e013b07fbb7a08b7c1e352",
+        "archive": "tar.gz",
+        "check": "kmp-lsp",
+        "arch": "aarch64",
+        "stripTopDir": true
+      },
+      {
+        "manager": "download",
+        "name": "kmp-lsp",
+        "url": "https://github.com/scto/kmp-lsp/releases/download/termux-1/kmp-lsp-termux-x86_64.tar.gz",
+        "sha256": "63ea6880a36705ae4123a10d6e747eaae78c93006fcf542cfecde2a7cec8be73",
+        "archive": "tar.gz",
+        "check": "kmp-lsp",
+        "arch": "x86_64",
+        "stripTopDir": true
+      }
+    ]
+  }
+}
