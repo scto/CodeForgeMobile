@@ -6,11 +6,8 @@ import org.junit.Test
 
 class EditorDisplaySettingsWiringTest {
 
-    /**
-     * Belegt strukturiert für jedes Feld in [EditorDisplaySettings],
-     * auf welche Eigenschaft / Komponente in [io.github.rosemoe.sora.widget.CodeEditor]
-     * es in [applyDisplaySettings] bzw. [EditorLanguageFactory] abgebildet wird.
-     */
+    // Belegt für jedes Feld in EditorDisplaySettings, auf welche Eigenschaft/Komponente des Sora-CodeEditor
+    // es in applyDisplaySettings bzw. EditorLanguageFactory abgebildet wird.
     private val expectedMappings = mapOf(
         "tabSize" to "editor.tabWidth",
         "useTreeSitter" to "EditorLanguageFactory.create(useTreeSitter)",
@@ -21,6 +18,7 @@ class EditorDisplaySettingsWiringTest {
         "showNonPrintableChars" to "editor.nonPrintablePaintingFlags",
         "stickyScrollEnabled" to "EditorStickyScroll.isEnabled",
         "magnifierEnabled" to "Magnifier.isEnabled",
+        "icuWordSelection" to "editor.props.useICULibToSelectWords",
         "symbolPairAutocompleteEnabled" to "editor.props.symbolPairAutoCompletion",
         "minimapEnabled" to "EditorMinimap.isEnabled",
         "rainbowBracketsEnabled" to "editor.isHighlightBracketPair / BracketPairs.isEnabled",
@@ -38,6 +36,7 @@ class EditorDisplaySettingsWiringTest {
         "showNonPrintableChars",
         "stickyScrollEnabled",
         "magnifierEnabled",
+        "icuWordSelection",
         "symbolPairAutocompleteEnabled",
         "minimapEnabled",
         "rainbowBracketsEnabled",
@@ -73,6 +72,7 @@ class EditorDisplaySettingsWiringTest {
         assertEquals(14f, defaultSettings.fontSizeSp)
         assertTrue(defaultSettings.stickyScrollEnabled)
         assertTrue(defaultSettings.magnifierEnabled)
+        assertTrue(defaultSettings.icuWordSelection)
         assertTrue(defaultSettings.symbolPairAutocompleteEnabled)
         assertTrue(defaultSettings.minimapEnabled)
         assertTrue(defaultSettings.rainbowBracketsEnabled)

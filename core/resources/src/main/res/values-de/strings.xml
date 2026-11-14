@@ -696,7 +696,7 @@
     <string name="settings_terminal_kompakt_beschreibung">Eingebettete schlanke Shell-Ansicht innerhalb der App</string>
     <string name="settings_termux_ui">Termux-UI</string>
     <string name="settings_termux_ui_beschreibung">Volles Multi-Session-Terminal mit Extra-Keys und Drawer (Standard)</string>
-    <string name="settings_text_lupe_magnifier">Text-Lupe (Magnifier)</string>
+    <string name="settings_text_lupe_magnifier">Lupe aktivieren</string>
     <string name="settings_token_anzeigen">Token anzeigen</string>
     <string name="settings_token_gespeichert">%1$s · Token gespeichert ••••••••</string>
     <string name="settings_token_passwort">Token / Passwort</string>
@@ -704,7 +704,7 @@
     <string name="settings_tokens_werden_verschluesselt_im_androi">Tokens werden verschlüsselt im Android Keystore abgelegt und nur für Fetch/Pull/Push/Clone an den passenden Host gesendet. SSH-Schlüssel werden nicht unterstützt – nutze HTTPS mit einem Personal Access Token.</string>
     <string name="settings_tree_sitter_verwenden">Tree-sitter verwenden</string>
     <string name="settings_ungueltige_mail_adresse">Ungültige E-Mail-Adresse</string>
-    <string name="settings_vergroesserungsglas_bei_cursor_platzie">Vergrößerungsglas bei Cursor-Platzierung per Long-Press.</string>
+    <string name="settings_vergroesserungsglas_bei_cursor_platzie">Vergrößert den Text an der Cursorposition, während Sie Text im Editor auswählen.</string>
     <string name="settings_wird_als_autor_in_jedem">Wird als Autor in jedem Commit und in neuen Projekten (Initial-Commit) verwendet.</string>
     <string name="settings_zeigt_den_umschliessenden_code_block">Zeigt den umschließenden Code-Block (Klasse/Funktion) fixiert am oberen Rand.</string>
     <string name="settings_zeilenumbruch_word_wrap">Zeilenumbruch (Word Wrap)</string>
@@ -2645,4 +2645,6 @@
     <string name="settings_j2k_enabled_desc">Beim Öffnen eines Projekts mit Java-Dateien die Umwandlung nach Kotlin anbieten. Aus: kein Scan und kein Dialog.</string>
     <string name="settings_x2c_enabled">XML → Compose (X2C)</string>
     <string name="settings_x2c_enabled_desc">Layouts nach Jetpack Compose umwandeln: Vorschlag beim Öffnen, Knopf in der Symbolleiste, Einträge im Dateibaum und in der Layout-Liste. Aus: alles ausgeblendet.</string>
+    <string name="settings_icu_word_selection">ICU-Bibliothek für die Wortauswahl</string>
+    <string name="settings_icu_word_selection_desc">Wortgrenzen bei Doppeltippen und langem Drücken mit ICU bestimmen (alle Schriften, Zahlen, Emojis).</string>
 </resources>

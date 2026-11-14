@@ -48,6 +48,7 @@ class EditorSettingsViewModel internal constructor(
                 showNonPrintableChars = settings.editor.showNonPrintableChars,
                 stickyScrollEnabled = settings.editor.stickyScrollEnabled,
                 magnifierEnabled = settings.editor.magnifierEnabled,
+                icuWordSelection = !settings.editor.icuWordSelectionDisabled,
                 symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled,
                 minimapEnabled = settings.editor.minimapEnabled,
                 rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,
@@ -118,6 +119,11 @@ class EditorSettingsViewModel internal constructor(
                 EditorSettingsUiEvent.StickyScrollToggled ->
                     settingsRepository.updateEditor {
                         it.toBuilder().setStickyScrollEnabled(!it.stickyScrollEnabled).build()
+                    }
+
+                EditorSettingsUiEvent.IcuWordSelectionToggled ->
+                    settingsRepository.updateEditor {
+                        it.toBuilder().setIcuWordSelectionDisabled(!it.icuWordSelectionDisabled).build()
                     }
 
                 EditorSettingsUiEvent.MagnifierToggled ->
@@ -222,6 +228,7 @@ class EditorSettingsViewModel internal constructor(
                                     .setShowNonPrintableChars(false)
                                     .setStickyScrollEnabled(true)
                                     .setMagnifierEnabled(true)
+                                    .setIcuWordSelectionDisabled(false)
                                     .setMinimapEnabled(true)
                                     .setRainbowBracketsEnabled(true)
                                     .setPinchToZoomEnabled(true)

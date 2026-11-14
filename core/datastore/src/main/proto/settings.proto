@@ -101,6 +101,8 @@ message EditorConfig {
   // Eingebaute Konverter, invertiert gespeichert (Standard = an): Java→Kotlin und XML→Compose.
   bool j2k_disabled = 32;
   bool x2c_disabled = 33;
+  // Wortauswahl (Doppeltipp, langes Drücken) über ICU-Wortgrenzen; invertiert gespeichert (Standard = an).
+  bool icu_word_selection_disabled = 34;
 }
 
 

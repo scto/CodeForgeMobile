@@ -303,6 +303,12 @@ private fun EditorSettingsScreen(
                 onToggle = { onEvent(EditorSettingsUiEvent.MagnifierToggled) }
             )
             EditorToggleRow(
+                title = Res.string(R.string.settings_icu_word_selection),
+                description = Res.string(R.string.settings_icu_word_selection_desc),
+                checked = uiState.icuWordSelection,
+                onToggle = { onEvent(EditorSettingsUiEvent.IcuWordSelectionToggled) }
+            )
+            EditorToggleRow(
                 title = Res.string(R.string.settings_pinch_to_zoom),
                 description = Res.string(R.string.settings_pinch_to_zoom_desc),
                 checked = uiState.pinchToZoomEnabled,

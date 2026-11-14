@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Editor: ICU-Wortauswahl)
+- Neuer Schalter „ICU-Bibliothek für die Wortauswahl“ (Editor-Einstellungen, Standard an): Doppeltippen und langes Drücken bestimmen die Wortgrenzen über ICU (`props.useICULibToSelectWords` von sora-editor, intern `android.icu.text.BreakIterator`) – korrekt auch bei CJK/Thai, Zahlen und Emojis. Ohne Zusatzbibliothek (ICU ist ab API 24 im System). Proto `icu_word_selection_disabled` (invertiert, gilt auch für bestehende Installationen).
+- Lupe: Texte angepasst („Lupe aktivieren – vergrößert den Text an der Cursorposition, während Sie Text im Editor auswählen“); die Funktion war schon vorhanden und ist bei neuen Installationen an.
+
 ## [3.0.6] - 2026-11-14
 
 ### Highlights

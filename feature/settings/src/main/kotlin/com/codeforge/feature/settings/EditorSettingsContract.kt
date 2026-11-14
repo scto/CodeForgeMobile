@@ -30,6 +30,8 @@ data class EditorSettingsUiState(
     val showNonPrintableChars: Boolean = false,
     val stickyScrollEnabled: Boolean = true,
     val magnifierEnabled: Boolean = true,
+    /** Wortauswahl über ICU-Wortgrenzen. */
+    val icuWordSelection: Boolean = true,
     val symbolPairAutocompleteEnabled: Boolean = true,
     val minimapEnabled: Boolean = true,
     val rainbowBracketsEnabled: Boolean = true,
@@ -87,6 +89,8 @@ sealed interface EditorSettingsUiEvent {
     data object StickyScrollToggled : EditorSettingsUiEvent
     /** Lupe umgeschaltet. */
     data object MagnifierToggled : EditorSettingsUiEvent
+    /** ICU-Wortauswahl an/aus. */
+    data object IcuWordSelectionToggled : EditorSettingsUiEvent
     /** Automatisches Schließen von Klammern und Anführungszeichen umgeschaltet. */
     data object SymbolPairAutocompleteToggled : EditorSettingsUiEvent
     /** Minimap umgeschaltet. */

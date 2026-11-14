@@ -696,7 +696,7 @@
     <string name="settings_terminal_kompakt_beschreibung">Embedded minimal shell view inside the app</string>
     <string name="settings_termux_ui">Termux UI</string>
     <string name="settings_termux_ui_beschreibung">Full multi-session terminal with extra keys and drawer (default)</string>
-    <string name="settings_text_lupe_magnifier">Text magnifier</string>
+    <string name="settings_text_lupe_magnifier">Enable magnifier</string>
     <string name="settings_token_anzeigen">Show token</string>
     <string name="settings_token_gespeichert">%1$s · Token saved ••••••••</string>
     <string name="settings_token_passwort">Token / Password</string>
@@ -704,7 +704,7 @@
     <string name="settings_tokens_werden_verschluesselt_im_androi">Tokens are stored encrypted in the Android Keystore and only sent to the matching host for fetch/pull/push/clone. SSH keys are not supported – use HTTPS with a Personal Access Token.</string>
     <string name="settings_tree_sitter_verwenden">Use Tree-sitter</string>
     <string name="settings_ungueltige_mail_adresse">Invalid email address</string>
-    <string name="settings_vergroesserungsglas_bei_cursor_platzie">Magnifier when placing cursor via long press.</string>
+    <string name="settings_vergroesserungsglas_bei_cursor_platzie">Magnify the text at the cursor position while selecting text in the editor.</string>
     <string name="settings_wird_als_autor_in_jedem">Used as author in every commit and in new projects (initial commit). </string>
     <string name="settings_zeigt_den_umschliessenden_code_block">Shows enclosing code block (class/function) pinned at the top.</string>
     <string name="settings_zeilenumbruch_word_wrap">Word wrap</string>
@@ -2645,4 +2645,6 @@
     <string name="settings_j2k_enabled_desc">Offer the conversion to Kotlin when opening a project with Java files. Off: no scan and no dialog.</string>
     <string name="settings_x2c_enabled">XML → Compose (X2C)</string>
     <string name="settings_x2c_enabled_desc">Convert layouts to Jetpack Compose: suggestion on open, toolbar button, entries in the file tree and layout list. Off: all hidden.</string>
+    <string name="settings_icu_word_selection">Use ICU library</string>
+    <string name="settings_icu_word_selection_desc">Use the ICU library to retrieve word edges for double-tap and long-press word selection.</string>
 </resources>

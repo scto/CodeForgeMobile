@@ -477,6 +477,7 @@ class EditorViewModel @Inject constructor(
                         showNonPrintableChars = settings.editor.showNonPrintableChars,
                         stickyScrollEnabled = settings.editor.stickyScrollEnabled,
                         magnifierEnabled = settings.editor.magnifierEnabled,
+                        icuWordSelection = !settings.editor.icuWordSelectionDisabled,
                         symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled,
                         minimapEnabled = settings.editor.minimapEnabled,
                         rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,

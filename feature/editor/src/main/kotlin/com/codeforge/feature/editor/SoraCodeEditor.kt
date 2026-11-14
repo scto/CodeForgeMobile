@@ -79,6 +79,8 @@ data class EditorDisplaySettings(
     val showNonPrintableChars: Boolean = false,
     val stickyScrollEnabled: Boolean = true,
     val magnifierEnabled: Boolean = true,
+    /** Wortgrenzen für Doppeltipp/langes Drücken per ICU (`android.icu.text.BreakIterator`) statt Zeichenklassen. */
+    val icuWordSelection: Boolean = true,
     val symbolPairAutocompleteEnabled: Boolean = true,
     val minimapEnabled: Boolean = true,
     val rainbowBracketsEnabled: Boolean = true,
@@ -371,10 +373,13 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
         editor.typefaceText = Typeface.MONOSPACE
     }
 
-    // Lupe
+    // Lupe: vergrößert den Text an der Cursorposition, solange eine Auswahl bzw. ein Griff gezogen wird.
     runCatching {
         editor.getComponent(Magnifier::class.java).isEnabled = settings.magnifierEnabled
     }
+
+    // Wortauswahl per ICU: erkennt Wörter in allen Schriften (CJK, Thai …), Bindestriche, Zahlen und Emojis korrekt.
+    editor.props.useICULibToSelectWords = settings.icuWordSelection
 
     // Symbolpaare automatisch schließen
     editor.props.symbolPairAutoCompletion = settings.symbolPairAutocompleteEnabled
