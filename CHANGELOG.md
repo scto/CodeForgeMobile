@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugin: Websuche für den KI-Agenten)
+- `examples/web-search-plugin`: deklaratives Plugin (kein App-Code) mit den Agent-Werkzeugen `web_search` (DuckDuckGo-HTML-Ergebnisse, bis 8 Treffer mit Titel, Adresse, Auszug; ohne Anzeigen) und `web_fetch` (lesbarer Text einer Seite, höchstens 2 MiB laden, ≈ 12.000 Zeichen). Python-Skript nur mit Standardbibliothek; `requires`: pkg `python`.
+- Schutz: `web_fetch` nur für http/https zu öffentlichen Adressen, auch bei Weiterleitungen (kein localhost, keine privaten Netze, keine Metadaten-Adressen). Beide Werkzeuge sind `execute`: der Agent fragt im Standardmodus vor jedem Aufruf nach, da Anfragen das Gerät verlassen. Nur per Sideload (Agent-Werkzeuge sind im Store nicht erlaubt).
+- `:examples:packageAll` baut auch deklarative Beispiele direkt unter `examples/` (→ `examples/out/web-search-plugin/`); `templates/build.py` packt keine `__pycache__`/`.pyc` mehr. Test: `python3 scripts/test_websearch_plugin.py`.
+
 ### Geändert (KI-Einstellungen: neues Layout, Grok und OpenRouter)
 - KI-Einstellungen in Abschnitten statt einer Karte je Anbieter: Anbieter (Chips, Schlüssel-Symbol bei hinterlegtem Schlüssel), Modell des aktiven Anbieters (Liste mit Häkchen, „Alle anzeigen“ ab 12 Modellen, eigener Modellname, Modelle laden, Verbindung testen), API-Schlüssel aller Anbieter (maskiert, ein-/ausblendbar), Endpunkte aller Anbieter (mit Hinweis und Zurücksetzen), Datenschutz und Tageslimit. Änderungen werden 600 ms nach der letzten Eingabe automatisch gespeichert; die Speichern-Knöpfe entfallen.
 - Neue Anbieter Grok (xAI, `https://api.x.ai/v1`) und OpenRouter (`https://openrouter.ai/api/v1`) über den OpenAI-kompatiblen Client (Chat, Agent, Modellliste); Schlüssel-Erkennung `xai-…` und `sk-or-…`. Endpunkte sind jetzt für alle Anbieter änderbar (die Clients nutzten die Basis-URL bereits).

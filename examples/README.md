@@ -15,6 +15,7 @@ Acht LSP-Referenz-Plugins im **neuen Modell** (Manifest v2 + Code für Installat
 | `toml-lsp-plugin` | TOML | Taplo | `requires`: pkg `taplo` |
 | `python-lsp-plugin` | Python | Pyright | `requires`: nodejs + npm |
 | `kmp-lsp-plugin` | Kotlin/Java/Swift | kmp-lsp (Rust, tree-sitter) | Download des Termux-Binaries (Release `termux-1` von `scto/kmp-lsp`, SHA-256-geprüft); keine Pakete nötig |
+| `web-search-plugin` | – | Agent-Werkzeuge `web_search` (DuckDuckGo) und `web_fetch` | deklarativ, Python-Skript; `requires`: pkg `python` |
 | `lsp-plugin-common` | – | Basisklasse `LspServerPlugin`, Installer | wird in jedes `classes.dex` gebündelt |
 
 Start der Server: deklarativ über `contributes.lspServers` (App-Resolver, aktives Projekt als Workspace). Das Plugin stellt nur sicher, dass der Server vorhanden ist (JDK-Check, Download, Meldung) und räumt bei der Deinstallation auf.

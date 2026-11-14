@@ -49,7 +49,7 @@ def build(folder, out=None, prefix=""):
         (out / name / "plugin.json").write_bytes((folder / "plugin.json").read_bytes())
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
         for f in sorted(folder.rglob("*")):
-            if f.is_file():
+            if f.is_file() and "__pycache__" not in f.parts and f.suffix not in (".pyc", ".pyo"):
                 z.write(f, f.relative_to(folder).as_posix())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     try:

@@ -1,0 +1,33 @@
+{
+  "id": "com.example.web-search",
+  "name": "Websuche (DuckDuckGo)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "minHostVersion": "3.0.5",
+  "publisher": "example",
+  "description": "Gibt dem KI-Agenten zwei Werkzeuge: Websuche über DuckDuckGo und Abruf einer Seite als Text. Suchanfragen und Adressen gehen an DuckDuckGo bzw. die abgerufene Seite; der Agent fragt vor jedem Aufruf nach. Braucht python (wird nach Bestätigung installiert).",
+  "permissions": ["agent", "shell"],
+  "contributes": {
+    "agentTools": [
+      {
+        "id": "web_search",
+        "description": "Sucht im Web (DuckDuckGo) nach aktuellen Informationen und liefert bis zu 8 Treffer mit Titel, Adresse und Auszug. Danach mit web_fetch eine Adresse lesen.",
+        "kind": "execute",
+        "inputDescription": "Suchbegriffe, z. B. 'Jetpack Compose LazyColumn stickyHeader'. Optional mit ' | n' die Trefferzahl (1–8).",
+        "command": ["python3", "${pluginDir}/websearch.py", "search", "${input}"],
+        "timeoutSeconds": 30
+      },
+      {
+        "id": "web_fetch",
+        "description": "Lädt eine Webseite (http/https) und liefert ihren lesbaren Text (Titel und Inhalt, gekürzt auf etwa 12.000 Zeichen). Keine lokalen oder privaten Adressen.",
+        "kind": "execute",
+        "inputDescription": "Vollständige Adresse, z. B. https://developer.android.com/develop/ui/compose/lists",
+        "command": ["python3", "${pluginDir}/websearch.py", "fetch", "${input}"],
+        "timeoutSeconds": 30
+      }
+    ],
+    "requires": [
+      { "manager": "pkg", "name": "python", "check": "python3" }
+    ]
+  }
+}

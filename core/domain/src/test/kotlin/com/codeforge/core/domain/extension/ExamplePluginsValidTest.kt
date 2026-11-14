@@ -11,7 +11,9 @@ class ExamplePluginsValidTest {
     private val dir: File = generateSequence(File("").absoluteFile) { it.parentFile }
         .map { File(it, "examples") }.first { it.isDirectory }
 
-    private val plugins = dir.listFiles { f -> File(f, "plugin.json").isFile }.orEmpty().sortedBy { it.name }
+    private val plugins = dir.listFiles { f -> f.name.endsWith("-lsp-plugin") && File(f, "plugin.json").isFile }
+        .orEmpty()
+        .sortedBy { it.name }
 
     @Test
     fun `alle neun LSP-Plugins haben gueltige Code-Manifeste mit lspServers`() {
@@ -37,5 +39,25 @@ class ExamplePluginsValidTest {
         val langs = ms.filter { it.id != "com.example.kmp-lsp" }
             .flatMap { m -> m.contributes.lspServers.flatMap { it.languages } }
         assertEquals(langs.toString(), langs.size, langs.toSet().size)
+    }
+
+    @Test
+    fun `Websuche-Plugin ist gueltig`() {
+        val folder = File(dir, "web-search-plugin")
+        val m = PluginManifestParser.parse(File(folder, "plugin.json").readText()).getOrThrow()
+        assertEquals(null, m.entryPointClass)
+        assertTrue(PluginPermissions.AGENT in m.permissions && PluginPermissions.SHELL in m.permissions)
+        assertEquals(listOf("web_search", "web_fetch"), m.contributes.agentTools.map { it.id })
+        // Anfragen verlassen das Gerät: Der Agent soll vor jedem Aufruf fragen.
+        assertTrue(m.contributes.agentTools.all { it.kind == AgentToolKind.EXECUTE })
+        m.contributes.agentTools.forEach { tool ->
+            assertEquals(listOf("python3", "\${pluginDir}/websearch.py"), tool.command.take(2))
+            assertTrue(tool.command.last() == "\${input}")
+        }
+        assertTrue(File(folder, "websearch.py").isFile)
+        assertEquals(listOf("python"), m.contributes.requires.map { it.name })
+        // Agent-Werkzeuge starten Programme: nur per Sideload, nicht über den Store.
+        val files = folder.listFiles().orEmpty().map { it.name }
+        assertNotNull(DeclarativeOnly.violation(files, m, allowTools = true))
     }
 }
