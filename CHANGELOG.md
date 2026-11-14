@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.0.6] - 2026-11-14
+
 ### Geändert (LSP-Beispiel-Plugins durch deklarative Plugins ersetzt)
 - **Entfernt:** die alten LSP-Code-Plugins unter `examples/` (`cpp-`, `python-`, `bash-`, `toml-`, `yaml-`, `kotlin-`, `java-`, `xml-`, `kmp-lsp-plugin`, `lsp-plugin-common`) samt Gradle-Modulen, `examples/out`-Archiven, detekt-Baselines und `ExamplePluginsValidTest`. `examples/` enthält nur noch `web-search-plugin` und die Leitfaden-Beispiele.
 - **Ersatz** sind die deklarativen Plugins in `tool-plugins/src/*.lsp` (Store-Kategorie „Sprachserver“): C/C++ (`clangd`, jetzt mit `--background-index` wie das alte Beispiel), Python (Pyright, zusätzlich Ruff), Bash, TOML (Taplo), YAML – dazu Kotlin LS, JDT LS, LemMinX und neu **kmp-lsp** (`com.codeforge.plugin.kmp-lsp.lsp`).
