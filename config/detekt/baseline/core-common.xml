@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:FileHeaderRenderer.kt:FileHeaderRenderer$else</ID>
+    <ID>BracesOnWhenStatements:FileHeaderRenderer.kt:FileHeaderRenderer$when</ID>
+    <ID>CascadingCallWrapping:CfmLogManager.kt:CfmLogManager$append(' ')</ID>
+    <ID>CascadingCallWrapping:CfmLogManager.kt:CfmLogManager$append('/')</ID>
+    <ID>ClassOrdering:CfmLogManager.kt:CfmLogManager$/** Ob die Protokollierung aktiv ist. */ val isEnabled: Boolean get() = enabled.get()</ID>
+    <ID>ClassOrdering:CfmLogger.kt:CfmLogger$Companion</ID>
+    <ID>CognitiveComplexMethod:FileHeaderRenderer.kt:FileHeaderRenderer$fun applyHeaderToContent: String</ID>
+    <ID>CognitiveComplexMethod:FileHeaderRenderer.kt:FileHeaderRenderer$fun render: String?</ID>
+    <ID>CollapsibleIfStatements:FileCfmLogger.kt:FileCfmLogger$if (file.isFile &amp;&amp; file.name.startsWith("cfm-") &amp;&amp; file.name.endsWith(".log")) { if (file.lastModified() &lt; cutoff) { file.delete() } }</ID>
+    <ID>ComplexInterface:CfmLogger.kt:CfmLogger</ID>
+    <ID>CyclomaticComplexMethod:FileHeaderRenderer.kt:FileHeaderRenderer$fun render: String?</ID>
+    <ID>DocumentationOverPrivateFunction:CfmLogManager.kt:CfmLogManager$private fun newLogFile: File</ID>
+    <ID>DocumentationOverPrivateProperty:CfmLogManager.kt:CfmLogManager$/** Datei der laufenden Sitzung (unter [lock]). */ private var activeFile: File? = null</ID>
+    <ID>ExpressionBodySyntax:FileCfmLogger.kt:FileCfmLogger$return msg.replace(Regex("(?i)(password|secret|token|api_?key|auth)[\\s:=]+[^\\s]+"), "$1=***")</ID>
+    <ID>FunctionNameMaxLength:CfmCrashHandlerTest.kt:CfmCrashHandlerTest$@Test fun `pruneOldCrashLogs limits stored crash files to maximum`</ID>
+    <ID>FunctionNameMaxLength:CfmCrashHandlerTest.kt:CfmCrashHandlerTest$@Test fun `writeCrashLog synchronously writes header and stacktrace`</ID>
+    <ID>FunctionNameMaxLength:CfmCrashHandlerTest.kt:CfmCrashHandlerTest$@Test fun `writeCrashLog uses fallback directory if primary is unwritable`</ID>
+    <ID>FunctionNameMaxLength:CfmLogManagerTest.kt:CfmLogManagerTest$@Test fun `Deaktivieren stoppt Schreiben und clearLogs loescht`</ID>
+    <ID>FunctionNameMaxLength:CfmLogManagerTest.kt:CfmLogManagerTest$@Test fun `Export nach HTML und XML maskiert und liest auch Zip`</ID>
+    <ID>FunctionNameMaxLength:CfmLogManagerTest.kt:CfmLogManagerTest$@Test fun `Fallback-Verzeichnis wenn primaer nicht beschreibbar`</ID>
+    <ID>FunctionNameMaxLength:CfmLogManagerTest.kt:CfmLogManagerTest$@Test fun `Hoechstzahl loescht die aeltesten und Zippen laesst die laufende Datei in Ruhe`</ID>
+    <ID>FunctionNameMaxLength:CfmLogManagerTest.kt:CfmLogManagerTest$@Test fun `jede Sitzung bekommt eine eigene Datei mit Datum und Uhrzeit`</ID>
+    <ID>FunctionNameMaxLength:CfmLogManagerTest.kt:CfmLogManagerTest$@Test fun `schreibt nach Aktivierung in cfm-Datei`</ID>
+    <ID>FunctionNameMaxLength:CfmLogManagerTest.kt:CfmLogManagerTest$@Test fun `schreibt nichts solange deaktiviert`</ID>
+    <ID>FunctionNameMaxLength:CfmLoggerTest.kt:CfmLoggerTest$@Test fun `constants adhere to requirements`</ID>
+    <ID>FunctionNameMaxLength:CfmLoggerTest.kt:CfmLoggerTest$@Test fun `file logger writes asynchronous log entries and sanitizes tokens`</ID>
+    <ID>FunctionNameMaxLength:FileHeaderRendererTest.kt:FileHeaderRendererTest$@Test fun testYamlAndTomlDefaultTemplates</ID>
+    <ID>FunctionNameMinLength:CfmLogger.kt:CfmLogger$fun d</ID>
+    <ID>FunctionNameMinLength:CfmLogger.kt:CfmLogger$fun e</ID>
+    <ID>FunctionNameMinLength:CfmLogger.kt:CfmLogger$fun i</ID>
+    <ID>FunctionNameMinLength:CfmLogger.kt:CfmLogger$fun w</ID>
+    <ID>MultilineRawStringIndentation:FileHeaderRenderer.kt:FileHeaderRenderer$""" # Modul: {{module}} # @author {{author}} """</ID>
+    <ID>MultilineRawStringIndentation:FileHeaderRenderer.kt:FileHeaderRenderer$""" /** * Modul: {{module}} * @author {{author}} */ """</ID>
+    <ID>MultilineRawStringIndentation:FileHeaderRenderer.kt:FileHeaderRenderer$""" &lt;!-- Modul: {{module}} @author {{author}} --> """</ID>
+    <ID>StringLiteralDuplication:FileHeaderRenderer.kt:FileHeaderRenderer$"$header\n$content"</ID>
+    <ID>StringShouldBeRawString:CfmLogExporter.kt:CfmLogExporter$" &lt;entry level=\"$level\">${escape(line)}&lt;/entry>\n"</ID>
+    <ID>StringShouldBeRawString:CfmLogExporter.kt:CfmLogExporter$"&lt;!DOCTYPE html>\n&lt;html>&lt;head>&lt;meta charset=\"utf-8\">&lt;title>${escape(base)}&lt;/title>&lt;style>" + "body{font-family:monospace;font-size:12px;background:#1c1b1f;color:#e6e1e5;margin:8px}" + "div{white-space:pre-wrap;word-break:break-word;padding:1px 0}" + ".E,.F{color:#f2b8b5}.W{color:#f5d38a}.I{color:#a8c7fa}.D,.V{color:#9e9aa5}" + "&lt;/style>&lt;/head>&lt;body>\n&lt;h3>${escape(source.name)}&lt;/h3>\n"</ID>
+    <ID>StringShouldBeRawString:CfmLogExporter.kt:CfmLogExporter$"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\n&lt;log file=\"${escape(source.name)}\">\n"</ID>
+    <ID>StringShouldBeRawString:CfmLogExporter.kt:CfmLogExporter$"&lt;div class=\"$level\">${escape(line)}&lt;/div>\n"</ID>
+    <ID>StringShouldBeRawString:CfmLogExporter.kt:CfmLogExporter$"^\\d\\d-\\d\\d \\S+\\s+\\d+\\s+\\d+ ([VDIWEF]) "</ID>
+    <ID>StringShouldBeRawString:CfmLogExporter.kt:CfmLogExporter$"^\\d{4}-\\d\\d-\\d\\d \\S+ ([VDIWEF])/"</ID>
+    <ID>StringShouldBeRawString:CfmLogManagerTest.kt:CfmLogManagerTest$"2023-11-14 12:00:00.000 E/Tag: &lt;kaputt> &amp; \"so\"\n\tat x.Y(Z.kt:1)\n11-14 12:00:01.000 1 2 W Lib: warn\n"</ID>
+    <ID>StringShouldBeRawString:CfmLogManagerTest.kt:CfmLogManagerTest$"&lt;div class=\"E\">\tat x.Y(Z.kt:1)&lt;/div>"</ID>
+    <ID>StringShouldBeRawString:CfmLogManagerTest.kt:CfmLogManagerTest$"cfm-\\d{8}-\\d{6}\\.log"</ID>
+    <ID>StringShouldBeRawString:FileHeaderRendererTest.kt:FileHeaderRendererTest$"/**\n * Modul: :feature:editor\n * @author Alice\n */\npackage com.example"</ID>
+    <ID>StringShouldBeRawString:FileHeaderRendererTest.kt:FileHeaderRendererTest$"&lt;!--\n Modul: :core:resources\n @author Bob\n-->"</ID>
+    <ID>StringShouldBeRawString:FileHeaderRendererTest.kt:FileHeaderRendererTest$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>"</ID>
+    <ID>StringShouldBeRawString:FileHeaderRendererTest.kt:FileHeaderRendererTest$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>\n&lt;resources>\n&lt;/resources>"</ID>
+    <ID>UndocumentedPublicFunction:CfmFileProvider.kt:CfmFileProvider.Companion$fun authority: String</ID>
+    <ID>UndocumentedPublicFunction:CfmFileProvider.kt:CfmFileProvider.Companion$fun buildShareIntent: Intent</ID>
+    <ID>UndocumentedPublicFunction:CfmFileProvider.kt:CfmFileProvider.Companion$fun getUriForFile: Uri</ID>
+  </CurrentIssues>
+</SmellBaseline>

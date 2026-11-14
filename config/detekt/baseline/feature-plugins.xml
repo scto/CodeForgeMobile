@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:PluginLspInfo.kt:PluginLspInfo$else</ID>
+    <ID>BracesOnIfStatements:PluginLspInfo.kt:PluginLspInfo$if</ID>
+    <ID>BracesOnIfStatements:PluginsScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:PluginsScreen.kt:if</ID>
+    <ID>BracesOnWhenStatements:PluginsViewModel.kt:PluginsViewModel$when</ID>
+    <ID>ClassOrdering:PluginsViewModel.kt:PluginsViewModel$private var infoJob: Job? = null</ID>
+    <ID>CognitiveComplexMethod:PluginsScreen.kt:@Composable private fun PluginRow</ID>
+    <ID>CognitiveComplexMethod:PluginsScreen.kt:@Composable private fun RequirementDialogView</ID>
+    <ID>DocumentationOverPrivateFunction:PluginsScreen.kt:private fun copyToCacheFile: File?</ID>
+    <ID>DocumentationOverPrivateFunction:PluginsViewModel.kt:PluginsViewModel$private fun openInfo</ID>
+    <ID>DocumentationOverPrivateFunction:PluginsViewModel.kt:PluginsViewModel$private fun refreshMissing</ID>
+    <ID>UnnecessaryParentheses:PluginsScreen.kt:(plugin.contributionKinds + plugin.packMembers.map { "→ $it" })</ID>
+  </CurrentIssues>
+</SmellBaseline>

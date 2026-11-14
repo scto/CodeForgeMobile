@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:ProjectWizardViewModel.kt:ProjectWizardViewModel$when</ID>
+    <ID>CascadingCallWrapping:ProjectWizardViewModel.kt:ProjectWizardViewModel$validated()</ID>
+    <ID>CognitiveComplexMethod:ProjectDirectoryPickerDialog.kt:@Composable fun ProjectDirectoryPickerDialog</ID>
+    <ID>CognitiveComplexMethod:ProjectWizardScreen.kt:@Composable private fun ConfigForm</ID>
+    <ID>CyclomaticComplexMethod:ProjectDirectoryPickerDialog.kt:@Composable fun ProjectDirectoryPickerDialog</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `compose template forces kotlin language`</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `create with validation errors does not generate and shows errors`</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `failure in template engine updates generationError without crash`</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `initial state loads templates and default settings`</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `package name change stops automatic suggestion updates`</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `project name change updates suggested package when unedited`</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `successful creation saves settings, updates recents, and emits OpenProject effect`</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `template selection transitions to configure step and suggests package`</ID>
+    <ID>FunctionNameMaxLength:ProjectWizardViewModelTest.kt:ProjectWizardViewModelTest$@Test fun `unexpected exception in template engine coroutine is caught without crashing`</ID>
+    <ID>FunctionNameMinLength:TemplateUi.kt:internal fun ProjectTemplateKind.ui: TemplateUi</ID>
+    <ID>ReturnCount:ProjectWizardViewModel.kt:ProjectWizardViewModel$private fun create</ID>
+    <ID>TooGenericExceptionCaught:ProjectWizardViewModel.kt:ProjectWizardViewModel$t: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

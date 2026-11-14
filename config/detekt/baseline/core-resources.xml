@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EndOfSentenceFormat:Res.kt:Res$ Text zu [id]; [args] ersetzen `%1$s`, `%2$d` … </ID>
+    <ID>FunctionNameMaxLength:LanguageOverridesTest.kt:LanguageOverridesTest$@Test fun `falscher Platzhalter ergibt null statt Absturz`</ID>
+    <ID>FunctionNameMaxLength:LanguageOverridesTest.kt:LanguageOverridesTest$@Test fun `format ohne Argumente liefert Vorlage unveraendert`</ID>
+    <ID>FunctionNameMinLength:UiText.kt:UiText.Companion$fun of: UiText</ID>
+    <ID>UndocumentedPublicFunction:Res.kt:Res.Resolver$fun plural: String</ID>
+    <ID>UndocumentedPublicFunction:Res.kt:Res.Resolver$fun string: String</ID>
+    <ID>UndocumentedPublicFunction:UiText.kt:UiText.Companion$fun of: UiText</ID>
+    <ID>UndocumentedPublicFunction:UiText.kt:UiText.Companion$fun plural: UiText</ID>
+  </CurrentIssues>
+</SmellBaseline>

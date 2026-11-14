@@ -1,0 +1,491 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:BuildCheckTest.kt:BuildCheckTest$else</ID>
+    <ID>BracesOnIfStatements:BuildCheckTest.kt:BuildCheckTest$if</ID>
+    <ID>BracesOnIfStatements:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$else</ID>
+    <ID>BracesOnIfStatements:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$if</ID>
+    <ID>BracesOnIfStatements:ComposeEntryWirerImpl.kt:ComposeEntryWirerImpl$if</ID>
+    <ID>BracesOnIfStatements:ComposeSession.kt:ComposeSession$else</ID>
+    <ID>BracesOnIfStatements:ComposeSession.kt:ComposeSession$if</ID>
+    <ID>BracesOnIfStatements:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$else</ID>
+    <ID>BracesOnIfStatements:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$if</ID>
+    <ID>BracesOnIfStatements:GradleLogParser.kt:GradleLogParser$if</ID>
+    <ID>BracesOnIfStatements:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$else</ID>
+    <ID>BracesOnIfStatements:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$if</ID>
+    <ID>BracesOnIfStatements:LayoutXmlParser.kt:LayoutXmlParser.&lt;no name provided>$if</ID>
+    <ID>BracesOnIfStatements:MiniJson.kt:MiniJson$if</ID>
+    <ID>BracesOnIfStatements:MiniJson.kt:MiniJson.Parser$if</ID>
+    <ID>BracesOnIfStatements:ProcessGitBranchCommitter.kt:ProcessGitBranchCommitter$if</ID>
+    <ID>BracesOnIfStatements:ProcessX2cBuildChecker.kt:ProcessX2cBuildChecker$else</ID>
+    <ID>BracesOnIfStatements:ProcessX2cBuildChecker.kt:ProcessX2cBuildChecker$if</ID>
+    <ID>BracesOnIfStatements:ValuesXmlParser.kt:ValuesXmlParser.&lt;no name provided>$if</ID>
+    <ID>BracesOnIfStatements:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$if</ID>
+    <ID>BracesOnIfStatements:X2cReportWriter.kt:X2cReportWriter$if</ID>
+    <ID>BracesOnIfStatements:X2cRepositoryImpl.kt:X2cRepositoryImpl$if</ID>
+    <ID>BracesOnWhenStatements:ComposeEntryWirerImpl.kt:ComposeEntryWirerImpl$when</ID>
+    <ID>BracesOnWhenStatements:ComposeSession.kt:ComposeSession$when</ID>
+    <ID>BracesOnWhenStatements:MiniJson.kt:MiniJson$when</ID>
+    <ID>BracesOnWhenStatements:MiniJson.kt:MiniJson.Parser$when</ID>
+    <ID>BracesOnWhenStatements:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$when</ID>
+    <ID>BracesOnWhenStatements:X2cReportWriter.kt:X2cReportWriter$when</ID>
+    <ID>CascadingCallWrapping:LayoutValues.kt:LayoutValues$replace("$", "\\$")</ID>
+    <ID>CascadingCallWrapping:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$associate { it.relativeTo(project).path to it.readText() }</ID>
+    <ID>CascadingCallWrapping:X2cRepositoryImpl.kt:X2cRepositoryImpl$dir.walkTopDown().onEnter { it.name !in ComposeMigrationScannerImpl.EXCLUDED_DIRS } .firstOrNull { it.isFile &amp;&amp; it.name == "$name.kt" &amp;&amp; Regex("""\bfun\s+$name\s*\(""").containsMatchIn(it.readText()) } ?: return null</ID>
+    <ID>CascadingCallWrapping:X2cRepositoryImpl.kt:X2cRepositoryImpl$map { it.relativeTo(project).path.replace('\\', '/') }</ID>
+    <ID>CascadingCallWrapping:X2cRepositoryImpl.kt:X2cRepositoryImpl$sortedBy { it.name }</ID>
+    <ID>ClassOrdering:BuildCheckTest.kt:BuildCheckTest$private val opts = X2cOptions(wireActivities = true, generateTheme = false, removeXmlAfterSuccess = false, runBuildCheck = true, includeGitInBackup = false)</ID>
+    <ID>ClassOrdering:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$Companion</ID>
+    <ID>ClassOrdering:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$private val fTarget = WireTarget("fragment_profile", "ProfileScreen", themeName = "AppTheme", themePackage = "com.example.ui.theme", composablePackage = "com.example")</ID>
+    <ID>ClassOrdering:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$private val fragment = """ package com.example import android.os.Bundle import android.view.LayoutInflater import android.view.View import android.view.ViewGroup import androidx.fragment.app.Fragment class ProfileFragment : Fragment() { override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? { return inflater.inflate(R.layout.fragment_profile, container, false) } } """.trimStart()</ID>
+    <ID>ClassOrdering:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$Companion</ID>
+    <ID>ClassOrdering:ComposeSession.kt:ComposeSession$/** TODO-Kommentare, die beim Aufbau des Modifiers entstehen und vor das Element gesetzt werden. */ private val pendingTodos = mutableListOf&lt;String>()</ID>
+    <ID>ClassOrdering:ComposeSession.kt:ComposeSession$private val ratioCalls = IdentityHashMap&lt;XmlElement, String>()</ID>
+    <ID>ClassOrdering:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$Companion</ID>
+    <ID>ClassOrdering:LayoutValues.kt:LayoutValues$/** Android-Standardfarben (Name auf Kotlin-Ausdruck). */ val ANDROID_COLORS = mapOf( "white" to "Color.White", "black" to "Color.Black", "transparent" to "Color.Transparent", "darker_gray" to "Color.DarkGray", "holo_red_dark" to "Color.Red" )</ID>
+    <ID>ClassOrdering:LayoutXmlParser.kt:XmlElement$/** Tag ohne Package (`Button` statt `android.widget.Button`). */ val shortTag: String get() = tag.substringAfterLast('.')</ID>
+    <ID>ClassOrdering:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$Companion</ID>
+    <ID>ClassOrdering:X2cChangeApplierTest.kt:X2cChangeApplierTest$private val create = PlannedChange.Create("app/src/main/kotlin/com/x/ui/MainScreen.kt", "fun MainScreen() {}")</ID>
+    <ID>ClassOrdering:X2cChangeApplierTest.kt:X2cChangeApplierTest$private val delete = PlannedChange.Delete("app/src/main/res/layout/activity_main.xml")</ID>
+    <ID>ClassOrdering:X2cChangeApplierTest.kt:X2cChangeApplierTest$private val replace = PlannedChange.Replace("app/src/main/java/com/x/MainActivity.kt", "class MainActivity2")</ID>
+    <ID>ClassOrdering:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$private val all = X2cOptions(wireActivities = true, generateTheme = true, removeXmlAfterSuccess = true, runBuildCheck = false, includeGitInBackup = false)</ID>
+    <ID>CognitiveComplexMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$override suspend fun checkPrerequisites: Result&lt;PrerequisitesCheckResult></ID>
+    <ID>CognitiveComplexMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$override suspend fun enableComposeInProject: Result&lt;BuildEnableResult></ID>
+    <ID>CognitiveComplexMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun ensureBuildFeaturesAndOptions: Pair&lt;String, Boolean></ID>
+    <ID>CognitiveComplexMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun ensureDependencies: Pair&lt;String, List&lt;String>></ID>
+    <ID>CognitiveComplexMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun updateVersionCatalog: CatalogUpdateResult</ID>
+    <ID>CognitiveComplexMethod:ComposeEntryWirerImpl.kt:ComposeEntryWirerImpl$internal fun blankCommentsAndStrings: String</ID>
+    <ID>CognitiveComplexMethod:ComposeEntryWirerImpl.kt:ComposeEntryWirerImpl$override fun wire: ComposeWireResult</ID>
+    <ID>CognitiveComplexMethod:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$override suspend fun scanProject: ComposeScanResult</ID>
+    <ID>CognitiveComplexMethod:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$private fun parseXmlStructure: ParsedXmlInfo</ID>
+    <ID>CognitiveComplexMethod:ComposeSession.kt:ComposeSession$private fun axis: String?</ID>
+    <ID>CognitiveComplexMethod:ComposeSession.kt:ComposeSession$private fun constraint: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:ComposeSession.kt:ComposeSession$private fun linear: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:ComposeSession.kt:ComposeSession$private fun modifierFor: String?</ID>
+    <ID>CognitiveComplexMethod:ComposeSession.kt:ComposeSession$private fun recycler: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:ComposeSession.kt:ComposeSession$private fun relative: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:ComposeSession.kt:ComposeSession$private fun text: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:ComposeSession.kt:ComposeSession$private fun textField: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$override fun generate: Result&lt;ThemeGenerationResult></ID>
+    <ID>CognitiveComplexMethod:GradleLogParser.kt:GradleLogParser$fun parse: List&lt;X2cBuildProblem></ID>
+    <ID>CognitiveComplexMethod:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$override suspend fun findAllUsages: Map&lt;String, List&lt;LayoutUsage>></ID>
+    <ID>CognitiveComplexMethod:LayoutXmlParser.kt:LayoutXmlParser$fun parse: XmlElement</ID>
+    <ID>CognitiveComplexMethod:ProcessX2cBuildChecker.kt:ProcessX2cBuildChecker$override suspend fun runTasks: X2cBuildStepResult</ID>
+    <ID>CognitiveComplexMethod:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>CognitiveComplexMethod:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$override suspend fun apply: Result&lt;ApplyResult></ID>
+    <ID>CognitiveComplexMethod:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$override suspend fun undo: Result&lt;UndoResult></ID>
+    <ID>CognitiveComplexMethod:X2cReportWriter.kt:X2cReportWriter$fun render: String</ID>
+    <ID>CognitiveComplexMethod:X2cRepositoryImpl.kt:X2cRepositoryImpl$override suspend fun executeMigration: X2cReport</ID>
+    <ID>CollapsibleIfStatements:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$if (!hasCompose) { if (COMPOSE_MARKERS.any { content.contains(it) } || checkComposeBuildFeatures(content) ) { hasCompose = true } }</ID>
+    <ID>ComplexCondition:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$javaVer == "1_6" || javaVer == "1_7" || javaVer == "6" || javaVer == "7"</ID>
+    <ID>ComplexCondition:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$text.contains("com.android.application") || text.contains("com.android.library") || text.contains("android {") || text.contains("android{")</ID>
+    <ID>ComplexCondition:ComposeSession.kt:ComposeSession$bg != null &amp;&amp; w == "match_parent" &amp;&amp; hNum != null &amp;&amp; hNum.first &lt;= 2.0</ID>
+    <ID>ComplexCondition:ComposeSession.kt:ComposeSession$bg == null &amp;&amp; el.peek("android:background") == null &amp;&amp; (wNum != null || h?.let { number(it) } != null || w == "0dp" || h == "0dp")</ID>
+    <ID>ComplexCondition:ComposeSession.kt:ComposeSession$it != null &amp;&amp; it.startsWith("width(") || it != null &amp;&amp; it.startsWith("height(")</ID>
+    <ID>ComplexCondition:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$line.startsWith("//") || line.startsWith("*") || line.startsWith("/*") || line.startsWith("import ")</ID>
+    <ID>CyclomaticComplexMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$override suspend fun enableComposeInProject: Result&lt;BuildEnableResult></ID>
+    <ID>CyclomaticComplexMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun ensureDependencies: Pair&lt;String, List&lt;String>></ID>
+    <ID>CyclomaticComplexMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun updateVersionCatalog: CatalogUpdateResult</ID>
+    <ID>CyclomaticComplexMethod:ComposeEntryWirerImpl.kt:ComposeEntryWirerImpl$override fun wire: ComposeWireResult</ID>
+    <ID>CyclomaticComplexMethod:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$override suspend fun scanProject: ComposeScanResult</ID>
+    <ID>CyclomaticComplexMethod:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$private fun analyzeLayoutFile: LayoutPlanEntry</ID>
+    <ID>CyclomaticComplexMethod:ComposeSession.kt:ComposeSession$private fun constraint: List&lt;String></ID>
+    <ID>CyclomaticComplexMethod:ComposeSession.kt:ComposeSession$private fun linear: List&lt;String></ID>
+    <ID>CyclomaticComplexMethod:ComposeSession.kt:ComposeSession$private fun modifierFor: String?</ID>
+    <ID>CyclomaticComplexMethod:ComposeSession.kt:ComposeSession$private fun recycler: List&lt;String></ID>
+    <ID>CyclomaticComplexMethod:ComposeSession.kt:ComposeSession$private fun relative: List&lt;String></ID>
+    <ID>CyclomaticComplexMethod:ComposeSession.kt:ComposeSession$private fun sidesCall: String?</ID>
+    <ID>CyclomaticComplexMethod:ComposeSession.kt:ComposeSession$private fun text: List&lt;String></ID>
+    <ID>CyclomaticComplexMethod:ComposeSession.kt:ComposeSession$private fun textField: List&lt;String></ID>
+    <ID>CyclomaticComplexMethod:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$override fun generate: Result&lt;ThemeGenerationResult></ID>
+    <ID>CyclomaticComplexMethod:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$override suspend fun findAllUsages: Map&lt;String, List&lt;LayoutUsage>></ID>
+    <ID>CyclomaticComplexMethod:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>CyclomaticComplexMethod:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$override suspend fun apply: Result&lt;ApplyResult></ID>
+    <ID>CyclomaticComplexMethod:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$override suspend fun undo: Result&lt;UndoResult></ID>
+    <ID>CyclomaticComplexMethod:X2cReportWriter.kt:X2cReportWriter$fun render: String</ID>
+    <ID>CyclomaticComplexMethod:X2cRepositoryImpl.kt:X2cRepositoryImpl$override suspend fun executeMigration: X2cReport</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:ComposeSession.kt:ComposeSession$val (s, t, en, b) = e</ID>
+    <ID>DocumentationOverPrivateFunction:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$private fun enrichWithUsages: LayoutPlanEntry</ID>
+    <ID>DocumentationOverPrivateFunction:ComposeSession.kt:ComposeSession$private fun nameOf: String</ID>
+    <ID>DocumentationOverPrivateFunction:ComposeSession.kt:ComposeSession$private fun str: String?</ID>
+    <ID>DocumentationOverPrivateFunction:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$private fun familyOfStyle: String?</ID>
+    <ID>DocumentationOverPrivateFunction:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$private fun pickTheme: StyleDef?</ID>
+    <ID>DocumentationOverPrivateFunction:ProcessX2cBuildChecker.kt:ProcessX2cBuildChecker$private fun killChildren</ID>
+    <ID>DocumentationOverPrivateFunction:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$private fun rollbackNow: List&lt;String></ID>
+    <ID>DocumentationOverPrivateFunction:X2cRepositoryImpl.kt:X2cRepositoryImpl$private fun composablePackage: String</ID>
+    <ID>DocumentationOverPrivateFunction:X2cRepositoryImpl.kt:X2cRepositoryImpl$private fun existingComposablePackage: String?</ID>
+    <ID>DocumentationOverPrivateProperty:ComposeSession.kt:ComposeSession$/** TODO-Kommentare, die beim Aufbau des Modifiers entstehen und vor das Element gesetzt werden. */ private val pendingTodos = mutableListOf&lt;String>()</ID>
+    <ID>EmptyElseBlock:ComposeEntryWirerImpl.kt:ComposeEntryWirerImpl$if (src[j] == '\\') j++</ID>
+    <ID>EmptyElseBlock:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$if (f.exists()) Files.delete(f.toPath())</ID>
+    <ID>EndOfSentenceFormat:X2cModels.kt:X2cBuildStepStatus$ Task 52.10 </ID>
+    <ID>EndOfSentenceFormat:X2cModels.kt:X2cReport$ Task 52.10 </ID>
+    <ID>ExpressionBodySyntax:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$return content.contains("compose = true") || content.contains("compose true") || content.contains("compose.set(true)") || (content.contains("buildFeatures") &amp;&amp; content.contains("compose"))</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `Build-Fehler bleibt sichtbar und folgende Schritte werden uebersprungen`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `Build-Pruefung Erfolg und Bericht`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `Fehlerlauf liefert Probleme mit Datei und Zeile`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `Geheimnisse und Laenge der Ausgabe`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `Parser ignoriert ANSI und liefert nichts bei Erfolg`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `Parser liest Kotlin Java und AAPT mit relativen Pfaden`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `Vorher auch bauen markiert bestehende Fehler`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `ohne gradlew bleibt Ergebnis offen und wird gemeldet`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `ohne gradlew wird uebersprungen`</ID>
+    <ID>FunctionNameMaxLength:BuildCheckTest.kt:BuildCheckTest$@Test fun `ohne runBuildCheck wird nicht gebaut`</ID>
+    <ID>FunctionNameMaxLength:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$@Test fun testDoesNotDuplicateExistingComposeConfiguration</ID>
+    <ID>FunctionNameMaxLength:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$@Test fun testEnableComposeGroovyDslWithKotlin19</ID>
+    <ID>FunctionNameMaxLength:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$@Test fun testEnableComposeKotlinDslWithKotlin2</ID>
+    <ID>FunctionNameMaxLength:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$@Test fun testEnableComposeWithVersionCatalog</ID>
+    <ID>FunctionNameMaxLength:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$@Test fun testPrerequisitesFailsWhenMinSdkBelow21</ID>
+    <ID>FunctionNameMaxLength:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$@Test fun testUnknownKotlinVersionFailsClearly</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `Activity wird auf setContent umgestellt`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `Ergebnis ist deterministisch und Kriterien sind benannt`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `Fragment mit Layout im Konstruktor wird uebersprungen`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `Fragment mit findViewById in onViewCreated wird uebersprungen`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `Kommentare und Strings loesen kein Hindernis aus`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `Pruefhinweise fuer Menue und onClick-Methoden`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `ViewBinding verhindert die Umstellung`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `anderes Layout in der Datei wird uebersprungen`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `findViewById verhindert die Umstellung mit Zeile`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `gleiches Paket braucht keinen Import`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `unbekannte Basisklasse wird uebersprungen`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `vorhandene Imports werden nicht doppelt`</ID>
+    <ID>FunctionNameMaxLength:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$@Test fun `zwei setContentView werden uebersprungen`</ID>
+    <ID>FunctionNameMaxLength:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$@Test fun `analyzeLayoutFile handles XML with XXE attempt securely`</ID>
+    <ID>FunctionNameMaxLength:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$@Test fun `createPlan accurately classifies layouts and detects theme and catalog`</ID>
+    <ID>FunctionNameMaxLength:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$@Test fun `scanProject detects Android project with XML layouts qualifying for auto prompt`</ID>
+    <ID>FunctionNameMaxLength:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$@Test fun `scanProject excludes build and Backup and dot-gradle directories`</ID>
+    <ID>FunctionNameMaxLength:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$@Test fun `scanProject recognizes already active Compose and does not auto prompt`</ID>
+    <ID>FunctionNameMaxLength:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$@Test fun `scanProject returns false for non-existent directory`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `AppCompat-Theme ist kein Material-Theme`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `Variant-Farben werden gemeldet und nicht uebernommen`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `Zyklen und Tiefe fuehren nicht zum Absturz`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `deterministisch und ohne Eingriff in themes xml`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `kaputtes XML wird uebersprungen statt Absturz`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `nicht aufloesbare Farbe bleibt Vorgabe mit Hinweis`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `ohne values-night nutzt dunkel die Vorgaben mit TODO`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `values-night ueberlagert die hellen Werte`</ID>
+    <ID>FunctionNameMaxLength:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$@Test fun `vorhandenes Theme wird nie ueberschrieben`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Accessibility contentDescription und importantForAccessibility`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Beispiel ConstraintLayout Screen ist ausgewogen`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Beispiel Formular ist vollstaendig und ausgewogen`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Button mit onClick Parameter wenn Code ihn anfasst`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Button ohne Zugriff bekommt leeren Klick`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `ConstraintLayout Constraints Margin Dimension Guideline`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `ConstraintLayout Kette und Barrier`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `ConstraintLayout Seitenverhaeltnis`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `EditText Passwort und mehrzeilig`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Gravity Layout-Gravity in Column Row Box`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `ImageView ohne contentDescription gibt null`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `LinearLayout vertikal und horizontal`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Name und Pfad folgen der Konvention`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `RecyclerView wird LazyColumn mit Item`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `ScrollView und HorizontalScrollView`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Sichtbarkeit gone invisible und Code-gesteuert`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `TextInputLayout wird zu TextField mit Zustand`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `Zeilennummer der TODOs zeigt auf die Quelle`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `eigene View wird AndroidView mit TODO`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `harter Text wird Hinweis und Literal`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `include wird Aufruf bekannter Composable`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `kaputtes XML ist Result failure`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `ohne rPackage gibt es Hinweis statt falschem Import`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `tools-Attribute erzeugen kein TODO`</ID>
+    <ID>FunctionNameMaxLength:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$@Test fun `unbekannte Attribute werden zu TODO`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `Adapter-inflate bekommt Hinweis und keinen Kandidaten`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `Fragment mit onCreateView ohne View-Zugriff ist Kandidat`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `Java-Activity wird nie als Kandidat gemeldet`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `Kotlin-Activity mit setContentView ohne View-Zugriff ist Stufe-2-Kandidat`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `Namen mit gemeinsamem Praefix werden nicht vermischt`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `Plan stuft Layout mit RemoteViews-Verwendung als nicht umwandelbar ein`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `RemoteViews und appwidget werden erkannt`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `ViewBinding wird erkannt und Zugriff ueber camelCase gezaehlt`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `build und Backup werden nicht durchsucht`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `findRemainingViewReferences listet klassische View-Zugriffe`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `findViewById auf eine ID des Layouts verhindert Stufe 2 und wird gemeldet`</ID>
+    <ID>FunctionNameMaxLength:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$@Test fun `include und tools-layout in XML sowie Kommentare`</ID>
+    <ID>FunctionNameMaxLength:X2cBackupRepositoryTest.kt:X2cBackupRepositoryTest$@Test fun testFreeSpaceCheckThrowsAndCleansUp</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `Datei ohne Backup-Eintrag wird abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `Fehler im Folgeschritt nimmt alles zurueck`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `Folgeschritt darf keine ungesicherte Datei anfassen`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `Folgeschritt wird ins Journal aufgenommen`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `Journal Roundtrip mit Sonderzeichen im Pfad`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `MiniJson parst und schreibt streng`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `Pfade ausserhalb und geschuetzte Ordner werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `doppelt geplanter Pfad wird abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `neu ersetzen und loeschen mit Journal`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `seit Backup geaenderte Datei stoppt vor jeder Aenderung`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `undo erkennt schon Originalzustand`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `undo mit Konflikt KEEP OVERWRITE und SAVE_AS_ORIG`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `undo stellt alles wieder her und fasst fremde Dateien nicht an`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `vorhandene neue Datei wird uebersprungen und mit overwrite ersetzt`</ID>
+    <ID>FunctionNameMaxLength:X2cChangeApplierTest.kt:X2cChangeApplierTest$@Test fun `zweites Anwenden erzeugt eigenes Journal ohne Ueberschreiben`</ID>
+    <ID>FunctionNameMaxLength:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Test fun `Auswahl beschraenkt die Umwandlung`</ID>
+    <ID>FunctionNameMaxLength:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Test fun `Fehler in der Build-Vorbereitung nimmt alles zurueck`</ID>
+    <ID>FunctionNameMaxLength:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Test fun `Git-Zweig und Commit bei sauberem Projekt`</ID>
+    <ID>FunctionNameMaxLength:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Test fun `Git-Zweig wird bei unsauberem Projekt nicht angelegt`</ID>
+    <ID>FunctionNameMaxLength:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Test fun `Layout das noch ueber include verwendet wird bleibt`</ID>
+    <ID>FunctionNameMaxLength:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Test fun `ohne Backup wird nichts angewendet`</ID>
+    <ID>FunctionNameMaxLength:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Test fun `ueberschreiben nur mit Bestaetigung`</ID>
+    <ID>FunctionNameMaxLength:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Test fun `zweiter Lauf aendert nichts und legt kein leeres Backup an`</ID>
+    <ID>FunctionNameMinLength:MiniJson.kt:MiniJson.Parser$fun ws</ID>
+    <ID>LargeClass:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl : ComposeBuildEnabler</ID>
+    <ID>LargeClass:ComposeSession.kt:ComposeSession</ID>
+    <ID>LongMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$override suspend fun enableComposeInProject: Result&lt;BuildEnableResult></ID>
+    <ID>LongMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun ensureDependencies: Pair&lt;String, List&lt;String>></ID>
+    <ID>LongMethod:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun updateVersionCatalog: CatalogUpdateResult</ID>
+    <ID>LongMethod:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$@Test fun testEnableComposeWithVersionCatalog</ID>
+    <ID>LongMethod:ComposeEntryWirerImpl.kt:ComposeEntryWirerImpl$override fun wire: ComposeWireResult</ID>
+    <ID>LongMethod:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$private fun analyzeLayoutFile: LayoutPlanEntry</ID>
+    <ID>LongMethod:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$@Test fun `createPlan accurately classifies layouts and detects theme and catalog`</ID>
+    <ID>LongMethod:ComposeSession.kt:ComposeSession$private fun constraint: List&lt;String></ID>
+    <ID>LongMethod:ComposeSession.kt:ComposeSession$private fun modifierFor: String?</ID>
+    <ID>LongMethod:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$override fun generate: Result&lt;ThemeGenerationResult></ID>
+    <ID>LongMethod:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$override suspend fun findAllUsages: Map&lt;String, List&lt;LayoutUsage>></ID>
+    <ID>LongMethod:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>LongMethod:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$override suspend fun apply: Result&lt;ApplyResult></ID>
+    <ID>LongMethod:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$@Before fun setUp</ID>
+    <ID>LongMethod:X2cReportWriter.kt:X2cReportWriter$fun render: String</ID>
+    <ID>LongMethod:X2cRepositoryImpl.kt:X2cRepositoryImpl$override suspend fun executeMigration: X2cReport</ID>
+    <ID>LoopWithTooManyJumpStatements:ComposeSession.kt:ComposeSession$for</ID>
+    <ID>LoopWithTooManyJumpStatements:ComposeSession.kt:ComposeSession$while</ID>
+    <ID>LoopWithTooManyJumpStatements:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$for</ID>
+    <ID>LoopWithTooManyJumpStatements:GradleLogParser.kt:GradleLogParser$for</ID>
+    <ID>LoopWithTooManyJumpStatements:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$for</ID>
+    <ID>LoopWithTooManyJumpStatements:ProcessX2cBuildChecker.kt:ProcessX2cBuildChecker$while</ID>
+    <ID>LoopWithTooManyJumpStatements:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$for</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$""" [versions] compose-bom = "${compatData.defaultComposeBom}" ${if (isKotlin2Plus) "kotlin = \"$kotlinVersion\"\n" else ""} ${if (wireActivities) "activity-compose = \"${compatData.defaultActivityComposeVersion}\"\n" else ""} ${if (hasConstraintLayout) "constraintlayout-compose = \"${compatData.defaultConstraintLayoutComposeVersion}\"\n" else ""} [libraries] androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" } androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" } androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" } androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" } androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" } ${if (wireActivities) "androidx-activity-compose = { group = \"androidx.activity\", name = \"activity-compose\", version.ref = \"activity-compose\" }\n" else ""} ${if (hasConstraintLayout) "androidx-constraintlayout-compose = { group = \"androidx.constraintlayout\", name = \"constraintlayout-compose\", version.ref = \"constraintlayout-compose\" }\n" else ""} [plugins] ${if (isKotlin2Plus) "compose-compiler = { id = \"org.jetbrains.kotlin.plugin.compose\", version.ref = \"kotlin\" }\n" else ""} """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" # Existing catalog comments [versions] agp = "8.6.0" kotlin = "2.0.21" [libraries] androidx-core = { group = "androidx.core", name = "core-ktx", version = "1.13.1" } [plugins] android-app = { id = "com.android.application", version.ref = "agp" } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" apply plugin: 'com.android.application' apply plugin: 'org.jetbrains.kotlin.android' android { compileSdkVersion 34 defaultConfig { minSdkVersion 21 targetSdkVersion 34 } } dependencies { implementation 'androidx.appcompat:appcompat:1.7.0' } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" buildscript { dependencies { classpath 'com.android.tools.build:gradle:8.2.0' classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.24' } } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" plugins { alias(libs.plugins.android.app) id("org.jetbrains.kotlin.android") } android { namespace = "com.example.catalog" compileSdk = 35 defaultConfig { minSdk = 26 } } dependencies { implementation(libs.androidx.core) } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" plugins { id("com.android.application") id("org.jetbrains.kotlin.android") version "2.0.21" id("org.jetbrains.kotlin.plugin.compose") } android { namespace = "com.example.existing" compileSdk = 35 defaultConfig { minSdk = 24 } buildFeatures { compose = true } } dependencies { implementation(platform("androidx.compose:compose-bom:2024.10.01")) implementation("androidx.compose.ui:ui") implementation("androidx.compose.ui:ui-tooling-preview") implementation("androidx.compose.material3:material3") debugImplementation("androidx.compose.ui:ui-tooling") } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" plugins { id("com.android.application") id("org.jetbrains.kotlin.android") version "2.0.21" } android { namespace = "com.example.lowsdk" compileSdk = 34 defaultConfig { minSdk = 19 targetSdk = 34 } } dependencies {} """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" plugins { id("com.android.application") id("org.jetbrains.kotlin.android") } android { minSdk = 24 } dependencies {} """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" plugins { id("com.android.application") id("org.jetbrains.kotlin.android") } android { namespace = "com.example.kotlindsl" compileSdk = 35 defaultConfig { minSdk = 24 targetSdk = 35 } } dependencies { implementation("androidx.core:core-ktx:1.15.0") } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeBuildEnablerTest.kt:ComposeBuildEnablerTest$""" plugins { id("com.android.application") version "8.7.0" apply false id("org.jetbrains.kotlin.android") version "2.0.21" apply false } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" &lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content"> &lt;ImageView android:id="@+id/iv_avatar" android:layout_width="48dp" android:layout_height="48dp" /> &lt;/FrameLayout> """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="horizontal"> &lt;/LinearLayout> """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"> &lt;TextView android:id="@+id/tv_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hello World" /> &lt;/LinearLayout> """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" /> &lt;Button android:id="@+id/btn_submit" android:layout_width="wrap_content" android:layout_height="wrap_content" /> &lt;/LinearLayout> """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;com.example.ui.CustomLineChart android:id="@+id/chart" android:layout_width="match_parent" android:layout_height="200dp" /> &lt;/LinearLayout> """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" &lt;androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;/androidx.constraintlayout.motion.widget.MotionLayout> """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" &lt;layout xmlns:android="http://schemas.android.com/apk/res/android"> &lt;data> &lt;variable name="user" type="com.example.User" /> &lt;/data> &lt;LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"> &lt;TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@{user.name}" /> &lt;/LinearLayout> &lt;/layout> """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" &lt;resources> &lt;style name="Theme.MyApp" parent="Theme.Material3.DayNight.NoActionBar"> &lt;item name="colorPrimary">@color/purple_500&lt;/item> &lt;/style> &lt;/resources> """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" package com.example import androidx.appcompat.app.AppCompatActivity class MainActivity : AppCompatActivity() { override fun onCreate(savedInstanceState: android.os.Bundle?) { super.onCreate(savedInstanceState) setContentView(R.layout.activity_main) } } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" plugins { id("com.android.application") id("org.jetbrains.kotlin.plugin.compose") } android { buildFeatures { compose = true } } dependencies { implementation(platform("androidx.compose:compose-bom:2024.10.01")) } """</ID>
+    <ID>MultilineRawStringIndentation:ComposeMigrationScannerTest.kt:ComposeMigrationScannerTest$""" plugins { id("com.android.application") kotlin("android") } android { compileSdk = 35 } """</ID>
+    <ID>MultilineRawStringIndentation:X2cBackupRepositoryTest.kt:X2cBackupRepositoryTest$""" # x2c rollback journal CREATED|src/MainScreen.kt DELETED|res/layout/activity_main.xml """</ID>
+    <ID>MultilineRawStringIndentation:X2cBackupRepositoryTest.kt:X2cBackupRepositoryTest$""" { "timestamp": 1729940000000, "backupZipPath": "$zipPath", "entries": [ { "action": "CREATED", "relativePath": "src/MainScreen.kt" }, { "action": "DELETED", "relativePath": "res/layout/activity_main.xml" } ] } """</ID>
+    <ID>NestedBlockDepth:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$private fun parseXmlStructure: ParsedXmlInfo</ID>
+    <ID>NestedBlockDepth:ComposeSession.kt:ComposeSession$private fun constraint: List&lt;String></ID>
+    <ID>NestedBlockDepth:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$override suspend fun findAllUsages: Map&lt;String, List&lt;LayoutUsage>></ID>
+    <ID>NestedBlockDepth:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>NestedBlockDepth:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$override suspend fun restoreBackup: Boolean</ID>
+    <ID>NestedBlockDepth:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$override suspend fun apply: Result&lt;ApplyResult></ID>
+    <ID>NestedBlockDepth:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$override suspend fun undo: Result&lt;UndoResult></ID>
+    <ID>NestedBlockDepth:X2cReportWriter.kt:X2cReportWriter$fun render: String</ID>
+    <ID>OutdatedDocumentation:X2cModels.kt:ComposeWireResult</ID>
+    <ID>OutdatedDocumentation:X2cRepositories.kt:ComposeThemeGenerator$fun generate: Result&lt;ThemeGenerationResult></ID>
+    <ID>OutdatedDocumentation:X2cRepositories.kt:X2cChangeApplier$suspend fun apply: Result&lt;ApplyResult></ID>
+    <ID>ReturnCount:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$override suspend fun checkPrerequisites: Result&lt;PrerequisitesCheckResult></ID>
+    <ID>ReturnCount:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$override suspend fun enableComposeInProject: Result&lt;BuildEnableResult></ID>
+    <ID>ReturnCount:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun detectAgpVersion: String?</ID>
+    <ID>ReturnCount:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun detectKotlinVersion: String?</ID>
+    <ID>ReturnCount:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$private fun loadCompatData: CompatData</ID>
+    <ID>ReturnCount:ComposeEntryWirerImpl.kt:ComposeEntryWirerImpl$override fun wire: ComposeWireResult</ID>
+    <ID>ReturnCount:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$private fun detectMaterialTheme: String?</ID>
+    <ID>ReturnCount:ComposeSession.kt:ComposeSession$private fun call: List&lt;String></ID>
+    <ID>ReturnCount:ComposeSession.kt:ComposeSession$private fun color: String?</ID>
+    <ID>ReturnCount:ComposeSession.kt:ComposeSession$private fun dim: String?</ID>
+    <ID>ReturnCount:ComposeSession.kt:ComposeSession$private fun emit: List&lt;String></ID>
+    <ID>ReturnCount:ComposeSession.kt:ComposeSession$private fun findDescendant: XmlElement?</ID>
+    <ID>ReturnCount:ComposeSession.kt:ComposeSession$private fun marginFor: String?</ID>
+    <ID>ReturnCount:ComposeSession.kt:ComposeSession$private fun plainView: List&lt;String></ID>
+    <ID>ReturnCount:ComposeSession.kt:ComposeSession$private fun sidesCall: String?</ID>
+    <ID>ReturnCount:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$private fun familyOfStyle: String?</ID>
+    <ID>ReturnCount:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$private fun lookup: String?</ID>
+    <ID>ReturnCount:LayoutValues.kt:LayoutValues$fun colorHex: String?</ID>
+    <ID>ReturnCount:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$override suspend fun restoreFile: Boolean</ID>
+    <ID>ReturnCount:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$private fun findBackupZipPath: String?</ID>
+    <ID>ReturnCount:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$override suspend fun apply: Result&lt;ApplyResult></ID>
+    <ID>ReturnCount:X2cRepositoryImpl.kt:X2cRepositoryImpl$private fun existingComposablePackage: String?</ID>
+    <ID>StringLiteralDuplication:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"""plugins\s*\{"""</ID>
+    <ID>StringLiteralDuplication:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"activity-compose"</ID>
+    <ID>StringLiteralDuplication:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"build.gradle"</ID>
+    <ID>StringLiteralDuplication:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"build.gradle.kts"</ID>
+    <ID>StringLiteralDuplication:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"compose-bom"</ID>
+    <ID>StringLiteralDuplication:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"constraintlayout-compose"</ID>
+    <ID>StringLiteralDuplication:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"gradle/libs.versions.toml"</ID>
+    <ID>StringLiteralDuplication:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$"layout"</ID>
+    <ID>StringLiteralDuplication:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl.ParsedXmlInfo$"unknown"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$" $it"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"() -> Unit"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Boolean"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Bottom"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Button"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Center"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"FrameLayout"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Horizontal"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Klick auf `$id`."</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"LazyVerticalGrid"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"LinearProgressIndicator"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Modifier"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Right"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Start"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"String"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"Vertical"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"ViewStub"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:background"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:enabled"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:gravity"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:id"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:layout_gravity"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:layout_height"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:layout_margin"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:layout_width"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:orientation"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:text"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:text=\"$raw\""</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"android:visibility"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"androidx.compose.foundation.layout.Box"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"androidx.compose.foundation.layout.Row"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"androidx.compose.foundation.lazy.items"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"androidx.compose.material3.$comp"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"androidx.compose.material3.Text"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"androidx.compose.ui.Alignment"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"app:layout_constraintHorizontal_chainStyle"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"app:layout_constraintVertical_chainStyle"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"baseline"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"bottom"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"center"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"center_horizontal"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"center_vertical"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"enabled = false"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"false"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"right"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"start"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:ComposeSession$"style"</ID>
+    <ID>StringLiteralDuplication:ComposeSession.kt:LayoutNames$"Screen"</ID>
+    <ID>StringLiteralDuplication:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$"Light"</ID>
+    <ID>StringLiteralDuplication:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$"Material3"</ID>
+    <ID>StringLiteralDuplication:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$"Theme"</ID>
+    <ID>StringLiteralDuplication:GradleLogParser.kt:GradleLogParser$"error"</ID>
+    <ID>StringLiteralDuplication:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$"DataBinding"</ID>
+    <ID>StringLiteralDuplication:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$"ViewBinding"</ID>
+    <ID>StringLiteralDuplication:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$"inflate"</ID>
+    <ID>StringLiteralDuplication:LayoutUsageAnalyzerImpl.kt:LayoutUsageAnalyzerImpl$"synthetic"</ID>
+    <ID>StringLiteralDuplication:ProcessGitBranchCommitter.kt:ProcessGitBranchCommitter$"rev-parse"</ID>
+    <ID>StringLiteralDuplication:ValuesXmlParser.kt:ValuesXmlParser.&lt;no name provided>$"color"</ID>
+    <ID>StringLiteralDuplication:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl.Companion$"Backup"</ID>
+    <ID>StringLiteralDuplication:X2cReportWriter.kt:X2cReportWriter$"- $it"</ID>
+    <ID>StringLiteralDuplication:X2cRepositoryImpl.kt:X2cRepositoryImpl$"error"</ID>
+    <ID>StringLiteralDuplication:X2cRepositoryImpl.kt:X2cRepositoryImpl$"src/main/kotlin"</ID>
+    <ID>StringShouldBeRawString:BuildCheckTest.kt:BuildCheckTest$"&lt;LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\" android:layout_width=\"match_parent\" android:layout_height=\"match_parent\">&lt;TextView android:layout_width=\"wrap_content\" android:layout_height=\"wrap_content\" android:text=\"@string/hello\"/>&lt;/LinearLayout>"</ID>
+    <ID>StringShouldBeRawString:BuildCheckTest.kt:BuildCheckTest$"package com.example.demo\n\nimport androidx.appcompat.app.AppCompatActivity\n\nclass MainActivity : AppCompatActivity() {\n override fun onCreate(b: android.os.Bundle?) {\n super.onCreate(b)\n setContentView(R.layout.activity_main)\n }\n}\n"</ID>
+    <ID>StringShouldBeRawString:BuildCheckTest.kt:BuildCheckTest$"plugins {\n id(\"com.android.application\") version \"8.7.0\" apply false\n id(\"org.jetbrains.kotlin.android\") version \"2.0.21\" apply false\n}\n"</ID>
+    <ID>StringShouldBeRawString:BuildCheckTest.kt:BuildCheckTest$"plugins {\n id(\"com.android.application\")\n id(\"org.jetbrains.kotlin.android\")\n}\nandroid {\n namespace = \"com.example.demo\"\n compileSdk = 34\n defaultConfig { minSdk = 24 }\n}\ndependencies {\n}\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" debugImplementation(\"androidx.compose.ui:ui-tooling\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" id(\"org.jetbrains.kotlin.android\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" id(\"org.jetbrains.kotlin.plugin.compose\") version \"$kotlinVersion\" apply false\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" id(\"org.jetbrains.kotlin.plugin.compose\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" implementation(\"androidx.activity:activity-compose:$actVer\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" implementation(\"androidx.compose.material3:material3\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" implementation(\"androidx.compose.ui:ui-tooling-preview\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" implementation(\"androidx.compose.ui:ui\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" implementation(\"androidx.constraintlayout:constraintlayout-compose:$clVer\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$" implementation(platform(\"androidx.compose:compose-bom:$bom\"))\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"$k = \"$v\"\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"\n buildFeatures {\n compose = true\n }\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"\n composeOptions {\n kotlinCompilerExtensionVersion = '$compilerExtVersion'\n }\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"\n composeOptions {\n kotlinCompilerExtensionVersion = \"$compilerExtVersion\"\n }\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"\ndependencies {\n$newLines}\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"activity-compose = \"${compatData.defaultActivityComposeVersion}\"\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"androidx-activity-compose = { group = \"androidx.activity\", name = \"activity-compose\", version.ref = \"activity-compose\" }\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"androidx-constraintlayout-compose = { group = \"androidx.constraintlayout\", name = \"constraintlayout-compose\", version.ref = \"constraintlayout-compose\" }\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"apply(plugin = \"org.jetbrains.kotlin.android\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"apply(plugin = \"org.jetbrains.kotlin.plugin.compose\")\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"compose-compiler = { id = \"org.jetbrains.kotlin.plugin.compose\", version = \"$kotlinVersion\" }\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"compose-compiler = { id = \"org.jetbrains.kotlin.plugin.compose\", version.ref = \"$kotlinRef\" }\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"compose-compiler = { id = \"org.jetbrains.kotlin.plugin.compose\", version.ref = \"kotlin\" }\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"constraintlayout-compose = \"${compatData.defaultConstraintLayoutComposeVersion}\"\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$"kotlin = \"$kotlinVersion\"\n"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$libEntries["androidx-activity-compose"] = "{ group = \"androidx.activity\", name = \"activity-compose\", version.ref = \"activity-compose\" }"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$libEntries["androidx-compose-bom"] = "{ group = \"androidx.compose\", name = \"compose-bom\", version.ref = \"compose-bom\" }"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$libEntries["androidx-compose-material3"] = "{ group = \"androidx.compose.material3\", name = \"material3\" }"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$libEntries["androidx-compose-ui"] = "{ group = \"androidx.compose.ui\", name = \"ui\" }"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$libEntries["androidx-compose-ui-tooling"] = "{ group = \"androidx.compose.ui\", name = \"ui-tooling\" }"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$libEntries["androidx-compose-ui-tooling-preview"] = "{ group = \"androidx.compose.ui\", name = \"ui-tooling-preview\" }"</ID>
+    <ID>StringShouldBeRawString:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$libEntries["androidx-constraintlayout-compose"] = "{ group = \"androidx.constraintlayout\", name = \"constraintlayout-compose\", version.ref = \"constraintlayout-compose\" }"</ID>
+    <ID>StringShouldBeRawString:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$" override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean = true\n\n fun onSave(view: android.view.View) {}\n\n override fun onCreate"</ID>
+    <ID>StringShouldBeRawString:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$" setContent {\n MaterialTheme {\n MainScreen()\n }\n }" in s</ID>
+    <ID>StringShouldBeRawString:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$"package a\n\nimport androidx.fragment.app.Fragment\n\nclass P : Fragment(R.layout.fragment_profile)\n"</ID>
+    <ID>StringShouldBeRawString:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$"super.onCreate(savedInstanceState)\n // findViewById war frueher hier\n val s = \"ActivityMainBinding\""</ID>
+    <ID>StringShouldBeRawString:ComposeMigrationScannerImpl.kt:ComposeMigrationScannerImpl$"android:id=\"@\\+?id/([a-zA-Z0-9_]+)\""</ID>
+    <ID>StringShouldBeRawString:ComposeSession.kt:ComposeSession$"(?s)(package [^\n]*\n\n).*?(\n/\\*\\*)"</ID>
+    <ID>StringShouldBeRawString:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$"&lt;!DOCTYPE r [&lt;!ENTITY e SYSTEM \"file:///etc/passwd\">]&gt;&lt;resources>&lt;color name=\"a\">&amp;e;&lt;/color>&lt;/resources>"</ID>
+    <ID>StringShouldBeRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"&lt;!DOCTYPE x [&lt;!ENTITY e SYSTEM \"file:///etc/passwd\">]&gt;&lt;LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"/>"</ID>
+    <ID>StringShouldBeRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"&lt;LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\" android:layout_width=\"match_parent\" android:layout_height=\"match_parent\">\n\n&lt;TextView android:layout_width=\"wrap_content\" android:layout_height=\"wrap_content\" android:text=\"@string/a\" android:shadowRadius=\"1\"/>\n&lt;/LinearLayout>"</ID>
+    <ID>StringShouldBeRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"\"(\\\\.|[^\"\\\\])*\""</ID>
+    <ID>StringShouldBeRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"\\\"Welt\\\"" in r.sourceContent &amp;&amp; "\\${'$'}5" in r.sourceContent</ID>
+    <ID>StringShouldBeRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"android:layout_width=\"match_parent\" android:layout_height=\"match_parent\" android:orientation=\"vertical\""</ID>
+    <ID>StringShouldBeRawString:X2cBackupRepositoryTest.kt:X2cBackupRepositoryTest$"MyAndroidApp-xml-\\d{8}-\\d{6}\\.zip"</ID>
+    <ID>StringShouldBeRawString:X2cChangeApplierTest.kt:X2cChangeApplierTest$"\"status\": \"COMPLETE\""</ID>
+    <ID>ThrowsCount:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>TooGenericExceptionCaught:ProcessX2cBuildChecker.kt:ProcessX2cBuildChecker$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:X2cBackupRepositoryImpl.kt:X2cBackupRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:X2cRepositoryImpl.kt:X2cRepositoryImpl$t: Throwable</ID>
+    <ID>TrimMultilineRawString:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$""" package com.example import android.os.Bundle import android.view.LayoutInflater import android.view.View import android.view.ViewGroup import androidx.fragment.app.Fragment class ProfileFragment : Fragment() { override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? { return inflater.inflate(R.layout.fragment_profile, container, false) } } """</ID>
+    <ID>TrimMultilineRawString:ComposeEntryWirerTest.kt:ComposeEntryWirerTest$""" package com.example import android.os.Bundle import androidx.appcompat.app.AppCompatActivity class MainActivity : AppCompatActivity() { override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState) setContentView(R.layout.activity_main) } } """</ID>
+    <ID>TrimMultilineRawString:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$"""&lt;resources> &lt;color name="purple_500">#6200EE&lt;/color> &lt;color name="purple_700">#3700B3&lt;/color> &lt;color name="teal_200">#03DAC5&lt;/color> &lt;color name="white">#FFFFFF&lt;/color> &lt;color name="alias">@color/purple_500&lt;/color> &lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$"""&lt;resources> &lt;style name="Base.Theme.MyApp" parent="Theme.MaterialComponents.DayNight.NoActionBar"> &lt;item name="colorPrimary">@color/alias&lt;/item> &lt;item name="colorPrimaryVariant">@color/purple_700&lt;/item> &lt;item name="colorOnPrimary">@color/white&lt;/item> &lt;item name="colorSecondary">@color/teal_200&lt;/item> &lt;item name="android:colorBackground">#FAFAFA&lt;/item> &lt;/style> &lt;style name="Theme.MyApp" parent="Base.Theme.MyApp"/> &lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$"""&lt;resources>&lt;color name="a">@color/b&lt;/color>&lt;color name="b">@color/a&lt;/color> &lt;style name="Theme.A" parent="Theme.Material3.Light">&lt;item name="colorPrimary">@color/a&lt;/item>&lt;/style>&lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$"""&lt;resources>&lt;color name="purple_500">#BB86FC&lt;/color> &lt;style name="Theme.MyApp" parent="Base.Theme.MyApp">&lt;item name="android:colorBackground">#121212&lt;/item>&lt;/style>&lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$"""&lt;resources>&lt;style name="Theme.A" parent="Theme.Material3.DayNight"> &lt;item name="colorPrimary">?attr/colorAccent&lt;/item>&lt;item name="colorSecondary">#00FF00&lt;/item>&lt;/style>&lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$""" &lt;Button android:id="@+id/x" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/x" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@id/y" app:layout_constraintHorizontal_chainStyle="packed"/> &lt;Button android:id="@+id/y" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/y" app:layout_constraintStart_toEndOf="@id/x" app:layout_constraintEnd_toEndOf="parent"/> &lt;androidx.constraintlayout.widget.Barrier android:id="@+id/bar" android:layout_width="wrap_content" android:layout_height="wrap_content" app:barrierDirection="bottom" app:constraint_referenced_ids="x,y"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$""" &lt;ImageView android:id="@+id/avatar" android:layout_width="64dp" android:layout_height="64dp" android:src="@drawable/ic_user" android:contentDescription="@string/avatar" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" android:layout_margin="16dp"/> &lt;androidx.recyclerview.widget.RecyclerView android:id="@+id/list" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toBottomOf="@id/avatar" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" tools:listitem="@layout/item_user"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$""" &lt;ImageView android:id="@+id/icon" android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_a" android:contentDescription="@null"/> &lt;LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp"> &lt;TextView android:id="@+id/name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/n" tools:text="Anna"/> &lt;TextView android:id="@+id/mail" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/m"/> &lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$""" &lt;TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/app_name" android:textSize="20sp" android:textStyle="bold" android:layout_marginBottom="8dp"/> &lt;Button android:id="@+id/submit" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/send"/> &lt;ProgressBar android:id="@+id/spinner" android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="gone" android:layout_gravity="center_horizontal"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$""" &lt;androidx.constraintlayout.widget.Guideline android:id="@+id/g" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" app:layout_constraintGuide_percent="0.5"/> &lt;TextView android:id="@+id/a" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/a" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@id/g" app:layout_constraintTop_toTopOf="parent" android:layout_marginStart="8dp"/> &lt;TextView android:id="@+id/b" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/b" app:layout_constraintStart_toEndOf="@id/g" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.3"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;$tag xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" $attrs> $body &lt;/$tag>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;CheckBox android:id="@+id/c" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/a" android:checked="true"/> &lt;Switch android:id="@+id/s" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/b"/> &lt;RadioGroup android:layout_width="wrap_content" android:layout_height="wrap_content">&lt;RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/c1"/>&lt;/RadioGroup>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;ImageView android:id="@+id/img" android:layout_width="0dp" android:layout_height="0dp" android:src="@drawable/p" android:contentDescription="@string/d" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" app:layout_constraintDimensionRatio="16:9"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;ProgressBar android:layout_width="wrap_content" android:layout_height="wrap_content" android:indeterminate="true"/> &lt;SeekBar android:id="@+id/sb" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="10" android:progress="5"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/a" android:contentDescription="@string/d"/> &lt;TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/b" android:importantForAccessibility="no"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/a" android:textColor="#FF0000" android:textSize="18sp" android:textStyle="bold|italic" android:maxLines="2" android:ellipsize="end" android:gravity="center"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="gone" android:text="@string/a"/> &lt;TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="invisible" android:text="@string/b"/> &lt;TextView android:id="@+id/err" android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="gone" android:text="@string/c"/>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" app:cardCornerRadius="8dp" app:cardElevation="4dp"> &lt;TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/a"/>&lt;/androidx.cardview.widget.CardView>"""</ID>
+    <ID>TrimMultilineRawString:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$"""&lt;com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/email"> &lt;com.google.android.material.textfield.TextInputEditText android:id="@+id/email" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textEmailAddress"/> &lt;/com.google.android.material.textfield.TextInputLayout>"""</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" // setContentView(R.layout.part_header) steht nur im Kommentar class D """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" /> """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"> &lt;include layout="@layout/part_header" /> &lt;/LinearLayout> """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" &lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android" android:initialLayout="@layout/widget_small" /> """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" class A : AppCompatActivity() { override fun onCreate(b: Bundle?) { setContentView(R.layout.activity_a) findViewById&lt;TextView>(R.id.title).text = "x" } } """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" class A : AppCompatActivity() { override fun onCreate(b: Bundle?) { setContentView(R.layout.activity_a) } } """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" class Adapter : RecyclerView.Adapter&lt;VH>() { override fun onCreateViewHolder(p: ViewGroup, t: Int) = VH(LayoutInflater.from(p.context).inflate(R.layout.item_row, p, false)) } """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" class F : Fragment() { override fun onCreateView(i: LayoutInflater, c: ViewGroup?, s: Bundle?): View = i.inflate(R.layout.fragment_f, c, false) } """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" fun build(ctx: Context) = RemoteViews(ctx.packageName, R.layout.widget_small) """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" import android.view.LayoutInflater class H { fun f() { findViewById&lt;View>(R.id.x) } } """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" import com.example.databinding.ActivityCBinding class C : AppCompatActivity() { private lateinit var binding: ActivityCBinding override fun onCreate(b: Bundle?) { binding = ActivityCBinding.inflate(layoutInflater) binding.btnSubmit.setOnClickListener { } } } """</ID>
+    <ID>TrimMultilineRawString:LayoutUsageAnalyzerTest.kt:LayoutUsageAnalyzerTest$""" public class B extends AppCompatActivity { protected void onCreate(Bundle b) { setContentView(R.layout.activity_b); } } """</ID>
+    <ID>TrimMultilineRawString:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$"""&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"> &lt;TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/hello"/> &lt;Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/go"/> &lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$"""&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;TextView android:id="@+id/label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/hello"/> &lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$"""&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;include layout="@layout/activity_main"/>&lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$"""package com.example.demo import android.os.Bundle import android.widget.TextView import androidx.appcompat.app.AppCompatActivity class OtherActivity : AppCompatActivity() { override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState) setContentView(R.layout.activity_other) findViewById&lt;TextView>(R.id.label).text = "x" } } """</ID>
+    <ID>TrimMultilineRawString:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$"""package com.example.demo import android.os.Bundle import androidx.appcompat.app.AppCompatActivity class MainActivity : AppCompatActivity() { override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState) setContentView(R.layout.activity_main) } } """</ID>
+    <ID>TrimMultilineRawString:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$"""plugins { id("com.android.application") id("org.jetbrains.kotlin.android") } android { namespace = "com.example.demo" compileSdk = 34 defaultConfig { minSdk = 24 targetSdk = 34 } } dependencies { } """</ID>
+    <ID>TrimMultilineRawString:X2cMigrationIntegrationTest.kt:X2cMigrationIntegrationTest$"""plugins { id("com.android.application") version "8.7.0" apply false id("org.jetbrains.kotlin.android") version "2.0.21" apply false } """</ID>
+    <ID>UnnecessaryBackticks:BuildCheckTest.kt:BuildCheckTest$`Scrubber`</ID>
+    <ID>UnnecessaryBackticks:ComposeThemeGeneratorTest.kt:ComposeThemeGeneratorTest$`Namensableitung`</ID>
+    <ID>UnnecessaryBackticks:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$`Namenskonventionen`</ID>
+    <ID>UnnecessaryBackticks:LayoutToComposeGeneratorTest.kt:LayoutToComposeGeneratorTest$`deterministisch`</ID>
+    <ID>UnnecessaryParentheses:ComposeSession.kt:ComposeSession$(el.attr("app:cardElevation"))</ID>
+    <ID>UnnecessaryParentheses:ComposeSession.kt:ComposeSession$(el.attr("app:layoutManager") ?: "")</ID>
+    <ID>UnnecessaryParentheses:ComposeThemeGeneratorImpl.kt:ComposeThemeGeneratorImpl$(plain.ifEmpty { materials })</ID>
+    <ID>UnnecessaryParentheses:GradleLogParser.kt:GradleLogParser$(m.groupValues[3].ifEmpty { m.groupValues[5] })</ID>
+    <ID>UnnecessaryParentheses:GradleLogParser.kt:GradleLogParser$(m.groupValues[4].ifEmpty { m.groupValues[6] })</ID>
+    <ID>UnnecessaryPartOfBinaryExpression:ComposeBuildEnablerImpl.kt:ComposeBuildEnablerImpl$text.contains("com.android.application") || text.contains("com.android.library") || text.contains("android {") || text.contains("android{")</ID>
+    <ID>UnusedPrivateClass:ComposeSession.kt:ComposeSession$Anchor</ID>
+    <ID>UseIfInsteadOfWhen:X2cChangeApplierImpl.kt:X2cChangeApplierImpl$when (e.action) { JournalAction.CREATED -> { if (f.exists()) Files.delete(f.toPath()); deleted += e.relativePath } else -> { restoreFromZip(requireNotNull(zip) { "Backup-ZIP fehlt" }, e.relativePath, f); restored += e.relativePath } }</ID>
+    <ID>UseIfInsteadOfWhen:X2cReportWriter.kt:X2cReportWriter$when { r.buildSteps.isEmpty() -> sb.appendLine("Nicht ausgeführt.") else -> { sb.appendLine("Ergebnis: " + when (r.buildVerificationSuccess) { true -> "**erfolgreich**"; false -> "**fehlgeschlagen**"; null -> "nicht möglich" }) for (s in r.buildSteps) { val st = when (s.status) { X2cBuildStepStatus.SUCCESS -> "ok"; X2cBuildStepStatus.FAILED -> "fehlgeschlagen"; X2cBuildStepStatus.SKIPPED -> "übersprungen" } sb.appendLine("- `${s.tasks.joinToString(" ")}`: $st${s.message?.let { " ($it)" } ?: ""}") s.problems.filter { it.severity == "error" }.forEach { p -> val where = p.path?.let { "`$it${p.line?.let { l -> ":$l" } ?: ""}`: " } ?: "" sb.appendLine(" - ${where}${p.message}${if (p.preExisting) " _(bestand schon vorher)_" else ""}") } } } }</ID>
+  </CurrentIssues>
+</SmellBaseline>

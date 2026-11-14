@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ExpressionBodySyntax:J2kViewModelTest.kt:J2kViewModelTest.FakeJ2kRepository$return J2kPlan( projectPath = projectPath, totalJavaFiles = 0, totalJavaLines = 0, totalKotlinFiles = 0, totalKotlinLines = 0, javaPercentage = 0f, javaFiles = emptyList(), groovyFiles = emptyList(), ktsFiles = emptyList(), hasExistingVersionCatalog = false )</ID>
+    <ID>ExpressionBodySyntax:J2kViewModelTest.kt:J2kViewModelTest.FakeJ2kRepository$return J2kReport( projectPath = projectPath, timestampEpochMillis = 1700000000000L, convertedJavaCount = 2, notesJavaCount = 1, skippedJavaCount = 0, failedJavaCount = 0, convertedGradleCount = 0, notesGradleCount = 0, skippedGradleCount = 0, versionCatalogCreated = false, backupPath = "/backup.zip", journalPath = "/journal.json", fileResults = listOf( J2kFileResult("FileA.kt", J2kFileStatus.CONVERTED, 100, 80), J2kFileResult("FileB.kt", J2kFileStatus.CONVERTED_WITH_NOTES, 100, 90, notes = listOf("Note")) ) )</ID>
+    <ID>ExpressionBodySyntax:J2kViewModelTest.kt:J2kViewModelTest.FakeJ2kRepository$return J2kScanResult( projectPath = projectPath, javaFilesCount = 8, javaLinesCount = 800, kotlinFilesCount = 2, kotlinLinesCount = 200, javaPercentage = 80.0f, hasGroovyGradle = true, hasKotlinDsl = false, hasVersionCatalog = false, qualifiesForAutoPrompt = true )</ID>
+    <ID>FunctionNameMaxLength:J2kViewModelTest.kt:J2kViewModelTest$@Test fun testScanProjectQualifiesForPrompt</ID>
+    <ID>TooGenericExceptionCaught:J2kViewModel.kt:J2kViewModel$e: Exception</ID>
+    <ID>UnderscoresInNumericLiterals:J2kResultScreen.kt:1700000000000L</ID>
+    <ID>UnderscoresInNumericLiterals:J2kViewModelTest.kt:J2kViewModelTest.FakeJ2kRepository$1700000000000L</ID>
+  </CurrentIssues>
+</SmellBaseline>

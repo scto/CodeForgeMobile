@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CognitiveComplexMethod:HardcodedStringsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun HardcodedStringsScreen</ID>
+    <ID>FunctionNameMaxLength:HardcodedStringsViewModelTest.kt:HardcodedStringsViewModelTest$@Test fun `filtering findings by confidence and search query works properly`</ID>
+    <ID>FunctionNameMaxLength:HardcodedStringsViewModelTest.kt:HardcodedStringsViewModelTest$@Test fun `toggle selection and update key`</ID>
+    <ID>UseIfInsteadOfWhen:HardcodedStringsScreen.kt:when (finding.contextType) { ReplacementContextType.XML_ATTRIBUTE -> "@string/" else -> "R.string." }</ID>
+  </CurrentIssues>
+</SmellBaseline>

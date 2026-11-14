@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:ProjectImportViewModel.kt:ProjectImportViewModel$when</ID>
+    <ID>BracesOnWhenStatements:ProjectWorkspaceRoute.kt:when</ID>
+    <ID>ClassOrdering:CodeForgeApplication.kt:CodeForgeApplication$Companion</ID>
+    <ID>CognitiveComplexMethod:CodeForgeNavHost.kt:@Composable fun CodeForgeNavHost</ID>
+    <ID>CognitiveComplexMethod:IdeProgressFlashbar.kt:@Composable private fun ProgressLine</ID>
+    <ID>CognitiveComplexMethod:ProjectWorkspaceRoute.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun ProjectWorkspaceRoute</ID>
+    <ID>CognitiveComplexMethod:WorkspaceDrawer.kt:@Composable fun WorkspaceDrawer</ID>
+    <ID>CyclomaticComplexMethod:ProjectWorkspaceRoute.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun ProjectWorkspaceRoute</ID>
+    <ID>DocumentationOverPrivateFunction:CodeForgeApplication.kt:CodeForgeApplication$private fun observeLogSetting</ID>
+    <ID>DocumentationOverPrivateFunction:WorkspaceDrawer.kt:@Composable private fun SectionRail</ID>
+    <ID>DocumentationOverPrivateProperty:CodeForgeApplication.kt:CodeForgeApplication$/** Zeitpunkt der letzten automatischen Speicherfreigabe (gegen Dauerfeuer bei anhaltendem Druck). */ @Volatile private var lastTrimMillis = 0L</ID>
+    <ID>ExpressionBodySyntax:CodeForgeNavHost.kt:Routes$return "hardcoded_strings?targetPath=${Uri.encode(targetPath)}&amp;projectRoot=${Uri.encode(projectRoot)}"</ID>
+    <ID>LateinitUsage:CodeForgeApplication.kt:CodeForgeApplication$@Inject lateinit var logManager: CfmLogManager</ID>
+    <ID>LateinitUsage:CodeForgeApplication.kt:CodeForgeApplication$@Inject lateinit var releaseMemory: dagger.Lazy&lt;com.codeforge.core.domain.runtime.ReleaseMemoryUseCase></ID>
+    <ID>LateinitUsage:CodeForgeApplication.kt:CodeForgeApplication$@Inject lateinit var settingsRepository: SettingsRepository</ID>
+    <ID>LateinitUsage:IdeKeepAliveService.kt:IdeKeepAliveService$@Inject lateinit var terminalSession: TerminalSessionRepository</ID>
+    <ID>LateinitUsage:MainActivity.kt:MainActivity$@Inject lateinit var contributionRepository: ContributionRepository</ID>
+    <ID>LateinitUsage:MainActivity.kt:MainActivity$@Inject lateinit var extensionThemeRepository: ExtensionThemeRepository</ID>
+    <ID>LateinitUsage:MainActivity.kt:MainActivity$@Inject lateinit var settingsRepository: SettingsRepository</ID>
+    <ID>MatchingDeclarationName:CodeForgeNavHost.kt:Routes</ID>
+    <ID>MatchingDeclarationName:WorkspaceDrawer.kt:DrawerSection</ID>
+    <ID>StringLiteralDuplication:CodeForgeNavHost.kt:"rootPath"</ID>
+    <ID>UnderscoresInNumericLiterals:IdeKeepAliveService.kt:IdeKeepAliveService.Companion$28010</ID>
+    <ID>UnderscoresInNumericLiterals:ScreenshotTest.kt:ScreenshotTest$30000L</ID>
+    <ID>UseIfInsteadOfWhen:EditorWithPreviewHost.kt:when { selectedTab == 1 &amp;&amp; hasComposables -> previewContent() else -> editorContent() }</ID>
+  </CurrentIssues>
+</SmellBaseline>

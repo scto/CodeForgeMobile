@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ClassOrdering:FileSyncBridge.kt:FileSyncBridge$/** Der Editor hat [path] gespeichert (z. B. für Git-Status im Dateibaum). Standard: ohne Wirkung (Fakes). */ val savedFiles: SharedFlow&lt;String> get() = MutableSharedFlow()</ID>
+    <ID>FunctionNameMaxLength:NavigationBridgeModule.kt:NavigationBridgeModule$@Binds @Singleton abstract fun bindActiveComposablePreviewBridge: ActiveComposablePreviewBridge</ID>
+  </CurrentIssues>
+</SmellBaseline>

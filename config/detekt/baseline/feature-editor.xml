@@ -1,0 +1,276 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AlsoCouldBeApply:WordCatalog.kt:WordCatalog$also</ID>
+    <ID>BracesOnIfStatements:ColorLiteralScanner.kt:ColorLiteralScanner$else</ID>
+    <ID>BracesOnIfStatements:ColorLiteralScanner.kt:ColorLiteralScanner$if</ID>
+    <ID>BracesOnIfStatements:EditorContract.kt:EditorUiState$else</ID>
+    <ID>BracesOnIfStatements:EditorContract.kt:EditorUiState$if</ID>
+    <ID>BracesOnIfStatements:EditorScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:EditorScreen.kt:if</ID>
+    <ID>BracesOnIfStatements:EditorSearchBar.kt:if</ID>
+    <ID>BracesOnIfStatements:EditorViewModel.kt:EditorViewModel$else</ID>
+    <ID>BracesOnIfStatements:EditorViewModel.kt:EditorViewModel$if</ID>
+    <ID>BracesOnIfStatements:EditorViewModel.kt:EditorViewModel.Companion$else</ID>
+    <ID>BracesOnIfStatements:ImageFilePreview.kt:else</ID>
+    <ID>BracesOnIfStatements:ImageFilePreview.kt:if</ID>
+    <ID>BracesOnIfStatements:LspInfoUi.kt:if</ID>
+    <ID>BracesOnIfStatements:SoraCodeEditor.kt:else</ID>
+    <ID>BracesOnIfStatements:SoraCodeEditor.kt:if</ID>
+    <ID>BracesOnWhenStatements:ColorLiteralScanner.kt:ColorLiteralScanner$when</ID>
+    <ID>BracesOnWhenStatements:EditorScreen.kt:when</ID>
+    <ID>BracesOnWhenStatements:EditorSearchBar.kt:when</ID>
+    <ID>BracesOnWhenStatements:EditorViewModel.kt:EditorViewModel$when</ID>
+    <ID>BracesOnWhenStatements:EditorViewModel.kt:EditorViewModel.Companion$when</ID>
+    <ID>BracesOnWhenStatements:MergeConflicts.kt:MergeConflicts$when</ID>
+    <ID>BracesOnWhenStatements:SoraCodeEditor.kt:&lt;no name provided>$when</ID>
+    <ID>BracesOnWhenStatements:TextMateGrammarStructureTest.kt:TextMateGrammarStructureTest$when</ID>
+    <ID>CascadingCallWrapping:EditorLanguageFactory.kt:EditorLanguageFactory$runCatching { TextMateLanguage.create(languageType.scopeName, true) } .onFailure { Log.w(TAG, "Keine TextMate-Grammatik für Scope '${languageType.scopeName}' – Rückfall auf Klartext", it) } .getOrNull() ?: EmptyLanguage()</ID>
+    <ID>CascadingCallWrapping:EditorLanguageFactory.kt:EditorLanguageFactory$runCatching { TextMateLanguage.create(scopeOverride, true) } .onFailure { Log.w(TAG, "Grammatik '$scopeOverride' nicht nutzbar – Rückfall auf Klartext", it) } .getOrNull() ?: EmptyLanguage()</ID>
+    <ID>CascadingCallWrapping:ImeAwareAutoCompletion.kt:ImeAwareAutoCompletion$bottom</ID>
+    <ID>CascadingCallWrapping:TreeSitterLanguageSupport.kt:TreeSitterLanguageSupport$use { it.readText() }</ID>
+    <ID>CascadingCallWrapping:WordCatalog.kt:WordCatalog$toList()</ID>
+    <ID>ClassOrdering:EditorViewModel.kt:EditorViewModel$Companion</ID>
+    <ID>ClassOrdering:EditorViewModel.kt:EditorViewModel$private var signatureJob: kotlinx.coroutines.Job? = null</ID>
+    <ID>ClassOrdering:EditorViewModelLspTest.kt:EditorViewModelLspTest.FakeLspClient$fun setCapabilities</ID>
+    <ID>ClassOrdering:LspSessionControllerTest.kt:LspSessionControllerTest.FakeLspClientRepository$override val serverCapabilities: StateFlow&lt;LspServerCapabilities?> = _serverCapabilities.asStateFlow()</ID>
+    <ID>ClassOrdering:LspSessionControllerTest.kt:LspSessionControllerTest.FakeLspClientRepository$override var applyEditHandler: (suspend (com.codeforge.core.domain.model.LspWorkspaceEdit) -> Boolean)? = null</ID>
+    <ID>ClassOrdering:LspSessionControllerTest.kt:LspSessionControllerTest.FakeLspClientRepository$private val _serverCapabilities = MutableStateFlow&lt;LspServerCapabilities?>(null)</ID>
+    <ID>ClassOrdering:TextMateAssetLoader.kt:TextMateAssetLoader$private val externalGrammars = java.util.concurrent.ConcurrentHashMap&lt;String, String>()</ID>
+    <ID>ClassOrdering:TextMateAssetLoader.kt:TextMateAssetLoader$private val externalThemes = java.util.concurrent.ConcurrentHashMap&lt;String, String>()</ID>
+    <ID>CognitiveComplexMethod:AiAssistantSheet.kt:@Composable private fun ChatMessageItem</ID>
+    <ID>CognitiveComplexMethod:AiAssistantSheet.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun AiAssistantSheet</ID>
+    <ID>CognitiveComplexMethod:AiDiffDialog.kt:@Composable fun AiDiffDialog</ID>
+    <ID>CognitiveComplexMethod:AiSettingsDialog.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun AiSettingsDialog</ID>
+    <ID>CognitiveComplexMethod:BreakpointDialogs.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun BreakpointsOverviewSheet</ID>
+    <ID>CognitiveComplexMethod:BreakpointOverlay.kt:@Composable fun BreakpointOverlayLayer</ID>
+    <ID>CognitiveComplexMethod:EditorLanguageFactory.kt:EditorLanguageFactory$fun create: Language</ID>
+    <ID>CognitiveComplexMethod:EditorOverlay.kt:@Composable internal fun EditorOverlayLayer</ID>
+    <ID>CognitiveComplexMethod:EditorScreen.kt:@Composable private fun EditorToolbar</ID>
+    <ID>CognitiveComplexMethod:EditorScreen.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class) @Composable fun EditorRoute</ID>
+    <ID>CognitiveComplexMethod:EditorSearchBar.kt:@Composable fun EditorSearchBar</ID>
+    <ID>CognitiveComplexMethod:EditorSymbolBar.kt:@Composable fun EditorSymbolBar</ID>
+    <ID>CognitiveComplexMethod:EditorViewModel.kt:EditorViewModel$fun onEvent</ID>
+    <ID>CognitiveComplexMethod:EditorViewModel.kt:EditorViewModel$private fun acceptAiProposedChange</ID>
+    <ID>CognitiveComplexMethod:EditorViewModel.kt:EditorViewModel$private fun assembleContext: com.codeforge.core.domain.ai.AiPreparedContext</ID>
+    <ID>CognitiveComplexMethod:GitGutterOverlay.kt:@Composable fun GitGutterOverlayLayer</ID>
+    <ID>CognitiveComplexMethod:ImageFilePreview.kt:@Composable fun ImageFilePreview</ID>
+    <ID>CognitiveComplexMethod:ImageFilePreview.kt:private fun loadXmlDrawable: Drawable?</ID>
+    <ID>CognitiveComplexMethod:LspInfoUi.kt:@Composable private fun HoverSignatureCard</ID>
+    <ID>CognitiveComplexMethod:LspInfoUi.kt:internal fun parseHoverBlocks: List&lt;HoverBlock></ID>
+    <ID>CognitiveComplexMethod:LspSessionController.kt:LspSessionController$suspend fun onFileOpened</ID>
+    <ID>CognitiveComplexMethod:QuickFixSheet.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun QuickFixSheet</ID>
+    <ID>CognitiveComplexMethod:SaveOnCloseDialog.kt:@Composable fun SaveOnCloseDialog</ID>
+    <ID>CognitiveComplexMethod:SoraCodeEditor.kt:@Composable fun SoraCodeEditor</ID>
+    <ID>CognitiveComplexMethod:TestTargetScanner.kt:TestTargetScanner$fun scan: List&lt;TestTarget></ID>
+    <ID>CognitiveComplexMethod:TestTargetScanner.kt:TestTargetScanner$internal fun sanitizeCode: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:TreeSitterGrammarTest.kt:TreeSitterGrammarTest$@Test fun kotlinLocalsQueryExistsAndValidStructure</ID>
+    <ID>CollapsibleIfStatements:TestTargetScanner.kt:TestTargetScanner$if (funMatch != null) { if (pendingTestAnnotation) { val fullClass = if (packageName.isNotEmpty()) "$packageName.$currentClassName" else currentClassName val filterTarget = if (fullClass.isNotEmpty()) "$fullClass.$funMatch" else funMatch targets.add( TestTarget( line = lineIdx, label = funMatch, filterTarget = filterTarget, isClass = false ) ) pendingTestAnnotation = false } }</ID>
+    <ID>ComplexCondition:EditorViewModel.kt:EditorViewModel$!forceOverwrite &amp;&amp; currentContent != null &amp;&amp; change.originalContent.isNotBlank() &amp;&amp; currentContent != change.originalContent</ID>
+    <ID>ComplexCondition:LspAwareLanguage.kt:start > 0 &amp;&amp; (line[start - 1].isLetterOrDigit() || line[start - 1] == '_' || line[start - 1] == '$')</ID>
+    <ID>ComplexCondition:TestTargetScanner.kt:TestTargetScanner$i &lt; line.length &amp;&amp; (line[i].isLetterOrDigit() || line[i] == '_' || line[i] == '.')</ID>
+    <ID>ComplexCondition:TestTargetScanner.kt:TestTargetScanner$line.contains('(') &amp;&amp; !line.startsWith("if") &amp;&amp; !line.startsWith("while") &amp;&amp; !line.startsWith("for")</ID>
+    <ID>CyclomaticComplexMethod:BreakpointOverlay.kt:@Composable fun BreakpointOverlayLayer</ID>
+    <ID>CyclomaticComplexMethod:EditorLanguageFactory.kt:EditorLanguageFactory$fun create: Language</ID>
+    <ID>CyclomaticComplexMethod:EditorScreen.kt:@Composable private fun EditorToolbar</ID>
+    <ID>CyclomaticComplexMethod:EditorScreen.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class) @Composable fun EditorRoute</ID>
+    <ID>CyclomaticComplexMethod:EditorSearchBar.kt:@Composable fun EditorSearchBar</ID>
+    <ID>CyclomaticComplexMethod:GitGutterOverlay.kt:@Composable fun GitGutterOverlayLayer</ID>
+    <ID>CyclomaticComplexMethod:ImageFilePreview.kt:@Composable fun ImageFilePreview</ID>
+    <ID>CyclomaticComplexMethod:LspSessionController.kt:LspSessionController$suspend fun onFileOpened</ID>
+    <ID>CyclomaticComplexMethod:MergeConflicts.kt:MergeConflicts$fun scan: List&lt;ConflictBlock></ID>
+    <ID>CyclomaticComplexMethod:SoraCodeEditor.kt:@Composable fun SoraCodeEditor</ID>
+    <ID>CyclomaticComplexMethod:TestTargetScanner.kt:TestTargetScanner$fun scan: List&lt;TestTarget></ID>
+    <ID>CyclomaticComplexMethod:TestTargetScanner.kt:TestTargetScanner$internal fun sanitizeCode: List&lt;String></ID>
+    <ID>DataClassContainsFunctions:EditorContract.kt:EditorUiState$private fun filterSymbols: List&lt;LspDocumentSymbol></ID>
+    <ID>DocumentationOverPrivateFunction:EditorController.kt:EditorController$private fun replaceRange</ID>
+    <ID>DocumentationOverPrivateFunction:EditorOverlay.kt:@Composable private fun ColorSwatch</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class) private fun observeUpdateAnnotations</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$@OptIn(kotlinx.coroutines.FlowPreview::class) private fun observeGitGutter</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$private fun closeTabs</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$private fun goToLocations</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$private fun observeDirectoryChanges</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$private fun observeExternalChanges</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$private fun observeFlushRequests</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$private fun observeSavedFiles</ID>
+    <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$private suspend fun persistDirty: Boolean</ID>
+    <ID>DocumentationOverPrivateFunction:ImeAwareAutoCompletion.kt:ImeAwareAutoCompletion$private fun visibleEditorHeight: Int</ID>
+    <ID>DocumentationOverPrivateFunction:SoraCodeEditor.kt:private fun emphasizeBracketPair</ID>
+    <ID>DocumentationOverPrivateProperty:EditorDisplaySettingsWiringTest.kt:EditorDisplaySettingsWiringTest$/** * Belegt strukturiert für jedes Feld in [EditorDisplaySettings], * auf welche Eigenschaft / Komponente in [io.github.rosemoe.sora.widget.CodeEditor] * es in [applyDisplaySettings] bzw. [EditorLanguageFactory] abgebildet wird. */ private val expectedMappings = mapOf( "tabSize" to "editor.tabWidth", "useTreeSitter" to "EditorLanguageFactory.create(useTreeSitter)", "textmateTheme" to "TextMateAssetLoader.setActiveTheme", "fontSizeSp" to "editor.setTextSize", "fontFamilyAssetPath" to "editor.typefaceText", "wordWrap" to "editor.isWordwrap", "showNonPrintableChars" to "editor.nonPrintablePaintingFlags", "stickyScrollEnabled" to "EditorStickyScroll.isEnabled", "magnifierEnabled" to "Magnifier.isEnabled", "symbolPairAutocompleteEnabled" to "editor.props.symbolPairAutoCompletion", "minimapEnabled" to "EditorMinimap.isEnabled", "rainbowBracketsEnabled" to "editor.isHighlightBracketPair / BracketPairs.isEnabled", "pinchToZoomEnabled" to "editor.setScaleTextEnabled / setScaleTextSizes", "desktopShortcutsEnabled" to "editor.props.navigationMode" )</ID>
+    <ID>DocumentationOverPrivateProperty:EditorLanguageFactory.kt:/** `true`, sobald TreeSitterLanguageSupport ein tsTheme-Mapping (Farben je Capture) setzt. */ private const val TREE_SITTER_THEMED = false</ID>
+    <ID>DocumentationOverPrivateProperty:EditorViewModel.kt:EditorViewModel$/** * WICHTIG: Eigenschaften, auf die in Coroutinen zugegriffen wird, die im `init`-Block gestartet * werden (wie z. B. in [observeUpdateAnnotations]), MÜSSEN VOR dem `init`-Block deklariert werden! * * Grund: `viewModelScope.launch` verwendet zur Laufzeit `Dispatchers.Main.immediate`. Läuft der * Aufrufer auf dem Main-Thread (wie bei der Instanziierung des ViewModels via Hilt/Compose), * wird der Coroutinen-Block SOFORT synchron innerhalb des Konstruktors ausgeführt. * Da Kotlin Eigenschaften streng in Deklarationsreihenfolge initialisiert, sind Eigenschaften, * die unterhalb von `init` deklariert sind, zu diesem Zeitpunkt noch `null` im Java-Bytecode. */ private val projectRoot = MutableStateFlow&lt;String?>(null)</ID>
+    <ID>DocumentationOverPrivateProperty:EditorViewModel.kt:EditorViewModel$/** Dokumentversion je Pfad, für LSP `textDocument/didChange` (versionierte Syncs). */ private val documentVersions = mutableMapOf&lt;String, Int>()</ID>
+    <ID>DocumentationOverPrivateProperty:EditorViewModel.kt:EditorViewModel$/** Gecachte AppSettings für Format on Save etc. */ private var currentAppSettings: AppSettings? = null</ID>
+    <ID>DocumentationOverPrivateProperty:EditorViewModel.kt:EditorViewModel$/** Zuletzt angewendete Rückgängig-Aktion (z. B. für Rename). */ private var lastUndoAction: (suspend () -> Unit)? = null</ID>
+    <ID>DocumentationOverPrivateProperty:EditorViewModel.kt:EditorViewModel$/** Zuletzt gemeldete, nicht dismissed Updates des Projekts (Basis für „Update All“). */ private var pendingUpdates: List&lt;DependencyUpdate> = emptyList()</ID>
+    <ID>DocumentationOverPrivateProperty:TreeSitterLanguageSupport.kt:TreeSitterLanguageSupport$/** * Name der gemeinsamen Core-/Runtime-Bibliothek (JNI-Bridge), die vor jeder * Pro-Sprache-Bibliothek geladen werden muss. Siehe Klassen-Kommentar oben sowie * TREESITTER.md. Je nach tatsächlich verwendeter `android-tree-sitter`-Version kann der * Name abweichen (ältere Versionen: `android-tree-sitter`, neuere: schlicht * `tree-sitter`) — PRÜFEN, welcher Name zur tatsächlich eingebundenen .aar-Version passt * (z. B. per `unzip -l` auf die aufgelöste .aar im Gradle-Cache), sobald die Dependency * aus TREESITTER.md ergänzt ist, und hier ggf. korrigieren. */ private const val CORE_LIBRARY_NAME = "android-tree-sitter"</ID>
+    <ID>DocumentationOverPrivateProperty:WordCatalog.kt:WordCatalog$/** Scopes, für die das Wörterbuch (Fließtext) statt Schlüsselwörtern verwendet wird. */ private val proseScopes = setOf("text.plain", "text.html.markdown", "text.tex.latex")</ID>
+    <ID>ExpressionBodySyntax:EditorViewModel.kt:EditorViewModel$return LspWorkspaceEditApplier( getOpenFileContent = { path -> val norm = normalize(path) _uiState.value.openFiles.firstOrNull { normalize(it.path) == norm }?.content }, updateOpenFileContent = { path, newContent -> updateBufferForPath(path, newContent) } )</ID>
+    <ID>ExpressionBodySyntax:EditorViewModel.kt:EditorViewModel$return aiProvider?.testConnection(options) ?: Result.failure(IllegalStateException("No AI provider"))</ID>
+    <ID>ExpressionBodySyntax:EditorViewModel.kt:EditorViewModel$return try { val rootCanonical = File(projectRootPath).canonicalPath val fileCanonical = File(absolutePath).canonicalPath fileCanonical.removePrefix(rootCanonical) .trimStart(File.separatorChar) .replace(File.separatorChar, '/') } catch (_: Exception) { absolutePath.substringAfterLast('/') }</ID>
+    <ID>ExpressionBodySyntax:EditorViewModel.kt:EditorViewModel.&lt;no name provided>$return _uiState.value.openFiles.map { file -> com.codeforge.core.domain.repository.OpenDocumentInfo( path = file.path, languageId = languageIdFor(file.path), content = file.content ) }</ID>
+    <ID>ExpressionBodySyntax:SymbolOutlineExtractor.kt:SymbolOutlineExtractor$return extractKotlin(content)</ID>
+    <ID>FunctionNameMaxLength:AiDiffApplicationTest.kt:AiDiffApplicationTest$@Test fun testConflictDetectionOnModifiedFile</ID>
+    <ID>FunctionNameMaxLength:EditorAiViewModelTest.kt:EditorAiViewModelTest$@Test fun testApplyProposedChangeConflictAndAccept</ID>
+    <ID>FunctionNameMaxLength:EditorControllerCursorTest.kt:EditorControllerCursorTest$@Test fun `cursor after modified region shifts by length delta`</ID>
+    <ID>FunctionNameMaxLength:EditorControllerCursorTest.kt:EditorControllerCursorTest$@Test fun `cursor before modified region remains at same position`</ID>
+    <ID>FunctionNameMaxLength:EditorControllerCursorTest.kt:EditorControllerCursorTest$@Test fun `cursor inside modified region interpolates proportionally`</ID>
+    <ID>FunctionNameMaxLength:EditorControllerCursorTest.kt:EditorControllerCursorTest$@Test fun `pure deletion where newMiddle is empty clamps within range`</ID>
+    <ID>FunctionNameMaxLength:EditorControllerCursorTest.kt:EditorControllerCursorTest$@Test fun `pure insertion where oldMiddle is empty places cursor at end of insertion`</ID>
+    <ID>FunctionNameMaxLength:EditorDisplaySettingsWiringTest.kt:EditorDisplaySettingsWiringTest$@Test fun `all EditorDisplaySettings fields have an explicit editor mapping`</ID>
+    <ID>FunctionNameMaxLength:EditorDisplaySettingsWiringTest.kt:EditorDisplaySettingsWiringTest$@Test fun `default values of EditorDisplaySettings are sane`</ID>
+    <ID>FunctionNameMaxLength:EditorLanguageIdTest.kt:EditorLanguageIdTest$@Test fun `languageIdFor evaluates shebang for script files without extension`</ID>
+    <ID>FunctionNameMaxLength:EditorLanguageIdTest.kt:EditorLanguageIdTest$@Test fun `languageIdFor maps file extensions according to Task 43 specification without regression`</ID>
+    <ID>FunctionNameMaxLength:EditorLanguageTypeTest.kt:EditorLanguageTypeTest$@Test fun `every type with a grammar is registered in languages json`</ID>
+    <ID>FunctionNameMaxLength:EditorLanguageTypeTest.kt:EditorLanguageTypeTest$@Test fun `files without a registered grammar map to PLAIN and have no grammar`</ID>
+    <ID>FunctionNameMaxLength:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest$@Test fun `closing multiple tabs until empty, reopening, and closing preserves index invariants`</ID>
+    <ID>FunctionNameMaxLength:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest$@Test fun `closing tab when no files open does not crash and keeps index 0`</ID>
+    <ID>FunctionNameMaxLength:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest$@Test fun `initial editor state has no open files and activeFile is null`</ID>
+    <ID>FunctionNameMaxLength:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest$@Test fun `invalid closeTab or selectTab indices do not crash or corrupt state`</ID>
+    <ID>FunctionNameMaxLength:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest$@Test fun `opening file then closing last tab leaves state empty without crash`</ID>
+    <ID>FunctionNameMaxLength:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest$@Test fun `reproduce root cause - accessing empty tabPositions throws IndexOutOfBoundsException`</ID>
+    <ID>FunctionNameMaxLength:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest$@Test fun `text change with no open files does not crash`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelFormatTest.kt:EditorViewModelFormatTest$@Test fun `test format document triggers formatFile and emits ApplyFormattedText effect`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelFormatTest.kt:EditorViewModelFormatTest$@Test fun `test format error emits error snackbar and leaves file intact`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelFormatTest.kt:EditorViewModelFormatTest$@Test fun `test format selection triggers formatRange`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelFormatTest.kt:EditorViewModelFormatTest$@Test fun `test saveActiveFile with format_on_save_kotlin enabled formats file before saving`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelInitTest.kt:EditorViewModelInitTest$@Test fun editorViewModel_initDoesNotThrowNullPointerException</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelLspTest.kt:EditorViewModelLspTest$@Test fun `test go to definition and find references`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelLspTest.kt:EditorViewModelLspTest$@Test fun `test outline toggle with LSP and fallback`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelLspTest.kt:EditorViewModelLspTest$@Test fun `test rename flow propose, preview and confirm`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelLspTest.kt:EditorViewModelLspTest$@Test fun `test trigger and dismiss quick fix`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest$@Test fun `DiscardAllAndClose discards buffer changes, reloads from disk and closes`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest$@Test fun `DismissSaveOnCloseDialog stays in editor`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest$@Test fun `SaveAllAndClose saves all dirty files and closes`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest$@Test fun `SaveAllAndClose with partial failure keeps failed file dirty and halts close`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest$@Test fun `requestClose proceeds immediately when no dirty files`</ID>
+    <ID>FunctionNameMaxLength:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest$@Test fun `requestClose shows dialog when dirty files exist`</ID>
+    <ID>FunctionNameMaxLength:ImageFilePreviewTest.kt:ImageFilePreviewTest$@Test fun adaptiveIconXmlRecognizedWhenInMipmapDirectory</ID>
+    <ID>FunctionNameMaxLength:ImageFilePreviewTest.kt:ImageFilePreviewTest$@Test fun standardImageExtensionsRecognized</ID>
+    <ID>FunctionNameMaxLength:ImageFilePreviewTest.kt:ImageFilePreviewTest$@Test fun vectorDrawableXmlRecognizedWhenInDrawableDirectory</ID>
+    <ID>FunctionNameMaxLength:LspInfoUiTest.kt:LspInfoUiTest$@Test fun `parseHoverBlocks behandelt ungeschlossenen Codeblock und reinen Text`</ID>
+    <ID>FunctionNameMaxLength:LspInfoUiTest.kt:LspInfoUiTest$@Test fun `parseHoverBlocks trennt Text und Codeblock`</ID>
+    <ID>FunctionNameMaxLength:LspInfoUiTest.kt:LspInfoUiTest$@Test fun `signatureAnnotated hebt aktiven Parameter hervor`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `changing workspace root stops all previous sessions`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `closing project or stop resets controller state and stops all clients`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `eviction with maxSessions 2 evicts least recently used session but never active document`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `idle timeout stops session with zero open documents using virtual time`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `re-registering open documents on server start sends didOpen with unsaved content`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `resolver returns launch - server starts exactly once for same workspace and language`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `resolver returns null - server does not start and state is STOPPED`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `start failure records cooldown period and manual restart bypasses it`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `switching language with maxSessions 1 stops previous server and starts new one`</ID>
+    <ID>FunctionNameMaxLength:LspSessionControllerTest.kt:LspSessionControllerTest$@Test fun `tab switch Kotlin to YAML to Kotlin starts each server exactly once when maxSessions greater than 1`</ID>
+    <ID>FunctionNameMaxLength:MergeConflictsTest.kt:MergeConflictsTest$@Test fun `Text ohne Konflikte oder unvollstaendige Marker liefert nichts`</ID>
+    <ID>FunctionNameMaxLength:MergeConflictsTest.kt:MergeConflictsTest$@Test fun `scan findet Block mit Labels und Zeilen`</ID>
+    <ID>FunctionNameMaxLength:ResolveEditorThemeTest.kt:ResolveEditorThemeTest$@Test fun `Plugin-Editor-Theme gilt nur bei auto`</ID>
+    <ID>FunctionNameMaxLength:ResolveEditorThemeTest.kt:ResolveEditorThemeTest$@Test fun `explizites Theme bleibt unveraendert`</ID>
+    <ID>FunctionNameMaxLength:TestTargetScannerTest.kt:TestTargetScannerTest$@Test fun ignoresTestAnnotationInsideCommentsAndStrings</ID>
+    <ID>FunctionNameMaxLength:TextMateGrammarStructureTest.kt:TextMateGrammarStructureTest$@Test fun `captures only contain capture objects`</ID>
+    <ID>FunctionNameMaxLength:TextMateGrammarStructureTest.kt:TextMateGrammarStructureTest$@Test fun `local includes resolve to repository entries`</ID>
+    <ID>FunctionNameMaxLength:TextMateManifestTest.kt:TextMateManifestTest$@Test fun `every referenced file exists and scope names are unique`</ID>
+    <ID>FunctionNameMaxLength:TextMateManifestTest.kt:TextMateManifestTest$@Test fun `manifest uses the languages key expected by sora`</ID>
+    <ID>FunctionNameMaxLength:TextMateThemeDefaultsTest.kt:TextMateThemeDefaultsTest$@Test fun `dark theme defines a global default foreground and background`</ID>
+    <ID>FunctionNameMaxLength:TextMateThemeDefaultsTest.kt:TextMateThemeDefaultsTest$@Test fun `light theme defines a global default foreground and background`</ID>
+    <ID>FunctionNameMaxLength:TreeSitterGrammarTest.kt:TreeSitterGrammarTest$@Test fun cmakeListsRecognizedDirectlyAndInPath</ID>
+    <ID>FunctionNameMaxLength:TreeSitterGrammarTest.kt:TreeSitterGrammarTest$@Test fun grammarPropertiesMatchConvention</ID>
+    <ID>FunctionNameMaxLength:TreeSitterGrammarTest.kt:TreeSitterGrammarTest$@Test fun isAvailableHandlesMissingRuntimeGracefully</ID>
+    <ID>FunctionNameMaxLength:TreeSitterGrammarTest.kt:TreeSitterGrammarTest$@Test fun kotlinLocalsQueryExistsAndValidStructure</ID>
+    <ID>FunctionNameMaxLength:TreeSitterGrammarTest.kt:TreeSitterGrammarTest$@Test fun nativeLibsExistForManuallyBuiltGrammars</ID>
+    <ID>FunctionNameMaxLength:TreeSitterGrammarTest.kt:TreeSitterGrammarTest$@Test fun queryAssetsExistForEveryGrammar</ID>
+    <ID>LargeClass:EditorViewModel.kt:EditorViewModel : ViewModel</ID>
+    <ID>LongMethod:EditorViewModel.kt:EditorViewModel$fun onEvent</ID>
+    <ID>LongMethod:EditorViewModel.kt:EditorViewModel$private fun assembleContext: com.codeforge.core.domain.ai.AiPreparedContext</ID>
+    <ID>LongMethod:EditorViewModel.kt:EditorViewModel$private fun executeAiPrompt</ID>
+    <ID>LongMethod:LspAwareLanguage.kt:LspAwareLanguage$override fun requireAutoComplete</ID>
+    <ID>LongMethod:LspSessionController.kt:LspSessionController$suspend fun onFileOpened</ID>
+    <ID>LongMethod:SoraCodeEditor.kt:fun applyDisplaySettings</ID>
+    <ID>LongMethod:TestTargetScanner.kt:TestTargetScanner$internal fun sanitizeCode: List&lt;String></ID>
+    <ID>LoopWithTooManyJumpStatements:BreakpointOverlay.kt:for</ID>
+    <ID>LoopWithTooManyJumpStatements:ColorLiteralScanner.kt:ColorLiteralScanner$for</ID>
+    <ID>LoopWithTooManyJumpStatements:GitGutterOverlay.kt:for</ID>
+    <ID>MatchingDeclarationName:AiQuickActionsSheet.kt:AiQuickActionType</ID>
+    <ID>MatchingDeclarationName:SoraCodeEditor.kt:EditorDisplaySettings</ID>
+    <ID>ReturnCount:ConflictOverlay.kt:fun band</ID>
+    <ID>ReturnCount:EditorController.kt:internal fun mapCursorOffset: Int</ID>
+    <ID>ReturnCount:ImageFilePreview.kt:fun isImageFilePath: Boolean</ID>
+    <ID>ReturnCount:LspSessionController.kt:LspSessionController$suspend fun onFileOpened</ID>
+    <ID>ReturnCount:TestTargetScanner.kt:TestTargetScanner$private fun extractFunctionName: String?</ID>
+    <ID>StringLiteralDuplication:EditorViewModel.kt:EditorViewModel$"file://"</ID>
+    <ID>StringLiteralDuplication:EditorViewModel.kt:EditorViewModel.Companion$"cmake"</ID>
+    <ID>StringLiteralDuplication:LspSessionController.kt:LspSessionController$"cmake"</ID>
+    <ID>StringLiteralDuplication:LspSessionController.kt:LspSessionController$"javascript"</ID>
+    <ID>StringLiteralDuplication:LspSessionController.kt:LspSessionController$"typescript"</ID>
+    <ID>StringLiteralDuplication:MergeConflicts.kt:MergeConflicts$"&lt;&lt;&lt;&lt;&lt;&lt;&lt;"</ID>
+    <ID>StringLiteralDuplication:TextMateAssetLoader.kt:TextMateAssetLoader$"TextMateAssetLoader"</ID>
+    <ID>StringShouldBeRawString:EditorAiViewModelTest.kt:EditorAiViewModelTest$"die Lösung:\n```kotlin\n// file: /project/src/Main.kt\nfun main() = println(\"fixed\")\n```"</ID>
+    <ID>StringShouldBeRawString:EditorAiViewModelTest.kt:EditorAiViewModelTest$fakeFileSystemRepo.files["/project/src/Main.kt"] = "fun main() {\n println(\"hello\")\n}"</ID>
+    <ID>StringShouldBeRawString:EditorLanguageTypeTest.kt:EditorLanguageTypeTest$"\"scopeName\": \"${type.scopeName}\""</ID>
+    <ID>StringShouldBeRawString:EditorViewModel.kt:EditorViewModel$"Erkläre den folgenden Code-Abschnitt in $fileName verständlich und präzise:\n```\n$selectedText\n```"</ID>
+    <ID>StringShouldBeRawString:EditorViewModel.kt:EditorViewModel$"Erstelle vollständige KDoc-/JavaDoc-Kommentare für alle Funktionen und Klassen in:\n```\n$targetCode\n```"</ID>
+    <ID>StringShouldBeRawString:EditorViewModel.kt:EditorViewModel$"Schreibe aussagekräftige Unit-Tests (JUnit 4/Kotlin) für folgenden Code in $fileName:\n```\n$targetCode\n```"</ID>
+    <ID>StringShouldBeRawString:EditorViewModel.kt:EditorViewModel$"Überarbeite und verbessere folgenden Code in $fileName (Lesbarkeit, Idiomatik, Performance):\n```\n$targetCode\n```"</ID>
+    <ID>StringShouldBeRawString:EditorViewModelFormatTest.kt:EditorViewModelFormatTest$"class Main {\n fun foo() = 1\n}\n"</ID>
+    <ID>StringShouldBeRawString:EditorViewModelFormatTest.kt:EditorViewModelFormatTest$"class Main {\n fun foo() = 42\n}\n"</ID>
+    <ID>StringShouldBeRawString:EditorViewModelFormatTest.kt:EditorViewModelFormatTest$"class Main {\n fun foo() = 99\n}\n"</ID>
+    <ID>StringShouldBeRawString:EditorViewModelFormatTest.kt:EditorViewModelFormatTest$files["/project/Main.kt"] = "class Main {\n fun foo() = 1\n}\n"</ID>
+    <ID>StringShouldBeRawString:LspInfoUiTest.kt:LspInfoUiTest$"```kotlin\nfun foo(): Int\n```\n\nGibt 42 zurück.\n"</ID>
+    <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"&lt;&lt;&lt;&lt;&lt;&lt;&lt; A\nx\n||||||| base\nb\n=======\ny\n>>>>>>> B\nmid\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; A\n1\n=======\n2\n>>>>>>> B"</ID>
+    <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nx\n=======\ny\n"</ID>
+    <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"a\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nours1\nours2\n=======\ntheirs\n>>>>>>> feature\nz\n"</ID>
+    <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"a\nours1\nours2\ntheirs\nz\n"</ID>
+    <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"a\nours1\nours2\nz\n"</ID>
+    <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"a\ntheirs\nz\n"</ID>
+    <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"x\nmid\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; A\n1\n=======\n2\n>>>>>>> B"</ID>
+    <ID>StringShouldBeRawString:TextMateManifestTest.kt:TextMateManifestTest$"\"grammar\"\\s*:\\s*\"([^\"]+)\""</ID>
+    <ID>StringShouldBeRawString:TextMateManifestTest.kt:TextMateManifestTest$"\"languageConfiguration\"\\s*:\\s*\"([^\"]+)\""</ID>
+    <ID>StringShouldBeRawString:TextMateManifestTest.kt:TextMateManifestTest$"\"scopeName\"\\s*:\\s*\"([^\"]+)\""</ID>
+    <ID>StringShouldBeRawString:TextMateThemeDefaultsTest.kt:TextMateThemeDefaultsTest$"\"tokenColors\"\\s*:\\s*\\[\\s*\\{\\s*\"settings\"\\s*:\\s*\\{[^}]*#D4D4D4"</ID>
+    <ID>StringShouldBeRawString:TextMateThemeDefaultsTest.kt:TextMateThemeDefaultsTest$"\"tokenColors\"\\s*:\\s*\\[\\s*\\{\\s*\"settings\"\\s*:\\s*\\{[^}]*#FFFFFF"</ID>
+    <ID>SwallowedException:EditorViewModel.kt:EditorViewModel$e: kotlinx.coroutines.CancellationException</ID>
+    <ID>TooGenericExceptionCaught:EditorViewModel.kt:EditorViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:LspSessionController.kt:LspSessionController$e: Exception</ID>
+    <ID>TooGenericExceptionThrown:LspSessionControllerTest.kt:LspSessionControllerTest.FakeLspServerResolver$throw RuntimeException("Resolver error")</ID>
+    <ID>TooManyFunctions:EditorController.kt:EditorController</ID>
+    <ID>UndocumentedPublicClass:EditorOverlay.kt:OverlayItem$Swatch : OverlayItem</ID>
+    <ID>UndocumentedPublicClass:EditorOverlay.kt:OverlayItem$TestRunChip : OverlayItem</ID>
+    <ID>UndocumentedPublicClass:EditorOverlay.kt:OverlayItem$UpdateChip : OverlayItem</ID>
+    <ID>UndocumentedPublicFunction:EditorLanguageFactory.kt:EditorLanguageType.Companion$fun fromPath: EditorLanguageType</ID>
+    <ID>UndocumentedPublicFunction:EditorViewModel.kt:EditorViewModel.Companion$fun languageIdFor: String</ID>
+    <ID>UndocumentedPublicFunction:TreeSitterLanguageSupport.kt:TreeSitterGrammar.Companion$fun fromPath: TreeSitterGrammar?</ID>
+    <ID>UnnecessaryParentheses:AiAssistantSheet.kt:(history.size)</ID>
+    <ID>UnnecessaryParentheses:AiDiffApplicationTest.kt:AiDiffApplicationTest$(modifiedOnDiskLater != change.originalContent)</ID>
+    <ID>UnnecessaryParentheses:ColorLiteralScanner.kt:ColorLiteralScanner$(lo + hi + 1)</ID>
+    <ID>UnnecessaryParentheses:EditorController.kt:(newLen - suffix)</ID>
+    <ID>UnnecessaryParentheses:EditorOverlay.kt:EditorOverlayGeometry$(bottom - editor.rowHeight)</ID>
+    <ID>UnnecessaryParentheses:EditorScreen.kt:(controller?.canRedoState ?: false)</ID>
+    <ID>UnnecessaryParentheses:EditorScreen.kt:(controller?.canUndoState ?: false)</ID>
+    <ID>UnnecessaryParentheses:EditorScreen.kt:(it.pluginId to it.commandId)</ID>
+    <ID>UnnecessaryParentheses:LspSessionController.kt:LspSessionController$(doc.languageId.lowercase() in setOf("c", "cpp"))</ID>
+    <ID>UnnecessaryParentheses:SoraCodeEditor.kt:(if (settings.keyboardSuggestions) 0 else android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS)</ID>
+    <ID>UnnecessaryParentheses:WordCatalog.kt:WordCatalog$(lo + hi)</ID>
+    <ID>UnusedParameter:EditorViewModel.kt:EditorViewModel$cursorLine: Int?</ID>
+    <ID>UnusedParameter:LspSessionController.kt:LspSessionController$sessionId: String</ID>
+    <ID>UnusedParameter:TestTargetScanner.kt:TestTargetScanner$ext: String</ID>
+    <ID>UseIfInsteadOfWhen:EditorViewModel.kt:EditorViewModel$when (sessionState) { is com.codeforge.core.domain.model.DebugSessionState.Paused -> { val topFrame = sessionState.frames.firstOrNull() _uiState.update { it.copy( pausedLine = topFrame?.line, pausedPath = topFrame?.path ) } } else -> { _uiState.update { it.copy( pausedLine = null, pausedPath = null ) } } }</ID>
+    <ID>VariableNaming:EditorAiViewModelTest.kt:EditorAiViewModelTest.FakeLspClient$val _capabilities = MutableStateFlow&lt;LspServerCapabilities?>(null)</ID>
+    <ID>VariableNaming:EditorAiViewModelTest.kt:EditorAiViewModelTest.FakeLspClient$val _diagnostics = MutableSharedFlow&lt;Pair&lt;String, List&lt;LspDiagnostic>>>()</ID>
+    <ID>VariableNaming:EditorAiViewModelTest.kt:EditorAiViewModelTest.FakeLspClient$val _serverState = MutableStateFlow(LspServerState.RUNNING)</ID>
+    <ID>VariableNaming:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest.FakeLspClient$val _capabilities = MutableStateFlow&lt;LspServerCapabilities?>(null)</ID>
+    <ID>VariableNaming:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest.FakeLspClient$val _diagnostics = MutableSharedFlow&lt;Pair&lt;String, List&lt;LspDiagnostic>>>()</ID>
+    <ID>VariableNaming:EditorTabRowCrashRegressionTest.kt:EditorTabRowCrashRegressionTest.FakeLspClient$val _serverState = MutableStateFlow(LspServerState.RUNNING)</ID>
+    <ID>VariableNaming:EditorViewModelFormatTest.kt:EditorViewModelFormatTest.FakeLspClient$val _capabilities = MutableStateFlow&lt;LspServerCapabilities?>(null)</ID>
+    <ID>VariableNaming:EditorViewModelFormatTest.kt:EditorViewModelFormatTest.FakeLspClient$val _diagnostics = MutableSharedFlow&lt;Pair&lt;String, List&lt;LspDiagnostic>>>()</ID>
+    <ID>VariableNaming:EditorViewModelFormatTest.kt:EditorViewModelFormatTest.FakeLspClient$val _serverState = MutableStateFlow(LspServerState.RUNNING)</ID>
+    <ID>VariableNaming:EditorViewModelInitTest.kt:EditorViewModelInitTest.FakeLspClient$val _capabilities = MutableStateFlow&lt;LspServerCapabilities?>(null)</ID>
+    <ID>VariableNaming:EditorViewModelInitTest.kt:EditorViewModelInitTest.FakeLspClient$val _diagnostics = MutableSharedFlow&lt;Pair&lt;String, List&lt;LspDiagnostic>>>()</ID>
+    <ID>VariableNaming:EditorViewModelInitTest.kt:EditorViewModelInitTest.FakeLspClient$val _serverState = MutableStateFlow(LspServerState.RUNNING)</ID>
+    <ID>VariableNaming:EditorViewModelLspTest.kt:EditorViewModelLspTest.FakeLspClient$val _capabilities = MutableStateFlow&lt;LspServerCapabilities?>(null)</ID>
+    <ID>VariableNaming:EditorViewModelLspTest.kt:EditorViewModelLspTest.FakeLspClient$val _diagnostics = MutableSharedFlow&lt;Pair&lt;String, List&lt;LspDiagnostic>>>()</ID>
+    <ID>VariableNaming:EditorViewModelLspTest.kt:EditorViewModelLspTest.FakeLspClient$val _serverState = MutableStateFlow(LspServerState.RUNNING)</ID>
+    <ID>VariableNaming:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest.FakeLspClient$val _capabilities = MutableStateFlow&lt;LspServerCapabilities?>(null)</ID>
+    <ID>VariableNaming:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest.FakeLspClient$val _diagnostics = MutableSharedFlow&lt;Pair&lt;String, List&lt;LspDiagnostic>>>()</ID>
+    <ID>VariableNaming:EditorViewModelSaveOnCloseTest.kt:EditorViewModelSaveOnCloseTest.FakeLspClient$val _serverState = MutableStateFlow(LspServerState.RUNNING)</ID>
+  </CurrentIssues>
+</SmellBaseline>

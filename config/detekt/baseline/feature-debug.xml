@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:DebugToolbar.kt:when</ID>
+    <ID>BracesOnWhenStatements:DebugViewModel.kt:DebugViewModel$when</ID>
+    <ID>CognitiveComplexMethod:BreakpointsTab.kt:@Composable private fun BreakpointRow</ID>
+    <ID>CognitiveComplexMethod:CallStackTab.kt:@Composable private fun StackFrameItem</ID>
+    <ID>CognitiveComplexMethod:DebugToolbar.kt:@Composable fun DebugToolbar</ID>
+    <ID>CognitiveComplexMethod:DebugViewModel.kt:DebugViewModel$private fun detectPackageName: String?</ID>
+    <ID>CognitiveComplexMethod:VariablesTab.kt:@Composable private fun VariableItem</ID>
+    <ID>CyclomaticComplexMethod:DebugToolbar.kt:@Composable fun DebugToolbar</ID>
+    <ID>CyclomaticComplexMethod:DebugViewModel.kt:DebugViewModel$private fun detectPackageName: String?</ID>
+    <ID>ExpressionBodySyntax:DebugViewModel.kt:DebugViewModel$return (_uiState.value.sessionState as? DebugSessionState.Paused)?.threadId ?: 1L</ID>
+    <ID>ExpressionBodySyntax:DebugViewModelTest.kt:DebugViewModelTest.&lt;no name provided>$return Result.success(breakpoints)</ID>
+    <ID>ExpressionBodySyntax:DebugViewModelTest.kt:DebugViewModelTest.&lt;no name provided>$return Result.success(listOf(DebugStackFrame(101L, "main()", "/src/Main.kt", 15, 1)))</ID>
+    <ID>ExpressionBodySyntax:DebugViewModelTest.kt:DebugViewModelTest.&lt;no name provided>$return Result.success(listOf(Scope("Locals", 201L)))</ID>
+    <ID>ExpressionBodySyntax:DebugViewModelTest.kt:DebugViewModelTest.&lt;no name provided>$return when (variablesReference) { 201L -> Result.success(listOf(Variable(name = "user", value = "UserObject", variablesReference = 301L))) 301L -> Result.success(listOf(Variable(name = "name", value = "\"Alice\"", variablesReference = 0L))) else -> Result.success(emptyList()) }</ID>
+    <ID>FunctionNameMaxLength:DebugViewModelTest.kt:DebugViewModelTest$@Test fun attachAndroidTransitionsToRunning</ID>
+    <ID>FunctionNameMaxLength:DebugViewModelTest.kt:DebugViewModelTest$@Test fun evaluateExpressionHandlesFailure</ID>
+    <ID>FunctionNameMaxLength:DebugViewModelTest.kt:DebugViewModelTest$@Test fun evaluateExpressionPopulatesResult</ID>
+    <ID>FunctionNameMaxLength:DebugViewModelTest.kt:DebugViewModelTest$@Test fun pausedSessionLoadsFramesAndVariables</ID>
+    <ID>FunctionNameMaxLength:DebugViewModelTest.kt:DebugViewModelTest$@Test fun setDebugModeAndTargetUpdatesState</ID>
+    <ID>FunctionNameMaxLength:DebugViewModelTest.kt:DebugViewModelTest$@Test fun stopInvokesDetachWhenAndroidTargetActive</ID>
+    <ID>FunctionNameMaxLength:DebugViewModelTest.kt:DebugViewModelTest$@Test fun toggleExpandVariableLoadsChildren</ID>
+    <ID>ReturnCount:DebugViewModel.kt:DebugViewModel$private fun detectPackageName: String?</ID>
+    <ID>ReturnCount:DebugViewModel.kt:DebugViewModel$private fun findApkInProject: File?</ID>
+    <ID>UseIfInsteadOfWhen:DebugViewModel.kt:DebugViewModel$when (event) { is DebugEvent.Error -> { _uiState.update { it.copy(errorMessage = event.message) } } else -> Unit }</ID>
+  </CurrentIssues>
+</SmellBaseline>

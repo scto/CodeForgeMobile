@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$else</ID>
+    <ID>BracesOnIfStatements:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$if</ID>
+    <ID>BracesOnWhenStatements:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$when</ID>
+    <ID>ClassOrdering:ProjectBackupRepositoryImpl.kt:ProjectBackupRepositoryImpl$Companion</ID>
+    <ID>ClassOrdering:ProjectLanguageScannerImpl.kt:ProjectLanguageScannerImpl$Companion</ID>
+    <ID>CognitiveComplexMethod:J2kRepositoryImpl.kt:J2kRepositoryImpl$override suspend fun executeMigration: J2kReport</ID>
+    <ID>CognitiveComplexMethod:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$override suspend fun convertFile: J2kFileResultWithContent</ID>
+    <ID>CognitiveComplexMethod:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$private fun replaceMethods: String</ID>
+    <ID>CognitiveComplexMethod:ProjectBackupRepositoryImpl.kt:ProjectBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>CognitiveComplexMethod:ProjectBackupRepositoryImpl.kt:ProjectBackupRepositoryImpl$override suspend fun rollbackWithJournal: Boolean</ID>
+    <ID>CyclomaticComplexMethod:J2kRepositoryImpl.kt:J2kRepositoryImpl$override suspend fun executeMigration: J2kReport</ID>
+    <ID>ExpressionBodySyntax:J2kRepositoryImpl.kt:J2kRepositoryImpl$return backupRepo.rollbackWithJournal(projectPath, journalPath)</ID>
+    <ID>ExpressionBodySyntax:J2kRepositoryImpl.kt:J2kRepositoryImpl$return buildString { appendLine("# J2K Migrationsbericht ($timestamp)") appendLine() appendLine("> **Hinweis:** Automatisch umgewandelt, bitte prüfen!") appendLine() appendLine("## Zusammenfassung") appendLine("- **Projekt:** `$projectPath`") appendLine("- **Backup:** `$backupZipPath`") appendLine("- **Journal:** `$journalPath`") appendLine("- **Java-Dateien erfolgreich:** $convertedJava") appendLine("- **Java-Dateien mit Hinweisen:** $notesJava") appendLine("- **Java-Dateien übersprungen:** $skippedJava") appendLine("- **Java-Dateien fehlgeschlagen:** $failedJava") appendLine("- **Gradle-Dateien konvertiert:** $convertedGradle") appendLine("- **Versionskatalog erstellt:** ${if (catalogCreated) "Ja (`gradle/libs.versions.toml`)" else "Nein"}") appendLine() appendLine("## Dateiergebnisse") appendLine("| Datei | Status | Originalzeilen | Ergebniszeilen | Hinweise |") appendLine("|---|---|---|---|---|") for (res in results) { val notesStr = if (res.notes.isNotEmpty()) res.notes.joinToString("; ") else (res.errorMessage ?: "-") appendLine("| `${res.filePath}` | ${res.status} | ${res.originalLines} | ${res.convertedLines} | $notesStr |") } }</ID>
+    <ID>ExpressionBodySyntax:J2kRepositoryImpl.kt:J2kRepositoryImpl$return scanner.createPlan(projectPath)</ID>
+    <ID>ExpressionBodySyntax:J2kRepositoryImpl.kt:J2kRepositoryImpl$return scanner.scanProject(projectPath)</ID>
+    <ID>ExpressionBodySyntax:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$return when (javaType) { "int" -> "Int" "long" -> "Long" "double" -> "Double" "float" -> "Float" "boolean" -> "Boolean" "byte" -> "Byte" "short" -> "Short" "char" -> "Char" "void" -> "Unit" "Object" -> "Any" "String[]" -> "Array&lt;String>" "int[]" -> "IntArray" "long[]" -> "LongArray" else -> { if (javaType.startsWith("List&lt;")) javaType else if (javaType.startsWith("Map&lt;")) javaType else if (javaType.startsWith("Set&lt;")) javaType else javaType } }</ID>
+    <ID>ExpressionBodySyntax:ProjectLanguageScannerImpl.kt:ProjectLanguageScannerImpl$return try { file.bufferedReader().useLines { lines -> lines.count { it.isNotBlank() } } } catch (_: Exception) { 0 }</ID>
+    <ID>ExpressionBodySyntax:VersionCatalogMigratorImpl.kt:VersionCatalogMigratorImpl$return makeAlias(group, artifact).replace("-", "")</ID>
+    <ID>FunctionNameMaxLength:JavaToKotlinConverterTest.kt:JavaToKotlinConverterTest$@Test fun testConvertSimpleClassWithFieldsAndMethods</ID>
+    <ID>FunctionNameMaxLength:ProjectLanguageScannerTest.kt:ProjectLanguageScannerTest$@Test fun testScanProjectExcludesBuildAndBackupDirs</ID>
+    <ID>FunctionNameMaxLength:ProjectLanguageScannerTest.kt:ProjectLanguageScannerTest$@Test fun testScanProjectWithHighJavaPercentage</ID>
+    <ID>FunctionNameMaxLength:VersionCatalogMigratorTest.kt:VersionCatalogMigratorTest$@Test fun testMigrateDependenciesToCatalog</ID>
+    <ID>InvalidPackageDeclaration:J2kModels.kt:package com.codeforge.core.domain.model</ID>
+    <ID>InvalidPackageDeclaration:J2kRepository.kt:package com.codeforge.core.domain.repository</ID>
+    <ID>LongMethod:GradleDslConverterImpl.kt:GradleDslConverterImpl$override suspend fun convertFile: J2kFileResultWithContent</ID>
+    <ID>LongMethod:J2kRepositoryImpl.kt:J2kRepositoryImpl$override suspend fun executeMigration: J2kReport</ID>
+    <ID>LongMethod:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$override suspend fun convertFile: J2kFileResultWithContent</ID>
+    <ID>LongMethod:ProjectBackupRepositoryImpl.kt:ProjectBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>LongMethod:ProjectLanguageScannerImpl.kt:ProjectLanguageScannerImpl$override suspend fun scanProject: J2kScanResult</ID>
+    <ID>NestedBlockDepth:ProjectBackupRepositoryImpl.kt:ProjectBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>NestedBlockDepth:ProjectBackupRepositoryImpl.kt:ProjectBackupRepositoryImpl$override suspend fun restoreBackup: Boolean</ID>
+    <ID>NestedBlockDepth:ProjectBackupRepositoryImpl.kt:ProjectBackupRepositoryImpl$override suspend fun rollbackWithJournal: Boolean</ID>
+    <ID>StringLiteralDuplication:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$": ${mapType(returnType)}"</ID>
+    <ID>StringLiteralDuplication:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$"public"</ID>
+    <ID>StringLiteralDuplication:ProjectLanguageScannerImpl.kt:ProjectLanguageScannerImpl$"/generated/"</ID>
+    <ID>StringLiteralDuplication:ProjectLanguageScannerImpl.kt:ProjectLanguageScannerImpl.Companion$".gradle"</ID>
+    <ID>StringShouldBeRawString:GradleDslConverterImpl.kt:GradleDslConverterImpl$"buildTypes {\n getByName(\"debug\") {"</ID>
+    <ID>StringShouldBeRawString:GradleDslConverterImpl.kt:GradleDslConverterImpl$"buildTypes {\n getByName(\"release\") {"</ID>
+    <ID>StringShouldBeRawString:GradleDslConverterImpl.kt:GradleDslConverterImpl$"fileTree(mapOf(\"dir\" to \"${m.groupValues[1]}\", \"include\" to listOf(\"${m.groupValues[2]}\")))"</ID>
+    <ID>StringShouldBeRawString:J2kRepositoryImpl.kt:J2kRepositoryImpl$"buildscript {\n dependencies {\n classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.21'\n }\n}\n" + content</ID>
+    <ID>StringShouldBeRawString:J2kRepositoryImpl.kt:J2kRepositoryImpl$"plugins {\n kotlin(\"jvm\") version \"2.1.21\" apply false"</ID>
+    <ID>StringShouldBeRawString:ProjectLanguageScannerTest.kt:ProjectLanguageScannerTest$"public class Main {\n int a;\n}\n"</ID>
+    <ID>StringShouldBeRawString:VersionCatalogMigratorImpl.kt:VersionCatalogMigratorImpl$"$verRef = \"$verVal\"\n"</ID>
+    <ID>StringShouldBeRawString:VersionCatalogMigratorImpl.kt:VersionCatalogMigratorImpl$libraries[alias] = "group = \"$group\", name = \"$artifact\", version.ref = \"$versionRef\""</ID>
+    <ID>ThrowsCount:ProjectBackupRepositoryImpl.kt:ProjectBackupRepositoryImpl$override suspend fun createBackup: String</ID>
+    <ID>TooGenericExceptionCaught:GradleDslConverterImpl.kt:GradleDslConverterImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:J2kRepositoryImpl.kt:J2kRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$e: Exception</ID>
+    <ID>UnnecessaryParentheses:J2kRepositoryImpl.kt:J2kRepositoryImpl$(res.errorMessage ?: "-")</ID>
+    <ID>UnnecessaryParentheses:ProjectLanguageScannerImpl.kt:ProjectLanguageScannerImpl$(javaFiles.toFloat() / (javaFiles + kotlinFiles).toFloat())</ID>
+    <ID>UnnecessaryParentheses:ProjectLanguageScannerImpl.kt:ProjectLanguageScannerImpl$(javaLines.toFloat() / totalLines.toFloat())</ID>
+    <ID>UnnecessaryParentheses:ProjectLanguageScannerImpl.kt:ProjectLanguageScannerImpl$(totalJavaLines.toFloat() / totalLines.toFloat())</ID>
+    <ID>UnusedParameter:J2kRepositoryImpl.kt:J2kRepositoryImpl$journalEntries: List&lt;String></ID>
+    <ID>UnusedParameter:J2kRepositoryImpl.kt:J2kRepositoryImpl$journalFile: File</ID>
+    <ID>UnusedParameter:J2kRepositoryImpl.kt:J2kRepositoryImpl$projectPath: String</ID>
+    <ID>UnusedParameter:JavaToKotlinConverterImpl.kt:JavaToKotlinConverterImpl$notes: MutableList&lt;String></ID>
+  </CurrentIssues>
+</SmellBaseline>

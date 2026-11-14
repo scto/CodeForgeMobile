@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:SigningViewModel.kt:SigningViewModel$else</ID>
+    <ID>BracesOnWhenStatements:SigningViewModel.kt:SigningViewModel$when</ID>
+    <ID>ClassOrdering:SigningProcessSecurityTest.kt:SigningProcessSecurityTest.FakeGradleBuildRepository$var extraEnv = mapOf&lt;String, String>()</ID>
+    <ID>ClassOrdering:SigningRepositoryImpl.kt:SigningRepositoryImpl$/** Startet Prozesse (in Tests ersetzbar). */ internal var processLauncher: (command: List&lt;String>, env: Map&lt;String, String>, workingDir: File) -> Process = { cmd, env, dir -> ProcessBuilder(cmd).apply { directory(dir) environment().clear() environment().putAll(env) redirectErrorStream(true) }.start() }</ID>
+    <ID>ClassOrdering:SigningRepositoryImpl.kt:SigningRepositoryImpl$constructor</ID>
+    <ID>ClassOrdering:SigningRepositoryImplTest.kt:SigningRepositoryImplTest.FakeGradleBuildRepository$var extraEnv = mapOf&lt;String, String>()</ID>
+    <ID>ClassOrdering:SigningViewModel.kt:SigningViewModel$constructor</ID>
+    <ID>CognitiveComplexMethod:SigningRepositoryImpl.kt:SigningRepositoryImpl$override suspend fun createKeystore: Result&lt;KeystoreInfo></ID>
+    <ID>CognitiveComplexMethod:SigningRepositoryImpl.kt:SigningRepositoryImpl$override suspend fun resolveBuildSigning: Result&lt;Map&lt;String, String>></ID>
+    <ID>CognitiveComplexMethod:SigningScreen.kt:@Composable private fun ImportKeystoreDialog</ID>
+    <ID>CognitiveComplexMethod:SigningScreen.kt:@Composable private fun KeystoreCard</ID>
+    <ID>CognitiveComplexMethod:SigningScreen.kt:@Composable private fun KeystoreDetailsDialog</ID>
+    <ID>CognitiveComplexMethod:SigningScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun CreateKeystoreDialog</ID>
+    <ID>CognitiveComplexMethod:SigningScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun SigningScreen</ID>
+    <ID>CognitiveComplexMethod:SigningScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable private fun SignApkTabContent</ID>
+    <ID>CyclomaticComplexMethod:SigningScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun SigningScreen</ID>
+    <ID>ExpressionBodySyntax:SigningRepositoryImpl.kt:SigningRepositoryImpl$return try { File(path).canonicalPath.trimEnd('/') } catch (_: Exception) { File(path).absolutePath.trimEnd('/') }</ID>
+    <ID>ExpressionBodySyntax:SigningRepositoryImpl.kt:SigningRepositoryImpl$return try { if (assignmentsFile.exists() &amp;&amp; assignmentsFile.isFile) { ProjectSigningAssignmentJson.fromJson(assignmentsFile.readText(Charsets.UTF_8)) } else { emptyList() } } catch (_: Exception) { emptyList() }</ID>
+    <ID>ExpressionBodySyntax:SigningRepositoryImpl.kt:SigningRepositoryImpl$return try { val process = processLauncher(command, env, workingDir) val reader = BufferedReader(InputStreamReader(process.inputStream, Charsets.UTF_8)) val outputSb = StringBuilder() val completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS) if (!completed) { process.destroyForcibly() return ProcessRunResult(-1, "Process timed out after ${timeoutSeconds}s") } var line = reader.readLine() while (line != null) { outputSb.appendLine(line) line = reader.readLine() } ProcessRunResult(process.exitValue(), outputSb.toString()) } catch (e: Exception) { ProcessRunResult(-1, e.message ?: "Unknown process execution error") }</ID>
+    <ID>ExpressionBodySyntax:SigningViewModelTest.kt:SigningViewModelTest.FakeSigningRepository$return Result.success( ApkSignResult( success = true, outputApkPath = request.resolveOutputPath(), outputApkSizeBytes = 10240, verificationResult = ApkVerificationResult(isVerified = true, v2SchemeVerified = true) ) )</ID>
+    <ID>ExpressionBodySyntax:SigningViewModelTest.kt:SigningViewModelTest.FakeSigningRepository$return Result.success(ApkVerificationResult(isVerified = true, v2SchemeVerified = true))</ID>
+    <ID>FunctionNameMaxLength:SigningProcessSecurityTest.kt:SigningProcessSecurityTest$@Test fun createKeystoreNeverExposesPasswordsInArguments</ID>
+    <ID>FunctionNameMaxLength:SigningProcessSecurityTest.kt:SigningProcessSecurityTest$@Test fun importKeystoreNeverExposesPasswordsInArguments</ID>
+    <ID>FunctionNameMaxLength:SigningProcessSecurityTest.kt:SigningProcessSecurityTest$@Test fun signApkNeverExposesPasswordsInArguments</ID>
+    <ID>FunctionNameMaxLength:SigningRepositoryImplTest.kt:SigningRepositoryImplTest$@Test fun configureBuildSigningSetsEnvironmentOnGradle</ID>
+    <ID>FunctionNameMaxLength:SigningViewModelTest.kt:SigningViewModelTest$@Test fun createKeystoreSuccessClosesDialogAndUpdatesList</ID>
+    <ID>FunctionNameMaxLength:SigningViewModelTest.kt:SigningViewModelTest$@Test fun gradleBuildSigningActivationAndDeactivation</ID>
+    <ID>FunctionNameMaxLength:SigningViewModelTest.kt:SigningViewModelTest$@Test fun passwordStrengthCalculationInCreateForm</ID>
+    <ID>LongMethod:SigningRepositoryImpl.kt:SigningRepositoryImpl$override suspend fun signApk: Result&lt;ApkSignResult></ID>
+    <ID>LongMethod:SigningViewModel.kt:SigningViewModel$fun onIntent</ID>
+    <ID>ReturnCount:SigningRepositoryImpl.kt:SigningRepositoryImpl$private suspend fun inspectKeystore: KeystoreInfo</ID>
+    <ID>StringLiteralDuplication:SigningRepositoryImpl.kt:SigningRepositoryImpl$"-keystore"</ID>
+    <ID>StringLiteralDuplication:SigningRepositoryImpl.kt:SigningRepositoryImpl$"-storepass:env"</ID>
+    <ID>StringLiteralDuplication:SigningRepositoryImpl.kt:SigningRepositoryImpl$"CF_KEY_PASS"</ID>
+    <ID>StringLiteralDuplication:SigningRepositoryImpl.kt:SigningRepositoryImpl$"CF_STORE_PASS"</ID>
+    <ID>StringLiteralDuplication:SigningRepositoryImpl.kt:SigningRepositoryImpl$"bin/keytool"</ID>
+    <ID>StringLiteralDuplication:SigningRepositoryImpl.kt:SigningRepositoryImpl$"keystore_${id}_storepass"</ID>
+    <ID>StringLiteralDuplication:SigningRepositoryImpl.kt:SigningRepositoryImpl$"keystore_${keystoreFile.name}_storepass"</ID>
+    <ID>StringShouldBeRawString:ProjectSigningAssignmentJson.kt:ProjectSigningAssignmentJson$" \"alias\": \"${escape(a.alias)}\"\n"</ID>
+    <ID>StringShouldBeRawString:ProjectSigningAssignmentJson.kt:ProjectSigningAssignmentJson$" \"keystoreId\": \"${escape(a.keystoreId)}\",\n"</ID>
+    <ID>StringShouldBeRawString:ProjectSigningAssignmentJson.kt:ProjectSigningAssignmentJson$" \"projectPath\": \"${escape(a.projectPath)}\",\n"</ID>
+    <ID>StringShouldBeRawString:SigningProcessSecurityTest.kt:SigningProcessSecurityTest$"Generating key pair...\nKeystore type: PKCS12\nAlias name: my_release\n"</ID>
+    <ID>TooGenericExceptionCaught:SigningRepositoryImpl.kt:SigningRepositoryImpl$e: Exception</ID>
+    <ID>UnderscoresInNumericLiterals:SigningViewModelTest.kt:SigningViewModelTest.FakeSigningRepository$10240</ID>
+    <ID>UnusedParameter:SigningScreen.kt:keystore: KeystoreInfo</ID>
+    <ID>UnusedParameter:SigningScreen.kt:onIntent: (SigningUiIntent) -> Unit</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:CodeFormatter.kt:BraceFormatter$if</ID>
+    <ID>BracesOnIfStatements:KotlinImportOrganizer.kt:KotlinImportOrganizer$else</ID>
+    <ID>BracesOnIfStatements:KotlinImportOrganizer.kt:KotlinImportOrganizer$if</ID>
+    <ID>BracesOnIfStatements:KotlinSignatureParser.kt:KotlinSignatureParser$if</ID>
+    <ID>BracesOnIfStatements:LineEdits.kt:LineEdits$else</ID>
+    <ID>BracesOnIfStatements:LineEdits.kt:LineEdits$if</ID>
+    <ID>BracesOnIfStatements:ModuleMaker.kt:ModuleMaker$if</ID>
+    <ID>BracesOnIfStatements:ProjectSearch.kt:ProjectSearcher$else</ID>
+    <ID>BracesOnIfStatements:ProjectSearch.kt:ProjectSearcher$if</ID>
+    <ID>BracesOnIfStatements:ProjectSearch.kt:ProjectSearcher.Companion$if</ID>
+    <ID>BracesOnIfStatements:TextSearch.kt:TextSearch$if</ID>
+    <ID>BracesOnIfStatements:XmlFormatter.kt:XmlFormatter$if</ID>
+    <ID>BracesOnWhenStatements:CodeFormatter.kt:BraceFormatter$when</ID>
+    <ID>BracesOnWhenStatements:JsonFormatter.kt:JsonFormatter$when</ID>
+    <ID>BracesOnWhenStatements:KotlinSignatureParser.kt:KotlinSignatureParser$when</ID>
+    <ID>BracesOnWhenStatements:ProjectSearch.kt:ProjectSearcher.Companion$when</ID>
+    <ID>BracesOnWhenStatements:XmlFormatter.kt:XmlFormatter$when</ID>
+    <ID>CascadingCallWrapping:ProjectSearch.kt:ProjectSearcher$toString()</ID>
+    <ID>CognitiveComplexMethod:CodeFormatter.kt:BraceFormatter$private fun formatLine: String</ID>
+    <ID>CognitiveComplexMethod:CodeFormatter.kt:BraceFormatter$private fun scan</ID>
+    <ID>CognitiveComplexMethod:JsonFormatter.kt:JsonFormatter$fun format: FormatResult?</ID>
+    <ID>CognitiveComplexMethod:KotlinImportOrganizer.kt:KotlinImportOrganizer$fun insertionFor: Pair&lt;Int, String>?</ID>
+    <ID>CognitiveComplexMethod:KotlinImportOrganizer.kt:KotlinImportOrganizer$fun organize: String?</ID>
+    <ID>CognitiveComplexMethod:KotlinSignatureParser.kt:KotlinSignatureParser$private fun splitTop: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:KotlinSignatureParser.kt:KotlinSignatureParser$private fun topLevelIndexOf: Int</ID>
+    <ID>CognitiveComplexMethod:LineEdits.kt:LineEdits$fun toggleComment: TextEdit</ID>
+    <ID>CognitiveComplexMethod:ModuleMaker.kt:ModuleMaker$fun create: Result&lt;ModuleResult></ID>
+    <ID>CognitiveComplexMethod:ProjectSearch.kt:ProjectSearcher$fun search: Result&lt;ProjectSearchResult></ID>
+    <ID>CognitiveComplexMethod:TextSearch.kt:TextSearch$private fun parseReplacement: List&lt;Token></ID>
+    <ID>CognitiveComplexMethod:XmlFormatter.kt:XmlFormatter$private fun parse: Element?</ID>
+    <ID>CognitiveComplexMethod:XmlFormatter.kt:XmlFormatter$private fun render</ID>
+    <ID>CollapsibleIfStatements:XmlFormatter.kt:XmlFormatter$if (node.blank) { if (node.raw.count { it == '\n' } >= 2 &amp;&amp; !first) pendingBlank = true }</ID>
+    <ID>ComplexCondition:KotlinSignatureParser.kt:KotlinSignatureParser$s[i] == close &amp;&amp; !(close == '>' &amp;&amp; i > 0 &amp;&amp; s[i - 1] == '-')</ID>
+    <ID>CyclomaticComplexMethod:CodeFormatter.kt:BraceFormatter$private fun formatLine: String</ID>
+    <ID>CyclomaticComplexMethod:CodeFormatter.kt:BraceFormatter$private fun scan</ID>
+    <ID>CyclomaticComplexMethod:JsonFormatter.kt:JsonFormatter$fun format: FormatResult?</ID>
+    <ID>CyclomaticComplexMethod:KotlinImportOrganizer.kt:KotlinImportOrganizer$fun organize: String?</ID>
+    <ID>CyclomaticComplexMethod:ModuleMaker.kt:ModuleMaker$fun create: Result&lt;ModuleResult></ID>
+    <ID>CyclomaticComplexMethod:XmlFormatter.kt:XmlFormatter$private fun parse: Element?</ID>
+    <ID>DataClassContainsFunctions:LineEdits.kt:TextEdit$fun applyTo: String</ID>
+    <ID>DocumentationOverPrivateFunction:KotlinSignatureParser.kt:KotlinSignatureParser$private fun topLevelIndexOf: Int</ID>
+    <ID>DocumentationOverPrivateFunction:LineEdits.kt:LineEdits$private fun adjust: Int</ID>
+    <ID>DocumentationOverPrivateFunction:ModuleMaker.kt:ModuleMaker$private fun usesBuiltInKotlin: Boolean</ID>
+    <ID>DocumentationOverPrivateFunction:TextSearch.kt:TextSearch$private fun parseReplacement: List&lt;Token></ID>
+    <ID>DocumentationOverPrivateFunction:XmlFormatter.kt:XmlFormatter$private fun tagEnd: Int</ID>
+    <ID>DocumentationOverPrivateProperty:CodeFormatter.kt:BraceFormatter$/** Indent-Ebene der Zeile, in der eine offene Klammer stand, + 1 (also „Innen“-Ebene). */ private val stack = ArrayList&lt;Int>()</ID>
+    <ID>DocumentationOverPrivateProperty:KotlinImportOrganizer.kt:KotlinImportOrganizer$/** Namen, die per Konvention/Operator ohne sichtbaren Bezeichner genutzt werden → nie als "unbenutzt" entfernen. */ private val implicitUseNames = setOf( "getValue", "setValue", "provideDelegate", "invoke", "iterator", "hasNext", "next", "compareTo", "contains", "get", "set", "plus", "minus", "times", "div", "rem", "mod", "unaryPlus", "unaryMinus", "not", "inc", "dec", "rangeTo", "rangeUntil", "equals", "plusAssign", "minusAssign", "timesAssign", "divAssign", "remAssign", "component1", "component2", "component3", "component4", "component5", )</ID>
+    <ID>EmptyElseBlock:XmlFormatter.kt:XmlFormatter$if (e &lt; 0) return null</ID>
+    <ID>ExpressionBodySyntax:CodeFormatter.kt:BraceFormatter$return line.indexOf(rawDelimiter, from)</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterTest.kt:CodeFormatterTest$@Test fun blockCommentWithCodeLikeTokensAndQuotes</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterTest.kt:CodeFormatterTest$@Test fun bracesInStringsAndCommentsAreIgnored</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterTest.kt:CodeFormatterTest$@Test fun invalidJsonFallsBackWithWarning</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterTest.kt:CodeFormatterTest$@Test fun markdownKeepsTrailingDoubleSpace</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterTest.kt:CodeFormatterTest$@Test fun rawStringWithMultipleBlankLinesAndQuotes</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterTest.kt:CodeFormatterTest$@Test fun singleLineCommentOnContinuationLine</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `Alias wird ueber Aliasnamen geprueft`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `alle Imports unbenutzt leert nur den Block`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `bereits sauber oder ohne Imports liefert null`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `entfernt unbenutzte Imports, behaelt Stern- und Operator-Imports`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `insertionFor liefert null wenn schon importiert`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `insertionFor ohne Block nach package oder am Dateianfang`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `insertionFor sortiert in vorhandenen Block ein`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `ohne Package-Zeile bleibt Inhalt erhalten`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `ohne removeUnused bleiben ungenutzte Imports`</ID>
+    <ID>FunctionNameMaxLength:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$@Test fun `sortiert alphabetisch und entfernt Duplikate`</ID>
+    <ID>FunctionNameMaxLength:KotlinSignatureParserTest.kt:KotlinSignatureParserTest$@Test fun `Funktion mit Parametern, Default und Rueckgabetyp`</ID>
+    <ID>FunctionNameMaxLength:KotlinSignatureParserTest.kt:KotlinSignatureParserTest$@Test fun `Funktion ohne Rueckgabetyp ist Unit`</ID>
+    <ID>FunctionNameMaxLength:KotlinSignatureParserTest.kt:KotlinSignatureParserTest$@Test fun `val und var werden unterschieden`</ID>
+    <ID>FunctionNameMaxLength:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$@Test fun agp9ProjectGetsNoKotlinAndroidPlugin</ID>
+    <ID>FunctionNameMaxLength:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$@Test fun createsGroovyModuleAndPatchesRootForJvm</ID>
+    <ID>FunctionNameMaxLength:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$@Test fun refusesExistingNonEmptyDirAndMissingSettings</ID>
+    <ID>FunctionNameMaxLength:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$@Test fun selectionEndingAtLineStartExcludesThatLine</ID>
+    <ID>FunctionNameMaxLength:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$@Test fun withoutCatalogUsesPluginIdsAndWarns</ID>
+    <ID>FunctionNameMaxLength:TextSearchTest.kt:TextSearchTest$@Test fun crlfLineTextHasNoCarriageReturn</ID>
+    <ID>FunctionNameMaxLength:TextSearchTest.kt:TextSearchTest$@Test fun invalidReplacementDoesNotTouchAnyFile</ID>
+    <ID>FunctionNameMaxLength:TextSearchTest.kt:TextSearchTest$@Test fun literalModeDoesNotInterpretDollar</ID>
+    <ID>FunctionNameMaxLength:TextSearchTest.kt:TextSearchTest$@Test fun projectSearchSkipsBuildGitBinaryAndNonUtf8</ID>
+    <ID>FunctionNameMaxLength:TextSearchTest.kt:TextSearchTest$@Test fun replaceAllPreservesLineEndingsAndSkipsUnsafeFiles</ID>
+    <ID>FunctionNameMinLength:CodeFormatterTest.kt:CodeFormatterTest$private fun kt</ID>
+    <ID>LongMethod:ModuleMaker.kt:ModuleMaker$fun buildFile: String</ID>
+    <ID>LongMethod:ModuleMaker.kt:ModuleMaker$fun create: Result&lt;ModuleResult></ID>
+    <ID>LoopWithTooManyJumpStatements:KotlinImportOrganizer.kt:KotlinImportOrganizer$while</ID>
+    <ID>LoopWithTooManyJumpStatements:ModuleMaker.kt:ModuleMaker$for</ID>
+    <ID>LoopWithTooManyJumpStatements:ProjectSearch.kt:ProjectSearcher$for</ID>
+    <ID>NestedBlockDepth:LineEdits.kt:LineEdits$fun toggleComment: TextEdit</ID>
+    <ID>NestedBlockDepth:TextSearch.kt:TextSearch$private fun parseReplacement: List&lt;Token></ID>
+    <ID>OutdatedDocumentation:KotlinImportOrganizer.kt:KotlinImportOrganizer$fun organize: String?</ID>
+    <ID>ReturnCount:CodeFormatter.kt:BraceFormatter$private fun formatLine: String</ID>
+    <ID>ReturnCount:CodeFormatter.kt:BraceFormatter$private fun scan</ID>
+    <ID>ReturnCount:JsonFormatter.kt:JsonFormatter$fun format: FormatResult?</ID>
+    <ID>ReturnCount:KotlinImportOrganizer.kt:KotlinImportOrganizer$fun insertionFor: Pair&lt;Int, String>?</ID>
+    <ID>ReturnCount:KotlinImportOrganizer.kt:KotlinImportOrganizer$fun organize: String?</ID>
+    <ID>ReturnCount:KotlinSignatureParser.kt:KotlinSignatureParser$fun parse: KotlinSignature?</ID>
+    <ID>ReturnCount:KotlinSignatureParser.kt:KotlinSignatureParser$private fun parseFun: KotlinSignature?</ID>
+    <ID>ReturnCount:KotlinSignatureParser.kt:KotlinSignatureParser$private fun parseParam: KotlinParam?</ID>
+    <ID>ReturnCount:LineEdits.kt:LineEdits$fun moveLines: TextEdit?</ID>
+    <ID>ReturnCount:ModuleMaker.kt:GradleModulePath.Companion$fun parse: Result&lt;GradleModulePath></ID>
+    <ID>ReturnCount:XmlFormatter.kt:XmlFormatter$private fun parse: Element?</ID>
+    <ID>StringLiteralDuplication:CodeFormatter.kt:BraceFormatter$"\"\"\""</ID>
+    <ID>StringLiteralDuplication:KotlinImportOrganizer.kt:KotlinImportOrganizer$"package "</ID>
+    <ID>StringLiteralDuplication:ModuleMaker.kt:ModuleMaker$"build.gradle"</ID>
+    <ID>StringLiteralDuplication:ModuleMaker.kt:ModuleMaker$"build.gradle.kts"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$" first line\n\n\n third line with \"quotes\" and { braces }"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>\n&lt;LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n android:layout_width=\"match_parent\">\n &lt;TextView\n android:text=\"Hi\"\n />\n &lt;!-- c -->\n &lt;Button android:id=\"@+id/b\"/>\n&lt;/LinearLayout>\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>\n&lt;LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\nandroid:layout_width=\"match_parent\">\n&lt;TextView\nandroid:text=\"Hi\"\n/>\n&lt;!-- c -->\n&lt;Button android:id=\"@+id/b\"/>\n&lt;/LinearLayout>\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"&lt;resources>\n &lt;string name=\"a\">Hello &lt;b>x&lt;/b> world&lt;/string>\n\n &lt;string name=\"b\"> spaced &lt;/string>\n&lt;/resources>\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"&lt;resources>\n&lt;string name=\"a\">Hello &lt;b>x&lt;/b> world&lt;/string>\n\n\n&lt;string name=\"b\"> spaced &lt;/string>\n&lt;/resources>\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"a() \n".trimEnd() + "\n\nb()\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"a() \n\n\n\n\nb()\n\n\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\n /**\n * Doku\n * zwei\n */\n fun f() {}\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\n fun f(x: Int) {\n if (x > 0) {\n println(x)\n } else {\n println(-x)\n }\n }\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\n void f() {\n g();\n }\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\n/**\n* Doku\n * zwei\n*/\nfun f() {}\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\n\tfun f() {}\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\nfun f(a: Int,\nb: Int) {\nval x = a\n.plus(b)\nwhen (x) {\n1 -> {\n}\nelse -> x\n}\n}\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\nfun f(x: Int) {\nif (x > 0) {\nprintln(x)\n} else {\nprintln(-x)\n}\n}\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\nvoid f() {\ng();\n}\n}"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\r\n fun f() {}\r\n}\r\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"class A {\r\nfun f() {}\r\n}\r\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"fun f() {\n val s = \"\"\"\n keep { \n me\n\"\"\".trimIndent()\n x()\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"fun f() {\n val s = \"{\"\n val c = '}'\n // {\n x()\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"fun f() {\nval s = \"\"\"\n keep { \n me\n\"\"\".trimIndent()\nx()\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"fun f() {\nval s = \"{\"\nval c = '}'\n// {\nx()\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"fun f(\n a: Int,\n b: Int\n) {\n return\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"fun f(\na: Int,\nb: Int\n) {\nreturn\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"fun test() {\n val raw = \"\"\"\n$rawContent\n\"\"\"\n val after = 42\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"package a\nimport b.C\nclass A {\nfun f(a: Int,\nb: Int) {\nval s = \"\"\"\n x { \n\"\"\"\nval x = a\n.plus(b) // {\n}\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"plugins {\n id 'x'\n}\nx = '''\n {\n'''\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"plugins {\nid 'x'\n}\nx = '''\n {\n'''\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"val r = list\n .map {\n it + 1\n }\n .filter { it > 0 }\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"val r = list\n.map {\nit + 1\n}\n.filter { it > 0 }\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"val x = a\n// comment\n.plus(b)\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"{ \"a\": 1, \n\n\n "</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"{\"a\":[1,2,{\"b\":null}],\"c\":{},\"d\":\"x,y:{\",\"e\":[]}"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterTest.kt:CodeFormatterTest$"{\n \"a\": [\n 1,\n 2,\n {\n \"b\": null\n }\n ],\n \"c\": {},\n \"d\": \"x,y:{\",\n \"e\": []\n}\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import a.A\nimport b.B\n\nclass K : A, B\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import a.A\nimport b.B\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import a.A\r\nimport b.B\r\n\r\nval x: A = B()\r\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import a.B as C\n\nval x = C()\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import a.B as C\nimport a.D as E\n\nval x = C()\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import b.B\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import b.B\nimport a.A\n\nclass K : A, B\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import b.B\nimport a.A\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"import b.B\r\nimport a.A\r\n\r\nval x: A = B()\r\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport a.A\n\nval x: A? = null\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport a.A\nimport b.B\nimport c.C\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport a.A\nimport c.C\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport a.A\nimport c.C\nimport d.D\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport a.Alpha\nimport b.Zeta\n\nfun f(x: Zeta, y: Alpha) {}\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport b.B\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport b.Zeta\nimport a.Alpha\nimport b.Zeta\n\nfun f(x: Zeta, y: Alpha) {}\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport x.*\nimport x.Used\nimport x.getValue\n\nval v: Used = TODO()\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport x.A\n\nclass K\n"</ID>
+    <ID>StringShouldBeRawString:KotlinImportOrganizerTest.kt:KotlinImportOrganizerTest$"package a\n\nimport x.Used\nimport x.Unused\nimport x.*\nimport x.getValue\n\nval v: Used = TODO()\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"[versions]\nagp = \"8\"\n[plugins]\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\nandroid-library = { id = \"com.android.library\", version.ref = \"agp\" }\nkotlin-android = { id = \"org.jetbrains.kotlin.android\", version.ref = \"k\" }\nkotlin-jvm = { id = \"org.jetbrains.kotlin.jvm\", version.ref = \"k\" }\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"[versions]\nagp = \"9.5.0\"\n[plugins]\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\n" + "android-library = { id = \"com.android.library\", version.ref = \"agp\" }\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"a\n // b\n\n // c\nd"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"a\n b\n\n c\nd"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"a\nb\nb\nc"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"android {\n namespace 'com.demo.app'\n compileSdk 34\n defaultConfig { minSdk 24 }\n}\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"android {\n namespace = \"com.demo.app\"\n compileSdk = 34\n defaultConfig { minSdk = 24 }\n}\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"include(\":app\")\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"plugins {\n alias(libs.plugins.android.application) apply false\n alias(libs.plugins.android.library) apply false\n alias(libs.plugins.kotlin.android) apply false\n}\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"plugins {\n alias(libs.plugins.android.application) apply false\n alias(libs.plugins.android.library) apply false\n}\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"rootProject.name = \"x\"\ninclude(\":app\")\n"</ID>
+    <ID>StringShouldBeRawString:LineEditsAndModuleMakerTest.kt:LineEditsAndModuleMakerTest$"rootProject.name = \"x\"\ninclude(\":app\")\ninclude(\":lib:a\")\n"</ID>
+    <ID>StringShouldBeRawString:ModuleMaker.kt:ModuleMaker$"\n\n(\\s*)\\}"</ID>
+    <ID>StringShouldBeRawString:ModuleMaker.kt:ModuleMaker$files["src/main/AndroidManifest.xml"] = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>\n&lt;manifest />\n"</ID>
+    <ID>StringShouldBeRawString:TextSearch.kt:"(?&lt;![\\p{L}\\p{N}_])(?:$body)(?![\\p{L}\\p{N}_])"</ID>
+    <ID>StringShouldBeRawString:TextSearchTest.kt:TextSearchTest$"class A { val token = \"x\" }\n"</ID>
+    <ID>StringShouldBeRawString:TextSearchTest.kt:TextSearchTest$"val Foo = 1\nfun foo() = FOO + foobar\n\tbar(Foo)\n"</ID>
+    <ID>SwallowedException:ProjectSearch.kt:ProjectSearcher$e: CharacterCodingException</ID>
+    <ID>UnnecessaryBackticks:KotlinSignatureParserTest.kt:KotlinSignatureParserTest$`Erweiterungsproperty`</ID>
+    <ID>UnnecessaryParentheses:ModuleMaker.kt:ModuleMaker$(rootBuild.substring(0, m.range.last + 1) + insert + rootBuild.substring(m.range.last + 1))</ID>
+    <ID>UnnecessaryParentheses:TextSearch.kt:DeadlineCharSequence$(++counter and 0xFFFF)</ID>
+    <ID>UnnecessaryParentheses:TextSearch.kt:LineIndex$(lo + hi + 1)</ID>
+    <ID>UseIfInsteadOfWhen:LineEdits.kt:LineEdits$when { line.startsWith("\t") -> 1 else -> line.takeWhile { it == ' ' }.length.coerceAtMost(unit.length) }</ID>
+  </CurrentIssues>
+</SmellBaseline>

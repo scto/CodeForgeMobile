@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:WelcomeScreen.kt:else</ID>
+    <ID>BracesOnWhenStatements:WelcomeScreen.kt:when</ID>
+    <ID>CascadingCallWrapping:WelcomeScreen.kt:takeIf { it.isNotBlank() }</ID>
+    <ID>DocumentationOverPrivateFunction:ProjectDiscovery.kt:ProjectDiscovery$private fun countModules: Int</ID>
+    <ID>DocumentationOverPrivateFunction:WelcomeScreen.kt:@Composable private fun appVersionLabel: String</ID>
+    <ID>DocumentationOverPrivateFunction:WelcomeViewModel.kt:WelcomeViewModel$private fun deletePendingProject</ID>
+    <ID>DocumentationOverPrivateFunction:WelcomeViewModel.kt:WelcomeViewModel$private fun refreshDiscoveredProjects</ID>
+    <ID>FunctionNameMaxLength:ProjectDiscoveryTest.kt:ProjectDiscoveryTest$@Test fun `deleteProject loescht Unterordner im Stamm`</ID>
+    <ID>FunctionNameMaxLength:ProjectDiscoveryTest.kt:ProjectDiscoveryTest$@Test fun `deleteProject verweigert Stamm, Aussenstehende und Ausbrueche`</ID>
+    <ID>FunctionNameMaxLength:ProjectDiscoveryTest.kt:ProjectDiscoveryTest$@Test fun `merge keeps recent entry and adds unknown discovered ones`</ID>
+    <ID>FunctionNameMaxLength:ProjectDiscoveryTest.kt:ProjectDiscoveryTest$@Test fun `scan lists visible directories only and counts modules`</ID>
+    <ID>FunctionNameMaxLength:WelcomeViewModelTest.kt:WelcomeViewModelTest$@Test fun `action events trigger corresponding effects`</ID>
+    <ID>FunctionNameMaxLength:WelcomeViewModelTest.kt:WelcomeViewModelTest$@Test fun `formatRelativeTime and getProjectInitials work correctly`</ID>
+    <ID>FunctionNameMaxLength:WelcomeViewModelTest.kt:WelcomeViewModelTest$@Test fun `initial state loads recent projects from repository`</ID>
+    <ID>FunctionNameMaxLength:WelcomeViewModelTest.kt:WelcomeViewModelTest$@Test fun `recent project actions open editor or settings or remove project`</ID>
+    <ID>TooGenericExceptionCaught:WelcomeViewModel.kt:WelcomeViewModel$e: Exception</ID>
+    <ID>UnderscoresInNumericLiterals:WelcomeScreen.kt:3600000</ID>
+    <ID>UnderscoresInNumericLiterals:WelcomeScreen.kt:86400000</ID>
+    <ID>UnderscoresInNumericLiterals:WelcomeViewModelTest.kt:WelcomeViewModelTest$10000</ID>
+    <ID>UnderscoresInNumericLiterals:WelcomeViewModelTest.kt:WelcomeViewModelTest$172800000</ID>
+    <ID>UnderscoresInNumericLiterals:WelcomeViewModelTest.kt:WelcomeViewModelTest$600000</ID>
+    <ID>UnderscoresInNumericLiterals:WelcomeViewModelTest.kt:WelcomeViewModelTest$7200000</ID>
+    <ID>UnnecessaryParentheses:WelcomeScreen.kt:({ onDeleteProject(project) })</ID>
+  </CurrentIssues>
+</SmellBaseline>

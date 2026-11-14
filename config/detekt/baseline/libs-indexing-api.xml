@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:GradleSourceUtils.kt:GradleSourceUtils$when</ID>
+    <ID>CognitiveComplexMethod:GradleSourceUtils.kt:GradleSourceUtils$fun maskComments: String</ID>
+    <ID>ComplexCondition:GradleSourceUtils.kt:GradleSourceUtils$i &lt; n &amp;&amp; !(text[i] == '*' &amp;&amp; i + 1 &lt; n &amp;&amp; text[i + 1] == '/')</ID>
+    <ID>CyclomaticComplexMethod:GradleSourceUtils.kt:GradleSourceUtils$fun maskComments: String</ID>
+    <ID>DataClassContainsFunctions:IndexingModels.kt:ProjectIndex$fun filesOfKind: List&lt;IndexedFile></ID>
+    <ID>DataClassContainsFunctions:IndexingModels.kt:ProjectIndex$fun findByName: List&lt;IndexedFile></ID>
+    <ID>EndOfSentenceFormat:IndexingModels.kt:RepositoryScope.DEPENDENCIES$ `dependencyResolutionManagement { repositories { } }` und modul-/projektweite `repositories { }` </ID>
+    <ID>EndOfSentenceFormat:IndexingModels.kt:RepositoryScope.PLUGINS$ `pluginManagement { repositories { } }` und `buildscript { repositories { } }` </ID>
+    <ID>ReturnCount:GradleSourceUtils.kt:GradleSourceUtils$fun findMatching: Int</ID>
+    <ID>ReturnCount:GradleSourceUtils.kt:GradleSourceUtils$fun skipString: Int</ID>
+    <ID>UndocumentedPublicFunction:IndexingModels.kt:MavenRepository.Companion$fun normalizeUrl: String</ID>
+    <ID>UnnecessaryParentheses:GradleSourceUtils.kt:GradleSourceUtils$(lo + hi + 1)</ID>
+    <ID>UnnecessaryParentheses:GradleSourceUtils.kt:GradleSourceUtils$(open + 1)</ID>
+  </CurrentIssues>
+</SmellBaseline>

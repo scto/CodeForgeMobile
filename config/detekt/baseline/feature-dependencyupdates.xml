@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CognitiveComplexMethod:DependencyUpdateDialog.kt:@Composable fun DependencyUpdateDialog</ID>
+    <ID>DocumentationOverPrivateProperty:DependencyUpdatesViewModel.kt:DependencyUpdatesViewModel$/** Alle noch nicht entschiedenen Updates (das erste steht im Dialog). */ private var queue: List&lt;DependencyUpdate> = emptyList()</ID>
+    <ID>DocumentationOverPrivateProperty:DependencyUpdatesViewModel.kt:DependencyUpdatesViewModel$/** Schlüssel erfolgreich angewendeter Updates — verhindert kurzes „Wiederauftauchen“ bis zur Neuprüfung. */ private val handledKeys = MutableStateFlow&lt;Set&lt;String>>(emptySet())</ID>
+  </CurrentIssues>
+</SmellBaseline>

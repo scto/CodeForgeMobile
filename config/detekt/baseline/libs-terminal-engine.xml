@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AlsoCouldBeApply:TerminalBackup.kt:TerminalBackup$also</ID>
+    <ID>BracesOnIfStatements:SdkScriptProtocol.kt:SdkScriptProtocol$else</ID>
+    <ID>BracesOnIfStatements:SdkScriptProtocol.kt:SdkScriptProtocol$if</ID>
+    <ID>BracesOnIfStatements:TerminalBackup.kt:TarReader$if</ID>
+    <ID>BracesOnIfStatements:TermuxScriptPackageRepository.kt:TermuxScriptPackageRepository$else</ID>
+    <ID>BracesOnIfStatements:TermuxScriptPackageRepository.kt:TermuxScriptPackageRepository$if</ID>
+    <ID>BracesOnIfStatements:TermuxScriptSdkRepository.kt:TermuxScriptSdkRepository$else</ID>
+    <ID>BracesOnIfStatements:TermuxScriptSdkRepository.kt:TermuxScriptSdkRepository$if</ID>
+    <ID>BracesOnWhenStatements:TerminalBackup.kt:TerminalBackup$when</ID>
+    <ID>CascadingCallWrapping:TermuxEnvironment.kt:TermuxEnvironment$joinToString(":")</ID>
+    <ID>ClassOrdering:ScriptInstaller.kt:ScriptInstaller.Companion$/** Standard-Repo der eigenen Builds; per `sdk.conf` überschreibbar (siehe Skript). */ const val DEFAULT_REPO_URL = "@CODEFORGE_SDK_REPO@"</ID>
+    <ID>ClassOrdering:SdkScriptProtocol.kt:SdkScriptProtocol$fun parse: SdkScriptLine?</ID>
+    <ID>CognitiveComplexMethod:TerminalBackup.kt:TarReader$fun next: Entry?</ID>
+    <ID>CognitiveComplexMethod:TerminalBackup.kt:TerminalBackup$fun backup: BackupSummary</ID>
+    <ID>CognitiveComplexMethod:TerminalBackup.kt:TerminalBackup$private fun process: BackupSummary</ID>
+    <ID>CyclomaticComplexMethod:TerminalBackup.kt:TerminalBackup$private fun process: BackupSummary</ID>
+    <ID>DocumentationOverPrivateFunction:ScriptInstaller.kt:ScriptInstaller$private fun installMotd</ID>
+    <ID>DocumentationOverPrivateFunction:TerminalBackup.kt:TerminalBackup$private fun ensureDir</ID>
+    <ID>DocumentationOverPrivateFunction:TerminalSessionRepositoryImpl.kt:TerminalSessionRepositoryImpl$private fun publishState</ID>
+    <ID>DocumentationOverPrivateProperty:SdkScriptProtocol.kt:SdkScriptProtocol$/** Debian-Paketname (Kleinbuchstaben, Ziffern, `+ . -`). */ private val SAFE_PACKAGE = Regex("^[a-z0-9][a-z0-9+.\\-]{0,63}$")</ID>
+    <ID>DocumentationOverPrivateProperty:SdkScriptProtocol.kt:SdkScriptProtocol$/** Paket-ID muss ins Schema passen, bevor sie an die Shell geht. */ private val SAFE_ID = Regex("^[A-Za-z0-9][A-Za-z0-9._;\\-]{0,63}$")</ID>
+    <ID>DocumentationOverPrivateProperty:TerminalSessionRepositoryImpl.kt:TerminalSessionRepositoryImpl$/** * Emittiert den vollständigen sichtbaren Bildschirminhalt bei jeder Änderung — kein * Zeilen-Log-Anhängen, ein echter Terminal-Emulator rendert einen aktuellen * Bildschirmzustand, keine anwachsende Textliste (siehe TerminalViewModel in * :feature:terminal, unverändert). */ private val _output = MutableSharedFlow&lt;String>(extraBufferCapacity = 64)</ID>
+    <ID>DocumentationOverPrivateProperty:TermuxScriptPackageRepository.kt:TermuxScriptPackageRepository$/** dpkg/apt sperren ihre Datenbank: Aktionen laufen nacheinander. */ private val lock = Mutex()</ID>
+    <ID>DocumentationOverPrivateProperty:TermuxScriptSdkRepository.kt:TermuxScriptSdkRepository$/** * Installationen laufen nacheinander: Mehrere gleichzeitige `codeforge-env install` (z. B. zwei Platforms aus * der Mehrfachauswahl) starten parallel den `sdkmanager` im selben SDK-Verzeichnis und beschädigen sich * gegenseitig (Platform-Ordner ohne `android.jar`). Wartende Pakete zeigen 0 % bis sie an der Reihe sind. */ private val installLock = Mutex()</ID>
+    <ID>EmptyElseBlock:TerminalBackup.kt:TarReader$if (input.read() &lt; 0) throw InvalidBackupException("Archiv abgeschnitten")</ID>
+    <ID>EmptyElseBlock:TerminalBackup.kt:TarReader$if (n &lt; 0) return if (off == 0) null else throw InvalidBackupException("Archiv abgeschnitten")</ID>
+    <ID>EmptyElseBlock:TerminalBackup.kt:TarReader$if (n &lt; 0) throw InvalidBackupException("Archiv abgeschnitten")</ID>
+    <ID>FunctionNameMaxLength:MotdInstallTest.kt:MotdInstallTest$@Test fun motdAssetNamesOnlyExistingCodeforgeEnvCommands</ID>
+    <ID>FunctionNameMaxLength:MotdInstallTest.kt:MotdInstallTest$@Test fun writesMotdAndReplacesExistingTermuxMotdScript</ID>
+    <ID>FunctionNameMaxLength:TerminalBackupTest.kt:TerminalBackupTest$@Test fun neverWritesThroughSymlinkOutOfTarget</ID>
+    <ID>FunctionNameMaxLength:TerminalBackupTest.kt:TerminalBackupTest$@Test fun rejectsArchiveWithoutMarkerAndNonTar</ID>
+    <ID>FunctionNameMaxLength:TerminalBackupTest.kt:TerminalBackupTest$@Test fun rejectsPathTraversalAbsoluteAndForeignRoots</ID>
+    <ID>FunctionNameMaxLength:TerminalBackupTest.kt:TerminalBackupTest$@Test fun roundtripKeepsFilesSymlinksAndExecBit</ID>
+    <ID>FunctionNameMaxLength:TerminalEngineModule.kt:TerminalEngineModule$@Binds @Singleton abstract fun bindTermuxEnvironmentRepository: TermuxEnvironmentRepository</ID>
+    <ID>LoopWithTooManyJumpStatements:TerminalBackup.kt:TerminalBackup$while</ID>
+    <ID>OutdatedDocumentation:TerminalBackup.kt:TerminalBackup$fun backup: BackupSummary</ID>
+    <ID>ReturnCount:SdkScriptProtocol.kt:SdkScriptProtocol$fun parse: SdkScriptLine?</ID>
+    <ID>ReturnCount:TerminalBackup.kt:TarReader$fun next: Entry?</ID>
+    <ID>StringLiteralDuplication:TerminalBackup.kt:TarReader$"Archiv abgeschnitten"</ID>
+    <ID>StringLiteralDuplication:TerminalSessionRepositoryImpl.kt:TerminalSessionRepositoryImpl$"TerminalSession"</ID>
+    <ID>StringShouldBeRawString:ScriptInstaller.kt:ScriptInstaller.Companion$"#!${prefix.path}/bin/sh\ncat \"${prefix.path}/etc/motd\"\n"</ID>
+    <ID>ThrowsCount:TerminalBackup.kt:TerminalBackup$private fun process: BackupSummary</ID>
+    <ID>TooGenericExceptionCaught:TermuxScriptPackageRepository.kt:TermuxScriptPackageRepository$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:TermuxScriptSdkRepository.kt:TermuxScriptSdkRepository$e: Exception</ID>
+    <ID>UnnecessaryParentheses:TerminalBackup.kt:TarReader$(h[i].toInt() and 0xff)</ID>
+    <ID>UseIfInsteadOfWhen:TerminalBackupTest.kt:TerminalBackupTest$when (type) { '2' -> w.writeSymlink(name, arg, 0) else -> w.writeFile(name, arg.toByteArray(), false, 0) }</ID>
+  </CurrentIssues>
+</SmellBaseline>

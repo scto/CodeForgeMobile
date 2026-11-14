@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ClassOrdering:LspServerInstaller.kt:LspServerInstaller$private fun runShellCommand: ShellResult</ID>
+    <ID>CognitiveComplexMethod:LspServerPlugin.kt:LspServerPlugin$private suspend fun ensureReady</ID>
+    <ID>DocumentationOverPrivateFunction:LspServerInstaller.kt:LspServerInstaller$private fun fetchCommand: String</ID>
+    <ID>OutdatedDocumentation:LspServerPlugin.kt:LspServerSpec</ID>
+    <ID>ReturnCount:LspServerPlugin.kt:LspServerPlugin$private suspend fun ensureReady</ID>
+    <ID>StringShouldBeRawString:LspServerInstaller.kt:LspServerInstaller$"if command -v wget >/dev/null 2>&amp;1; then wget -qO- \"$url\"; else curl -fsSL \"$url\"; fi"</ID>
+    <ID>StringShouldBeRawString:LspServerInstaller.kt:LspServerInstaller$"set -e; mkdir -p \"$installDir\"; ${fetchCommand(downloadUrl)} > \"$installDir/$fileName.part\"; " + "mv \"$installDir/$fileName.part\" \"$installDir/$fileName\"; "</ID>
+    <ID>TooGenericExceptionCaught:LspServerInstaller.kt:LspServerInstaller$e: Exception</ID>
+    <ID>UndocumentedPublicClass:LspServerInstaller.kt:InstallOutcome</ID>
+    <ID>UndocumentedPublicClass:LspServerInstaller.kt:InstallOutcome$Failed : InstallOutcome</ID>
+    <ID>UndocumentedPublicClass:LspServerInstaller.kt:InstallOutcome$Success : InstallOutcome</ID>
+    <ID>UndocumentedPublicClass:LspServerInstaller.kt:ShellResult</ID>
+    <ID>UndocumentedPublicFunction:LspServerInstaller.kt:LspServerInstaller$suspend fun isInstalled: Boolean</ID>
+    <ID>UndocumentedPublicFunction:LspServerInstaller.kt:LspServerInstaller$suspend fun uninstall: InstallOutcome</ID>
+  </CurrentIssues>
+</SmellBaseline>

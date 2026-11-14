@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>DocumentationOverPrivateProperty:KmpLspPlugin.kt:/** Lädt das Release-Archiv passend zur Architektur, prüft die Summe und installiert Server und JAR-Indexer. */ private val INSTALL_SCRIPT = listOf( "set -e", "case \"\$(uname -m)\" in aarch64|arm64) A=aarch64; H=$SHA256_AARCH64;; x86_64) A=x86_64; H=$SHA256_X86_64;; " + "*) echo \"Architektur nicht unterstützt: \$(uname -m)\"; exit 1;; esac", "command -v curl >/dev/null 2>&amp;1 || { echo 'curl fehlt'; exit 1; }", "T=\"\$(mktemp -d)\"; trap 'rm -rf \"\$T\"' EXIT", "curl -fsSL -o \"\$T/k.tgz\" \"$RELEASE_URL/kmp-lsp-termux-\$A.tar.gz\"", "echo \"\$H \$T/k.tgz\" | sha256sum -c - >/dev/null || { echo 'SHA-256 stimmt nicht'; exit 1; }", "tar xzf \"\$T/k.tgz\" -C \"\$T\"", "mkdir -p \"$INSTALL_DIR/bin\"", "cp \"\$T/kmp-lsp-termux-\$A/kmp-lsp\" \"\$T/kmp-lsp-termux-\$A/kmp-jar-indexer.jar\" \"$INSTALL_DIR/bin/\"", "chmod 755 \"$INSTALL_DIR/bin/kmp-lsp\"" ).joinToString("; ")</ID>
+    <ID>StringShouldBeRawString:KmpLspPlugin.kt:"T=\"\$(mktemp -d)\"; trap 'rm -rf \"\$T\"' EXIT"</ID>
+    <ID>StringShouldBeRawString:KmpLspPlugin.kt:"case \"\$(uname -m)\" in aarch64|arm64) A=aarch64; H=$SHA256_AARCH64;; x86_64) A=x86_64; H=$SHA256_X86_64;; " + "*) echo \"Architektur nicht unterstützt: \$(uname -m)\"; exit 1;; esac"</ID>
+    <ID>StringShouldBeRawString:KmpLspPlugin.kt:"cp \"\$T/kmp-lsp-termux-\$A/kmp-lsp\" \"\$T/kmp-lsp-termux-\$A/kmp-jar-indexer.jar\" \"$INSTALL_DIR/bin/\""</ID>
+    <ID>StringShouldBeRawString:KmpLspPlugin.kt:"curl -fsSL -o \"\$T/k.tgz\" \"$RELEASE_URL/kmp-lsp-termux-\$A.tar.gz\""</ID>
+    <ID>StringShouldBeRawString:KmpLspPlugin.kt:"tar xzf \"\$T/k.tgz\" -C \"\$T\""</ID>
+    <ID>UndocumentedPublicClass:KmpLspPlugin.kt:KmpLspPlugin : LspServerPlugin</ID>
+  </CurrentIssues>
+</SmellBaseline>

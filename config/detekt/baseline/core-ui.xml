@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:LspInfoDialog.kt:if</ID>
+    <ID>CognitiveComplexMethod:LspInfoDialog.kt:@Composable private fun InfoRow</ID>
+    <ID>DocumentationOverPrivateProperty:WindowSizeUtils.kt:/** Material-3-Breakpoints: Compact &lt; 600dp &lt;= Medium &lt; 840dp &lt;= Expanded. */ private const val COMPACT_WIDTH_BREAKPOINT_DP = 600</ID>
+    <ID>UseIfInsteadOfWhen:LspInfoDialog.kt:when { runtime?.running == true -> LspCheck( stringRes(R.string.lspinfo_check_running), stringRes(R.string.lspinfo_check_running_ok, runtime.sessionCount), LspCheckLevel.OK ) else -> LspCheck(stringRes(R.string.lspinfo_check_running), stringRes(R.string.lspinfo_check_running_idle), LspCheckLevel.WARN) }</ID>
+  </CurrentIssues>
+</SmellBaseline>

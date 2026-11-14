@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:AssetStudioScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:AssetStudioScreen.kt:if</ID>
+    <ID>BracesOnIfStatements:AssetStudioViewModel.kt:AssetStudioViewModel$if</ID>
+    <ID>BracesOnIfStatements:VectorXmlReader.kt:VectorXmlReader$if</ID>
+    <ID>BracesOnIfStatements:VectorXmlWriter.kt:VectorXmlWriter$if</ID>
+    <ID>BracesOnWhenStatements:AssetStudioViewModel.kt:AssetStudioViewModel$when</ID>
+    <ID>BracesOnWhenStatements:IconRenderer.kt:IconRenderer$when</ID>
+    <ID>BracesOnWhenStatements:VectorXmlReader.kt:VectorXmlReader$when</ID>
+    <ID>CognitiveComplexMethod:AssetStudioScreen.kt:@Composable private fun PreviewCard</ID>
+    <ID>CognitiveComplexMethod:AssetStudioScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun AssetStudioScreen</ID>
+    <ID>CognitiveComplexMethod:AssetStudioViewModel.kt:AssetStudioViewModel$private fun generate</ID>
+    <ID>CognitiveComplexMethod:VectorXmlWriter.kt:VectorXmlWriter$internal fun pathData: String</ID>
+    <ID>DocumentationOverPrivateProperty:AssetStudioViewModel.kt:AssetStudioViewModel$/** Name wurde vom Nutzer geändert → Vorschläge (M3-Auswahl) überschreiben ihn nicht mehr. */ private var nameEdited = false</ID>
+    <ID>FunctionNameMaxLength:AssetStudioLogicTest.kt:AssetStudioLogicTest$@Test fun `res-Ordner finden und schreiben`</ID>
+    <ID>FunctionNameMinLength:VectorXmlWriter.kt:VectorXmlWriter$private fun p</ID>
+    <ID>OutdatedDocumentation:AssetFilePlanner.kt:AssetFilePlanner$fun planAdaptiveIcon: List&lt;PlannedFile></ID>
+    <ID>OutdatedDocumentation:VectorXmlWriter.kt:VectorXmlWriter$fun toXml: String</ID>
+    <ID>ReturnCount:AssetFilePlanner.kt:AssetFilePlanner$fun findResDir: File?</ID>
+    <ID>TrimMultilineRawString:AssetFilePlanner.kt:AssetFilePlanner$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"> &lt;background android:drawable="@color/${name}_background" /> &lt;foreground android:drawable="@drawable/${name}_foreground" /> &lt;monochrome android:drawable="@drawable/${name}_foreground" /> &lt;/adaptive-icon> """</ID>
+    <ID>TrimMultilineRawString:AssetFilePlanner.kt:AssetFilePlanner$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;inset xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/$fgName" android:insetLeft="$inset%" android:insetTop="$inset%" android:insetRight="$inset%" android:insetBottom="$inset%" /> """</ID>
+    <ID>TrimMultilineRawString:AssetFilePlanner.kt:AssetFilePlanner$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;resources> &lt;color name="${name}_background">${colorHex(backgroundArgb)}&lt;/color> &lt;/resources> """</ID>
+    <ID>UndocumentedPublicClass:IconRenderer.kt:IconRenderer.Motif$Raster : Motif</ID>
+    <ID>UndocumentedPublicClass:IconRenderer.kt:IconRenderer.Motif$Vector : Motif</ID>
+    <ID>UnnecessaryBackticks:AssetStudioLogicTest.kt:AssetStudioLogicTest$`Anzeigenamen`</ID>
+    <ID>UnnecessaryBackticks:AssetStudioLogicTest.kt:AssetStudioLogicTest$`Inset`</ID>
+    <ID>UnnecessaryBackticks:AssetStudioLogicTest.kt:AssetStudioLogicTest$`Ressourcennamen`</ID>
+    <ID>UnnecessaryParentheses:AssetFilePlanner.kt:AssetFilePlanner$((1f - scale.coerceIn(0.3f, 1f)) / 2f)</ID>
+    <ID>UnnecessaryParentheses:AssetStudioScreen.kt:({ Text(stringRes(R.string.assetstudio_name_invalid)) })</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooGenericExceptionCaught:AppSettingsSerializer.kt:AppSettingsSerializer$exception: Exception</ID>
+    <ID>TooManyFunctions:SettingsRepository.kt:SettingsRepository</ID>
+  </CurrentIssues>
+</SmellBaseline>

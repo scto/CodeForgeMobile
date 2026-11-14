@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:SearchScreen.kt:if</ID>
+    <ID>BracesOnWhenStatements:SearchViewModel.kt:SearchViewModel$when</ID>
+    <ID>CognitiveComplexMethod:SearchViewModel.kt:SearchViewModel$private fun replace</ID>
+    <ID>DocumentationOverPrivateFunction:SearchScreen.kt:private fun highlighted: AnnotatedString</ID>
+    <ID>DocumentationOverPrivateFunction:SearchViewModel.kt:SearchViewModel$private fun replace</ID>
+    <ID>OutdatedDocumentation:SearchScreen.kt:@Composable fun SearchRoute</ID>
+  </CurrentIssues>
+</SmellBaseline>

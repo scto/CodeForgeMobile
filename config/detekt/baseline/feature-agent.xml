@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AlsoCouldBeApply:AgentViewModelTest.kt:AgentViewModelTest$also</ID>
+    <ID>BracesOnIfStatements:AgentConnections.kt:AgentConnections$if</ID>
+    <ID>BracesOnWhenStatements:AgentTranscript.kt:AgentTranscript$when</ID>
+    <ID>BracesOnWhenStatements:AgentViewModel.kt:AgentViewModel$when</ID>
+    <ID>BracesOnWhenStatements:GradleAgentBuildRunner.kt:GradleAgentBuildRunner$when</ID>
+    <ID>CascadingCallWrapping:AgentConnections.kt:AgentConnections$toSet()</ID>
+    <ID>CascadingCallWrapping:AgentTranscript.kt:AgentTranscript$let { items += AgentChatItem.User(id++, it) }</ID>
+    <ID>ClassOrdering:AgentConnections.kt:AgentConnections$/** MCP-Server aus aktiven Plugins (`contributes.mcpServers`); wie Projekt-Server unvertraut, bis der Nutzer sie freigibt. */ @Volatile var pluginServers: List&lt;McpServerConfig> = emptyList()</ID>
+    <ID>ClassOrdering:AgentConnections.kt:AgentConnections$private val contextTrustFile get() = File(dir, "context-trust.json")</ID>
+    <ID>CognitiveComplexMethod:AgentScreen.kt:@Composable private fun ChatItem</ID>
+    <ID>CognitiveComplexMethod:AgentScreen.kt:@Composable private fun McpServerRow</ID>
+    <ID>CognitiveComplexMethod:AgentTranscript.kt:AgentTranscript$fun toItems: List&lt;AgentChatItem></ID>
+    <ID>CognitiveComplexMethod:AgentViewModel.kt:AgentViewModel$private suspend fun runTurn</ID>
+    <ID>CognitiveComplexMethod:GradleAgentBuildRunner.kt:GradleAgentBuildRunner$override suspend fun run: BuildOutcome</ID>
+    <ID>ComplexCondition:AgentViewModel.kt:AgentViewModel$saved.isEmpty() || session !== current || _state.value.items.isNotEmpty() || _state.value.running</ID>
+    <ID>CyclomaticComplexMethod:AgentViewModel.kt:AgentViewModel$private suspend fun runTurn</ID>
+    <ID>DocumentationOverPrivateFunction:AgentScreen.kt:@Composable private fun DiffView</ID>
+    <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private fun pluginTools: List&lt;AgentTool></ID>
+    <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private fun registryFor: AgentToolRegistry?</ID>
+    <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private fun restoreHistory</ID>
+    <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private suspend fun loadContext: ProjectContext</ID>
+    <ID>DocumentationOverPrivateFunction:AgentViewModelTest.kt:AgentViewModelTest$private fun AgentViewModel.await</ID>
+    <ID>FunctionNameMaxLength:AgentAttachmentTest.kt:AgentAttachmentTest$@Test fun `Prompt enthaelt Auszug mit Pfad und Zeilen`</ID>
+    <ID>FunctionNameMaxLength:AgentAttachmentTest.kt:AgentAttachmentTest$@Test fun `ganze Datei wird nur referenziert, lange Auszuege gekuerzt`</ID>
+    <ID>FunctionNameMaxLength:AgentAttachmentTest.kt:AgentAttachmentTest$@Test fun `ohne Anhaenge bleibt der Text unveraendert`</ID>
+    <ID>FunctionNameMaxLength:AgentConnectionsTest.kt:AgentConnectionsTest$@Test fun `App-Server werden gespeichert und gelesen`</ID>
+    <ID>FunctionNameMaxLength:AgentConnectionsTest.kt:AgentConnectionsTest$@Test fun `Projekt-Server sind erst nach Freigabe vertraut, eine geaenderte URL braucht neue Freigabe`</ID>
+    <ID>FunctionNameMaxLength:AgentConnectionsTest.kt:AgentConnectionsTest$@Test fun `Projektkontext ist an Inhalt gebunden`</ID>
+    <ID>FunctionNameMaxLength:AgentConnectionsTest.kt:AgentConnectionsTest$@Test fun `kaputte Dateien ergeben leere Listen`</ID>
+    <ID>FunctionNameMaxLength:AgentConnectionsTest.kt:AgentConnectionsTest$@Test fun `shellQuote schuetzt einfache Anfuehrungszeichen`</ID>
+    <ID>FunctionNameMaxLength:AgentDiagnosticsStoreTest.kt:AgentDiagnosticsStoreTest$@Test fun `filtert nach Datei oder Ordner und ignoriert fremde Projekte`</ID>
+    <ID>FunctionNameMaxLength:AgentDiagnosticsStoreTest.kt:AgentDiagnosticsStoreTest$@Test fun `leere Liste entfernt die Datei, Limit wird eingehalten`</ID>
+    <ID>FunctionNameMaxLength:AgentDiagnosticsStoreTest.kt:AgentDiagnosticsStoreTest$@Test fun `liefert relative Pfade, 1-basierte Zeilen und blendet Hinweise aus`</ID>
+    <ID>FunctionNameMaxLength:AgentTranscriptTest.kt:AgentTranscriptTest$@Test fun `baut Eintraege mit Status je Ergebnis`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Anhaenge werden gemerkt, entfernt und mit dem Senden geleert`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Auto-Modus schreibt Datei, zeigt Werkzeugaufruf, Antwort und Aenderungen`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Fragen-Modus Ablehnen laesst die Datei weg`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Fragen-Modus wartet auf Freigabe, Erlauben fuehrt aus`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `MCP-Server hinzufuegen speichert, meldet Zustand, Entfernen loescht`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Plan-Modus lehnt Schreiben ab und aendert nichts`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Projekt-Server aus mcp_json brauchen Freigabe`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Projektregeln brauchen Freigabe und gelten danach`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Revert loescht die neu angelegte Datei wieder`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `Verlauf wird gespeichert und beim Oeffnen des Projekts wiederhergestellt`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `ohne Projekt meldet Senden einen Fehler statt still nichts zu tun`</ID>
+    <ID>FunctionNameMaxLength:AgentViewModelTest.kt:AgentViewModelTest$@Test fun `ohne Schluessel gibt es eine Fehlermeldung statt eines Laufs`</ID>
+    <ID>FunctionNameMaxLength:GradleAgentBuildRunnerTest.kt:GradleAgentBuildRunnerTest$@Test fun `Erfolg, BuildFailed und Verbindungsfehler`</ID>
+    <ID>FunctionNameMaxLength:GradleAgentBuildRunnerTest.kt:GradleAgentBuildRunnerTest$@Test fun `Zeitueberschreitung bricht den Build ab`</ID>
+    <ID>FunctionNameMaxLength:GradleAgentBuildRunnerTest.kt:GradleAgentBuildRunnerTest$@Test fun `sammelt Fehler mit relativen Pfaden, ignoriert Info und meldet Misserfolg`</ID>
+    <ID>FunctionNameMaxLength:PluginAgentToolsTest.kt:PluginAgentToolsTest$@Test fun `Ausfuehrung liefert Ausgabe und reicht Eingabe weiter`</ID>
+    <ID>FunctionNameMaxLength:PluginAgentToolsTest.kt:PluginAgentToolsTest$@Test fun `Exit-Code ungleich null und Timeout sind Fehler`</ID>
+    <ID>FunctionNameMaxLength:PluginAgentToolsTest.kt:PluginAgentToolsTest$@Test fun `MCP-Server werden je Plugin benannt und dem Transport zugeordnet`</ID>
+    <ID>FunctionNameMaxLength:PluginAgentToolsTest.kt:PluginAgentToolsTest$@Test fun `Manifest verlangt agent und shell Berechtigung`</ID>
+    <ID>FunctionNameMaxLength:PluginAgentToolsTest.kt:PluginAgentToolsTest$@Test fun `Werkzeuge bekommen normalisierte Namen und passende Art`</ID>
+    <ID>FunctionNameMinLength:AgentViewModelTest.kt:AgentViewModelTest$private fun vm</ID>
+    <ID>LongMethod:AgentViewModel.kt:AgentViewModel$private suspend fun runTurn</ID>
+    <ID>MultilineRawStringIndentation:PluginAgentToolsTest.kt:PluginAgentToolsTest$""" {"id":"my.plugin","name":"P","version":"1","apiVersion":2,"permissions":["agent","shell"], "contributes":{ "agentTools":[ {"id":"lint","description":"Lint","command":["lint","${'$'}{input}"],"kind":"read"}, {"id":"deploy","description":"Deploy","command":["deploy"]}], "mcpServers":[ {"name":"docs","url":"https://example.org/mcp"}, {"name":"local","command":"node","args":["srv.js"]}]}} """</ID>
+    <ID>NestedBlockDepth:AgentTranscript.kt:AgentTranscript$fun toItems: List&lt;AgentChatItem></ID>
+    <ID>OutdatedDocumentation:AgentTranscript.kt:AgentTranscript$fun toItems: List&lt;AgentChatItem></ID>
+    <ID>OutdatedDocumentation:GradleAgentBuildRunner.kt:GradleAgentBuildRunner : AgentBuildRunner</ID>
+    <ID>ReturnCount:GradleAgentBuildRunner.kt:GradleAgentBuildRunner$override suspend fun run: BuildOutcome</ID>
+    <ID>StringLiteralDuplication:PluginAgentTools.kt:PluginAgentTool$"input"</ID>
+    <ID>StringShouldBeRawString:AgentAttachmentTest.kt:AgentAttachmentTest$"[Auszug: /p/Foo.kt, Zeile 3-4]\n```\na\nb\n```"</ID>
+    <ID>StringShouldBeRawString:AgentViewModel.kt:AgentViewModel$"\n\n&lt;mcp-server-notes>\n$notes\n&lt;/mcp-server-notes>"</ID>
+    <ID>SwallowedException:GradleAgentBuildRunner.kt:GradleAgentBuildRunner$e: TimeoutCancellationException</ID>
+    <ID>TooGenericExceptionCaught:AgentViewModel.kt:AgentViewModel$e: Exception</ID>
+    <ID>UseIfInsteadOfWhen:AgentViewModel.kt:AgentViewModel$when { // Lokale OpenAI-kompatible Server (eigene Basis-URL) laufen auch ohne Schlüssel. options.apiKey.isBlank() &amp;&amp; !(options.provider == AiProviderType.OPENAI &amp;&amp; !options.baseUrl.isNullOrBlank()) -> Res.string(R.string.agent_error_no_key) else -> dailyLimitProblem() }</ID>
+  </CurrentIssues>
+</SmellBaseline>

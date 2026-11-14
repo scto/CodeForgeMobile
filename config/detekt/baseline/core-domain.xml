@@ -1,0 +1,386 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:BinaryFileDetector.kt:BinaryFileDetector$if</ID>
+    <ID>BracesOnIfStatements:GitConflict.kt:ConflictParser$if</ID>
+    <ID>BracesOnIfStatements:GitGraph.kt:GitGraphLayout$else</ID>
+    <ID>BracesOnIfStatements:GradleRunSettings.kt:GradleRunSettings$else</ID>
+    <ID>BracesOnIfStatements:GradleRunSettings.kt:GradleRunSettings$if</ID>
+    <ID>BracesOnIfStatements:HunkPatcher.kt:HunkPatcher$if</ID>
+    <ID>BracesOnIfStatements:ProjectInputValidator.kt:ProjectInputValidator$if</ID>
+    <ID>BracesOnWhenStatements:AiPatchParser.kt:AiPatchParser$when</ID>
+    <ID>BracesOnWhenStatements:ApkZipAnalyzer.kt:ApkZipAnalyzer$when</ID>
+    <ID>BracesOnWhenStatements:GitConflict.kt:ConflictParser$when</ID>
+    <ID>BracesOnWhenStatements:GitDiff.kt:UnifiedDiffParser$when</ID>
+    <ID>BracesOnWhenStatements:HunkPatcher.kt:HunkPatcher$when</ID>
+    <ID>CascadingCallWrapping:ExamplePluginsValidTest.kt:ExamplePluginsValidTest$first { it.isDirectory }</ID>
+    <ID>CascadingCallWrapping:GuidePluginsValidTest.kt:GuidePluginsValidTest$first { it.isDirectory }</ID>
+    <ID>CascadingCallWrapping:GuidePluginsValidTest.kt:GuidePluginsValidTest$toList()</ID>
+    <ID>CascadingCallWrapping:LogcatParserTest.kt:LogcatParserTest$readLines()</ID>
+    <ID>CascadingCallWrapping:ProjectInputValidator.kt:ProjectInputValidator$replace(Regex("[^a-z0-9]"), "")</ID>
+    <ID>CascadingCallWrapping:TemplatesValidTest.kt:TemplatesValidTest$first { it.isDirectory }</ID>
+    <ID>CascadingCallWrapping:TextMatePluginsValidTest.kt:TextMatePluginsValidTest$first { it.isDirectory }</ID>
+    <ID>CascadingCallWrapping:ThemePluginsValidTest.kt:ThemePluginsValidTest$first { it.isDirectory }</ID>
+    <ID>CascadingCallWrapping:ToolPluginsValidTest.kt:ToolPluginsValidTest$first { it.isDirectory }</ID>
+    <ID>ClassOrdering:GitPatchTest.kt:GitPatchTest$private val conflicted = "head\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nours1\nours2\n=======\ntheirs1\n>>>>>>> feature\nmid\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nA\n=======\nB\n>>>>>>> feature\ntail\n"</ID>
+    <ID>ClassOrdering:GradleOutputParser.kt:GradleOutputParser$Companion</ID>
+    <ID>ClassOrdering:GradleRunSettings.kt:GradleRunSettings$/** Eigene Flags (aus [extraArgs]) in Eingabereihenfolge, ohne Doppelte. */ val customFlags: List&lt;String> get() = extraArgs.split(WHITESPACE).filter { it.isNotEmpty() }.distinct()</ID>
+    <ID>ClassOrdering:LspClientRepository.kt:LspClientRepository$/** * Handler für eingehende `workspace/applyEdit`-Anfragen vom Server. * Liefert true, wenn der WorkspaceEdit erfolgreich angewendet wurde. */ var applyEditHandler: (suspend (LspWorkspaceEdit) -> Boolean)?</ID>
+    <ID>ClassOrdering:LspModels.kt:LspWorkspaceEdit$/** Alle Dateioperationen des Edits in Reihenfolge. */ val allFileOperations: List&lt;LspFileOperation> get() = documentChanges.mapNotNull { (it as? LspDocumentChange.FileOp)?.operation }</ID>
+    <ID>ClassOrdering:ProjectsDirectoryProvider.kt:ProjectsDirectoryProvider$/** * Absoluter Pfad des Stammverzeichnisses. */ val projectsRootPath: String get() = getProjectsRoot().absolutePath</ID>
+    <ID>ClassOrdering:ProjectsDirectoryProvider.kt:ProjectsDirectoryProvider$Companion</ID>
+    <ID>ClassOrdering:Requirements.kt:RequirementPolicy$/** Pakete, die Store-Plugins anfordern dürfen (nur Programme, die CodeForge selbst als Tool-Plugins verwendet). */ private val STORE_ALLOWED: Map&lt;RequirementManager, Set&lt;String>> = mapOf( RequirementManager.PKG to setOf( "clang", "cmake", "nodejs", "python", "golang", "rust", "rust-analyzer", "ruff", "shfmt", "shellcheck", "taplo", "gopls", "dart", "neocmakelsp", "ktlint", "git", "jq", "ripgrep", "librsvg" ), RequirementManager.NPM to setOf( "prettier", "typescript", "typescript-language-server", "pyright", "bash-language-server", "vscode-langservers-extracted", "yaml-language-server" ), RequirementManager.PIP to emptySet() )</ID>
+    <ID>ClassOrdering:SigningRepository.kt:SigningRepository$/** * Aktuell aktive Signatur-Umgebungsvariablen für Gradle-Builds (oder leer). */ val activeBuildSigning: StateFlow&lt;Map&lt;String, String>></ID>
+    <ID>ClassOrdering:WorkspaceRepository.kt:WorkspaceRepository$Companion</ID>
+    <ID>CognitiveComplexMethod:AaptBadgingParser.kt:AaptBadgingParser$fun parse: ApkDetailedMetadata</ID>
+    <ID>CognitiveComplexMethod:AiPatchParser.kt:AiPatchParser$fun parseProposedChanges: List&lt;AiProposedChange></ID>
+    <ID>CognitiveComplexMethod:AiPatchParser.kt:AiPatchParser$private fun applyDiffToFile: String</ID>
+    <ID>CognitiveComplexMethod:ApkComparator.kt:ApkComparator$fun compare: ApkComparisonResult</ID>
+    <ID>CognitiveComplexMethod:ApkMetadataParser.kt:ApkMetadataParser$private fun extractArrayContent: String?</ID>
+    <ID>CognitiveComplexMethod:ApkMetadataParser.kt:ApkMetadataParser$private fun extractTopLevelObjects: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:ApkReportFormatter.kt:ApkReportFormatter$fun formatAnalysisToMarkdown: String</ID>
+    <ID>CognitiveComplexMethod:ApkReportFormatter.kt:ApkReportFormatter$fun formatComparisonToMarkdown: String</ID>
+    <ID>CognitiveComplexMethod:ApkZipAnalyzer.kt:ApkZipAnalyzer$@Throws(ApkAnalysisException::class) fun analyze: ApkAnalysisResult</ID>
+    <ID>CognitiveComplexMethod:ApksignerOutputParser.kt:ApksignerOutputParser$fun parse: ApkVerificationResult</ID>
+    <ID>CognitiveComplexMethod:AxmlManifestParser.kt:AxmlManifestParser$private fun parseStream: ApkDetailedMetadata?</ID>
+    <ID>CognitiveComplexMethod:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$fun parse: DependencyInsight</ID>
+    <ID>CognitiveComplexMethod:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$private fun parseTreeLines: List&lt;DependencyNode></ID>
+    <ID>CognitiveComplexMethod:GradleOutputParser.kt:GradleOutputParser.Session$fun feedLine: List&lt;BuildProblem></ID>
+    <ID>CognitiveComplexMethod:GradleRunSettings.kt:GradleRunSettings$fun toArgs: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:HunkPatcher.kt:HunkPatcher$fun apply: String</ID>
+    <ID>CognitiveComplexMethod:KeytoolOutputParser.kt:KeytoolOutputParser$fun parse: ParsedKeystore</ID>
+    <ID>CognitiveComplexMethod:LogcatModels.kt:LogcatFilter$fun matches: Boolean</ID>
+    <ID>CognitiveComplexMethod:LogcatParser.kt:LogcatParser$fun parseLines: List&lt;LogEntry></ID>
+    <ID>CognitiveComplexMethod:PluginManifest.kt:fun Contributes.kinds: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$fun resolve: File?</ID>
+    <ID>CognitiveComplexMethod:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
+    <ID>ComplexCondition:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$trimmed.contains(":") &amp;&amp; !trimmed.startsWith(">") &amp;&amp; !trimmed.startsWith("+---") &amp;&amp; !trimmed.startsWith("\\---") &amp;&amp; !trimmed.startsWith("|") &amp;&amp; !trimmed.startsWith("-") &amp;&amp; resolvedVersion.isEmpty()</ID>
+    <ID>ComplexCondition:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$trimmed.contains(" - ") &amp;&amp; !trimmed.startsWith("+---") &amp;&amp; !trimmed.startsWith("\\---") &amp;&amp; !trimmed.startsWith("|")</ID>
+    <ID>ComplexCondition:GradleOutputParser.kt:GradleOutputParser.Session$trimmed.contains("AAPT") || trimmed.contains("/res/") || trimmed.endsWith(".xml:") || trimmed.contains(".xml:")</ID>
+    <ID>ComplexCondition:LogcatParser.kt:LogcatParser$prev != null &amp;&amp; prev.isCrash &amp;&amp; r.entry.tag.equals("AndroidRuntime", ignoreCase = true) &amp;&amp; prev.pid == r.entry.pid</ID>
+    <ID>ComplexCondition:SnippetModels.kt:SnippetParser$i &lt; len &amp;&amp; body[i] != ':' &amp;&amp; body[i] != '|' &amp;&amp; body[i] != '/' &amp;&amp; body[i] != '}'</ID>
+    <ID>ComplexInterface:AiRepository.kt:AiRepository</ID>
+    <ID>ComplexInterface:DebugRepository.kt:DebugRepository</ID>
+    <ID>ComplexInterface:GitRepository.kt:GitRepository</ID>
+    <ID>ComplexInterface:LspClientRepository.kt:LspClientRepository</ID>
+    <ID>ComplexInterface:ProjectsDirectoryProvider.kt:ProjectsDirectoryProvider</ID>
+    <ID>ComplexInterface:SigningRepository.kt:SigningRepository</ID>
+    <ID>CyclomaticComplexMethod:AaptBadgingParser.kt:AaptBadgingParser$fun parse: ApkDetailedMetadata</ID>
+    <ID>CyclomaticComplexMethod:AiPatchParser.kt:AiPatchParser$fun parseProposedChanges: List&lt;AiProposedChange></ID>
+    <ID>CyclomaticComplexMethod:ApkComparator.kt:ApkComparator$fun compare: ApkComparisonResult</ID>
+    <ID>CyclomaticComplexMethod:ApkReportFormatter.kt:ApkReportFormatter$fun formatAnalysisToMarkdown: String</ID>
+    <ID>CyclomaticComplexMethod:ApkZipAnalyzer.kt:ApkZipAnalyzer$@Throws(ApkAnalysisException::class) fun analyze: ApkAnalysisResult</ID>
+    <ID>CyclomaticComplexMethod:AxmlManifestParser.kt:AxmlManifestParser$private fun parseStream: ApkDetailedMetadata?</ID>
+    <ID>CyclomaticComplexMethod:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$fun parse: DependencyInsight</ID>
+    <ID>CyclomaticComplexMethod:GradleOutputParser.kt:GradleOutputParser.Session$fun feedLine: List&lt;BuildProblem></ID>
+    <ID>CyclomaticComplexMethod:HunkPatcher.kt:HunkPatcher$fun apply: String</ID>
+    <ID>CyclomaticComplexMethod:LogcatModels.kt:LogcatFilter$fun matches: Boolean</ID>
+    <ID>CyclomaticComplexMethod:LogcatParser.kt:LogcatParser$fun parseLines: List&lt;LogEntry></ID>
+    <ID>CyclomaticComplexMethod:PluginManifestParser.kt:PluginManifestParser$private fun parseContributes: Contributes</ID>
+    <ID>CyclomaticComplexMethod:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$fun resolve: File?</ID>
+    <ID>CyclomaticComplexMethod:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
+    <ID>DataClassContainsFunctions:GradleRunSettings.kt:GradleRunSettings$fun activeFlags: List&lt;String></ID>
+    <ID>DataClassContainsFunctions:GradleRunSettings.kt:GradleRunSettings$fun addCustomFlag: GradleRunSettings</ID>
+    <ID>DataClassContainsFunctions:GradleRunSettings.kt:GradleRunSettings$fun firstInvalidExtraArg: String?</ID>
+    <ID>DataClassContainsFunctions:GradleRunSettings.kt:GradleRunSettings$fun isActive: Boolean</ID>
+    <ID>DataClassContainsFunctions:GradleRunSettings.kt:GradleRunSettings$fun removeCustomFlag: GradleRunSettings</ID>
+    <ID>DataClassContainsFunctions:IconThemeFile.kt:IconThemeFile$fun allPaths: List&lt;String></ID>
+    <ID>DataClassContainsFunctions:IconThemeFile.kt:IconThemeFile$fun forFile: String?</ID>
+    <ID>DataClassContainsFunctions:IconThemeFile.kt:IconThemeFile$fun forFolder: String?</ID>
+    <ID>DataClassContainsFunctions:LogcatModels.kt:LogcatFilter$fun matches: Boolean</ID>
+    <ID>DataClassContainsFunctions:LspModels.kt:LspWorkspaceEdit$fun allTextEdits: Map&lt;String, List&lt;LspTextEdit>></ID>
+    <ID>DataClassContainsFunctions:LspServerSettings.kt:JvmOptions$fun firstInvalid: String?</ID>
+    <ID>DataClassContainsFunctions:LspServerSettings.kt:LspServerSettings$fun allows: Boolean</ID>
+    <ID>DataClassContainsFunctions:PluginManifest.kt:AgentToolContribution$fun asTool: ToolContribution</ID>
+    <ID>DataClassContainsFunctions:PluginManifest.kt:ToolPrompt$fun compose: String</ID>
+    <ID>DataClassContainsFunctions:PluginManifest.kt:ToolPrompt$fun optionOf: String</ID>
+    <ID>DataClassContainsFunctions:PluginManifest.kt:ToolPrompt$fun textOf: String</ID>
+    <ID>DataClassContainsFunctions:SigningModels.kt:DistinguishedName$private fun escape: String</ID>
+    <ID>DataClassContainsFunctions:SigningModels.kt:SignApkRequest$fun resolveOutputPath: String</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:HunkPatcher.kt:HunkPatcher$val (oldStart, oldCount, newStart, newCount) = listOf(1, 2, 3, 4).map { m.groupValues[it] } .let { g -> Quad(g[0].toInt(), g[1].ifEmpty { "1" }.toInt(), g[2].toInt(), g[3].ifEmpty { "1" }.toInt()) }</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:LogcatParser.kt:LogcatParser$val (className, methodName, fileName, lineStr) = match.destructured</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:LogcatParser.kt:LogcatParser$val (timestamp, pidStr, tidStr, levelStr, tag, message) = match.destructured</ID>
+    <ID>DocumentationOverPrivateFunction:GitConflict.kt:ConflictParser$private fun readBlock: Pair&lt;ConflictSegment.Conflict, Int>?</ID>
+    <ID>DocumentationOverPrivateFunction:PluginManifestParser.kt:PluginManifestParser$private fun JsonObject.relPath: String</ID>
+    <ID>DocumentationOverPrivateProperty:Requirements.kt:RequirementPolicy$/** Pakete, die Store-Plugins anfordern dürfen (nur Programme, die CodeForge selbst als Tool-Plugins verwendet). */ private val STORE_ALLOWED: Map&lt;RequirementManager, Set&lt;String>> = mapOf( RequirementManager.PKG to setOf( "clang", "cmake", "nodejs", "python", "golang", "rust", "rust-analyzer", "ruff", "shfmt", "shellcheck", "taplo", "gopls", "dart", "neocmakelsp", "ktlint", "git", "jq", "ripgrep", "librsvg" ), RequirementManager.NPM to setOf( "prettier", "typescript", "typescript-language-server", "pyright", "bash-language-server", "vscode-langservers-extracted", "yaml-language-server" ), RequirementManager.PIP to emptySet() )</ID>
+    <ID>ExpressionBodySyntax:AiSanitizer.kt:AiSanitizer$return if (text.length > maxChars) { val truncated = text.take(maxChars) + "\n\n[... Truncated ${text.length - maxChars} characters due to context limit ...]\n" Pair(truncated, true) } else { Pair(text, false) }</ID>
+    <ID>ExpressionBodySyntax:AxmlManifestParser.kt:AxmlManifestParser$return try { parseStream(ByteArrayInputStream(bytes)) } catch (_: Exception) { null }</ID>
+    <ID>ExpressionBodySyntax:LogcatRingBufferTest.kt:LogcatRingBufferTest$return LogEntry( id = id, timestamp = "10-19 12:00:00.000", pid = 1000, tid = 1000, level = level, tag = tag, message = "Message $id", isCrash = isCrash )</ID>
+    <ID>FunctionNameMaxLength:AaptPermissionsParserTest.kt:AaptPermissionsParserTest$@Test fun parseEmptyOutputReturnsNullPackageAndEmptyList</ID>
+    <ID>FunctionNameMaxLength:ApkInstallStatusMapperTest.kt:ApkInstallStatusMapperTest$@Test fun mapIncompatibleSignatureFailure</ID>
+    <ID>FunctionNameMaxLength:ApkMetadataParserTest.kt:ApkMetadataParserTest$@Test fun parseAbiSplitSelectsMatchingDeviceAbi</ID>
+    <ID>FunctionNameMaxLength:ApkMetadataParserTest.kt:ApkMetadataParserTest$@Test fun parseUnsignedApkIdentifiesUnsignedState</ID>
+    <ID>FunctionNameMaxLength:ApkReportFormatterTest.kt:ApkReportFormatterTest$@Test fun formatAnalysisToMarkdownGeneratesValidMarkdown</ID>
+    <ID>FunctionNameMaxLength:ApkReportFormatterTest.kt:ApkReportFormatterTest$@Test fun formatBytesOutputsHumanReadableUnits</ID>
+    <ID>FunctionNameMaxLength:ApksignerOutputParserTest.kt:ApksignerOutputParserTest$@Test fun parseSuccessfulVerificationWithDebugKey</ID>
+    <ID>FunctionNameMaxLength:ColorThemeFileParserTest.kt:ColorThemeFileParserTest$@Test fun `Hex-Formate werden korrekt gelesen`</ID>
+    <ID>FunctionNameMaxLength:ColorThemeFileParserTest.kt:ColorThemeFileParserTest$@Test fun `gueltiges Schema, unbekannte Rollen werden ignoriert`</ID>
+    <ID>FunctionNameMaxLength:DeclarativeOnlyTest.kt:DeclarativeOnlyTest$@Test fun `ohne Beitraege ist es kein gueltiges deklaratives Plugin`</ID>
+    <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `falls back to general star section for unmatched specific extension`</ID>
+    <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `matchesPattern correctly handles glob expressions`</ID>
+    <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `resolves java file options with tabs`</ID>
+    <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `resolves kotlin file options from editorconfig`</ID>
+    <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `resolves kts file options from editorconfig`</ID>
+    <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `returns fallback options when editorconfig is null or blank`</ID>
+    <ID>FunctionNameMaxLength:ExamplePluginsValidTest.kt:ExamplePluginsValidTest$@Test fun `Plugin-IDs und Sprachen sind eindeutig`</ID>
+    <ID>FunctionNameMaxLength:ExamplePluginsValidTest.kt:ExamplePluginsValidTest$@Test fun `alle neun LSP-Plugins haben gueltige Code-Manifeste mit lspServers`</ID>
+    <ID>FunctionNameMaxLength:ExtensionPacksTest.kt:ExtensionPacksTest$@Test fun `Closure loest verschachtelte Bundles ohne Zyklen auf`</ID>
+    <ID>FunctionNameMaxLength:ExtensionPacksTest.kt:ExtensionPacksTest$@Test fun `fehlende Mitglieder ohne Duplikate und Selbstverweis`</ID>
+    <ID>FunctionNameMaxLength:ExtensionSnippetsTest.kt:ExtensionSnippetsTest$@Test fun `Snippets bekommen deterministische ID, Scope der Sprache und sind unlöschbar markiert`</ID>
+    <ID>FunctionNameMaxLength:ExtensionSnippetsTest.kt:ExtensionSnippetsTest$@Test fun `defekte Datei ergibt leere Liste, Pfad ausserhalb wird ignoriert`</ID>
+    <ID>FunctionNameMaxLength:FormattersTest.kt:FormattersTest$@Test fun `Zuordnung nach Endung und Dateiname, Platzhalter`</ID>
+    <ID>FunctionNameMaxLength:FormattersTest.kt:FormattersTest$@Test fun `ungueltige Formatierer werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:GeneratedContentPluginsTest.kt:GeneratedContentPluginsTest$@Test fun `alle erzeugten Plugins sind gueltig und deklarativ`</ID>
+    <ID>FunctionNameMaxLength:GitPatchTest.kt:GitPatchTest$@Test fun hasUnresolvedMarkersDetectsLeftoverMarkers</ID>
+    <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseConflictResolution_arrowParsedAndConflictDetected</ID>
+    <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseFailedDependency_markedAsFailed</ID>
+    <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseProjectDependency_recognizedProperly</ID>
+    <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseRealFixture_coreCommonDebugCompileClasspath</ID>
+    <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseRealFixture_dependencyUpdaterApi</ID>
+    <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseRepeatedAndConstraint_flagsSetCorrectly</ID>
+    <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseSimpleTree_extractsRootAndChildren</ID>
+    <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseVeryDeepTree_doesNotCauseStackOverflow</ID>
+    <ID>FunctionNameMaxLength:GradleOutputParserTest.kt:GradleOutputParserTest$@Test fun streamingSessionMatchesBatchParse</ID>
+    <ID>FunctionNameMaxLength:GradleRunSettingsTest.kt:GradleRunSettingsTest$@Test fun customFlagsAreValidatedDeduplicatedAndRemovable</ID>
+    <ID>FunctionNameMaxLength:GradleRunSettingsTest.kt:GradleRunSettingsTest$@Test fun daemonIdleTimeoutIsPassedInMilliseconds</ID>
+    <ID>FunctionNameMaxLength:GradleRunSettingsTest.kt:GradleRunSettingsTest$@Test fun releaseMemoryCollectsCountsAndSurvivesFailures</ID>
+    <ID>FunctionNameMaxLength:GradleRunSettingsTest.kt:GradleRunSettingsTest$@Test fun toggleKeepsLogLevelsAndStacktracesExclusive</ID>
+    <ID>FunctionNameMaxLength:GuidePluginsValidTest.kt:GuidePluginsValidTest$@Test fun `commit-notes ist ein Code-Plugin mit minimalen Berechtigungen und nur per Sideload`</ID>
+    <ID>FunctionNameMaxLength:GuidePluginsValidTest.kt:GuidePluginsValidTest$@Test fun `nord-night ist ein gueltiges Farbschema und Store-tauglich`</ID>
+    <ID>FunctionNameMaxLength:GuidePluginsValidTest.kt:GuidePluginsValidTest$@Test fun `todo-report ist ein Werkzeug mit shell-Berechtigung und nur mit allowTools zulaessig`</ID>
+    <ID>FunctionNameMaxLength:GuidePluginsValidTest.kt:GuidePluginsValidTest$@Test fun `zig-support enthaelt Grammatik Snippets Formatierer Server und Voraussetzungen`</ID>
+    <ID>FunctionNameMaxLength:IconThemeFileParserTest.kt:IconThemeFileParserTest$@Test fun `Datei-Aufloesung Name vor Endung vor Standard`</ID>
+    <ID>FunctionNameMaxLength:IconThemeFileParserTest.kt:IconThemeFileParserTest$@Test fun `ohne Standard liefert unbekannt null`</ID>
+    <ID>FunctionNameMaxLength:IconThemeFileParserTest.kt:IconThemeFileParserTest$@Test fun `ungueltige Pfade und leere Themes scheitern`</ID>
+    <ID>FunctionNameMaxLength:IdeActivityRegistryTest.kt:IdeActivityRegistryTest$@Test fun tasksTerminalsAndWakeLockDecideWhetherForegroundIsNeeded</ID>
+    <ID>FunctionNameMaxLength:IdeActivityRegistryTest.kt:IdeActivityRegistryTest$@Test fun trackedFlowIsRegisteredOnlyWhileItRuns</ID>
+    <ID>FunctionNameMaxLength:JUnitXmlParserTest.kt:JUnitXmlParserTest$@Test fun buildTestRunResultCombinesModulesAndFiles</ID>
+    <ID>FunctionNameMaxLength:JUnitXmlParserTest.kt:JUnitXmlParserTest$@Test fun parseFailedSuiteWithStacktraceAndComparison</ID>
+    <ID>FunctionNameMaxLength:JUnitXmlParserTest.kt:JUnitXmlParserTest$@Test fun parseMultiSuitesInSingleDocument</ID>
+    <ID>FunctionNameMaxLength:JvmOptionsTest.kt:JvmOptionsTest$@Test fun buildsArgsAndSkipsInvalidEntries</ID>
+    <ID>FunctionNameMaxLength:LogcatParserTest.kt:LogcatParserTest$@Test fun parseNoTagLogsAndIgnoredBuffers</ID>
+    <ID>FunctionNameMaxLength:LogcatParserTest.kt:LogcatParserTest$@Test fun stackFrameParserMatchesVariousFormats</ID>
+    <ID>FunctionNameMaxLength:LogcatRingBufferTest.kt:LogcatRingBufferTest$@Test fun evictsOldestWhenCapacityExceeded</ID>
+    <ID>FunctionNameMaxLength:LogcatRingBufferTest.kt:LogcatRingBufferTest$@Test fun filteredSnapshotReturnsMatchesOnly</ID>
+    <ID>FunctionNameMaxLength:PluginCompatibilityTest.kt:PluginCompatibilityTest$@Test fun `Manifest lehnt Selbstabhaengigkeit und ungueltige Version ab`</ID>
+    <ID>FunctionNameMaxLength:PluginCompatibilityTest.kt:PluginCompatibilityTest$@Test fun `Manifest liest minHostVersion und dependsOn`</ID>
+    <ID>FunctionNameMaxLength:PluginCompatibilityTest.kt:PluginCompatibilityTest$@Test fun `Versionen werden numerisch je Segment verglichen`</ID>
+    <ID>FunctionNameMaxLength:PluginCompatibilityTest.kt:PluginCompatibilityTest$@Test fun `fehlende und deaktivierte Abhaengigkeiten werden unterschieden`</ID>
+    <ID>FunctionNameMaxLength:PluginCompatibilityTest.kt:PluginCompatibilityTest$@Test fun `ohne Anforderungen keine Probleme`</ID>
+    <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:ActiveContributionsTest$@Test fun `erste Contribution mit gleicher ID gewinnt und Herkunft bleibt erhalten`</ID>
+    <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:ActiveContributionsTest$@Test fun `kinds listet nur nicht leere Arten`</ID>
+    <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:GrammarLookupTest$@Test fun `Endung und Dateiname werden gefunden`</ID>
+    <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:PluginManifestParserTest$@Test fun `Pfad-Traversal und absolute Pfade werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:PluginManifestParserTest$@Test fun `lspServer ohne command scheitert`</ID>
+    <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:PluginManifestParserTest$@Test fun `ungueltige ID, fehlende Felder, zu neue API und unbekannte Berechtigung scheitern`</ID>
+    <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:PluginManifestParserTest$@Test fun `v2 Manifest mit allen Contributions`</ID>
+    <ID>FunctionNameMaxLength:PluginPermissionPolicyTest.kt:PluginPermissionPolicyTest$@Test fun `Ereignisse verlangen die passende Berechtigung`</ID>
+    <ID>FunctionNameMaxLength:PluginPermissionPolicyTest.kt:PluginPermissionPolicyTest$@Test fun `v1 Plugins behalten shell und lsp, brauchen aber commands explizit`</ID>
+    <ID>FunctionNameMaxLength:PluginPermissionPolicyTest.kt:PluginPermissionPolicyTest$@Test fun `v2 Plugins brauchen jede Berechtigung`</ID>
+    <ID>FunctionNameMaxLength:ProjectInputValidatorTest.kt:ProjectInputValidatorTest$@Test fun existingDirectoryAndBlankTarget</ID>
+    <ID>FunctionNameMaxLength:ProjectStackFrameResolverTest.kt:ProjectStackFrameResolverTest$@Test fun resolvesFileViaTopDownFallbackWhenNotInStandardPath</ID>
+    <ID>FunctionNameMaxLength:ProjectStackFrameResolverTest.kt:ProjectStackFrameResolverTest$@Test fun resolvesProjectTestFileSuccessfully</ID>
+    <ID>FunctionNameMaxLength:ProjectStackFrameResolverTest.kt:ProjectStackFrameResolverTest$@Test fun returnsNullForFrameworkOrNativeFrames</ID>
+    <ID>FunctionNameMaxLength:SdkSetupOptionsTest.kt:SdkSetupOptionsTest$@Test fun `feste Zielumgebung als Kommando`</ID>
+    <ID>FunctionNameMaxLength:SdkSetupOptionsTest.kt:SdkSetupOptionsTest$@Test fun `unsichere Versionsangaben werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:SigningModelsTest.kt:SigningModelsTest$@Test fun gradleSigningSnippetContainsExpectedVariables</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `extractTabStops extracts unique tab stop numbers in order`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate choice tabstop returns Valid`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate escaped dollar and backslash returns Valid`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate known variables returns Valid`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate nested placeholders returns Valid`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate placeholders with default values returns Valid`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate simple text without variables returns Valid`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate tabstops and final tabstop returns Valid`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate unclosed brace reports Invalid with line and column`</ID>
+    <ID>FunctionNameMaxLength:SnippetParserTest.kt:SnippetParserTest$@Test fun `validate unclosed choice tabstop reports Invalid with line and column`</ID>
+    <ID>FunctionNameMaxLength:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$@Test fun `deriveClassName extracts file name without extension`</ID>
+    <ID>FunctionNameMaxLength:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$@Test fun `derivePackageName extracts java package from standard src main java path`</ID>
+    <ID>FunctionNameMaxLength:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$@Test fun `derivePackageName extracts kotlin package from standard src main kotlin path`</ID>
+    <ID>FunctionNameMaxLength:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$@Test fun `resolveVariables replaces CLIPBOARD and fallback variables`</ID>
+    <ID>FunctionNameMaxLength:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$@Test fun `resolveVariables replaces PACKAGE, CLASSNAME, and CURRENT_YEAR`</ID>
+    <ID>FunctionNameMaxLength:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$@Test fun `resolveVariables replaces TM_FILENAME and TM_FILENAME_BASE`</ID>
+    <ID>FunctionNameMaxLength:TemplatesValidTest.kt:TemplatesValidTest$@Test fun `Agent-Vorlage ist gueltig, Skripte existieren und der Store lehnt sie ab`</ID>
+    <ID>FunctionNameMaxLength:TemplatesValidTest.kt:TemplatesValidTest$@Test fun `Farbschema Icons Sprachpaket sind lesbar`</ID>
+    <ID>FunctionNameMaxLength:TemplatesValidTest.kt:TemplatesValidTest$@Test fun `alle Vorlagen haben gueltige Manifeste`</ID>
+    <ID>FunctionNameMaxLength:TemplatesValidTest.kt:TemplatesValidTest$@Test fun `deklarative Vorlagen bestehen die Store-Pruefung, Code-Plugin nicht`</ID>
+    <ID>FunctionNameMaxLength:TestCommandBuilderTest.kt:TestCommandBuilderTest$@Test fun defaultRootProjectCommandWithoutFilter</ID>
+    <ID>FunctionNameMaxLength:TestCommandBuilderTest.kt:TestCommandBuilderTest$@Test fun specificModuleCommandWithoutFilter</ID>
+    <ID>FunctionNameMaxLength:TestCommandBuilderTest.kt:TestCommandBuilderTest$@Test fun specificModuleWithReleaseVariant</ID>
+    <ID>FunctionNameMaxLength:TextMatePluginsValidTest.kt:TextMatePluginsValidTest$@Test fun `15 TextMate-Plugins sind gueltig und deklarativ`</ID>
+    <ID>FunctionNameMaxLength:TextMatePluginsValidTest.kt:TextMatePluginsValidTest$@Test fun `Farbschema-Vorlage verweist auf ein vorhandenes TextMate-Theme`</ID>
+    <ID>FunctionNameMaxLength:ThemePluginsValidTest.kt:ThemePluginsValidTest$@Test fun `alle 15 Theme-Plugins sind gueltig und deklarativ`</ID>
+    <ID>FunctionNameMaxLength:ToolPluginsValidTest.kt:ToolPluginsValidTest$@Test fun `Bundles verweisen nur auf vorhandene Plugins`</ID>
+    <ID>FunctionNameMaxLength:ToolPluginsValidTest.kt:ToolPluginsValidTest$@Test fun `Formatierer und Language Server deklarieren erlaubte Voraussetzungen`</ID>
+    <ID>FunctionNameMaxLength:ToolPluginsValidTest.kt:ToolPluginsValidTest$@Test fun `Formatierer und Language Server verwenden keine Skripte oder Fremdpfade`</ID>
+    <ID>FunctionNameMaxLength:ToolPluginsValidTest.kt:ToolPluginsValidTest$@Test fun `Werkzeug-Plugins haben shell-Berechtigung, Skript und python als Voraussetzung`</ID>
+    <ID>FunctionNameMaxLength:ToolPluginsValidTest.kt:ToolPluginsValidTest$@Test fun `alle Tool-Plugins sind gueltig, deklarativ und haben Publisher codeforge`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `Kommando-Platzhalter bleiben einzelne Argumente`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `Store erlaubt nur Freigabeliste und keine tools`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `Werkzeug-IDs bleiben ueber Plugins hinweg erhalten`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `allowTools erlaubt Skripte, aber weder Plugin-Code noch native Dateien`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `prompt mit Dropdown-Optionen und Textfeld wird geparst und zerlegt`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `tools ohne shell-Berechtigung werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `tools und requires werden geparst`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `ungueltige Optionen werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$@Test fun `ungueltige Paketnamen und Manager werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:UserToolsTest.kt:UserToolsTest$@Test fun `Nutzer-Werkzeuge werden ergaenzt`</ID>
+    <ID>FunctionNameMaxLength:UserToolsTest.kt:UserToolsTest$@Test fun `ausgeschaltete Formatierer entfallen, Plugin gewinnt bei gleicher ID`</ID>
+    <ID>FunctionNameMaxLength:VsCodeSnippetJsonSerializerTest.kt:VsCodeSnippetJsonSerializerTest$@Test fun `deserialize parses multiline array body snippet`</ID>
+    <ID>FunctionNameMaxLength:VsCodeSnippetJsonSerializerTest.kt:VsCodeSnippetJsonSerializerTest$@Test fun `deserialize parses single string body snippet`</ID>
+    <ID>FunctionNameMaxLength:VsCodeSnippetJsonSerializerTest.kt:VsCodeSnippetJsonSerializerTest$@Test fun `serialize and deserialize roundtrip preserves snippets`</ID>
+    <ID>FunctionNameMaxLength:X2cModelsTest.kt:X2cModelsTest$@Test fun `ComposeScanResult qualifies for auto prompt only if android and layouts exist and no compose`</ID>
+    <ID>FunctionNameMaxLength:X2cModelsTest.kt:X2cModelsTest$@Test fun `X2cFileResult tracks status and todos`</ID>
+    <ID>FunctionNameMaxLength:X2cModelsTest.kt:X2cModelsTest$@Test fun `X2cPlan correctly holds classifications and counts`</ID>
+    <ID>FunctionNameMaxLength:X2cModelsTest.kt:X2cModelsTest$@Test fun `X2cProgress sealed states represent migration lifecycle`</ID>
+    <ID>FunctionNameMaxLength:X2cModelsTest.kt:X2cModelsTest$@Test fun `default X2cOptions has safe values`</ID>
+    <ID>FunctionNameMinLength:ContributionRepository.kt:ActiveContributions.Companion$fun of: ActiveContributions</ID>
+    <ID>FunctionNameMinLength:DeclarativeOnlyTest.kt:DeclarativeOnlyTest$private fun m</ID>
+    <ID>FunctionNameMinLength:ExtensionPacksTest.kt:ExtensionPacksTest$private fun p</ID>
+    <ID>FunctionNameMinLength:GitModelsTest.kt:GitModelsTest$private fun c</ID>
+    <ID>FunctionNameMinLength:LspSettingsRepository.kt:LspSettingsRepository$fun of: LspServerSettings</ID>
+    <ID>FunctionNameMinLength:PluginManifest.kt:RequirementManager.Companion$fun of: RequirementManager?</ID>
+    <ID>LongMethod:AaptBadgingParser.kt:AaptBadgingParser$fun parse: ApkDetailedMetadata</ID>
+    <ID>LongMethod:AiPatchParser.kt:AiPatchParser$fun parseProposedChanges: List&lt;AiProposedChange></ID>
+    <ID>LongMethod:ApkComparator.kt:ApkComparator$fun compare: ApkComparisonResult</ID>
+    <ID>LongMethod:ApkInstallStatusMapper.kt:ApkInstallStatusMapper$fun mapStatusCode: ApkInstallStatus</ID>
+    <ID>LongMethod:ApkReportFormatter.kt:ApkReportFormatter$fun formatAnalysisToMarkdown: String</ID>
+    <ID>LongMethod:ApkZipAnalyzer.kt:ApkZipAnalyzer$@Throws(ApkAnalysisException::class) fun analyze: ApkAnalysisResult</ID>
+    <ID>LongMethod:ApksignerOutputParser.kt:ApksignerOutputParser$fun parse: ApkVerificationResult</ID>
+    <ID>LongMethod:AxmlManifestParser.kt:AxmlManifestParser$private fun parseStream: ApkDetailedMetadata?</ID>
+    <ID>LongMethod:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$fun parseNodeContent: DependencyNode</ID>
+    <ID>LongMethod:GradleOutputParser.kt:GradleOutputParser.Session$fun feedLine: List&lt;BuildProblem></ID>
+    <ID>LongMethod:KeytoolOutputParser.kt:KeytoolOutputParser$fun parse: ParsedKeystore</ID>
+    <ID>LongMethod:PluginManifestParser.kt:PluginManifestParser$private fun parseContributes: Contributes</ID>
+    <ID>LongMethod:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
+    <ID>LoopWithTooManyJumpStatements:ApkMetadataParser.kt:ApkMetadataParser$for</ID>
+    <ID>LoopWithTooManyJumpStatements:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$for</ID>
+    <ID>LoopWithTooManyJumpStatements:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$for</ID>
+    <ID>LoopWithTooManyJumpStatements:JUnitXmlParser.kt:JUnitXmlParser$for</ID>
+    <ID>LoopWithTooManyJumpStatements:KeytoolOutputParser.kt:KeytoolOutputParser$for</ID>
+    <ID>LoopWithTooManyJumpStatements:SnippetModels.kt:SnippetParser$while</ID>
+    <ID>MatchingDeclarationName:EditorRepositories.kt:FileSystemRepository</ID>
+    <ID>MatchingDeclarationName:TerminalModels.kt:TerminalSessionState</ID>
+    <ID>MultilineRawStringIndentation:IconThemeFileParserTest.kt:IconThemeFileParserTest$""" {"file":"file.png","folder":"d.png","folderOpen":"do.png", "fileExtensions":{"kt":"kotlin.png",".tar.gz":"archive.png","gz":"gz.png"}, "fileNames":{"Build.Gradle.KTS":"gradle.png"}, "folderNames":{"src":"src.png"},"folderNamesOpen":{"src":"src-open.png"}} """</ID>
+    <ID>MultilineRawStringIndentation:PluginManifestParserTest.kt:PluginManifestParserTest$""" {"id":"p.one","name":"One","version":"2.1","apiVersion":2,"publisher":"me","permissions":["commands"], "contributes":{ "colorThemes":[{"id":"t","label":"T","uiTheme":"dark","path":"themes/t.json"}], "iconThemes":[{"id":"i","label":"I","path":"icons/i.json"}], "languagePacks":[{"locale":"fr","label":"Français","path":"l/fr.json"}], "grammars":[{"languageId":"zig","scopeName":"source.zig","path":"g/zig.json","extensions":["zig"]}], "snippets":[{"languageId":"kotlin","path":"s/k.json"}], "lspServers":[{"id":"zls","languages":["zig"],"command":["${'$'}{pluginDir}/zls"]}], "extensionPack":["p.two"]}} """</ID>
+    <ID>MultilineRawStringIndentation:VsCodeSnippetJsonSerializerTest.kt:VsCodeSnippetJsonSerializerTest$""" { "For Loop": { "prefix": "fori", "body": [ "for (int ${'$'}{1:i} = 0; ${'$'}{1:i} &lt; ${'$'}{2:count}; ${'$'}{1:i}++) {", " ${'$'}0", "}" ], "description": "Standard for loop", "scope": "java" } } """</ID>
+    <ID>MultilineRawStringIndentation:VsCodeSnippetJsonSerializerTest.kt:VsCodeSnippetJsonSerializerTest$""" { "Print to console": { "prefix": "log", "body": "android.util.Log.d(\"TAG\", \"${'$'}1\");", "description": "Log output to android logcat", "scope": "java,kotlin" } } """</ID>
+    <ID>NestedBlockDepth:ApkReportFormatter.kt:ApkReportFormatter$fun formatAnalysisToMarkdown: String</ID>
+    <ID>NestedBlockDepth:AxmlManifestParser.kt:AxmlManifestParser$private fun parseStream: ApkDetailedMetadata?</ID>
+    <ID>NestedBlockDepth:GitConflict.kt:ConflictParser$fun resolve: String</ID>
+    <ID>NestedBlockDepth:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$fun resolve: File?</ID>
+    <ID>NestedBlockDepth:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
+    <ID>OutdatedDocumentation:AptPackageModels.kt:AptPackage</ID>
+    <ID>OutdatedDocumentation:BreakpointRepository.kt:BreakpointRepository$suspend fun adjustBreakpointsOnEdit</ID>
+    <ID>OutdatedDocumentation:EditorRepositories.kt:FileSystemRepository$suspend fun rename: Result&lt;Unit></ID>
+    <ID>OutdatedDocumentation:GitRepository.kt:GitRepository$suspend fun merge: Result&lt;GitMergeResult></ID>
+    <ID>OutdatedDocumentation:GitRepository.kt:GitRepository$suspend fun rebaseControl: Result&lt;GitMergeResult></ID>
+    <ID>OutdatedDocumentation:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$fun parse: DependencyInsight</ID>
+    <ID>OutdatedDocumentation:HunkPatcher.kt:HunkPatcher$fun apply: String</ID>
+    <ID>OutdatedDocumentation:WorkspaceRepository.kt:WorkspaceRepository$suspend fun updateModifiedFiles: Result&lt;Unit></ID>
+    <ID>ReturnCount:AiPatchParser.kt:AiPatchParser$fun parseProposedChanges: List&lt;AiProposedChange></ID>
+    <ID>ReturnCount:ApkMetadataParser.kt:ApkMetadataParser$private fun extractArrayContent: String?</ID>
+    <ID>ReturnCount:AxmlManifestParser.kt:AxmlManifestParser$private fun parseStream: ApkDetailedMetadata?</ID>
+    <ID>ReturnCount:ColorThemeFile.kt:ColorThemeFileParser$fun parseHex: Long?</ID>
+    <ID>ReturnCount:DeclarativeOnly.kt:DeclarativeOnly$fun violation: String?</ID>
+    <ID>ReturnCount:FormatModels.kt:EditorConfigResolver$internal fun matchesPattern: Boolean</ID>
+    <ID>ReturnCount:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$fun parseNodeContent: DependencyNode</ID>
+    <ID>ReturnCount:GradleOutputParser.kt:GradleOutputParser.Session$fun feedLine: List&lt;BuildProblem></ID>
+    <ID>ReturnCount:GradleRunSettings.kt:GradleRunSettings$fun addCustomFlag: GradleRunSettings</ID>
+    <ID>ReturnCount:IconThemeFile.kt:IconThemeFile$fun forFile: String?</ID>
+    <ID>ReturnCount:IconThemeFile.kt:IconThemeFile$fun forFolder: String?</ID>
+    <ID>ReturnCount:LogcatModels.kt:LogcatFilter$fun matches: Boolean</ID>
+    <ID>ReturnCount:LogcatParser.kt:LogcatParser$fun parseLine: ParseLineResult</ID>
+    <ID>ReturnCount:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$fun resolve: File?</ID>
+    <ID>ReturnCount:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
+    <ID>StringLiteralDuplication:AaptBadgingParser.kt:AaptBadgingParser$"exported='true'"</ID>
+    <ID>StringLiteralDuplication:AxmlManifestParser.kt:AxmlManifestParser$"exported"</ID>
+    <ID>StringLiteralDuplication:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$"\\---"</ID>
+    <ID>StringLiteralDuplication:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$"FAILED"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleLogLevel.DEBUG$"--debug"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleLogLevel.INFO$"--info"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleLogLevel.QUIET$"--quiet"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleLogLevel.WARN$"--warn"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleRunSettings$"--continue"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleRunSettings$"--no-build-cache"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleRunSettings$"--no-daemon"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleRunSettings$"--offline"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleRunSettings$"--parallel"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleRunSettings$"--profile"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleRunSettings$"--rerun-tasks"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleStacktrace.FULL$"--full-stacktrace"</ID>
+    <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleStacktrace.SHORT$"--stacktrace"</ID>
+    <ID>StringLiteralDuplication:PluginManifestParser.kt:PluginManifestParser$"command"</ID>
+    <ID>StringLiteralDuplication:PluginManifestParser.kt:PluginManifestParser$"description"</ID>
+    <ID>StringLiteralDuplication:PluginManifestParser.kt:PluginManifestParser$"label"</ID>
+    <ID>StringLiteralDuplication:PluginManifestParser.kt:PluginManifestParser$"timeoutSeconds"</ID>
+    <ID>StringLiteralDuplication:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$"$sub/$pkgPath/${frame.fileName}"</ID>
+    <ID>StringLiteralDuplication:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$"build"</ID>
+    <ID>StringLiteralDuplication:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$"src/main/java"</ID>
+    <ID>StringLiteralDuplication:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$"src/main/kotlin"</ID>
+    <ID>StringLiteralDuplication:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$"src/test/java"</ID>
+    <ID>StringLiteralDuplication:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$"src/test/kotlin"</ID>
+    <ID>StringShouldBeRawString:AgentAttachment.kt:AgentAttachment$"[Auszug: $path, Zeile ${startLine ?: 1}${endLine?.takeIf { it != startLine }?.let { "-$it" }.orEmpty()}]\n```\n$clipped\n```"</ID>
+    <ID>StringShouldBeRawString:AiPatchParserTest.kt:AiPatchParserTest$"fun main() {\n println(\"new\")\n}"</ID>
+    <ID>StringShouldBeRawString:AiPatchParserTest.kt:AiPatchParserTest$"fun main() {\n println(\"old\")\n}"</ID>
+    <ID>StringShouldBeRawString:AiSanitizer.kt:AiSanitizer$text.take(maxChars) + "\n\n[... Truncated ${text.length - maxChars} characters due to context limit ...]\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\no\n||||||| base\nb\n=======\nt\n>>>>>>> x\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"a\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nx\n=======\ny\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"a\r\nB\r\nc\r\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"a\r\nb\r\nc\r\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"diff --git a/n b/n\n--- /dev/null\n+++ b/n\n@@ -0,0 +1,2 @@\n+a\n+b\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"diff --git a/x b/x\n--- a/x\n+++ b/x\n@@ -1,2 +1,2 @@\n a\n-b\n\\ No newline at end of file\n+b\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"diff --git a/x b/x\n--- a/x\n+++ b/x\n@@ -1,3 +1,3 @@\n a\n-b\n+B\n c\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"head\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nours1\nours2\n=======\ntheirs1\n>>>>>>> feature\nmid\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nA\n=======\nB\n>>>>>>> feature\ntail\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"head\nmy custom resolution line\nmid\nA\ntail\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"head\nours1\nours2\nmid\nB\nA\ntail\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"head\ntheirs1\nmid\nA\nB\ntail\n"</ID>
+    <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"some code\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nours\n=======\ntheirs\n>>>>>>> branch\n"</ID>
+    <ID>StringShouldBeRawString:GradleOutputParser.kt:GradleOutputParser.Companion$"\u001B\\[[;?0-9]*[a-zA-Z]|\u001B\\].*?\\u0007"</ID>
+    <ID>StringShouldBeRawString:LogcatParserTest.kt:LogcatParserTest$"\"status\": \"ok\""</ID>
+    <ID>StringShouldBeRawString:PluginManifestParser.kt:PluginManifestParser$"\\d+(\\.\\d+)*([-+][A-Za-z0-9.]+)?"</ID>
+    <ID>StringShouldBeRawString:SnippetParserTest.kt:SnippetParserTest$"package \$PACKAGE\nclass \$CLASSNAME {\n // Year: \$CURRENT_YEAR\n}"</ID>
+    <ID>StringShouldBeRawString:SnippetParserTest.kt:SnippetParserTest$"val cost = \\\$100\nval path = \"C:\\\\test\""</ID>
+    <ID>StringShouldBeRawString:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$"package \$PACKAGE\n\n// Copyright \$CURRENT_YEAR\nclass \$CLASSNAME"</ID>
+    <ID>StringShouldBeRawString:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$"package com.codeforge.domain\n\n// Copyright 2026\nclass User"</ID>
+    <ID>StringShouldBeRawString:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$"val data = \"\$CLIPBOARD\"\nval fallback = \${UNKNOWN_VAR:default_val}"</ID>
+    <ID>StringShouldBeRawString:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$"val data = \"pasted_text\"\nval fallback = default_val"</ID>
+    <ID>StringShouldBeRawString:TestCommandBuilderTest.kt:TestCommandBuilderTest$":core:domain:testDebugUnitTest --tests \"SampleParameterizedTest.test*[\\\"param\\\"]\""</ID>
+    <ID>StringShouldBeRawString:TestCommandBuilderTest.kt:TestCommandBuilderTest$":feature:editor:testDebugUnitTest --tests \"com.example.FooTest.testA\" --tests \"com.example.BarTest.testB\""</ID>
+    <ID>StringShouldBeRawString:TextMatePluginsValidTest.kt:TextMatePluginsValidTest$"com\\.codeforge\\.plugin\\.[a-z0-9-]+\\.theme"</ID>
+    <ID>StringShouldBeRawString:ThemePluginsValidTest.kt:ThemePluginsValidTest$"com\\.codeforge\\.plugin\\.[a-z0-9-]+\\.theme"</ID>
+    <ID>StringShouldBeRawString:ToolPluginsValidTest.kt:ToolPluginsValidTest$"com\\.codeforge\\.plugin\\.[a-z0-9-]+\\.(formatter|lsp|bundle|tool)"</ID>
+    <ID>StringShouldBeRawString:VsCodeSnippetJsonSerializerTest.kt:VsCodeSnippetJsonSerializerTest$"android.util.Log.d(\"TAG\", \"\$1\");"</ID>
+    <ID>ThrowsCount:ApkZipAnalyzer.kt:ApkZipAnalyzer$@Throws(ApkAnalysisException::class) fun analyze: ApkAnalysisResult</ID>
+    <ID>ThrowsCount:PluginManifestParser.kt:PluginManifestParser$private fun parseContributes: Contributes</ID>
+    <ID>TooGenericExceptionCaught:ApkZipAnalyzer.kt:ApkZipAnalyzer$e: Exception</ID>
+    <ID>TooManyFunctions:AiRepository.kt:AiRepository</ID>
+    <ID>TooManyFunctions:DebugRepository.kt:DebugRepository</ID>
+    <ID>TooManyFunctions:GitRepository.kt:GitRepository</ID>
+    <ID>TooManyFunctions:LspClientRepository.kt:LspClientRepository</ID>
+    <ID>TooManyFunctions:SigningRepository.kt:SigningRepository</ID>
+    <ID>TrimMultilineRawString:GitModelsTest.kt:GitModelsTest$"""diff --git a/src/A.kt b/src/A.kt index 111..222 100644 --- a/src/A.kt +++ b/src/A.kt @@ -1,3 +1,4 @@ class A line1 -old +new +extra line3 \ No newline at end of file diff --git a/img.png b/img.png index 1..2 100644 Binary files a/img.png and b/img.png differ diff --git a/New.kt b/New.kt new file mode 100644 --- /dev/null +++ b/New.kt @@ -0,0 +1,1 @@ +hello """</ID>
+    <ID>TrimMultilineRawString:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$"""{"lspServers":[{"id":"a","languages":["c"],"command":["clangd"]}], "requires":[{"manager":"npm","name":"left-pad"}]}"""</ID>
+    <ID>TrimMultilineRawString:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$"""{"lspServers":[{"id":"a","languages":["c"],"command":["clangd"]}], "requires":[{"manager":"pkg","name":"clang","check":"clangd"}]}"""</ID>
+    <ID>TrimMultilineRawString:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$"""{"tools":[{"id":"gen","command":["x"],"prompt":{"label":"Lizenz","default":"mit", "options":[{"value":"mit","label":"MIT"},{"value":"gplv3","label":"GPL-3.0"}],"textLabel":"Name"}}]}"""</ID>
+    <ID>TrimMultilineRawString:ToolsAndRequirementsTest.kt:ToolsAndRequirementsTest$"""{"tools":[{"id":"run","label":"Run","command":["python3","${'$'}{pluginDir}/t.py","${'$'}{projectDir}","${'$'}{input}"], "prompt":{"label":"Modus","default":"check"},"confirm":"Sicher?","timeoutSeconds":60}], "requires":[{"manager":"pkg","name":"python","check":"python3"},{"manager":"npm","name":"@scope/pkg"}]}"""</ID>
+    <ID>UnderscoresInNumericLiterals:AaptBadgingParserTest.kt:AaptBadgingParserTest$10203L</ID>
+    <ID>UnderscoresInNumericLiterals:ApkMetadataParserTest.kt:ApkMetadataParserTest$30000L</ID>
+    <ID>UnderscoresInNumericLiterals:LogcatParserTest.kt:LogcatParserTest$32448</ID>
+    <ID>UnderscoresInNumericLiterals:WordDiff.kt:WordDiff$20000</ID>
+    <ID>UnderscoresInNumericLiterals:WorkspaceRepository.kt:WorkspaceRepository$10000</ID>
+    <ID>UnnecessaryParentheses:AiPatchParser.kt:AiPatchParser$(currentFileContent ?: "")</ID>
+    <ID>UnnecessaryParentheses:ApkComparator.kt:ApkComparator$(delta.toDouble() / baseSecSize.toDouble())</ID>
+    <ID>UnnecessaryParentheses:ApkComparator.kt:ApkComparator$(totalDeltaBytes.toDouble() / baseFileSize.toDouble())</ID>
+    <ID>UnnecessaryParentheses:ApkZipAnalyzer.kt:ApkZipAnalyzer$(compSize.toDouble() / totalCompressed.toDouble())</ID>
+    <ID>UnnecessaryParentheses:ApkZipAnalyzer.kt:ApkZipAnalyzer$(uncompSize.toDouble() / totalUncompressed.toDouble())</ID>
+    <ID>UnnecessaryParentheses:AxmlManifestParser.kt:AxmlManifestParser$(flags and UTF8_FLAG)</ID>
+    <ID>UnnecessaryParentheses:FormatModels.kt:EditorConfigResolver$(it == "tab")</ID>
+    <ID>UnnecessaryParentheses:FormatModels.kt:EditorConfigResolver$(it == "true")</ID>
+    <ID>UnnecessaryParentheses:GitConflict.kt:ConflictParser$(i + 1)</ID>
+    <ID>UnnecessaryParentheses:PluginManifestParser.kt:PluginManifestParser$(url == null)</ID>
+    <ID>UnusedParameter:AxmlManifestParser.kt:AxmlManifestParser$chunkSize: Int</ID>
+    <ID>UnusedParameter:AxmlManifestParser.kt:AxmlManifestParser$headerSize: Int</ID>
+  </CurrentIssues>
+</SmellBaseline>

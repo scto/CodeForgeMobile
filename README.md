@@ -168,7 +168,7 @@ git clone https://github.com/scto/CodeForgeMobile.git
 cd CodeForgeMobile
 ./gradlew :app:assembleDebug     # never run so far – expect errors
 ./gradlew ktlintCheck
-./gradlew detekt                 # Regeln: config/detekt/detekt.yml, Berichte in <modul>/build/reports/detekt
+./gradlew detekt                 # Gate: neue Verstöße brechen ab; Regeln config/detekt/detekt.yml, Bestand config/detekt/baseline/
 ```
 
 ### Termux Bootstrap & Large Packages (`> 30 MiB`)

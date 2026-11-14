@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AlsoCouldBeApply:FileTreeBuilderTest.kt:FileTreeBuilderTest$also</ID>
+    <ID>BracesOnIfStatements:FileTreeBuilder.kt:FileTreeBuilder$if</ID>
+    <ID>BracesOnIfStatements:FileTreeScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:FileTreeScreen.kt:if</ID>
+    <ID>BracesOnIfStatements:FileTreeViewModel.kt:FileTreeViewModel$if</ID>
+    <ID>BracesOnWhenStatements:FileTreeBuilder.kt:FileTreeBuilder$when</ID>
+    <ID>BracesOnWhenStatements:FileTreeScreen.kt:when</ID>
+    <ID>BracesOnWhenStatements:FileTreeViewModel.kt:FileTreeViewModel$when</ID>
+    <ID>CascadingCallWrapping:FileTreeBuilder.kt:FileTreeBuilder$forEach { scripts += "gradle" to it }</ID>
+    <ID>CascadingCallWrapping:FileTreeBuilder.kt:FileTreeBuilder$forEach { scripts += name to it }</ID>
+    <ID>CascadingCallWrapping:FileTreeBuilder.kt:FileTreeBuilder$forEach { scripts += root.name to it }</ID>
+    <ID>CascadingCallWrapping:FileTreeBuilder.kt:FileTreeBuilder$map { s.name to it }</ID>
+    <ID>CascadingCallWrapping:GradleModules.kt:GradleModules$firstOrNull { it.isFile }</ID>
+    <ID>CascadingCallWrapping:GradleModules.kt:GradleModules$joinToString("\n") { it.substringBefore("//") }</ID>
+    <ID>ClassOrdering:FileTreeOptions.kt:FileTreeOptions$fun toProto: com.codeforge.core.datastore.proto.FileTreeConfig</ID>
+    <ID>ClassOrdering:FileTreeViewModel.kt:FileTreeViewModel$Companion</ID>
+    <ID>CognitiveComplexMethod:FileTreeBuilder.kt:FileTreeBuilder$private fun appendModulesView</ID>
+    <ID>CognitiveComplexMethod:FileTreeScreen.kt:@Composable private fun FileTreeNodeRow</ID>
+    <ID>CognitiveComplexMethod:FileTreeScreen.kt:@Composable private fun FileTreeToolDialog</ID>
+    <ID>CognitiveComplexMethod:FileTreeSorter.kt:FileTreeSorter$internal fun compareNames: Int</ID>
+    <ID>CognitiveComplexMethod:FileTreeViewModel.kt:FileTreeViewModel$private fun confirmAction</ID>
+    <ID>CognitiveComplexMethod:GradleModules.kt:GradleModules$fun parse: List&lt;String></ID>
+    <ID>CyclomaticComplexMethod:FileTreeBuilder.kt:FileTreeBuilder$private fun appendModulesView</ID>
+    <ID>CyclomaticComplexMethod:FileTreeScreen.kt:@Composable private fun FileTreeNodeRow</ID>
+    <ID>CyclomaticComplexMethod:GradleModules.kt:GradleModules$fun parse: List&lt;String></ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeBuilder.kt:FileTreeBuilder$private fun otherEntries: List&lt;Pair&lt;String, File>></ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeBuilder.kt:FileTreeBuilder$private fun sourceSets: List&lt;File></ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeScreen.kt:@Composable private fun FileTreeOptionsMenu</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeScreen.kt:@Composable private fun FileTreeToolsMenu</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeScreen.kt:@Composable private fun MenuChoice</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeScreen.kt:@OptIn(ExperimentalFoundationApi::class) /** Farbe des Namens nach Git-Status: Konflikt rot, geändert amber, neu/hinzugefügt grün; Ordner mit Änderungen amber. */ @Composable private fun gitNameColor: Color</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeScreen.kt:@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class) @Composable private fun ToolPromptFields</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeViewModel.kt:FileTreeViewModel$private fun bumpRefreshToken</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeViewModel.kt:FileTreeViewModel$private fun handleToolEvent: Boolean</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeViewModel.kt:FileTreeViewModel$private fun prepareRun</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeViewModel.kt:FileTreeViewModel$private fun rebuildEntries</ID>
+    <ID>DocumentationOverPrivateFunction:FileTreeViewModel.kt:FileTreeViewModel$private fun refreshGitStatus</ID>
+    <ID>DocumentationOverPrivateProperty:FileTreeBuilder.kt:FileTreeBuilder$/** In der Projekt-/Modul-Ansicht ausgeblendete Build- und IDE-Verzeichnisse. */ private val PROJECT_HIDDEN_DIRS = setOf("build", ".gradle", ".idea", ".git", ".kotlin", ".cxx", ".externalNativeBuild")</ID>
+    <ID>ExpressionBodySyntax:FileTreeFormatters.kt:FileTreeFormatters$return when { count &lt;= 0 -> Res.string(R.string.filetree_keine_eintraege) count == 1 -> Res.string(R.string.filetree_ein_eintrag) else -> Res.string(R.string.filetree_eintraege, count) }</ID>
+    <ID>FunctionNameMaxLength:FileTreeBuilderTest.kt:FileTreeBuilderTest$@Test fun `children appear only for expanded directories`</ID>
+    <ID>FunctionNameMaxLength:FileTreeBuilderTest.kt:FileTreeBuilderTest$@Test fun `grouped sort puts hidden folders, folders, hidden files, files in that order`</ID>
+    <ID>FunctionNameMaxLength:FileTreeBuilderTest.kt:FileTreeBuilderTest$@Test fun `hidden entries and cfm folder are filtered`</ID>
+    <ID>FunctionNameMaxLength:FileTreeBuilderTest.kt:FileTreeBuilderTest$@Test fun `mixed sort is one case-insensitive list`</ID>
+    <ID>FunctionNameMaxLength:FileTreeBuilderTest.kt:FileTreeBuilderTest$@Test fun `module view groups manifests, sources, res and gradle scripts`</ID>
+    <ID>FunctionNameMaxLength:FileTreeBuilderTest.kt:FileTreeBuilderTest$@Test fun `project view hides build dirs and marks modules`</ID>
+    <ID>FunctionNameMaxLength:FileTreeFormattersTest.kt:FileTreeFormattersTest$@Test fun testExtractFilePropertiesForDirectory</ID>
+    <ID>FunctionNameMaxLength:FileTreeFormattersTest.kt:FileTreeFormattersTest$@Test fun testExtractFilePropertiesForFile</ID>
+    <ID>FunctionNameMaxLength:FileTreeGitStatusTest.kt:FileTreeGitStatusTest$@Test fun `absolute Pfade und Eltern-Ordner`</ID>
+    <ID>FunctionNameMaxLength:FileTreeGitStatusTest.kt:FileTreeGitStatusTest$@Test fun `wichtigster Status gewinnt, gelöschte Dateien werden ignoriert`</ID>
+    <ID>FunctionNameMaxLength:ToolPromptInputTest.kt:ToolPromptInputTest$@Test fun `dropdown prompt starts with a valid option`</ID>
+    <ID>FunctionNameMaxLength:ToolPromptInputTest.kt:ToolPromptInputTest$@Test fun `license prompt keeps the name when option is the default`</ID>
+    <ID>FunctionNameMaxLength:ToolPromptInputTest.kt:ToolPromptInputTest$@Test fun `plain text prompt keeps its default`</ID>
+    <ID>NestedBlockDepth:GradleModules.kt:GradleModules$fun parse: List&lt;String></ID>
+    <ID>ReturnCount:FileTreeFormatters.kt:FileTreeFormatters$fun formatFileSize: String</ID>
+    <ID>ReturnCount:FileTreeSorter.kt:FileTreeSorter$internal fun compareNames: Int</ID>
+    <ID>StringLiteralDuplication:FileTreeBuilder.kt:FileTreeBuilder$"gradle"</ID>
+    <ID>UnderscoresInNumericLiterals:FileTreeFormattersTest.kt:FileTreeFormattersTest$1700000000000L</ID>
+    <ID>UndocumentedPublicFunction:FileTreeOptions.kt:FileTreeOptions.Companion$fun fromProto</ID>
+    <ID>UnnecessaryParentheses:FileTreeScreen.kt:({ Text(prompt.hint) })</ID>
+    <ID>UnnecessaryParentheses:FileTreeScreen.kt:({ Text(prompt.textHint) })</ID>
+    <ID>UnusedParameter:FileTreeViewModel.kt:FileTreeViewModel$item: FileTreeTool</ID>
+  </CurrentIssues>
+</SmellBaseline>

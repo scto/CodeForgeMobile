@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:SdkManagerScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:SdkManagerScreen.kt:if</ID>
+    <ID>BracesOnWhenStatements:SdkManagerViewModel.kt:SdkManagerViewModel$when</ID>
+    <ID>ClassOrdering:SdkManagerContract.kt:SdkManagerState$/** Gewählter Eintrag des aktuellen Reiters. */ val selectedItem: ToolItem? get() = itemsOf(selectedCategory).firstOrNull { it.id == selectedId }</ID>
+    <ID>DataClassContainsFunctions:SdkManagerContract.kt:SdkManagerState$fun itemsOf: List&lt;ToolItem></ID>
+    <ID>DocumentationOverPrivateFunction:SdkManagerScreen.kt:private fun groupShape: RoundedCornerShape</ID>
+    <ID>DocumentationOverPrivateFunction:SdkManagerViewModel.kt:SdkManagerViewModel$private fun installSelected</ID>
+  </CurrentIssues>
+</SmellBaseline>

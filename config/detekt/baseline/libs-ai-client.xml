@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$else</ID>
+    <ID>BracesOnIfStatements:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$if</ID>
+    <ID>BracesOnIfStatements:OpenAiAgentWire.kt:OpenAiAgentWire.StreamAssembler$else</ID>
+    <ID>BracesOnIfStatements:OpenAiAgentWire.kt:OpenAiAgentWire.StreamAssembler$if</ID>
+    <ID>BracesOnWhenStatements:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$when</ID>
+    <ID>BracesOnWhenStatements:CompositeAiProvider.kt:CompositeAiProvider$when</ID>
+    <ID>BracesOnWhenStatements:SseEventParser.kt:SseEventParser$when</ID>
+    <ID>CascadingCallWrapping:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$delta["text"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotEmpty() } ?.let { listOf(LlmStreamEvent.TextDelta(it)) } ?: emptyList()</ID>
+    <ID>CascadingCallWrapping:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$root["message"]?.jsonObject?.get("usage")?.jsonObject?.get("input_tokens")?.jsonPrimitive?.intOrNull ?.let { inputTokens = it; listOf(LlmStreamEvent.Usage(inputTokens, outputTokens)) } ?: emptyList()</ID>
+    <ID>CascadingCallWrapping:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$root["usage"]?.jsonObject?.get("output_tokens")?.jsonPrimitive?.intOrNull ?.let { outputTokens = it; listOf(LlmStreamEvent.Usage(inputTokens, outputTokens)) } ?: emptyList()</ID>
+    <ID>ClassOrdering:GeminiModelCheckTest.kt:GeminiModelCheckTest$private val available = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-preview-tts", "embedding-001")</ID>
+    <ID>CognitiveComplexMethod:AgentSseTransport.kt:AgentSseTransport$fun stream: Flow&lt;LlmStreamEvent></ID>
+    <ID>CognitiveComplexMethod:AnthropicClient.kt:AnthropicClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>CognitiveComplexMethod:GeminiAgentWire.kt:GeminiAgentWire$private fun content: JsonObject?</ID>
+    <ID>CognitiveComplexMethod:GeminiClient.kt:GeminiClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>CognitiveComplexMethod:OpenAiAgentWire.kt:OpenAiAgentWire$private fun messages: List&lt;JsonObject></ID>
+    <ID>CognitiveComplexMethod:OpenAiAgentWire.kt:OpenAiAgentWire.StreamAssembler$override fun finish: List&lt;LlmStreamEvent></ID>
+    <ID>CognitiveComplexMethod:OpenAiClient.kt:OpenAiClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>CollapsibleIfStatements:AnthropicClient.kt:AnthropicClient$if (responseCode == 429 || responseCode in 500..599) { if (attempts &lt; maxAttempts) { connection.disconnect() delay(delayMs) delayMs *= 2 continue } }</ID>
+    <ID>CollapsibleIfStatements:GeminiClient.kt:GeminiClient$if (responseCode == 429 || responseCode in 500..599) { if (attempts &lt; maxAttempts) { connection.disconnect() delay(delayMs) delayMs *= 2 continue } }</ID>
+    <ID>CollapsibleIfStatements:OpenAiClient.kt:OpenAiClient$if (responseCode == 429 || responseCode in 500..599) { if (attempts &lt; maxAttempts) { connection.disconnect() delay(delayMs) delayMs *= 2 continue } }</ID>
+    <ID>CyclomaticComplexMethod:AgentSseTransport.kt:AgentSseTransport$fun stream: Flow&lt;LlmStreamEvent></ID>
+    <ID>CyclomaticComplexMethod:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$override fun accept: List&lt;LlmStreamEvent></ID>
+    <ID>CyclomaticComplexMethod:AnthropicClient.kt:AnthropicClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>CyclomaticComplexMethod:GeminiClient.kt:GeminiClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>CyclomaticComplexMethod:OpenAiClient.kt:OpenAiClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>DocumentationOverPrivateFunction:GeminiClient.kt:GeminiClient$private fun errorMessage: String</ID>
+    <ID>ExpressionBodySyntax:CompositeAiProvider.kt:CompositeAiProvider$return when (options.provider) { AiProviderType.ANTHROPIC -> Result.success(options.provider.suggestedModels) AiProviderType.OPENAI -> { val remote = openAiClient.fetchModels(options) if (remote.isSuccess &amp;&amp; remote.getOrNull()?.isNotEmpty() == true) { remote } else { Result.success(options.provider.suggestedModels) } } AiProviderType.GEMINI -> { val remote = geminiClient.fetchModels(options) if (remote.isSuccess &amp;&amp; remote.getOrNull()?.isNotEmpty() == true) { remote } else { Result.success(options.provider.suggestedModels) } } }</ID>
+    <ID>ExpressionBodySyntax:CompositeAiProvider.kt:CompositeAiProvider$return when (options.provider) { AiProviderType.ANTHROPIC -> anthropicClient.stream(messages, options) AiProviderType.OPENAI -> openAiClient.stream(messages, options) AiProviderType.GEMINI -> geminiClient.stream(messages, options) }</ID>
+    <ID>ExpressionBodySyntax:CompositeAiProvider.kt:CompositeAiProvider$return when (options.provider) { AiProviderType.ANTHROPIC -> anthropicClient.testConnection(options) AiProviderType.OPENAI -> openAiClient.testConnection(options) AiProviderType.GEMINI -> geminiClient.testConnection(options) }</ID>
+    <ID>FunctionNameMaxLength:AiHttpSupportTest.kt:AiHttpSupportTest$@Test fun `api key in an error message is never shown`</ID>
+    <ID>FunctionNameMaxLength:AiHttpSupportTest.kt:AiHttpSupportTest$@Test fun `base url is cleaned and pasted endpoints are stripped`</ID>
+    <ID>FunctionNameMaxLength:AiHttpSupportTest.kt:AiHttpSupportTest$@Test fun `blank base url falls back to the default instead of an invalid url`</ID>
+    <ID>FunctionNameMaxLength:AiHttpSupportTest.kt:AiHttpSupportTest$@Test fun `errors are told apart and keep the technical detail`</ID>
+    <ID>FunctionNameMaxLength:AiHttpSupportTest.kt:AiHttpSupportTest$@Test fun `key loses whitespace and control characters from pasting`</ID>
+    <ID>FunctionNameMaxLength:AnthropicAgentWireTest.kt:AnthropicAgentWireTest$@Test fun `Body enthaelt Werkzeuge, Werkzeugaufrufe und Ergebnisse im Anthropic-Format`</ID>
+    <ID>FunctionNameMaxLength:AnthropicAgentWireTest.kt:AnthropicAgentWireTest$@Test fun `Body ohne Werkzeuge und System laesst die Felder weg`</ID>
+    <ID>FunctionNameMaxLength:AnthropicAgentWireTest.kt:AnthropicAgentWireTest$@Test fun `Fehlerereignis, kaputte Argumente und Rauschen`</ID>
+    <ID>FunctionNameMaxLength:AnthropicAgentWireTest.kt:AnthropicAgentWireTest$@Test fun `Text und Werkzeugaufruf mit zerstueckelten Argumenten werden zusammengesetzt`</ID>
+    <ID>FunctionNameMaxLength:AnthropicAgentWireTest.kt:AnthropicAgentWireTest$@Test fun `Werkzeug ohne Argumente ergibt leeres Objekt, End-Gruende werden abgebildet`</ID>
+    <ID>FunctionNameMaxLength:GeminiAgentWireTest.kt:GeminiAgentWireTest$@Test fun `Body mit systemInstruction, Funktionsdeklarationen, Aufrufen mit Signatur und Antworten mit Funktionsnamen`</ID>
+    <ID>FunctionNameMaxLength:GeminiAgentWireTest.kt:GeminiAgentWireTest$@Test fun `Text, Gedanken werden uebersprungen, Funktionsaufruf mit Signatur, Usage und Ende`</ID>
+    <ID>FunctionNameMaxLength:GeminiModelCheckTest.kt:GeminiModelCheckTest$@Test fun `fehlendes Modell nennt Alternativen ohne TTS`</ID>
+    <ID>FunctionNameMaxLength:GeminiModelCheckTest.kt:GeminiModelCheckTest$@Test fun `leere Liste oder leeres Modell fuehrt nicht zu einer Fehlermeldung`</ID>
+    <ID>FunctionNameMaxLength:GeminiModelCheckTest.kt:GeminiModelCheckTest$@Test fun `vorhandenes Modell ist in Ordnung, auch mit models-Praefix`</ID>
+    <ID>FunctionNameMaxLength:OpenAiAgentWireTest.kt:OpenAiAgentWireTest$@Test fun `Body mit Tools, tool_calls und tool-Nachrichten`</ID>
+    <ID>FunctionNameMaxLength:OpenAiAgentWireTest.kt:OpenAiAgentWireTest$@Test fun `Ende ohne DONE ueber finish, length und Fehler`</ID>
+    <ID>FunctionNameMaxLength:OpenAiAgentWireTest.kt:OpenAiAgentWireTest$@Test fun `Text und zerstueckelte parallele Werkzeugaufrufe`</ID>
+    <ID>LongMethod:AgentSseTransport.kt:AgentSseTransport$fun stream: Flow&lt;LlmStreamEvent></ID>
+    <ID>LongMethod:AnthropicClient.kt:AnthropicClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>LongMethod:GeminiClient.kt:GeminiClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>LongMethod:OpenAiClient.kt:OpenAiClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>LoopWithTooManyJumpStatements:AgentSseTransport.kt:AgentSseTransport$while</ID>
+    <ID>LoopWithTooManyJumpStatements:AiStreamFixturesTest.kt:AiStreamFixturesTest$for</ID>
+    <ID>LoopWithTooManyJumpStatements:AnthropicClient.kt:AnthropicClient$while</ID>
+    <ID>LoopWithTooManyJumpStatements:GeminiClient.kt:GeminiClient$while</ID>
+    <ID>LoopWithTooManyJumpStatements:OpenAiClient.kt:OpenAiClient$while</ID>
+    <ID>NestedBlockDepth:AiStreamFixturesTest.kt:AiStreamFixturesTest$@Test fun testGeminiFixtureParsing</ID>
+    <ID>OutdatedDocumentation:OpenAiAgentWire.kt:OpenAiAgentWire$fun buildBody: JsonObject</ID>
+    <ID>ReturnCount:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$override fun accept: List&lt;LlmStreamEvent></ID>
+    <ID>ReturnCount:GeminiAgentWire.kt:GeminiAgentWire.StreamAssembler$override fun accept: List&lt;LlmStreamEvent></ID>
+    <ID>ReturnCount:GeminiClient.kt:GeminiClient$suspend fun testConnection: Result&lt;String></ID>
+    <ID>ReturnCount:OpenAiAgentWire.kt:OpenAiAgentWire.StreamAssembler$override fun accept: List&lt;LlmStreamEvent></ID>
+    <ID>ReturnCount:SseEventParser.kt:SseEventParser$fun parseLine: RawSseEvent?</ID>
+    <ID>StringLiteralDuplication:AnthropicAgentWire.kt:AnthropicAgentWire$"tool_use"</ID>
+    <ID>StringLiteralDuplication:GeminiAgentWire.kt:GeminiAgentWire$"parts"</ID>
+    <ID>StringLiteralDuplication:GeminiClient.kt:GeminiClient$"parts"</ID>
+    <ID>StringLiteralDuplication:OpenAiAgentWire.kt:OpenAiAgentWire$"content"</ID>
+    <ID>StringLiteralDuplication:OpenAiAgentWire.kt:OpenAiAgentWire$"function"</ID>
+    <ID>TooGenericExceptionCaught:AgentSseTransport.kt:AgentSseTransport$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:AnthropicClient.kt:AnthropicClient$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GeminiClient.kt:GeminiClient$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:OpenAiClient.kt:OpenAiClient$e: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (detekt scharf geschaltet)
+- Baseline je Modul unter `config/detekt/baseline/` (62 Dateien; Module ohne Datei haben keinen Bestand). `ignoreFailures = false`: Neue Verstöße lassen `./gradlew detekt` und `check` scheitern; Bestand abbauen mit `./gradlew :<modul>:detektBaseline` nach dem Beheben.
+- `UndocumentedPublicProperty` und `LabeledExpression` abgeschaltet (meldeten Felder von UiState-Klassen bzw. idiomatische `return@withContext`/`return@launch`). KDoc an öffentlichen Klassen und Funktionen bleibt Pflicht.
+- CI (`build-debug-apk.yml`): eigener Schritt „Statische Analyse (detekt)“.
+
 ### Geändert (Build & Run: Flag-Auswahl)
 - Gradle-Optionen als Chip-Auswahl: oben die aktiven Flags (Antippen entfernt, sonst „Keine zusätzlichen Flags“), darunter „Häufige Flags“ (`--info --debug --quiet --warn --stacktrace --full-stacktrace --profile --rerun-tasks --no-build-cache --no-daemon --parallel --offline --continue`) und „Eigenes Flag“ mit Plus-Knopf. Log-Stufen und Stacktrace-Arten schließen sich jeweils aus; eigene Flags werden geprüft (keine Shell-Sonderzeichen, Wert mit `=` anhängen).
 

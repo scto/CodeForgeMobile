@@ -1,0 +1,186 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:ComposeSourceAnalyzerImpl.kt:ComposeSourceAnalyzerImpl$if</ID>
+    <ID>BracesOnIfStatements:GitRepositoryImpl.kt:GitRepositoryImpl$else</ID>
+    <ID>BracesOnIfStatements:GitRepositoryImpl.kt:GitRepositoryImpl$if</ID>
+    <ID>BracesOnIfStatements:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$else</ID>
+    <ID>BracesOnIfStatements:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$if</ID>
+    <ID>BracesOnIfStatements:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$else</ID>
+    <ID>BracesOnIfStatements:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$if</ID>
+    <ID>BracesOnWhenStatements:GitRepositoryImpl.kt:GitRepositoryImpl$when</ID>
+    <ID>BracesOnWhenStatements:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$when</ID>
+    <ID>CascadingCallWrapping:GitRepositoryImpl.kt:GitRepositoryImpl$call()</ID>
+    <ID>CascadingCallWrapping:GitRepositoryImpl.kt:GitRepositoryImpl$setSign(false)</ID>
+    <ID>CascadingCallWrapping:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$absolutePath</ID>
+    <ID>ClassOrdering:AiRepositoryImpl.kt:AiRepositoryImpl$constructor</ID>
+    <ID>ClassOrdering:AiRepositoryImpl.kt:AiRepositoryImpl$private suspend fun restoreStoredKey</ID>
+    <ID>ClassOrdering:BuildSettingsRepositoryImpl.kt:BuildSettingsRepositoryImpl$constructor</ID>
+    <ID>ClassOrdering:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$private val prettier = FormatterContribution( id = "prettier", label = "Prettier", extensions = listOf("js", "ts"), command = listOf("prettier", "--stdin-filepath", "${'$'}{file}") )</ID>
+    <ID>ClassOrdering:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest.FakeLspClient$fun setCapabilities</ID>
+    <ID>ClassOrdering:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest.FakeLspClient$fun setServerState</ID>
+    <ID>ClassOrdering:GitSettingsRepositoryImpl.kt:GitSettingsRepositoryImpl$constructor</ID>
+    <ID>ClassOrdering:LegacyProjectMigratorImpl.kt:LegacyProjectMigratorImpl$Companion</ID>
+    <ID>ClassOrdering:LspSettingsRepositoryImpl.kt:LspSettingsRepositoryImpl$constructor</ID>
+    <ID>ClassOrdering:ProjectsDirectoryProviderImpl.kt:ProjectsDirectoryProviderImpl$/** Datei mit dem Nutzer-Override (einfache Textdatei, damit der Zugriff synchron und ohne DataStore bleibt). */ private val overrideFile: File get() = File(context.filesDir, OVERRIDE_FILE_NAME)</ID>
+    <ID>ClassOrdering:SnippetRepositoryImpl.kt:SnippetRepositoryImpl$constructor</ID>
+    <ID>ClassOrdering:SnippetRepositoryImpl.kt:SnippetRepositoryImpl.Companion$val FALLBACK_BUILTIN_SNIPPETS = listOf( Snippet( name = "fun", prefix = "fun", scope = setOf("kotlin"), description = "Function declaration", body = "fun \${1:name}(\${2:params}): \${3:Unit} {\n \$0\n}", isBuiltin = true ), Snippet( name = "main", prefix = "main", scope = setOf("kotlin"), description = "Kotlin main entry point", body = "fun main(args: Array&lt;String>) {\n \$0\n}", isBuiltin = true ), Snippet( name = "composable", prefix = "composable", scope = setOf("kotlin"), description = "Jetpack Compose @Composable function", body = "@androidx.compose.runtime.Composable\nfun \${1:Name}(\n modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier\$0\n) {\n}", isBuiltin = true ), Snippet( name = "fori", prefix = "fori", scope = setOf("java"), description = "For loop with index", body = "for (int \${1:i} = 0; \${1:i} &lt; \${2:max}; \${1:i}++) {\n \$0\n}", isBuiltin = true ), Snippet( name = "linearlayout", prefix = "linearlayout", scope = setOf("xml"), description = "Android LinearLayout XML root", body = "&lt;LinearLayout\n xmlns:android=\"http://schemas.android.com/apk/res/android\"\n android:layout_width=\"\${1|match_parent,wrap_content|}\"\n android:layout_height=\"\${2|wrap_content,match_parent|}\"\n android:orientation=\"\${3|vertical,horizontal|}\">\n \$0\n&lt;/LinearLayout>", isBuiltin = true ) )</ID>
+    <ID>CognitiveComplexMethod:ApkInstallerRepositoryImpl.kt:ApkInstallerRepositoryImpl$override fun findApk: Result&lt;ApkMetadata></ID>
+    <ID>CognitiveComplexMethod:ApkInstallerRepositoryImpl.kt:ApkInstallerRepositoryImpl$override fun installApk: Flow&lt;ApkInstallStatus></ID>
+    <ID>CognitiveComplexMethod:ComposeSourceAnalyzerImpl.kt:ComposeSourceAnalyzerImpl$override fun findComposables: List&lt;ComposableCandidate></ID>
+    <ID>CognitiveComplexMethod:DependencyGraphRepositoryImpl.kt:DependencyGraphRepositoryImpl$override suspend fun loadGraph: Result&lt;DependencyGraph></ID>
+    <ID>CognitiveComplexMethod:GitRepositoryImpl.kt:GitRepositoryImpl$override suspend fun applyHunks: Result&lt;Unit></ID>
+    <ID>CognitiveComplexMethod:LegacyProjectMigratorImpl.kt:LegacyProjectMigratorImpl$override suspend fun migrateLegacyProjects: Result&lt;MigrationSummary></ID>
+    <ID>CognitiveComplexMethod:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$override fun startStream: Flow&lt;LogEntry></ID>
+    <ID>CognitiveComplexMethod:SnippetRepositoryImpl.kt:SnippetRepositoryImpl$override suspend fun importSnippets: Result&lt;List&lt;Snippet>></ID>
+    <ID>CognitiveComplexMethod:WorkspaceRepositoryImpl.kt:WorkspaceRepositoryImpl$override suspend fun ensureGitExclude: Result&lt;Unit></ID>
+    <ID>CognitiveComplexMethod:WorkspaceRepositoryImpl.kt:WorkspaceRepositoryImpl$override suspend fun scanProjectFiles: List&lt;CfmFileInfo></ID>
+    <ID>ComplexCondition:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$prev != null &amp;&amp; prev.isCrash &amp;&amp; r.entry.tag.equals("AndroidRuntime", ignoreCase = true) &amp;&amp; prev.pid == r.entry.pid</ID>
+    <ID>CyclomaticComplexMethod:GitRepositoryImpl.kt:GitRepositoryImpl$override suspend fun applyHunks: Result&lt;Unit></ID>
+    <ID>CyclomaticComplexMethod:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$override fun startStream: Flow&lt;LogEntry></ID>
+    <ID>DocumentationOverPrivateFunction:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$private suspend fun tryPluginFormat: Result&lt;FormattedCode>?</ID>
+    <ID>DocumentationOverPrivateFunction:GitRepositoryImpl.kt:GitRepositoryImpl$private fun collectRefs: Pair&lt;Map&lt;ObjectId, MutableList&lt;String>>, Set&lt;ObjectId>></ID>
+    <ID>DocumentationOverPrivateFunction:GitRepositoryImpl.kt:GitRepositoryImpl$private fun friendly: Throwable</ID>
+    <ID>DocumentationOverPrivateFunction:GitRepositoryImpl.kt:GitRepositoryImpl$private fun writeIndex</ID>
+    <ID>DocumentationOverPrivateFunction:GitRepositoryImpl.kt:GitRepositoryImpl$private suspend fun applyIdentity: PersonIdent?</ID>
+    <ID>DocumentationOverPrivateFunction:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$private suspend fun kotlinx.coroutines.channels.ProducerScope&lt;ToolRunEvent>.stream: StreamResult</ID>
+    <ID>DocumentationOverPrivateFunction:ProjectImportRepositoryImpl.kt:ProjectImportRepositoryImpl$private suspend fun copyRecursively: Int</ID>
+    <ID>DocumentationOverPrivateProperty:ProjectsDirectoryProviderImpl.kt:ProjectsDirectoryProviderImpl$/** Datei mit dem Nutzer-Override (einfache Textdatei, damit der Zugriff synchron und ohne DataStore bleibt). */ private val overrideFile: File get() = File(context.filesDir, OVERRIDE_FILE_NAME)</ID>
+    <ID>ExpressionBodySyntax:AiRepositoryImpl.kt:AiRepositoryImpl$return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())</ID>
+    <ID>ExpressionBodySyntax:AiRepositoryImpl.kt:AiRepositoryImpl$return synchronized(historyFlows) { historyFlows.getOrPut(projectId) { MutableStateFlow(loadHistoryFromFile(projectId)) }.asStateFlow() }</ID>
+    <ID>ExpressionBodySyntax:ApkInstallerRepositoryImpl.kt:ApkInstallerRepositoryImpl$return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { context.packageManager.canRequestPackageInstalls() } else { true }</ID>
+    <ID>ExpressionBodySyntax:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest.FakeProcessExecutor$return availableExecutables[name]</ID>
+    <ID>ExpressionBodySyntax:DependencyGraphRepositoryImpl.kt:DependencyGraphRepositoryImpl$return listOf( "debugRuntimeClasspath", "debugCompileClasspath", "releaseRuntimeClasspath", "debugUnitTestRuntimeClasspath", "compileClasspath", "runtimeClasspath" )</ID>
+    <ID>ExpressionBodySyntax:LegacyProjectMigratorImpl.kt:LegacyProjectMigratorImpl$return listLegacyProjects().isNotEmpty()</ID>
+    <ID>ExpressionBodySyntax:LegacyProjectMigratorImpl.kt:LegacyProjectMigratorImpl$return try { val prefs = dataStore.data.first() prefs[KEY_MIGRATION_DECLINED] ?: false } catch (_: Throwable) { false }</ID>
+    <ID>ExpressionBodySyntax:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$return ringBuffer.filteredSnapshot(filter)</ID>
+    <ID>ExpressionBodySyntax:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$return ringBuffer.snapshot()</ID>
+    <ID>ExpressionBodySyntax:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$return buildString { appendLine("// CodeForge Generated Project Settings Init Script") appendLine("allprojects { project ->") appendLine(" project.plugins.withId('com.android.application') {") appendLine(" project.android {") appendLine(" buildTypes {") appendLine(" release {") appendLine(" minifyEnabled ${settings.release.minifyEnabled}") if (settings.release.minifyEnabled &amp;&amp; settings.release.shrinkResources) { appendLine(" shrinkResources true") } else { appendLine(" shrinkResources false") } if (settings.release.crunchPngs) { appendLine(" crunchPngs true") } appendLine(" debuggable ${settings.release.debuggable}") if (!settings.release.proguardRulesPath.isNullOrBlank()) { appendLine(" proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), '${settings.release.proguardRulesPath}'") } appendLine(" }") appendLine(" debug {") appendLine(" minifyEnabled ${settings.debug.minifyEnabled}") if (settings.debug.minifyEnabled &amp;&amp; settings.debug.shrinkResources) { appendLine(" shrinkResources true") } else { appendLine(" shrinkResources false") } appendLine(" debuggable ${settings.debug.debuggable}") appendLine(" }") appendLine(" }") appendLine(" }") appendLine(" }") appendLine("}") }</ID>
+    <ID>ExpressionBodySyntax:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$return buildString { appendLine("{") appendLine(" \"projectPath\": \"${escape(settings.projectPath)}\",") appendLine(" \"release\": {") appendLine(" \"minifyEnabled\": ${settings.release.minifyEnabled},") appendLine(" \"shrinkResources\": ${settings.release.shrinkResources},") appendLine(" \"crunchPngs\": ${settings.release.crunchPngs},") appendLine(" \"debuggable\": ${settings.release.debuggable},") appendLine(" \"proguardRulesPath\": \"${escape(settings.release.proguardRulesPath ?: "")}\",") appendLine(" \"signingEnabled\": ${settings.release.signingEnabled}") appendLine(" },") appendLine(" \"debug\": {") appendLine(" \"minifyEnabled\": ${settings.debug.minifyEnabled},") appendLine(" \"shrinkResources\": ${settings.debug.shrinkResources},") appendLine(" \"crunchPngs\": ${settings.debug.crunchPngs},") appendLine(" \"debuggable\": ${settings.debug.debuggable},") appendLine(" \"proguardRulesPath\": \"${escape(settings.debug.proguardRulesPath ?: "")}\",") appendLine(" \"signingEnabled\": ${settings.debug.signingEnabled}") appendLine(" }") appendLine("}") }</ID>
+    <ID>ExpressionBodySyntax:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$return synchronized(flowMap) { flowMap.getOrPut(projectPath) { MutableSharedFlow(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST) } }</ID>
+    <ID>ExpressionBodySyntax:ProjectsDirectoryProviderImpl.kt:ProjectsDirectoryProviderImpl$return try { val rootPath = getProjectsRoot().canonicalPath val filePath = file.canonicalPath filePath == rootPath || filePath.startsWith(rootPath + File.separator) } catch (_: Exception) { false }</ID>
+    <ID>ExpressionBodySyntax:SnippetRepositoryImpl.kt:SnippetRepositoryImpl$return _snippets.asStateFlow()</ID>
+    <ID>FunctionNameMaxLength:AiRepositoryImplTest.kt:AiRepositoryImplTest$@Test fun storedApiKeyIsRestoredAfterRestart</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `plugin formatter failure is reported and tool missing falls through`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `plugin formatter wins over LSP and builtin and gets file placeholder plus env`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `range formatting with fallback only modifies selected lines`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 1 resolves capabilities per path rather than globally`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 1 uses LSP range format when rangeFormattingProvider is true`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 1 uses LSP when server is running and formattingProvider is true`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 2 returns failure on ktlint syntax error without modifying file`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 2 returns failure on ktlint timeout without modifying file`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 2 uses google-java-format for java when available`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 2 uses ktlint process for kotlin when LSP is unavailable and ktlint exists`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 3 falls back to builtin simplified formatter when no LSP or process available`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 3 formats json with builtin pretty printer`</ID>
+    <ID>FunctionNameMaxLength:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$@Test fun `strategy 3 formats xml with builtin pretty printer`</ID>
+    <ID>FunctionNameMaxLength:ComposeSourceAnalyzerImplTest.kt:ComposeSourceAnalyzerImplTest$@Test fun `erkennt Parameter und Preview-Annotation`</ID>
+    <ID>FunctionNameMaxLength:ComposeSourceAnalyzerImplTest.kt:ComposeSourceAnalyzerImplTest$@Test fun `liest Preview-Parameter auch ueber mehrere Zeilen`</ID>
+    <ID>FunctionNameMaxLength:ComposeSourceAnalyzerImplTest.kt:ComposeSourceAnalyzerImplTest$@Test fun `liest name, fontScale, locale und device`</ID>
+    <ID>FunctionNameMaxLength:DependencyGraphRepositoryImplTest.kt:DependencyGraphRepositoryImplTest$@Test fun getModules_parsesSettingsGradleKts</ID>
+    <ID>FunctionNameMaxLength:DependencyGraphRepositoryImplTest.kt:DependencyGraphRepositoryImplTest$@Test fun loadGraph_cachesResultAndInvalidatesWhenBuildFileChanges</ID>
+    <ID>FunctionNameMaxLength:DependencyGraphRepositoryImplTest.kt:DependencyGraphRepositoryImplTest$@Test fun loadInsight_executesInsightTask</ID>
+    <ID>FunctionNameMaxLength:GitAdvancedTest.kt:GitAdvancedTest$@Test fun renameBranchAndCheckoutCommitAndBranchAtCommit</ID>
+    <ID>FunctionNameMaxLength:GitAdvancedTest.kt:GitAdvancedTest$@Test fun resolveMergeConflictWithOneSide</ID>
+    <ID>FunctionNameMaxLength:GitAdvancedTest.kt:GitAdvancedTest$@Test fun stashApplyConflictIsReportedFriendly</ID>
+    <ID>FunctionNameMaxLength:GitLineDiffTest.kt:GitLineDiffTest$@Test fun `entfernte Zeile ist DELETED an der Folgezeile`</ID>
+    <ID>FunctionNameMaxLength:GitLineDiffTest.kt:GitLineDiffTest$@Test fun `identische Texte liefern keine Aenderung`</ID>
+    <ID>FunctionNameMaxLength:GitLineDiffTest.kt:GitLineDiffTest$@Test fun `neue Datei ohne HEAD ist komplett ADDED`</ID>
+    <ID>FunctionNameMaxLength:GitRepositoryImplTest.kt:GitRepositoryImplTest$@Test fun cloneFlowWithCredentialLookupForLocalRepo</ID>
+    <ID>FunctionNameMaxLength:GitRepositoryImplTest.kt:GitRepositoryImplTest$@Test fun commitRequiresIdentityAndMessageAndChanges</ID>
+    <ID>FunctionNameMaxLength:GitRepositoryImplTest.kt:GitRepositoryImplTest$@Test fun diffForModifiedStagedUntrackedAndNoHead</ID>
+    <ID>FunctionNameMaxLength:GitRepositoryImplTest.kt:GitRepositoryImplTest$@Test fun discardRestoresAndDeletesUntracked</ID>
+    <ID>FunctionNameMaxLength:GitRepositoryImplTest.kt:GitRepositoryImplTest$@Test fun resolveConflictAndCommitCompletesMerge</ID>
+    <ID>FunctionNameMaxLength:GitSettingsRepositoryTest.kt:GitSettingsRepositoryTest$@Test fun credentialOnlyForMatchingHttpHost</ID>
+    <ID>FunctionNameMaxLength:GitSettingsRepositoryTest.kt:GitSettingsRepositoryTest$@Test fun identityIsTrimmedPersistedAndObservable</ID>
+    <ID>FunctionNameMaxLength:LegacyProjectMigratorTest.kt:LegacyProjectMigratorTest$@Test fun `migrateLegacyProjects creates backup, copies, verifies and deletes source`</ID>
+    <ID>FunctionNameMaxLength:LegacyProjectMigratorTest.kt:LegacyProjectMigratorTest$@Test fun `migration declined preference persists and stops prompt`</ID>
+    <ID>FunctionNameMaxLength:LogcatRepositoryImplTest.kt:LogcatRepositoryImplTest$@Test fun detectAvailableSourcesListsAllThreeSources</ID>
+    <ID>FunctionNameMaxLength:LogcatRepositoryImplTest.kt:LogcatRepositoryImplTest$@Test fun detectAvailableSourcesWithReadLogsGranted</ID>
+    <ID>FunctionNameMaxLength:LogcatRepositoryImplTest.kt:LogcatRepositoryImplTest$@Test fun startStreamParsesAndEmitsEntries</ID>
+    <ID>FunctionNameMaxLength:LogcatRepositoryImplTest.kt:LogcatRepositoryImplTest$@Test fun streamCancellationDestroysProcess</ID>
+    <ID>FunctionNameMaxLength:PluginToolRunnerImplTest.kt:PluginToolRunnerImplTest$@Test fun `Ausgabe wird gestreamt und Exit-Code gemeldet`</ID>
+    <ID>FunctionNameMaxLength:PluginToolRunnerImplTest.kt:PluginToolRunnerImplTest$@Test fun `fehlende Voraussetzungen werden erkannt`</ID>
+    <ID>FunctionNameMaxLength:PluginToolRunnerImplTest.kt:PluginToolRunnerImplTest$@Test fun `unbekanntes Programm und Werkzeug liefern Fehler statt Absturz`</ID>
+    <ID>FunctionNameMaxLength:ProjectsDirectoryProviderTest.kt:ProjectsDirectoryProviderTest$@Test fun `constant projects directory name matches official standard`</ID>
+    <ID>FunctionNameMaxLength:ProjectsDirectoryProviderTest.kt:ProjectsDirectoryProviderTest$@Test fun `custom root overrides default and can be reset`</ID>
+    <ID>FunctionNameMaxLength:ProjectsDirectoryProviderTest.kt:ProjectsDirectoryProviderTest$@Test fun `custom root rejects relative paths`</ID>
+    <ID>FunctionNameMaxLength:ProjectsDirectoryProviderTest.kt:ProjectsDirectoryProviderTest$@Test fun `isSubpathOfProjectsRoot detects inside vs outside files`</ID>
+    <ID>FunctionNameMaxLength:ProjectsDirectoryProviderTest.kt:ProjectsDirectoryProviderTest$@Test fun `resolveProjectPath rejects directory traversal escape attempts`</ID>
+    <ID>FunctionNameMaxLength:ProjectsDirectoryProviderTest.kt:ProjectsDirectoryProviderTest$@Test fun `sanitizeProjectName handles special characters, cfm and blanks`</ID>
+    <ID>FunctionNameMaxLength:SafTreePathTest.kt:SafTreePathTest$@Test fun `foreign provider traversal and garbage are rejected`</ID>
+    <ID>FunctionNameMaxLength:SafTreePathTest.kt:SafTreePathTest$@Test fun `primary volume maps to external storage root`</ID>
+    <ID>FunctionNameMaxLength:SafTreePathTest.kt:SafTreePathTest$@Test fun `sd card volume maps below storage`</ID>
+    <ID>FunctionNameMaxLength:SafTreePathTest.kt:SafTreePathTest$@Test fun `volume root without relative part`</ID>
+    <ID>FunctionNameMaxLength:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$@Test fun `deleteSnippet removes custom snippet but prevents deleting built-ins`</ID>
+    <ID>FunctionNameMaxLength:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$@Test fun `getSnippetsForLanguage returns only matching enabled snippets`</ID>
+    <ID>FunctionNameMaxLength:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$@Test fun `importSnippets and exportSnippets work correctly`</ID>
+    <ID>FunctionNameMaxLength:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$@Test fun `loads built-in snippets when no user snippets exist`</ID>
+    <ID>FunctionNameMaxLength:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$@Test fun `resetToDefaults restores original built-ins and removes custom snippets`</ID>
+    <ID>FunctionNameMaxLength:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$@Test fun `saveSnippet adds custom snippet and persists it`</ID>
+    <ID>FunctionNameMaxLength:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$@Test fun `setSnippetEnabled disables snippet from language query`</ID>
+    <ID>FunctionNameMaxLength:WorkspaceRepositoryTest.kt:WorkspaceRepositoryTest$@Test fun `ensureGitExclude adds dot-cfm to exclude without duplicate`</ID>
+    <ID>FunctionNameMaxLength:WorkspaceRepositoryTest.kt:WorkspaceRepositoryTest$@Test fun `loadWorkspace renames corrupted file and returns null`</ID>
+    <ID>FunctionNameMaxLength:WorkspaceRepositoryTest.kt:WorkspaceRepositoryTest$@Test fun `loadWorkspace renames unknown schema version and returns null`</ID>
+    <ID>FunctionNameMaxLength:WorkspaceRepositoryTest.kt:WorkspaceRepositoryTest$@Test fun `saveWorkspace and loadWorkspace roundtrip atomically`</ID>
+    <ID>FunctionNameMaxLength:WorkspaceRepositoryTest.kt:WorkspaceRepositoryTest$@Test fun `scanProjectFiles respects exclusion list and calculates relative paths`</ID>
+    <ID>FunctionNameMaxLength:WorkspaceRepositoryTest.kt:WorkspaceRepositoryTest$@Test fun `updateModifiedFiles updates modified list and preserves scanned files`</ID>
+    <ID>InvalidPackageDeclaration:SafTreePathTest.kt:package com.codeforge.core.data.repository</ID>
+    <ID>LargeClass:GitRepositoryImpl.kt:GitRepositoryImpl : GitRepository</ID>
+    <ID>LongMethod:ApkInstallerRepositoryImpl.kt:ApkInstallerRepositoryImpl$override fun installApk: Flow&lt;ApkInstallStatus></ID>
+    <ID>LoopWithTooManyJumpStatements:ComposeSourceAnalyzerImpl.kt:ComposeSourceAnalyzerImpl$while</ID>
+    <ID>LoopWithTooManyJumpStatements:GitRepositoryImpl.kt:GitRepositoryImpl$for</ID>
+    <ID>LoopWithTooManyJumpStatements:WorkspaceRepositoryImpl.kt:WorkspaceRepositoryImpl$for</ID>
+    <ID>MultilineRawStringIndentation:DependencyGraphRepositoryImplTest.kt:DependencyGraphRepositoryImplTest$""" include(":app") include(":core:domain") include(":libs:test-lib") """</ID>
+    <ID>MultilineRawStringIndentation:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$""" { "Function": { "prefix": "fun", "body": "fun ${'$'}1(${'$'}2): ${'$'}3 {\n ${'$'}0\n}", "description": "Funktion deklarieren", "scope": "kotlin" }, "Print line": { "prefix": "sout", "body": "System.out.println(${'$'}1);", "description": "Print to stdout", "scope": "java" } } """</ID>
+    <ID>MultilineRawStringIndentation:SnippetRepositoryImplTest.kt:SnippetRepositoryImplTest$""" { "Imported Log": { "prefix": "ilog", "body": "Log.i(\"TAG\", \"${'$'}1\");", "description": "Imported info log", "scope": "java,kotlin" } } """</ID>
+    <ID>ReturnCount:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$private suspend fun formatWithGoogleJavaFormat: Result&lt;FormattedCode>?</ID>
+    <ID>ReturnCount:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$private suspend fun formatWithKtlint: Result&lt;FormattedCode>?</ID>
+    <ID>ReturnCount:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$private suspend fun tryPluginFormat: Result&lt;FormattedCode>?</ID>
+    <ID>ReturnCount:GitRepositoryImpl.kt:GitRepositoryImpl$private fun readRebaseStep: Pair&lt;Int, Int>?</ID>
+    <ID>ReturnCount:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$private suspend fun kotlinx.coroutines.channels.ProducerScope&lt;ToolRunEvent>.stream: StreamResult</ID>
+    <ID>ReturnCount:ProcessExecutor.kt:DefaultProcessExecutor$override fun findExecutable: String?</ID>
+    <ID>ReturnCount:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$private fun extractBlock: String?</ID>
+    <ID>ReturnCount:RecentProjectsRepositoryImpl.kt:RecentProjectsRepositoryImpl$private fun decode: RecentProject?</ID>
+    <ID>ReturnCount:SafTreePath.kt:SafTreePath$fun resolve: File?</ID>
+    <ID>StringLiteralDuplication:ApkInstallerRepositoryImpl.kt:ApkInstallerRepositoryImpl$"-unsigned"</ID>
+    <ID>StringLiteralDuplication:ApkInstallerRepositoryImpl.kt:ApkInstallerRepositoryImpl$"debug"</ID>
+    <ID>StringLiteralDuplication:ComposeSourceAnalyzerImpl.kt:ComposeSourceAnalyzerImpl$"Preview"</ID>
+    <ID>StringLiteralDuplication:GitRepositoryImpl.kt:GitRepositoryImpl$"branch"</ID>
+    <ID>StringLiteralDuplication:GitRepositoryImpl.kt:GitRepositoryImpl$"remote"</ID>
+    <ID>StringLiteralDuplication:GitSettingsRepositoryImpl.kt:GitSettingsRepositoryImpl$"cred.$h.user"</ID>
+    <ID>StringLiteralDuplication:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$"install"</ID>
+    <ID>StringLiteralDuplication:SnippetRepositoryImpl.kt:SnippetRepositoryImpl.Companion$"kotlin"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$"class A {\nfun f() {\nval x = 1\n}\n}"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$"class Main {\n void foo() {}\n}\n"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$"val top = 1\nfun calc() {\nreturn 42\n}\nval bottom = 2"</ID>
+    <ID>StringShouldBeRawString:CodeFormatterRepositoryImplTest.kt:CodeFormatterRepositoryImplTest$"{\"a\":1,\"b\":[2,3]}"</ID>
+    <ID>StringShouldBeRawString:GitAdvancedTest.kt:GitAdvancedTest$"l1\nl2 changed\nl3\n"</ID>
+    <ID>StringShouldBeRawString:GitLineDiffTest.kt:GitLineDiffTest$"a\nX\nc\n"</ID>
+    <ID>StringShouldBeRawString:GitLineDiffTest.kt:GitLineDiffTest$"a\nb\nc\n"</ID>
+    <ID>StringShouldBeRawString:GitRepositoryImpl.kt:GitRepositoryImpl$"--- /dev/null\n+++ b/$path\n@@ -0,0 +1,${capped.size} @@\n"</ID>
+    <ID>StringShouldBeRawString:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$" \"proguardRulesPath\": \"${escape(settings.debug.proguardRulesPath ?: "")}\","</ID>
+    <ID>StringShouldBeRawString:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$" \"proguardRulesPath\": \"${escape(settings.release.proguardRulesPath ?: "")}\","</ID>
+    <ID>StringShouldBeRawString:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$" \"projectPath\": \"${escape(settings.projectPath)}\","</ID>
+    <ID>StringShouldBeRawString:SnippetRepositoryImpl.kt:SnippetRepositoryImpl.Companion$"&lt;LinearLayout\n xmlns:android=\"http://schemas.android.com/apk/res/android\"\n android:layout_width=\"\${1|match_parent,wrap_content|}\"\n android:layout_height=\"\${2|wrap_content,match_parent|}\"\n android:orientation=\"\${3|vertical,horizontal|}\">\n \$0\n&lt;/LinearLayout>"</ID>
+    <ID>StringShouldBeRawString:SnippetRepositoryImpl.kt:SnippetRepositoryImpl.Companion$"@androidx.compose.runtime.Composable\nfun \${1:Name}(\n modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier\$0\n) {\n}"</ID>
+    <ID>SwallowedException:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ApkInstallerRepositoryImpl.kt:ApkInstallerRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DependencyGraphRepositoryImpl.kt:DependencyGraphRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GitRepositoryImpl.kt:GitRepositoryImpl$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$e: Exception</ID>
+    <ID>TooManyFunctions:DataModule.kt:DataModule</ID>
+    <ID>TrimMultilineRawString:PluginToolRunnerImplTest.kt:PluginToolRunnerImplTest$"""{"id":"p.test","name":"T","version":"1","apiVersion":2,"permissions":["shell"], "contributes":{"tools":[$toolJson],"requires":$requires}}"""</ID>
+    <ID>UndocumentedPublicFunction:SnippetRepositoryImpl.kt:SnippetRepositoryImpl.Companion$fun createAssetLoader: () -> String?</ID>
+    <ID>UnnecessaryParentheses:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$(execResult.stdout == content)</ID>
+    <ID>UnnecessaryParentheses:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$(formatted == content)</ID>
+    <ID>UnnecessaryParentheses:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$(newContent == content)</ID>
+    <ID>UnnecessaryParentheses:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$(result.stdout == content)</ID>
+    <ID>UnnecessaryParentheses:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$(result.text == content)</ID>
+    <ID>UnnecessaryParentheses:ComposeSourceAnalyzerImpl.kt:ComposeSourceAnalyzerImpl$(m.groupValues[1].ifEmpty { m.groupValues[2] })</ID>
+    <ID>UnnecessaryParentheses:JGitCloneProgressMonitor.kt:JGitCloneProgressMonitor$(currentCompleted * 100)</ID>
+    <ID>UseIfInsteadOfWhen:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$when (source) { LogcatSource.ADB_LOOPBACK -> { val adb = findAdbBinary() ?: "adb" mutableListOf(adb, "logcat", "-v", "threadtime") } else -> mutableListOf("logcat", "-v", "threadtime") }</ID>
+  </CurrentIssues>
+</SmellBaseline>

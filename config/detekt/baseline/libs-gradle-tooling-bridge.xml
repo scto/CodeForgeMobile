@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CascadingCallWrapping:ProcessGradleBuildRepository.kt:ProcessGradleBuildRepository$takeIf { it.isFile }</ID>
+    <ID>ClassOrdering:BuildForegroundService.kt:BuildForegroundService$Companion</ID>
+    <ID>ClassOrdering:CircularLineBuffer.kt:CircularLineBuffer$/** Anzahl der gespeicherten Zeilen. */ val lineCount: Int get() = lock.withLock { count }</ID>
+    <ID>ClassOrdering:GradleBridgeService.kt:GradleBridgeService$override fun onCreate</ID>
+    <ID>ClassOrdering:GradleToolingBridgeRepositoryImpl.kt:GradleToolingBridgeRepositoryImpl$private var boundConnection: ServiceConnection? = null</ID>
+    <ID>ClassOrdering:ProcessGradleBuildRepository.kt:ProcessGradleBuildRepository$/** Startet den Build-Prozess; in Tests ersetzbar. */ internal var processLauncher: (command: List&lt;String>, env: Map&lt;String, String>, workingDir: File) -> Process = { cmd, env, dir -> ProcessBuilder(cmd).apply { directory(dir) environment().putAll(env) redirectErrorStream(true) }.start() }</ID>
+    <ID>ClassOrdering:ProcessGradleBuildRepository.kt:ProcessGradleBuildRepository$Companion</ID>
+    <ID>ClassOrdering:ProcessGradleBuildRepository.kt:ProcessGradleBuildRepository$constructor</ID>
+    <ID>CognitiveComplexMethod:ProcessGradleBuildRepository.kt:ProcessGradleBuildRepository$override fun runTask: Flow&lt;BuildEvent></ID>
+    <ID>CyclomaticComplexMethod:ProcessGradleBuildRepository.kt:ProcessGradleBuildRepository$override fun runTask: Flow&lt;BuildEvent></ID>
+    <ID>DocumentationOverPrivateFunction:GradleMaintenanceRepositoryImpl.kt:GradleMaintenanceRepositoryImpl$private fun deleteTree: Long</ID>
+    <ID>DocumentationOverPrivateFunction:GradleToolingBridgeRepositoryImpl.kt:GradleToolingBridgeRepositoryImpl$private suspend fun bindServiceIfNeeded</ID>
+    <ID>ForbiddenComment:GradleBridgeService.kt:GradleBridgeService$* Läuft isoliert im :gradletooling-Prozess (siehe AndroidManifest.xml). Jeder Aufruf * aus dem App-Prozess kommt über den Binder-IPC-Mechanismus hier an — es gibt keine * gemeinsam genutzten Klassenobjekte mit der Activity/dem ViewModel-Layer, wodurch * Konflikte zwischen der Gradle-Tooling-API-Classloader-Hierarchie und ART vermieden * werden (siehe Design-Entscheidung im Projekt-README). * * TODO: GradleConnector.useInstallation(...) bzw. useGradleUserHomeDir(...) auf die * JDK/Gradle-Distribution innerhalb der PRoot-Rootfs zeigen lassen (JAVA_HOME aus * :libs:terminal-engine beziehen), sobald die Termux-Umgebung (TermuxEnvironment) produktiv ist.</ID>
+    <ID>FunctionNameMaxLength:GradleMaintenanceRepositoryTest.kt:GradleMaintenanceRepositoryTest$@Test fun projectDirNeedsGradleProjectAndDoesNotFollowLinks</ID>
+    <ID>FunctionNameMaxLength:GradleToolingBridgeModule.kt:GradleToolingBridgeModule$@Binds @Singleton abstract fun bindGradleMaintenanceRepository: com.codeforge.core.domain.repository.GradleMaintenanceRepository</ID>
+    <ID>FunctionNameMaxLength:ProcessGradleBuildRepositoryTest.kt:ProcessGradleBuildRepositoryTest$@Test fun failedBuildWithProblemsDetected</ID>
+    <ID>FunctionNameMaxLength:ProcessGradleBuildRepositoryTest.kt:ProcessGradleBuildRepositoryTest$@Test fun forwardsExtraEnvironmentVariablesToProcess</ID>
+    <ID>FunctionNameMaxLength:ProcessGradleBuildRepositoryTest.kt:ProcessGradleBuildRepositoryTest$@Test fun globalGradleSettingsAreAppendedAndCustomGradleReplacesWrapper</ID>
+    <ID>FunctionNameMaxLength:ProcessGradleBuildRepositoryTest.kt:ProcessGradleBuildRepositoryTest$@Test fun successfulBuildParsesOutputAndCompletes</ID>
+    <ID>LongMethod:ProcessGradleBuildRepository.kt:ProcessGradleBuildRepository$override fun runTask: Flow&lt;BuildEvent></ID>
+    <ID>ReturnCount:BuildForegroundService.kt:BuildForegroundService$override fun onStartCommand: Int</ID>
+    <ID>TooGenericExceptionCaught:GradleBridgeService.kt:GradleBridgeService.&lt;no name provided>$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:ProcessGradleBuildRepository.kt:ProcessGradleBuildRepository$e: Throwable</ID>
+    <ID>UnderscoresInNumericLiterals:BuildForegroundService.kt:BuildForegroundService.Companion$28001</ID>
+    <ID>UndocumentedPublicFunction:BuildForegroundService.kt:BuildForegroundService.Companion$fun start</ID>
+    <ID>UndocumentedPublicFunction:BuildForegroundService.kt:BuildForegroundService.Companion$fun stop</ID>
+  </CurrentIssues>
+</SmellBaseline>

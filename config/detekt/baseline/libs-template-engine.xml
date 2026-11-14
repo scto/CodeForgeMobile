@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:FileOps.kt:if</ID>
+    <ID>CascadingCallWrapping:ProjectGenerator.kt:ProjectGenerator$replace("DashboardViewModel", "${cls}ViewModel")</ID>
+    <ID>CascadingCallWrapping:ProjectGenerator.kt:ProjectGenerator$replace("dashboard", screen)</ID>
+    <ID>CascadingCallWrapping:ProjectGeneratorTest.kt:ProjectGeneratorTest$first { it.isDirectory }</ID>
+    <ID>CognitiveComplexMethod:AppBuildGradle.kt:fun AppBuildGradle: String</ID>
+    <ID>CognitiveComplexMethod:ProjectGeneratorTest.kt:ProjectGeneratorTest$@Test fun everyCombinationProducesCoreFiles</ID>
+    <ID>CyclomaticComplexMethod:AppBuildGradle.kt:fun AppBuildGradle: String</ID>
+    <ID>FunctionNameMaxLength:ProjectGeneratorTest.kt:ProjectGeneratorTest$@Test fun everyCombinationProducesCoreFiles</ID>
+    <ID>FunctionNameMaxLength:ProjectGeneratorTest.kt:ProjectGeneratorTest$@Test fun generatedKotlinProjectUsesGradle9AndBuiltInKotlin</ID>
+    <ID>FunctionNaming:AndroidMkFile.kt:fun AndroidMkFile: String</ID>
+    <ID>FunctionNaming:AppBuildGradle.kt:fun AppBuildGradle: String</ID>
+    <ID>FunctionNaming:AppBuildGradle.kt:fun AppBuildGradleGroovy: String</ID>
+    <ID>FunctionNaming:AppBuildGradle.kt:fun AppBuildGradleKotlin: String</ID>
+    <ID>FunctionNaming:AppManifest.kt:fun AppManifest: String</ID>
+    <ID>FunctionNaming:ApplicationMkFile.kt:fun ApplicationMkFile: String</ID>
+    <ID>FunctionNaming:BaseLayoutContentMain.kt:fun BaseLayoutContentMain</ID>
+    <ID>FunctionNaming:BasicActivityJava.kt:fun BasicActivityJava</ID>
+    <ID>FunctionNaming:BasicActivityKt.kt:fun BasicActivityKt</ID>
+    <ID>FunctionNaming:BasicActivityLayout.kt:fun BasicActivityLayout</ID>
+    <ID>FunctionNaming:BasicJniCppSource.kt:fun BasicJniCppSource: String</ID>
+    <ID>FunctionNaming:BotNavActivityJava.kt:fun BotNavActivityJava</ID>
+    <ID>FunctionNaming:BotNavActivityKt.kt:fun BotNavActivityKt</ID>
+    <ID>FunctionNaming:BotNavDashboardFragmentJava.kt:fun BotNavDashboardFragmentJava</ID>
+    <ID>FunctionNaming:BotNavDashboardFragmentKt.kt:fun BotNavDashboardFragmentKt</ID>
+    <ID>FunctionNaming:BotNavDashboardViewModelJava.kt:fun BotNavDashboardViewModelJava</ID>
+    <ID>FunctionNaming:BotNavDashboardViewModelKt.kt:fun BotNavDashboardViewModelKt</ID>
+    <ID>FunctionNaming:BotNavHomeFragmentJava.kt:fun BotNavHomeFragmentJava</ID>
+    <ID>FunctionNaming:BotNavHomeFragmentKt.kt:fun BotNavHomeFragmentKt</ID>
+    <ID>FunctionNaming:BotNavHomeViewModelJava.kt:fun BotNavHomeViewModelJava</ID>
+    <ID>FunctionNaming:BotNavHomeViewModelKt.kt:fun BotNavHomeViewModelKt</ID>
+    <ID>FunctionNaming:BotNavNavigationXml.kt:fun BotNavNavigationXml</ID>
+    <ID>FunctionNaming:BotNavNotifFragmentJava.kt:fun BotNavNotifFragmentJava</ID>
+    <ID>FunctionNaming:BotNavNotifFragmentKt.kt:fun BotNavNotifFragmentKt</ID>
+    <ID>FunctionNaming:BotNavNotifViewModelJava.kt:fun BotNavNotifViewModelJava</ID>
+    <ID>FunctionNaming:BotNavNotifViewModelKt.kt:fun BotNavNotifViewModelKt</ID>
+    <ID>FunctionNaming:BotNavStringsXml.kt:fun BotNavStringsXml</ID>
+    <ID>FunctionNaming:ComposeActivityKt.kt:fun ComposeActivityKt</ID>
+    <ID>FunctionNaming:ComposeColorKt.kt:fun ComposeColorKt</ID>
+    <ID>FunctionNaming:ComposeThemeKt.kt:fun ComposeThemeKt</ID>
+    <ID>FunctionNaming:ComposeThemesXml.kt:fun ComposeThemesXml</ID>
+    <ID>FunctionNaming:ComposeTypeKt.kt:fun ComposeTypeKt</ID>
+    <ID>FunctionNaming:CppActivityJava.kt:fun CppActivityJava</ID>
+    <ID>FunctionNaming:CppActivityKt.kt:fun CppActivityKt</ID>
+    <ID>FunctionNaming:DashboardFragmentJava.kt:fun DashboardFragmentJava</ID>
+    <ID>FunctionNaming:DashboardFragmentKt.kt:fun DashboardFragmentKt</ID>
+    <ID>FunctionNaming:DashboardViewModelJava.kt:fun DashboardViewModelJava</ID>
+    <ID>FunctionNaming:DashboardViewModelKt.kt:fun DashboardViewModelKt</ID>
+    <ID>FunctionNaming:DefaultGitIgnore.kt:fun DefaultGitIgnore: String</ID>
+    <ID>FunctionNaming:DefaultProguardRules.kt:fun DefaultProguardRules: String</ID>
+    <ID>FunctionNaming:EmptyActivityJava.kt:fun EmptyActivityJava</ID>
+    <ID>FunctionNaming:EmptyActivityKt.kt:fun EmptyActivityKt</ID>
+    <ID>FunctionNaming:GradleProperties.kt:fun GradleProperties: String</ID>
+    <ID>FunctionNaming:HomeFragmentJava.kt:fun HomeFragmentJava</ID>
+    <ID>FunctionNaming:HomeFragmentKt.kt:fun HomeFragmentKt</ID>
+    <ID>FunctionNaming:HomeViewModelJava.kt:fun HomeViewModelJava</ID>
+    <ID>FunctionNaming:HomeViewModelKt.kt:fun HomeViewModelKt</ID>
+    <ID>FunctionNaming:NavDrawerActivityJava.kt:fun NavDrawerActivityJava</ID>
+    <ID>FunctionNaming:NavDrawerActivityKt.kt:fun NavDrawerActivityKt</ID>
+    <ID>FunctionNaming:NavDrawerNavigationXml.kt:fun NavDrawerNavigationXml</ID>
+    <ID>FunctionNaming:NavDrawerStringsXml.kt:fun NavDrawerStringsXml</ID>
+    <ID>FunctionNaming:NoAndroidXActivityJava.kt:fun NoAndroidXActivityJava</ID>
+    <ID>FunctionNaming:NoAndroidXActivityKt.kt:fun NoAndroidXActivityKt</ID>
+    <ID>FunctionNaming:NoAndroidXActivityLayout.kt:fun NoAndroidXActivityLayout</ID>
+    <ID>FunctionNaming:RootBuildGradle.kt:fun AppGradleGroovy: String</ID>
+    <ID>FunctionNaming:RootBuildGradle.kt:fun AppGradleKotlin: String</ID>
+    <ID>FunctionNaming:RootBuildGradle.kt:fun RootBuildGradle: String</ID>
+    <ID>FunctionNaming:SettingsGradle.kt:fun SettingsGradle: String</ID>
+    <ID>FunctionNaming:SimpleMaterial3Theme.kt:fun SimpleMaterial3Theme: String</ID>
+    <ID>FunctionNaming:TabActivityJava.kt:fun TabActivityJava</ID>
+    <ID>FunctionNaming:TabActivityKt.kt:fun TabActivityKt</ID>
+    <ID>FunctionNaming:TabPageViewModelJava.kt:fun TabPageViewModelJava</ID>
+    <ID>FunctionNaming:TabPageViewModelKt.kt:fun TabPageViewModelKt</ID>
+    <ID>FunctionNaming:TabPagerAdapterJava.kt:fun TabPagerAdapterJava</ID>
+    <ID>FunctionNaming:TabPagerAdapterKt.kt:fun TabPagerAdapterKt</ID>
+    <ID>FunctionNaming:TabPlaceholderFragmentJava.kt:fun TabPlaceholderFragmentJava</ID>
+    <ID>FunctionNaming:TabPlaceholderFragmentKt.kt:fun TabPlaceholderFragmentKt</ID>
+    <ID>FunctionNaming:TabStringsXml.kt:fun TabStringsXml</ID>
+    <ID>LongMethod:AppBuildGradle.kt:fun AppBuildGradle: String</ID>
+    <ID>LongMethod:NavDrawerActivityJava.kt:fun NavDrawerActivityJava</ID>
+    <ID>LongMethod:TabPlaceholderFragmentJava.kt:fun TabPlaceholderFragmentJava</ID>
+    <ID>LongMethod:TabPlaceholderFragmentKt.kt:fun TabPlaceholderFragmentKt</ID>
+    <ID>StringLiteralDuplication:FileOps.kt:"&lt;/resources>"</ID>
+    <ID>StringLiteralDuplication:ProjectGenerator.kt:ProjectGenerator$"DashboardViewModel"</ID>
+    <ID>StringLiteralDuplication:ProjectGenerator.kt:ProjectGenerator$"Gallery"</ID>
+    <ID>StringLiteralDuplication:ProjectGenerator.kt:ProjectGenerator$"MainActivity"</ID>
+    <ID>StringLiteralDuplication:ProjectGenerator.kt:ProjectGenerator$"Slideshow"</ID>
+    <ID>StringLiteralDuplication:ProjectGenerator.kt:ProjectGenerator$"gallery"</ID>
+    <ID>StringLiteralDuplication:ProjectGenerator.kt:ProjectGenerator$"layout/activity_main.xml"</ID>
+    <ID>StringLiteralDuplication:ProjectGenerator.kt:ProjectGenerator$"slideshow"</ID>
+    <ID>StringLiteralDuplication:ProjectGenerator.kt:ProjectGenerator$"themes.xml"</ID>
+    <ID>StringShouldBeRawString:FileOps.kt:"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>\n&lt;resources>\n&lt;/resources>\n"</ID>
+    <ID>StringShouldBeRawString:ProjectGeneratorTest.kt:ProjectGeneratorTest$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>"</ID>
+    <ID>TooGenericExceptionCaught:TemplateEngineRepositoryImpl.kt:TemplateEngineRepositoryImpl$t: Throwable</ID>
+    <ID>UnusedParameter:AppManifest.kt:appId: String</ID>
+    <ID>UseIfInsteadOfWhen:AppBuildGradle.kt:when { !enableCompose -> "" else -> "androidComponents { beforeVariants { builder -> builder.enableUnitTest = true } }" }</ID>
+  </CurrentIssues>
+</SmellBaseline>

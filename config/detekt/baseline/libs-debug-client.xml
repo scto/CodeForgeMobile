@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:DebugRepositoryImpl.kt:DebugRepositoryImpl$else</ID>
+    <ID>BracesOnWhenStatements:DapFraming.kt:DapFraming$when</ID>
+    <ID>ClassOrdering:DebugRepositoryImpl.kt:DebugRepositoryImpl$constructor</ID>
+    <ID>CognitiveComplexMethod:AndroidDebugManagerImpl.kt:AndroidDebugManagerImpl$override suspend fun attach: Result&lt;Unit></ID>
+    <ID>CognitiveComplexMethod:AndroidDebugManagerImpl.kt:AndroidDebugManagerImpl$override suspend fun isAppDebuggable: Result&lt;Boolean></ID>
+    <ID>CognitiveComplexMethod:AndroidDebugManagerImpl.kt:AndroidDebugManagerImpl$override suspend fun startAppWaitingForDebugger: Result&lt;Int></ID>
+    <ID>CognitiveComplexMethod:DebugRepositoryImpl.kt:DebugRepositoryImpl$override suspend fun start: Result&lt;Unit></ID>
+    <ID>CognitiveComplexMethod:SourceToClassMapperImpl.kt:SourceToClassMapperImpl$override fun analyzeSource: SourceFileAnalysis</ID>
+    <ID>ComplexCondition:SourceToClassMapperImpl.kt:SourceToClassMapperImpl$trimmed.startsWith("package ") || trimmed.startsWith("import ") || trimmed == "{" || trimmed == "}" || trimmed == "};" || trimmed == "});"</ID>
+    <ID>CyclomaticComplexMethod:DebugRepositoryImpl.kt:DebugRepositoryImpl$override suspend fun start: Result&lt;Unit></ID>
+    <ID>CyclomaticComplexMethod:DebugRepositoryImplTest.kt:DebugRepositoryImplTest$@Test fun testCompleteDebugSessionLifecycle</ID>
+    <ID>CyclomaticComplexMethod:SourceToClassMapperImpl.kt:SourceToClassMapperImpl$override fun analyzeSource: SourceFileAnalysis</ID>
+    <ID>DocumentationOverPrivateFunction:DapFraming.kt:DapFraming$private fun readHeaderLine: String?</ID>
+    <ID>ExpressionBodySyntax:BreakpointRepositoryImpl.kt:BreakpointRepositoryImpl$return getOrInitFlow(projectRoot).asStateFlow()</ID>
+    <ID>ExpressionBodySyntax:BreakpointRepositoryImpl.kt:BreakpointRepositoryImpl$return projectBreakpoints.getOrPut(projectRoot) { val initial = loadFromFile(projectRoot) MutableStateFlow(initial) }</ID>
+    <ID>ExpressionBodySyntax:DapFraming.kt:DapFraming$return value.replace("\\", "\\\\") .replace("\"", "\\\"") .replace("\b", "\\b") .replace("\n", "\\n") .replace("\r", "\\r") .replace("\t", "\\t")</ID>
+    <ID>ExpressionBodySyntax:SourceToClassMapperImpl.kt:SourceToClassMapperImpl$return line in analysis.executableLines</ID>
+    <ID>FunctionNameMaxLength:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$@Test fun `attach cleans up port forward immediately when debugRepository fails`</ID>
+    <ID>FunctionNameMaxLength:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$@Test fun `attach sets up forward and starts debug session`</ID>
+    <ID>FunctionNameMaxLength:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$@Test fun `detach stops debug repository, removes forward and force-stops app if requested`</ID>
+    <ID>FunctionNameMaxLength:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$@Test fun `forwardPort and removeForward execute expected adb commands`</ID>
+    <ID>FunctionNameMaxLength:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$@Test fun `getDebuggablePids parses real adb jdwp fixture`</ID>
+    <ID>FunctionNameMaxLength:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$@Test fun `isAppDebuggable returns false when package exists but has no DEBUGGABLE flag`</ID>
+    <ID>FunctionNameMaxLength:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$@Test fun `isAppDebuggable returns true when dumpsys package contains DEBUGGABLE`</ID>
+    <ID>FunctionNameMaxLength:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$@Test fun `startAppWaitingForDebugger executes am start -D and returns process PID`</ID>
+    <ID>FunctionNameMaxLength:BreakpointLineAdjusterTest.kt:BreakpointLineAdjusterTest$@Test fun lineDeletionDeletesContainedBreakpointsAndDecrementsLater</ID>
+    <ID>FunctionNameMaxLength:BreakpointLineAdjusterTest.kt:BreakpointLineAdjusterTest$@Test fun lineInsertionShiftsSubsequentBreakpoints</ID>
+    <ID>FunctionNameMaxLength:DapFramingTest.kt:DapFramingTest$@Test fun readsFragmentedStreamByteByByte</ID>
+    <ID>FunctionNameMaxLength:DapFramingTest.kt:DapFramingTest$@Test fun readsMultipleConsecutiveMessages</ID>
+    <ID>FunctionNameMaxLength:DebugRepositoryImplTest.kt:DebugRepositoryImplTest$@Test fun testCompleteDebugSessionLifecycle</ID>
+    <ID>FunctionNameMaxLength:DebugRepositoryImplTest.kt:DebugRepositoryImplTest$@Test fun testStartFailureWhenConnectionRefused</ID>
+    <ID>FunctionNameMaxLength:SourceToClassMapperTest.kt:SourceToClassMapperTest$@Test fun `file with JvmName uses custom facade class name`</ID>
+    <ID>FunctionNameMaxLength:SourceToClassMapperTest.kt:SourceToClassMapperTest$@Test fun `findSourceFileForClass resolves source files from class names`</ID>
+    <ID>FunctionNameMaxLength:SourceToClassMapperTest.kt:SourceToClassMapperTest$@Test fun `java source files resolve classes properly`</ID>
+    <ID>FunctionNameMaxLength:SourceToClassMapperTest.kt:SourceToClassMapperTest$@Test fun `multiple kotlin classes in single file are correctly scoped`</ID>
+    <ID>FunctionNameMaxLength:SourceToClassMapperTest.kt:SourceToClassMapperTest$@Test fun `nested and inner classes resolve with dollar separator`</ID>
+    <ID>FunctionNameMaxLength:SourceToClassMapperTest.kt:SourceToClassMapperTest$@Test fun `single kotlin class resolves class name and executable lines`</ID>
+    <ID>FunctionNameMaxLength:SourceToClassMapperTest.kt:SourceToClassMapperTest$@Test fun `top-level functions use file facade class name`</ID>
+    <ID>FunctionNameMaxLength:SourceToClassMapperTest.kt:SourceToClassMapperTest$@Test fun `unmapped lines like comments and blank lines return null and unverified`</ID>
+    <ID>LongMethod:DebugRepositoryImplTest.kt:DebugRepositoryImplTest$@Test fun testCompleteDebugSessionLifecycle</ID>
+    <ID>LongMethod:SourceToClassMapperImpl.kt:SourceToClassMapperImpl$override fun analyzeSource: SourceFileAnalysis</ID>
+    <ID>LoopWithTooManyJumpStatements:DebugRepositoryImplTest.kt:DebugRepositoryImplTest$while</ID>
+    <ID>ReturnCount:AndroidDebugManagerImpl.kt:AndroidDebugManagerImpl$private suspend fun findProcessId: Int?</ID>
+    <ID>ReturnCount:DapFraming.kt:DapFraming$fun parseDapMessage: DapMessage?</ID>
+    <ID>ReturnCount:DapFraming.kt:DapFraming$fun readMessage: DapMessage?</ID>
+    <ID>ReturnCount:SourceToClassMapperImpl.kt:SourceToClassMapperImpl$override fun findSourceFileForClass: File?</ID>
+    <ID>StringLiteralDuplication:AndroidDebugManagerImpl.kt:AndroidDebugManagerImpl$"shell"</ID>
+    <ID>StringLiteralDuplication:DapFraming.kt:DapFraming$"{\"seq\":"</ID>
+    <ID>StringLiteralDuplication:DebugRepositoryImpl.kt:DebugRepositoryImpl$"Keine aktive Sitzung"</ID>
+    <ID>StringLiteralDuplication:DebugRepositoryImpl.kt:DebugRepositoryImpl$"breakpoint"</ID>
+    <ID>StringLiteralDuplication:DebugRepositoryImpl.kt:DebugRepositoryImpl$"threadId"</ID>
+    <ID>StringShouldBeRawString:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$"1045\n2890\n17432\n"</ID>
+    <ID>StringShouldBeRawString:DapFraming.kt:DapFraming$",\"command\":\""</ID>
+    <ID>StringShouldBeRawString:DapFraming.kt:DapFraming$",\"event\":\""</ID>
+    <ID>StringShouldBeRawString:DapFraming.kt:DapFraming$",\"message\":\""</ID>
+    <ID>StringShouldBeRawString:DapFraming.kt:DapFraming$",\"type\":\"event\""</ID>
+    <ID>StringShouldBeRawString:DapFraming.kt:DapFraming$",\"type\":\"request\""</ID>
+    <ID>StringShouldBeRawString:DapFraming.kt:DapFraming$",\"type\":\"response\""</ID>
+    <ID>StringShouldBeRawString:DapFramingTest.kt:DapFramingTest$"{\"seq\":10,\"type\":\"event\",\"event\":\"output\",\"body\":{\"output\":\"Hello\"}}"</ID>
+    <ID>TooGenericExceptionCaught:AdbRunner.kt:DefaultAdbRunner$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DapConnection.kt:DapConnection$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DebugRepositoryImpl.kt:DebugRepositoryImpl$e: Exception</ID>
+    <ID>UnderscoresInNumericLiterals:AndroidDebugManagerTest.kt:AndroidDebugManagerTest$17432</ID>
+    <ID>UnnecessaryParentheses:SourceToClassMapperImpl.kt:SourceToClassMapperImpl$(openCount - closeCount)</ID>
+    <ID>UnusedParameter:DapJsonMapper.kt:DapJsonMapper$path: String</ID>
+  </CurrentIssues>
+</SmellBaseline>

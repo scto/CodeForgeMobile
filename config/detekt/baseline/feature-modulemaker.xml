@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:ModuleMakerScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:ModuleMakerScreen.kt:if</ID>
+    <ID>BracesOnWhenStatements:ModuleMakerViewModel.kt:ModuleMakerViewModel$when</ID>
+    <ID>CascadingCallWrapping:ModuleMakerViewModel.kt:ModuleMakerViewModel$toSet()</ID>
+    <ID>CognitiveComplexMethod:ModuleMakerScreen.kt:@Composable fun ModuleMakerScreen</ID>
+    <ID>DocumentationOverPrivateFunction:ModuleMakerViewModel.kt:ModuleMakerViewModel$private fun recompute</ID>
+    <ID>StringLiteralDuplication:ModuleMakerViewModel.kt:ModuleMakerViewModel$"build.gradle"</ID>
+    <ID>StringLiteralDuplication:ModuleMakerViewModel.kt:ModuleMakerViewModel$"build.gradle.kts"</ID>
+  </CurrentIssues>
+</SmellBaseline>

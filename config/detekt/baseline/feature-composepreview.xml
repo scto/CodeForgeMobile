@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$if</ID>
+    <ID>BracesOnIfStatements:KotlincDaemon.kt:KotlincDaemon$if</ID>
+    <ID>BracesOnIfStatements:KotlincProcessCompiler.kt:KotlincOutputParser$else</ID>
+    <ID>BracesOnWhenStatements:ComposePreviewScreen.kt:when</ID>
+    <ID>BracesOnWhenStatements:PreviewSourcePreparer.kt:PreviewSourcePreparer$when</ID>
+    <ID>ClassOrdering:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$private val mutex = Mutex()</ID>
+    <ID>ClassOrdering:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Nachbarn, deren Vorkompilierung scheitert (z. B. Zyklus zur Zieldatei), nicht bei jedem Lauf neu versuchen. */ private val siblingFailures = java.util.Collections.synchronizedSet(HashSet&lt;String>())</ID>
+    <ID>CognitiveComplexMethod:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$override suspend fun ensureInstalled: Result&lt;File></ID>
+    <ID>CognitiveComplexMethod:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>CognitiveComplexMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$override suspend fun render: Result&lt;PreviewRenderResult></ID>
+    <ID>CognitiveComplexMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun buildDex: CachedBuild</ID>
+    <ID>CognitiveComplexMethod:ComposePreviewScreen.kt:@Composable private fun RenderStateContent</ID>
+    <ID>CognitiveComplexMethod:ComposeViewBitmapRenderer.kt:ComposeViewBitmapRenderer$private suspend fun renderToBitmapInternal: Bitmap</ID>
+    <ID>CognitiveComplexMethod:KotlincDaemon.kt:KotlincDaemon$suspend fun run: DaemonRun?</ID>
+    <ID>CognitiveComplexMethod:KotlincProcessCompiler.kt:KotlincOutputParser$fun parseErrors: List&lt;String></ID>
+    <ID>CognitiveComplexMethod:KotlincProcessCompiler.kt:KotlincProcessCompiler$override suspend fun compile: CompileResult</ID>
+    <ID>CognitiveComplexMethod:PreviewDependencyResolver.kt:PreviewDependencyResolver$private fun findDependencies: List&lt;ParsedKotlinFile></ID>
+    <ID>CognitiveComplexMethod:PreviewSourcePreparer.kt:PreviewSourcePreparer$internal fun matchingBrace: Int</ID>
+    <ID>CognitiveComplexMethod:PreviewSourcePreparer.kt:PreviewSourcePreparer$internal fun removeThemeSideEffects: String</ID>
+    <ID>CollapsibleIfStatements:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$if (hadExisting &amp;&amp; backupDir.exists()) { if (!backupDir.renameTo(targetDir)) { backupDir.copyRecursively(targetDir, overwrite = true) backupDir.deleteRecursively() } }</ID>
+    <ID>CollapsibleIfStatements:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$if (hadExisting) { if (!targetDir.renameTo(backupDir)) { targetDir.copyRecursively(backupDir, overwrite = true) targetDir.deleteRecursively() } }</ID>
+    <ID>CollapsibleIfStatements:PreviewDependencyResolver.kt:PreviewDependencyResolver$if (cand.packageName == consumerPackage) { if (cand.topLevelSymbols.any { it in consumer.referencedIdentifiers }) { needed += cand } }</ID>
+    <ID>CollapsibleIfStatements:PreviewDependencyResolver.kt:PreviewDependencyResolver$if (cand.packageName == wildPkg) { // Prüfen, ob der Consumer mindestens ein Symbol aus dieser Datei verwendet if (cand.topLevelSymbols.any { it in consumer.referencedIdentifiers }) { needed += cand } }</ID>
+    <ID>ComplexCondition:CompilerRuntimeProviderImpl.kt:CompilerRuntimeManifest.Companion$name.isBlank() || name.contains('/') || name.contains('\\') || name.contains("..")</ID>
+    <ID>CyclomaticComplexMethod:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>CyclomaticComplexMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun buildDex: CachedBuild</ID>
+    <ID>CyclomaticComplexMethod:KotlincProcessCompiler.kt:KotlincProcessCompiler$override suspend fun compile: CompileResult</ID>
+    <ID>CyclomaticComplexMethod:PreviewDependencyResolver.kt:PreviewDependencyResolver$private fun findDependencies: List&lt;ParsedKotlinFile></ID>
+    <ID>CyclomaticComplexMethod:PreviewSourcePreparer.kt:PreviewSourcePreparer$internal fun matchingBrace: Int</ID>
+    <ID>CyclomaticComplexMethod:PreviewSourcePreparer.kt:PreviewSourcePreparer$internal fun removeThemeSideEffects: String</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:KotlincProcessCompiler.kt:KotlincOutputParser$val (file, line, col, msg) = match.destructured</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun buildDex: CachedBuild</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun precompileSiblings: File?</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewDexer.kt:PreviewDexer$private suspend fun dexWarm: DexResult?</ID>
+    <ID>DocumentationOverPrivateProperty:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Nachbarn, deren Vorkompilierung scheitert (z. B. Zyklus zur Zieldatei), nicht bei jedem Lauf neu versuchen. */ private val siblingFailures = java.util.Collections.synchronizedSet(HashSet&lt;String>())</ID>
+    <ID>DocumentationOverPrivateProperty:ComposePreviewViewModel.kt:ComposePreviewViewModel$/** Laufender Render; wird bei neuer Eingabe abgebrochen, damit veraltete Läufe nicht weiterkompilieren. */ private var renderJob: Job? = null</ID>
+    <ID>DocumentationOverPrivateProperty:ComposePreviewViewModel.kt:ComposePreviewViewModel$/** Wird für Re-Render (FunctionSelected/Rerender) benötigt, ohne den Quelltext im UiState zu duplizieren. */ private var lastActiveFile: ActiveComposableFile? = null</ID>
+    <ID>EmptyElseBlock:PreviewSourcePreparer.kt:PreviewSourcePreparer$if (s[i] == '\\') i++</ID>
+    <ID>ExpressionBodySyntax:PreviewDexer.kt:PreviewDexer$return try { val command = buildList { add(d8BinaryPath) // minSdk der App = 26: weniger Desugaring-Arbeit; Debug-Modus spart Optimierungsläufe. add("--min-api"); add("26") add("--debug") add("-JXmx512m") SHORT_RUN_JVM_FLAGS.split(' ').forEach { add("-J$it") } add("--output") add(outputDir.absolutePath) addAll(classFiles.map { it.absolutePath }) } // d8 ist ein Shell-Skript und braucht `java` im PATH bzw. JAVA_HOME (Termux-Umgebung, wie kotlinc). val builder = ProcessBuilder(command) .redirectErrorStream(true) .redirectInput(File("/dev/null")) // JAVA_HOME/bin zuerst im PATH: unabhängig davon, ob update-alternatives `java` verlinkt hat // (gilt für jedes installierte JDK – 17, 21, 25; es wird das höchste installierte gewählt). val javaHome = TermuxEnvironment.environment()["JAVA_HOME"] builder.environment().putAll(TermuxEnvironment.environment(extraPath = listOfNotNull(javaHome?.let { "$it/bin" }))) val process = builder.start() val output = process.inputStream.bufferedReader().readText() val exitCode = process.waitFor() val dexFile = File(outputDir, "classes.dex").takeIf { it.isFile } DexResult(success = exitCode == 0 &amp;&amp; dexFile != null, dexFile = dexFile, errorOutput = output) } catch (e: Exception) { val defaultMessage = Res.string(R.string.composepreview_d8_konnte_nicht_gestartet_werden) DexResult(success = false, dexFile = null, errorOutput = e.message ?: defaultMessage) }</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `gradle generated manifest json matches generated jars in build compiler-runtime`</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `manifest parser parses valid manifest json`</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `resolveRuntimeJars returns sorted list of all jar files in directory`</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `sha256 mismatch fails and keeps existing installation intact`</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `version comparator sorts versions properly`</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `version mismatch in existing installation triggers re-download and replaces installation`</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `zip slip entry is rejected and existing installation remains intact`</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test(expected = IllegalArgumentException::class) fun `manifest parser rejects empty files array`</ID>
+    <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test(expected = IllegalArgumentException::class) fun `manifest parser rejects missing bom`</ID>
+    <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `buildCommandLine constructs expected argument list with multiple source files`</ID>
+    <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `buildCommandLine constructs expected argument list`</ID>
+    <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `compile returns failure when kotlinc or plugin jar is missing`</ID>
+    <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `compile times out cleanly if process hangs`</ID>
+    <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `output parser attaches resource note on R reference errors`</ID>
+    <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `output parser extracts line-based compiler errors`</ID>
+    <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `output parser filters out jansi noise and returns fallback message`</ID>
+    <ID>FunctionNameMaxLength:PreviewCacheTest.kt:PreviewCacheTest$@Test fun `Build wird gespeichert, wiedergefunden und aelteste Eintraege fallen heraus`</ID>
+    <ID>FunctionNameMaxLength:PreviewCacheTest.kt:PreviewCacheTest$@Test fun `Schluessel haengt von allen Teilen und der Reihenfolge ab`</ID>
+    <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `determines target class name correctly for custom JvmName and empty package`</ID>
+    <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `excludes pure Activity and ViewModel sibling files`</ID>
+    <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `handles cyclic dependencies without infinite recursion`</ID>
+    <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `handles missing and external symbols gracefully without errors`</ID>
+    <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `resolves sibling in same package without explicit import`</ID>
+    <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `resolves transitive theme chain Theme Color and Type`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `Datei ohne Activity bleibt inhaltlich unveraendert`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `Klammern in Strings stoeren die Klassenentfernung nicht`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `Theme in derselben Datei bekommt keinen Stub`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `behaelt package wenn keepPackage wahr ist`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `determineFallback aktiviert sich bei Fehler in Nachbardatei und liefert Stub-Quelltext`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `determineFallback ist inaktiv wenn primaere Kompilierung erfolgreich war`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `entfernt WindowCompat und SideEffect aus Theme`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `entfernt package, Activity-Klasse und Activity-Imports`</ID>
+    <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `ersetzt Projekt-Theme durch Material3-Stub`</ID>
+    <ID>FunctionNameMinLength:PreviewCache.kt:PreviewCacheKey$fun of: String</ID>
+    <ID>LongMethod:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>LongMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$override suspend fun render: Result&lt;PreviewRenderResult></ID>
+    <ID>LongMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun buildDex: CachedBuild</ID>
+    <ID>LongMethod:ComposeViewBitmapRenderer.kt:ComposeViewBitmapRenderer$private suspend fun renderToBitmapInternal: Bitmap</ID>
+    <ID>LongMethod:KotlincProcessCompiler.kt:KotlincProcessCompiler$override suspend fun compile: CompileResult</ID>
+    <ID>LongMethod:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `resolves transitive theme chain Theme Color and Type`</ID>
+    <ID>LoopWithTooManyJumpStatements:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$while</ID>
+    <ID>LoopWithTooManyJumpStatements:PreviewSourcePreparer.kt:PreviewSourcePreparer$while</ID>
+    <ID>MultilineRawStringIndentation:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$""" { "bom": "2024.01.00", "kotlin": "1.9.22", "files": [ { "name": "old-runtime.jar", "sha256": "$existingSha", "size": ${existingJar.length()} } ] } """</ID>
+    <ID>MultilineRawStringIndentation:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$""" { "bom": "2024.01.00", "kotlin": "1.9.22", "files": [ { "name": "safe.jar", "sha256": "$existingSha", "size": ${existingJar.length()} } ] } """</ID>
+    <ID>MultilineRawStringIndentation:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$""" { "bom": "2024.09.00", "kotlin": "2.0.20", "files": [ { "name": "old.jar", "sha256": "$oldSha", "size": ${oldJar.length()} } ] } """</ID>
+    <ID>NestedBlockDepth:PreviewDependencyResolver.kt:PreviewDependencyResolver$private fun findDependencies: List&lt;ParsedKotlinFile></ID>
+    <ID>OutdatedDocumentation:PreviewSourcePreparer.kt:PreviewSourcePreparer$fun prepare: String</ID>
+    <ID>ReturnCount:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun precompileSiblings: File?</ID>
+    <ID>ReturnCount:KotlincDaemon.kt:KotlincDaemon$private fun ensureStarted: Process?</ID>
+    <ID>StringLiteralDuplication:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$"CFPreviewPerf"</ID>
+    <ID>StringLiteralDuplication:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$"class"</ID>
+    <ID>StringShouldBeRawString:PreviewSourcePreparer.kt:PreviewSourcePreparer$body + "\n\n" + stubs.distinct().joinToString("\n\n") + "\n"</ID>
+    <ID>StringShouldBeRawString:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$"import androidx.compose.material3.Text\n@androidx.compose.runtime.Composable\nfun P() { Text(\"x\") }\n"</ID>
+    <ID>ThrowsCount:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$internal fun verifyDirectoryOrThrow</ID>
+    <ID>TooGenericExceptionCaught:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ComposeViewBitmapRenderer.kt:ComposeViewBitmapRenderer$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:KotlincProcessCompiler.kt:KotlincProcessCompiler$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PreviewDexer.kt:PreviewDexer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ReflectiveComposableHost.kt:e: Throwable</ID>
+    <ID>UnconditionalJumpStatementInLoop:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$while (true) { val conn = URI(currentUrl).toURL().openConnection() as HttpURLConnection conn.connectTimeout = 15_000 conn.readTimeout = 30_000 conn.instanceFollowRedirects = false conn.setRequestProperty("User-Agent", "CodeForgeMobile/3.0.0") conn.connect() val responseCode = conn.responseCode if (responseCode in listOf( HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_SEE_OTHER, 307, 308 ) ) { if (++redirects > maxRedirects) { conn.disconnect() throw IOException("Too many redirects ($redirects) for $url") } val location = conn.getHeaderField("Location") ?: throw IOException("HTTP redirect $responseCode without Location header") val resolved = URI(currentUrl).resolve(location).toString() requireAllowedRedirectUrl(resolved) currentUrl = resolved conn.disconnect() continue } if (responseCode !in 200..299) { conn.disconnect() throw IllegalStateException("HTTP error $responseCode while downloading $url") } connection = conn break }</ID>
+    <ID>UnnecessaryParentheses:ComposePreviewScreen.kt:(state.progress.coerceIn(0, 100))</ID>
+    <ID>UnnecessaryParentheses:ComposeViewBitmapRenderer.kt:(when (rtl) { true -> LayoutDirection.Rtl; false -> LayoutDirection.Ltr; null -> LocalLayoutDirection.current })</ID>
+    <ID>UnnecessaryParentheses:PreviewDependencyResolver.kt:PreviewDependencyResolver$(totalBytes + size)</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AlsoCouldBeApply:HttpTransports.kt:FallbackHttpTransport$also</ID>
+    <ID>BracesOnIfStatements:McpManagerTest.kt:McpManagerTest$else</ID>
+    <ID>BracesOnIfStatements:McpManagerTest.kt:McpManagerTest$if</ID>
+    <ID>BracesOnIfStatements:McpTransportsTest.kt:McpTransportsTest$if</ID>
+    <ID>BracesOnWhenStatements:FakeMcpServer.kt:FakeMcpServer$when</ID>
+    <ID>BracesOnWhenStatements:HttpTransports.kt:StreamableHttpTransport$when</ID>
+    <ID>BracesOnWhenStatements:HttpTransports.kt:when</ID>
+    <ID>BracesOnWhenStatements:McpClient.kt:McpClient$when</ID>
+    <ID>BracesOnWhenStatements:McpManager.kt:McpManager$when</ID>
+    <ID>ClassOrdering:McpManager.kt:McpManager$private val toolCache = java.util.concurrent.ConcurrentHashMap&lt;String, List&lt;AgentTool>>()</ID>
+    <ID>CognitiveComplexMethod:HttpTransports.kt:LegacySseTransport$override suspend fun start</ID>
+    <ID>CognitiveComplexMethod:McpManager.kt:McpManager$suspend fun setEntries</ID>
+    <ID>CognitiveComplexMethod:McpSchemas.kt:McpSchemas$private fun node: JsonElement</ID>
+    <ID>CognitiveComplexMethod:McpServerConfig.kt:McpServerConfig.Companion$private fun toEntry: JsonObject</ID>
+    <ID>CognitiveComplexMethod:StdioTransport.kt:StdioTransport$override suspend fun start</ID>
+    <ID>CyclomaticComplexMethod:McpSchemas.kt:McpSchemas$private fun node: JsonElement</ID>
+    <ID>DocumentationOverPrivateFunction:HttpTransports.kt:private fun readSse</ID>
+    <ID>EmptyCatchBlock:McpTransportsTest.kt:McpTransportsTest${ }</ID>
+    <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `Aufruf flacht Text, Ressourcen und Fehlerkennzeichen ab`</ID>
+    <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `Handshake liefert Serverdaten, initialized wird gesendet`</ID>
+    <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `JSON-RPC-Fehler wird zur McpException, Zeitlimit zur McpTimeoutException`</ID>
+    <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `Verbindungsabbruch bricht offene Anfragen ab und meldet onDisconnected`</ID>
+    <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `Werkzeugliste folgt der Paginierung und liest Annotationen`</ID>
+    <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `ping des Servers wird beantwortet, unbekannte Server-Anfragen mit Fehler`</ID>
+    <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `tools list_changed ruft den Rueckruf`</ID>
+    <ID>FunctionNameMaxLength:McpConfigSchemaToolTest.kt:McpConfigSchemaToolTest$@Test fun `Konfiguration liest Claude-Code-Format, leitet Typ ab und schreibt zurueck`</ID>
+    <ID>FunctionNameMaxLength:McpConfigSchemaToolTest.kt:McpConfigSchemaToolTest$@Test fun `Remote-Werkzeug mapped Art, kuerzt Ergebnisse und meldet Bilder`</ID>
+    <ID>FunctionNameMaxLength:McpConfigSchemaToolTest.kt:McpConfigSchemaToolTest$@Test fun `Schema-Normalisierung setzt Refs ein, reduziert Typlisten und anyOf, streicht Unbekanntes`</ID>
+    <ID>FunctionNameMaxLength:McpConfigSchemaToolTest.kt:McpConfigSchemaToolTest$@Test fun `Werkzeugnamen werden bereinigt, gekuerzt und sind stabil`</ID>
+    <ID>FunctionNameMaxLength:McpConfigSchemaToolTest.kt:McpConfigSchemaToolTest$@Test fun `leeres Schema wird zu object mit leeren properties`</ID>
+    <ID>FunctionNameMaxLength:McpManagerTest.kt:McpManagerTest$@Test fun `Fehler werden je Server gemeldet, unveraenderte Server bleiben verbunden, Entfernte verschwinden`</ID>
+    <ID>FunctionNameMaxLength:McpManagerTest.kt:McpManagerTest$@Test fun `Namenskonflikte bekommen ein Suffix`</ID>
+    <ID>FunctionNameMaxLength:McpManagerTest.kt:McpManagerTest$@Test fun `Projekt-Server ohne Freigabe verbinden nicht, mit Freigabe schon, Projekt gewinnt bei gleichem Namen`</ID>
+    <ID>FunctionNameMaxLength:McpManagerTest.kt:McpManagerTest$@Test fun `verbindet Server, benennt Werkzeuge um und liefert Hinweise`</ID>
+    <ID>FunctionNameMaxLength:McpTransportsTest.kt:McpTransportsTest$@Test fun `401 wird zur Anmeldung, 404 mit Sitzung zur abgelaufenen Sitzung`</ID>
+    <ID>FunctionNameMaxLength:McpTransportsTest.kt:McpTransportsTest$@Test fun `Rueckfall auf das aeltere HTTP+SSE`</ID>
+    <ID>FunctionNameMaxLength:McpTransportsTest.kt:McpTransportsTest$@Test fun `Streamable HTTP mit JSON-Antwort, Sitzungs-ID und Protokollheader`</ID>
+    <ID>FunctionNameMaxLength:McpTransportsTest.kt:McpTransportsTest$@Test fun `Streamable HTTP mit SSE-Antwort`</ID>
+    <ID>FunctionNameMaxLength:McpTransportsTest.kt:McpTransportsTest$@Test fun `stdio liest und schreibt Zeilen (cat spiegelt jede Nachricht zurueck)`</ID>
+    <ID>FunctionNameMaxLength:McpTransportsTest.kt:McpTransportsTest$@Test fun `stdio meldet Prozessende samt stderr`</ID>
+    <ID>LateinitUsage:HttpTransports.kt:FallbackHttpTransport$private lateinit var onClosed: (Throwable?) -> Unit</ID>
+    <ID>LateinitUsage:HttpTransports.kt:FallbackHttpTransport$private lateinit var onMessage: (JsonObject) -> Unit</ID>
+    <ID>LateinitUsage:HttpTransports.kt:StreamableHttpTransport$private lateinit var onMessage: (JsonObject) -> Unit</ID>
+    <ID>LoopWithTooManyJumpStatements:McpTransportsTest.kt:McpTransportsTest$while</ID>
+    <ID>ReturnCount:FakeMcpServer.kt:FakeMcpServer$fun reply: List&lt;JsonObject></ID>
+    <ID>ReturnCount:McpSchemas.kt:McpSchemas$private fun node: JsonElement</ID>
+    <ID>ReturnCount:McpServerConfig.kt:McpServerConfig.Companion$fun parseEntry: McpServerConfig?</ID>
+    <ID>StringLiteralDuplication:HttpTransports.kt:StreamableHttpTransport$"Mcp-Session-Id"</ID>
+    <ID>StringLiteralDuplication:HttpTransports.kt:StreamableHttpTransport$"WWW-Authenticate"</ID>
+    <ID>StringLiteralDuplication:McpClient.kt:McpClient$"jsonrpc"</ID>
+    <ID>StringLiteralDuplication:McpClient.kt:McpClient$"method"</ID>
+    <ID>StringLiteralDuplication:McpSchemas.kt:McpSchemas$"items"</ID>
+    <ID>StringLiteralDuplication:McpSchemas.kt:McpSchemas$"properties"</ID>
+    <ID>StringLiteralDuplication:McpSchemas.kt:McpSchemas$"string"</ID>
+    <ID>StringShouldBeRawString:McpTransportsTest.kt:McpTransportsTest$": ping\n\nevent: message\ndata: ${replies[0]}\n\n"</ID>
+    <ID>StringShouldBeRawString:McpTransportsTest.kt:McpTransportsTest$"event: endpoint\ndata: /messages?s=1\n\n"</ID>
+    <ID>StringShouldBeRawString:McpTransportsTest.kt:McpTransportsTest$"event: message\ndata: $m\n\n"</ID>
+    <ID>SwallowedException:HttpTransports.kt:LegacySseTransport$e: kotlinx.coroutines.TimeoutCancellationException</ID>
+    <ID>SwallowedException:McpClient.kt:McpClient$e: TimeoutCancellationException</ID>
+    <ID>SwallowedException:McpTransportsTest.kt:McpTransportsTest$e: McpSessionExpiredException</ID>
+    <ID>ThrowsCount:HttpTransports.kt:LegacySseTransport$override suspend fun start</ID>
+    <ID>ThrowsCount:McpClient.kt:McpClient$suspend fun request: JsonObject</ID>
+    <ID>TooGenericExceptionCaught:HttpTransports.kt:LegacySseTransport$e: Throwable</ID>
+    <ID>TooGenericExceptionCaught:McpClient.kt:McpClient$e: Throwable</ID>
+    <ID>TooGenericExceptionCaught:McpManager.kt:McpManager$e: Throwable</ID>
+    <ID>TrimMultilineRawString:McpConfigSchemaToolTest.kt:McpConfigSchemaToolTest$"""{"${'$'}schema":"x","type":"object","additionalProperties":false, "${'$'}defs":{"Pos":{"type":"object","properties":{"line":{"type":"integer"}},"required":["line"]}}, "properties":{ "pos":{"${'$'}ref":"#/${'$'}defs/Pos"}, "name":{"type":["string","null"],"description":"d","minLength":1}, "opt":{"anyOf":[{"type":"null"},{"type":"number"}]}, "list":{"type":"array","items":{"type":"string","format":"x"}}, "mode":{"enum":["a","b"],"type":"string"}, "frei":{} },"required":["pos"]}"""</ID>
+    <ID>UnderscoresInNumericLiterals:FakeMcpServer.kt:FakeMcpServer$32601</ID>
+    <ID>UnderscoresInNumericLiterals:McpClient.kt:McpClient.Companion$32601</ID>
+    <ID>UnderscoresInNumericLiterals:McpClientTest.kt:McpClientTest$32601</ID>
+    <ID>UnnecessaryParentheses:McpSchemas.kt:McpSchemas$((pick as? JsonObject).orEmpty())</ID>
+    <ID>UnnecessaryParentheses:McpSchemas.kt:McpSchemas$((schema["\$defs"] ?: schema["definitions"]) as? JsonObject)</ID>
+    <ID>UseIfInsteadOfWhen:McpSchemas.kt:McpSchemas$when (v) { is JsonArray -> v.firstOrNull { it is JsonPrimitive &amp;&amp; it.contentOrNull != "null" } ?: JsonPrimitive("string") else -> v }</ID>
+    <ID>UseIfInsteadOfWhen:McpServerConfig.kt:McpServerConfig$when (transport) { McpTransportKind.STDIO -> "stdio:" + (listOfNotNull(command) + args).joinToString(" ") else -> "url:" + url.orEmpty() }</ID>
+    <ID>UseIfInsteadOfWhen:McpServerConfig.kt:McpServerConfig.Companion$when (s.transport) { McpTransportKind.STDIO -> { put("type", "stdio") put("command", s.command.orEmpty()) if (s.args.isNotEmpty()) putJsonArray("args") { s.args.forEach { add(JsonPrimitive(it)) } } if (s.env.isNotEmpty()) putJsonObject("env") { s.env.forEach { (k, v) -> put(k, v) } } } else -> { put("type", if (s.transport == McpTransportKind.SSE) "sse" else "http") put("url", s.url.orEmpty()) if (s.headers.isNotEmpty()) putJsonObject("headers") { s.headers.forEach { (k, v) -> put(k, v) } } } }</ID>
+  </CurrentIssues>
+</SmellBaseline>

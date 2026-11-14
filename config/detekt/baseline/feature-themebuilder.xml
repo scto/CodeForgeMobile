@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:ThemeBuilderViewModel.kt:ThemeBuilderViewModel$when</ID>
+    <ID>CognitiveComplexMethod:ThemeBuilderScreen.kt:@Composable private fun ExtensionThemeRow</ID>
+    <ID>DocumentationOverPrivateProperty:ThemeBuilderViewModel.kt:ThemeBuilderViewModel$/** Überschreibt die persistierten Hex-Werte während einer aktiven Custom-Color-Bearbeitung. */ private val editBuffer = MutableStateFlow&lt;HexBuffer?>(null)</ID>
+    <ID>ExpressionBodySyntax:RgbColorUtils.kt:RgbColorUtils$return hexToRgb(hex) != null</ID>
+    <ID>FunctionNameMaxLength:RgbColorUtilsTest.kt:RgbColorUtilsTest$@Test fun testQuickPresetsCountAndValidity</ID>
+    <ID>UnnecessaryParentheses:ThemeBuilderScreen.kt:((theme.colors["background"] ?: if (theme.isDark) 0xFF121212L else 0xFFFFFFFFL).toInt())</ID>
+    <ID>UnnecessaryParentheses:ThemeBuilderScreen.kt:((theme.colors["primary"] ?: 0xFF888888L).toInt())</ID>
+    <ID>UnnecessaryParentheses:ThemeBuilderScreen.kt:((theme.colors["secondary"] ?: theme.colors["primary"] ?: 0xFF888888L).toInt())</ID>
+  </CurrentIssues>
+</SmellBaseline>

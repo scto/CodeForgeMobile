@@ -68,7 +68,9 @@ comments:
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
     searchProtectedFunction: true
   UndocumentedPublicProperty:
-    active: true
+    # CodeForgeMobile: aus – meldet vor allem Felder von Daten-/UiState-Klassen; die Klasse selbst trägt das KDoc.
+    # KDoc an öffentlichen Klassen und Funktionen bleibt Pflicht (UndocumentedPublicClass/-Function).
+    active: false
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
     searchProtectedProperty: true
     ignoreEnumEntries: true
@@ -105,7 +107,8 @@ complexity:
       - 'use'
       - 'with'
   LabeledExpression:
-    active: true
+    # CodeForgeMobile: aus – meldet idiomatische Rücksprünge aus Lambdas (return@withContext, return@launch …).
+    active: false
     ignoredLabels: []
   LargeClass:
     active: true

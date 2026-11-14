@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:X2cPhases.kt:X2cPhaseTracker$else</ID>
+    <ID>BracesOnIfStatements:X2cPhases.kt:X2cPhaseTracker$if</ID>
+    <ID>BracesOnIfStatements:X2cViewModel.kt:X2cViewModel$else</ID>
+    <ID>BracesOnIfStatements:X2cViewModel.kt:X2cViewModel$if</ID>
+    <ID>BracesOnWhenStatements:GradleRepositoryX2cBuildChecker.kt:GradleRepositoryX2cBuildChecker$when</ID>
+    <ID>CognitiveComplexMethod:GradleRepositoryX2cBuildChecker.kt:GradleRepositoryX2cBuildChecker$override suspend fun runTasks: X2cBuildStepResult</ID>
+    <ID>CognitiveComplexMethod:X2cProgressScreen.kt:@Composable fun X2cProgressScreen</ID>
+    <ID>CognitiveComplexMethod:X2cResultScreen.kt:@Composable private fun BuildCard</ID>
+    <ID>CognitiveComplexMethod:X2cResultScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun X2cResultScreen</ID>
+    <ID>CognitiveComplexMethod:X2cViewModel.kt:X2cViewModel$private fun scanProject</ID>
+    <ID>DataClassContainsFunctions:X2cPhases.kt:X2cPhaseTracker$fun onProgress: X2cPhaseTracker</ID>
+    <ID>DataClassContainsFunctions:X2cPhases.kt:X2cPhaseTracker$fun steps: List&lt;X2cPhaseStep></ID>
+    <ID>DataClassContainsFunctions:X2cPhases.kt:X2cPhaseTracker$private fun advance: X2cPhaseTracker</ID>
+    <ID>DocumentationOverPrivateFunction:X2cResultScreen.kt:@Composable private fun UndoConflictDialog</ID>
+    <ID>FunctionNameMaxLength:GradleRepositoryX2cBuildCheckerTest.kt:GradleRepositoryX2cBuildCheckerTest$@Test fun `build failure message and missing finish event both count as failed`</ID>
+    <ID>FunctionNameMaxLength:GradleRepositoryX2cBuildCheckerTest.kt:GradleRepositoryX2cBuildCheckerTest$@Test fun `caller cancellation stops the gradle build`</ID>
+    <ID>FunctionNameMaxLength:GradleRepositoryX2cBuildCheckerTest.kt:GradleRepositoryX2cBuildCheckerTest$@Test fun `connect failure fails without starting a task`</ID>
+    <ID>FunctionNameMaxLength:GradleRepositoryX2cBuildCheckerTest.kt:GradleRepositoryX2cBuildCheckerTest$@Test fun `failed build keeps errors with file and line, info is dropped`</ID>
+    <ID>FunctionNameMaxLength:GradleRepositoryX2cBuildCheckerTest.kt:GradleRepositoryX2cBuildCheckerTest$@Test fun `joins tasks into one gradle call and maps a successful build`</ID>
+    <ID>FunctionNameMaxLength:GradleRepositoryX2cBuildCheckerTest.kt:GradleRepositoryX2cBuildCheckerTest$@Test fun `secrets in output and messages are scrubbed`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `a phase marks all earlier phases as done`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `before the first progress everything is pending`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `build before apply is the baseline, after apply it is the verification`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `fraction exists only for counted phases`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `overall percent grows with the phase and stays below 100`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `plan lists only phases the options need, in pipeline order`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `preparing the build counts as applying`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `rollback and failure keep the phase and set flags`</ID>
+    <ID>FunctionNameMaxLength:X2cPhasesTest.kt:X2cPhasesTest$@Test fun `without baseline option an early build step is the verification`</ID>
+    <ID>FunctionNameMaxLength:X2cResultModelTest.kt:X2cResultModelTest$@Test fun `a rerun replaces the earlier verdict`</ID>
+    <ID>FunctionNameMaxLength:X2cResultModelTest.kt:X2cResultModelTest$@Test fun `errors list only errors, own errors first, duplicates removed, limited`</ID>
+    <ID>FunctionNameMaxLength:X2cResultModelTest.kt:X2cResultModelTest$@Test fun `explicit verdict wins over the steps`</ID>
+    <ID>FunctionNameMaxLength:X2cResultModelTest.kt:X2cResultModelTest$@Test fun `no steps and no verdict means the build did not run`</ID>
+    <ID>FunctionNameMaxLength:X2cResultModelTest.kt:X2cResultModelTest$@Test fun `rerun errors replace the errors of the migration run`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `backup folder message names the folder, not the zip`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `baseline option needs the build check`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `cancel from the notification behaves like cancel in the screen`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `cancel informs repository, waits for rollback and then ends the run`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `cancel without a run does nothing`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `dismiss with dontAskAgain saves preference to settings and suppresses auto prompt`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `failed migration reports error and ends the run`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `layout selection toggling and select all deselect all`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `open report and compose file resolve paths against the project`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `open report without report file shows a message`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `openFile requests navigation via bridge`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `progress drives phase tracker and notification`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `result can be closed and shown again, filters apply`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `run build again falls back to assembleDebug without earlier steps`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `run build again uses the tasks of the first real build step`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `scanProject opens dialog and preselects convertible layouts`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `scanProject with manualTrigger opens dialog even if auto prompt doesn't qualify`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `scanProject with preselectedLayout selects only that layout`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `search query filters displayed layouts`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `second start while running is ignored`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `startMigration runs, reports and keeps the notifier in sync`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `undo asks about changed files and passes the answer on`</ID>
+    <ID>FunctionNameMaxLength:X2cViewModelTest.kt:X2cViewModelTest$@Test fun `undo failure is reported and ends the run`</ID>
+    <ID>LongMethod:GradleRepositoryX2cBuildChecker.kt:GradleRepositoryX2cBuildChecker$override suspend fun runTasks: X2cBuildStepResult</ID>
+    <ID>MatchingDeclarationName:X2cResultModel.kt:X2cBuildBadge</ID>
+    <ID>ReturnCount:X2cPhases.kt:fun X2cPhaseTracker.overallPercent: Int?</ID>
+    <ID>TooGenericExceptionCaught:GradleRepositoryX2cBuildChecker.kt:GradleRepositoryX2cBuildChecker$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:X2cViewModel.kt:X2cViewModel$e: Exception</ID>
+    <ID>UnderscoresInNumericLiterals:X2cForegroundService.kt:X2cForegroundService.Companion$52011</ID>
+    <ID>UnderscoresInNumericLiterals:X2cTestFakes.kt:123456789L</ID>
+    <ID>UndocumentedPublicFunction:X2cForegroundService.kt:X2cForegroundService.Companion$fun start</ID>
+    <ID>UndocumentedPublicFunction:X2cForegroundService.kt:X2cForegroundService.Companion$fun stop</ID>
+    <ID>UndocumentedPublicFunction:X2cForegroundService.kt:X2cForegroundService.Companion$fun update</ID>
+    <ID>UnnecessaryParentheses:X2cPhases.kt:((index + inner) / phases.size)</ID>
+  </CurrentIssues>
+</SmellBaseline>

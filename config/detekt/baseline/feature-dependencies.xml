@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:DependenciesScreen.kt:when</ID>
+    <ID>CognitiveComplexMethod:DependenciesScreen.kt:@Composable private fun DependencyTreeRow</ID>
+    <ID>CognitiveComplexMethod:DependenciesScreen.kt:private fun flattenTree: List&lt;FlattenedTreeItem></ID>
+    <ID>CognitiveComplexMethod:DependencyDetailBottomSheet.kt:@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun DependencyDetailBottomSheet</ID>
+    <ID>ExpressionBodySyntax:DependenciesScreen.kt:return when (filterMode) { DependencyFilterMode.ALL -> true DependencyFilterMode.ONLY_CONFLICTS -> node.hasConflict || hasConflictInSubtree(node) DependencyFilterMode.ONLY_PROJECTS -> node.isProject || hasProjectInSubtree(node) DependencyFilterMode.ONLY_DIRECT -> true }</ID>
+    <ID>FunctionNameMaxLength:DependenciesViewModelTest.kt:DependenciesViewModelTest$@Test fun expandAndCollapseAll_updatesExpandedKeys</ID>
+    <ID>FunctionNameMaxLength:DependenciesViewModelTest.kt:DependenciesViewModelTest$@Test fun init_loadsModulesAndInitialGraph</ID>
+    <ID>FunctionNameMaxLength:DependenciesViewModelTest.kt:DependenciesViewModelTest$@Test fun selectModule_updatesModuleAndReloadsGraph</ID>
+    <ID>StringLiteralDuplication:DependenciesViewModel.kt:DependenciesViewModel$"debugRuntimeClasspath"</ID>
+  </CurrentIssues>
+</SmellBaseline>

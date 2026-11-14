@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$else</ID>
+    <ID>BracesOnIfStatements:LspJsonMapper.kt:else</ID>
+    <ID>BracesOnIfStatements:LspServerSession.kt:LspServerSession$else</ID>
+    <ID>BracesOnIfStatements:ProcFs.kt:ProcFs$if</ID>
+    <ID>BracesOnWhenStatements:LspJsonMapper.kt:when</ID>
+    <ID>ClassOrdering:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$constructor</ID>
+    <ID>ClassOrdering:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$private fun LspServerSession.allows: Boolean</ID>
+    <ID>ClassOrdering:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$private fun publish</ID>
+    <ID>ClassOrdering:LspRpcConnection.kt:LspRpcConnection$constructor</ID>
+    <ID>ClassOrdering:LspServerSession.kt:LspServerSession$Companion</ID>
+    <ID>ClassOrdering:LspServerSession.kt:LspServerSession$fun processId: Long?</ID>
+    <ID>ClassOrdering:LspServerSession.kt:LspServerSession$private val stderrTail = ArrayDeque&lt;String>()</ID>
+    <ID>CognitiveComplexMethod:LspWorkspaceEditApplier.kt:LspWorkspaceEditApplier$suspend fun apply: Result&lt;AppliedEditResult></ID>
+    <ID>ComplexCondition:LspJsonMapper.kt:i &lt; len &amp;&amp; text[i] != '\n' &amp;&amp; text[i] != '\r' &amp;&amp; charCount &lt; position.character</ID>
+    <ID>ComplexCondition:LspJsonMapper.kt:start != null &amp;&amp; end != null &amp;&amp; start in 0..end &amp;&amp; end &lt;= label.length</ID>
+    <ID>CyclomaticComplexMethod:LspWorkspaceEditApplier.kt:LspWorkspaceEditApplier$suspend fun apply: Result&lt;AppliedEditResult></ID>
+    <ID>DocumentationOverPrivateFunction:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$private fun publish</ID>
+    <ID>DocumentationOverPrivateFunction:LspServerSession.kt:LspServerSession$private fun drainStderr</ID>
+    <ID>DocumentationOverPrivateFunction:LspServerSession.kt:LspServerSession$private fun notifySafely</ID>
+    <ID>DocumentationOverPrivateFunction:LspServerSession.kt:LspServerSession$private fun watchExit</ID>
+    <ID>ExpressionBodySyntax:LspJsonMapper.kt:return when (result) { is JsonArray -> result.mapNotNull { parseSingleLocation(it) } is JsonObject -> listOfNotNull(parseSingleLocation(result)) else -> emptyList() }</ID>
+    <ID>FunctionNameMaxLength:LspFakeServerTest.kt:LspFakeServerTest$@Test fun `test all LSP requests and responses roundtrip through fake server`</ID>
+    <ID>FunctionNameMaxLength:LspFakeServerTest.kt:LspFakeServerTest$@Test fun `test server-to-client workspace applyEdit request and client response`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `applyTextEditsToString applies multiple non-overlapping edits in correct order`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `applyTextEditsToString applies single edit correctly`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `lspPositionToCharOffset correctly handles emojis and surrogate pairs in UTF-16`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `lspPositionToCharOffset correctly handles german umlauts`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `lspPositionToCharOffset handles ascii lines`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseCodeActions parses full code action with edit and command`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseDocumentSymbols parses hierarchical and flat symbols`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseFoldingRanges liest Bereiche und verwirft Einzeiler`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseInlayHints unterstuetzt String- und Teile-Labels mit Padding`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseServerCapabilities erkennt foldingRange und inlayHint`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseServerCapabilities erkennt typeDefinition, implementation und signatureHelp`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseServerCapabilities parses boolean and object providers`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseSignatureHelp liefert null ohne Signaturen`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseSignatureHelp liest Signaturen, Parameter-Offsets und aktiven Parameter`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test fun `parseWorkspaceEdit parses documentChanges with file operations`</ID>
+    <ID>FunctionNameMaxLength:LspJsonMapperTest.kt:LspJsonMapperTest$@Test(expected = IllegalArgumentException::class) fun `applyTextEditsToString rejects overlapping edits`</ID>
+    <ID>FunctionNameMaxLength:LspReaderCloseTest.kt:LspReaderCloseTest$@Test fun `close waehrend des Lesens fuehrt zu keiner unbehandelten Ausnahme`</ID>
+    <ID>FunctionNameMaxLength:LspRouterTest.kt:LspRouterTest$@Test fun `disabled features answer empty without asking the server`</ID>
+    <ID>FunctionNameMaxLength:LspRouterTest.kt:LspRouterTest$@Test fun `memory release keeps the active session and spares open documents unless asked`</ID>
+    <ID>FunctionNameMaxLength:LspRouterTest.kt:LspRouterTest$@Test fun `request on unknown path returns failure without throwing exception`</ID>
+    <ID>FunctionNameMaxLength:LspRouterTest.kt:LspRouterTest$@Test fun `router delegates to correct session based on opened path and keeps sessions isolated`</ID>
+    <ID>FunctionNameMaxLength:LspRouterTest.kt:LspRouterTest$@Test fun `session key distinguishes same server in different workspaces and same server across languages`</ID>
+    <ID>FunctionNameMaxLength:LspRouterTest.kt:LspRouterTest$@Test fun `stopping session clears its diagnostics while other sessions diagnostics remain`</ID>
+    <ID>FunctionNameMaxLength:LspServerDeathTest.kt:LspServerDeathTest$@Test fun `didOpen didChange didClose werfen nicht bei geschlossenem Server-Eingabestrom`</ID>
+    <ID>FunctionNameMaxLength:LspWorkspaceEditApplierTest.kt:LspWorkspaceEditApplierTest$@Test fun `apply handles file operations and rollback on failure`</ID>
+    <ID>FunctionNameMaxLength:LspWorkspaceEditApplierTest.kt:LspWorkspaceEditApplierTest$@Test fun `apply updates open file buffer and closed file disk correctly`</ID>
+    <ID>FunctionNameMaxLength:LspWorkspaceEditApplierTest.kt:LspWorkspaceEditApplierTest$@Test fun `atomic rollback restores all files when one file write fails`</ID>
+    <ID>FunctionNameMaxLength:ProcFsTest.kt:ProcFsTest$@Test fun `descendants follow the process tree`</ID>
+    <ID>FunctionNameMaxLength:ProcFsTest.kt:ProcFsTest$@Test fun `ppid survives process names with spaces and parentheses`</ID>
+    <ID>LongMethod:LspFakeServerTest.kt:LspFakeServerTest$@Test fun `test all LSP requests and responses roundtrip through fake server`</ID>
+    <ID>LongMethod:LspServerSession.kt:LspServerSession$suspend fun start: Result&lt;Unit></ID>
+    <ID>LongMethod:LspWorkspaceEditApplier.kt:LspWorkspaceEditApplier$suspend fun apply: Result&lt;AppliedEditResult></ID>
+    <ID>LoopWithTooManyJumpStatements:LspFakeServerTest.kt:LspFakeServerTest$while</ID>
+    <ID>ReturnCount:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$private fun findOrCreateRoutingForOpen: LspServerSession?</ID>
+    <ID>ReturnCount:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$private fun sessionForPath: LspServerSession?</ID>
+    <ID>ReturnCount:LspJsonMapper.kt:internal fun parseFileOperation: LspFileOperation?</ID>
+    <ID>ReturnCount:LspRpcConnection.kt:LspRpcConnection.Companion$fun readMessage: JsonObject?</ID>
+    <ID>StringLiteralDuplication:LspJsonMapper.kt:"character"</ID>
+    <ID>StringLiteralDuplication:LspJsonMapper.kt:"command"</ID>
+    <ID>StringLiteralDuplication:LspJsonMapper.kt:"label"</ID>
+    <ID>StringLiteralDuplication:LspJsonMapper.kt:"range"</ID>
+    <ID>StringLiteralDuplication:LspJsonMapper.kt:"textDocument"</ID>
+    <ID>StringLiteralDuplication:LspRpcConnection.kt:LspRpcConnection$"jsonrpc"</ID>
+    <ID>StringLiteralDuplication:LspRpcConnection.kt:LspRpcConnection$"method"</ID>
+    <ID>StringLiteralDuplication:LspRpcConnection.kt:LspRpcConnection$"params"</ID>
+    <ID>StringLiteralDuplication:LspServerSession.kt:LspServerSession$"dynamicRegistration"</ID>
+    <ID>StringLiteralDuplication:LspServerSession.kt:LspServerSession$"file://$path"</ID>
+    <ID>StringLiteralDuplication:LspServerSession.kt:LspServerSession$"position"</ID>
+    <ID>StringLiteralDuplication:LspServerSession.kt:LspServerSession$"range"</ID>
+    <ID>StringLiteralDuplication:LspServerSession.kt:LspServerSession$"result"</ID>
+    <ID>StringLiteralDuplication:LspServerSession.kt:LspServerSession$"textDocument"</ID>
+    <ID>StringShouldBeRawString:ProcFsTest.kt:ProcFsTest$"Name:\tjava\nVmRSS:\t 2048 kB\nThreads:\t3"</ID>
+    <ID>SwallowedException:LspServerSession.kt:LspServerSession$e: java.io.IOException</ID>
+    <ID>TooGenericExceptionCaught:LspRpcConnection.kt:LspRpcConnection$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:LspWorkspaceEditApplier.kt:LspWorkspaceEditApplier$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:LspWorkspaceEditApplier.kt:LspWorkspaceEditApplier$e: Throwable</ID>
+    <ID>TooManyFunctions:LspServerSession.kt:LspServerSession</ID>
+    <ID>TrimMultilineRawString:LspJsonMapperTest.kt:LspJsonMapperTest$"""[{"position":{"line":1,"character":5},"label":": Int","kind":1,"paddingLeft":true}, {"position":{"line":2,"character":0},"label":[{"value":"name"},{"value":":"}],"kind":2,"paddingRight":true,"tooltip":{"kind":"markdown","value":"Parametername"}}, {"position":{"line":3,"character":0},"label":""},{"label":"x"}]"""</ID>
+    <ID>TrimMultilineRawString:LspJsonMapperTest.kt:LspJsonMapperTest$"""{"signatures":[{"label":"foo(a: Int, b: String)","documentation":{"kind":"markdown","value":"Doku"}, "parameters":[{"label":[4,10]},{"label":"b: String"}]}],"activeSignature":0,"activeParameter":1}"""</ID>
+    <ID>UnderscoresInNumericLiterals:LspRpcConnection.kt:LspRpcConnection$32603</ID>
+    <ID>UnusedParameter:LspServerSession.kt:LspServerSession$id: JsonElement</ID>
+    <ID>UseLet:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$if (activePath != null) { val sId = documentToSession[activePath] if (sId != null) sessions[sId] else null } else null</ID>
+    <ID>UseLet:LspClientRepositoryImpl.kt:LspClientRepositoryImpl$if (sId != null) sessions[sId] else null</ID>
+  </CurrentIssues>
+</SmellBaseline>

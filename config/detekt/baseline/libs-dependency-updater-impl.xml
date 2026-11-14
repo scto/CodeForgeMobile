@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:CatalogAnnotator.kt:FileAnnotator$else</ID>
+    <ID>BracesOnIfStatements:CatalogAnnotator.kt:FileAnnotator$if</ID>
+    <ID>BracesOnIfStatements:TomlCatalogParser.kt:TomlCatalogParser$if</ID>
+    <ID>BracesOnWhenStatements:TomlCatalogParser.kt:TomlCatalogParser$when</ID>
+    <ID>BracesOnWhenStatements:VersionComparator.kt:VersionComparator$when</ID>
+    <ID>ClassOrdering:DependencyUpdateRepositoryImpl.kt:DependencyUpdateRepositoryImpl$constructor</ID>
+    <ID>ClassOrdering:GradleBuildParser.kt:VariableIndex.Companion$val EMPTY = VariableIndex(emptyMap())</ID>
+    <ID>ClassOrdering:HttpMavenMetadataClient.kt:HttpMavenMetadataClient$constructor</ID>
+    <ID>ClassOrdering:RepositoryFlowTest.kt:RepositoryFlowTest$private val server = mapOf( "androidx.compose.ui:ui" to listOf("1.7.0", "1.7.3"), "com.squareup.okhttp3:okhttp" to listOf("4.11.0", "4.12.0") )</ID>
+    <ID>ClassOrdering:UpdateFlowTest.kt:UpdateFlowTest$private val server = mapOf( "androidx.compose.ui:ui" to listOf("1.7.0", "1.7.3", "1.8.0-alpha01"), "androidx.compose.ui:ui-graphics" to listOf("1.7.0", "1.7.2"), "org.jetbrains.kotlin:kotlin-stdlib" to listOf("2.0.20"), "com.squareup.okhttp3:okhttp" to listOf("4.12.0", "5.0.0") )</ID>
+    <ID>CognitiveComplexMethod:GradleBuildParser.kt:GradleBuildParser$fun parse: List&lt;RawUsage></ID>
+    <ID>CognitiveComplexMethod:GradleBuildParser.kt:VariableIndex.Companion$fun build: VariableIndex</ID>
+    <ID>CognitiveComplexMethod:TomlCatalogParser.kt:TomlCatalogParser$fun parse: List&lt;RawUsage></ID>
+    <ID>CognitiveComplexMethod:TomlCatalogParser.kt:TomlCatalogParser$private fun readTable: Int</ID>
+    <ID>CognitiveComplexMethod:VersionComparator.kt:VersionComparator$private fun tokenize: List&lt;Part></ID>
+    <ID>ComplexCondition:TomlCatalogParser.kt:TomlCatalogParser$i &lt; limit &amp;&amp; text[i] != '=' &amp;&amp; text[i] != '}' &amp;&amp; text[i] != ','</ID>
+    <ID>ComplexCondition:VersionComparator.kt:UpdatePolicy$v.any { it == '+' || it == '$' || it == '[' || it == '(' || it == ',' || it == ' ' }</ID>
+    <ID>CyclomaticComplexMethod:GradleBuildParser.kt:GradleBuildParser$fun parse: List&lt;RawUsage></ID>
+    <ID>CyclomaticComplexMethod:TomlCatalogParser.kt:TomlCatalogParser$fun parse: List&lt;RawUsage></ID>
+    <ID>CyclomaticComplexMethod:TomlCatalogParser.kt:TomlCatalogParser$private fun readTable: Int</ID>
+    <ID>DocumentationOverPrivateFunction:CatalogAnnotator.kt:FileAnnotator$private fun annotateByStoredLocations: List&lt;FileUpdateAnnotation></ID>
+    <ID>DocumentationOverPrivateFunction:CatalogAnnotator.kt:FileAnnotator$private fun annotateCatalog: List&lt;FileUpdateAnnotation></ID>
+    <ID>DocumentationOverPrivateFunction:HttpMavenMetadataClient.kt:HttpMavenMetadataClient$private fun fetch: List&lt;String>?</ID>
+    <ID>DocumentationOverPrivateFunction:TomlCatalogParser.kt:TomlCatalogParser$private fun readTable: Int</ID>
+    <ID>DocumentationOverPrivateFunction:VersionComparator.kt:VersionComparator$private fun compareMissing: Int</ID>
+    <ID>EmptyElseBlock:TomlCatalogParser.kt:TomlCatalogParser$if (i == keyStart) i++</ID>
+    <ID>EmptyElseBlock:VersionComparator.kt:VersionComparator$if (digits == false) flush()</ID>
+    <ID>EmptyElseBlock:VersionComparator.kt:VersionComparator$if (digits == true) flush()</ID>
+    <ID>FunctionNameMaxLength:GradleBuildParserTest.kt:GradleBuildParserTest$@Test fun sameDependencyInSeveralModulesMergesToOneCandidate</ID>
+    <ID>FunctionNameMaxLength:RepositoryFlowTest.kt:RepositoryFlowTest$@Test fun applyFailsGracefullyWhenFileChanged</ID>
+    <ID>FunctionNameMaxLength:UpdateFlowTest.kt:UpdateFlowTest$@Test fun calculatorUsesMinimumForSharedVersionAndSkipsCurrent</ID>
+    <ID>LongMethod:TomlCatalogParser.kt:TomlCatalogParser$fun parse: List&lt;RawUsage></ID>
+    <ID>LoopWithTooManyJumpStatements:TomlCatalogParser.kt:TomlCatalogParser$for</ID>
+    <ID>MatchingDeclarationName:CatalogAnnotator.kt:FileAnnotator</ID>
+    <ID>NestedBlockDepth:TomlCatalogParser.kt:TomlCatalogParser$fun parse: List&lt;RawUsage></ID>
+    <ID>ReturnCount:GradleBuildParser.kt:GradleBuildParser$fun literal: VersionLiteral?</ID>
+    <ID>ReturnCount:GradleBuildParser.kt:VariableIndex$fun resolve: VersionLiteral?</ID>
+    <ID>ReturnCount:TomlCatalogParser.kt:TomlCatalogParser$private fun readTable: Int</ID>
+    <ID>ReturnCount:VersionApplier.kt:VersionApplier$fun apply: Result&lt;String></ID>
+    <ID>ReturnCount:VersionComparator.kt:UpdatePolicy$fun isUpgradable: Boolean</ID>
+    <ID>StringShouldBeRawString:RepositoryFlowTest.kt:RepositoryFlowTest$"[versions]\ncompose = \"1.7.0\"\n[libraries]\nui = { module = \"androidx.compose.ui:ui\", version.ref = \"compose\" }\nokhttp = \"com.squareup.okhttp3:okhttp:4.11.0\"\n"</ID>
+    <ID>StringShouldBeRawString:RepositoryFlowTest.kt:RepositoryFlowTest$"[versions]\ncompose = \"1.7.1\"\n[libraries]\nui = { module = \"androidx.compose.ui:ui\", version.ref = \"compose\" }\n"</ID>
+    <ID>StringShouldBeRawString:RepositoryFlowTest.kt:RepositoryFlowTest$"rootProject.name = \"P\"\ninclude(\":app\")\n"</ID>
+    <ID>StringShouldBeRawString:TomlCatalogParserTest.kt:TomlCatalogParserTest$"[versions]\r\na = \"1.0\"\r\n[libraries]\r\nl = { module = \"g:n\", version.ref = \"a\" }\r\n"</ID>
+    <ID>TooGenericExceptionCaught:DependencyUpdateRepositoryImpl.kt:DependencyUpdateRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:HttpMavenMetadataClient.kt:HttpMavenMetadataClient$e: Exception</ID>
+    <ID>UndocumentedPublicFunction:DependencyUpdaterModule.kt:DependencyUpdaterModule.Companion$@Provides @Singleton fun provideDismissalStore: DismissalStore</ID>
+    <ID>UndocumentedPublicFunction:GradleBuildParser.kt:VariableIndex.Companion$fun build: VariableIndex</ID>
+    <ID>UseIfInsteadOfWhen:VersionComparator.kt:VersionComparator$when { p.number != null -> if (p.number == 0L) 0 else 1 else -> rank(p.text).compareTo(rank("final")) }</ID>
+  </CurrentIssues>
+</SmellBaseline>

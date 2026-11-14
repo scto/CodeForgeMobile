@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:CodeForgeTheme.kt:else</ID>
+    <ID>BracesOnIfStatements:CodeForgeTheme.kt:if</ID>
+    <ID>BracesOnIfStatements:ThemedFileIcon.kt:else</ID>
+    <ID>BracesOnIfStatements:ThemedFileIcon.kt:if</ID>
+    <ID>EndOfSentenceFormat:TextMateThemeCatalog.kt:TextMateThemeCatalog$* Löst das anzuwendende TextMate-Theme auf: * - "auto" oder leer: abhängig von [themeMode] und [systemDark] -> default dark oder light * - vorhandenes Theme: exakt dieser Wert * - unbekannter / nicht mehr vorhandener Wert: Rückfall auf "auto", ohne Absturz</ID>
+    <ID>FunctionNameMaxLength:BastiAnimationTest.kt:BastiAnimationTest$@Test fun `Animation wiederholt sich nach einem Durchgang`</ID>
+    <ID>FunctionNameMaxLength:BastiAnimationTest.kt:BastiAnimationTest$@Test fun `Blinzeln folgt nach der ersten Ruhephase`</ID>
+    <ID>FunctionNameMaxLength:BastiAnimationTest.kt:BastiAnimationTest$@Test fun `Zeitplan nutzt nur vorhandene Frames und hat positive Dauern`</ID>
+    <ID>FunctionNameMaxLength:BastiAnimationTest.kt:BastiAnimationTest$@Test fun `alle Frames kommen im Durchgang vor`</ID>
+    <ID>FunctionNameMaxLength:FluentTokensTest.kt:FluentTokensTest$@Test fun `brand tokens have valid distinct shades`</ID>
+    <ID>FunctionNameMaxLength:FluentTokensTest.kt:FluentTokensTest$@Test fun `corner radii conform to Fluent 2 scale`</ID>
+    <ID>FunctionNameMaxLength:FluentTokensTest.kt:FluentTokensTest$@Test fun `elevations are monotonically increasing`</ID>
+    <ID>FunctionNameMaxLength:FluentTokensTest.kt:FluentTokensTest$@Test fun `fluent color scheme light and dark differentiate correctly`</ID>
+    <ID>FunctionNameMaxLength:TextMateThemeCatalogTest.kt:TextMateThemeCatalogTest$@Test fun `auto resolves correctly for each ThemeMode and systemDark`</ID>
+    <ID>FunctionNameMaxLength:TextMateThemeCatalogTest.kt:TextMateThemeCatalogTest$@Test fun `bundled themes appear in catalog`</ID>
+    <ID>FunctionNameMaxLength:TextMateThemeCatalogTest.kt:TextMateThemeCatalogTest$@Test fun `installed themes from extensions dir appear in catalog`</ID>
+    <ID>FunctionNameMaxLength:TextMateThemeCatalogTest.kt:TextMateThemeCatalogTest$@Test fun `unknown stored value falls back to auto`</ID>
+    <ID>FunctionNameMaxLength:TextMateThemeCatalogTest.kt:TextMateThemeCatalogTest$@Test fun `valid stored theme is preserved`</ID>
+    <ID>MatchingDeclarationName:BastiSprite.kt:BastiVariant</ID>
+    <ID>ReturnCount:ThemedFileIcon.kt:IconBitmapCache$fun get: ImageBitmap?</ID>
+    <ID>UseLet:ThemedFileIcon.kt:if (theme == null) null else remember(theme, fileName, isDirectory, isExpanded) { theme.bitmapFor(fileName, isDirectory, isExpanded) }</ID>
+  </CurrentIssues>
+</SmellBaseline>

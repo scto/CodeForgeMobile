@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:AndroidStringEscaper.kt:AndroidStringEscaper$when</ID>
+    <ID>CognitiveComplexMethod:AndroidStringEscaper.kt:AndroidStringEscaper$fun convertTemplatePlaceholders: TemplateConversionResult</ID>
+    <ID>CognitiveComplexMethod:AndroidStringEscaper.kt:AndroidStringEscaper$private fun findClosingBrace: Int</ID>
+    <ID>CognitiveComplexMethod:KotlinStringExtractor.kt:KotlinStringExtractor$fun extract: List&lt;HardcodedStringFinding></ID>
+    <ID>CognitiveComplexMethod:KotlinStringExtractor.kt:KotlinStringExtractor$private fun determineConfidence: StringConfidence</ID>
+    <ID>CognitiveComplexMethod:KotlinStringExtractor.kt:KotlinStringExtractor$private fun isExcludedByPrecedingContext: Boolean</ID>
+    <ID>CognitiveComplexMethod:SourceLexer.kt:SourceLexer$fun tokenize: List&lt;Token></ID>
+    <ID>CognitiveComplexMethod:XmlStringExtractor.kt:XmlStringExtractor$fun extract: List&lt;HardcodedStringFinding></ID>
+    <ID>CollapsibleIfStatements:KotlinStringExtractor.kt:KotlinStringExtractor$if (t.type == TokenType.IDENTIFIER) { // Common composables start with uppercase or match ui functions if (t.text.firstOrNull()?.isUpperCase() == true || t.text.lowercase() in uiFunctionNames) { return true } }</ID>
+    <ID>CollapsibleIfStatements:KotlinStringExtractor.kt:KotlinStringExtractor$if (token.type == TokenType.COMMENT) { if (token.text.contains("i18n-ignore", ignoreCase = true) || token.text.contains("hardcoded-ignore", ignoreCase = true) ) { ignoreLines.add(token.line) val hasCodeOnLine = tokens.any { it.type != TokenType.COMMENT &amp;&amp; it.line == token.line } if (!hasCodeOnLine) { ignoreLines.add(token.line + 1) } } }</ID>
+    <ID>ComplexCondition:HardcodedStringsEngine.kt:HardcodedStringsEngine$file.path.contains("/src/test/") || file.path.contains("/src/androidTest/") || file.path.contains("\\src\\test\\") || file.path.contains("\\src\\androidTest\\")</ID>
+    <ID>ComplexCondition:KotlinStringExtractor.kt:KotlinStringExtractor$isComposeFile &amp;&amp; hasSpaces &amp;&amp; (startsWithCapital || hasPunctuation)</ID>
+    <ID>ComplexCondition:KotlinStringExtractor.kt:KotlinStringExtractor$t.type == TokenType.SYMBOL &amp;&amp; (t.text == "{" || t.text == "}" || t.text == ";")</ID>
+    <ID>ComplexCondition:KotlinStringExtractor.kt:KotlinStringExtractor$trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("file://") || trimmed.startsWith("content://") || trimmed.startsWith("android.resource://") || trimmed.startsWith("package:")</ID>
+    <ID>CyclomaticComplexMethod:AndroidStringEscaper.kt:AndroidStringEscaper$fun convertTemplatePlaceholders: TemplateConversionResult</ID>
+    <ID>CyclomaticComplexMethod:KotlinStringExtractor.kt:KotlinStringExtractor$fun extract: List&lt;HardcodedStringFinding></ID>
+    <ID>CyclomaticComplexMethod:KotlinStringExtractor.kt:KotlinStringExtractor$private fun determineConfidence: StringConfidence</ID>
+    <ID>CyclomaticComplexMethod:KotlinStringExtractor.kt:KotlinStringExtractor$private fun isExcludedByPrecedingContext: Boolean</ID>
+    <ID>CyclomaticComplexMethod:KotlinStringExtractor.kt:KotlinStringExtractor$private fun isViableCandidate: Boolean</ID>
+    <ID>CyclomaticComplexMethod:SourceLexer.kt:SourceLexer$fun tokenize: List&lt;Token></ID>
+    <ID>ExpressionBodySyntax:CodeReplacementApplier.kt:CodeReplacementApplier$return when (finding.contextType) { ReplacementContextType.COMPOSE -> { if (finding.isTemplate &amp;&amp; finding.templatePlaceholders.isNotEmpty()) { val args = finding.templatePlaceholders.joinToString(", ") "stringResource(R.string.${finding.selectedKey}, $args)" } else { "stringResource(R.string.${finding.selectedKey})" } } ReplacementContextType.ANDROID_CONTEXT -> { if (finding.isTemplate &amp;&amp; finding.templatePlaceholders.isNotEmpty()) { val args = finding.templatePlaceholders.joinToString(", ") "getString(R.string.${finding.selectedKey}, $args)" } else { "getString(R.string.${finding.selectedKey})" } } ReplacementContextType.XML_ATTRIBUTE -> { "\"@string/${finding.selectedKey}\"" } ReplacementContextType.MANUAL -> { // Keep original literal if manual finding.originalLiteral } }</ID>
+    <ID>ExpressionBodySyntax:HardcodedStringsEngine.kt:HardcodedStringsEngine$return items.joinToString(",\n ") { "\"$it\"" }</ID>
+    <ID>ExpressionBodySyntax:KotlinStringExtractor.kt:KotlinStringExtractor$return if (isRaw) { literal.removePrefix("\"\"\"").removeSuffix("\"\"\"") } else { literal.removePrefix("\"").removeSuffix("\"") }</ID>
+    <ID>FunctionNameMaxLength:AndroidStringEscaperTest.kt:AndroidStringEscaperTest$@Test fun `converts complex expression template to positional args`</ID>
+    <ID>FunctionNameMaxLength:AndroidStringEscaperTest.kt:AndroidStringEscaperTest$@Test fun `converts simple template variables to positional args`</ID>
+    <ID>FunctionNameMaxLength:AndroidStringEscaperTest.kt:AndroidStringEscaperTest$@Test fun `escapes leading at sign and question mark`</ID>
+    <ID>FunctionNameMaxLength:AndroidStringEscaperTest.kt:AndroidStringEscaperTest$@Test fun `escapes quotes and apostrophes correctly`</ID>
+    <ID>FunctionNameMaxLength:AndroidStringEscaperTest.kt:AndroidStringEscaperTest$@Test fun `preserves leading and trailing spaces with quotes`</ID>
+    <ID>FunctionNameMaxLength:CodeReplacementApplierTest.kt:CodeReplacementApplierTest$@Test fun `inserts template arguments when replacing template strings`</ID>
+    <ID>FunctionNameMaxLength:CodeReplacementApplierTest.kt:CodeReplacementApplierTest$@Test fun `replaces multiple strings in reverse offset order without offset drifting`</ID>
+    <ID>FunctionNameMaxLength:HardcodedStringsEngineTest.kt:HardcodedStringsEngineTest$@Test fun `end to end scan plan apply and undo`</ID>
+    <ID>FunctionNameMaxLength:KotlinStringExtractorTest.kt:KotlinStringExtractorTest$@Test fun `detects Text composable string with HIGH confidence`</ID>
+    <ID>FunctionNameMaxLength:KotlinStringExtractorTest.kt:KotlinStringExtractorTest$@Test fun `detects parameter text with HIGH confidence`</ID>
+    <ID>FunctionNameMaxLength:KotlinStringExtractorTest.kt:KotlinStringExtractorTest$@Test fun `detects string template and extracts placeholders`</ID>
+    <ID>FunctionNameMaxLength:KotlinStringExtractorTest.kt:KotlinStringExtractorTest$@Test fun `ignores Log statements and exceptions`</ID>
+    <ID>FunctionNameMaxLength:KotlinStringExtractorTest.kt:KotlinStringExtractorTest$@Test fun `ignores i18n-ignore annotated line`</ID>
+    <ID>FunctionNameMaxLength:SourceLexerTest.kt:SourceLexerTest$@Test fun `handles escaped quotes inside strings without terminating early`</ID>
+    <ID>FunctionNameMaxLength:SourceLexerTest.kt:SourceLexerTest$@Test fun `tokenizes comments, strings and identifiers`</ID>
+    <ID>FunctionNameMaxLength:StringKeyGeneratorTest.kt:StringKeyGeneratorTest$@Test fun `converts German umlauts to ae oe ue ss`</ID>
+    <ID>FunctionNameMaxLength:StringKeyGeneratorTest.kt:StringKeyGeneratorTest$@Test fun `derives prefix from source file name`</ID>
+    <ID>FunctionNameMaxLength:StringKeyGeneratorTest.kt:StringKeyGeneratorTest$@Test fun `resolves collision with existing different value by appending suffix`</ID>
+    <ID>FunctionNameMaxLength:StringKeyGeneratorTest.kt:StringKeyGeneratorTest$@Test fun `reuses existing key if identical string exists in strings xml`</ID>
+    <ID>FunctionNameMaxLength:StringKeyGeneratorTest.kt:StringKeyGeneratorTest$@Test fun `sanitizes key and avoids leading digits`</ID>
+    <ID>FunctionNameMaxLength:StringsXmlWriterTest.kt:StringsXmlWriterTest$@Test fun `creates clean strings xml from scratch`</ID>
+    <ID>FunctionNameMaxLength:StringsXmlWriterTest.kt:StringsXmlWriterTest$@Test fun `does not duplicate existing keys`</ID>
+    <ID>FunctionNameMaxLength:StringsXmlWriterTest.kt:StringsXmlWriterTest$@Test fun `inserts new strings into existing xml before closing tag`</ID>
+    <ID>FunctionNameMaxLength:XmlStringExtractorTest.kt:XmlStringExtractorTest$@Test fun `extracts android text and hint attributes`</ID>
+    <ID>FunctionNameMaxLength:XmlStringExtractorTest.kt:XmlStringExtractorTest$@Test fun `ignores files under res values directory`</ID>
+    <ID>FunctionNameMaxLength:XmlStringExtractorTest.kt:XmlStringExtractorTest$@Test fun `ignores string references and null`</ID>
+    <ID>LongMethod:HardcodedStringsEngineTest.kt:HardcodedStringsEngineTest$@Test fun `end to end scan plan apply and undo`</ID>
+    <ID>LongMethod:KotlinStringExtractor.kt:KotlinStringExtractor$fun extract: List&lt;HardcodedStringFinding></ID>
+    <ID>LongMethod:SourceLexer.kt:SourceLexer$fun tokenize: List&lt;Token></ID>
+    <ID>LoopWithTooManyJumpStatements:AndroidStringEscaper.kt:AndroidStringEscaper$while</ID>
+    <ID>LoopWithTooManyJumpStatements:HardcodedStringsEngine.kt:HardcodedStringsEngine$for</ID>
+    <ID>LoopWithTooManyJumpStatements:KotlinStringExtractor.kt:KotlinStringExtractor$for</ID>
+    <ID>LoopWithTooManyJumpStatements:SourceLexer.kt:SourceLexer$while</ID>
+    <ID>ReturnCount:AndroidModuleResolver.kt:AndroidModuleResolver$fun resolveNamespace: String?</ID>
+    <ID>ReturnCount:HardcodedStringsEngine.kt:HardcodedStringsEngine$fun applyPlan: ExtractionResult</ID>
+    <ID>ReturnCount:KotlinStringExtractor.kt:KotlinStringExtractor$private fun determineConfidence: StringConfidence</ID>
+    <ID>ReturnCount:KotlinStringExtractor.kt:KotlinStringExtractor$private fun isExcludedByPrecedingContext: Boolean</ID>
+    <ID>ReturnCount:KotlinStringExtractor.kt:KotlinStringExtractor$private fun isViableCandidate: Boolean</ID>
+    <ID>ReturnCount:StringKeyGenerator.kt:StringKeyGenerator$fun generateKey: String</ID>
+    <ID>ReturnCount:StringsXmlWriter.kt:StringsXmlWriter$fun mergeEntries: String</ID>
+    <ID>StringLiteralDuplication:AndroidModuleResolver.kt:AndroidModuleResolver$"build.gradle.kts"</ID>
+    <ID>StringLiteralDuplication:StringsXmlWriter.kt:StringsXmlWriter$" &lt;string name=\"$key\">$value&lt;/string>"</ID>
+    <ID>StringLiteralDuplication:StringsXmlWriter.kt:StringsXmlWriter$"&lt;/resources>"</ID>
+    <ID>StringShouldBeRawString:AndroidStringEscaperTest.kt:AndroidStringEscaperTest$"Don\\'t touch \\\"this\\\""</ID>
+    <ID>StringShouldBeRawString:HardcodedStringsEngine.kt:HardcodedStringsEngine$"\\src\\androidTest\\"</ID>
+    <ID>StringShouldBeRawString:HardcodedStringsEngine.kt:HardcodedStringsEngine$"\\src\\test\\"</ID>
+    <ID>StringShouldBeRawString:SourceLexerTest.kt:SourceLexerTest$"\"He said \\\"hello\\\" to me\""</ID>
+    <ID>StringShouldBeRawString:StringKeyGenerator.kt:StringKeyGenerator$"\\$\\{[^}]+\\}"</ID>
+    <ID>StringShouldBeRawString:StringsXmlWriter.kt:StringsXmlWriter$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>"</ID>
+    <ID>TooGenericExceptionCaught:HardcodedStringsEngine.kt:HardcodedStringsEngine$e: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

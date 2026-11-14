@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:BranchesTab.kt:else</ID>
+    <ID>BracesOnIfStatements:BranchesTab.kt:if</ID>
+    <ID>BracesOnIfStatements:ChangesTab.kt:else</ID>
+    <ID>BracesOnIfStatements:ChangesTab.kt:if</ID>
+    <ID>BracesOnIfStatements:CommitViews.kt:if</ID>
+    <ID>BracesOnIfStatements:ConflictEditor.kt:else</ID>
+    <ID>BracesOnIfStatements:DiffViewer.kt:if</ID>
+    <ID>BracesOnIfStatements:GitPanel.kt:if</ID>
+    <ID>BracesOnIfStatements:GitViewModel.kt:GitViewModel$else</ID>
+    <ID>BracesOnIfStatements:GitViewModel.kt:GitViewModel$if</ID>
+    <ID>BracesOnIfStatements:StashTab.kt:else</ID>
+    <ID>BracesOnIfStatements:StashTab.kt:if</ID>
+    <ID>BracesOnWhenStatements:CommitViews.kt:when</ID>
+    <ID>BracesOnWhenStatements:ConflictEditor.kt:when</ID>
+    <ID>BracesOnWhenStatements:GitCloneViewModel.kt:GitCloneViewModel$when</ID>
+    <ID>BracesOnWhenStatements:GitDialogs.kt:when</ID>
+    <ID>BracesOnWhenStatements:GitPanel.kt:when</ID>
+    <ID>BracesOnWhenStatements:GitViewModel.kt:GitViewModel$when</ID>
+    <ID>CognitiveComplexMethod:BranchesTab.kt:@Composable private fun BranchRow</ID>
+    <ID>CognitiveComplexMethod:BranchesTab.kt:@Composable private fun RemoteCard</ID>
+    <ID>CognitiveComplexMethod:ChangesTab.kt:@Composable internal fun ChangesTab</ID>
+    <ID>CognitiveComplexMethod:ChangesTab.kt:@Composable private fun CommitBox</ID>
+    <ID>CognitiveComplexMethod:ChangesTab.kt:@Composable private fun FileMenu</ID>
+    <ID>CognitiveComplexMethod:CommitViews.kt:@Composable internal fun CommitDetailDialog</ID>
+    <ID>CognitiveComplexMethod:CommitViews.kt:@Composable private fun ChangedFileRow</ID>
+    <ID>CognitiveComplexMethod:ConflictEditor.kt:@Composable internal fun ConflictEditorDialog</ID>
+    <ID>CognitiveComplexMethod:ConflictEditor.kt:@Composable private fun ConflictBlock</ID>
+    <ID>CognitiveComplexMethod:ConflictEditor.kt:@Composable private fun Side</ID>
+    <ID>CognitiveComplexMethod:DiffViewer.kt:@Composable internal fun DiffViewerDialog</ID>
+    <ID>CognitiveComplexMethod:DiffViewer.kt:@Composable private fun DiffBody</ID>
+    <ID>CognitiveComplexMethod:GitPanel.kt:@Composable private fun OperationBanner</ID>
+    <ID>CognitiveComplexMethod:GitViewModel.kt:GitViewModel$fun onEvent</ID>
+    <ID>CognitiveComplexMethod:GitViewModel.kt:GitViewModel$private fun applyConflict</ID>
+    <ID>CognitiveComplexMethod:GitViewModel.kt:GitViewModel$private fun openConflict</ID>
+    <ID>CognitiveComplexMethod:GitViewModel.kt:GitViewModel$private fun refresh</ID>
+    <ID>ComplexCondition:ChangesTab.kt:state.amend &amp;&amp; status != null &amp;&amp; status.upstream != null &amp;&amp; status.ahead == 0</ID>
+    <ID>CyclomaticComplexMethod:ConflictEditor.kt:@Composable internal fun ConflictEditorDialog</ID>
+    <ID>CyclomaticComplexMethod:ConflictEditor.kt:@Composable private fun ConflictBlock</ID>
+    <ID>CyclomaticComplexMethod:GitDialogs.kt:@Composable internal fun GitDialogs</ID>
+    <ID>CyclomaticComplexMethod:GitViewModel.kt:GitViewModel$private fun refresh</ID>
+    <ID>DocumentationOverPrivateFunction:ChangesTab.kt:@Composable private fun FileMenu</ID>
+    <ID>DocumentationOverPrivateFunction:CommitViews.kt:@Composable private fun DialogHeader</ID>
+    <ID>DocumentationOverPrivateFunction:GitCloneViewModel.kt:GitCloneViewModel$private fun refreshDefaultTarget</ID>
+    <ID>DocumentationOverPrivateFunction:GitPanel.kt:@Composable private fun OperationBanner</ID>
+    <ID>DocumentationOverPrivateFunction:GitViewModel.kt:GitViewModel$private fun op</ID>
+    <ID>DocumentationOverPrivateFunction:GraphTab.kt:private fun refChipWidth: Dp</ID>
+    <ID>EmptyElseBlock:CommitViews.kt:if (isNotEmpty()) append(" · ")</ID>
+    <ID>FunctionNameMaxLength:GitCloneViewModelTest.kt:GitCloneViewModelTest$@Test fun defaultTargetFollowsPermissionAfterResume</ID>
+    <ID>FunctionNameMaxLength:GitCloneViewModelTest.kt:GitCloneViewModelTest$@Test fun userEditedTargetIsNeverReplaced</ID>
+    <ID>FunctionNameMaxLength:GitConflictNavigationTest.kt:GitConflictNavigationTest$@Test fun testBinaryAndDeletedVsModifiedState</ID>
+    <ID>FunctionNameMaxLength:GitConflictNavigationTest.kt:GitConflictNavigationTest$@Test fun testConflictEditorStateNavigation</ID>
+    <ID>FunctionNameMinLength:GitViewModel.kt:GitViewModel$private fun op</ID>
+    <ID>LongMethod:GitViewModel.kt:GitViewModel$fun onEvent</ID>
+    <ID>StringLiteralDuplication:ConflictEditor.kt:" ($it)"</ID>
+    <ID>StringLiteralDuplication:GitViewModel.kt:GitViewModel$"Merge"</ID>
+    <ID>StringLiteralDuplication:GitViewModel.kt:GitViewModel$"Rebase"</ID>
+    <ID>UnnecessaryParentheses:DiffViewer.kt:(when { diff.commit != null -> stringRes(R.string.git_commit_short, diff.commit.take(7)) diff.staged -> Res.string(R.string.git_vorgemerkt) else -> Res.string(R.string.git_arbeitsverzeichnis) })</ID>
+    <ID>UnnecessaryParentheses:GitPanel.kt:(if (conflicts > 0) Res.string(R.string.git_konflikt_loesen_und_vormerken_dann, conflicts) else Res.string(R.string.git_konflikte_geloest_fortsetzen_oder_comm))</ID>
+    <ID>UnnecessaryParentheses:GraphTab.kt:(lane.coerceAtMost(MAX_VISIBLE_LANES - 1))</ID>
+  </CurrentIssues>
+</SmellBaseline>

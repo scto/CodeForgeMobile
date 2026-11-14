@@ -80,6 +80,13 @@ jobs:
             "$SDK/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
           fi
 
+      - name: Statische Analyse (detekt)
+        # Neue Verstöße brechen den Build; Bestand steht in config/detekt/baseline/.
+        # :templates:code-plugin verlangt eine JDK-17-Toolchain (hier läuft 21) und hat keine Befunde.
+        run: |
+          chmod +x gradlew
+          ./gradlew detekt -x :templates:code-plugin:detekt --stacktrace
+
       - name: Unit-Tests
         if: inputs.run_tests == true
         run: |

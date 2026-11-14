@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:BuiltinTools.kt:BuiltinTools.ReadFile$else</ID>
+    <ID>BracesOnIfStatements:CheckpointWorkspace.kt:CheckpointWorkspace$else</ID>
+    <ID>BracesOnIfStatements:CheckpointWorkspace.kt:CheckpointWorkspace$if</ID>
+    <ID>BracesOnIfStatements:HistoryCompactor.kt:HistoryCompactor$if</ID>
+    <ID>BracesOnIfStatements:TextDiff.kt:TextDiff$if</ID>
+    <ID>CascadingCallWrapping:RunGradleTool.kt:GradleTaskSupport$append(": ")</ID>
+    <ID>ClassOrdering:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$private val sample = listOf( AgentMessage(AgentRole.USER, listOf(ContentPart.Text("lies a.kt\nmit \"Anführungszeichen\""))), AgentMessage(AgentRole.ASSISTANT, listOf(ContentPart.Text("ok"), ContentPart.ToolUse("t1", "read_file", buildJsonObject { put("path", "a.kt") }))), AgentMessage(AgentRole.USER, listOf(ContentPart.ToolResultPart("t1", "inhalt", isError = true))), )</ID>
+    <ID>ClassOrdering:ProjectContext.kt:ProjectContext$/** `true`, wenn weder Regeln noch Skills vorhanden sind. */ val isEmpty: Boolean get() = instructions.isBlank() &amp;&amp; skills.isEmpty()</ID>
+    <ID>CognitiveComplexMethod:AgentLoop.kt:AgentLoop$fun run: Flow&lt;AgentEvent></ID>
+    <ID>CognitiveComplexMethod:FileAgentWorkspace.kt:FileAgentWorkspace$override suspend fun searchText: List&lt;SearchHit></ID>
+    <ID>CognitiveComplexMethod:HistoryCompactor.kt:HistoryCompactor$fun compact: List&lt;AgentMessage></ID>
+    <ID>CognitiveComplexMethod:TextDiff.kt:TextDiff$fun unified: String</ID>
+    <ID>CyclomaticComplexMethod:TextDiff.kt:TextDiff$fun unified: String</ID>
+    <ID>FunctionNameMaxLength:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$@Test fun `Speichern, Laden getrennt je Projekt, Loeschen`</ID>
+    <ID>FunctionNameMaxLength:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$@Test fun `alte Werkzeugergebnisse werden beim Speichern gekuerzt`</ID>
+    <ID>FunctionNameMaxLength:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$@Test fun `kaputte oder fremde Dateien ergeben leeren Verlauf`</ID>
+    <ID>FunctionNameMaxLength:AgentLoopTest.kt:AgentLoopTest$@Test fun `Modellfehler endet mit Failed und liefert den Verlauf`</ID>
+    <ID>FunctionNameMaxLength:AgentLoopTest.kt:AgentLoopTest$@Test fun `Plan-Modus lehnt Schreiben ab und meldet es dem Modell`</ID>
+    <ID>FunctionNameMaxLength:AgentLoopTest.kt:AgentLoopTest$@Test fun `Rueckfrage im ASK_EACH-Modus entscheidet`</ID>
+    <ID>FunctionNameMaxLength:AgentLoopTest.kt:AgentLoopTest$@Test fun `Schrittgrenze beendet die Schleife`</ID>
+    <ID>FunctionNameMaxLength:AgentLoopTest.kt:AgentLoopTest$@Test fun `Werkzeugaufruf, Ergebnis und Schlussantwort`</ID>
+    <ID>FunctionNameMaxLength:AgentLoopTest.kt:AgentLoopTest$@Test fun `abgeschnittene Antwort wird als TRUNCATED gemeldet`</ID>
+    <ID>FunctionNameMaxLength:AgentLoopTest.kt:AgentLoopTest$@Test fun `bisheriger Verlauf wird fortgesetzt`</ID>
+    <ID>FunctionNameMaxLength:AgentLoopTest.kt:AgentLoopTest$@Test fun `unbekanntes Werkzeug und fehlerhafte Argumente werden als Fehlerergebnis gemeldet`</ID>
+    <ID>FunctionNameMaxLength:BuiltinToolsTest.kt:BuiltinToolsTest$@Test fun `Pfade werden normalisiert und begrenzt`</ID>
+    <ID>FunctionNameMaxLength:BuiltinToolsTest.kt:BuiltinToolsTest$@Test fun `Schemas sind gueltige Objekt-Schemas`</ID>
+    <ID>FunctionNameMaxLength:BuiltinToolsTest.kt:BuiltinToolsTest$@Test fun `create_file ueberschreibt nur mit overwrite`</ID>
+    <ID>FunctionNameMaxLength:BuiltinToolsTest.kt:BuiltinToolsTest$@Test fun `delete_path loescht und schuetzt den Projektstamm`</ID>
+    <ID>FunctionNameMaxLength:BuiltinToolsTest.kt:BuiltinToolsTest$@Test fun `edit_file verlangt eindeutigen Treffer`</ID>
+    <ID>FunctionNameMaxLength:BuiltinToolsTest.kt:BuiltinToolsTest$@Test fun `list_dir sortiert Ordner zuerst`</ID>
+    <ID>FunctionNameMaxLength:BuiltinToolsTest.kt:BuiltinToolsTest$@Test fun `read_file liest ganz und zeilenweise`</ID>
+    <ID>FunctionNameMaxLength:BuiltinToolsTest.kt:BuiltinToolsTest$@Test fun `search_text findet Treffer mit Zeile`</ID>
+    <ID>FunctionNameMaxLength:CheckpointAndCompactorTest.kt:CheckpointWorkspaceTest$@Test fun `Lesezugriffe laufen unveraendert durch`</ID>
+    <ID>FunctionNameMaxLength:CheckpointAndCompactorTest.kt:CheckpointWorkspaceTest$@Test fun `Zuege sind getrennt, ohne beginTurn wird nichts aufgezeichnet`</ID>
+    <ID>FunctionNameMaxLength:CheckpointAndCompactorTest.kt:CheckpointWorkspaceTest$@Test fun `revert stellt den Ausgangszustand her`</ID>
+    <ID>FunctionNameMaxLength:CheckpointAndCompactorTest.kt:CheckpointWorkspaceTest$@Test fun `unveraenderte Dateien erscheinen nicht in changes`</ID>
+    <ID>FunctionNameMaxLength:CheckpointAndCompactorTest.kt:HistoryCompactorTest$@Test fun `gekuerzte Ergebnisse bleiben gekuerzt (stabiles Praefix)`</ID>
+    <ID>FunctionNameMaxLength:CheckpointAndCompactorTest.kt:HistoryCompactorTest$@Test fun `kuerzt die aeltesten Ergebnisse bis zum Ziel und schont die juengsten`</ID>
+    <ID>FunctionNameMaxLength:CheckpointAndCompactorTest.kt:HistoryCompactorTest$@Test fun `unterhalb der Schwelle bleibt alles identisch`</ID>
+    <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `Listing sortiert Ordner zuerst und blendet Build-Ordner aus`</ID>
+    <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `Pfade ausserhalb des Projekts werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `Projektstamm laesst sich nicht loeschen und Ordner nicht ueberschreiben`</ID>
+    <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `Suche findet Treffer ohne Gross-Kleinschreibung, ueberspringt Build und Binaerdateien`</ID>
+    <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `schreiben legt Ordner an, lesen und loeschen funktionieren`</ID>
+    <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `zu grosse Dateien werden nicht gelesen, Diagnosen bekommen normalisierte Pfade`</ID>
+    <ID>FunctionNameMaxLength:ProjectContextTest.kt:ProjectContextTest$@Test fun `Regeln kommen aus AGENTS_md vor CLAUDE_md und werden gekuerzt`</ID>
+    <ID>FunctionNameMaxLength:ProjectContextTest.kt:ProjectContextTest$@Test fun `Skills mit Frontmatter, Fallback und Duplikaten`</ID>
+    <ID>FunctionNameMaxLength:ProjectContextTest.kt:ProjectContextTest$@Test fun `use_skill liefert den Text oder listet die Namen`</ID>
+    <ID>FunctionNameMaxLength:RunGradleToolTest.kt:RunGradleToolTest$@Test fun `Erfolg wird gemeldet und Task bereinigt`</ID>
+    <ID>FunctionNameMaxLength:RunGradleToolTest.kt:RunGradleToolTest$@Test fun `Fehler stehen zuerst, Ausgabeende nur ohne strukturierte Fehler`</ID>
+    <ID>FunctionNameMaxLength:RunGradleToolTest.kt:RunGradleToolTest$@Test fun `Shell-Zeichen und leere Tasks werden abgelehnt`</ID>
+    <ID>FunctionNameMaxLength:RunGradleToolTest.kt:RunGradleToolTest$@Test fun `Tool ist nur mit Runner registriert und gilt als Ausfuehrung`</ID>
+    <ID>FunctionNameMaxLength:RunGradleToolTest.kt:RunGradleToolTest$@Test fun `nicht ausfuehrbarer Build ist ein Fehler mit Grund`</ID>
+    <ID>FunctionNameMaxLength:TextDiffTest.kt:TextDiffTest$@Test fun `Aenderung in der Mitte mit Kontext und Hunk-Kopf`</ID>
+    <ID>FunctionNameMaxLength:TextDiffTest.kt:TextDiffTest$@Test fun `Vorschau der Werkzeuge entspricht der spaeteren Aenderung und aendert nichts`</ID>
+    <ID>FunctionNameMaxLength:TextDiffTest.kt:TextDiffTest$@Test fun `getrennte Aenderungen ergeben zwei Hunks, Einfuegen und Loeschen werden erkannt`</ID>
+    <ID>FunctionNameMaxLength:TextDiffTest.kt:TextDiffTest$@Test fun `gleiche Texte ergeben leeren Diff`</ID>
+    <ID>FunctionNameMaxLength:TextDiffTest.kt:TextDiffTest$@Test fun `neue Datei besteht nur aus Plus-Zeilen, geloeschte nur aus Minus-Zeilen`</ID>
+    <ID>LoopWithTooManyJumpStatements:FileAgentWorkspace.kt:FileAgentWorkspace$for</ID>
+    <ID>LoopWithTooManyJumpStatements:HistoryCompactor.kt:HistoryCompactor$for</ID>
+    <ID>OutdatedDocumentation:RunGradleTool.kt:BuildOutcome</ID>
+    <ID>ReturnCount:BuiltinTools.kt:BuiltinTools.EditFile$override suspend fun execute: ToolResult</ID>
+    <ID>ReturnCount:BuiltinTools.kt:BuiltinTools.EditFile$override suspend fun preview: String?</ID>
+    <ID>ReturnCount:BuiltinTools.kt:BuiltinTools.ListDir$override suspend fun execute: ToolResult</ID>
+    <ID>ReturnCount:BuiltinTools.kt:BuiltinTools.ReadFile$override suspend fun execute: ToolResult</ID>
+    <ID>StringLiteralDuplication:AgentTool.kt:"description"</ID>
+    <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.CreateFile$"content"</ID>
+    <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.EditFile$"new_string"</ID>
+    <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.EditFile$"old_string"</ID>
+    <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.EditFile$"replace_all"</ID>
+    <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.ReadFile$"File path relative to the project root"</ID>
+    <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.SearchText$"query"</ID>
+    <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.TodoWrite$"status"</ID>
+    <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.TodoWrite$"todos"</ID>
+    <ID>StringShouldBeRawString:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$"lies a.kt\nmit \"Anführungszeichen\""</ID>
+    <ID>StringShouldBeRawString:BuiltinToolsTest.kt:BuiltinToolsTest$"src/Main.kt" to "fun main() {\n println(\"a\")\n println(\"a\")\n}\n"</ID>
+    <ID>StringShouldBeRawString:BuiltinToolsTest.kt:BuiltinToolsTest$"src/Main.kt:2: println(\"a\")\nsrc/Main.kt:3: println(\"a\")"</ID>
+    <ID>StringShouldBeRawString:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$"fun main() {\n println(\"Hallo\")\n}"</ID>
+    <ID>StringShouldBeRawString:ProjectContext.kt:ProjectContext$"\n\n&lt;available-skills>\nCall use_skill with the name when a skill fits the task.\n"</ID>
+    <ID>StringShouldBeRawString:ProjectContext.kt:ProjectContext$"\n\n&lt;project-instructions>\n"</ID>
+    <ID>StringShouldBeRawString:ProjectContextTest.kt:ProjectContextTest$"---\nname: Release\ndescription: \"Release bauen\"\n---\n# Schritte\n1. tag"</ID>
+    <ID>StringShouldBeRawString:ProjectContextTest.kt:ProjectContextTest$"---\nname: a\ndescription: d\n---\nBODY"</ID>
+    <ID>StringShouldBeRawString:ProjectContextTest.kt:ProjectContextTest$"---\nname: release\ndescription: doppelt\n---\nx"</ID>
+    <ID>StringShouldBeRawString:TextDiffTest.kt:TextDiffTest$"@@ -3,5 +3,5 @@\n z3\n z4\n-z5\n+NEU\n z6\n z7"</ID>
+    <ID>SwallowedException:CheckpointWorkspace.kt:CheckpointWorkspace$e: Exception</ID>
+    <ID>ThrowsCount:RunGradleTool.kt:GradleTaskSupport$fun validate: String</ID>
+    <ID>TooGenericExceptionCaught:AgentLoop.kt:AgentLoop$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:CheckpointWorkspace.kt:CheckpointWorkspace$e: Exception</ID>
+    <ID>UnnecessaryParentheses:TextDiff.kt:TextDiff$(when (it.op) { Op.KEEP -> " "; Op.DEL -> "-"; Op.ADD -> "+" })</ID>
+  </CurrentIssues>
+</SmellBaseline>

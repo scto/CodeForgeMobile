@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:IntroPagerScreen.kt:if</ID>
+    <ID>BracesOnWhenStatements:OnboardingRoute.kt:when</ID>
+    <ID>BracesOnWhenStatements:OnboardingViewModel.kt:OnboardingViewModel$when</ID>
+    <ID>BracesOnWhenStatements:SetupScreen.kt:when</ID>
+    <ID>CognitiveComplexMethod:OnboardingRoute.kt:@Composable fun OnboardingRoute</ID>
+    <ID>FunctionNameMaxLength:OnboardingRoute.kt:private fun Context.isNotificationPermissionGranted: Boolean</ID>
+    <ID>FunctionNameMaxLength:OnboardingUiStateTest.kt:OnboardingUiStateTest$@Test fun `Loslegen braucht Speicher und App-Installation, Benachrichtigungen sind optional`</ID>
+  </CurrentIssues>
+</SmellBaseline>

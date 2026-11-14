@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>DocumentationOverPrivateProperty:TerminalViewModel.kt:TerminalViewModel$/** * Optionales Startkommando aus dem Nav-Argument `initialCommand` (z. B. das * `codeforge-env setup …` am Ende des Onboardings). Wird genau einmal ausgeführt; * `autostarted` überlebt Konfigurationsänderungen/Prozess-Neustart über den SavedStateHandle. */ private val initialCommand: String? = savedStateHandle.get&lt;String>("initialCommand")?.takeIf { it.isNotBlank() }</ID>
+  </CurrentIssues>
+</SmellBaseline>

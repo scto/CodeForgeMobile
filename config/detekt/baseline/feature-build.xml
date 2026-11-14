@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$else</ID>
+    <ID>BracesOnIfStatements:BuildContract.kt:BuildUiState$else</ID>
+    <ID>BracesOnIfStatements:BuildContract.kt:BuildUiState$if</ID>
+    <ID>BracesOnIfStatements:BuildViewModel.kt:BuildViewModel$else</ID>
+    <ID>BracesOnIfStatements:LogcatTab.kt:else</ID>
+    <ID>BracesOnIfStatements:LogcatTab.kt:if</ID>
+    <ID>BracesOnWhenStatements:BuildViewModel.kt:BuildViewModel$when</ID>
+    <ID>ClassOrdering:BuildViewModel.kt:BuildViewModel$constructor</ID>
+    <ID>CognitiveComplexMethod:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$private fun extractMetadata: ApkDetailedMetadata?</ID>
+    <ID>CognitiveComplexMethod:ApkAnalyzerScreen.kt:@Composable private fun ApkSectionBarChart</ID>
+    <ID>CognitiveComplexMethod:ApkAnalyzerScreen.kt:@Composable private fun ComponentsTab</ID>
+    <ID>CognitiveComplexMethod:ApkAnalyzerScreen.kt:@Composable private fun SignatureStatusCard</ID>
+    <ID>CognitiveComplexMethod:ApkInstallSection.kt:@Composable fun ApkInstallSection</ID>
+    <ID>CognitiveComplexMethod:BuildScreen.kt:@Composable fun BuildPanel</ID>
+    <ID>CognitiveComplexMethod:BuildViewModel.kt:BuildViewModel$fun runTests</ID>
+    <ID>CognitiveComplexMethod:BuildViewModel.kt:BuildViewModel$fun startBuild</ID>
+    <ID>CognitiveComplexMethod:BuildViewModel.kt:BuildViewModel$private fun detectModules</ID>
+    <ID>CognitiveComplexMethod:LogcatTab.kt:@Composable private fun LogcatActionBar</ID>
+    <ID>CognitiveComplexMethod:LogcatTab.kt:@Composable private fun LogcatSourceDialog</ID>
+    <ID>CognitiveComplexMethod:LogcatTab.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun LogcatFilterBar</ID>
+    <ID>CognitiveComplexMethod:ProblemsTab.kt:@Composable private fun ProblemItem</ID>
+    <ID>CognitiveComplexMethod:TestDetailSheet.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun TestDetailSheet</ID>
+    <ID>CognitiveComplexMethod:TestsTab.kt:@Composable fun TestsTab</ID>
+    <ID>CognitiveComplexMethod:TestsTab.kt:@Composable private fun TestsFilterBar</ID>
+    <ID>CyclomaticComplexMethod:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$private fun extractFromPackageManager: ApkDetailedMetadata?</ID>
+    <ID>CyclomaticComplexMethod:ApkInstallSection.kt:@Composable fun ApkInstallSection</ID>
+    <ID>CyclomaticComplexMethod:BuildViewModel.kt:BuildViewModel$fun startBuild</ID>
+    <ID>CyclomaticComplexMethod:TestDetailSheet.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun TestDetailSheet</ID>
+    <ID>DocumentationOverPrivateFunction:BuildScreen.kt:@Composable private fun TabActionsBar</ID>
+    <ID>DocumentationOverPrivateFunction:BuildViewModel.kt:BuildViewModel$private fun autoLoadTasks</ID>
+    <ID>DocumentationOverPrivateFunction:BuildViewModel.kt:BuildViewModel$private fun sendTabText</ID>
+    <ID>DocumentationOverPrivateProperty:BuildViewModel.kt:/** Task für den Gradle-Sync: konfiguriert alle Module und löst Plugins/Abhängigkeiten auf. */ private const val SYNC_TASK = "tasks --all"</ID>
+    <ID>ExpressionBodySyntax:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$return try { val env = try { TermuxEnvironment.environment() } catch (_: Exception) { emptyMap() } val process = processLauncher(command, env, File(".")) val reader = BufferedReader(InputStreamReader(process.inputStream, Charsets.UTF_8)) val output = StringBuilder() val completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS) if (completed) { reader.forEachLine { line -> output.appendLine(line) } ProcessRunResult(process.exitValue(), output.toString()) } else { process.destroyForcibly() ProcessRunResult(-1, "Timeout nach $timeoutSeconds s") } } catch (e: Exception) { ProcessRunResult(-1, e.message ?: "Ausführungsfehler") }</ID>
+    <ID>ExpressionBodySyntax:ApkAnalyzerViewModelTest.kt:ApkAnalyzerViewModelTest$return ApkAnalysisResult( apkFile = file, fileName = file.name, fileSizeBytes = 1024L, totalCompressedSize = entries.sumOf { it.compressedSize }, totalUncompressedSize = entries.sumOf { it.uncompressedSize }, entries = entries, sections = emptyList(), topEntries = entries, abiSummaries = emptyList() )</ID>
+    <ID>ExpressionBodySyntax:BuildViewModelTest.kt:BuildViewModelTest.FakeTestRunnerRepository$return _lastRunResult.value</ID>
+    <ID>ExpressionBodySyntax:BuildViewModelTest.kt:BuildViewModelTest.FakeTestRunnerRepository$return runTaskFlow</ID>
+    <ID>ExpressionBodySyntax:TestRunnerRepositoryImpl.kt:TestRunnerRepositoryImpl$return projectRoot.walkTopDown() .onEnter { dir -> val name = dir.name // Ignore .git, .gradle, .idea, etc., but traverse into build directories if they may contain test-results if (name.startsWith(".") &amp;&amp; name != ".") return@onEnter false true } .filter { it.isFile &amp;&amp; it.name.startsWith("TEST-") &amp;&amp; it.name.endsWith(".xml") } .filter { it.parentFile?.parentFile?.name == "test-results" || it.path.contains("test-results") } .toList()</ID>
+    <ID>FunctionNameMaxLength:ApkAnalyzerViewModelTest.kt:ApkAnalyzerViewModelTest$@Test fun compareWithApkSuccessUpdatesComparisonResult</ID>
+    <ID>FunctionNameMaxLength:BuildTabTextTest.kt:BuildTabTextTest$@Test fun `empty tabs give empty text so nothing is copied`</ID>
+    <ID>FunctionNameMaxLength:BuildTabTextTest.kt:BuildTabTextTest$@Test fun `file names carry the tab and a timestamp`</ID>
+    <ID>FunctionNameMaxLength:BuildTabTextTest.kt:BuildTabTextTest$@Test fun `long text keeps the end and starts at a line boundary`</ID>
+    <ID>FunctionNameMaxLength:BuildTabTextTest.kt:BuildTabTextTest$@Test fun `output text follows the search filter`</ID>
+    <ID>FunctionNameMaxLength:BuildTabTextTest.kt:BuildTabTextTest$@Test fun `problems are written one per line with location`</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun autoLaunchEnabledLaunchesAppAfterInstall</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun copyTabSendsTheFilteredTextAsEffect</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun incompatibleSignatureShowsDialogAndAllowsUninstall</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun logcatPauseStopsReceivingNewEntries</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun logcatReceivesStreamAndBuffersEntries</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun logcatSourceSelectionUpdatesState</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun logcatStackFrameNavigationResolvesFile: Unit</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun rejectsConcurrentBuildWhenAlreadyRunning</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun selfReplaceRequiresConfirmation</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun shareAndSaveUseTheSameTextAndFileNameHasTheTab</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun startBuildAndRunFailedBuildDoesNotAttemptInstall</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun startBuildStreamsProblemsAndFinishes</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun syncGradleRunsHelpTaskAndKeepsSelectedTask</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun testRunRequestBridgeTriggersTestsTabAndExecution</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun testRunnerClickStackFrameNavigatesToEditor</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun testRunnerPreTestFailureTriggersNotice</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun testRunnerRunsTestsAndUpdatesState</ID>
+    <ID>FunctionNameMaxLength:BuildViewModelTest.kt:BuildViewModelTest$@Test fun unsignedApkResultsInFailedWithUnsignedFlag</ID>
+    <ID>FunctionNameMaxLength:GradleTaskListParserTest.kt:GradleTaskListParserTest$@Test fun parseDetailedKeepsGroupAndDescription</ID>
+    <ID>FunctionNameMaxLength:GradleTaskListParserTest.kt:GradleTaskListParserTest$@Test fun parsesTaskNamesAndIgnoresHeadersAndNoise</ID>
+    <ID>FunctionNameMaxLength:TestRunnerRepositoryTest.kt:TestRunnerRepositoryTest$@Test fun determineModuleGradlePathResolvesCorrectly</ID>
+    <ID>FunctionNameMaxLength:TestRunnerRepositoryTest.kt:TestRunnerRepositoryTest$@Test fun findTestResultFilesAndLoadLastResults</ID>
+    <ID>FunctionNameMaxLength:TestRunnerRepositoryTest.kt:TestRunnerRepositoryTest$@Test fun loadLastResultsReturnsNullOnEmptyDirectory</ID>
+    <ID>LargeClass:BuildViewModel.kt:BuildViewModel : ViewModel</ID>
+    <ID>LongMethod:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$private fun extractFromPackageManager: ApkDetailedMetadata?</ID>
+    <ID>LongMethod:BuildViewModel.kt:BuildViewModel$fun handleIntent</ID>
+    <ID>LongMethod:BuildViewModel.kt:BuildViewModel$fun runTests</ID>
+    <ID>LongMethod:BuildViewModel.kt:BuildViewModel$fun startBuild</ID>
+    <ID>LoopWithTooManyJumpStatements:GradleTaskListParser.kt:GradleTaskListParser$for</ID>
+    <ID>MultilineRawStringIndentation:TestRunnerRepositoryTest.kt:TestRunnerRepositoryTest$""" &lt;?xml version="1.0" encoding="UTF-8"?> &lt;testsuite name="com.example.SampleTest" tests="1" skipped="0" failures="0" errors="0" time="0.05"> &lt;testcase name="testSuccess" classname="com.example.SampleTest" time="0.05"/> &lt;/testsuite> """</ID>
+    <ID>NestedBlockDepth:BuildViewModel.kt:BuildViewModel$private fun detectModules</ID>
+    <ID>OutdatedDocumentation:BuildTextActions.kt:BuildTextActions</ID>
+    <ID>ReturnCount:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$private fun extractFromPackageManager: ApkDetailedMetadata?</ID>
+    <ID>ReturnCount:BuildViewModel.kt:BuildViewModel$private fun onBuildSucceeded</ID>
+    <ID>ReturnCount:TestRunnerRepositoryImpl.kt:TestRunnerRepositoryImpl$internal fun determineModuleGradlePath: String</ID>
+    <ID>StringLiteralDuplication:BuildContract.kt:BuildUiState$"assembleDebug"</ID>
+    <ID>StringLiteralDuplication:BuildViewModel.kt:BuildViewModel$"build.gradle"</ID>
+    <ID>StringLiteralDuplication:BuildViewModel.kt:BuildViewModel$"build.gradle.kts"</ID>
+    <ID>SwallowedException:BuildTextActions.kt:BuildTextActions$e: RuntimeException</ID>
+    <ID>TooGenericExceptionCaught:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:BuildTextActions.kt:BuildTextActions$e: RuntimeException</ID>
+    <ID>UnnecessaryParentheses:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$(appInfo.flags and ApplicationInfo.FLAG_ALLOW_BACKUP)</ID>
+    <ID>UnnecessaryParentheses:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$(appInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE)</ID>
+    <ID>UnusedParameter:ApkAnalyzerScreen.kt:result: ApkAnalysisResult</ID>
+    <ID>UseIfInsteadOfWhen:BuildViewModel.kt:BuildViewModel$when { taskName.contains("Release", ignoreCase = true) -> "release" else -> "debug" }</ID>
+    <ID>UseLet:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$if (appInfo != null) (appInfo.flags and ApplicationInfo.FLAG_ALLOW_BACKUP) != 0 else null</ID>
+    <ID>UseLet:ApkAnalyzerRepositoryImpl.kt:ApkAnalyzerRepositoryImpl$if (appInfo != null) (appInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0 else null</ID>
+    <ID>UseLet:BuildViewModel.kt:BuildViewModel$if (root != null) { ProjectStackFrameResolver.resolve(root, frame) ?: resolveStackFrameFile(root, frame) } else null</ID>
+    <ID>UseLet:BuildViewModel.kt:BuildViewModel$if (root != null) { resolveStackFrameFile(root, frame) } else null</ID>
+    <ID>VariableNaming:BuildViewModelTest.kt:BuildViewModelTest.FakeTestRunRequestBridge$val _runRequests = MutableSharedFlow&lt;TestRunRequest>(extraBufferCapacity = 4)</ID>
+    <ID>VariableNaming:BuildViewModelTest.kt:BuildViewModelTest.FakeTestRunnerRepository$val _isRunning = MutableStateFlow(false)</ID>
+    <ID>VariableNaming:BuildViewModelTest.kt:BuildViewModelTest.FakeTestRunnerRepository$val _lastRunResult = MutableStateFlow&lt;TestRunResult?>(null)</ID>
+  </CurrentIssues>
+</SmellBaseline>

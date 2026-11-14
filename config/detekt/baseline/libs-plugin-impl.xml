@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CascadingCallWrapping:PluginRepositoryImpl.kt:PluginRepositoryImpl$toList()</ID>
+    <ID>CascadingCallWrapping:UserToolsRepositoryImpl.kt:UserToolsRepositoryImpl$put("command", JSONArray(it.command))</ID>
+    <ID>ClassOrdering:PluginRepositoryImpl.kt:PluginRepositoryImpl$init { pluginsDir.mkdirs() val plugins = registry.loadAll() _installedPlugins.value = plugins refreshContributions() // Best-effort: Plugins, die in einer vorherigen Sitzung aktiviert waren, werden // beim Neustart erneut geladen. Ein einzelnes defektes Plugin (z.B. fehlendes // classes.dex nach manueller Manipulation) darf App-Start/andere Plugins nicht // blockieren — Fehler werden daher bewusst verschluckt, sichtbar über // loadedPluginIds (enthält den Eintrag dann schlicht nicht). plugins.filter { it.isEnabled }.forEach { plugin -> attemptLoad(plugin) } }</ID>
+    <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.PermissionedHostServices$private fun require</ID>
+    <ID>CognitiveComplexMethod:PluginRepositoryImpl.kt:PluginRepositoryImpl$override fun installFromFile: Flow&lt;PluginInstallEvent></ID>
+    <ID>CyclomaticComplexMethod:PluginRepositoryImpl.kt:PluginRepositoryImpl$override fun installFromFile: Flow&lt;PluginInstallEvent></ID>
+    <ID>DocumentationOverPrivateFunction:PluginRepositoryImpl.kt:PluginRepositoryImpl$private fun issuesOf: List&lt;PluginIssue></ID>
+    <ID>DocumentationOverPrivateFunction:PluginRepositoryImpl.kt:PluginRepositoryImpl$private fun refreshContributions</ID>
+    <ID>DocumentationOverPrivateProperty:PluginRuntime.kt:PluginRuntime$/** Basisdienste ohne Berechtigungsprüfung; Plugins sehen nur die geprüfte Hülle [PermissionedHostServices]. */ private val baseServices = object : BaseHostServices { override val lspClientRepository: LspClientRepository get() = this@PluginRuntime.lspClientRepository override val homeDir: String get() = TermuxEnvironment.home override fun buildShellCommand( script: String, workingDirectory: String, extraPathEntries: List&lt;String> ): ShellLaunchSpec { check(TermuxEnvironment.isBootstrapInstalled()) { Res.string(R.string.common_termux_umgebung_ist_noch_nicht) } return ShellLaunchSpec( command = listOf(TermuxEnvironment.bashPath, "-lc", script), processEnv = TermuxEnvironment.environment(extraPathEntries), workingDirectory = workingDirectory ) } override fun jdkInstallPath(version: String): String = TermuxEnvironment.jdkHome(version) }</ID>
+    <ID>FunctionNameMaxLength:ExtensionThemeLoaderTest.kt:ExtensionThemeLoaderTest$@Test fun `Icon-Theme wird geladen, Pfade ausserhalb des Plugins verwerfen das Theme`</ID>
+    <ID>FunctionNameMaxLength:ExtensionThemeLoaderTest.kt:ExtensionThemeLoaderTest$@Test fun `Sprachpaket wird geladen, defektes uebersprungen`</ID>
+    <ID>FunctionNameMaxLength:ExtensionThemeLoaderTest.kt:ExtensionThemeLoaderTest$@Test fun `TextMate-Datei fehlt - Theme bleibt ohne Editor-Theme, Pfad ausserhalb wird ignoriert`</ID>
+    <ID>FunctionNameMaxLength:ExtensionThemeLoaderTest.kt:ExtensionThemeLoaderTest$@Test fun `laedt gueltige Themes, ueberspringt defekte und fehlende`</ID>
+    <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `Befehl registrieren und ausfuehren, Fehler werden als Failure gemeldet`</ID>
+    <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `Befehl-Timeout nach 60s bricht ab und liefert Fehler`</ID>
+    <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `Ereignisse nur mit passender Berechtigung`</ID>
+    <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `Menueeintrag braucht vorhandenen Befehl`</ID>
+    <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `Nachrichten werden gekuerzt, Grenzen fuer Befehle gelten`</ID>
+    <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `unregisterAll entfernt Befehle, Menues und Listener`</ID>
+    <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `werfender Listener stoert andere nicht`</ID>
+    <ID>LongMethod:PluginRepositoryImpl.kt:PluginRepositoryImpl$override fun installFromFile: Flow&lt;PluginInstallEvent></ID>
+    <ID>StringLiteralDuplication:PluginRegistry.kt:PluginRegistry$"entryPointClass"</ID>
+    <ID>StringLiteralDuplication:UserToolsRepositoryImpl.kt:UserToolsRepositoryImpl$"command"</ID>
+    <ID>StringLiteralDuplication:UserToolsRepositoryImpl.kt:UserToolsRepositoryImpl$"label"</ID>
+    <ID>SwallowedException:PluginHooks.kt:PluginHooks$e: TimeoutCancellationException</ID>
+    <ID>TooGenericExceptionCaught:PluginHooks.kt:PluginHooks$e: Throwable</ID>
+    <ID>TooGenericExceptionCaught:PluginRepositoryImpl.kt:PluginRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PluginRuntime.kt:PluginRuntime$t: Throwable</ID>
+    <ID>UnnecessaryParentheses:PluginRepositoryImpl.kt:PluginRepositoryImpl$(processed * 100)</ID>
+  </CurrentIssues>
+</SmellBaseline>

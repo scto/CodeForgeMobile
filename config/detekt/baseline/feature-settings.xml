@@ -1,0 +1,270 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:BuildRunScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:BuildRunScreen.kt:if</ID>
+    <ID>BracesOnIfStatements:BuildRunViewModel.kt:BuildRunViewModel$if</ID>
+    <ID>BracesOnIfStatements:ExtensionInfoModel.kt:ExtensionInfoModel$else</ID>
+    <ID>BracesOnIfStatements:ExtensionInfoModel.kt:ExtensionInfoModel$if</ID>
+    <ID>BracesOnIfStatements:ExtensionsScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:ExtensionsScreen.kt:if</ID>
+    <ID>BracesOnIfStatements:ExtensionsViewModel.kt:ExtensionsViewModel$else</ID>
+    <ID>BracesOnIfStatements:GitSettingsViewModel.kt:GitSettingsViewModel$if</ID>
+    <ID>BracesOnIfStatements:LspServerResolverImpl.kt:LspServerResolverImpl$else</ID>
+    <ID>BracesOnIfStatements:LspServerSettingsUi.kt:else</ID>
+    <ID>BracesOnIfStatements:LspUpdateChecker.kt:LspUpdateChecker$else</ID>
+    <ID>BracesOnIfStatements:LspUpdateChecker.kt:LspUpdateChecker$if</ID>
+    <ID>BracesOnIfStatements:StoreInstallerTest.kt:StoreInstallerTest.&lt;no name provided>$else</ID>
+    <ID>BracesOnIfStatements:StoreInstallerTest.kt:StoreInstallerTest.&lt;no name provided>$if</ID>
+    <ID>BracesOnIfStatements:StoreScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:StoreScreen.kt:if</ID>
+    <ID>BracesOnIfStatements:StoreViewModel.kt:StoreViewModel$if</ID>
+    <ID>BracesOnIfStatements:TerminalSettingsScreen.kt:else</ID>
+    <ID>BracesOnIfStatements:TerminalSettingsScreen.kt:if</ID>
+    <ID>BracesOnIfStatements:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$if</ID>
+    <ID>BracesOnWhenStatements:ArchiveUtils.kt:ArchiveUtils$when</ID>
+    <ID>BracesOnWhenStatements:BuildRunViewModel.kt:BuildRunViewModel$when</ID>
+    <ID>BracesOnWhenStatements:EditorSettingsViewModel.kt:EditorSettingsViewModel$when</ID>
+    <ID>BracesOnWhenStatements:ExtensionsManager.kt:ExtensionsManager$when</ID>
+    <ID>BracesOnWhenStatements:PackageManagerViewModel.kt:PackageManagerViewModel$when</ID>
+    <ID>BracesOnWhenStatements:StoreInstaller.kt:StoreInstaller$when</ID>
+    <ID>BracesOnWhenStatements:StoreScreen.kt:when</ID>
+    <ID>BracesOnWhenStatements:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$when</ID>
+    <ID>CascadingCallWrapping:JvmOptionsSheet.kt:padding(bottom = 16.dp)</ID>
+    <ID>CascadingCallWrapping:LspUpdateCheck.kt:UpdateParsers$substringAfter(':')</ID>
+    <ID>CascadingCallWrapping:LspUpdateCheck.kt:VersionCompare$toList()</ID>
+    <ID>CascadingCallWrapping:StoreCatalogParser.kt:StoreCatalogParser$takeIf { it.isNotBlank() }</ID>
+    <ID>CascadingCallWrapping:StoreViewModel.kt:StoreViewModel$extensionIdOf(item) ?.let { id -> extensionsManager.getCatalog().firstOrNull { it.id == id } } ?: return</ID>
+    <ID>CascadingCallWrapping:StoreViewModel.kt:StoreViewModel$toSet()</ID>
+    <ID>CascadingCallWrapping:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$properties.read(TermuxPropertiesStore.KEY_CURSOR_STYLE) ?.takeIf { it in setOf("block", "bar", "underline") } ?: "block"</ID>
+    <ID>CascadingCallWrapping:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$properties.read(TermuxPropertiesStore.KEY_TRANSCRIPT_ROWS)?.toIntOrNull() ?.coerceIn(100, 50_000) ?: TerminalScrollback.DEFAULT</ID>
+    <ID>ClassOrdering:EditorSettingsViewModel.kt:EditorSettingsViewModel$constructor</ID>
+    <ID>ClassOrdering:ExtensionInstallCoordinator.kt:ExtensionInstallCoordinator$constructor</ID>
+    <ID>ClassOrdering:ExtensionsContract.kt:ExtensionsUiState$fun settingsOf: com.codeforge.core.domain.model.LspServerSettings</ID>
+    <ID>ClassOrdering:ExtensionsManager.kt:ExtensionsManager$/** Ersetzt den npm-Aufruf (Tests). */ var customNpmRunner: (suspend (packageDir: File) -> Result&lt;Unit>)? = null</ID>
+    <ID>ClassOrdering:ExtensionsManager.kt:ExtensionsManager$constructor</ID>
+    <ID>ClassOrdering:ExtensionsViewModel.kt:ExtensionsViewModel$private var infoJob: kotlinx.coroutines.Job? = null</ID>
+    <ID>ClassOrdering:LspExtensionPackage.kt:LspExtensionPackage$constructor</ID>
+    <ID>ClassOrdering:LspServerResolverTest.kt:LspServerResolverTest$@get:Rule val tempFolder = TemporaryFolder()</ID>
+    <ID>ClassOrdering:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$/** UI-Zustand. */ val uiState: StateFlow&lt;TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState, backupState) { e, k, c, b -> listOf(e, k, c, b) }) { settings, termux, fontSp, font, extra -> @Suppress("UNCHECKED_CAST") val extraKeys = extra[0] as String? val killOnExit = extra[1] as Boolean val clipboard = extra[2] as Boolean val backup = extra[3] as Pair&lt;Boolean, String?> TerminalSettingsUiState( fontSize = fontSp ?: settings.terminal.fontSize.takeIf { it > 0 } ?: 14, useCompactTerminal = settings.terminal.useCompactTerminal, scrollbackRows = termux.first, cursorStyle = termux.second, customFontInstalled = font.first, killSessionsOnExit = killOnExit, clipboardShortcuts = clipboard, backupBusy = backup.first, backupMessage = backup.second, extraKeys = extraKeys ?: ExtraKeysConfig.DEFAULT, extraKeysCustom = extraKeys != null, fontMessageRes = font.second, isLoading = false ) } .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TerminalSettingsUiState())</ID>
+    <ID>ClassOrdering:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$private fun readExtraKeys: String?</ID>
+    <ID>ClassOrdering:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$private fun readTermuxFontSp: Int?</ID>
+    <ID>CognitiveComplexMethod:AiSettingsScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun ProviderCard</ID>
+    <ID>CognitiveComplexMethod:ArchiveUtils.kt:ArchiveUtils$fun extractZip: Result&lt;Unit></ID>
+    <ID>CognitiveComplexMethod:ArchiveUtils.kt:ArchiveUtils$private fun extractTarStream</ID>
+    <ID>CognitiveComplexMethod:BuildRunScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun BuildRunScreen</ID>
+    <ID>CognitiveComplexMethod:ExtensionDetailDialog.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun ExtensionDetailDialog</ID>
+    <ID>CognitiveComplexMethod:ExtensionInfoModel.kt:ExtensionInfoModel$fun checks: List&lt;LspCheck></ID>
+    <ID>CognitiveComplexMethod:ExtensionsManager.kt:ExtensionsManager$suspend fun install: Result&lt;File></ID>
+    <ID>CognitiveComplexMethod:ExtensionsManager.kt:ExtensionsManager$suspend fun uninstall: Result&lt;Unit></ID>
+    <ID>CognitiveComplexMethod:ExtensionsScreen.kt:@Composable private fun ExtensionCard</ID>
+    <ID>CognitiveComplexMethod:ExtensionsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun ExtensionsScreen</ID>
+    <ID>CognitiveComplexMethod:FileDownloader.kt:HttpFileDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>CognitiveComplexMethod:FormattersScreen.kt:@Composable fun FormattersScreen</ID>
+    <ID>CognitiveComplexMethod:GitSettingsScreen.kt:@Composable private fun CredentialDialog</ID>
+    <ID>CognitiveComplexMethod:HttpTextFetcher.kt:DefaultHttpTextFetcher$override suspend fun fetch: Result&lt;String></ID>
+    <ID>CognitiveComplexMethod:LspServerResolverImpl.kt:LspServerResolverImpl$override suspend fun resolve: LspServerLaunch?</ID>
+    <ID>CognitiveComplexMethod:LspServerSettingsUi.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable internal fun LspFeatureSheet</ID>
+    <ID>CognitiveComplexMethod:PackageManagerScreen.kt:@Composable private fun PackageCard</ID>
+    <ID>CognitiveComplexMethod:SnippetSettingsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun SnippetSettingsScreen</ID>
+    <ID>CognitiveComplexMethod:StoreInstaller.kt:StoreInstaller$private suspend fun installRecursive: StoreInstallResult</ID>
+    <ID>CognitiveComplexMethod:StoreScreen.kt:@Composable private fun StoreContent</ID>
+    <ID>CognitiveComplexMethod:StoreScreen.kt:@Composable private fun StoreItemCard</ID>
+    <ID>CognitiveComplexMethod:TerminalSettingsContract.kt:ExtraKeysConfig$fun isValid: Boolean</ID>
+    <ID>CognitiveComplexMethod:TerminalSettingsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable private fun TerminalSettingsScreen</ID>
+    <ID>CyclomaticComplexMethod:ArchiveUtils.kt:ArchiveUtils$private fun extractTarStream</ID>
+    <ID>CyclomaticComplexMethod:ExtensionsManager.kt:ExtensionsManager$suspend fun install: Result&lt;File></ID>
+    <ID>CyclomaticComplexMethod:ExtensionsScreen.kt:@Composable private fun ExtensionCard</ID>
+    <ID>CyclomaticComplexMethod:ExtensionsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun ExtensionsScreen</ID>
+    <ID>CyclomaticComplexMethod:FileDownloader.kt:HttpFileDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>CyclomaticComplexMethod:LspServerResolverImpl.kt:LspServerResolverImpl$override suspend fun resolve: LspServerLaunch?</ID>
+    <ID>CyclomaticComplexMethod:StoreInstaller.kt:StoreInstaller$private suspend fun installRecursive: StoreInstallResult</ID>
+    <ID>CyclomaticComplexMethod:StoreScreen.kt:@Composable private fun StoreItemCard</ID>
+    <ID>DataClassContainsFunctions:ExtensionsContract.kt:ExtensionsUiState$fun settingsOf: com.codeforge.core.domain.model.LspServerSettings</ID>
+    <ID>DataClassContainsFunctions:StoreModels.kt:StoreCatalog$fun itemsOf: List&lt;StoreItem></ID>
+    <ID>DocumentationOverPrivateFunction:ArchiveUtilsTest.kt:ArchiveUtilsTest$private fun createTarGzArchive: ByteArray</ID>
+    <ID>DocumentationOverPrivateFunction:BuildRunViewModel.kt:BuildRunViewModel$private suspend fun updateWrapper</ID>
+    <ID>DocumentationOverPrivateFunction:ExtensionsManager.kt:ExtensionsManager$private fun hasSupportedJdk: Boolean</ID>
+    <ID>DocumentationOverPrivateFunction:ExtensionsManager.kt:ExtensionsManager$private suspend fun ensureDependencies</ID>
+    <ID>DocumentationOverPrivateFunction:ExtensionsViewModel.kt:ExtensionsViewModel$private fun applyActive: List&lt;ExtensionUiItem></ID>
+    <ID>DocumentationOverPrivateFunction:ExtensionsViewModel.kt:ExtensionsViewModel$private fun openInfo</ID>
+    <ID>DocumentationOverPrivateFunction:LspServerResolverImpl.kt:LspServerResolverImpl$private fun resolveContributed: LspServerLaunch?</ID>
+    <ID>DocumentationOverPrivateFunction:StoreInstaller.kt:StoreInstaller$private suspend fun installRecursive: StoreInstallResult</ID>
+    <ID>DocumentationOverPrivateFunction:StoreScreen.kt:@Composable private fun StoreFilterChips</ID>
+    <ID>DocumentationOverPrivateFunction:StoreViewModel.kt:StoreViewModel$private fun extensionIdOf: String?</ID>
+    <ID>DocumentationOverPrivateFunction:StoreViewModel.kt:StoreViewModel$private fun refreshServerStates</ID>
+    <ID>DocumentationOverPrivateFunction:StoreViewModel.kt:StoreViewModel$private fun serverItemIds: Set&lt;String></ID>
+    <ID>DocumentationOverPrivateFunction:StoreViewModel.kt:StoreViewModel$private fun uninstall</ID>
+    <ID>DocumentationOverPrivateFunction:StoreViewModel.kt:StoreViewModel$private fun withLocalServers: StoreCatalog</ID>
+    <ID>DocumentationOverPrivateFunction:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$private fun notifyTermuxStylingReload</ID>
+    <ID>DocumentationOverPrivateFunction:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$private fun runBackup</ID>
+    <ID>DocumentationOverPrivateProperty:LspPluginLink.kt:LspPluginLink$/** Plugin-Namen, die im Extensions-Katalog unter anderer ID stehen. */ private val ALIASES = mapOf("web-langservers" to "vscode-langservers-extracted")</ID>
+    <ID>DocumentationOverPrivateProperty:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$/** Termux-Einstellungen des Terminals (Schriftgröße liegt dort in SharedPreferences, nicht im DataStore). */ private val termuxPrefs by lazy { runCatching { com.codeforge.shared.termux.settings.preferences.TermuxAppSharedPreferences.build(context, false) }.getOrNull() }</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* Bash Language Server * Download: npm registry tarball bash-language-server-5.8.1.tgz * URL: https://registry.npmjs.org/bash-language-server/-/bash-language-server-5.8.1.tgz * SHA-256 verifiziert 2026-10-21: 2ae910de8c50f4ec148222bdc580c121f2c621bdacc1225716218ca700f8ec79 * dist.integrity (sha512): F3g0hKZhCiKbLUf9wkrST6+ZypsHvJqaJxw/+J7WK2ywhFyc8+7jSHSTU1UDYncZkyWgbKV6+eZy5qWTZtoXww== * Benötigt: nodejs; Optional: shellcheck für Diagnosen</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* Clangd C/C++ Language Server * Bereitstellung über das Termux-Paket 'clang' im CodeForge APT-Repository (apt-stages.conf Stage 10) * Binary: $PREFIX/bin/clangd</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* Eclipse JDT Language Server (Eclipse Foundation) * Download: Eclipse Milestones (1.45.0) * SHA-256 verifiziert 2026-10-16: c09e79e958beb5ce41fb3b5097aec0455298bc88a14c8e41462b57edb2812797 * Benötigt: openjdk-17, python</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* Eclipse LemMinX XML Language Server (Eclipse Foundation) * Download: Eclipse LemMinX Releases (0.31.2 uber-jar) * URL: https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar * SHA-256 verifiziert 2026-10-21: f4fde164e785c635e5f86361dbf4b993bfe2c5f83fdb52891d058b7dfc9bcfc8 * Benötigt: openjdk-17</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* Kotlin Language Server (fwcd/kotlin-language-server) * Download: GitHub Releases asset server.zip * SHA-256 verifiziert 2026-10-16: c65efea1c09d88ddb1fe227d8e2c5dbb3d8dd568453bccbbf2e20dfa2f004dcd * Benötigt: openjdk-17 (Java Runtime)</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* Pyright (Microsoft) * Download: npm registry tarball pyright-1.1.377.tgz * SHA-256 verifiziert 2026-10-16: b11dc22e92560b38ebad99a892544d9ce81e2ce995db430b3683e86db57d7710 * dist.integrity (sha512): y6ENYuyZXTczPnPWZnqx78pE+ZgyIotEas2M/LFRTq3EfbgVk84EcvuSKLIy2DJeDKjKDxVP/LVmDNHabljD3g== * Benötigt: nodejs</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* Rust Analyzer * Bereitstellung über das Termux-Paket 'rust-analyzer' im CodeForge APT-Repository (apt-stages.conf Stage 15) * Binary: $PREFIX/bin/rust-analyzer</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* Taplo TOML Language Server * Bereitstellung über das Termux-Paket 'taplo' (APT-Paket 'taplo', Binary 'taplo') * Binary: $PREFIX/bin/taplo * Befehl: taplo lsp stdio</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* VS Code Language Servers Extracted (HTML / CSS / JSON / ESLint) * Download: npm registry tarball vscode-langservers-extracted-4.8.0.tgz * SHA-256 verifiziert 2026-10-16: 8c7102927a32fa145077f0406b66bb3a7d85f5b0a208d4efeb40702b5a6cd2e1 * dist.integrity (sha512): kWqVdmdcf9Ez1P3hZpvCHomxVqrdK2awwZkezSW3SuXLX0kXS4x8WoA0GkF54SA0CiXtJWszaFpQghUNVlepuQ== * Benötigt: nodejs</ID>
+    <ID>EndOfSentenceFormat:LspExtensionPackage.kt:LspExtensionCatalog$* YAML Language Server (Red Hat) * Download: npm registry tarball yaml-language-server-2.0.0.tgz * URL: https://registry.npmjs.org/yaml-language-server/-/yaml-language-server-2.0.0.tgz * SHA-256 verifiziert 2026-10-21: 8dcd68cc8bcdde719def62e651de9744576d3227de2e4ab85961603c92a52423 * dist.integrity (sha512): vT6ZEMTkXJA9Ixo07ByLgPkkt/L22fJdVDGAoB3EpPq3DCfKkMYeEeZdK5ECU6alwFUofhETo94/OV8GUxGuBg== * Benötigt: nodejs, npm</ID>
+    <ID>ExpressionBodySyntax:ExtensionsManager.kt:ExtensionsManager$return getExecutableFile(pkg) != null</ID>
+    <ID>ExpressionBodySyntax:ExtensionsManager.kt:ExtensionsManager$return when (val source = pkg.source) { is ExtensionSource.TermuxPackage -> { val direct = File(termuxBinDir, source.binaryName) if (direct.exists() &amp;&amp; direct.canExecute()) { direct } else { findBinaryOnPath(source.binaryName) } } is ExtensionSource.Download -> { val extensionDir = getExtensionDirectory(pkg) if (!extensionDir.exists()) return null val executable = File(extensionDir, pkg.executableRelativePath) if (executable.exists()) executable else null } }</ID>
+    <ID>ExpressionBodySyntax:SnippetSettingsViewModelTest.kt:SnippetSettingsViewModelTest.FakeSnippetRepository$return Result.success(com.codeforge.core.domain.model.VsCodeSnippetJsonSerializer.serialize(snippets ?: snippetsFlow.value))</ID>
+    <ID>FunctionNameMaxLength:AiSettingsViewModelTest.kt:AiSettingsViewModelTest$@Test fun `Anbieter aktivieren speichert ihn mit Schluessel`</ID>
+    <ID>FunctionNameMaxLength:AiSettingsViewModelTest.kt:AiSettingsViewModelTest$@Test fun `Live-Modelle stehen vor den Vorschlaegen ohne Duplikate`</ID>
+    <ID>FunctionNameMaxLength:AiSettingsViewModelTest.kt:AiSettingsViewModelTest$@Test fun `Schluessel wird pro Anbieter gespeichert und aktiver Anbieter bleibt`</ID>
+    <ID>FunctionNameMaxLength:AiSettingsViewModelTest.kt:AiSettingsViewModelTest$@Test fun `Standardmodell ist in den Vorschlaegen enthalten`</ID>
+    <ID>FunctionNameMaxLength:AiSettingsViewModelTest.kt:AiSettingsViewModelTest$@Test fun `Verbindungstest meldet Erfolg und Fehler`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractGz extracts single file and sets executable bit`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractTarGz prevents Symlink escaping destination folder`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractTarGz prevents Tar Slip path traversal and cleans up`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractTarGz successfully extracts files and sets executable mode`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractZip prevents Zip Slip attack and cleans up destination`</ID>
+    <ID>FunctionNameMaxLength:ArchiveUtilsTest.kt:ArchiveUtilsTest$@Test fun `extractZip successfully extracts nested files and directories`</ID>
+    <ID>FunctionNameMaxLength:ClipboardShortcutsTest.kt:ClipboardShortcutsTest$@Test fun disabledOrAltPressedDoesNothing</ID>
+    <ID>FunctionNameMaxLength:EditorSettingsViewModelTest.kt:EditorSettingsViewModelTest$@Test fun `backward compatibility with default empty proto`</ID>
+    <ID>FunctionNameMaxLength:EditorSettingsViewModelTest.kt:EditorSettingsViewModelTest$@Test fun `changing options saves to repository and updates uiState`</ID>
+    <ID>FunctionNameMaxLength:EditorSettingsViewModelTest.kt:EditorSettingsViewModelTest$@Test fun `initial state reflects datastore settings`</ID>
+    <ID>FunctionNameMaxLength:EditorSettingsViewModelTest.kt:EditorSettingsViewModelTest$@Test fun `project indexing is on by default and can be toggled and reset`</ID>
+    <ID>FunctionNameMaxLength:EditorSettingsViewModelTest.kt:EditorSettingsViewModelTest$@Test fun `section reset restores defaults for that section`</ID>
+    <ID>FunctionNameMaxLength:EditorSettingsViewModelTest.kt:EditorSettingsViewModelTest$@Test fun `xed style display options have sane defaults and can be changed and reset`</ID>
+    <ID>FunctionNameMaxLength:ExtensionDependenciesTest.kt:ExtensionDependenciesTest$@Test fun `catalog servers declare their runtimes`</ID>
+    <ID>FunctionNameMaxLength:ExtensionDependenciesTest.kt:ExtensionDependenciesTest$@Test fun `failing dependency install aborts without download`</ID>
+    <ID>FunctionNameMaxLength:ExtensionDependenciesTest.kt:ExtensionDependenciesTest$@Test fun `install list merges nodejs and npm and maps names`</ID>
+    <ID>FunctionNameMaxLength:ExtensionDependenciesTest.kt:ExtensionDependenciesTest$@Test fun `missing JDK and python are installed before the download`</ID>
+    <ID>FunctionNameMaxLength:ExtensionDependenciesTest.kt:ExtensionDependenciesTest$@Test fun `nothing is installed when requirements are already met`</ID>
+    <ID>FunctionNameMaxLength:ExtensionDependenciesTest.kt:ExtensionDependenciesTest$@Test fun `termux package clangd is installed via apt`</ID>
+    <ID>FunctionNameMaxLength:ExtensionDependenciesTest.kt:ExtensionDependenciesTest$@Test fun `termux package without installer keeps the terminal hint`</ID>
+    <ID>FunctionNameMaxLength:ExtensionInstallCoordinatorTest.kt:ExtensionInstallCoordinatorTest$@Test fun `cancelAll stops running installs without an outcome`</ID>
+    <ID>FunctionNameMaxLength:ExtensionInstallCoordinatorTest.kt:ExtensionInstallCoordinatorTest$@Test fun `install runs independently of the caller, reports the outcome and starts the service once`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManager.kt:ExtensionsManager$fun checkMissingOptionalRequirements: List&lt;String></ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerJdkTest$@Test fun `nur JDK 25 gilt fuer den Kotlin-Sprachserver als fehlend`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `install and uninstall lifecycle with GZ raw binary`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `install and uninstall lifecycle with JAR archive`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `install and uninstall lifecycle with TAR_GZ archive`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `install and uninstall lifecycle with ZIP archive`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `install fails if SHA-256 mismatch occurs and cleans up archive and directory`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `install with needsNpmInstall cleans up on npm failure`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `install with needsNpmInstall invokes runner and transitions through INSTALLING_DEPENDENCIES`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `optional requirement is detected correctly`</ID>
+    <ID>FunctionNameMaxLength:ExtensionsManagerTest.kt:ExtensionsManagerTest$@Test fun `termux package detection and requirements check`</ID>
+    <ID>FunctionNameMaxLength:LspExtensionCatalogTest.kt:LspExtensionCatalogTest$@Test fun `catalog has unique non-blank IDs`</ID>
+    <ID>FunctionNameMaxLength:LspExtensionCatalogTest.kt:LspExtensionCatalogTest$@Test fun `download packages have valid https URLs, 64-char hex SHA256, and matching archive types`</ID>
+    <ID>FunctionNameMaxLength:LspExtensionCatalogTest.kt:LspExtensionCatalogTest$@Test fun `findById retrieves expected catalog entries`</ID>
+    <ID>FunctionNameMaxLength:LspExtensionCatalogTest.kt:LspExtensionCatalogTest$@Test fun `termux packages have valid package and binary names and launch commands`</ID>
+    <ID>FunctionNameMaxLength:LspPluginLinkTest.kt:LspPluginLinkTest$@Test fun `alle Store-LSP-Plugins mit Katalogpaket werden aufgeloest`</ID>
+    <ID>FunctionNameMaxLength:LspPluginLinkTest.kt:LspPluginLinkTest$@Test fun `leitet die Paket-ID aus der Plugin-ID ab`</ID>
+    <ID>FunctionNameMaxLength:LspServerResolverTest.kt:LspServerResolverTest$@Test fun `beigesteuerter Server mit fehlender Datei liefert null`</ID>
+    <ID>FunctionNameMaxLength:LspServerResolverTest.kt:LspServerResolverTest$@Test fun `disabled server is not resolved and jvm options reach the command`</ID>
+    <ID>FunctionNameMaxLength:LspServerResolverTest.kt:LspServerResolverTest$@Test fun `resolve nutzt von Plugin beigesteuerten Language Server mit Platzhaltern`</ID>
+    <ID>FunctionNameMaxLength:LspServerResolverTest.kt:LspServerResolverTest$@Test fun `resolve returns expected launch commands for installed extensions`</ID>
+    <ID>FunctionNameMaxLength:LspServerResolverTest.kt:LspServerResolverTest$@Test fun `resolve returns null for unknown language`</ID>
+    <ID>FunctionNameMaxLength:LspServerResolverTest.kt:LspServerResolverTest$@Test fun `resolve returns null when extension is not installed`</ID>
+    <ID>FunctionNameMaxLength:PackageManagerViewModelTest.kt:PackageManagerViewModelTest$@Test fun filterSortsUpdatesFirstAndSearchesDescription</ID>
+    <ID>FunctionNameMaxLength:SettingsNavigationTest.kt:SettingsNavigationTest$@Test fun dialogState_consumesBackBeforeExitingScreen</ID>
+    <ID>FunctionNameMaxLength:SettingsNavigationTest.kt:SettingsNavigationTest$@Test fun emptyStackNavigation_fallsBackToStartDestination</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `calculateSha256 for empty bytes matches known digest`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `calculateSha256 for hello world matches standard SHA-256`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `verifySha256 is case insensitive`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `verifySha256 returns false for non-existent file`</ID>
+    <ID>FunctionNameMaxLength:Sha256UtilsTest.kt:Sha256UtilsTest$@Test fun `verifySha256 returns false for wrong hash`</ID>
+    <ID>FunctionNameMaxLength:SnippetSettingsViewModelTest.kt:SnippetSettingsViewModelTest$@Test fun `insertSnippetVariable appends variable to body`</ID>
+    <ID>FunctionNameMaxLength:SnippetSettingsViewModelTest.kt:SnippetSettingsViewModelTest$@Test fun `live validation updates on body edit with errors for unclosed brackets`</ID>
+    <ID>FunctionNameMaxLength:SnippetSettingsViewModelTest.kt:SnippetSettingsViewModelTest$@Test fun `observes snippets and computes filtered lists by query and scope`</ID>
+    <ID>FunctionNameMaxLength:SnippetSettingsViewModelTest.kt:SnippetSettingsViewModelTest$@Test fun `saveEditSnippet creates new snippet when editingSnippet is null`</ID>
+    <ID>FunctionNameMaxLength:SnippetSettingsViewModelTest.kt:SnippetSettingsViewModelTest$@Test fun `toggleEnabled updates repository and state`</ID>
+    <ID>FunctionNameMaxLength:StoreCatalogParserTest.kt:StoreCatalogParserTest$@Test fun dropsUnsafeLinksIncompleteItemsAndAddsUnknownCategories</ID>
+    <ID>FunctionNameMaxLength:StoreCatalogParserTest.kt:StoreCatalogParserTest$@Test fun parsesLocalizedTextAndFallsBackToEnglish</ID>
+    <ID>FunctionNameMaxLength:StoreInstallerTest.kt:StoreInstallerTest$@Test fun hashMismatchNeverReachesPluginSystem</ID>
+    <ID>FunctionNameMaxLength:StoreInstallerTest.kt:StoreInstallerTest$@Test fun installsDeclarativeOnlyAndPullsBundleMembers</ID>
+    <ID>FunctionNameMaxLength:StoreInstallerTest.kt:StoreInstallerTest$@Test fun installsWhenHashMatchesAndCleansUp</ID>
+    <ID>FunctionNameMaxLength:StoreInstallerTest.kt:StoreInstallerTest$@Test fun onlyHttpsPluginsWithHashAreInstallable</ID>
+    <ID>FunctionNameMaxLength:TermuxPropertiesTest.kt:ExtraKeysConfigTest$@org.junit.Test fun bracketsInsideStringsAreIgnoredAndNewlinesCollapse</ID>
+    <ID>FunctionNameMaxLength:TermuxPropertiesTest.kt:TerminalFontInstallerTest$@Test fun `gueltige Schrift wird installiert und ersetzt die alte`</ID>
+    <ID>FunctionNameMaxLength:TermuxPropertiesTest.kt:TerminalFontInstallerTest$@Test fun `ungueltige Datei wird abgelehnt und alte Schrift bleibt`</ID>
+    <ID>FunctionNameMaxLength:TermuxPropertiesTest.kt:TerminalFontSizeTest$@Test fun `sp zu px ist gerade und rechnet zurueck`</ID>
+    <ID>FunctionNameMaxLength:TermuxPropertiesTest.kt:TermuxPropertiesTest$@Test fun `Store schreibt und liest Datei inklusive Verzeichnis`</ID>
+    <ID>FunctionNameMaxLength:TermuxPropertiesTest.kt:TermuxPropertiesTest$@Test fun `auskommentierte Schluessel werden ignoriert`</ID>
+    <ID>FunctionNameMaxLength:TermuxPropertiesTest.kt:TermuxPropertiesTest$@Test fun `set ersetzt vorhandenen Schluessel und behaelt Kommentare`</ID>
+    <ID>FunctionNameMaxLength:TermuxPropertiesTest.kt:TermuxPropertiesTest$@Test fun `set haengt fehlenden Schluessel an und null entfernt ihn`</ID>
+    <ID>FunctionNameMinLength:AiSettingsViewModelTest.kt:AiSettingsViewModelTest$private fun vm</ID>
+    <ID>FunctionNameMinLength:LspServerInfo.kt:LspServerInfoCatalog$fun of: LspServerInfo?</ID>
+    <ID>LateinitUsage:ExtensionInstallService.kt:ExtensionInstallService$@Inject lateinit var coordinator: ExtensionInstallCoordinator</ID>
+    <ID>LongMethod:ArchiveUtils.kt:ArchiveUtils$private fun extractTarStream</ID>
+    <ID>LongMethod:EditorSettingsViewModel.kt:EditorSettingsViewModel$fun onEvent</ID>
+    <ID>LongMethod:EditorSettingsViewModelTest.kt:EditorSettingsViewModelTest$@Test fun `changing options saves to repository and updates uiState`</ID>
+    <ID>LongMethod:ExtensionsManager.kt:ExtensionsManager$suspend fun install: Result&lt;File></ID>
+    <ID>LongMethod:FileDownloader.kt:HttpFileDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>LongMethod:LspServerResolverImpl.kt:LspServerResolverImpl$override suspend fun resolve: LspServerLaunch?</ID>
+    <ID>LongMethod:SnippetSettingsViewModel.kt:SnippetSettingsViewModel$fun onEvent</ID>
+    <ID>LongMethod:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$fun onEvent</ID>
+    <ID>LoopWithTooManyJumpStatements:ArchiveUtils.kt:ArchiveUtils$for</ID>
+    <ID>LoopWithTooManyJumpStatements:ArchiveUtils.kt:ArchiveUtils$while</ID>
+    <ID>LoopWithTooManyJumpStatements:FileDownloader.kt:HttpFileDownloader$while</ID>
+    <ID>LoopWithTooManyJumpStatements:StoreInstaller.kt:StoreInstaller$for</ID>
+    <ID>MatchingDeclarationName:AboutSettingsScreen.kt:AboutInfo</ID>
+    <ID>MultilineRawStringIndentation:SnippetSettingsViewModelTest.kt:SnippetSettingsViewModelTest$""" { "Imported": { "prefix": "imp", "body": "val imported = 1", "scope": "kotlin" } } """</ID>
+    <ID>MultilineRawStringIndentation:StoreCatalogParserTest.kt:StoreCatalogParserTest$""" {"schema":1,"updated":"2026-10-27", "categories":[{"id":"plugin","title":{"de":"Plugins","en":"Plugins"}},{"id":"theme","title":"Themes"}], "items":[ {"id":"a","category":"plugin","name":{"de":"Alpha","en":"Alpha EN"},"summary":{"en":"Only English"},"version":"1.0","author":"me", "homepage":"https://example.org","downloadUrl":"https://example.org/a.zip","sha256":"${"a".repeat(64)}"}, {"id":"b","category":"icons","name":"Bravo","homepage":"javascript:alert(1)","downloadUrl":"ftp://x/y"}, {"id":"c","category":"theme"}, {"category":"theme","name":"ohne id"} ]} """</ID>
+    <ID>ReturnCount:LspServerResolverImpl.kt:LspServerResolverImpl$override suspend fun resolve: LspServerLaunch?</ID>
+    <ID>ReturnCount:LspServerResolverImpl.kt:LspServerResolverImpl$private fun resolveContributed: LspServerLaunch?</ID>
+    <ID>ReturnCount:LspUpdateCheck.kt:VersionCompare$fun isNewer: Boolean</ID>
+    <ID>ReturnCount:LspUpdateChecker.kt:LspUpdateChecker$private suspend fun remote: UpdateCheckResult</ID>
+    <ID>ReturnCount:SnippetSettingsViewModel.kt:SnippetSettingsViewModel$fun onEvent</ID>
+    <ID>ReturnCount:StoreInstaller.kt:StoreInstaller$private suspend fun installRecursive: StoreInstallResult</ID>
+    <ID>ReturnCount:TerminalSettingsContract.kt:ExtraKeysConfig$fun isValid: Boolean</ID>
+    <ID>StringLiteralDuplication:LspDependencies.kt:LspDependencies$"python"</ID>
+    <ID>StringLiteralDuplication:LspDependencies.kt:LspDependencies$"python3"</ID>
+    <ID>StringLiteralDuplication:LspExtensionPackage.kt:LspExtensionCatalog$"--stdio"</ID>
+    <ID>StringLiteralDuplication:LspExtensionPackage.kt:LspExtensionCatalog$"clangd"</ID>
+    <ID>StringLiteralDuplication:LspExtensionPackage.kt:LspExtensionCatalog$"nodejs"</ID>
+    <ID>StringLiteralDuplication:LspExtensionPackage.kt:LspExtensionCatalog$"openjdk-17"</ID>
+    <ID>StringLiteralDuplication:LspExtensionPackage.kt:LspExtensionCatalog$"rust-analyzer"</ID>
+    <ID>StringLiteralDuplication:LspExtensionPackage.kt:LspExtensionCatalog$"taplo"</ID>
+    <ID>StringLiteralDuplication:LspServerResolverImpl.kt:LspServerResolverImpl$"--stdio"</ID>
+    <ID>StringLiteralDuplication:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$"block"</ID>
+    <ID>StringLiteralDuplication:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$"no stream"</ID>
+    <ID>StringShouldBeRawString:GitSettingsContract.kt:GitSettingsUiState.Companion$"^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"</ID>
+    <ID>StringShouldBeRawString:LspUpdateCheckTest.kt:LspUpdateCheckTest$"clang:\n Installed: 18.1.3\n Candidate: 19.1.0\n Version table:\n"</ID>
+    <ID>StringShouldBeRawString:LspUpdateCheckTest.kt:LspUpdateCheckTest$"x:\n Installed: (none)\n Candidate: 1.0\n"</ID>
+    <ID>StringShouldBeRawString:TermuxPropertiesTest.kt:TermuxPropertiesTest$"# Kommentar\nbell-character=ignore\nterminal-transcript-rows=10000\n"</ID>
+    <ID>StringShouldBeRawString:TermuxPropertiesTest.kt:TermuxPropertiesTest$"# Kommentar\nbell-character=ignore\nterminal-transcript-rows=2000\n"</ID>
+    <ID>StringShouldBeRawString:UserToolsDialogs.kt:"\"([^\"]*)\"|([^\\s,]+)"</ID>
+    <ID>SwallowedException:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$e: com.codeforge.libs.terminal_engine.BackupCancelledException</ID>
+    <ID>TooGenericExceptionCaught:ArchiveUtils.kt:ArchiveUtils$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ExtensionsManager.kt:ExtensionsManager$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:FileDownloader.kt:HttpFileDownloader$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$e: Exception</ID>
+    <ID>UnconditionalJumpStatementInLoop:FileDownloader.kt:HttpFileDownloader$while (true) { val conn = URI(currentUrl).toURL().openConnection() as HttpURLConnection conn.connectTimeout = 15_000 conn.readTimeout = 30_000 conn.instanceFollowRedirects = false conn.setRequestProperty("User-Agent", "CodeForgeMobile/3.0.0") conn.connect() val responseCode = conn.responseCode if (responseCode in listOf( HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_SEE_OTHER, 307, 308 ) ) { if (++redirects > maxRedirects) { conn.disconnect() throw IOException("Too many redirects ($redirects) for $url") } val location = conn.getHeaderField("Location") ?: throw IOException("HTTP redirect $responseCode without Location header") currentUrl = URI(currentUrl).resolve(location).toString() conn.disconnect() continue } if (responseCode !in 200..299) { conn.disconnect() throw IllegalStateException("HTTP error $responseCode while downloading $url") } connection = conn break }</ID>
+    <ID>UnderscoresInNumericLiterals:ExtensionInstallService.kt:ExtensionInstallService.Companion$61001</ID>
+    <ID>UnderscoresInNumericLiterals:PackageManagerViewModelTest.kt:PackageManagerViewModelTest$102400</ID>
+    <ID>UnderscoresInNumericLiterals:TerminalSettingsContract.kt:TerminalScrollback$10000</ID>
+    <ID>UnderscoresInNumericLiterals:TerminalSettingsContract.kt:TerminalScrollback$20000</ID>
+    <ID>UnderscoresInNumericLiterals:TerminalSettingsContract.kt:TerminalScrollback$50000</ID>
+    <ID>UndocumentedPublicClass:BuildRunContract.kt:BuildRunEffect$ShowSnackbar : BuildRunEffect</ID>
+    <ID>UndocumentedPublicClass:BuildRunContract.kt:BuildRunEvent$Confirm : BuildRunEvent</ID>
+    <ID>UndocumentedPublicClass:BuildRunContract.kt:BuildRunEvent$DismissConfirm : BuildRunEvent</ID>
+    <ID>UndocumentedPublicClass:BuildRunContract.kt:BuildRunEvent$GradleHomeInputChanged : BuildRunEvent</ID>
+    <ID>UndocumentedPublicClass:BuildRunContract.kt:BuildRunEvent$WrapperVersionChanged : BuildRunEvent</ID>
+    <ID>UndocumentedPublicFunction:ExtensionInstallService.kt:ExtensionInstallService.Companion$fun start</ID>
+    <ID>UndocumentedPublicFunction:TerminalFontInstaller.kt:TerminalFontInstaller.Companion$@SuppressLint("SdCardPath") fun defaultTarget: File</ID>
+    <ID>UndocumentedPublicFunction:TerminalFontInstaller.kt:TerminalFontInstaller.Companion$fun isFontFile: Boolean</ID>
+    <ID>UndocumentedPublicFunction:TermuxProperties.kt:TermuxPropertiesStore.Companion$@SuppressLint("SdCardPath") fun defaultFile: File</ID>
+    <ID>UnnecessaryParentheses:AboutSettingsScreen.kt:(context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE)</ID>
+    <ID>UnnecessaryParentheses:ArchiveUtils.kt:ArchiveUtils$(mode and 0b000_001_000 != 0)</ID>
+    <ID>UnnecessaryParentheses:ArchiveUtils.kt:ArchiveUtils$(mode and 0b001_000_000 != 0)</ID>
+    <ID>UnnecessaryParentheses:ArchiveUtilsTest.kt:ArchiveUtilsTest$(b.toInt() and 0xFF)</ID>
+    <ID>UnnecessaryParentheses:ExtensionsManagerTest.kt:ExtensionsManagerTest$(b.toInt() and 0xFF)</ID>
+    <ID>UnnecessaryParentheses:GitSettingsScreen.kt:({ Text(stringRes(R.string.settings_ungueltige_mail_adresse)) })</ID>
+    <ID>UnnecessaryParentheses:TerminalSettingsScreen.kt:({ Text(stringRes(R.string.settings_terminal_extra_keys_invalid)) })</ID>
+    <ID>UnnecessaryParentheses:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$(if (ok) com.codeforge.core.resources.R.string.settings_terminal_font_installed else com.codeforge.core.resources.R.string.settings_terminal_font_invalid)</ID>
+    <ID>UnnecessaryParentheses:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$(null as Int?)</ID>
+    <ID>UnnecessaryParentheses:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$(null as String?)</ID>
+    <ID>UnusedParameter:StoreScreen.kt:onInstallServer: () -> Unit</ID>
+    <ID>UseIfInsteadOfWhen:ExtensionInfoModel.kt:ExtensionInfoModel$when (pkg.id) { "vscode-langservers-extracted" -> setOf("vscode-html-language-server", "vscode-css-language-server", "vscode-json-language-server", pkg.id) else -> setOf(pkg.id) }</ID>
+    <ID>UseIfInsteadOfWhen:LspServerResolverImpl.kt:LspServerResolverImpl$when (pkg.id) { "vscode-langservers-extracted" -> when (languageId.lowercase()) { "css" -> "vscode-css-language-server" "json" -> "vscode-json-language-server" else -> "vscode-html-language-server" } else -> pkg.id }</ID>
+  </CurrentIssues>
+</SmellBaseline>

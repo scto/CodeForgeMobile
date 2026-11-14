@@ -1,0 +1,380 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:ConstraintMapper.kt:ConstraintMapper$else</ID>
+    <ID>BracesOnIfStatements:DesignerPanels.kt:else</ID>
+    <ID>BracesOnIfStatements:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$else</ID>
+    <ID>BracesOnIfStatements:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$if</ID>
+    <ID>BracesOnIfStatements:LayoutOps.kt:else</ID>
+    <ID>BracesOnIfStatements:LayoutOps.kt:if</ID>
+    <ID>BracesOnIfStatements:LayoutPreview.kt:else</ID>
+    <ID>BracesOnIfStatements:LayoutScanner.kt:LayoutScanner$else</ID>
+    <ID>BracesOnIfStatements:SdkAttrsParser.kt:SdkAttrsParser$else</ID>
+    <ID>BracesOnWhenStatements:ConstraintLayoutPreview.kt:when</ID>
+    <ID>BracesOnWhenStatements:ConstraintMapper.kt:ConstraintMapper$when</ID>
+    <ID>BracesOnWhenStatements:DesignerPanels.kt:when</ID>
+    <ID>BracesOnWhenStatements:LayoutDesignerScreen.kt:when</ID>
+    <ID>BracesOnWhenStatements:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$when</ID>
+    <ID>BracesOnWhenStatements:LayoutPreview.kt:when</ID>
+    <ID>BracesOnWhenStatements:RelativeLayoutPreview.kt:when</ID>
+    <ID>BracesOnWhenStatements:ResourceRepository.kt:ResourceRepository$when</ID>
+    <ID>ClassOrdering:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$constructor</ID>
+    <ID>ClassOrdering:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$private var lintJob: Job? = null</ID>
+    <ID>ClassOrdering:LayoutNode.kt:LayoutNode$fun attr: String?</ID>
+    <ID>ClassOrdering:LayoutScanner.kt:LayoutScanner$const val TEMPLATE = """&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" /> """</ID>
+    <ID>ClassOrdering:WidgetCatalog.kt:WidgetCatalog$/** Einträge der Palette. */ val palette: List&lt;PaletteEntry> = listOf( PaletteEntry("linear_vertical", "LinearLayout", WidgetCategory.LAYOUT, fillDefaults("android:orientation" to "vertical")), PaletteEntry("linear_horizontal", "LinearLayout", WidgetCategory.LAYOUT, linkedMapOf("android:layout_width" to MATCH, "android:layout_height" to WRAP, "android:orientation" to "horizontal")), PaletteEntry("frame", "FrameLayout", WidgetCategory.LAYOUT, fillDefaults()), PaletteEntry("scroll", "ScrollView", WidgetCategory.LAYOUT, fillDefaults()), PaletteEntry("constraint", "androidx.constraintlayout.widget.ConstraintLayout", WidgetCategory.LAYOUT, fillDefaults()), PaletteEntry("text", "TextView", WidgetCategory.TEXT, wrapDefaults("android:text" to "Text")), PaletteEntry("button", "Button", WidgetCategory.BUTTON, wrapDefaults("android:text" to "Button")), PaletteEntry("edit", "EditText", WidgetCategory.INPUT, linkedMapOf("android:layout_width" to MATCH, "android:layout_height" to WRAP, "android:hint" to "Hint", "android:inputType" to "text")), PaletteEntry("checkbox", "CheckBox", WidgetCategory.INPUT, wrapDefaults("android:text" to "CheckBox")), PaletteEntry("switch", "Switch", WidgetCategory.INPUT, wrapDefaults("android:text" to "Switch")), PaletteEntry("image", "ImageView", WidgetCategory.MEDIA, linkedMapOf("android:layout_width" to "64dp", "android:layout_height" to "64dp")), PaletteEntry("progress", "ProgressBar", WidgetCategory.OTHER, wrapDefaults()), PaletteEntry("view", "View", WidgetCategory.OTHER, linkedMapOf("android:layout_width" to MATCH, "android:layout_height" to "1dp", "android:background" to "#CCCCCC")), PaletteEntry("space", "Space", WidgetCategory.OTHER, linkedMapOf("android:layout_width" to "16dp", "android:layout_height" to "16dp")), PaletteEntry("include", "include", WidgetCategory.LAYOUT, linkedMapOf("layout" to "@layout/...", "android:layout_width" to MATCH, "android:layout_height" to WRAP)), PaletteEntry("card_view", "androidx.cardview.widget.CardView", WidgetCategory.LAYOUT, fillDefaults()), PaletteEntry("material_button", "com.google.android.material.button.MaterialButton", WidgetCategory.BUTTON, wrapDefaults("android:text" to "MaterialButton")), PaletteEntry("chip", "com.google.android.material.chip.Chip", WidgetCategory.BUTTON, wrapDefaults("android:text" to "Chip")), PaletteEntry("fab", "com.google.android.material.floatingactionbutton.FloatingActionButton", WidgetCategory.BUTTON, wrapDefaults()), PaletteEntry("recycler_view", "androidx.recyclerview.widget.RecyclerView", WidgetCategory.LAYOUT, fillDefaults()), PaletteEntry("text_input_layout", "com.google.android.material.textfield.TextInputLayout", WidgetCategory.INPUT, fillDefaults()), PaletteEntry("slider", "com.google.android.material.slider.Slider", WidgetCategory.INPUT, fillDefaults()), PaletteEntry("material_divider", "com.google.android.material.divider.MaterialDivider", WidgetCategory.OTHER, fillDefaults("android:layout_height" to "1dp")), PaletteEntry("compose_view", "androidx.compose.ui.platform.ComposeView", WidgetCategory.OTHER, fillDefaults()), )</ID>
+    <ID>CognitiveComplexMethod:ConstraintCard.kt:@Composable fun ConstraintCard</ID>
+    <ID>CognitiveComplexMethod:ConstraintLayoutPreview.kt:@Composable internal fun ConstraintView</ID>
+    <ID>CognitiveComplexMethod:ConstraintMapper.kt:ConstraintMapper$private fun detectCycles: List&lt;ConstraintWarning></ID>
+    <ID>CognitiveComplexMethod:ConstraintMapper.kt:ConstraintMapper$private fun mapChild: NodeConstraintSpec</ID>
+    <ID>CognitiveComplexMethod:CustomViewScanner.kt:CustomViewScanner$private fun scanFile</ID>
+    <ID>CognitiveComplexMethod:DesignerPanels.kt:@Composable internal fun PalettePanel</ID>
+    <ID>CognitiveComplexMethod:DesignerPanels.kt:@Composable internal fun ProblemsPanel</ID>
+    <ID>CognitiveComplexMethod:DesignerPanels.kt:@Composable internal fun PropertiesPanel</ID>
+    <ID>CognitiveComplexMethod:DesignerPanels.kt:@Composable internal fun TreePanel</ID>
+    <ID>CognitiveComplexMethod:DesignerPanels.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun AttributeEditor</ID>
+    <ID>CognitiveComplexMethod:DropResolver.kt:DropResolver$private fun resolveContainerDrop: DropTarget</ID>
+    <ID>CognitiveComplexMethod:LayoutClipboard.kt:LayoutClipboard$fun pasteSnippet: AddResult</ID>
+    <ID>CognitiveComplexMethod:LayoutDesignerScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable private fun LayoutDesignerScreen</ID>
+    <ID>CognitiveComplexMethod:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$fun onEvent</ID>
+    <ID>CognitiveComplexMethod:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$private fun load</ID>
+    <ID>CognitiveComplexMethod:LayoutLinter.kt:LayoutLinter$private fun checkConstraintLayoutRules</ID>
+    <ID>CognitiveComplexMethod:LayoutLinter.kt:LayoutLinter$private fun checkInefficientWeight</ID>
+    <ID>CognitiveComplexMethod:LayoutLinter.kt:LayoutLinter$private fun checkMissingIdReferences</ID>
+    <ID>CognitiveComplexMethod:LayoutOps.kt:fun LayoutDocument.canDrop: DropVerdict</ID>
+    <ID>CognitiveComplexMethod:LayoutOps.kt:fun LayoutDocument.findIncompatibleChildAttributes: List&lt;IncompatibleAttribute></ID>
+    <ID>CognitiveComplexMethod:LayoutOps.kt:fun LayoutDocument.removeWithReferences: RemoveWithReferencesResult</ID>
+    <ID>CognitiveComplexMethod:LayoutOps.kt:fun LayoutDocument.renameId: LayoutDocument</ID>
+    <ID>CognitiveComplexMethod:LayoutPreview.kt:@Composable fun LayoutPreview</ID>
+    <ID>CognitiveComplexMethod:LayoutPreview.kt:@Composable internal fun NodeView</ID>
+    <ID>CognitiveComplexMethod:LayoutPreview.kt:@Composable private fun LeafView</ID>
+    <ID>CognitiveComplexMethod:LayoutPreview.kt:@Composable private fun LinearView</ID>
+    <ID>CognitiveComplexMethod:LayoutPreview.kt:@Composable private fun ViewStubView</ID>
+    <ID>CognitiveComplexMethod:LayoutXml.kt:LayoutXml$fun parse: LayoutDocument</ID>
+    <ID>CognitiveComplexMethod:LayoutXml.kt:LayoutXml$fun write: String</ID>
+    <ID>CognitiveComplexMethod:LayoutXml.kt:LayoutXml$private fun StringBuilder.writeNode</ID>
+    <ID>CognitiveComplexMethod:LayoutXml.kt:LayoutXml$private fun detectIndentation: String</ID>
+    <ID>CognitiveComplexMethod:RelativeLayoutPreview.kt:@Composable internal fun RelativeView</ID>
+    <ID>CognitiveComplexMethod:RelativeSolver.kt:RelativeSolver$fun solve: RelativeSolveResult</ID>
+    <ID>CognitiveComplexMethod:ResourceRepository.kt:ResourceRepository$fun extractToResource: Boolean</ID>
+    <ID>CognitiveComplexMethod:ResourceRepository.kt:ResourceRepository$private fun parseValuesXml</ID>
+    <ID>CognitiveComplexMethod:ResourceRepository.kt:ResourceRepository$private fun scoreQualifier: Int</ID>
+    <ID>CognitiveComplexMethod:SdkAttrsParser.kt:SdkAttrsParser$fun parse: Map&lt;String, List&lt;AttrSpec>></ID>
+    <ID>CollapsibleIfStatements:LayoutLinter.kt:LayoutLinter$if (node.tag.substringAfterLast('.') in scrollContainers) { if (node.children.size > 1) { issues.add( LayoutIssue( uid = node.uid, severity = IssueSeverity.ERROR, ruleId = "ScrollViewChildren", message = "&lt;${node.tag}> darf nur genau ein direktes Kind haben (${node.children.size} vorhanden)" ) ) } }</ID>
+    <ID>CollapsibleIfStatements:LayoutLinter.kt:LayoutLinter$if (node.uid != document.root.uid &amp;&amp; node.tag.substringAfterLast('.') in genericContainers) { if (node.children.size == 1) { val hasBackground = node.attributes.containsKey("android:background") val hasPadding = node.attributes.keys.any { it.contains("padding") } val hasElevation = node.attributes.containsKey("android:elevation") val hasWeight = node.attributes.containsKey("android:layout_weight") if (!hasBackground &amp;&amp; !hasPadding &amp;&amp; !hasElevation &amp;&amp; !hasWeight) { issues.add( LayoutIssue( uid = node.uid, severity = IssueSeverity.INFO, ruleId = "UselessParent", message = "Überflüssiger Eltern-Container &lt;${node.tag}> mit nur einem Kind", quickFix = QuickFix.UnwrapContainer("Container auflösen", node.uid) ) ) } } }</ID>
+    <ID>ComplexCondition:LayoutLinter.kt:LayoutLinter$!hasBackground &amp;&amp; !hasPadding &amp;&amp; !hasElevation &amp;&amp; !hasWeight</ID>
+    <ID>ComplexCondition:LayoutLinter.kt:LayoutLinter$(wDp != null &amp;&amp; wDp &lt; 48f) || (hDp != null &amp;&amp; hDp &lt; 48f)</ID>
+    <ID>ComplexCondition:LayoutLinter.kt:LayoutLinter$key != "android:textSize" &amp;&amp; value.endsWith("sp") &amp;&amp; (key.contains("layout_") || key.contains("padding"))</ID>
+    <ID>ComplexCondition:LayoutLinter.kt:LayoutLinter$key in idRefAttrs || key.contains(":layout_constraint") &amp;&amp; key.endsWith("toTopOf") || key.contains(":layout_constraint") &amp;&amp; key.endsWith("toBottomOf") || key.contains(":layout_constraint") &amp;&amp; key.endsWith("toStartOf") || key.contains(":layout_constraint") &amp;&amp; key.endsWith("toEndOf") || key.contains(":layout_constraint") &amp;&amp; key.endsWith("toLeftOf") || key.contains(":layout_constraint") &amp;&amp; key.endsWith("toRightOf") || key.contains(":layout_constraint") &amp;&amp; key.endsWith("toBaselineOf")</ID>
+    <ID>ComplexCondition:LayoutLinter.kt:LayoutLinter$value.endsWith("px") &amp;&amp; (key.contains("layout_") || key.contains("padding") || key.contains("min") || key.contains("max"))</ID>
+    <ID>ComplexCondition:LayoutLinter.kt:LayoutLinter$value.isNotBlank() &amp;&amp; !value.startsWith("@string/") &amp;&amp; !value.startsWith("@android:string/") &amp;&amp; !value.startsWith("?")</ID>
+    <ID>ComplexCondition:LayoutOps.kt:isOldRelative &amp;&amp; !isNewRelative &amp;&amp; (attr.startsWith("android:layout_align") || attr.startsWith("android:layout_to") || attr in setOf("android:layout_below", "android:layout_above", "android:layout_centerInParent", "android:layout_centerHorizontal", "android:layout_centerVertical"))</ID>
+    <ID>ComplexCondition:LayoutPreview.kt:selectedUid != null &amp;&amp; dragController?.isDragging != true &amp;&amp; onResizeDelta != null &amp;&amp; onToggleSizeMode != null</ID>
+    <ID>ComplexCondition:LayoutXml.kt:LayoutXml$trimmed.startsWith("&lt;") &amp;&amp; !trimmed.startsWith("&lt;?") &amp;&amp; !trimmed.startsWith("&lt;!") &amp;&amp; !trimmed.startsWith("&lt;/")</ID>
+    <ID>CyclomaticComplexMethod:ConstraintCard.kt:@Composable fun ConstraintCard</ID>
+    <ID>CyclomaticComplexMethod:ConstraintLayoutPreview.kt:@Composable internal fun ConstraintView</ID>
+    <ID>CyclomaticComplexMethod:ConstraintMapper.kt:ConstraintMapper$private fun mapChild: NodeConstraintSpec</ID>
+    <ID>CyclomaticComplexMethod:CustomViewScanner.kt:CustomViewScanner$private fun scanFile</ID>
+    <ID>CyclomaticComplexMethod:DesignerPanels.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun AttributeEditor</ID>
+    <ID>CyclomaticComplexMethod:DropResolver.kt:DropResolver$private fun resolveContainerDrop: DropTarget</ID>
+    <ID>CyclomaticComplexMethod:LayoutDesignerScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable private fun LayoutDesignerScreen</ID>
+    <ID>CyclomaticComplexMethod:LayoutLinter.kt:LayoutLinter$private fun checkConstraintLayoutRules</ID>
+    <ID>CyclomaticComplexMethod:LayoutLinter.kt:LayoutLinter$private fun checkMissingIdReferences</ID>
+    <ID>CyclomaticComplexMethod:LayoutOps.kt:fun LayoutDocument.canDrop: DropVerdict</ID>
+    <ID>CyclomaticComplexMethod:LayoutOps.kt:fun LayoutDocument.findIncompatibleChildAttributes: List&lt;IncompatibleAttribute></ID>
+    <ID>CyclomaticComplexMethod:LayoutOps.kt:fun LayoutDocument.removeWithReferences: RemoveWithReferencesResult</ID>
+    <ID>CyclomaticComplexMethod:LayoutPreview.kt:@Composable fun LayoutPreview</ID>
+    <ID>CyclomaticComplexMethod:LayoutPreview.kt:@Composable internal fun NodeView</ID>
+    <ID>CyclomaticComplexMethod:LayoutPreview.kt:@Composable private fun LeafView</ID>
+    <ID>CyclomaticComplexMethod:LayoutXml.kt:LayoutXml$fun parse: LayoutDocument</ID>
+    <ID>CyclomaticComplexMethod:RelativeLayoutPreview.kt:@Composable internal fun RelativeView</ID>
+    <ID>CyclomaticComplexMethod:RelativeSolver.kt:RelativeSolver$fun solve: RelativeSolveResult</ID>
+    <ID>CyclomaticComplexMethod:ResourceRepository.kt:ResourceRepository$private fun parseValuesXml</ID>
+    <ID>CyclomaticComplexMethod:ResourceRepository.kt:ResourceRepository$private fun scoreQualifier: Int</ID>
+    <ID>CyclomaticComplexMethod:SdkAttrsParser.kt:SdkAttrsParser$fun parse: Map&lt;String, List&lt;AttrSpec>></ID>
+    <ID>DataClassContainsFunctions:DropResolver.kt:DesignerRect$fun contains: Boolean</ID>
+    <ID>DataClassContainsFunctions:LayoutNode.kt:LayoutNode$fun attr: String?</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$val (repo, includeRes, customViews, variants, currVariant) = withContext(ioDispatcher) { val dirs = ResourceRepository.findResDirsForLayout(layoutFile) val r = if (dirs.isNotEmpty()) ResourceRepository(dirs) else null val inc = if (dirs.isNotEmpty()) IncludeResolver(dirs) else null val srcDir = findSrcDir(layoutFile) val cvs = srcDir?.let { CustomViewScanner().scanDirectory(it) } ?: emptyList() val resDir = layoutFile.parentFile?.parentFile val fileName = layoutFile.name val vList = if (resDir != null &amp;&amp; resDir.exists()) { val layoutDirs = resDir.listFiles { f -> f.isDirectory &amp;&amp; f.name.startsWith("layout") } ?: emptyArray() layoutDirs.filter { File(it, fileName).exists() } .map { it.name.removePrefix("layout").removePrefix("-").ifEmpty { "default" } } .sorted() } else listOf("default") val curV = layoutFile.parentFile?.name?.removePrefix("layout")?.removePrefix("-")?.ifEmpty { "default" } ?: "default" LoadedContext(r, inc, cvs, vList, curV) }</ID>
+    <ID>DocumentationOverPrivateFunction:DesignerPanels.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun AttributeEditor</ID>
+    <ID>DocumentationOverPrivateFunction:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$private fun applyDraft: Boolean</ID>
+    <ID>DocumentationOverPrivateFunction:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$private fun commit</ID>
+    <ID>DocumentationOverPrivateProperty:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$/** Aufeinanderfolgende Eingaben in dasselbe Feld teilen sich einen Undo-Schritt. */ private var lastEditKey: String? = null</ID>
+    <ID>DocumentationOverPrivateProperty:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$/** Normalisiertes XML des zuletzt geladenen/gespeicherten Stands. */ private var savedXml: String = ""</ID>
+    <ID>EmptyCatchBlock:LayoutModelTest.kt:LayoutModelTest${ }</ID>
+    <ID>EndOfSentenceFormat:DesignerToolbars.kt: 4 Größengriffe an den Rändern des selektierten Elements </ID>
+    <ID>EndOfSentenceFormat:DesignerToolbars.kt: Breadcrumb-Leiste: Wurzel › … › Aktuelle Auswahl </ID>
+    <ID>EndOfSentenceFormat:DesignerToolbars.kt: Schnellauswahl für Konfigurationen und Overlays </ID>
+    <ID>EndOfSentenceFormat:DesignerToolbars.kt: Schwebende Zoom-Steuerung (+, -, 100%, Reset) </ID>
+    <ID>EndOfSentenceFormat:ResourceRepository.kt:ResourceRepository$ Eingebaute Material-3 Theme-Tabelle </ID>
+    <ID>EndOfSentenceFormat:ResourceRepository.kt:ResourceRepository$ Löst eine Dimension (`@dimen/name` oder `16dp`) auf </ID>
+    <ID>EndOfSentenceFormat:ResourceRepository.kt:ResourceRepository$ Löst eine Farbe (`@color/name`, `#RGB` oder `?attr/...`) auf </ID>
+    <ID>EndOfSentenceFormat:ResourceRepository.kt:ResourceRepository$ Löst eine Zeichenkette (`@string/name` oder Direkttyp) auf </ID>
+    <ID>EndOfSentenceFormat:ResourceRepository.kt:ResourceRepository$ Prüft, ob eine Ressource existiert </ID>
+    <ID>EndOfSentenceFormat:ResourceRepository.kt:ResourceRepository.Companion$ Findet alle res/-Ordner für die gegebene Layout-Datei </ID>
+    <ID>EndOfSentenceFormat:SdkAttrsParser.kt:SdkAttrsParser.Companion$ Sucht nach der attrs.xml im Android-SDK </ID>
+    <ID>ExpressionBodySyntax:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest.FakeLayoutFileStore$return files[path] ?: throw IOException("File not found: $path")</ID>
+    <ID>ExpressionBodySyntax:LayoutLinter.kt:LayoutLinter$return idValue.removePrefix("@+id/").removePrefix("@id/")</ID>
+    <ID>ExpressionBodySyntax:ResourceRepository.kt:ResourceRepository$return runCatching { val dirName = if (qualifier.isEmpty()) "values" else "values-$qualifier" val valuesDir = File(targetResDir, dirName) if (!valuesDir.exists()) valuesDir.mkdirs() val fileName = when (type) { ResType.STRING -> "strings.xml" ResType.COLOR -> "colors.xml" ResType.DIMEN -> "dimens.xml" ResType.INTEGER, ResType.BOOL -> "integers.xml" else -> "values.xml" } val file = File(valuesDir, fileName) val xmlSnippet = when (type) { ResType.STRING -> " &lt;string name=\"$name\">$value&lt;/string>\n" ResType.COLOR -> " &lt;color name=\"$name\">$value&lt;/color>\n" ResType.DIMEN -> " &lt;dimen name=\"$name\">$value&lt;/dimen>\n" ResType.INTEGER -> " &lt;integer name=\"$name\">$value&lt;/integer>\n" ResType.BOOL -> " &lt;bool name=\"$name\">$value&lt;/bool>\n" else -> " &lt;item name=\"$name\">$value&lt;/item>\n" } if (!file.exists()) { val content = "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>\n&lt;resources>\n$xmlSnippet&lt;/resources>\n" file.writeText(content) } else { val text = file.readText() if (text.contains("name=\"$name\"")) { // Ersetzen val regex = Regex("&lt;${type.name.lowercase()}\\s+name=\"$name\"[^>]*>.*?&lt;/${type.name.lowercase()}>") val newElem = xmlSnippet.trim() val updated = regex.replace(text, newElem) file.writeText(updated) } else { // Vor &lt;/resources> einfügen val updated = text.replace("&lt;/resources>", "$xmlSnippet&lt;/resources>") file.writeText(updated) } } // Neu laden loadAll() true }.getOrDefault(false)</ID>
+    <ID>ExpressionBodySyntax:ResourceRepository.kt:ResourceRepository$return when (type) { "string" -> entriesByType[ResType.STRING]?.any { it.name == name } == true "color" -> entriesByType[ResType.COLOR]?.any { it.name == name } == true "dimen" -> entriesByType[ResType.DIMEN]?.any { it.name == name } == true "integer" -> entriesByType[ResType.INTEGER]?.any { it.name == name } == true "bool" -> entriesByType[ResType.BOOL]?.any { it.name == name } == true "style" -> styles.containsKey(name) "drawable", "mipmap" -> { for (resDir in resDirs) { val subDirs = resDir.listFiles { f -> f.isDirectory &amp;&amp; (f.name.startsWith("drawable") || f.name.startsWith("mipmap")) } ?: continue for (dir in subDirs) { val matches = dir.listFiles { f -> f.isFile &amp;&amp; f.name.substringBeforeLast('.') == name } if (!matches.isNullOrEmpty()) return true } } false } else -> true }</ID>
+    <ID>FunctionNameMaxLength:ConstraintMapperTest.kt:ConstraintMapperTest$@Test fun mapContainer_detectsMissingConstraints</ID>
+    <ID>FunctionNameMaxLength:ConstraintMapperTest.kt:ConstraintMapperTest$@Test fun mapContainer_detectsUnknownTargetId</ID>
+    <ID>FunctionNameMaxLength:ConstraintMapperTest.kt:ConstraintMapperTest$@Test fun mapContainer_linksAndMarginsCorrect</ID>
+    <ID>FunctionNameMaxLength:CustomViewScannerTest.kt:CustomViewScannerTest$@Test fun scanDirectory_detectsKotlinAndJavaViews</ID>
+    <ID>FunctionNameMaxLength:DropResolverTest.kt:DropResolverTest$@Test fun resolveDrop_constraintLayout_setsParentConstraintsAndSnappedMargins</ID>
+    <ID>FunctionNameMaxLength:DropResolverTest.kt:DropResolverTest$@Test fun resolveDrop_deepestContainerWins</ID>
+    <ID>FunctionNameMaxLength:DropResolverTest.kt:DropResolverTest$@Test fun resolveDrop_frameLayout_computesGravityZones</ID>
+    <ID>FunctionNameMaxLength:DropResolverTest.kt:DropResolverTest$@Test fun resolveDrop_linearLayout_horizontal_calculatesIndexByX</ID>
+    <ID>FunctionNameMaxLength:DropResolverTest.kt:DropResolverTest$@Test fun resolveDrop_linearLayout_vertical_calculatesIndexAndLine</ID>
+    <ID>FunctionNameMaxLength:DropResolverTest.kt:DropResolverTest$@Test fun resolveDrop_outsideBounds_returnsNull</ID>
+    <ID>FunctionNameMaxLength:IncludeResolverTest.kt:IncludeResolverTest$@Test fun resolve_cycleDetected_returnsCycleResult</ID>
+    <ID>FunctionNameMaxLength:IncludeResolverTest.kt:IncludeResolverTest$@Test fun resolve_depthLimitExceeded_returnsDepthLimitResult</ID>
+    <ID>FunctionNameMaxLength:IncludeResolverTest.kt:IncludeResolverTest$@Test fun resolve_normalInclude_mergesAttributesCorrectly</ID>
+    <ID>FunctionNameMaxLength:IncludeResolverTest.kt:IncludeResolverTest$@Test fun resolve_notFound_returnsNotFoundResult</ID>
+    <ID>FunctionNameMaxLength:LayoutClipboardTest.kt:LayoutClipboardTest$@Test fun createSnippet_and_pasteWithCollisionHandling</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun addGuideline_insertsGuidelineChildAndEnablesUndo</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun applyQuickFix_updatesDocumentAndEnablesUndo</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun backRequested_cleanState_navigatesBack</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun backRequested_dirtyState_promptsConfirmation</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun centerHorizontallyAndVertically_setsConstraintsAndBiases</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun clipboard_copyCutPaste_worksWithUndo</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun configurationToggles_updateState</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun createVariant_writesVariantFileAndLoadsIt</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun dirty_returnsToFalse_whenUndoneToSavedXml</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun dropWidget_insertsNewWidget_recordsSingleUndoStep</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun dropWidget_movesExistingNode_recordsSingleUndoStep</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun externalChange_cleanState_autoReloads</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun externalChange_dirtyState_showsConflictDialog</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun extractToResource_replacesAttributeAndEnablesUndo</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun jumpToIssue_selectsNodeAndSwitchesTab</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun load_success_populatesDocumentAndXml</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun openInEditor_savesAndRequestsOpen</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun openIncludedLayout_emitsOpenLayoutFileEffect</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun renameId_updatesStateAndRecordsUndo</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun resizeAndToggleSizeMode_updatesAttributesAndRecordsUndo</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun restoreProcessDeath_restoresDirtyXmlAndNotifies</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun save_failure_emitsErrorSnackbarAndRemainsDirty</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun save_success_writesFileAndNotifiesBridge</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun selectToggle_managesMultiSelection</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun setAndRemoveConstraint_updatesAttributesAndUndo</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun setReformatOnSave_togglesReformatAndRebuildsXml</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun setShowToolsAttributes_togglesFlag</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun toggleInflateViewStub_togglesUidInState</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun undoCoalescing_differentField_createsSeparateSteps</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun undoCoalescing_sameField_mergesIntoSingleStep</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun xmlDraft_apply_invalidXml_setsError</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun xmlDraft_apply_updatesDocumentAndEnablesUndo</ID>
+    <ID>FunctionNameMaxLength:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$@Test fun zoomAndPan_updatesStateAndResetRestoresDefaults</ID>
+    <ID>FunctionNameMaxLength:LayoutFileStoreTest.kt:LayoutFileStoreTest$@Test fun readText_existingFile_returnsContent</ID>
+    <ID>FunctionNameMaxLength:LayoutFileStoreTest.kt:LayoutFileStoreTest$@Test fun writeAtomically_overwritesExistingFile</ID>
+    <ID>FunctionNameMaxLength:LayoutFileStoreTest.kt:LayoutFileStoreTest$@Test fun writeAtomically_writesContentAndCleansTmp</ID>
+    <ID>FunctionNameMaxLength:LayoutFileStoreTest.kt:LayoutFileStoreTest$@Test(expected = IOException::class) fun readText_missingFile_throwsIOException</ID>
+    <ID>FunctionNameMaxLength:LayoutLinterTest.kt:LayoutLinterTest$@Test fun testDeepNesting_reportedAtLevelEleven</ID>
+    <ID>FunctionNameMaxLength:LayoutLinterTest.kt:LayoutLinterTest$@Test fun testDeprecatedFillParent_andQuickFix</ID>
+    <ID>FunctionNameMaxLength:LayoutLinterTest.kt:LayoutLinterTest$@Test fun testInefficientWeight_andQuickFix</ID>
+    <ID>FunctionNameMaxLength:LayoutLinterTest.kt:LayoutLinterTest$@Test fun testMissingContentDescription_andQuickFix</ID>
+    <ID>FunctionNameMaxLength:LayoutLinterTest.kt:LayoutLinterTest$@Test fun testMissingIdReference_detected</ID>
+    <ID>FunctionNameMaxLength:LayoutLinterTest.kt:LayoutLinterTest$@Test fun testScrollViewChildren_errorWhenMoreThanOne</ID>
+    <ID>FunctionNameMaxLength:LayoutLinterTest.kt:LayoutLinterTest$@Test fun testUnconstrainedChild_andCircularConstraints</ID>
+    <ID>FunctionNameMaxLength:LayoutLinterTest.kt:LayoutLinterTest$@Test fun testWrongDimensionUnits_spForLayoutAndDpForText</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun addWidgetAt_insertsAtSpecificIndex</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun addWidgetGoesIntoSelectedContainerOrParent</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun byteIdenticalRoundTripWithCommentsAndCustomNamespaces</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun duplicateCreatesFreshUidsAndIds</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun moveNode_invalidMovesAreRejected</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun moveNode_validWithinSameParentAndDifferentParent</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun multiSelection_removeAndDuplicate</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun removeWithReferences_detectsAndCleansReferences</ID>
+    <ID>FunctionNameMaxLength:LayoutModelTest.kt:LayoutModelTest$@Test fun renameId_updatesAllReferencesAcrossDocument</ID>
+    <ID>FunctionNameMaxLength:LayoutOps.kt:fun LayoutDocument.findIncompatibleChildAttributes: List&lt;IncompatibleAttribute></ID>
+    <ID>FunctionNameMaxLength:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$@Test fun benchmark_500Nodes_parseWriteLintDropResolver</ID>
+    <ID>FunctionNameMaxLength:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$@Test fun robustness_crlfLineEndings_preserved</ID>
+    <ID>FunctionNameMaxLength:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$@Test fun robustness_unicodeCharacters_preserved</ID>
+    <ID>FunctionNameMaxLength:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$@Test fun robustness_unknownTagsAndNestedCustomTags_preserved</ID>
+    <ID>FunctionNameMaxLength:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$@Test fun robustness_veryLongAttributeValues_roundtrip</ID>
+    <ID>FunctionNameMaxLength:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$@Test fun robustness_xmlEntities_handledCorrectly</ID>
+    <ID>FunctionNameMaxLength:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$@Test(expected = LayoutParseException::class) fun robustness_malformedXml_throwsLayoutParseException</ID>
+    <ID>FunctionNameMaxLength:LayoutScannerTest.kt:LayoutScannerTest$@Test fun findsLayoutsAndResDirsAndSkipsBuild</ID>
+    <ID>FunctionNameMaxLength:LayoutTemplatesTest.kt:LayoutTemplatesTest$@Test fun testAllTemplates_validXmlAndLintClean</ID>
+    <ID>FunctionNameMaxLength:RelativeSolverTest.kt:RelativeSolverTest$@Test fun solve_missingTarget_reportedInMissingList</ID>
+    <ID>FunctionNameMaxLength:RelativeSolverTest.kt:RelativeSolverTest$@Test fun solve_topologicalOrder_placesDependenciesFirst</ID>
+    <ID>FunctionNameMaxLength:ResourceRepositoryTest.kt:ResourceRepositoryTest$@Test fun extractToResource_writesToFileAndReloads</ID>
+    <ID>FunctionNameMaxLength:ResourceRepositoryTest.kt:ResourceRepositoryTest$@Test fun qualifierMatching_selectsBestMatchingLanguageAndNight</ID>
+    <ID>FunctionNameMaxLength:ResourceRepositoryTest.kt:ResourceRepositoryTest$@Test fun referenceChains_cycleDetectedWithoutInfiniteLoop</ID>
+    <ID>FunctionNameMaxLength:ResourceRepositoryTest.kt:ResourceRepositoryTest$@Test fun referenceChains_resolvedSuccessfully</ID>
+    <ID>FunctionNameMaxLength:ResourceRepositoryTest.kt:ResourceRepositoryTest$@Test fun styleInheritance_resolvesAttributesFromParent</ID>
+    <ID>FunctionNameMaxLength:ResourceRepositoryTest.kt:ResourceRepositoryTest$@Test fun themeAttributes_resolvedFromBuiltInMaterialTable</ID>
+    <ID>FunctionNameMaxLength:SdkAttrsParserTest.kt:SdkAttrsParserTest$@Test fun getAttrsFor_returnsCachedResults</ID>
+    <ID>FunctionNameMaxLength:SdkAttrsParserTest.kt:SdkAttrsParserTest$@Test fun parse_extractsStyleablesAndAttributesCorrectly</ID>
+    <ID>LargeClass:LayoutDesignerViewModel.kt:LayoutDesignerViewModel : ViewModel</ID>
+    <ID>LargeClass:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest</ID>
+    <ID>LongMethod:ConstraintMapper.kt:ConstraintMapper$private fun mapChild: NodeConstraintSpec</ID>
+    <ID>LongMethod:DropResolver.kt:DropResolver$private fun resolveContainerDrop: DropTarget</ID>
+    <ID>LongMethod:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$fun onEvent</ID>
+    <ID>LongMethod:LayoutLinter.kt:LayoutLinter$private fun checkConstraintLayoutRules</ID>
+    <ID>LongMethod:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$@Test fun benchmark_500Nodes_parseWriteLintDropResolver</ID>
+    <ID>LongMethod:LayoutTemplates.kt:LayoutTemplate$fun xml: String</ID>
+    <ID>LongMethod:LayoutXml.kt:LayoutXml$fun convert: LayoutNode</ID>
+    <ID>LongMethod:LayoutXml.kt:LayoutXml$fun parse: LayoutDocument</ID>
+    <ID>LongMethod:RelativeSolver.kt:RelativeSolver$fun solve: RelativeSolveResult</ID>
+    <ID>LongMethod:ResourceRepository.kt:ResourceRepository$private fun parseValuesXml</ID>
+    <ID>LongMethod:WidgetCatalog.kt:WidgetCatalog$fun attrsFor: List&lt;AttrSpec></ID>
+    <ID>LoopWithTooManyJumpStatements:ConstraintLayoutPreview.kt:for</ID>
+    <ID>LoopWithTooManyJumpStatements:ConstraintMapper.kt:ConstraintMapper$for</ID>
+    <ID>LoopWithTooManyJumpStatements:CustomViewScanner.kt:CustomViewScanner$for</ID>
+    <ID>LoopWithTooManyJumpStatements:DropResolver.kt:DropResolver$for</ID>
+    <ID>LoopWithTooManyJumpStatements:IncludeResolver.kt:IncludeResolver$for</ID>
+    <ID>LoopWithTooManyJumpStatements:LayoutOps.kt:for</ID>
+    <ID>LoopWithTooManyJumpStatements:ResourceRepository.kt:ResourceRepository$for</ID>
+    <ID>LoopWithTooManyJumpStatements:SdkAttrsParser.kt:SdkAttrsParser$for</ID>
+    <ID>LoopWithTooManyJumpStatements:VectorDrawableParser.kt:VectorDrawableParser$for</ID>
+    <ID>MatchingDeclarationName:LayoutPreview.kt:PreviewContext</ID>
+    <ID>MatchingDeclarationName:LayoutTemplates.kt:LayoutTemplate</ID>
+    <ID>MultilineRawStringIndentation:CustomViewScannerTest.kt:CustomViewScannerTest$""" package com.example import android.view.View import android.content.Context class CustomBadge(context: Context) : View(context) class CustomCard(context: Context) : FrameLayout(context) class NonViewHelper """</ID>
+    <ID>MultilineRawStringIndentation:CustomViewScannerTest.kt:CustomViewScannerTest$""" package com.example.java; import android.widget.Button; public class JavaCustomButton extends Button { } """</ID>
+    <ID>MultilineRawStringIndentation:IncludeResolverTest.kt:IncludeResolverTest$""" &lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;include layout="@layout/layout_a" /> &lt;/FrameLayout> """</ID>
+    <ID>MultilineRawStringIndentation:IncludeResolverTest.kt:IncludeResolverTest$""" &lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;include layout="@layout/layout_b" /> &lt;/FrameLayout> """</ID>
+    <ID>MultilineRawStringIndentation:IncludeResolverTest.kt:IncludeResolverTest$""" &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/original_header" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="#FF0000"> &lt;TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Header Title" /> &lt;/LinearLayout> """</ID>
+    <ID>NestedBlockDepth:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$fun onEvent</ID>
+    <ID>NestedBlockDepth:LayoutLinter.kt:LayoutLinter$private fun checkConstraintLayoutRules</ID>
+    <ID>NestedBlockDepth:LayoutLinter.kt:LayoutLinter$private fun checkInefficientWeight</ID>
+    <ID>NestedBlockDepth:LayoutLinter.kt:LayoutLinter$private fun checkMissingIdReferences</ID>
+    <ID>NestedBlockDepth:LayoutOps.kt:fun LayoutDocument.removeWithReferences: RemoveWithReferencesResult</ID>
+    <ID>NestedBlockDepth:SdkAttrsParser.kt:SdkAttrsParser$fun parse: Map&lt;String, List&lt;AttrSpec>></ID>
+    <ID>ReturnCount:ConstraintMapper.kt:ConstraintMapper$fun dfs: Boolean</ID>
+    <ID>ReturnCount:ConstraintMapper.kt:ConstraintMapper$private fun getGoneMarginForAnchor: Int?</ID>
+    <ID>ReturnCount:DropResolver.kt:DropResolver$fun resolveDrop: DropTarget?</ID>
+    <ID>ReturnCount:DropResolver.kt:DropResolver$private fun resolveLeafDrop: DropTarget</ID>
+    <ID>ReturnCount:IncludeResolver.kt:IncludeResolver$fun resolve: IncludedLayoutResult</ID>
+    <ID>ReturnCount:LayoutClipboard.kt:LayoutClipboard$fun pasteSnippet: AddResult</ID>
+    <ID>ReturnCount:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$private fun findSrcDir: File?</ID>
+    <ID>ReturnCount:LayoutOps.kt:fun LayoutDocument.canDrop: DropVerdict</ID>
+    <ID>ReturnCount:LayoutOps.kt:fun LayoutDocument.moveNode: LayoutDocument</ID>
+    <ID>ReturnCount:LayoutOps.kt:fun LayoutDocument.renameId: LayoutDocument</ID>
+    <ID>ReturnCount:LayoutOps.kt:fun LayoutDocument.wrapIn: AddResult</ID>
+    <ID>ReturnCount:ResourceRepository.kt:ResourceRepository$fun resolveStyleAttr: String?</ID>
+    <ID>ReturnCount:ResourceRepository.kt:ResourceRepository$private fun resolveChain: String?</ID>
+    <ID>ReturnCount:ResourceRepository.kt:ResourceRepository$private fun scoreQualifier: Int</ID>
+    <ID>ReturnCount:SdkAttrsParser.kt:SdkAttrsParser$fun parse: Map&lt;String, List&lt;AttrSpec>></ID>
+    <ID>ReturnCount:SdkAttrsParser.kt:SdkAttrsParser.Companion$fun findSdkAttrsXml: File?</ID>
+    <ID>ReturnCount:Units.kt:fun parseColorArgb: Long?</ID>
+    <ID>ReturnCount:VectorDrawableParser.kt:VectorDrawableParser$fun parse: ImageVector?</ID>
+    <ID>StringLiteralDuplication:ConstraintMapper.kt:ConstraintMapper$"@+id/"</ID>
+    <ID>StringLiteralDuplication:CustomViewScanner.kt:CustomViewScanner$"ViewGroup"</ID>
+    <ID>StringLiteralDuplication:LayoutClipboard.kt:LayoutClipboard$"android:id"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"android:layout_height"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"android:layout_width"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintBaseline_toBaselineOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintBottom_toBottomOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintBottom_toTopOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintEnd_toEndOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintEnd_toStartOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintStart_toEndOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintStart_toStartOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintTop_toBottomOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"app:layout_constraintTop_toTopOf"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"default"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"layout"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"parent"</ID>
+    <ID>StringLiteralDuplication:LayoutDesignerViewModel.kt:LayoutDesignerViewModel$"wrap_content"</ID>
+    <ID>StringLiteralDuplication:LayoutLinter.kt:LayoutLinter$":layout_constraint"</ID>
+    <ID>StringLiteralDuplication:LayoutLinter.kt:LayoutLinter$"LinearLayout"</ID>
+    <ID>StringLiteralDuplication:LayoutLinter.kt:LayoutLinter$"android:id"</ID>
+    <ID>StringLiteralDuplication:LayoutLinter.kt:LayoutLinter$"android:layout_height"</ID>
+    <ID>StringLiteralDuplication:LayoutLinter.kt:LayoutLinter$"android:layout_weight"</ID>
+    <ID>StringLiteralDuplication:LayoutLinter.kt:LayoutLinter$"android:layout_width"</ID>
+    <ID>StringLiteralDuplication:LayoutLinter.kt:LayoutLinter$"android:textSize"</ID>
+    <ID>StringLiteralDuplication:LayoutLinter.kt:LayoutLinter$"padding"</ID>
+    <ID>StringLiteralDuplication:LayoutOps.kt:"@+id/"</ID>
+    <ID>StringLiteralDuplication:LayoutOps.kt:"android:id"</ID>
+    <ID>StringLiteralDuplication:LayoutOps.kt:"app:constraint_referenced_ids"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"ConstraintLayout"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"FragmentContainerView"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"FrameLayout"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"LinearLayout"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"RelativeLayout"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"android:checked"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"android:hint"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"android:layout_weight"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"android:text"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"center"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"merge"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"tools:layout"</ID>
+    <ID>StringLiteralDuplication:LayoutPreview.kt:"tools:text"</ID>
+    <ID>StringLiteralDuplication:LayoutXml.kt:LayoutXml$"android"</ID>
+    <ID>StringLiteralDuplication:LayoutXml.kt:LayoutXml$"tools"</ID>
+    <ID>StringLiteralDuplication:LayoutXml.kt:LayoutXml$"xmlns"</ID>
+    <ID>StringLiteralDuplication:LayoutXml.kt:LayoutXml$"xmlns:"</ID>
+    <ID>StringLiteralDuplication:ResourceRepository.kt:ResourceRepository$"@color/"</ID>
+    <ID>StringLiteralDuplication:ResourceRepository.kt:ResourceRepository$"@dimen/"</ID>
+    <ID>StringLiteralDuplication:ResourceRepository.kt:ResourceRepository$"@string/"</ID>
+    <ID>StringLiteralDuplication:ResourceRepository.kt:ResourceRepository$"values"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"Button"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"CheckBox"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"FrameLayout"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"GridLayout"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"LinearLayout"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"Switch"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:checked"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:gravity"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:hint"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:layout_gravity"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:layout_height"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:layout_width"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:orientation"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:src"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"android:text"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"false"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"horizontal"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"include"</ID>
+    <ID>StringLiteralDuplication:WidgetCatalog.kt:WidgetCatalog$"vertical"</ID>
+    <ID>StringShouldBeRawString:LayoutClipboard.kt:LayoutClipboard$"&lt;FrameLayout xmlns:android=\"http://schemas.android.com/apk/res/android\">\n$cleanSnippet\n&lt;/FrameLayout>"</ID>
+    <ID>StringShouldBeRawString:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$"&lt;TextView xmlns:android=\"http://schemas.android.com/apk/res/android\" android:layout_width=\"wrap_content\" android:layout_height=\"wrap_content\" android:text=\"Inc\" />"</ID>
+    <ID>StringShouldBeRawString:LayoutDesignerViewModelTest.kt:LayoutDesignerViewModelTest$fileStore.files[mainLayout.absolutePath] = "&lt;FrameLayout xmlns:android=\"http://schemas.android.com/apk/res/android\" android:layout_width=\"match_parent\" android:layout_height=\"match_parent\">&lt;include layout=\"@layout/header\" />&lt;/FrameLayout>"</ID>
+    <ID>StringShouldBeRawString:LayoutModelTest.kt:LayoutModelTest$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>"</ID>
+    <ID>StringShouldBeRawString:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" + "&lt;LinearLayout\r\n" + " xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n" + " android:layout_width=\"match_parent\"\r\n" + " android:layout_height=\"match_parent\">\r\n" + " &lt;TextView\r\n" + " android:layout_width=\"wrap_content\"\r\n" + " android:layout_height=\"wrap_content\"\r\n" + " android:text=\"CRLF Test\" />\r\n" + "&lt;/LinearLayout>\r\n"</ID>
+    <ID>StringShouldBeRawString:LayoutXml.kt:LayoutXml$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>"</ID>
+    <ID>StringShouldBeRawString:ResourceRepository.kt:ResourceRepository$" &lt;bool name=\"$name\">$value&lt;/bool>\n"</ID>
+    <ID>StringShouldBeRawString:ResourceRepository.kt:ResourceRepository$" &lt;color name=\"$name\">$value&lt;/color>\n"</ID>
+    <ID>StringShouldBeRawString:ResourceRepository.kt:ResourceRepository$" &lt;dimen name=\"$name\">$value&lt;/dimen>\n"</ID>
+    <ID>StringShouldBeRawString:ResourceRepository.kt:ResourceRepository$" &lt;integer name=\"$name\">$value&lt;/integer>\n"</ID>
+    <ID>StringShouldBeRawString:ResourceRepository.kt:ResourceRepository$" &lt;item name=\"$name\">$value&lt;/item>\n"</ID>
+    <ID>StringShouldBeRawString:ResourceRepository.kt:ResourceRepository$" &lt;string name=\"$name\">$value&lt;/string>\n"</ID>
+    <ID>StringShouldBeRawString:ResourceRepository.kt:ResourceRepository$"&lt;${type.name.lowercase()}\\s+name=\"$name\"[^>]*>.*?&lt;/${type.name.lowercase()}>"</ID>
+    <ID>StringShouldBeRawString:ResourceRepository.kt:ResourceRepository$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>\n&lt;resources>\n$xmlSnippet&lt;/resources>\n"</ID>
+    <ID>TooGenericExceptionCaught:IncludeResolver.kt:IncludeResolver$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:LayoutDesignerScreen.kt:t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:LayoutXml.kt:LayoutXml$e: Exception</ID>
+    <ID>TooManyFunctions:LayoutOps.kt:com.codeforge.feature.layoutdesigner.model.LayoutOps.kt</ID>
+    <ID>TrimMultilineRawString:DropResolverTest.kt:DropResolverTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" />"""</ID>
+    <ID>TrimMultilineRawString:DropResolverTest.kt:DropResolverTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="horizontal"> &lt;Button android:id="@+id/b1" android:layout_width="100dp" android:layout_height="50dp" /> &lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:DropResolverTest.kt:DropResolverTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"> &lt;TextView android:id="@+id/v1" android:layout_width="match_parent" android:layout_height="50dp" /> &lt;TextView android:id="@+id/v2" android:layout_width="match_parent" android:layout_height="50dp" /> &lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:DropResolverTest.kt:DropResolverTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;FrameLayout android:id="@+id/innerFrame" android:layout_width="200dp" android:layout_height="200dp" /> &lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:DropResolverTest.kt:DropResolverTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" />"""</ID>
+    <ID>TrimMultilineRawString:LayoutClipboardTest.kt:LayoutClipboardTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"> &lt;TextView android:id="@+id/myText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CopyMe" /> &lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:LayoutModelTest.kt:LayoutModelTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;!-- Header comment before root --> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:custom="http://schemas.android.com/apk/res/custom" android:id="@+id/root_layout" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"> &lt;!-- Child leading comment --> &lt;TextView android:id="@+id/custom_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hello World" /> &lt;!-- Trailing comment inside root --> &lt;/LinearLayout> """</ID>
+    <ID>TrimMultilineRawString:LayoutModelTest.kt:LayoutModelTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"> &lt;!-- Kommentar --> &lt;TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hallo &amp;amp; &amp;quot;Welt&amp;quot;" app:foo="bar" /> &lt;FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content"> &lt;Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="OK" /> &lt;/FrameLayout> &lt;/LinearLayout>"""</ID>
+    <ID>TrimMultilineRawString:LayoutModelTest.kt:LayoutModelTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;TextView android:id="@+id/header" android:layout_width="wrap_content" android:layout_height="wrap_content" /> &lt;Button android:id="@+id/btn" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@id/header" /> &lt;/RelativeLayout>"""</ID>
+    <ID>TrimMultilineRawString:LayoutModelTest.kt:LayoutModelTest$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;TextView android:id="@+id/oldTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" /> &lt;Button android:id="@+id/actionBtn" android:layout_width="wrap_content" android:layout_height="wrap_content" android:labelFor="@id/oldTitle" android:nextFocusDown="@id/oldTitle" app:layout_constraintTop_toBottomOf="@id/oldTitle" /> &lt;androidx.constraintlayout.widget.Barrier android:id="@+id/barrier" android:layout_width="wrap_content" android:layout_height="wrap_content" app:constraint_referenced_ids="oldTitle,actionBtn" /> &lt;/androidx.constraintlayout.widget.ConstraintLayout>"""</ID>
+    <ID>TrimMultilineRawString:LayoutTemplates.kt:LayoutTemplate$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="16dp"> &lt;EditText android:id="@+id/input_first" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" tools:hint="Erstes Eingabefeld" /> &lt;EditText android:id="@+id/input_second" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:inputType="text" tools:hint="Zweites Eingabefeld" /> &lt;Button android:id="@+id/button_submit" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="16dp" tools:text="Absenden" /> &lt;/LinearLayout> """</ID>
+    <ID>TrimMultilineRawString:LayoutTemplates.kt:LayoutTemplate$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"> &lt;/LinearLayout> """</ID>
+    <ID>TrimMultilineRawString:LayoutTemplates.kt:LayoutTemplate$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"> &lt;Toolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" tools:title="Überschrift" /> &lt;ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"> &lt;LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp"> &lt;TextView android:id="@+id/page_content" android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="Seiteninhalt..." /> &lt;/LinearLayout> &lt;/ScrollView> &lt;/LinearLayout> """</ID>
+    <ID>TrimMultilineRawString:LayoutTemplates.kt:LayoutTemplate$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical"> &lt;ImageView android:id="@+id/item_icon" android:layout_width="48dp" android:layout_height="48dp" android:importantForAccessibility="no" /> &lt;LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="16dp" android:orientation="vertical"> &lt;TextView android:id="@+id/item_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="16sp" tools:text="Titelzeile" /> &lt;TextView android:id="@+id/item_subtitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textSize="14sp" tools:text="Untertitel oder Beschreibung" /> &lt;/LinearLayout> &lt;/LinearLayout> """</ID>
+    <ID>TrimMultilineRawString:LayoutTemplates.kt:LayoutTemplate$"""&lt;?xml version="1.0" encoding="utf-8"?> &lt;androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent"> &lt;/androidx.constraintlayout.widget.ConstraintLayout> """</ID>
+    <ID>TrimMultilineRawString:ResourceRepositoryTest.kt:ResourceRepositoryTest$"""&lt;resources> &lt;color name="bg">#000000&lt;/color> &lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ResourceRepositoryTest.kt:ResourceRepositoryTest$"""&lt;resources> &lt;color name="c1">#FF0000&lt;/color> &lt;color name="c2">@color/c1&lt;/color> &lt;color name="c3">@color/c2&lt;/color> &lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ResourceRepositoryTest.kt:ResourceRepositoryTest$"""&lt;resources> &lt;string name="a">@string/b&lt;/string> &lt;string name="b">@string/a&lt;/string> &lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ResourceRepositoryTest.kt:ResourceRepositoryTest$"""&lt;resources> &lt;string name="hello">Hallo&lt;/string> &lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ResourceRepositoryTest.kt:ResourceRepositoryTest$"""&lt;resources> &lt;string name="hello">Hello&lt;/string> &lt;color name="bg">#FFFFFF&lt;/color> &lt;/resources>"""</ID>
+    <ID>TrimMultilineRawString:ResourceRepositoryTest.kt:ResourceRepositoryTest$"""&lt;resources> &lt;style name="BaseTheme"> &lt;item name="android:textColor">#111111&lt;/item> &lt;item name="android:textSize">14sp&lt;/item> &lt;/style> &lt;style name="ChildTheme" parent="BaseTheme"> &lt;item name="android:textSize">18sp&lt;/item> &lt;/style> &lt;/resources>"""</ID>
+    <ID>UnderscoresInNumericLiterals:LayoutPerformanceAndRobustnessTest.kt:LayoutPerformanceAndRobustnessTest$50000</ID>
+    <ID>UndocumentedPublicFunction:LayoutDesignerFileProvider.kt:LayoutDesignerFileProvider.Companion$fun authority: String</ID>
+    <ID>UndocumentedPublicFunction:LayoutDesignerFileProvider.kt:LayoutDesignerFileProvider.Companion$fun buildSharePngIntent: Intent</ID>
+    <ID>UndocumentedPublicFunction:LayoutDesignerFileProvider.kt:LayoutDesignerFileProvider.Companion$fun uriForFile</ID>
+    <ID>UnnecessaryParentheses:LayoutPreview.kt:(if (ctx.showTools) node.attr("tools:layout") else null)</ID>
+    <ID>UnnecessaryParentheses:LayoutPreview.kt:(runCatching { parseDimension(node.attr("android:layout_margin")) ?: 0f }.getOrDefault(0f))</ID>
+    <ID>UnnecessaryParentheses:LayoutPreview.kt:(runCatching { parseDimension(node.attr("android:padding")) ?: 0f }.getOrDefault(0f))</ID>
+    <ID>UnusedParameter:LayoutLinter.kt:LayoutLinter$document: LayoutDocument</ID>
+    <ID>UseIfInsteadOfWhen:LayoutFilesViewModel.kt:LayoutFilesViewModel$when { target.exists() -> Result.failure(IllegalStateException(Res.string(R.string.layout_exists))) else -> runCatching { target.parentFile?.mkdirs() target.writeText(s.selectedTemplate.xml()) } }</ID>
+  </CurrentIssues>
+</SmellBaseline>

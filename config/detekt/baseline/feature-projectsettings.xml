@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:ProjectSettingsViewModel.kt:ProjectSettingsViewModel$when</ID>
+    <ID>ClassOrdering:ProjectSettingsViewModelTest.kt:ProjectSettingsViewModelTest.FakeSigningRepository$override val activeBuildSigning: kotlinx.coroutines.flow.StateFlow&lt;Map&lt;String, String>> = MutableStateFlow(emptyMap())</ID>
+    <ID>CognitiveComplexMethod:ProjectSettingsScreen.kt:@Composable fun ProjectSettingsScreen</ID>
+    <ID>ExpressionBodySyntax:ProjectSettingsViewModelTest.kt:ProjectSettingsViewModelTest.FakeSigningRepository$return flowOf( listOf( ProjectSigningAssignment( projectPath = "/path/to/project", keystoreId = "key1", alias = "alias1" ) ) )</ID>
+    <ID>FunctionNameMaxLength:ProjectSettingsViewModelTest.kt:ProjectSettingsViewModelTest$@Test fun testShrinkDisabledWhenMinifyDisabled</ID>
+    <ID>StringLiteralDuplication:ProjectSettingsScreen.kt:"/sample/project"</ID>
+    <ID>SwallowedException:ProjectSettingsViewModel.kt:ProjectSettingsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ProjectSettingsViewModel.kt:ProjectSettingsViewModel$e: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

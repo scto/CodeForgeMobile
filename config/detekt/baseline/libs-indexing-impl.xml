@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ClassOrdering:ProjectIndexerImpl.kt:ProjectIndexerImpl$constructor</ID>
+    <ID>CognitiveComplexMethod:GradleSettingsParser.kt:GradleSettingsParser$fun parse: ParsedSettings</ID>
+    <ID>FunctionNameMaxLength:GradleSettingsParserTest.kt:GradleSettingsParserTest$@Test fun groovyDsl_includesWithoutParens</ID>
+    <ID>FunctionNameMaxLength:GradleSettingsParserTest.kt:GradleSettingsParserTest$@Test fun kotlinDsl_includesRootNameAndCatalog</ID>
+    <ID>FunctionNameMaxLength:ProjectIndexBuilderTest.kt:ProjectIndexBuilderTest$@Test fun buildsIndexForMultiModuleProject</ID>
+    <ID>FunctionNameMaxLength:ProjectIndexBuilderTest.kt:ProjectIndexBuilderTest$@Test fun projectWithoutSettingsHasOnlyRootModule</ID>
+    <ID>FunctionNameMaxLength:ProjectIndexBuilderTest.kt:ProjectIndexBuilderTest$@Test fun scanReportsProgressUpToHundredPercent</ID>
+    <ID>LoopWithTooManyJumpStatements:GradleSettingsParser.kt:GradleSettingsParser$while</ID>
+    <ID>MultilineRawStringIndentation:GradleRepositoryParserTest.kt:GradleRepositoryParserTest$""" pluginManagement { repositories { gradlePluginPortal(); google() } } dependencyResolutionManagement { repositories { google() mavenCentral() maven { url = uri("https://jitpack.io") } maven("https://repo.gradle.org/gradle/libs-releases") maven { url 'https://example.com/m2/' } // maven { url = uri("https://commented.example") } maven { url = uri(someVariable) } } } """</ID>
+    <ID>MultilineRawStringIndentation:GradleSettingsParserTest.kt:GradleSettingsParserTest$""" rootProject.name = "CodeForgeMobile" // include(":ignored") include(":app", ":core:domain") include( ":feature:editor", ":feature:git" ) /* include(":blocked") */ includeBuild("../other") dependencyResolutionManagement { versionCatalogs { create("libs") { from(files("gradle/my.versions.toml")) } } } project(":core:domain").projectDir = File(settingsDir, "modules/domain") """</ID>
+    <ID>OutdatedDocumentation:ProjectScanner.kt:ProjectScanner$fun scan: List&lt;IndexedFile></ID>
+    <ID>StringShouldBeRawString:GradleSettingsParserTest.kt:GradleSettingsParserTest$"rootProject.name = 'Demo'\ninclude ':app', 'lib'\ninclude(':x')\n"</ID>
+    <ID>StringShouldBeRawString:ProjectIndexBuilderTest.kt:ProjectIndexBuilderTest$"rootProject.name = \"Demo\"\ninclude(\":app\", \":core:domain\")\ndependencyResolutionManagement { repositories { google() } }"</ID>
+    <ID>UnnecessaryParentheses:ProjectScanner.kt:ProjectScanner$("/res/" in "/$relativePath")</ID>
+  </CurrentIssues>
+</SmellBaseline>
