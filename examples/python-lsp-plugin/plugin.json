@@ -1,7 +1,7 @@
 {
   "id": "com.example.python-lsp",
   "name": "Python Language Server (Pyright)",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 2,
   "publisher": "example",
   "description": "Bindet Pyright für Python ein. nodejs und das npm-Paket pyright installiert die App nach Bestätigung.",

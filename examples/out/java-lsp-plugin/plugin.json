@@ -1,10 +1,10 @@
 {
   "id": "com.example.java-lsp",
   "name": "Java Language Server",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 2,
   "publisher": "example",
-  "description": "Installiert den Eclipse JDT Language Server (Snapshot) nach ~/.local/share und bindet ihn für Java ein. Benötigt JDK 17.",
+  "description": "Installiert den Eclipse JDT Language Server (Snapshot) nach ~/.local/share und bindet ihn für Java ein. Benötigt JDK 21.",
   "permissions": [
     "shell"
   ],
@@ -20,7 +20,7 @@
         "command": [
           "bash",
           "-c",
-          "D=\"$1/.local/share/jdt-language-server\"; J=\"$PREFIX/lib/jvm/java-17-openjdk/bin/java\"; L=$(ls \"$D\"/plugins/org.eclipse.equinox.launcher_*.jar 2>/dev/null | head -n1); [ -n \"$L\" ] || { echo \"JDT LS nicht installiert\" >&2; exit 1; }; mkdir -p \"$1/.cache/jdtls-workspace\"; exec \"$J\" -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4 -Declipse.product=org.eclipse.jdt.ls.core.product -Xmx1G --add-modules=ALL-SYSTEM --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED -jar \"$L\" -configuration \"$D/config_linux\" -data \"$1/.cache/jdtls-workspace\"",
+          "J=; for v in 21; do [ -x \"$PREFIX/lib/jvm/java-$v-openjdk/bin/java\" ] && { J=\"$PREFIX/lib/jvm/java-$v-openjdk\"; break; }; done; [ -n \"$J\" ] || { echo \"JDK 21 fehlt (SDK-Manager)\" >&2; exit 1; }; D=\"$1/.local/share/jdt-language-server\"; L=$(ls \"$D\"/plugins/org.eclipse.equinox.launcher_*.jar 2>/dev/null | head -n1); [ -n \"$L\" ] || { echo \"JDT LS nicht installiert\" >&2; exit 1; }; mkdir -p \"$1/.cache/jdtls-workspace\"; exec \"$J/bin/java\" -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4 -Declipse.product=org.eclipse.jdt.ls.core.product -Xmx1G --add-modules=ALL-SYSTEM --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED -jar \"$L\" -configuration \"$D/config_linux\" -data \"$1/.cache/jdtls-workspace\"",
           "java-lsp",
           "${home}"
         ]

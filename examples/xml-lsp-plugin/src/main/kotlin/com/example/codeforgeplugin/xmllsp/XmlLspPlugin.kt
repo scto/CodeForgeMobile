@@ -21,6 +21,6 @@ class XmlLspPlugin : LspServerPlugin(
             "https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.28.0/org.eclipse.lemminx-0.28.0-uber.jar",
             fileName = "org.eclipse.lemminx-uber.jar"
         ),
-        requiredJdk = "17"
+        jdkVersions = listOf(21, 17)
     )
 )

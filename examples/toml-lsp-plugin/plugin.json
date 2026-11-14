@@ -1,7 +1,7 @@
 {
   "id": "com.example.toml-lsp",
   "name": "TOML Language Server (Taplo)",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 2,
   "publisher": "example",
   "description": "Bindet Taplo für TOML ein. Das Paket taplo installiert die App nach Bestätigung.",

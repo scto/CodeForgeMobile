@@ -1,7 +1,7 @@
 {
   "id": "com.example.cpp-lsp",
   "name": "C/C++ Language Server (clangd)",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 2,
   "publisher": "example",
   "description": "Bindet clangd für C/C++ ein. Das Paket clang installiert die App nach Bestätigung (Einstellungen → Plugins).",

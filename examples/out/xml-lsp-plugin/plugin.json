@@ -1,10 +1,10 @@
 {
   "id": "com.example.xml-lsp",
   "name": "XML Language Server (LemMinX)",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 2,
   "publisher": "example",
-  "description": "Lädt Eclipse LemMinX (Uber-JAR 0.28.0) nach ~/.local/share und bindet ihn für XML ein. Benötigt JDK 17.",
+  "description": "Lädt Eclipse LemMinX (Uber-JAR 0.28.0) nach ~/.local/share und bindet ihn für XML ein. Benötigt JDK 17 oder 21 (bevorzugt 21).",
   "permissions": [
     "shell"
   ],
@@ -20,7 +20,7 @@
         "command": [
           "bash",
           "-c",
-          "exec \"$PREFIX/lib/jvm/java-17-openjdk/bin/java\" -jar \"$1/.local/share/lemminx/org.eclipse.lemminx-uber.jar\"",
+          "J=; for v in 21 17; do [ -x \"$PREFIX/lib/jvm/java-$v-openjdk/bin/java\" ] && { J=\"$PREFIX/lib/jvm/java-$v-openjdk\"; break; }; done; [ -n \"$J\" ] || { echo \"JDK 21 oder JDK 17 fehlt (SDK-Manager)\" >&2; exit 1; }; exec \"$J/bin/java\" -jar \"$1/.local/share/lemminx/org.eclipse.lemminx-uber.jar\"",
           "xml-lsp",
           "${home}"
         ]

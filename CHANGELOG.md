@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Beispiel-Plugins: JDK 21 und Ausgabe nach examples/out)
+- Alle Beispiel-Plugins bauen mit der JDK-21-Toolchain (Bytecode weiter Java 17). Kotlin-, XML- und Java-LSP-Plugin verlangten fest JDK 17 und blieben mit dem vom SDK-Manager installierten JDK 21 stehen: `LspServerSpec.jdkVersions` (statt `requiredJdk`) nimmt das erste vorhandene JDK, Kotlin/XML bevorzugt 21 sonst 17, Java (aktuelle JDT-LS-Snapshots) nur 21; die Startbefehle in `plugin.json` wählen genauso. LSP-Plugins 2.1.0 (kmp-lsp 2.2.0), da sie die geänderte Basis bündeln.
+- `./gradlew :examples:packageAll` baut alle Beispiele nach `examples/out/<modul>/`, auch die Guide-Beispiele (`guide-commit-notes` über das gemeinsame Packaging, die deklarativen über `templates/build.py --out … --prefix guide-`).
+
 ### Geändert (Vorlage Code-Plugin: JDK 21)
 - `:templates:code-plugin` kompiliert mit der JDK-21-Toolchain (vorher 17, die in CI und Termux fehlt). Der Bytecode bleibt Java 17 wie im übrigen Projekt und in `:libs:plugin-api`; `compileKotlin`, `dexClasses`, `packagePlugin`, Tests und detekt laufen durch. Die Ausnahme im CI-Schritt für detekt entfällt.
 

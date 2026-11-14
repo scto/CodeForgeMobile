@@ -18,6 +18,7 @@ class JavaLspPlugin : LspServerPlugin(
         installDir = "\$HOME/.local/share/jdt-language-server",
         installedCheck = "ls \$HOME/.local/share/jdt-language-server/plugins/org.eclipse.equinox.launcher_*.jar >/dev/null 2>&1",
         download = ServerDownload("https://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz", stripComponents = 0),
-        requiredJdk = "17"
+        // Aktuelle JDT-LS-Snapshots laufen nur noch mit Java 21.
+        jdkVersions = listOf(21)
     )
 )

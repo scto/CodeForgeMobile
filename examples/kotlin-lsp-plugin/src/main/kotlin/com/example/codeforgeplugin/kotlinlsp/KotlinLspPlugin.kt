@@ -18,6 +18,6 @@ class KotlinLspPlugin : LspServerPlugin(
         installDir = "\$HOME/.local/share/kotlin-language-server",
         installedCheck = "test -x \"\$HOME/.local/share/kotlin-language-server/bin/kotlin-language-server\"",
         download = ServerDownload("https://github.com/fwcd/kotlin-language-server/releases/download/1.3.9/server.tar.gz", stripComponents = 1),
-        requiredJdk = "17"
+        jdkVersions = listOf(21, 17)
     )
 )

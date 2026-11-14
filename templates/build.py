@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Baut alle deklarativen Vorlagen zu installierbaren ZIPs (templates/build/<ordner>.zip).
 
-Aufruf:  python3 templates/build.py [vorlage-oder-pfad ...]
+Aufruf:  python3 templates/build.py [--out ORDNER] [--prefix P] [vorlage-oder-pfad ...]
+  --out ORDNER  legt je Plugin ORDNER/<P><name>/<P><name>.zip samt plugin.json ab (z. B. examples/out)
 Prüft vorher, dass alle JSON-Dateien gültig sind und alle in plugin.json referenzierten Dateien existieren,
 und gibt je ZIP die SHA-256 aus (für den Store-Katalog). Das Code-Plugin baut Gradle:
   ./gradlew :templates:code-plugin:packagePlugin
@@ -36,10 +37,16 @@ def check(folder):
     return manifest
 
 
-def build(folder):
+def build(folder, out=None, prefix=""):
     check(folder)
-    OUT.mkdir(exist_ok=True)
-    target = OUT / f"{folder.name}.zip"
+    if out is None:
+        OUT.mkdir(exist_ok=True)
+        target = OUT / f"{folder.name}.zip"
+    else:
+        name = prefix + folder.name
+        (out / name).mkdir(parents=True, exist_ok=True)
+        target = out / name / f"{name}.zip"
+        (out / name / "plugin.json").write_bytes((folder / "plugin.json").read_bytes())
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
         for f in sorted(folder.rglob("*")):
             if f.is_file():
@@ -53,10 +60,20 @@ def build(folder):
 
 
 if __name__ == "__main__":
-    names = sys.argv[1:]
+    args = sys.argv[1:]
+    out, prefix = None, ""
+    while args and args[0] in ("--out", "--prefix"):
+        if len(args) < 2:
+            raise SystemExit(f"{args[0]} braucht einen Wert")
+        if args[0] == "--out":
+            out = Path(args[1]).resolve()
+        else:
+            prefix = args[1]
+        args = args[2:]
+    names = args
     # Name = Vorlage unter templates/, sonst Pfad zu einem beliebigen Plugin-Ordner (z. B. examples/guide/nord-night)
     folders = [(Path(n).resolve() if (Path(n) / "plugin.json").is_file() else ROOT / n) for n in names] if names else [
         p.parent for p in sorted(ROOT.glob("*/plugin.json")) if "entryPointClass" not in p.read_text(encoding="utf-8")
     ]
     for folder in folders:
-        build(folder)
+        build(folder, out, prefix)

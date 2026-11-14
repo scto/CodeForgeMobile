@@ -57,6 +57,6 @@ Das Manifest-Modell ist die bessere Wahl für: Themes, Icons, Sprachpakete, Gram
 ## 5. Grenzen / nicht geprüft
 
 * Gebaut und manifest-validiert in der Sandbox; **nicht auf einem Gerät** installiert oder gestartet (DexClassLoader, Download-URLs, Serverstart).
-* Die Bash-Start-Skripte (Kotlin/Java/XML) nutzen `$PREFIX/lib/jvm/java-17-openjdk` (Termux-JDK-Pfad); bei abweichender JDK-Installation muss `jdkInstallPath` bzw. der Pfad angepasst werden.
+* Die Bash-Start-Skripte (Kotlin/Java/XML) wählen das JDK unter `$PREFIX/lib/jvm/java-<v>-openjdk`: Kotlin und XML nehmen 21, sonst 17; Java (JDT LS) verlangt 21. Fehlt es, endet der Start mit einer klaren Meldung.
 * Download-URLs: Kotlin LS 1.3.9 (fest), JDT LS „latest snapshot“ (ändert sich), LemMinX 0.28.0 (HTTP 200 geprüft).
 * Gleichzeitig installierte Store-Plugins gleicher Sprache (`com.codeforge.plugin.*.lsp`) und Beispiel-Plugins konkurrieren; je Sprache gewinnt der erste Treffer.

@@ -28,7 +28,8 @@ data class ServerDownload(
  *
  * @property installedCheck Shell-Skript; Exit-Code 0 = Server ist einsatzbereit.
  * @property installDir Shell-Ausdruck (`$HOME` wird von der Termux-Shell expandiert); null = nichts selbst installiert.
- * @property requiredJdk JDK-Hauptversion (z. B. "17"), die für den Server vorhanden sein muss; null = keine JVM nötig.
+ * @property jdkVersions JDK-Hauptversionen, mit denen der Server läuft, bevorzugte zuerst (z. B. `listOf(21, 17)`);
+ *   genutzt wird die erste installierte. Leer = keine JVM nötig. Dieselbe Reihenfolge steht im Startbefehl in `plugin.json`.
  * @property installScript Shell-Skript, das den Server selbst baut/installiert (z. B. `cargo install`), wenn kein [download] möglich ist.
  * @property missingHint Hinweis für den Nutzer, wenn nichts heruntergeladen werden kann ([download] = null) und der Server fehlt.
  */
@@ -38,7 +39,7 @@ data class LspServerSpec(
     val installedCheck: String,
     val installDir: String? = null,
     val download: ServerDownload? = null,
-    val requiredJdk: String? = null,
+    val jdkVersions: List<Int> = emptyList(),
     val installScript: String? = null,
     val missingHint: String? = null
 )
@@ -71,14 +72,14 @@ abstract class LspServerPlugin(private val spec: LspServerSpec) : CodeForgePlugi
     private suspend fun ensureReady(context: PluginContext) {
         val installer = LspServerInstaller(context.hostServices)
 
-        spec.requiredJdk?.let { version ->
-            val java = "${context.hostServices.jdkInstallPath(version)}/bin/java"
-            if (installer.runShellScript("test -x \"$java\"").exitCode != 0) {
-                report(
-                    context,
-                    "${spec.displayName}: JDK $version fehlt. Bitte unter Einstellungen → SDK-Manager installieren.",
-                    true
-                )
+        if (spec.jdkVersions.isNotEmpty()) {
+            val found = spec.jdkVersions.firstOrNull { version ->
+                val java = "${context.hostServices.jdkInstallPath(version.toString())}/bin/java"
+                installer.runShellScript("test -x \"$java\"").exitCode == 0
+            }
+            if (found == null) {
+                val wanted = spec.jdkVersions.joinToString(" oder ") { "JDK $it" }
+                report(context, "${spec.displayName}: $wanted fehlt. Bitte unter Einstellungen → SDK-Manager installieren.", true)
                 return
             }
         }

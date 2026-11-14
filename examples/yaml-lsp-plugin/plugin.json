@@ -1,7 +1,7 @@
 {
   "id": "com.example.yaml-lsp",
   "name": "YAML Language Server",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 2,
   "publisher": "example",
   "description": "Bindet yaml-language-server für YAML ein. nodejs und das npm-Paket installiert die App nach Bestätigung.",

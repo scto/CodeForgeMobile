@@ -1,0 +1,14 @@
+{
+  "id": "com.example.guide.nord-night",
+  "name": "Nord Night",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "example",
+  "description": "Dunkles Nord-Farbschema für App und Editor.",
+  "permissions": [],
+  "contributes": {
+    "colorThemes": [
+      { "id": "nord-night", "label": "Nord Night", "uiTheme": "dark", "path": "themes/nord-night.json" }
+    ]
+  }
+}

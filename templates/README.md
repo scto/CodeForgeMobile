@@ -20,6 +20,7 @@ Je Ordner eine lauffähige Minimalvorlage. Ausführliche Anleitung: `docs/extens
 ```bash
 python3 templates/build.py              # alle deklarativen → templates/build/*.zip (mit SHA-256)
 python3 templates/build.py color-theme  # nur eine
+python3 templates/build.py --out examples/out --prefix guide- examples/guide/nord-night  # → examples/out/guide-nord-night/
 ./gradlew :templates:code-plugin:packagePlugin   # Code-Plugin (ANDROID_HOME nötig)
 ```
 

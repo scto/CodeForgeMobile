@@ -630,64 +630,27 @@ dependencies {
     compileOnly(libs.kotlinx.coroutines.core)
 }
 
-// Kein Toolchain-Zwang (läuft auch mit JDK 21): Bytecode-Ziel 17, d8 entzuckert für Android.
+// Kompiliert mit JDK 21; der Bytecode bleibt Java 17 (jvmTarget aus der build-logic).
 kotlin {
-    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
-}
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    jvmToolchain(21)
 }
 
-/** Konvertiert die .class-Dateien via `d8` zu classes.dex (benötigt ANDROID_HOME mit build-tools). */
-val dexClasses by tasks.registering(Exec::class) {
-    dependsOn("compileKotlin")
-
-    val androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
-    val ownClassesDir = layout.buildDirectory.dir("classes/kotlin/main")
-    val dexOutputDir = layout.buildDirectory.dir("dex")
-
-    doFirst {
-        requireNotNull(androidHome) { "ANDROID_HOME oder ANDROID_SDK_ROOT muss gesetzt sein." }
-        dexOutputDir.get().asFile.mkdirs()
-
-        val buildToolsRoot = file("$androidHome/build-tools")
-        val latestBuildTools = buildToolsRoot.listFiles()?.maxByOrNull { it.name }
-            ?: error("Keine Build-Tools unter $buildToolsRoot gefunden.")
-        val d8Binary = File(latestBuildTools, "d8")
-        check(d8Binary.isFile) { "d8 nicht gefunden unter ${d8Binary.path}" }
-
-        val classFiles = fileTree(ownClassesDir).matching { include("**/*.class") }.files
-        check(classFiles.isNotEmpty()) { "Keine .class-Dateien gefunden — vorher compileKotlin ausführen." }
-
-        commandLine(
-            listOf(d8Binary.absolutePath, "--output", dexOutputDir.get().asFile.absolutePath) +
-                classFiles.map { it.absolutePath }
-        )
-    }
-}
-
-val packagePlugin by tasks.registering(Zip::class) {
-    dependsOn(dexClasses)
-    archiveFileName.set("commit-notes-plugin.zip")
-    destinationDirectory.set(layout.buildDirectory.dir("plugin-package"))
-
-    from(projectDir) { include("plugin.json") }
-    from(layout.buildDirectory.dir("dex")) { include("classes.dex") }
-}
+// Gemeinsames Packaging aller Beispiel-Plugins: d8 → classes.dex, ZIP nach examples/out/<modul>/
+apply(from = rootProject.file("examples/plugin-packaging.gradle.kts"))
 ```
 
 * `compileOnly`: SDK (`:libs:plugin-api`) und Coroutines liegen zur Laufzeit im App-Prozess (Parent-Delegation im `DexClassLoader`). Nichts davon darf ins `classes.dex`, sonst gibt es doppelte Klassen.
 * `d8` wandelt die `.class`-Dateien in `classes.dex` um; `DexClassLoader` lädt **keine** rohen `.class`-/`.jar`-Dateien.
-* `packagePlugin` packt `plugin.json` und `classes.dex` als ZIP; das ZIP enthält also **nur** diese zwei Dateien im Wurzelverzeichnis.
-* Der Bytecode zielt auf Java 17 (`jvmTarget`), die Toolchain ist nicht erzwungen, damit es auch mit einem neueren JDK baut.
+* `packagePlugin` (aus `examples/plugin-packaging.gradle.kts`) packt `plugin.json` und `classes.dex` als ZIP; das ZIP enthält also **nur** diese zwei Dateien im Wurzelverzeichnis.
+* Gebaut wird mit der JDK-21-Toolchain, der Bytecode zielt auf Java 17 – wie `:libs:plugin-api` und die App.
 
 ### 9.5 Bauen, installieren, ausprobieren
 
 ```bash
 export ANDROID_HOME=/pfad/zum/android/sdk
 ./gradlew :examples:guide-commit-notes:packagePlugin
-# → examples/guide/commit-notes/build/plugin-package/commit-notes-plugin.zip
+# → examples/out/guide-commit-notes/guide-commit-notes.zip
+./gradlew :examples:packageAll   # alle Beispiel-Plugins nach examples/out/
 ```
 
 Sideload (Einstellungen → Plugins → „+“, aktivieren). Dann in einem Git-Projekt committen und über die Plugin-Schaltfläche der Editor-Leiste „Letzte Commits“ wählen. Auf dem Gerät noch nicht geprüft.
@@ -735,7 +698,7 @@ class XmlLspPlugin : LspServerPlugin(
             "https://repo.eclipse.org/content/repositories/lemminx-releases/org/eclipse/lemminx/org.eclipse.lemminx/0.28.0/org.eclipse.lemminx-0.28.0-uber.jar",
             fileName = "org.eclipse.lemminx-uber.jar"
         ),
-        requiredJdk = "17"
+        jdkVersions = listOf(21, 17) // bevorzugt 21, sonst 17
     )
 )
 ```
@@ -746,10 +709,10 @@ und einem Manifest, das den Start beschreibt:
 {
   "id": "com.example.xml-lsp",
   "name": "XML Language Server (LemMinX)",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 2,
   "publisher": "example",
-  "description": "Lädt Eclipse LemMinX (Uber-JAR 0.28.0) nach ~/.local/share und bindet ihn für XML ein. Benötigt JDK 17.",
+  "description": "Lädt Eclipse LemMinX (Uber-JAR 0.28.0) nach ~/.local/share und bindet ihn für XML ein. Benötigt JDK 17 oder 21 (bevorzugt 21).",
   "permissions": [
     "shell"
   ],
@@ -765,7 +728,7 @@ und einem Manifest, das den Start beschreibt:
         "command": [
           "bash",
           "-c",
-          "exec \"$PREFIX/lib/jvm/java-17-openjdk/bin/java\" -jar \"$1/.local/share/lemminx/org.eclipse.lemminx-uber.jar\"",
+          "J=; for v in 21 17; do [ -x \"$PREFIX/lib/jvm/java-$v-openjdk/bin/java\" ] && { J=\"$PREFIX/lib/jvm/java-$v-openjdk\"; break; }; done; [ -n \"$J\" ] || { echo \"JDK 21 oder JDK 17 fehlt (SDK-Manager)\" >&2; exit 1; }; exec \"$J/bin/java\" -jar \"$1/.local/share/lemminx/org.eclipse.lemminx-uber.jar\"",
           "xml-lsp",
           "${home}"
         ]
@@ -780,7 +743,7 @@ Beobachte:
 * `contributes.lspServers[].command` startet den Server über `bash -c`; `${home}` wird als `$1` übergeben, weil Kommandos ohne Shell laufen.
 * Der Plugin-Code startet den Server **nicht**: Das macht der `LspServerResolver` der App, mit dem aktiven Projekt als Workspace. So kollidieren mehrere Plugins nicht.
 * `LspServerSpec` kennt drei Beschaffungswege: `download` (`.tar.gz` entpacken oder Einzeldatei), `installScript` (eigenes Skript) oder `missingHint` (nur Hinweis).
-* Vor dem Start wird mit `requiredJdk` geprüft, ob das JDK vorhanden ist; sonst meldet das Plugin, es im SDK-Manager zu installieren. Das JDK wird beim Entfernen **nicht** gelöscht, es gehört dem SDK-Manager.
+* Vor dem Start prüft das Plugin mit `jdkVersions` (bevorzugte zuerst), ob eines dieser JDKs vorhanden ist; sonst meldet es, eines im SDK-Manager zu installieren. Der Startbefehl im Manifest wählt in derselben Reihenfolge (`for v in 21 17`). Das JDK wird beim Entfernen **nicht** gelöscht, es gehört dem SDK-Manager.
 * `onUninstall` löscht nur `installDir`.
 
 **Eigener Download mit Prüfsumme:** Das kmp-lsp-Plugin zeigt, wie ein `installScript` ein Binary lädt und die **SHA-256 vor dem Entpacken prüft** (bei Abweichung wird nichts installiert). Das solltest du für jeden Download übernehmen; siehe `examples/kmp-lsp-plugin/src/main/kotlin/…/KmpLspPlugin.kt`.
