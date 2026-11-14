@@ -2641,4 +2641,8 @@
     <string name="lsp_none_installed">Noch kein Sprachserver installiert. Sprachserver kommen als Plugins aus dem Store (Kategorie „Sprachserver“).</string>
     <string name="flashbar_install">Installiere %1$s</string>
     <string name="pw_tpl_plugin">Vorlage aus Plugin</string>
+    <string name="settings_j2k_enabled">Java → Kotlin (J2K)</string>
+    <string name="settings_j2k_enabled_desc">Beim Öffnen eines Projekts mit Java-Dateien die Umwandlung nach Kotlin anbieten. Aus: kein Scan und kein Dialog.</string>
+    <string name="settings_x2c_enabled">XML → Compose (X2C)</string>
+    <string name="settings_x2c_enabled_desc">Layouts nach Jetpack Compose umwandeln: Vorschlag beim Öffnen, Knopf in der Symbolleiste, Einträge im Dateibaum und in der Layout-Liste. Aus: alles ausgeblendet.</string>
 </resources>

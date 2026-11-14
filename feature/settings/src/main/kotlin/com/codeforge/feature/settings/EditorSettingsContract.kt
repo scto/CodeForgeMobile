@@ -42,6 +42,10 @@ data class EditorSettingsUiState(
     val lspMaxConcurrentSessions: Int = 3,
     val lspIdleTimeoutMinutes: Int = 10,
     val projectIndexingEnabled: Boolean = true,
+    /** Java→Kotlin-Konverter (Vorschlag beim Öffnen). */
+    val j2kEnabled: Boolean = true,
+    /** XML→Compose-Konverter (Vorschlag beim Öffnen, Menüeinträge). */
+    val x2cEnabled: Boolean = true,
     val showLineNumbers: Boolean = true,
     val pinLineNumbers: Boolean = false,
     val cursorAnimationEnabled: Boolean = true,
@@ -89,6 +93,10 @@ sealed interface EditorSettingsUiEvent {
     data object MinimapToggled : EditorSettingsUiEvent
     /** Projektindexierung umgeschaltet. */
     data object ProjectIndexingToggled : EditorSettingsUiEvent
+    /** Java→Kotlin-Konverter an/aus. */
+    data object J2kToggled : EditorSettingsUiEvent
+    /** XML→Compose-Konverter an/aus. */
+    data object X2cToggled : EditorSettingsUiEvent
     /** Zeilennummern umgeschaltet. */
     data object LineNumbersToggled : EditorSettingsUiEvent
     /** Fixieren der Zeilennummern umgeschaltet. */

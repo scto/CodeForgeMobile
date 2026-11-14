@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -95,6 +96,12 @@ class EditorViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EditorUiState())
     /** UI-Zustand. */
     val uiState: StateFlow<EditorUiState> = _uiState.asStateFlow()
+
+    /** Eingebaute Konverter J2K/X2C an/aus (Editor-Einstellungen → Projekt-Indexierung). */
+    val converters: StateFlow<ConverterToggles> = settingsRepository.appSettings
+        .map { ConverterToggles(j2k = !it.editor.j2KDisabled, x2c = !it.editor.x2CDisabled) }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(CONVERTER_STOP_TIMEOUT_MS), ConverterToggles())
 
     private val _effect = MutableSharedFlow<EditorUiEffect>()
     /** Einmalige Effekte. */
@@ -444,6 +451,10 @@ class EditorViewModel @Inject constructor(
             _uiState.update { it.copy(pendingJump = target) }
         }
     }
+
+    /** Aktueller Stand der Konverter-Schalter (für den Auto-Scan beim Öffnen). */
+    suspend fun converterToggles(): ConverterToggles =
+        settingsRepository.appSettings.first().editor.let { ConverterToggles(j2k = !it.j2KDisabled, x2c = !it.x2CDisabled) }
 
     /** `false`, wenn der Nutzer die automatische Projekt-Indexierung abgeschaltet hat (Editor-Einstellungen). */
     suspend fun isProjectIndexingEnabled(): Boolean =

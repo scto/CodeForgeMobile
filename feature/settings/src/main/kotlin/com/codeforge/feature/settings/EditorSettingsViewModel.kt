@@ -60,6 +60,8 @@ class EditorSettingsViewModel internal constructor(
                 lspMaxConcurrentSessions = settings.editor.lspMaxConcurrentSessions.takeIf { it > 0 } ?: 3,
                 lspIdleTimeoutMinutes = settings.editor.lspIdleTimeoutMinutes.takeIf { it > 0 } ?: 10,
                 projectIndexingEnabled = !settings.editor.projectIndexingDisabled,
+                j2kEnabled = !settings.editor.j2KDisabled,
+                x2cEnabled = !settings.editor.x2CDisabled,
                 showLineNumbers = !settings.editor.lineNumbersHidden,
                 pinLineNumbers = settings.editor.pinLineNumbers,
                 cursorAnimationEnabled = !settings.editor.cursorAnimationDisabled,
@@ -132,6 +134,12 @@ class EditorSettingsViewModel internal constructor(
                     settingsRepository.updateEditor {
                         it.toBuilder().setProjectIndexingDisabled(!it.projectIndexingDisabled).build()
                     }
+
+                EditorSettingsUiEvent.J2kToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setJ2KDisabled(!it.j2KDisabled).build() }
+
+                EditorSettingsUiEvent.X2cToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setX2CDisabled(!it.x2CDisabled).build() }
 
                 EditorSettingsUiEvent.MinimapToggled ->
                     settingsRepository.updateEditor { it.toBuilder().setMinimapEnabled(!it.minimapEnabled).build() }
@@ -249,7 +257,7 @@ class EditorSettingsViewModel internal constructor(
                         }
                         EditorSettingsSection.INDEXING -> {
                             settingsRepository.updateEditor {
-                                it.toBuilder().setProjectIndexingDisabled(false).build()
+                                it.toBuilder().setProjectIndexingDisabled(false).setJ2KDisabled(false).setX2CDisabled(false).build()
                             }
                         }
                         EditorSettingsSection.FORMAT_ON_SAVE -> {

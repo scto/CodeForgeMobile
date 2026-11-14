@@ -97,7 +97,8 @@ fun WorkspaceDrawer(
     onNavigate: (route: String) -> Unit,
     onOpenGitSettings: () -> Unit,
     modifier: Modifier = Modifier,
-    onConvertLayout: (path: String?) -> Unit = {},
+    /** `null`, wenn X2C abgeschaltet ist (Menüeinträge ausgeblendet). */
+    onConvertLayout: ((path: String?) -> Unit)? = null,
     /** true = dauerhaft sichtbar (Expanded-Breite): feste Breite, keine runden Ecken. */
     permanent: Boolean = false,
     /** Vom Editor übergebener Kontext: öffnet das Agent-Panel und hängt ihn an die nächste Nachricht. */
@@ -166,9 +167,11 @@ fun WorkspaceDrawer(
                                 onCloseDrawer()
                                 onNavigate(Routes.hardcodedStrings(path, rootPath))
                             },
-                            onConvertLayoutToCompose = { path ->
-                                onCloseDrawer()
-                                onConvertLayout(path)
+                            onConvertLayoutToCompose = onConvertLayout?.let { convert ->
+                                { path: String ->
+                                    onCloseDrawer()
+                                    convert(path)
+                                }
                             }
                         )
                         DrawerSection.SEARCH -> SearchRoute(
@@ -200,9 +203,11 @@ fun WorkspaceDrawer(
                                 onCloseDrawer()
                                 onNavigate(Routes.layoutDesigner(path))
                             },
-                            onConvertLayoutsToCompose = {
-                                onCloseDrawer()
-                                onConvertLayout(null)
+                            onConvertLayoutsToCompose = onConvertLayout?.let { convert ->
+                                {
+                                    onCloseDrawer()
+                                    convert(null)
+                                }
                             }
                         )
                         DrawerSection.ASSETS -> AssetStudioPanel(

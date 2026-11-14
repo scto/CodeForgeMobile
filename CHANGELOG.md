@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Schalter für J2K und X2C)
+- Einstellungen → Editor → Projekt-Indexierung: „Java → Kotlin (J2K)“ und „XML → Compose (X2C)“ einzeln abschaltbar (Proto `j2k_disabled`, `x2c_disabled`, Standard an; „Zurücksetzen“ schaltet beide wieder ein). J2K aus: kein Scan, kein Dialog beim Öffnen. X2C aus: kein Scan, Symbolleisten-Knöpfe, Eintrag im Dateibaum-Kontextmenü und Knopf in der Layout-Liste ausgeblendet.
+- Die beiden Konverter bleiben eingebaut: Als Plugin gingen Dialoge, Diff-/Ergebnisansicht und Auto-Scan verloren (Code-Plugins haben keine UI-API, `.jar` ist im Store verboten), der Speichergewinn wäre gering.
+
 ### Geändert (Vorlagen: Host-Tests statt enableUnitTest)
 - Compose-Vorlagen schalten die Unit-Tests aller Varianten mit der AGP-9-API ein: `androidComponents { beforeVariants { builder -> builder.hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true } }` statt des veralteten `enableUnitTest`. Groovy-DSL braucht dort einen Selektor (`beforeVariants(selector().all()) { … }`); die bisherige Groovy-Zeile brach mit „Could not find method beforeVariants()“ ab.
 - Eingebaute Compose-Vorlage: Einrückung von `plugins { … }` und des neuen Blocks korrigiert. Beide DSL-Varianten im Sandkasten erzeugt und mit `assembleDebug testReleaseUnitTest` gebaut.

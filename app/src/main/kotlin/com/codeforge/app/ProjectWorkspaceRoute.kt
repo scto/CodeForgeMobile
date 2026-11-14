@@ -106,6 +106,17 @@ fun ProjectWorkspaceRoute(
     val buildState by buildViewModel.uiState.collectAsState()
     val j2kState by j2kViewModel.uiState.collectAsState()
     val x2cState by x2cViewModel.uiState.collectAsState()
+    val converters by editorViewModel.converters.collectAsState()
+    // X2C abgeschaltet → keine Menüeinträge im Dateibaum und in der Layout-Liste.
+    val convertLayout: ((String?) -> Unit)? = if (converters.x2c) {
+        { layoutPath ->
+            x2cViewModel.handleIntent(
+                X2cIntent.ScanProject(projectPath = rootPath, manualTrigger = true, preselectedLayout = layoutPath)
+            )
+        }
+    } else {
+        null
+    }
 
     // Erst nach der Indexierungs-Entscheidung (LaunchedEffect unten) für den Auto-Scan freigegeben.
     var x2cScannedForProject by remember(rootPath) { mutableStateOf(true) }
@@ -131,9 +142,11 @@ fun ProjectWorkspaceRoute(
     LaunchedEffect(rootPath) {
         buildViewModel.connectProject(rootPath)
         // Automatische Indexierung aus: weder Java→Kotlin- noch XML→Compose-Scan beim Öffnen.
+        // Abgeschaltete Konverter (Editor-Einstellungen) scannen nicht.
         if (editorViewModel.isProjectIndexingEnabled()) {
-            x2cScannedForProject = false
-            j2kViewModel.handleIntent(J2kIntent.ScanProject(rootPath, manualTrigger = false))
+            val toggles = editorViewModel.converterToggles()
+            x2cScannedForProject = !toggles.x2c
+            if (toggles.j2k) j2kViewModel.handleIntent(J2kIntent.ScanProject(rootPath, manualTrigger = false))
         }
     }
 
@@ -214,22 +227,24 @@ fun ProjectWorkspaceRoute(
                         }
                     },
                     actions = {
-                        TooltipIconButton(onClick = {
-                            x2cViewModel.handleIntent(
-                                X2cIntent.ScanProject(
-                                    projectPath = rootPath,
-                                    manualTrigger = true
+                        if (converters.x2c) {
+                            TooltipIconButton(onClick = {
+                                x2cViewModel.handleIntent(
+                                    X2cIntent.ScanProject(
+                                        projectPath = rootPath,
+                                        manualTrigger = true
+                                    )
                                 )
-                            )
-                        },
-                            label = stringRes(R.string.x2c_menu_convert_layouts)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Transform,
-                                contentDescription = stringRes(R.string.x2c_menu_convert_layouts)
-                            )
+                            },
+                                label = stringRes(R.string.x2c_menu_convert_layouts)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Transform,
+                                    contentDescription = stringRes(R.string.x2c_menu_convert_layouts)
+                                )
+                            }
                         }
-                        if (x2cState.report != null && !x2cState.showResultScreen && !x2cState.isConverting) {
+                        if (converters.x2c && x2cState.hasHiddenResult()) {
                             TooltipIconButton(onClick = { x2cViewModel.handleIntent(X2cIntent.ShowResult) }, label = stringRes(R.string.x2c_result_title)) {
                                 Icon(
                                     imageVector = Icons.Default.Description,
@@ -289,15 +304,7 @@ fun ProjectWorkspaceRoute(
                 onCloseDrawer = {},
                 onNavigate = safeNavigate,
                 onOpenGitSettings = onOpenGitSettings,
-                onConvertLayout = { layoutPath ->
-                    x2cViewModel.handleIntent(
-                        X2cIntent.ScanProject(
-                            projectPath = rootPath,
-                            manualTrigger = true,
-                            preselectedLayout = layoutPath
-                        )
-                    )
-                },
+                onConvertLayout = convertLayout,
                 permanent = true,
                 agentAttachment = agentAttachment,
                 onAgentAttachmentConsumed = { agentAttachment = null },
@@ -322,15 +329,7 @@ fun ProjectWorkspaceRoute(
                     onCloseDrawer = { coroutineScope.launch { drawerState.close() } },
                     onNavigate = safeNavigate,
                     onOpenGitSettings = onOpenGitSettings,
-                    onConvertLayout = { layoutPath ->
-                        x2cViewModel.handleIntent(
-                            X2cIntent.ScanProject(
-                                projectPath = rootPath,
-                                manualTrigger = true,
-                                preselectedLayout = layoutPath
-                            )
-                        )
-                    },
+                    onConvertLayout = convertLayout,
                     agentAttachment = agentAttachment,
                     onAgentAttachmentConsumed = { agentAttachment = null },
                 )
@@ -393,3 +392,7 @@ fun ProjectWorkspaceRoute(
         }
     }
 }
+
+// Ein X2C-Bericht liegt vor, wird aber gerade nicht angezeigt (Knopf zum erneuten Öffnen).
+private fun com.codeforge.feature.x2c.X2cUiState.hasHiddenResult(): Boolean =
+    report != null && !showResultScreen && !isConverting

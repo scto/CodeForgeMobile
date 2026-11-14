@@ -49,7 +49,8 @@ fun LayoutFilesPanel(
     rootPath: String,
     onOpenDesigner: (path: String) -> Unit,
     modifier: Modifier = Modifier,
-    onConvertLayoutsToCompose: () -> Unit = {},
+    /** `null` blendet den Umwandeln-Knopf aus (X2C abgeschaltet). */
+    onConvertLayoutsToCompose: (() -> Unit)? = null,
     viewModel: LayoutFilesViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -76,7 +77,7 @@ private fun LayoutFilesContent(
     state: LayoutFilesUiState,
     onEvent: (LayoutFilesUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    onConvertLayoutsToCompose: () -> Unit = {},
+    onConvertLayoutsToCompose: (() -> Unit)? = null,
 ) {
     Column(modifier.fillMaxSize()) {
         Row(
@@ -84,12 +85,14 @@ private fun LayoutFilesContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringRes(R.string.layout_files_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            IconButton(onClick = onConvertLayoutsToCompose) {
-                Icon(
-                    Icons.Filled.Transform,
-                    contentDescription = stringRes(R.string.x2c_menu_convert_layouts),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+            if (onConvertLayoutsToCompose != null) {
+                IconButton(onClick = onConvertLayoutsToCompose) {
+                    Icon(
+                        Icons.Filled.Transform,
+                        contentDescription = stringRes(R.string.x2c_menu_convert_layouts),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
             IconButton(onClick = { onEvent(LayoutFilesUiEvent.Refresh) }) {
                 Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))

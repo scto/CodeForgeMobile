@@ -100,7 +100,8 @@ fun FileTreeRoute(
     onOpenFile: (path: String) -> Unit,
     onOpenApkAnalyzer: (path: String) -> Unit = {},
     onScanHardcodedStrings: (path: String) -> Unit = {},
-    onConvertLayoutToCompose: (path: String) -> Unit = {},
+    /** `null` blendet „Nach Compose umwandeln“ aus (X2C abgeschaltet). */
+    onConvertLayoutToCompose: ((path: String) -> Unit)? = null,
     viewModel: FileTreeViewModel = hiltViewModel()
 ) {
     LaunchedEffect(rootPath) { viewModel.initialize(rootPath) }
@@ -114,7 +115,7 @@ fun FileTreeRoute(
                 is FileTreeUiEffect.FileOpenedInEditor -> onOpenFile(effect.path)
                 is FileTreeUiEffect.OpenApkAnalyzer -> onOpenApkAnalyzer(effect.path)
                 is FileTreeUiEffect.ScanHardcodedStrings -> onScanHardcodedStrings(effect.path)
-                is FileTreeUiEffect.ConvertLayoutToCompose -> onConvertLayoutToCompose(effect.path)
+                is FileTreeUiEffect.ConvertLayoutToCompose -> onConvertLayoutToCompose?.invoke(effect.path)
                 is FileTreeUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
             }
         }
@@ -124,7 +125,8 @@ fun FileTreeRoute(
         modifier = modifier,
         uiState = uiState,
         snackbarHostState = snackbarHostState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        canConvertLayout = onConvertLayoutToCompose != null
     )
 }
 
@@ -133,7 +135,8 @@ private fun FileTreeScreen(
     modifier: Modifier = Modifier,
     uiState: FileTreeUiState,
     snackbarHostState: SnackbarHostState,
-    onEvent: (FileTreeUiEvent) -> Unit
+    onEvent: (FileTreeUiEvent) -> Unit,
+    canConvertLayout: Boolean = true
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -203,7 +206,11 @@ private fun FileTreeScreen(
             onDelete = { onEvent(FileTreeUiEvent.DeleteClicked) },
             onAnalyzeApk = { onEvent(FileTreeUiEvent.AnalyzeApkClicked) },
             onScanHardcodedStrings = { onEvent(FileTreeUiEvent.ScanHardcodedStringsClicked) },
-            onConvertLayoutToCompose = { onEvent(FileTreeUiEvent.ConvertLayoutToComposeClicked) },
+            onConvertLayoutToCompose = if (canConvertLayout) {
+                { onEvent(FileTreeUiEvent.ConvertLayoutToComposeClicked) }
+            } else {
+                null
+            },
             pluginEntries = uiState.pluginMenuEntries,
             onPluginEntry = { onEvent(FileTreeUiEvent.RunPluginEntry(it.pluginId, it.commandId)) },
             onDismiss = { onEvent(FileTreeUiEvent.DismissContextMenu) }
@@ -651,7 +658,7 @@ private fun FileTreeContextMenuDialog(
     onDelete: () -> Unit,
     onAnalyzeApk: () -> Unit,
     onScanHardcodedStrings: () -> Unit,
-    onConvertLayoutToCompose: () -> Unit,
+    onConvertLayoutToCompose: (() -> Unit)?,
     pluginEntries: List<com.codeforge.core.domain.extension.PluginMenuEntry> = emptyList(),
     onPluginEntry: (com.codeforge.core.domain.extension.PluginMenuEntry) -> Unit = {},
     onDismiss: () -> Unit
@@ -674,7 +681,8 @@ private fun FileTreeContextMenuDialog(
                         modifier = Modifier.clickable(onClick = onAnalyzeApk)
                     )
                 }
-                if (!target.isDirectory && target.path.endsWith(".xml", ignoreCase = true) && target.path.contains("/res/layout")) {
+                val isLayout = !target.isDirectory && target.path.endsWith(".xml", ignoreCase = true) && target.path.contains("/res/layout")
+                if (isLayout && onConvertLayoutToCompose != null) {
                     ListItem(
                         headlineContent = { Text(stringRes(R.string.x2c_context_convert_layout)) },
                         leadingContent = { Icon(Icons.Default.Transform, contentDescription = null) },

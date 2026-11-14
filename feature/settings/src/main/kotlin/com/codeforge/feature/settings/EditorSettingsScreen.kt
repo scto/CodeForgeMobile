@@ -430,6 +430,18 @@ private fun EditorSettingsScreen(
                 checked = uiState.projectIndexingEnabled,
                 onToggle = { onEvent(EditorSettingsUiEvent.ProjectIndexingToggled) }
             )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_j2k_enabled),
+                description = Res.string(R.string.settings_j2k_enabled_desc),
+                checked = uiState.j2kEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.J2kToggled) }
+            )
+            EditorToggleRow(
+                title = Res.string(R.string.settings_x2c_enabled),
+                description = Res.string(R.string.settings_x2c_enabled_desc),
+                checked = uiState.x2cEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.X2cToggled) }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 

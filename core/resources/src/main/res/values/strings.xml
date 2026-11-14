@@ -2641,4 +2641,8 @@
     <string name="lsp_none_installed">No language server installed yet. Language servers come as plugins from the Store (category “Language servers”).</string>
     <string name="flashbar_install">Installing %1$s</string>
     <string name="pw_tpl_plugin">Template from plugin</string>
+    <string name="settings_j2k_enabled">Java → Kotlin (J2K)</string>
+    <string name="settings_j2k_enabled_desc">Offer the conversion to Kotlin when opening a project with Java files. Off: no scan and no dialog.</string>
+    <string name="settings_x2c_enabled">XML → Compose (X2C)</string>
+    <string name="settings_x2c_enabled_desc">Convert layouts to Jetpack Compose: suggestion on open, toolbar button, entries in the file tree and layout list. Off: all hidden.</string>
 </resources>
