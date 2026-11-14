@@ -10,7 +10,9 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(17)
+    // Kompiliert mit JDK 21 (wie CI und Termux). Der Bytecode bleibt Java 17 (jvmTarget aus der build-logic),
+    // passend zu :libs:plugin-api und zur App, in die das Plugin nach d8 geladen wird.
+    jvmToolchain(21)
 }
 
 /** Konvertiert die .class-Dateien via `d8` zu classes.dex (benötigt ANDROID_HOME mit build-tools). */

@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Vorlage Code-Plugin: JDK 21)
+- `:templates:code-plugin` kompiliert mit der JDK-21-Toolchain (vorher 17, die in CI und Termux fehlt). Der Bytecode bleibt Java 17 wie im übrigen Projekt und in `:libs:plugin-api`; `compileKotlin`, `dexClasses`, `packagePlugin`, Tests und detekt laufen durch. Die Ausnahme im CI-Schritt für detekt entfällt.
+
 ### Geändert (detekt scharf geschaltet)
 - Baseline je Modul unter `config/detekt/baseline/` (62 Dateien; Module ohne Datei haben keinen Bestand). `ignoreFailures = false`: Neue Verstöße lassen `./gradlew detekt` und `check` scheitern; Bestand abbauen mit `./gradlew :<modul>:detektBaseline` nach dem Beheben.
 - `UndocumentedPublicProperty` und `LabeledExpression` abgeschaltet (meldeten Felder von UiState-Klassen bzw. idiomatische `return@withContext`/`return@launch`). KDoc an öffentlichen Klassen und Funktionen bleibt Pflicht.
