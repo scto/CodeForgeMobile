@@ -6,6 +6,18 @@ package com.codeforge.feature.settings.buildrun
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import com.codeforge.core.domain.model.JvmOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,7 +39,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,9 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.codeforge.core.domain.model.GradleLogLevel
 import com.codeforge.core.domain.model.GradleRunSettings
-import com.codeforge.core.domain.model.GradleStacktrace
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.SettingsTopBar
@@ -122,51 +131,60 @@ fun BuildRunScreen(
         ) {
             SectionTitle(R.string.buildrun_section_options)
             Block {
-                Text(stringRes(R.string.buildrun_log_level), style = MaterialTheme.typography.titleSmall)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    GradleLogLevel.entries.forEach { level ->
+                // Aktive Flags: wie sie an jeden Gradle-Lauf angehängt werden; Antippen entfernt.
+                val active = settings.activeFlags()
+                if (active.isEmpty()) {
+                    Text(
+                        stringRes(R.string.buildrun_no_flags),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        active.forEach { flag ->
+                            InputChip(
+                                selected = true,
+                                onClick = { onEvent(BuildRunEvent.RemoveFlag(flag)) },
+                                label = { Text(flag, fontFamily = FontFamily.Monospace) },
+                                trailingIcon = {
+                                    Icon(Icons.Filled.Close, contentDescription = stringRes(R.string.buildrun_remove_flag, flag), modifier = Modifier.size(18.dp))
+                                },
+                            )
+                        }
+                    }
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                Text(stringRes(R.string.buildrun_common_flags), style = MaterialTheme.typography.titleSmall)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    GradleRunSettings.COMMON_FLAGS.forEach { flag ->
                         FilterChip(
-                            selected = settings.logLevel == level,
-                            onClick = { onEvent(BuildRunEvent.SetLogLevel(level)) },
-                            label = { Text(level.flag ?: stringRes(R.string.buildrun_default)) },
+                            selected = settings.isActive(flag),
+                            onClick = { onEvent(BuildRunEvent.ToggleFlag(flag)) },
+                            label = { Text(flag, fontFamily = FontFamily.Monospace) },
                         )
                     }
                 }
-                Text(stringRes(R.string.buildrun_stacktrace), style = MaterialTheme.typography.titleSmall)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    GradleStacktrace.entries.forEach { mode ->
-                        FilterChip(
-                            selected = settings.stacktrace == mode,
-                            onClick = { onEvent(BuildRunEvent.SetStacktrace(mode)) },
-                            label = { Text(mode.flag ?: stringRes(R.string.buildrun_off)) },
-                        )
-                    }
+                Text(stringRes(R.string.buildrun_flags_exclusive), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringRes(R.string.buildrun_custom_flag), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val input = state.customFlagInput.trim()
+                    val valid = input.isEmpty() || JvmOptions.isValidFlag(input)
+                    OutlinedTextField(
+                        value = state.customFlagInput,
+                        onValueChange = { onEvent(BuildRunEvent.CustomFlagInputChanged(it)) },
+                        singleLine = true,
+                        isError = !valid,
+                        placeholder = { Text(stringRes(R.string.buildrun_custom_flag_hint), fontFamily = FontFamily.Monospace) },
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                        keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { onEvent(BuildRunEvent.AddCustomFlag) }),
+                        modifier = Modifier.weight(1f),
+                    )
+                    FilledTonalIconButton(
+                        onClick = { onEvent(BuildRunEvent.AddCustomFlag) },
+                        enabled = input.isNotEmpty() && valid,
+                    ) { Icon(Icons.Filled.Add, contentDescription = stringRes(R.string.buildrun_add_flag)) }
                 }
-            }
-            Block {
-                SwitchRow("--offline", R.string.buildrun_offline_sum, settings.offline) { onEvent(BuildRunEvent.SetOffline(it)) }
-                SwitchRow("--no-build-cache", R.string.buildrun_no_build_cache_sum, settings.noBuildCache) { onEvent(BuildRunEvent.SetNoBuildCache(it)) }
-                SwitchRow("--no-daemon", R.string.buildrun_no_daemon_sum, settings.noDaemon) { onEvent(BuildRunEvent.SetNoDaemon(it)) }
-                SwitchRow("--continue", R.string.buildrun_continue_sum, settings.continueOnFailure) { onEvent(BuildRunEvent.SetContinue(it)) }
-            }
-            Block {
-                val invalid = remember(settings.extraArgs) { settings.firstInvalidExtraArg() }
-                OutlinedTextField(
-                    value = settings.extraArgs,
-                    onValueChange = { onEvent(BuildRunEvent.SetExtraArgs(it)) },
-                    label = { Text(stringRes(R.string.buildrun_extra_args)) },
-                    isError = invalid != null,
-                    supportingText = {
-                        Text(if (invalid != null) stringRes(R.string.jvm_invalid, invalid) else stringRes(R.string.buildrun_extra_args_hint))
-                    },
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Text(
-                    stringRes(R.string.buildrun_effective, settings.toArgs().joinToString(" ").ifEmpty { "–" }),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
 
             SectionTitle(R.string.buildrun_section_service)
@@ -283,16 +301,5 @@ private fun SectionTitle(@StringRes title: Int) {
 private fun Block(content: @Composable ColumnScope.() -> Unit) {
     Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
-    }
-}
-
-@Composable
-private fun SwitchRow(flag: String, @StringRes summary: Int, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(flag, style = MaterialTheme.typography.titleSmall, fontFamily = FontFamily.Monospace)
-            Text(stringRes(summary), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Switch(checked = checked, onCheckedChange = onChange)
     }
 }

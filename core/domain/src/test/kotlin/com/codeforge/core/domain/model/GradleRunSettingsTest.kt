@@ -58,4 +58,28 @@ class GradleRunSettingsTest {
         assertEquals(mapOf("lsp" to 2), useCase(com.codeforge.core.domain.runtime.MemoryPressure.LOW))
         assertEquals(mapOf("lsp" to 2, "gradle" to 1), useCase(com.codeforge.core.domain.runtime.MemoryPressure.MANUAL))
     }
+
+    @Test fun toggleKeepsLogLevelsAndStacktracesExclusive() {
+        val s = GradleRunSettings().toggle("--info").toggle("--debug").toggle("--stacktrace").toggle("--full-stacktrace")
+        assertEquals(listOf("--debug", "--full-stacktrace"), s.activeFlags())
+        assertEquals(GradleRunSettings(), s.toggle("--debug").toggle("--full-stacktrace"))
+    }
+
+    @Test fun newFlagsReachTheCommandLine() {
+        val s = GradleRunSettings().toggle("--profile").toggle("--rerun-tasks").toggle("--parallel")
+        assertEquals(listOf("--profile", "--rerun-tasks", "--parallel"), s.toArgs())
+    }
+
+    @Test fun customFlagsAreValidatedDeduplicatedAndRemovable() {
+        val s = GradleRunSettings()
+            .addCustomFlag(" --warning-mode=all ")
+            .addCustomFlag("--warning-mode=all")
+            .addCustomFlag("--scan;rm")
+            .addCustomFlag("all")
+            .addCustomFlag("--offline") // häufiges Flag → wird eingeschaltet, nicht doppelt als eigenes
+        assertEquals(listOf("--offline", "--warning-mode=all"), s.activeFlags())
+        assertEquals(listOf("--offline", "--warning-mode=all"), s.toArgs())
+        val removed = s.removeCustomFlag("--warning-mode=all").removeCustomFlag("--offline")
+        assertTrue(removed.activeFlags().isEmpty())
+    }
 }

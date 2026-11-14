@@ -2521,17 +2521,7 @@
     <string name="buildrun_section_options">Gradle-Optionen</string>
     <string name="buildrun_section_service">Gradle-Dienst</string>
     <string name="buildrun_section_maintenance">Wartung</string>
-    <string name="buildrun_log_level">Ausgabe</string>
-    <string name="buildrun_stacktrace">Stacktrace</string>
     <string name="buildrun_default">Standard</string>
-    <string name="buildrun_off">Aus</string>
-    <string name="buildrun_offline_sum">Ohne Netzwerk bauen; fehlende Abhängigkeiten lassen den Build scheitern.</string>
-    <string name="buildrun_no_build_cache_sum">Build-Cache für alle Läufe abschalten.</string>
-    <string name="buildrun_no_daemon_sum">Kein Hintergrund-Daemon: spart RAM zwischen Builds, jeder Start dauert länger.</string>
-    <string name="buildrun_continue_sum">Nach einem fehlgeschlagenen Task weitermachen.</string>
-    <string name="buildrun_extra_args">Weitere Argumente</string>
-    <string name="buildrun_extra_args_hint">Optionen durch Leerzeichen getrennt, z. B. --parallel -Pkey=wert</string>
-    <string name="buildrun_effective">Wird jedem Gradle-Lauf angehängt: %1$s</string>
     <string name="buildrun_gradle_home">Eigene Gradle-Installation</string>
     <string name="buildrun_gradle_home_sum">Nutzt statt des Wrappers eine lokale Gradle-Distribution (Ordner mit bin/gradle). Leer = Wrapper des Projekts.</string>
     <string name="buildrun_gradle_home_path">Pfad zur Distribution</string>
@@ -2575,4 +2565,11 @@
     <string name="buildrun_idle">Leerlaufzeit des Gradle-Daemons</string>
     <string name="buildrun_idle_sum">Nach dieser Zeit ohne Build beendet sich der Daemon selbst und gibt seinen Speicher frei. Gradle-Standard: 3 Stunden.</string>
     <string name="buildrun_idle_minutes">%1$s min</string>
+    <string name="buildrun_no_flags">Keine zusätzlichen Flags</string>
+    <string name="buildrun_common_flags">Häufige Flags</string>
+    <string name="buildrun_custom_flag">Eigenes Flag</string>
+    <string name="buildrun_custom_flag_hint">z. B. --warning-mode=all</string>
+    <string name="buildrun_add_flag">Flag hinzufügen</string>
+    <string name="buildrun_remove_flag">%1$s entfernen</string>
+    <string name="buildrun_flags_exclusive">--info, --debug, --quiet und --warn schließen sich aus, ebenso --stacktrace und --full-stacktrace. Flags, die ein Aufruf selbst mitbringt, haben Vorrang.</string>
 </resources>

@@ -5,9 +5,7 @@
 package com.codeforge.feature.settings.buildrun
 
 import androidx.compose.runtime.Immutable
-import com.codeforge.core.domain.model.GradleLogLevel
 import com.codeforge.core.domain.model.GradleRunSettings
-import com.codeforge.core.domain.model.GradleStacktrace
 import com.codeforge.core.domain.model.JvmOptions
 
 /** Aufräum- und Wartungsaktionen. */
@@ -23,6 +21,8 @@ data class BuildRunState(
     val gradleUserHome: String = "",
     /** Eingabe für die eigene Gradle-Installation (noch nicht gespeichert). */
     val gradleHomeInput: String = "",
+    /** Eingabe eines eigenen Flags. */
+    val customFlagInput: String = "",
     /** Eingabe der Wrapper-Version. */
     val wrapperVersion: String = "latest",
     /** Laufende Aktion. */
@@ -42,13 +42,14 @@ data class BuildRunState(
 
 /** Aktionen des Nutzers. */
 sealed interface BuildRunEvent {
-    data class SetLogLevel(val level: GradleLogLevel) : BuildRunEvent
-    data class SetStacktrace(val mode: GradleStacktrace) : BuildRunEvent
-    data class SetOffline(val enabled: Boolean) : BuildRunEvent
-    data class SetNoBuildCache(val enabled: Boolean) : BuildRunEvent
-    data class SetNoDaemon(val enabled: Boolean) : BuildRunEvent
-    data class SetContinue(val enabled: Boolean) : BuildRunEvent
-    data class SetExtraArgs(val value: String) : BuildRunEvent
+    /** Häufiges Flag an-/abwählen. */
+    data class ToggleFlag(val flag: String) : BuildRunEvent
+    /** Eingabe für ein eigenes Flag. */
+    data class CustomFlagInputChanged(val value: String) : BuildRunEvent
+    /** Eingegebenes eigenes Flag hinzufügen. */
+    data object AddCustomFlag : BuildRunEvent
+    /** Flag aus der Liste der aktiven entfernen. */
+    data class RemoveFlag(val flag: String) : BuildRunEvent
     data class GradleHomeInputChanged(val value: String) : BuildRunEvent
     /** Eigene Gradle-Installation übernehmen (leer = Wrapper des Projekts). */
     data object SaveGradleHome : BuildRunEvent

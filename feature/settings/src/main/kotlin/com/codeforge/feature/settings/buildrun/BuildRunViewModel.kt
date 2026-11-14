@@ -66,13 +66,10 @@ class BuildRunViewModel @Inject constructor(
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: BuildRunEvent) {
         when (event) {
-            is BuildRunEvent.SetLogLevel -> save { it.copy(logLevel = event.level) }
-            is BuildRunEvent.SetStacktrace -> save { it.copy(stacktrace = event.mode) }
-            is BuildRunEvent.SetOffline -> save { it.copy(offline = event.enabled) }
-            is BuildRunEvent.SetNoBuildCache -> save { it.copy(noBuildCache = event.enabled) }
-            is BuildRunEvent.SetNoDaemon -> save { it.copy(noDaemon = event.enabled) }
-            is BuildRunEvent.SetContinue -> save { it.copy(continueOnFailure = event.enabled) }
-            is BuildRunEvent.SetExtraArgs -> save { it.copy(extraArgs = event.value) }
+            is BuildRunEvent.ToggleFlag -> save { it.toggle(event.flag) }
+            is BuildRunEvent.RemoveFlag -> save { it.removeCustomFlag(event.flag) }
+            is BuildRunEvent.CustomFlagInputChanged -> _uiState.update { it.copy(customFlagInput = event.value) }
+            BuildRunEvent.AddCustomFlag -> addCustomFlag()
             is BuildRunEvent.GradleHomeInputChanged -> _uiState.update { it.copy(gradleHomeInput = event.value) }
             BuildRunEvent.SaveGradleHome -> saveGradleHome()
             is BuildRunEvent.SaveDaemonJvm -> {
@@ -96,6 +93,17 @@ class BuildRunViewModel @Inject constructor(
 
     private fun save(change: (GradleRunSettings) -> GradleRunSettings) {
         viewModelScope.launch { buildSettings.update(change) }
+    }
+
+    private fun addCustomFlag() {
+        val flag = _uiState.value.customFlagInput.trim()
+        if (flag.isEmpty()) return
+        if (!com.codeforge.core.domain.model.JvmOptions.isValidFlag(flag)) {
+            say(Res.string(R.string.jvm_invalid, flag))
+            return
+        }
+        save { it.addCustomFlag(flag) }
+        _uiState.update { it.copy(customFlagInput = "") }
     }
 
     private fun saveGradleHome() {

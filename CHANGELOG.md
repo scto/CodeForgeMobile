@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Build & Run: Flag-Auswahl)
+- Gradle-Optionen als Chip-Auswahl: oben die aktiven Flags (Antippen entfernt, sonst „Keine zusätzlichen Flags“), darunter „Häufige Flags“ (`--info --debug --quiet --warn --stacktrace --full-stacktrace --profile --rerun-tasks --no-build-cache --no-daemon --parallel --offline --continue`) und „Eigenes Flag“ mit Plus-Knopf. Log-Stufen und Stacktrace-Arten schließen sich jeweils aus; eigene Flags werden geprüft (keine Shell-Sonderzeichen, Wert mit `=` anhängen).
+
 ### Hinzugefügt (build-logic: detekt)
 - Convention-Plugin `codeforge.detekt` (`DetektConventionPlugin`), über `codeforge.quality` in allen Modulen aktiv. Regeln: `config/detekt/detekt.yml` (eine Datei im Projekt-Root für alle Module), Baseline je Modul unter `config/detekt/baseline/<modul>.xml`, sobald vorhanden. Vorerst nur Bericht (`ignoreFailures = true`), wie bei ktlint.
 - `detekt.yml` an das Projekt angepasst: `rootPackage` stammte aus einem anderen Projekt (`com.neonide.studio`) und meldete jede Datei; Paketnamen mit Unterstrich (`libs.terminal_engine`) erlaubt; `@Composable` von `FunctionNaming`, `LongMethod` und `LongParameterList` ausgenommen, `@Inject` von `LongParameterList`, `@Preview` von `UnusedPrivateFunction`.

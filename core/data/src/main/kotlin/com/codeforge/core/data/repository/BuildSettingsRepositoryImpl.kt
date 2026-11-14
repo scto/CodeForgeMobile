@@ -54,6 +54,9 @@ class BuildSettingsRepositoryImpl(private val file: File) : BuildSettingsReposit
         val gradleHome: String = "",
         val jvm: JvmDto? = null,
         val idleMinutes: Int = 0,
+        val profile: Boolean = false,
+        val rerunTasks: Boolean = false,
+        val parallel: Boolean = false,
     )
 
     @Serializable
@@ -63,6 +66,7 @@ class BuildSettingsRepositoryImpl(private val file: File) : BuildSettingsReposit
         logLevel.name, stacktrace.name, offline, noBuildCache, noDaemon, continueOnFailure, extraArgs, customGradleHome,
         daemonJvm?.let { JvmDto(it.xms, it.xmx, it.maxMetaspace, it.extraFlags) },
         daemonIdleMinutes,
+        profile, rerunTasks, parallel,
     )
 
     private fun Dto.toModel() = GradleRunSettings(
@@ -72,5 +76,6 @@ class BuildSettingsRepositoryImpl(private val file: File) : BuildSettingsReposit
         extraArgs = extraArgs, customGradleHome = gradleHome,
         daemonJvm = jvm?.let { JvmOptions(it.xms, it.xmx, it.metaspace, it.flags) },
         daemonIdleMinutes = idleMinutes.coerceIn(0, GradleRunSettings.MAX_IDLE_MINUTES),
+        profile = profile, rerunTasks = rerunTasks, parallel = parallel,
     )
 }

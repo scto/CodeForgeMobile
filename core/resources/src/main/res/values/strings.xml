@@ -2521,17 +2521,7 @@
     <string name="buildrun_section_options">Gradle options</string>
     <string name="buildrun_section_service">Gradle service</string>
     <string name="buildrun_section_maintenance">Maintenance</string>
-    <string name="buildrun_log_level">Output</string>
-    <string name="buildrun_stacktrace">Stacktrace</string>
     <string name="buildrun_default">Default</string>
-    <string name="buildrun_off">Off</string>
-    <string name="buildrun_offline_sum">Build without network; missing dependencies fail the build.</string>
-    <string name="buildrun_no_build_cache_sum">Turn the build cache off for all runs.</string>
-    <string name="buildrun_no_daemon_sum">No background daemon: saves RAM between builds, each start takes longer.</string>
-    <string name="buildrun_continue_sum">Keep going after a task fails.</string>
-    <string name="buildrun_extra_args">Extra arguments</string>
-    <string name="buildrun_extra_args_hint">Options separated by spaces, e.g. --parallel -Pkey=value</string>
-    <string name="buildrun_effective">Appended to every Gradle run: %1$s</string>
     <string name="buildrun_gradle_home">Custom Gradle installation</string>
     <string name="buildrun_gradle_home_sum">Uses a local Gradle distribution (folder with bin/gradle) instead of the wrapper. Empty = project wrapper.</string>
     <string name="buildrun_gradle_home_path">Path to distribution</string>
@@ -2575,4 +2565,11 @@
     <string name="buildrun_idle">Gradle daemon idle time</string>
     <string name="buildrun_idle_sum">After this time without a build the daemon stops itself and frees its memory. Gradle default: 3 hours.</string>
     <string name="buildrun_idle_minutes">%1$s min</string>
+    <string name="buildrun_no_flags">No extra flags</string>
+    <string name="buildrun_common_flags">Common flags</string>
+    <string name="buildrun_custom_flag">Custom flag</string>
+    <string name="buildrun_custom_flag_hint">e.g. --warning-mode=all</string>
+    <string name="buildrun_add_flag">Add flag</string>
+    <string name="buildrun_remove_flag">Remove %1$s</string>
+    <string name="buildrun_flags_exclusive">--info, --debug, --quiet and --warn exclude each other, as do --stacktrace and --full-stacktrace. Flags a call brings itself take precedence.</string>
 </resources>
