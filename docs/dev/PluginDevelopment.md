@@ -668,6 +668,28 @@ Sideload (Einstellungen → Plugins → „+“, aktivieren). Dann in einem Git-
     * **Programm ausführen:** `buildShellCommand(script, workingDirectory)` liefert ein `ShellLaunchSpec` (Befehl + Umgebung mit `PREFIX`, `HOME`, `PATH`); `spec.processEnv` muss auf `ProcessBuilder(...).environment()` angewendet werden. Berechtigung `shell`.
     * **Langlaufende Arbeit:** eigener `CoroutineScope(SupervisorJob() + Dispatchers.IO)`, in `onUnload()` mit `cancel()` beenden.
 
+### 9.7 Seit API 3: Protokoll, Andockstellen, Abhängigkeiten
+
+```kotlin
+override fun onLoad(context: PluginContext) {
+    val log = context.logger("main")            // keine Berechtigung nötig
+    log.info("geladen")
+    val handle = context.register(SomePoint, impl) // Berechtigung = SomePoint.permission
+    // handle.dispose() meldet früher ab; beim Deaktivieren/Entfernen meldet die App alles selbst ab.
+}
+```
+
+* **Protokoll:** `context.logger(tag)` mit `debug`/`info`/`warn`/`error(…, throwable)`. Die letzten 500 Zeilen je Plugin
+  zeigt Einstellungen → Plugins → **Protokoll**; zusätzlich landen sie mit dem Tag `plugin/<id>/<tag>` im App-Log.
+  Ein fehlgeschlagenes `onLoad` wird dort automatisch mit Stacktrace protokolliert.
+* **Andockstellen:** `context.register(point, value)` meldet einen Beitrag an einem `ExtensionPoint` an. Alles hängt am
+  gemeinsamen `ExtensionRegistry` der App (`core/domain/…/extension/registry`); Befehle, Menüs und Ereignis-Empfänger
+  laufen intern bereits darüber. Welche Andockstellen es für Plugins gibt, steht in `PluginExtensionPoints`.
+* **`dependsOn`:** Plugins werden in Abhängigkeitsreihenfolge geladen. Wird ein Plugin deaktiviert oder entfernt, entlädt
+  die App zuerst alle Plugins, die (auch indirekt) davon abhängen; beim Wiedereinschalten lädt sie sie nach. Zyklen und
+  Ketten mit einem nicht ladbaren Glied werden im Plugins-Bildschirm mit Grund angezeigt.
+* `apiVersion` 3 im Manifest, wenn das Plugin diese Funktionen nutzt (ältere Apps lehnen es dann mit Grund ab).
+
 ## 10. Beispiel 6: Hybrid – LSP-Plugin mit Download
 
 **Ziel:** Ein Language Server, der nicht als Paket vorliegt, sondern heruntergeladen werden muss. Das Manifest startet den Server (deklarativ), der Code stellt nur sicher, dass er da ist.

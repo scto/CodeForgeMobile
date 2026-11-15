@@ -26,6 +26,8 @@ public abstract interface class com/codeforge/libs/plugin_api/PluginCommandHandl
 public abstract interface class com/codeforge/libs/plugin_api/PluginContext {
 	public abstract fun getHostServices ()Lcom/codeforge/libs/plugin_api/PluginHostServices;
 	public abstract fun getPluginId ()Ljava/lang/String;
+	public abstract fun logger (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginLogger;
+	public abstract fun register (Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;Ljava/lang/Object;)Lcom/codeforge/core/domain/extension/registry/Disposable;
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/PluginEvent {
@@ -107,6 +109,18 @@ public abstract interface class com/codeforge/libs/plugin_api/PluginHostServices
 
 public final class com/codeforge/libs/plugin_api/PluginHostServices$DefaultImpls {
 	public static synthetic fun buildShellCommand$default (Lcom/codeforge/libs/plugin_api/PluginHostServices;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/codeforge/libs/terminal_engine/ShellLaunchSpec;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/PluginLogger {
+	public abstract fun debug (Ljava/lang/String;)V
+	public abstract fun error (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public abstract fun info (Ljava/lang/String;)V
+	public abstract fun warn (Ljava/lang/String;Ljava/lang/Throwable;)V
+}
+
+public final class com/codeforge/libs/plugin_api/PluginLogger$DefaultImpls {
+	public static synthetic fun error$default (Lcom/codeforge/libs/plugin_api/PluginLogger;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static synthetic fun warn$default (Lcom/codeforge/libs/plugin_api/PluginLogger;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
 }
 
 public final class com/codeforge/libs/plugin_api/PluginMenuTarget : java/lang/Enum {

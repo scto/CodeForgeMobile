@@ -20,6 +20,13 @@ import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import com.codeforge.libs.terminal_engine.ShellLaunchSpec
 import com.codeforge.libs.terminal_engine.TermuxEnvironment
+import com.codeforge.core.domain.extension.PluginLogLevel
+import com.codeforge.core.domain.extension.PluginLogLine
+import com.codeforge.core.domain.extension.PluginLogRepository
+import com.codeforge.core.domain.extension.registry.Disposable
+import com.codeforge.core.domain.extension.registry.ExtensionPoint
+import com.codeforge.core.domain.extension.registry.ExtensionRegistry
+import com.codeforge.libs.plugin_api.PluginLogger
 import dalvik.system.DexClassLoader
 import java.io.File
 
@@ -37,7 +44,9 @@ import java.io.File
 internal class PluginRuntime(
     private val hostContext: Context,
     private val lspClientRepository: LspClientRepository,
-    private val hooks: PluginHooks
+    private val hooks: PluginHooks,
+    private val registry: ExtensionRegistry,
+    private val logs: PluginLogRepository
 ) {
 
     private class LoadedPlugin(val instance: CodeForgePlugin, val context: PluginContext)
@@ -67,9 +76,11 @@ internal class PluginRuntime(
         override fun jdkInstallPath(version: String): String = TermuxEnvironment.jdkHome(version)
     }
 
-    private fun contextFor(plugin: InstalledPlugin): PluginContext = SimplePluginContext(
-        plugin.id,
-        PermissionedHostServices(plugin.id, plugin.apiVersion, plugin.permissions, baseServices, hooks)
+    private fun contextFor(plugin: InstalledPlugin): PluginContext = HostPluginContext(
+        plugin,
+        PermissionedHostServices(plugin.id, plugin.apiVersion, plugin.permissions, baseServices, hooks),
+        registry,
+        logs
     )
 
     /**
@@ -120,6 +131,7 @@ internal class PluginRuntime(
             instance.onLoad(context)
         } catch (t: Throwable) {
             hooks.unregisterAll(plugin.id) // Teilregistrierungen eines fehlgeschlagenen onLoad entfernen
+            context.logger("host").error("onLoad fehlgeschlagen", t)
             throw t
         }
         loadedPlugins[plugin.id] = LoadedPlugin(instance, context)
@@ -150,10 +162,49 @@ internal class PluginRuntime(
         loaded.instance.onUnload()
     }
 
-    private class SimplePluginContext(
-        override val pluginId: String,
-        override val hostServices: PluginHostServices
-    ) : PluginContext
+    /** Kontext eines geladenen Plugins: Dienste, Protokoll, Andockstellen (mit Berechtigungsprüfung). */
+    private class HostPluginContext(
+        private val plugin: InstalledPlugin,
+        override val hostServices: PluginHostServices,
+        private val registry: ExtensionRegistry,
+        private val logs: PluginLogRepository
+    ) : PluginContext {
+        override val pluginId: String get() = plugin.id
+
+        override fun logger(tag: String): PluginLogger = HostPluginLogger(plugin.id, tag.ifBlank { "main" }, logs)
+
+        override fun <T : Any> register(point: ExtensionPoint<T>, value: T): Disposable {
+            point.permission?.let { permission ->
+                if (!PluginPermissionPolicy.isAllowed(plugin.apiVersion, plugin.permissions, permission)) {
+                    throw PluginPermissionException(plugin.id, permission)
+                }
+            }
+            return registry.register(point, value, plugin.id)
+        }
+    }
+
+    /** Schreibt Plugin-Protokollzeilen in [PluginLogRepository]. */
+    private class HostPluginLogger(
+        private val pluginId: String,
+        private val tag: String,
+        private val logs: PluginLogRepository
+    ) : PluginLogger {
+        private fun log(level: PluginLogLevel, message: String, throwable: Throwable?) = logs.append(
+            pluginId,
+            PluginLogLine(
+                timeMillis = System.currentTimeMillis(),
+                level = level,
+                tag = tag,
+                message = message.take(PluginLogStore.MAX_MESSAGE),
+                stackTrace = throwable?.stackTraceToString()?.take(PluginLogStore.MAX_MESSAGE)
+            )
+        )
+
+        override fun debug(message: String) = log(PluginLogLevel.DEBUG, message, null)
+        override fun info(message: String) = log(PluginLogLevel.INFO, message, null)
+        override fun warn(message: String, throwable: Throwable?) = log(PluginLogLevel.WARN, message, throwable)
+        override fun error(message: String, throwable: Throwable?) = log(PluginLogLevel.ERROR, message, throwable)
+    }
 
     /** Der ungeprüfte Teil der Host-Dienste (Shell/LSP/Pfade). */
     private interface BaseHostServices {

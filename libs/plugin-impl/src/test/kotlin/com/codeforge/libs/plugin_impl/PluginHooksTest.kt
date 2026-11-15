@@ -19,7 +19,7 @@ class PluginHooksTest {
 
     @Test
     fun `Befehl registrieren und ausfuehren, Fehler werden als Failure gemeldet`() = runBlocking {
-        val hooks = PluginHooks()
+        val hooks = PluginHooks(com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl())
         var got: String? = "unset"
         hooks.registerCommand("p", "hello", "Hallo") { args -> got = args.activeFilePath }
         hooks.registerCommand("p", "boom", "Boom") { error("kaputt") }
@@ -35,7 +35,7 @@ class PluginHooksTest {
 
     @Test
     fun `Menueeintrag braucht vorhandenen Befehl`() {
-        val hooks = PluginHooks()
+        val hooks = PluginHooks(com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl())
         hooks.registerCommand("p", "c", "C") { }
         hooks.registerMenuItem("p", "m", "Mein Eintrag", PluginMenuTarget.FILE_CONTEXT_MENU, "c")
         assertEquals(listOf("m"), hooks.menuEntries.value.map { it.id })
@@ -45,7 +45,7 @@ class PluginHooksTest {
 
     @Test
     fun `unregisterAll entfernt Befehle, Menues und Listener`() = runBlocking {
-        val hooks = PluginHooks()
+        val hooks = PluginHooks(com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl())
         hooks.registerCommand("p", "c", "C") { }
         hooks.registerMenuItem("p", "m", "M", PluginMenuTarget.EDITOR_MENU, "c")
         hooks.addListener("p", 2, setOf(PluginPermissions.FILE_EVENTS)) { }
@@ -56,7 +56,7 @@ class PluginHooksTest {
 
     @Test
     fun `Ereignisse nur mit passender Berechtigung`() {
-        val hooks = PluginHooks()
+        val hooks = PluginHooks(com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl())
         val fileEvents = CopyOnWriteArrayList<PluginEvent>()
         val gitEvents = CopyOnWriteArrayList<PluginEvent>()
         val latch = CountDownLatch(2)
@@ -72,7 +72,7 @@ class PluginHooksTest {
 
     @Test
     fun `werfender Listener stoert andere nicht`() {
-        val hooks = PluginHooks()
+        val hooks = PluginHooks(com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl())
         val latch = CountDownLatch(1)
         hooks.addListener("bad", 2, setOf(PluginPermissions.FILE_EVENTS)) { error("x") }
         hooks.addListener("good", 2, setOf(PluginPermissions.FILE_EVENTS)) { latch.countDown() }
@@ -82,7 +82,7 @@ class PluginHooksTest {
 
     @Test
     fun `Nachrichten werden gekuerzt, Grenzen fuer Befehle gelten`() = runBlocking {
-        val hooks = PluginHooks()
+        val hooks = PluginHooks(com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl())
         val received = CopyOnWriteArrayList<String>()
         val job = launch(kotlinx.coroutines.Dispatchers.Unconfined) {
             hooks.messages.collect { received.add(it) }
@@ -96,7 +96,7 @@ class PluginHooksTest {
 
     @Test
     fun `Befehl-Timeout nach 60s bricht ab und liefert Fehler`() = kotlinx.coroutines.test.runTest {
-        val hooks = PluginHooks()
+        val hooks = PluginHooks(com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl())
         hooks.registerCommand("p", "slow", "Langsam") {
             kotlinx.coroutines.delay(70_000)
         }

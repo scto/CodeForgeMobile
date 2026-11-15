@@ -11,6 +11,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugin-API 3, Teil 1)
+- Gemeinsames `ExtensionRegistry` (`core:domain`): typisierte `ExtensionPoint<T>`, jeder Beitrag gehört einem Plugin
+  (oder der App), einzeln per `Disposable` oder gesammelt per `unregisterAll` abmeldbar, beobachtbar als `StateFlow`.
+  Befehle, Menüeinträge und Ereignis-Empfänger der Plugins laufen jetzt darüber.
+- Plugin-API 3: `context.logger(tag)` (Protokoll je Plugin, im Plugins-Bildschirm unter „Protokoll“, zusätzlich im
+  App-Log als `plugin/<id>/<tag>`) und `context.register(point, value)` mit Berechtigungsprüfung je Andockstelle.
+- `dependsOn`: Laden in Abhängigkeitsreihenfolge; Deaktivieren/Entfernen entlädt Abhängige zuerst, Einschalten lädt
+  wartende nach. Neue Gründe im Plugins-Bildschirm: „benötigtes Plugin kann selbst nicht geladen werden“, „Zyklus“.
+
 ### Behoben
 - Store: Karten installierter Plugins waren übermäßig hoch, „Entfernen“ brach um. Die drei Knöpfe standen in einer
   festen Zeile; der letzte bekam keine Breite und sein Text brach zeichenweise um. Jetzt `FlowRow` (Umbruch in die

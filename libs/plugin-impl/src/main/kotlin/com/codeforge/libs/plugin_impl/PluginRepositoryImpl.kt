@@ -10,6 +10,10 @@ import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.DeclarativeOnly
 import com.codeforge.core.domain.extension.PluginCompatibility
 import com.codeforge.core.domain.extension.PluginIssue
+import com.codeforge.core.domain.extension.PluginLoadOrder
+import com.codeforge.core.domain.extension.PluginLogRepository
+import com.codeforge.core.domain.extension.PluginNode
+import com.codeforge.core.domain.extension.registry.ExtensionRegistry
 import com.codeforge.core.domain.extension.PluginManifestParser
 import com.codeforge.core.domain.extension.kinds
 import com.codeforge.core.domain.model.InstalledPlugin
@@ -50,7 +54,9 @@ import javax.inject.Singleton
 class PluginRepositoryImpl @Inject constructor(
     @ApplicationContext context: Context,
     lspClientRepository: LspClientRepository,
-    hooks: PluginHooks
+    hooks: PluginHooks,
+    extensionRegistry: ExtensionRegistry,
+    logs: PluginLogRepository
 ) : PluginRepository, ContributionRepository {
 
     override val hostVersion: String = runCatching {
@@ -59,7 +65,7 @@ class PluginRepositoryImpl @Inject constructor(
 
     private val pluginsDir = File(context.filesDir, "plugins")
     private val registry = PluginRegistry(File(pluginsDir, "registry.json"))
-    private val runtime = PluginRuntime(context, lspClientRepository, hooks)
+    private val runtime = PluginRuntime(context, lspClientRepository, hooks, extensionRegistry, logs)
 
     private val _installedPlugins = MutableStateFlow<List<InstalledPlugin>>(emptyList())
     override val installedPlugins: Flow<List<InstalledPlugin>> = _installedPlugins.asStateFlow()
@@ -69,24 +75,6 @@ class PluginRepositoryImpl @Inject constructor(
 
     private val _contributions = MutableStateFlow(ActiveContributions.EMPTY)
     override val contributions: StateFlow<ActiveContributions> = _contributions.asStateFlow()
-
-    /** Liest die Manifeste aller aktivierten Plugins neu ein (deklarativ, unabhängig davon, ob Plugin-Code lädt). */
-    private fun refreshContributions() {
-        val entries = _installedPlugins.value.filter { it.isEnabled && issuesOf(it).isEmpty() }.mapNotNull { plugin ->
-            val dir = File(pluginsDir, plugin.id)
-            val manifestFile = File(dir, "plugin.json").takeIf { it.isFile } ?: return@mapNotNull null
-            PluginManifestParser.parse(manifestFile.readText()).getOrNull()?.let { it to dir.absolutePath }
-        }
-        _contributions.value = ActiveContributions.of(entries)
-    }
-
-    /** Probleme eines installierten Plugins gegen die aktuelle App-Version und den Bestand. */
-    private fun issuesOf(plugin: InstalledPlugin): List<PluginIssue> = PluginCompatibility.check(
-        minHostVersion = plugin.minHostVersion,
-        dependsOn = plugin.dependsOn,
-        hostVersion = hostVersion.ifBlank { Int.MAX_VALUE.toString() },
-        installed = _installedPlugins.value.associate { it.id to it.isEnabled },
-    )
 
     init {
         pluginsDir.mkdirs()
@@ -99,8 +87,60 @@ class PluginRepositoryImpl @Inject constructor(
         // classes.dex nach manueller Manipulation) darf App-Start/andere Plugins nicht
         // blockieren — Fehler werden daher bewusst verschluckt, sichtbar über
         // loadedPluginIds (enthält den Eintrag dann schlicht nicht).
-        plugins.filter { it.isEnabled }.forEach { plugin -> attemptLoad(plugin) }
+        loadOrder(plugins.filter { it.isEnabled }).forEach { plugin -> attemptLoad(plugin) }
     }
+
+    /** Liest die Manifeste aller aktivierten Plugins neu ein (deklarativ, unabhängig davon, ob Plugin-Code lädt). */
+    private fun refreshContributions() {
+        val entries = _installedPlugins.value.filter { it.isEnabled && issuesOf(it).isEmpty() }.mapNotNull { plugin ->
+            val dir = File(pluginsDir, plugin.id)
+            val manifestFile = File(dir, "plugin.json").takeIf { it.isFile } ?: return@mapNotNull null
+            PluginManifestParser.parse(manifestFile.readText()).getOrNull()?.let { it to dir.absolutePath }
+        }
+        _contributions.value = ActiveContributions.of(entries)
+    }
+
+    /** Probleme eines installierten Plugins gegen die App-Version und den Bestand (auch über Abhängigkeitsketten). */
+    private fun issuesOf(plugin: InstalledPlugin): List<PluginIssue> = allIssues()[plugin.id].orEmpty()
+
+    private fun allIssues(): Map<String, List<PluginIssue>> = PluginCompatibility.checkAll(
+        _installedPlugins.value.associate { it.id to PluginNode(it.isEnabled, it.minHostVersion, it.dependsOn) },
+        hostVersion.ifBlank { Int.MAX_VALUE.toString() }
+    )
+
+    private fun loadNow(plugin: InstalledPlugin) {
+        issuesOf(plugin).firstOrNull()?.let { error(it.describe()) }
+        if (plugin.isDeclarativeOnly) return
+        runtime.load(plugin, File(pluginsDir, plugin.id)).getOrThrow()
+        _loadedPluginIds.update { it + plugin.id }
+    }
+
+    // Abhängige zuerst entladen: Sie laufen nicht gegen ein fehlendes Plugin weiter.
+    private fun unloadWithDependents(pluginId: String) = unloadAll(dependentsOf(pluginId) + pluginId)
+
+    // Aktivierte Plugins in Ladereihenfolge (Abhängigkeiten zuerst).
+    private fun loadOrder(plugins: List<InstalledPlugin>): List<InstalledPlugin> {
+        val byId = plugins.associateBy { it.id }
+        return PluginLoadOrder.sort(plugins.associate { it.id to it.dependsOn }).order.mapNotNull { byId[it] }
+    }
+
+    private fun dependentsOf(pluginId: String): Set<String> =
+        PluginLoadOrder.dependentsClosure(pluginId, _installedPlugins.value.associate { it.id to it.dependsOn })
+
+    // Entlädt [ids] in umgekehrter Ladereihenfolge (Abhängige vor ihren Abhängigkeiten).
+    private fun unloadAll(ids: Set<String>) {
+        loadOrder(_installedPlugins.value.filter { it.id in ids }).asReversed().forEach { plugin ->
+            runtime.unload(plugin.id)
+            _loadedPluginIds.update { it - plugin.id }
+        }
+    }
+
+    // Lädt alle aktivierten, problemfreien, noch nicht geladenen Plugins in Ladereihenfolge.
+    private fun loadPending() {
+        loadOrder(_installedPlugins.value.filter { it.isEnabled && it.id !in _loadedPluginIds.value })
+            .forEach { attemptLoad(it) }
+    }
+
 
     private fun attemptLoad(plugin: InstalledPlugin) {
         if (issuesOf(plugin).isNotEmpty()) return // inkompatibel: bleibt installiert, wird aber nicht geladen
@@ -219,20 +259,12 @@ class PluginRepositoryImpl @Inject constructor(
             val plugin = _installedPlugins.value.find { it.id == pluginId }
                 ?: error(Res.string(R.string.plugin_plugin_nicht_gefunden, pluginId))
 
-            if (enabled) {
-                issuesOf(plugin).firstOrNull()?.let { error(it.describe()) }
-                if (!plugin.isDeclarativeOnly) {
-                    runtime.load(plugin, File(pluginsDir, pluginId)).getOrThrow()
-                    _loadedPluginIds.update { it + pluginId }
-                }
-            } else {
-                runtime.unload(pluginId)
-                _loadedPluginIds.update { it - pluginId }
-            }
+            if (enabled) loadNow(plugin) else unloadWithDependents(pluginId)
 
             val updated = _installedPlugins.value.map { if (it.id == pluginId) it.copy(isEnabled = enabled) else it }
             registry.saveAll(updated)
             _installedPlugins.value = updated
+            if (enabled) loadPending() // Abhängige, die auf dieses Plugin gewartet haben
             refreshContributions()
         }
     }
@@ -249,6 +281,7 @@ class PluginRepositoryImpl @Inject constructor(
                 runtime.load(plugin, File(pluginsDir, pluginId))
             }
 
+            unloadAll(dependentsOf(pluginId))
             runtime.uninstall(pluginId)
             _loadedPluginIds.update { it - pluginId }
             File(pluginsDir, pluginId).deleteRecursively()
@@ -263,6 +296,8 @@ class PluginRepositoryImpl @Inject constructor(
         is PluginIssue.HostTooOld -> "Benötigt CodeForge $required oder neuer (installiert: $actual)"
         is PluginIssue.DependencyMissing -> "Benötigtes Plugin fehlt: $pluginId"
         is PluginIssue.DependencyDisabled -> "Benötigtes Plugin ist deaktiviert: $pluginId"
+        is PluginIssue.DependencyUnavailable -> "Benötigtes Plugin kann nicht geladen werden: $pluginId"
+        PluginIssue.DependencyCycle -> "Abhängigkeitszyklus in dependsOn"
     }
 
     private fun countZipEntries(file: File): Int {

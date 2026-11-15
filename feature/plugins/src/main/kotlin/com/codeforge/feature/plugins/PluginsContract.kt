@@ -6,6 +6,7 @@ package com.codeforge.feature.plugins
 
 import androidx.compose.runtime.Immutable
 import com.codeforge.core.domain.extension.PluginIssue
+import com.codeforge.core.domain.extension.PluginLogLine
 import com.codeforge.core.domain.extension.RequirementContribution
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.ui.LspInfoModel
@@ -24,8 +25,14 @@ data class PluginsUiState(
     val missingRequirements: Map<String, List<RequirementContribution>> = emptyMap(),
     val requirementDialog: RequirementDialog? = null,
     /** Offener Info-Dialog eines Language-Server-Plugins (Zustand/Laufzeit/Allgemein). */
-    val infoDialog: PluginInfoDialog? = null
+    val infoDialog: PluginInfoDialog? = null,
+    /** Offenes Protokoll eines Plugins. */
+    val logDialog: PluginLogDialog? = null
 )
+
+/** Protokoll-Dialog eines Plugins (letzte Zeilen, älteste zuerst). */
+@Immutable
+data class PluginLogDialog(val pluginId: String, val title: String, val lines: List<PluginLogLine> = emptyList())
 
 /** Info-Dialog zu einem Plugin. */
 @Immutable
@@ -65,6 +72,12 @@ sealed interface PluginsUiEvent {
     data class InfoClicked(val pluginId: String) : PluginsUiEvent
     /** Info schließen. */
     data object InfoDismissed : PluginsUiEvent
+    /** Protokoll eines Plugins öffnen. */
+    data class LogClicked(val pluginId: String) : PluginsUiEvent
+    /** Protokoll schließen. */
+    data object LogDismissed : PluginsUiEvent
+    /** Protokoll des offenen Plugins leeren. */
+    data object LogCleared : PluginsUiEvent
 }
 
 /** Einmalige Effekte. */

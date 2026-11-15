@@ -4,6 +4,8 @@
  */
 package com.codeforge.libs.plugin_api
 
+import com.codeforge.core.domain.extension.registry.Disposable
+import com.codeforge.core.domain.extension.registry.ExtensionPoint
 import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.libs.terminal_engine.ShellLaunchSpec
 
@@ -44,6 +46,33 @@ interface PluginContext {
     val pluginId: String
     /** Die vom Host bereitgestellten, berechtigungsgeprüften Dienste (siehe [PluginHostServices]). */
     val hostServices: PluginHostServices
+
+    /**
+     * Seit API 3: Protokoll dieses Plugins. Zeilen erscheinen unter Einstellungen → Plugins → „Protokoll“ und im
+     * App-Log mit dem Tag `plugin/<id>/<tag>`. Keine Berechtigung nötig.
+     */
+    fun logger(tag: String): PluginLogger
+
+    /**
+     * Seit API 3: meldet [value] an der Andockstelle [point] an (siehe [PluginExtensionPoints]). Braucht die
+     * Berechtigung [ExtensionPoint.permission]. Alles Angemeldete wird beim Deaktivieren/Entfernen automatisch
+     * abgemeldet; das zurückgegebene [Disposable] meldet früher ab.
+     *
+     * @throws PluginPermissionException wenn die Berechtigung fehlt.
+     */
+    fun <T : Any> register(point: ExtensionPoint<T>, value: T): Disposable
+}
+
+/** Seit API 3: Protokoll eines Plugins (siehe [PluginContext.logger]). */
+interface PluginLogger {
+    /** Detailmeldung. */
+    fun debug(message: String)
+    /** Information. */
+    fun info(message: String)
+    /** Warnung, optional mit Ausnahme. */
+    fun warn(message: String, throwable: Throwable? = null)
+    /** Fehler, optional mit Ausnahme. */
+    fun error(message: String, throwable: Throwable? = null)
 }
 
 /**

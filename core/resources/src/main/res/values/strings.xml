@@ -2691,4 +2691,10 @@
     <string name="filetree_rename_only">Rename only</string>
     <string name="filetree_rename_planning">Searching references …</string>
     <string name="filetree_rename_adjusted">Renamed – %1$d changes in %2$d files updated</string>
+    <string name="plugins_issue_dependency_unavailable">Not loaded: required plugin \'%1$s\' cannot be loaded itself.</string>
+    <string name="plugins_issue_dependency_cycle">Not loaded: dependency cycle in \'dependsOn\'.</string>
+    <string name="plugins_log">Log</string>
+    <string name="plugins_log_title">Log: %1$s</string>
+    <string name="plugins_log_empty">No entries yet. Plugins write here with context.logger(…).</string>
+    <string name="plugins_log_clear">Clear</string>
 </resources>

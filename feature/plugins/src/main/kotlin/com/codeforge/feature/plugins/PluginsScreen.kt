@@ -117,6 +117,7 @@ private fun PluginsScreen(
     onImportClicked: () -> Unit
 ) {
     uiState.requirementDialog?.let { RequirementDialogView(it, onEvent) }
+    uiState.logDialog?.let { PluginLogDialogView(it, onEvent) }
     uiState.infoDialog?.let { info ->
         com.codeforge.core.ui.LspInfoDialog(
             model = info.model,
@@ -258,6 +259,10 @@ private fun PluginRow(
                             stringRes(R.string.plugins_issue_dependency_missing, issue.pluginId)
                         is com.codeforge.core.domain.extension.PluginIssue.DependencyDisabled ->
                             stringRes(R.string.plugins_issue_dependency_disabled, issue.pluginId)
+                        is com.codeforge.core.domain.extension.PluginIssue.DependencyUnavailable ->
+                            stringRes(R.string.plugins_issue_dependency_unavailable, issue.pluginId)
+                        com.codeforge.core.domain.extension.PluginIssue.DependencyCycle ->
+                            stringRes(R.string.plugins_issue_dependency_cycle)
                     },
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.error,
@@ -293,6 +298,11 @@ private fun PluginRow(
                 if (missing.isNotEmpty()) {
                     TextButton(onClick = { onEvent(PluginsUiEvent.RequirementsClicked(plugin.id)) }) {
                         Text(stringRes(R.string.plugins_voraussetzungen_installieren))
+                    }
+                }
+                if (!plugin.isDeclarativeOnly) {
+                    TextButton(onClick = { onEvent(PluginsUiEvent.LogClicked(plugin.id)) }) {
+                        Text(stringRes(R.string.plugins_log))
                     }
                 }
                 TextButton(onClick = { onEvent(PluginsUiEvent.Uninstall(plugin.id)) }) {
@@ -376,6 +386,7 @@ fun InstalledPluginsPanel(
         }
     }
     uiState.requirementDialog?.let { RequirementDialogView(it, viewModel::onEvent) }
+    uiState.logDialog?.let { PluginLogDialogView(it, viewModel::onEvent) }
     uiState.infoDialog?.let { info ->
         com.codeforge.core.ui.LspInfoDialog(
             model = info.model,

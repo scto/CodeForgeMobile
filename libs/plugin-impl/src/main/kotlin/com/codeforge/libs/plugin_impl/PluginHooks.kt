@@ -11,6 +11,9 @@ import com.codeforge.core.domain.extension.PluginMenuEntry
 import com.codeforge.core.domain.extension.PluginMenuTarget
 import com.codeforge.core.domain.extension.PluginPermissionPolicy
 import com.codeforge.core.domain.extension.PluginUiRepository
+import com.codeforge.core.domain.extension.registry.Disposable
+import com.codeforge.core.domain.extension.registry.ExtensionPoint
+import com.codeforge.core.domain.extension.registry.ExtensionRegistry
 import com.codeforge.libs.plugin_api.CommandArgs
 import com.codeforge.libs.plugin_api.PluginCommandHandler
 import com.codeforge.libs.plugin_api.PluginEvent
@@ -36,21 +39,19 @@ import javax.inject.Singleton
  * und nie an die App weitergereicht; ein Befehl hat ein Zeitlimit.
  */
 @Singleton
-class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
+class PluginHooks @Inject constructor(
+    private val registry: ExtensionRegistry
+) : PluginUiRepository, PluginEventSink {
 
-    private class Cmd(val title: String, val handler: PluginCommandHandler)
-    private class Listener(
-        val pluginId: String,
-        val apiVersion: Int,
-        val granted: Set<String>,
-        val listener: PluginEventListener
-    )
+    internal class Cmd(val id: String, val title: String, val handler: PluginCommandHandler)
+    internal class Listener(val apiVersion: Int, val granted: Set<String>, val listener: PluginEventListener)
 
     private val lock = Any()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val handlers = LinkedHashMap<String, LinkedHashMap<String, Cmd>>()
-    private val menus = ArrayList<PluginMenuEntry>()
-    private val listeners = ArrayList<Listener>()
+
+    // Befehle, Menüs und Listener liegen im gemeinsamen ExtensionRegistry; hier nur die Handles zum Ersetzen.
+    private val commandHandles = HashMap<Pair<String, String>, Disposable>()
+    private val menuHandles = HashMap<Pair<String, String>, Disposable>()
 
     private val _commands = MutableStateFlow<List<PluginCommandInfo>>(emptyList())
     override val commands: StateFlow<List<PluginCommandInfo>> = _commands.asStateFlow()
@@ -62,9 +63,11 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
     override val messages: SharedFlow<String> = _messages.asSharedFlow()
 
     private fun republish() {
-        _commands.value = handlers.flatMap { (pid, m) -> m.map { (id, c) -> PluginCommandInfo(pid, id, c.title) } }
-        _menuEntries.value = menus.toList()
+        _commands.value = registry.contributions(COMMAND_POINT).map { PluginCommandInfo(it.pluginId, it.value.id, it.value.title) }
+        _menuEntries.value = registry.extensions(MENU_POINT)
     }
+
+    private fun commandsOf(pluginId: String) = registry.contributions(COMMAND_POINT).filter { it.pluginId == pluginId }
 
     /**
      * Registriert einen Befehl eines Plugins; ein vorhandener Befehl mit gleicher [id] wird ersetzt.
@@ -79,9 +82,12 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
         require(id.isNotBlank() && id.length <= MAX_ID) { "Ungültige Befehls-ID" }
         require(title.isNotBlank() && title.length <= MAX_TITLE) { "Ungültiger Befehlstitel" }
         synchronized(lock) {
-            val own = handlers.getOrPut(pluginId) { LinkedHashMap() }
-            require(own.size < MAX_COMMANDS || id in own) { "Zu viele Befehle (max. $MAX_COMMANDS je Plugin)" }
-            own[id] = Cmd(title, handler)
+            val key = pluginId to id
+            require(commandsOf(pluginId).size < MAX_COMMANDS || key in commandHandles) {
+                "Zu viele Befehle (max. $MAX_COMMANDS je Plugin)"
+            }
+            commandHandles.remove(key)?.dispose()
+            commandHandles[key] = registry.register(COMMAND_POINT, Cmd(id, title, handler), pluginId)
             republish()
         }
     }
@@ -99,10 +105,11 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
         require(id.isNotBlank() && id.length <= MAX_ID) { "Ungültige Menü-ID" }
         require(title.isNotBlank() && title.length <= MAX_TITLE) { "Ungültiger Menütitel" }
         synchronized(lock) {
-            require(handlers[pluginId]?.containsKey(commandId) == true) { "Unbekannter Befehl: $commandId" }
-            menus.removeAll { it.pluginId == pluginId && it.id == id }
-            require(menus.count { it.pluginId == pluginId } < MAX_COMMANDS) { "Zu viele Menüeinträge" }
-            menus.add(PluginMenuEntry(pluginId, id, title, target, commandId))
+            require(commandsOf(pluginId).any { it.value.id == commandId }) { "Unbekannter Befehl: $commandId" }
+            val key = pluginId to id
+            menuHandles.remove(key)?.dispose()
+            require(registry.extensions(MENU_POINT).count { it.pluginId == pluginId } < MAX_COMMANDS) { "Zu viele Menüeinträge" }
+            menuHandles[key] = registry.register(MENU_POINT, PluginMenuEntry(pluginId, id, title, target, commandId), pluginId)
             republish()
         }
     }
@@ -116,7 +123,7 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
      * @param listener Empfänger.
      */
     fun addListener(pluginId: String, apiVersion: Int, granted: Set<String>, listener: PluginEventListener) {
-        synchronized(lock) { listeners.add(Listener(pluginId, apiVersion, granted, listener)) }
+        registry.register(LISTENER_POINT, Listener(apiVersion, granted, listener), pluginId)
     }
 
     /**
@@ -131,29 +138,28 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
     /** Entfernt alles, was [pluginId] registriert hat (beim Deaktivieren/Deinstallieren). */
     fun unregisterAll(pluginId: String) {
         synchronized(lock) {
-            handlers.remove(pluginId)
-            menus.removeAll { it.pluginId == pluginId }
-            listeners.removeAll { it.pluginId == pluginId }
+            registry.unregisterAll(pluginId)
+            commandHandles.keys.removeAll { it.first == pluginId }
+            menuHandles.keys.removeAll { it.first == pluginId }
             republish()
         }
     }
 
     override fun publish(event: HostEvent) {
-        val targets = synchronized(lock) {
-            listeners.filter { PluginPermissionPolicy.isAllowed(it.apiVersion, it.granted, event.permission) }
-        }
+        val targets = registry.contributions(LISTENER_POINT)
+            .filter { PluginPermissionPolicy.isAllowed(it.value.apiVersion, it.value.granted, event.permission) }
         if (targets.isEmpty()) return
         val sdkEvent = event.toSdk()
         for (t in targets) {
             scope.launch {
-                runCatching { t.listener.onEvent(sdkEvent) }
+                runCatching { t.value.listener.onEvent(sdkEvent) }
                     .onFailure { e -> runCatching { android.util.Log.w("PluginHooks", "Listener von ${t.pluginId} fehlgeschlagen", e) } }
             }
         }
     }
 
     override suspend fun runCommand(pluginId: String, commandId: String, activeFilePath: String?): Result<Unit> {
-        val cmd = synchronized(lock) { handlers[pluginId]?.get(commandId) }
+        val cmd = commandsOf(pluginId).firstOrNull { it.value.id == commandId }?.value
             ?: return Result.failure(IllegalArgumentException("Befehl nicht gefunden: $pluginId/$commandId"))
         return try {
             withTimeout(COMMAND_TIMEOUT_MS) { cmd.handler.run(CommandArgs(activeFilePath)) }
@@ -168,6 +174,15 @@ class PluginHooks @Inject constructor() : PluginUiRepository, PluginEventSink {
     }
 
     internal companion object {
+        /** Befehle der Plugins. */
+        val COMMAND_POINT = ExtensionPoint<Cmd>("plugin.command")
+
+        /** Menüeinträge der Plugins. */
+        val MENU_POINT = ExtensionPoint<PluginMenuEntry>("plugin.menu")
+
+        /** Ereignis-Empfänger der Plugins. */
+        val LISTENER_POINT = ExtensionPoint<Listener>("plugin.eventListener")
+
         const val MAX_ID = 100
         const val MAX_TITLE = 120
         const val MAX_COMMANDS = 100

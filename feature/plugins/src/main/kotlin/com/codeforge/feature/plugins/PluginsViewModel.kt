@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.PluginCompatibility
+import com.codeforge.core.domain.extension.PluginNode
 import com.codeforge.core.domain.extension.PluginToolRunner
 import com.codeforge.core.domain.extension.ToolRunEvent
 import com.codeforge.core.domain.model.PluginInstallEvent
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.codeforge.core.domain.extension.PluginLogRepository
 
 /** ViewModel der Plugin-Verwaltung. */
 @HiltViewModel
@@ -35,8 +37,11 @@ class PluginsViewModel @Inject constructor(
     private val pluginRepository: PluginRepository,
     private val contributionRepository: ContributionRepository? = null,
     private val toolRunner: PluginToolRunner? = null,
-    private val runtimeStats: com.codeforge.core.domain.model.LspRuntimeStatsProvider? = null
+    private val runtimeStats: com.codeforge.core.domain.model.LspRuntimeStatsProvider? = null,
+    private val pluginLogs: PluginLogRepository? = null
 ) : ViewModel() {
+
+    private var logJob: Job? = null
 
     private val _uiState = MutableStateFlow(PluginsUiState())
     /** UI-Zustand. */
@@ -57,15 +62,10 @@ class PluginsViewModel @Inject constructor(
             pluginRepository.loadedPluginIds
         ) { plugins, loadedIds -> plugins to loadedIds }
             .onEach { (plugins, loadedIds) ->
-                val enabledById = plugins.associate { p -> p.id to p.isEnabled }
-                val issues = plugins.associate { p ->
-                    p.id to PluginCompatibility.check(
-                        minHostVersion = p.minHostVersion,
-                        dependsOn = p.dependsOn,
-                        hostVersion = pluginRepository.hostVersion.ifBlank { Int.MAX_VALUE.toString() },
-                        installed = enabledById,
-                    )
-                }.filterValues { it.isNotEmpty() }
+                val issues = PluginCompatibility.checkAll(
+                    plugins.associate { p -> p.id to PluginNode(p.isEnabled, p.minHostVersion, p.dependsOn) },
+                    pluginRepository.hostVersion.ifBlank { Int.MAX_VALUE.toString() },
+                ).filterValues { it.isNotEmpty() }
                 _uiState.update { it.copy(plugins = plugins, loadedPluginIds = loadedIds, issues = issues, isLoading = false) }
             }
             .launchIn(viewModelScope)
@@ -84,6 +84,12 @@ class PluginsViewModel @Inject constructor(
             PluginsUiEvent.RequirementsConfirmed -> installRequirements()
             is PluginsUiEvent.InfoClicked -> openInfo(event.pluginId)
             PluginsUiEvent.InfoDismissed -> closeInfo()
+            is PluginsUiEvent.LogClicked -> openLog(event.pluginId)
+            PluginsUiEvent.LogDismissed -> {
+                logJob?.cancel()
+                _uiState.update { it.copy(logDialog = null) }
+            }
+            PluginsUiEvent.LogCleared -> _uiState.value.logDialog?.let { pluginLogs?.clear(it.pluginId) }
             PluginsUiEvent.RequirementsDismissed -> {
                 installJob?.cancel()
                 _uiState.update { it.copy(requirementDialog = null) }
@@ -176,5 +182,14 @@ class PluginsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun openLog(pluginId: String) {
+        val logs = pluginLogs ?: return
+        val title = _uiState.value.plugins.firstOrNull { it.id == pluginId }?.name ?: pluginId
+        logJob?.cancel()
+        logJob = logs.observe(pluginId)
+            .onEach { lines -> _uiState.update { it.copy(logDialog = PluginLogDialog(pluginId, title, lines)) } }
+            .launchIn(viewModelScope)
     }
 }

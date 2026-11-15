@@ -7,7 +7,7 @@ package com.codeforge.core.domain.extension
 /** Versionen des Manifest-/SDK-Vertrags. v1 = nur id/name/version/entryPointClass, v2 = + contributes/permissions. */
 object PluginApiVersion {
     /** Aktuelle Version des Plugin-API-Vertrags. */
-    const val CURRENT: Int = 2
+    const val CURRENT: Int = 3
 }
 
 /** Berechtigungen, die ein Code-Plugin im Manifest anfordern muss (rein deklarative Plugins brauchen keine). */

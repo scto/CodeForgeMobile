@@ -56,4 +56,18 @@ abstract class PluginApiModule {
     @Binds
     @Singleton
     abstract fun bindPluginEventSink(impl: PluginHooks): PluginEventSink
+
+    /** Bindet die Protokolle der Plugins. */
+    @Binds
+    @Singleton
+    abstract fun bindPluginLogRepository(impl: PluginLogStore): com.codeforge.core.domain.extension.PluginLogRepository
+
+    /** Stellt das gemeinsame Register aller Beiträge (App und Plugins) bereit. */
+    companion object {
+        /** Ein Register je App-Prozess. */
+        @dagger.Provides
+        @Singleton
+        fun provideExtensionRegistry(): com.codeforge.core.domain.extension.registry.ExtensionRegistry =
+            com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl()
+    }
 }

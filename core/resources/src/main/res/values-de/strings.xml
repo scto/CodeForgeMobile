@@ -2691,4 +2691,10 @@
     <string name="filetree_rename_only">Nur umbenennen</string>
     <string name="filetree_rename_planning">Verweise werden gesucht …</string>
     <string name="filetree_rename_adjusted">Umbenannt – %1$d Änderungen in %2$d Dateien angepasst</string>
+    <string name="plugins_issue_dependency_unavailable">Nicht geladen: Das benötigte Plugin „%1$s“ kann selbst nicht geladen werden.</string>
+    <string name="plugins_issue_dependency_cycle">Nicht geladen: Abhängigkeitszyklus in „dependsOn“.</string>
+    <string name="plugins_log">Protokoll</string>
+    <string name="plugins_log_title">Protokoll: %1$s</string>
+    <string name="plugins_log_empty">Noch keine Einträge. Plugins schreiben mit context.logger(…) hierher.</string>
+    <string name="plugins_log_clear">Leeren</string>
 </resources>

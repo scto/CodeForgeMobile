@@ -14,6 +14,12 @@ sealed interface PluginIssue {
 
     /** Ein Plugin, von dem dieses abhängt, ist installiert, aber deaktiviert. */
     data class DependencyDisabled(val pluginId: String) : PluginIssue
+
+    /** Ein Plugin, von dem dieses abhängt, kann selbst nicht geladen werden (z. B. weil dessen Abhängigkeit fehlt). */
+    data class DependencyUnavailable(val pluginId: String) : PluginIssue
+
+    /** Das Plugin steckt in einem Abhängigkeitszyklus (`dependsOn` im Kreis). */
+    data object DependencyCycle : PluginIssue
 }
 
 /** Prüft `minHostVersion` und `dependsOn` eines Plugins; rein, ohne Android-Abhängigkeit. */
@@ -57,4 +63,29 @@ object PluginCompatibility {
             }
         }
     }
+
+    /**
+     * Probleme aller Plugins inklusive Folgeproblemen: Ein Plugin ist nur nutzbar, wenn es selbst und jede seiner
+     * (transitiven) Abhängigkeiten nutzbar ist; Zyklen werden als [PluginIssue.DependencyCycle] gemeldet.
+     *
+     * @param plugins ID → (aktiviert, minHostVersion, dependsOn).
+     * @param hostVersion installierte App-Version.
+     */
+    fun checkAll(plugins: Map<String, PluginNode>, hostVersion: String): Map<String, List<PluginIssue>> {
+        val enabled = plugins.mapValues { it.value.enabled }
+        val direct = plugins.mapValues { (_, n) -> check(n.minHostVersion, n.dependsOn, hostVersion, enabled) }
+        val sorted = PluginLoadOrder.sort(plugins.mapValues { it.value.dependsOn })
+        val result = LinkedHashMap<String, List<PluginIssue>>()
+        sorted.cycles.forEach { result[it] = direct[it].orEmpty() + PluginIssue.DependencyCycle }
+        for (id in sorted.order) {
+            val unavailable = plugins.getValue(id).dependsOn.filter { dep ->
+                enabled[dep] == true && result[dep].orEmpty().isNotEmpty()
+            }
+            result[id] = direct[id].orEmpty() + unavailable.map { PluginIssue.DependencyUnavailable(it) }
+        }
+        return result
+    }
 }
+
+/** Angaben eines Plugins für [PluginCompatibility.checkAll]. */
+data class PluginNode(val enabled: Boolean, val minHostVersion: String, val dependsOn: List<String>)
