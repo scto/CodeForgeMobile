@@ -13,6 +13,22 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [3.0.7] - 2026-11-15
 
+### Hinzugefügt
+- build: tasks --all in der Task-Auswahl
+- editor: Ligaturen, Soft-Tab, Backspace-Optionen
+- editor: ICU-Wortgrenzen fuer Doppeltipp/langes Druecken, Lupen-Texte
+
+### Geändert
+- changelog: 3.0.7
+- changelog: 3.0.6 zusammengefasst
+
+### Behoben
+- hardcoded-strings: eindeutige Schlüssel, keine Platzhalter-/Pfad-Texte, bessere Präfixe
+- lsp: JVM-Optionen fuer kmp-lsp (kmp-jar-indexer via JDK_JAVA_OPTIONS)
+- composepreview: Compose/Kotlin in Release-Builds fuer die Vorschau erhalten
+
+## [3.0.7] - 2026-11-15
+
 ### Highlights
 - **Editor:** Wortauswahl per ICU, Schriftart-Ligaturen, Soft-Tab und neue Backspace-Optionen.
 - **Compose-Vorschau läuft wieder in Release-Builds** („Failed resolution of: Landroidx/compose/runtime/Composer;“).
