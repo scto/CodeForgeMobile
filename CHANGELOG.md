@@ -11,31 +11,44 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-### Behoben (Quick Fix „String-Ressource extrahieren“)
-- Keine doppelten Einträge mehr in `strings.xml` („Duplicate resources“): gleicher Text → ein Schlüssel für alle Fundstellen (auch ein schon vorhandener Eintrag), gleicher Schlüssel mit anderem Text → `_2`, `_3` …; gilt auch nach manuellem Umbenennen.
-- Prüfungen laufen auf dem sichtbaren Text ohne `${…}`/`$name`: reine Platzhalter-Texte wie `"${a} ${b} (${c})"`, Pfade (`"${dir}/.cfm/crash"`) und einzelne kleingeschriebene Wörter (`"crash"`) werden nicht mehr vorgeschlagen.
-- Argumente von `File(…)`, `getExternalFilesDir`, `getSharedPreferences`, `Intent`/`putExtra`, `Uri.parse`, `getSystemService`, SQL-Aufrufen, `getProperty`/`getenv` u. a. gelten als technisch.
-- Texte in Dateien ohne Compose-/View-UI (z. B. `Application`, Repositories) haben niedrige Zuverlässigkeit und sind nicht mehr vorausgewählt.
-- Schlüssel-Präfix aus ganzen Wörtern des Dateinamens (`CodeForgeApplication` → `code_forge_…` statt `codeforgeapplic_…`).
+## [3.0.7] - 2026-11-15
 
-### Behoben (kmp-lsp: JVM-Optionen)
-- kmp-lsp (Plugin 1.0.1) zeigt in Einstellungen → Sprachserver die JVM-Optionen. kmp-lsp selbst ist nativ; sie gelten für den Java-Helfer `kmp-jar-indexer.jar` (Symbole aus Bibliotheken), den kmp-lsp per `java -jar` startet – übergeben über `JDK_JAVA_OPTIONS`. Vorgabe: `-Xmx384m -XX:+UseSerialGC -XX:-UsePerfData`.
+### Highlights
+- **Editor:** Wortauswahl per ICU, Schriftart-Ligaturen, Soft-Tab und neue Backspace-Optionen.
+- **Compose-Vorschau läuft wieder in Release-Builds** („Failed resolution of: Landroidx/compose/runtime/Composer;“).
+- **„String-Ressource extrahieren“ repariert:** keine doppelten Schlüssel und keine Platzhalter-/Pfad-Texte mehr.
 
-### Behoben (Compose-Vorschau in Release-Builds)
-- „Failed resolution of: Landroidx/compose/runtime/Composer;“: R8 hatte Compose (und Kotlin-Stdlib/Coroutines/Lifecycle) im Release-Build umbenannt bzw. gekürzt; der Vorschau-Code des Nutzers linkt zur Laufzeit gegen genau diese Klassen der App. `feature/composepreview/consumer-rules.pro` behält jetzt `androidx.compose.{runtime,ui,foundation,animation,material3,material.ripple}`, die Standard-Symbole, `androidx.lifecycle`, `androidx.activity.compose`, `kotlin`, `kotlinx.coroutines` vollständig; erweiterte Symbole nur dem Namen nach (ungenutzte fehlen weiterhin). Die APK wird dadurch größer.
-- Vorschau-Fehler landen jetzt mit Stacktrace im App-Log (Tag `ComposePreview`). Dabei doppelte Hilt-Bindung von `CfmLogger` entfernt (`core:data` legte einen zweiten, ungesteuerten Datei-Logger an; maßgeblich ist `LoggingModule`/`CfmLogManager`).
+### Hinzugefügt
+- Editor: Schalter „ICU-Bibliothek für die Wortauswahl“ (Standard an) – Doppeltippen und langes Drücken bestimmen
+  Wortgrenzen über `android.icu.text.BreakIterator` (`props.useICULibToSelectWords`), korrekt auch bei CJK/Thai,
+  Zahlen und Emojis; ohne Zusatzbibliothek.
+- Editor: „Schriftart-Ligaturen“, „Soft-Tab benutzen“ (Leerzeichen statt `\t`, für TextMate, Tree-sitter und Klartext
+  über die Hülle `TabPolicyLanguage`), „Leere Zeilen mit Backspace löschen“, „Tab mit Backspace löschen“ – alle
+  standardmäßig an. Proto speichert invertiert (`icu_word_selection_disabled`, `font_ligatures_disabled`, `hard_tabs`,
+  `delete_empty_line_fast_disabled`, `backspace_deletes_tab_disabled`).
+- Build: `tasks --all` in der Task-Auswahl (Gruppe „Help“, auch vor dem ersten Sync); aktualisiert zugleich die Task-Liste.
 
-### Hinzugefügt (Build: `tasks --all`)
-- Task-Auswahl im Build-Bereich enthält `tasks --all` (Gruppe „Help“, auch vor dem ersten Sync). Startet man ihn dort, zeigt die Ausgabe alle Tasks samt Beschreibung und die Task-Liste wird zugleich aktualisiert (wie „Gradle-Sync“).
-- Test `testRunRequestBridgeTriggersTestsTabAndExecution` wartet auf den Tab-Wechsel statt fester 250 ms (war unter Last wackelig).
+### Geändert
+- Editor: Texte für Lupe, Zeilenumbruch, Sticky Scroll und „Zeilennummern anheften“ überarbeitet.
 
-### Hinzugefügt (Editor: Ligaturen, Soft-Tab, Backspace)
-- Editor-Einstellungen, alle standardmäßig an: „Schriftart-Ligaturen“ (`isLigatureEnabled`), „Soft-Tab benutzen“ (Leerzeichen statt `\t`; gilt für TextMate, Tree-sitter und Klartext über die neue Hülle `TabPolicyLanguage`, TextMate-Einrückung folgt Tab-Breite und Soft-Tab), „Leere Zeilen mit Backspace löschen“ (`props.deleteEmptyLineFast`), „Tab mit Backspace löschen“ (`props.deleteMultiSpaces` = Tab-Breite). Proto invertiert gespeichert (`font_ligatures_disabled`, `hard_tabs`, `delete_empty_line_fast_disabled`, `backspace_deletes_tab_disabled`).
-- Zeilenumbruch, Sticky Scroll und Zeilennummern anheften: Beschreibungen ergänzt bzw. angepasst (die Funktionen gab es schon).
-
-### Hinzugefügt (Editor: ICU-Wortauswahl)
-- Neuer Schalter „ICU-Bibliothek für die Wortauswahl“ (Editor-Einstellungen, Standard an): Doppeltippen und langes Drücken bestimmen die Wortgrenzen über ICU (`props.useICULibToSelectWords` von sora-editor, intern `android.icu.text.BreakIterator`) – korrekt auch bei CJK/Thai, Zahlen und Emojis. Ohne Zusatzbibliothek (ICU ist ab API 24 im System). Proto `icu_word_selection_disabled` (invertiert, gilt auch für bestehende Installationen).
-- Lupe: Texte angepasst („Lupe aktivieren – vergrößert den Text an der Cursorposition, während Sie Text im Editor auswählen“); die Funktion war schon vorhanden und ist bei neuen Installationen an.
+### Behoben
+- Compose-Vorschau in Release-Builds: `feature/composepreview/consumer-rules.pro` behält Compose (runtime, ui,
+  foundation, animation, material3, ripple), Standard-Symbole, `androidx.lifecycle`, `androidx.activity.compose`,
+  `kotlin` und `kotlinx.coroutines` vollständig; erweiterte Symbole nur dem Namen nach. Die APK wird dadurch größer.
+- Vorschau-Fehler landen mit Stacktrace im App-Log (Tag `ComposePreview`); doppelte Hilt-Bindung von `CfmLogger`
+  (`core:data`) entfernt.
+- kmp-lsp (Plugin 1.0.1): JVM-Optionen in Einstellungen → Sprachserver; sie gelten für den Java-Helfer
+  `kmp-jar-indexer.jar` (über `JDK_JAVA_OPTIONS`). Vorgabe `-Xmx384m -XX:+UseSerialGC -XX:-UsePerfData`.
+- „String-Ressource extrahieren“:
+  - keine doppelten Einträge in `strings.xml`: gleicher Text → ein Schlüssel (auch ein vorhandener),
+    gleicher Schlüssel mit anderem Text → `_2`, `_3` …;
+  - geprüft wird der sichtbare Text ohne `${…}`/`$name`: reine Platzhalter-Texte, Pfade (`"${dir}/.cfm/crash"`) und
+    einzelne kleingeschriebene Wörter (`"crash"`) werden nicht mehr vorgeschlagen;
+  - Argumente von `File(…)`, `getExternalFilesDir`, `getSharedPreferences`, `putExtra`, `Uri.parse`,
+    `getSystemService`, SQL-Aufrufen, `getProperty`/`getenv` u. a. gelten als technisch;
+  - Texte in Dateien ohne UI (z. B. `Application`, Repositories) sind nicht mehr vorausgewählt;
+  - Schlüssel-Präfix aus ganzen Wörtern (`CodeForgeApplication` → `code_forge_…` statt `codeforgeapplic_…`).
+- Test `testRunRequestBridgeTriggersTestsTabAndExecution` wartet auf den Tab-Wechsel statt fester 250 ms.
 
 ## [3.0.6] - 2026-11-14
 
