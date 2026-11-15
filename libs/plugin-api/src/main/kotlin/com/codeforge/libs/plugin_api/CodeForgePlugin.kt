@@ -67,6 +67,50 @@ interface PluginContext {
      * jeden Schlüssel den Wert des Nutzers oder die Vorgabe aus dem Manifest. Keine Berechtigung nötig.
      */
     fun settings(): PluginSettings
+
+    /**
+     * Seit API 3: Rückmeldungen an den Nutzer – Fortschritt, Rückfragen, Benachrichtigungen. Fortschritt und
+     * Rückfragen brauchen keine Berechtigung, Benachrichtigungen `notifications`.
+     */
+    fun feedback(): PluginUi
+}
+
+/** Seit API 3: Rückmeldungen eines Plugins an den Nutzer (siehe [PluginContext.feedback]). */
+interface PluginUi {
+    /**
+     * Zeigt [title] in der Fortschrittsleiste über allen Bildschirmen, solange [block] läuft. Über den
+     * [ProgressReporter] lassen sich Detailtext und Prozent melden.
+     */
+    suspend fun <T> withProgress(title: String, block: suspend (ProgressReporter) -> T): T
+
+    /**
+     * Fragt nach Bestätigung (Dialog mit [confirmLabel] und „Abbrechen“). Höchstens 3 offene Rückfragen je Plugin;
+     * beim Entladen des Plugins wird die Rückfrage mit `false` beendet.
+     *
+     * @return `true`, wenn der Nutzer bestätigt hat.
+     */
+    suspend fun confirm(title: String, message: String, confirmLabel: String = "OK"): Boolean
+
+    /**
+     * Lässt den Nutzer eine von [options] (höchstens 50) wählen.
+     *
+     * @return Index der Wahl oder `null`, wenn abgebrochen wurde.
+     */
+    suspend fun choose(title: String, options: List<String>): Int?
+
+    /**
+     * Zeigt eine Systembenachrichtigung (Berechtigung `notifications`); Tippen öffnet die App. Gleiche [tag] ersetzen
+     * eine frühere Benachrichtigung desselben Plugins.
+     *
+     * @throws PluginPermissionException wenn die Berechtigung fehlt.
+     */
+    fun notify(title: String, text: String, tag: String = "default")
+}
+
+/** Meldet den Stand eines Vorgangs aus [PluginUi.withProgress]. */
+interface ProgressReporter {
+    /** Setzt den Detailtext und optional den Fortschritt in Prozent (0–100; `null` = unverändert). */
+    fun report(detail: String, percent: Int? = null)
 }
 
 /** Seit API 3: Lesezugriff auf die Einstellungen eines Plugins (siehe [PluginContext.settings]). */

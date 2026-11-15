@@ -32,6 +32,7 @@ import com.codeforge.core.domain.extension.PluginSettingItem
 import com.codeforge.core.domain.extension.PluginSettingsRepository
 import com.codeforge.core.domain.extension.normalize
 import com.codeforge.libs.plugin_api.PluginSettings
+import com.codeforge.libs.plugin_api.PluginUi
 import dalvik.system.DexClassLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,6 +64,7 @@ internal class PluginRuntime(
     private class LoadedPlugin(val instance: CodeForgePlugin, val context: PluginContext)
 
     private val loadedPlugins = mutableMapOf<String, LoadedPlugin>()
+    private val notifier = PluginNotifier(hostContext)
 
     /** Basisdienste ohne Berechtigungsprüfung; Plugins sehen nur die geprüfte Hülle [PermissionedHostServices]. */
     private val baseServices = object : BaseHostServices {
@@ -92,7 +94,8 @@ internal class PluginRuntime(
         PermissionedHostServices(plugin.id, plugin.apiVersion, plugin.permissions, baseServices, hooks),
         registry,
         logs,
-        HostPluginSettings(plugin.id, settingItemsOf(pluginDir), settingsRepository)
+        HostPluginSettings(plugin.id, settingItemsOf(pluginDir), settingsRepository),
+        HostPluginUi(plugin.id, plugin.name, plugin.apiVersion, plugin.permissions, notifier)
     )
 
     private fun settingItemsOf(pluginDir: File): List<PluginSettingItem> = runCatching {
@@ -147,6 +150,7 @@ internal class PluginRuntime(
             instance.onLoad(context)
         } catch (t: Throwable) {
             hooks.unregisterAll(plugin.id) // Teilregistrierungen eines fehlgeschlagenen onLoad entfernen
+            context.close()
             context.logger("host").error("onLoad fehlgeschlagen", t)
             throw t
         }
@@ -186,14 +190,20 @@ internal class PluginRuntime(
         override val hostServices: PluginHostServices,
         private val registry: ExtensionRegistry,
         private val logs: PluginLogRepository,
-        private val settings: HostPluginSettings
+        private val settings: HostPluginSettings,
+        private val ui: HostPluginUi
     ) : PluginContext {
         override val pluginId: String get() = plugin.id
 
         override fun settings(): PluginSettings = settings
 
-        /** Beendet Beobachter (Einstellungs-Listener) beim Entladen. */
-        fun close() = settings.close()
+        override fun feedback(): PluginUi = ui
+
+        /** Beendet Beobachter (Einstellungs-Listener), offene Rückfragen und Fortschrittsanzeigen beim Entladen. */
+        fun close() {
+            settings.close()
+            ui.close()
+        }
 
         override fun logger(tag: String): PluginLogger = HostPluginLogger(plugin.id, tag.ifBlank { "main" }, logs)
 

@@ -77,6 +77,8 @@ class MainActivity : ComponentActivity() {
                     )
                     // Laufende Indexierung und Gradle-Läufe, sichtbar auf jedem Bildschirm.
                     IdeProgressFlashbar(modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopCenter))
+                    // Rückfragen von Plugins (Bestätigung/Auswahl).
+                    PluginPromptHost()
                 }
             }
         }

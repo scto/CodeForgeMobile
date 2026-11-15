@@ -36,10 +36,13 @@ object PluginPermissions {
     const val UI = "ui"
     /** Seit API 3: Ausführen- und Test-Einträge beisteuern. */
     const val RUN = "run"
+    /** Seit API 3: Systembenachrichtigungen zeigen. */
+    const val NOTIFICATIONS = "notifications"
 
     /** Menge aller bekannten Berechtigungen. */
     val ALL: Set<String> = setOf(
-        COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT, EDITOR, BUILD_EVENTS, PROJECT_EVENTS, UI, RUN
+        COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT, EDITOR, BUILD_EVENTS, PROJECT_EVENTS, UI, RUN,
+        NOTIFICATIONS
     )
 }
 

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -80,6 +81,7 @@ private fun ProgressLine(item: IdeProgress) {
                     IdeProgressKind.INDEXING -> Icons.Filled.Search
                     IdeProgressKind.GRADLE -> Icons.Filled.Build
                     IdeProgressKind.INSTALL -> Icons.Filled.Download
+                    IdeProgressKind.PLUGIN -> Icons.Filled.Extension
                 },
                 contentDescription = null, tint = onColor, modifier = Modifier.size(16.dp),
             )
@@ -90,6 +92,7 @@ private fun ProgressLine(item: IdeProgress) {
                             IdeProgressKind.INDEXING -> R.string.flashbar_indexing
                             IdeProgressKind.GRADLE -> R.string.flashbar_gradle
                             IdeProgressKind.INSTALL -> R.string.flashbar_install
+                            IdeProgressKind.PLUGIN -> R.string.flashbar_plugin
                         },
                         item.title
                     ),

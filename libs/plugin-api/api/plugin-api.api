@@ -178,6 +178,7 @@ public abstract interface class com/codeforge/libs/plugin_api/PluginContext {
 	public abstract fun logger (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginLogger;
 	public abstract fun register (Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;Ljava/lang/Object;)Lcom/codeforge/core/domain/extension/registry/Disposable;
 	public abstract fun settings ()Lcom/codeforge/libs/plugin_api/PluginSettings;
+	public abstract fun ui ()Lcom/codeforge/libs/plugin_api/PluginUi;
 }
 
 public final class com/codeforge/libs/plugin_api/PluginDiagnostic {
@@ -404,6 +405,26 @@ public abstract interface class com/codeforge/libs/plugin_api/PluginSettings {
 public final class com/codeforge/libs/plugin_api/PluginSettings$DefaultImpls {
 	public static fun getBoolean (Lcom/codeforge/libs/plugin_api/PluginSettings;Ljava/lang/String;)Z
 	public static fun getInt (Lcom/codeforge/libs/plugin_api/PluginSettings;Ljava/lang/String;)I
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/PluginUi {
+	public abstract fun choose (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun confirm (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun notify (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public abstract fun withProgress (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginUi$DefaultImpls {
+	public static synthetic fun confirm$default (Lcom/codeforge/libs/plugin_api/PluginUi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun notify$default (Lcom/codeforge/libs/plugin_api/PluginUi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/ProgressReporter {
+	public abstract fun report (Ljava/lang/String;Ljava/lang/Integer;)V
+}
+
+public final class com/codeforge/libs/plugin_api/ProgressReporter$DefaultImpls {
+	public static synthetic fun report$default (Lcom/codeforge/libs/plugin_api/ProgressReporter;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)V
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/QuickFixProvider {

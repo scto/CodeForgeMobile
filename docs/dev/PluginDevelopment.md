@@ -787,6 +787,31 @@ Grenzen:
 - Gutter-Markierungen für einzelne Tests und ein eigener Test-Reiter gibt es noch nicht; Tests erscheinen nur als
   Zusammenfassung im Ausgabeblatt.
 
+### 9.10 Seit API 3: Fortschritt, Rückfragen, Benachrichtigungen
+
+`context.feedback()` liefert die Rückmeldungen an den Nutzer. Fortschritt und Rückfragen brauchen keine Berechtigung,
+Benachrichtigungen `notifications`.
+
+```kotlin
+val ui = context.feedback()
+scope.launch {
+    if (!ui.confirm("Server installieren?", "Lädt etwa 40 MB herunter.", confirmLabel = "Installieren")) return@launch
+    val variant = ui.choose("Variante", listOf("stable", "nightly")) ?: return@launch
+    ui.withProgress("Installiere Server ($variant)") { progress ->
+        progress.report("Herunterladen …", percent = 10)
+        // …
+        progress.report("Entpacken …", percent = 80)
+    }
+    ui.notify("Server installiert", "Der Sprachserver ist bereit.")
+}
+```
+
+- `withProgress` zeigt den Vorgang in der Leiste über allen Bildschirmen, solange der Block läuft.
+- `confirm`/`choose` warten auf den Nutzer; höchstens 3 offene Rückfragen je Plugin. Wird das Plugin deaktiviert,
+  enden sie mit `false` bzw. `null`.
+- `notify` zeigt eine Systembenachrichtigung (Kanal „Plugins“); gleiche `tag` ersetzen die vorherige.
+- Nicht in `onLoad` blockierend aufrufen – eigene Coroutine starten und in `onUnload` abbrechen.
+
 ## 10. Beispiel 6: Hybrid – LSP-Plugin mit Download
 
 **Ziel:** Ein Language Server, der nicht als Paket vorliegt, sondern heruntergeladen werden muss. Das Manifest startet den Server (deklarativ), der Code stellt nur sicher, dass er da ist.

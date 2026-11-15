@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugin-API 3: Fortschritt, Rückfragen, Benachrichtigungen)
+- `context.feedback()`: `withProgress` (Leiste über allen Bildschirmen), `confirm` und `choose` (Dialoge, das Plugin
+  wartet auf die Antwort) sowie `notify` (Systembenachrichtigung, neue Berechtigung `notifications`).
+- Beim Deaktivieren eines Plugins enden seine offenen Rückfragen und Fortschrittsanzeigen automatisch.
+
 ### Behoben
 - Release-Build schlug fehl („InternalProblems … removed in Gradle 9.6.0“): Der Gradle-Wrapper war auf 9.9.1 gehoben
   worden, AGP 8.13 läuft aber nur bis Gradle 9.5. Wrapper wieder auf 8.14.3.

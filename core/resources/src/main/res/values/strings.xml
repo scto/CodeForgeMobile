@@ -2718,4 +2718,5 @@
     <string name="plugin_test_prefix">Tests:</string>
     <string name="plugin_run_exit">Finished (exit %1$d)</string>
     <string name="plugin_test_summary">%1$d passed, %2$d failed</string>
+    <string name="flashbar_plugin">%1$s</string>
 </resources>
