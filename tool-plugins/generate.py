@@ -60,12 +60,12 @@ LSP = [
      [("lemminx", ["xml"], ["java", "${jvmArg}", "-jar", "${deps}/lemminx/org.eclipse.lemminx-uber.jar"])],
      "Download lemminx-uber.jar 0.31.2 von eclipse.org, JDK 17"),
     # Rust-Server (tree-sitter, ohne JVM/Gradle-Import); Alternative zu Kotlin LS/JDT LS – beide schaltet man in
-    # Einstellungen → Sprachserver getrennt ab. Termux-Binary je Architektur aus dem Release termux-1 von scto/kmp-lsp.
+    # Einstellungen → Sprachserver getrennt ab. Termux-Binary je Architektur aus dem Release termux-2 von scto/kmp-lsp.
     ("kmp-lsp", "kmp-lsp (Kotlin/Java/Swift)",
      # kmp-lsp startet für Bibliotheks-Symbole `java -jar kmp-jar-indexer.jar` (ohne eigene Optionen); der
      # java-Launcher liest JDK_JAVA_OPTIONS – darüber kommen die JVM-Optionen aus den Einstellungen an.
      [("kmp-lsp", ["kotlin", "java", "swift"], ["${deps}/kmp-lsp/kmp-lsp"], {"JDK_JAVA_OPTIONS": "${jvmArgs}"})],
-     "Download kmp-lsp termux-1 von GitHub (aarch64/x86_64)"),
+     "Download kmp-lsp termux-2 von GitHub (aarch64/x86_64)"),
 ]
 
 
@@ -109,11 +109,11 @@ REQUIRES = {
         "jdtls", "https://download.eclipse.org/jdtls/milestones/1.45.0/jdt-language-server-1.45.0-202502271238.tar.gz",
         "c09e79e958beb5ce41fb3b5097aec0455298bc88a14c8e41462b57edb2812797", "tar.gz", "bin/jdtls")],
     "kmp-lsp": [
-        {**_dl("kmp-lsp", "https://github.com/scto/kmp-lsp/releases/download/termux-1/kmp-lsp-termux-aarch64.tar.gz",
-               "228a955d5a712445683963ef6cc6775855969dbb63e013b07fbb7a08b7c1e352", "tar.gz", "kmp-lsp"),
+        {**_dl("kmp-lsp", "https://github.com/scto/kmp-lsp/releases/download/termux-2/kmp-lsp-termux-aarch64.tar.gz",
+               "c1f5ad310fc90f7f7019c0f8a988b010152a22cc8e59917f2f9a0543a3a9a08a", "tar.gz", "kmp-lsp"),
          "arch": "aarch64", "stripTopDir": True},
-        {**_dl("kmp-lsp", "https://github.com/scto/kmp-lsp/releases/download/termux-1/kmp-lsp-termux-x86_64.tar.gz",
-               "63ea6880a36705ae4123a10d6e747eaae78c93006fcf542cfecde2a7cec8be73", "tar.gz", "kmp-lsp"),
+        {**_dl("kmp-lsp", "https://github.com/scto/kmp-lsp/releases/download/termux-2/kmp-lsp-termux-x86_64.tar.gz",
+               "b0a554fe44dbe07e2ca9c9d4871bb9dc05a9fe0b40ab3aa07b2b1596ed765c1a", "tar.gz", "kmp-lsp"),
          "arch": "x86_64", "stripTopDir": True}],
     "lemminx": [JDK, _dl(
         "lemminx", "https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar",
@@ -179,7 +179,7 @@ def dump(path, obj):
 
 
 # Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
-VERSIONS = {"com.codeforge.plugin.kmp-lsp.lsp": "1.0.1"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer
+VERSIONS = {"com.codeforge.plugin.kmp-lsp.lsp": "1.0.2"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
 
 
 def manifest(pid, name, desc, contributes):

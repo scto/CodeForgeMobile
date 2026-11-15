@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Sprachserver)
+- Plugin „kmp-lsp“ 1.0.2 lädt kmp-lsp aus dem Release `termux-2`: keine falschen „expected at most 0 argument(s)“-
+  Warnungen mehr bei Konstruktoren von Bibliotheks-Klassen und bei Compose-Aufrufen wie `Text(…)`/`Icon(…)`.
+
 ### Geändert (Build)
 - `gradle.properties`: Locale (en_US) und UTF-8 jetzt über `org.gradle.jvmargs` statt `systemProp.*`, wo sie keine
   Wirkung hatten; der Gradle-Daemon beendet sich nach 30 statt 180 Minuten Leerlauf.
