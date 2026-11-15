@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.0.8] - 2026-11-15
+
 ### Highlights
 - **Befehlspalette** (`Strg+Umschalt+P`): alle Befehle, die gerade funktionieren – eingebaut, vom Sprachserver, von Plugins.
 - **Refactoring-Menü** (`Strg+Umschalt+R`): Extrahieren, Inline, Umschreiben, Imports – direkt vom Sprachserver.
