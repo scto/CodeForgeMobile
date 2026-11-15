@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-11-15
+
 ### Geändert (Fortschrittsleiste)
 - Die Leiste für laufende Vorgänge lässt sich per Tipp aufklappen: alle Vorgänge statt höchstens zwei, Laufzeit,
   längere Detailtexte und die letzten Ausgabezeilen je Vorgang. Zugeklappt zeigt ein „+N“ weitere Vorgänge an.
