@@ -68,8 +68,16 @@ data class FileTreeUiState(
     val pluginMenuEntries: List<com.codeforge.core.domain.extension.PluginMenuEntry> = emptyList(),
     /** Werkzeuge der aktivierten Plugins (PT-Menü). */
     val tools: List<FileTreeTool> = emptyList(),
-    val toolDialog: ToolDialogState? = null
+    val toolDialog: ToolDialogState? = null,
+    /** Folgeänderungen eines Umbenennens, die bestätigt werden müssen. */
+    val renamePlan: RenamePlanState? = null,
+    /** Folgeänderungen werden gerade ermittelt (Sprachserver/Projekt durchsuchen). */
+    val isPlanningRename: Boolean = false
 )
+
+/** Umbenennen mit Folgeänderungen ([plan]) auf den neuen Namen [newName]. */
+@Immutable
+data class RenamePlanState(val plan: com.codeforge.core.domain.refactoring.RenameRefactorPlan, val newName: String)
 
 /** Aktionen im Dateibaum. */
 sealed interface FileTreeUiEvent {
@@ -131,6 +139,10 @@ sealed interface FileTreeUiEvent {
     data class ActionConfirmed(val inputName: String) : FileTreeUiEvent
     /** Aktion abgebrochen. */
     data object ActionCancelled : FileTreeUiEvent
+    /** Umbenennen bestätigt; [adjustReferences] = Folgeänderungen (package/import …) mit anwenden. */
+    data class ConfirmRenamePlan(val adjustReferences: Boolean) : FileTreeUiEvent
+    /** Umbenennen mit Folgeänderungen abgebrochen. */
+    data object CancelRenamePlan : FileTreeUiEvent
     /** Neu einlesen. */
     data object Refresh : FileTreeUiEvent
 }

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.codeforge.core.domain.model.LspCodeAction
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.feature.editor.palette.codeActionKindLabelRes
 
 /** Sheet mit Schnellkorrekturen. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +36,8 @@ import com.codeforge.core.resources.stringRes
 fun QuickFixSheet(
     modifier: Modifier = Modifier,
     actions: List<LspCodeAction>,
+    title: String = stringRes(R.string.lsp_quick_fixes_title),
+    emptyText: String = stringRes(R.string.lsp_no_code_actions),
     sheetState: SheetState = rememberModalBottomSheetState(),
     onSelectAction: (LspCodeAction) -> Unit,
     onDismiss: () -> Unit
@@ -50,14 +53,14 @@ fun QuickFixSheet(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(
-                text = stringRes(R.string.lsp_quick_fixes_title),
+                text = title,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
             if (actions.isEmpty()) {
                 Text(
-                    text = stringRes(R.string.lsp_no_code_actions),
+                    text = emptyText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 16.dp)
@@ -84,9 +87,9 @@ fun QuickFixSheet(
                                     text = action.title,
                                     style = MaterialTheme.typography.bodyLarge
                                 )
-                                action.kind?.let { kind ->
+                                action.kind?.takeIf { it.isNotBlank() }?.let { kind ->
                                     Text(
-                                        text = kind,
+                                        text = codeActionKindLabelRes(kind)?.let { stringRes(it) } ?: kind,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

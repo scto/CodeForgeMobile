@@ -234,6 +234,19 @@ private fun FileTreeScreen(
         )
     }
 
+    uiState.renamePlan?.let { state ->
+        RenamePlanDialog(
+            state = state,
+            onAdjust = { onEvent(FileTreeUiEvent.ConfirmRenamePlan(adjustReferences = true)) },
+            onRenameOnly = { onEvent(FileTreeUiEvent.ConfirmRenamePlan(adjustReferences = false)) },
+            onDismiss = { onEvent(FileTreeUiEvent.CancelRenamePlan) }
+        )
+    }
+
+    if (uiState.isPlanningRename) {
+        RenamePlanningDialog()
+    }
+
     uiState.pendingAction?.let { action ->
         FileTreeNameDialog(
             action = action,

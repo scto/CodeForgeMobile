@@ -26,6 +26,13 @@ abstract class LspClientModule {
         impl: LspRuntimeStatsProviderImpl
     ): com.codeforge.core.domain.model.LspRuntimeStatsProvider
 
+    /** Folgeänderungen beim Umbenennen von Dateien/Ordnern (Sprachserver bzw. package/import-Ersatz). */
+    @Binds
+    @Singleton
+    abstract fun bindRenameRefactoringService(
+        impl: RenameRefactoringServiceImpl
+    ): com.codeforge.core.domain.refactoring.RenameRefactoringService
+
     /** Sprachserver als Teil der Speicherfreigabe. */
     @Binds
     @dagger.multibindings.IntoSet

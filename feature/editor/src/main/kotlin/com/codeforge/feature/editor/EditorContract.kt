@@ -25,6 +25,9 @@ data class OpenFile(
     val isDirty: Boolean = false
 )
 
+/** Inhalt des Code-Action-Sheets. */
+enum class CodeActionsMode { QUICK_FIX, REFACTOR }
+
 /** Zustand des Umbenennen-Dialogs (Name, Vorschau, Fehler). */
 @Immutable
 data class RenameDialogState(
@@ -67,6 +70,10 @@ data class EditorUiState(
     // LSP Task 31 UI-States
     val codeActions: List<LspCodeAction> = emptyList(),
     val isCodeActionsSheetVisible: Boolean = false,
+    /** Ob das Code-Action-Sheet Schnellkorrekturen oder Refactorings zeigt (Titel, Leertext). */
+    val codeActionsMode: CodeActionsMode = CodeActionsMode.QUICK_FIX,
+    /** Geöffnete Befehlspalette, sonst `null`. */
+    val commandPalette: com.codeforge.feature.editor.palette.CommandPaletteState? = null,
     val renameDialog: RenameDialogState? = null,
     val isOutlineVisible: Boolean = false,
     val outlineSymbols: List<LspDocumentSymbol> = emptyList(),
@@ -227,6 +234,23 @@ sealed interface EditorUiEvent {
     data object DismissQuickFix : EditorUiEvent
     /** Code-Aktion anwenden. */
     data class ApplyCodeAction(val action: LspCodeAction) : EditorUiEvent
+
+    /** Befehlspalette öffnen; [pluginCommands] = Befehle der Code-Plugins. */
+    data class OpenCommandPalette(
+        val pluginCommands: List<com.codeforge.feature.editor.palette.PalettePluginCommand> = emptyList()
+    ) : EditorUiEvent
+    /** Suchtext der Befehlspalette geändert. */
+    data class CommandPaletteQueryChanged(val query: String) : EditorUiEvent
+    /** Befehlspalette schließen. */
+    data object DismissCommandPalette : EditorUiEvent
+    /** „String-Ressource extrahieren“ für die aktive Datei öffnen. */
+    data object ExtractStringResource : EditorUiEvent
+    /** Vom Server gemeldeten Befehl ausführen (`workspace/executeCommand`). */
+    data class RunServerCommand(val command: String) : EditorUiEvent
+    /** Refactorings für Cursor bzw. Auswahl [range] anfordern (`refactor.*`, `source.*`). */
+    data class TriggerRefactor(val line: Int, val col: Int, val range: LspRange? = null) : EditorUiEvent
+    /** Quelltext-Aktion der Art [kind] (z. B. `source.organizeImports`) für die ganze Datei ausführen. */
+    data class RunSourceAction(val kind: String) : EditorUiEvent
 
     /** Umbenennen an Position beginnen. */
     data class TriggerRename(val line: Int, val col: Int, val fallbackName: String) : EditorUiEvent

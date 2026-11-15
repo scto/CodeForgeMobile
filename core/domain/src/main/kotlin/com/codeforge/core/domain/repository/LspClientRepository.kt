@@ -5,6 +5,7 @@ import com.codeforge.core.domain.model.LspCodeAction
 import com.codeforge.core.domain.model.LspCompletionItem
 import com.codeforge.core.domain.model.LspDiagnostic
 import com.codeforge.core.domain.model.LspDocumentSymbol
+import com.codeforge.core.domain.model.LspFileRename
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspFoldingRange
 import com.codeforge.core.domain.model.LspInlayHint
@@ -133,6 +134,30 @@ interface LspClientRepository {
         range: LspRange,
         diagnostics: List<LspDiagnostic> = emptyList()
     ): Result<List<LspCodeAction>>
+
+    /**
+     * Code-Actions nur der Arten [only] (`context.only`, z. B. `refactor`, `source.organizeImports`).
+     * Standard: alle anfordern und nach Art filtern.
+     */
+    suspend fun requestCodeActionsOfKind(
+        path: String,
+        range: LspRange,
+        only: List<String>
+    ): Result<List<LspCodeAction>> = requestCodeActions(path, range).map { actions ->
+        actions.filter { action -> val k = action.kind.orEmpty(); only.any { k == it || k.startsWith("$it.") } }
+    }
+
+    /**
+     * `workspace/willRenameFiles` an alle Server, die es unterstützen; liefert die zusammengeführten Folgeänderungen
+     * (anzuwenden *vor* dem Umbenennen) oder `null`, wenn kein Server etwas beiträgt.
+     */
+    suspend fun willRenameFiles(renames: List<LspFileRename>): Result<LspWorkspaceEdit?> = Result.success(null)
+
+    /** `workspace/didRenameFiles` an alle Server, die es wünschen. */
+    suspend fun didRenameFiles(renames: List<LspFileRename>) {}
+
+    /** `true`, wenn mindestens ein laufender Server `willRenameFiles` unterstützt. */
+    fun supportsWillRenameFiles(): Boolean = false
 
     /** Prüft, ob Umbenennen an der Position möglich ist. */
     suspend fun requestPrepareRename(

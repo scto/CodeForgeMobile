@@ -235,5 +235,21 @@ data class LspServerCapabilities(
     val implementationProvider: Boolean = false,
     val signatureHelpProvider: Boolean = false,
     val foldingRangeProvider: Boolean = false,
-    val inlayHintProvider: Boolean = false
+    val inlayHintProvider: Boolean = false,
+    /** Vom Server gemeldete Befehle (`executeCommandProvider.commands`) – Quelle der Server-Befehle der Befehlspalette. */
+    val executeCommands: List<String> = emptyList(),
+    /** Unterstützte Code-Action-Arten (`codeActionProvider.codeActionKinds`); leer = unbekannt. */
+    val codeActionKinds: List<String> = emptyList(),
+    /** `workspace.fileOperations.willRename`: Server liefert Folgeänderungen (z. B. `package`/`import`) vor dem Umbenennen. */
+    val willRenameFiles: Boolean = false,
+    /** `workspace.fileOperations.didRename`: Server möchte über erfolgte Umbenennungen informiert werden. */
+    val didRenameFiles: Boolean = false
 )
+
+/** `true`, wenn der Server Code-Actions der Art [kind] (oder einer Unter-/Oberart) anbietet bzw. keine Arten meldet. */
+fun LspServerCapabilities.supportsCodeActionKind(kind: String): Boolean =
+    codeActionProvider &&
+        (codeActionKinds.isEmpty() || codeActionKinds.any { it == kind || it.startsWith("$kind.") || kind.startsWith("$it.") })
+
+/** Umbenennen oder Verschieben einer Datei bzw. eines Ordners (absolute Pfade). */
+data class LspFileRename(val oldPath: String, val newPath: String)

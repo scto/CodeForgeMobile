@@ -9,7 +9,10 @@ import androidx.lifecycle.viewModelScope
 import com.codeforge.core.common.FileHeaderContext
 import com.codeforge.core.common.FileHeaderRenderer
 import com.codeforge.core.datastore.SettingsRepository
+import com.codeforge.core.domain.model.LspFileRename
 import com.codeforge.core.domain.model.SnippetVariableResolver
+import com.codeforge.core.domain.refactoring.RenameRefactorPlan
+import com.codeforge.core.domain.refactoring.RenameRefactoringService
 import com.codeforge.core.domain.repository.FileSystemRepository
 import com.codeforge.core.navigation.OpenFileRequestBridge
 import com.codeforge.core.resources.R
@@ -42,7 +45,8 @@ class FileTreeViewModel @Inject constructor(
     private val fileSyncBridge: com.codeforge.core.navigation.FileSyncBridge? = null,
     private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null,
     private val contributionRepository: com.codeforge.core.domain.extension.ContributionRepository? = null,
-    private val toolRunner: com.codeforge.core.domain.extension.PluginToolRunner? = null
+    private val toolRunner: com.codeforge.core.domain.extension.PluginToolRunner? = null,
+    private val renameRefactoring: RenameRefactoringService? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FileTreeUiState())
@@ -191,6 +195,8 @@ class FileTreeViewModel @Inject constructor(
             FileTreeUiEvent.CancelDelete -> _uiState.update { it.copy(deleteConfirmTarget = null) }
             is FileTreeUiEvent.ActionConfirmed -> confirmAction(event.inputName)
             FileTreeUiEvent.ActionCancelled -> _uiState.update { it.copy(pendingAction = null) }
+            is FileTreeUiEvent.ConfirmRenamePlan -> confirmRenamePlan(event.adjustReferences)
+            FileTreeUiEvent.CancelRenamePlan -> _uiState.update { it.copy(renamePlan = null) }
             FileTreeUiEvent.Refresh -> bumpRefreshToken()
         }
     }
@@ -305,13 +311,78 @@ class FileTreeViewModel @Inject constructor(
             FileTreeActionType.CREATE_DIRECTORY ->
                 fileSystemRepository.createDirectory("${action.targetPath}/$inputName")
 
-            FileTreeActionType.RENAME ->
-                fileSystemRepository.rename(action.targetPath, inputName)
+            FileTreeActionType.RENAME -> {
+                startRename(action.targetPath, inputName)
+                return@launch
+            }
         }
 
         result
             .onSuccess { bumpRefreshToken() }
             .onFailure { _effect.emit(FileTreeUiEffect.ShowSnackbar(it.message ?: Res.string(R.string.filetree_aktion_fehlgeschlagen))) }
+    }
+
+    // ---- Umbenennen mit Folgeänderungen (willRenameFiles bzw. package/import) ----
+
+    // Ermittelt Folgeänderungen; gibt es welche, fragt ein Dialog nach, sonst wird direkt umbenannt.
+    private suspend fun startRename(oldPath: String, newName: String) {
+        val service = renameRefactoring
+        val root = _uiState.value.rootPath
+        val newPath = File(oldPath).parentFile?.let { File(it, newName).path }
+        val canPlan = service != null && root.isNotBlank()
+        if (!canPlan || newPath == null || newPath == oldPath) {
+            performRename(oldPath, newName, null)
+            return
+        }
+        // Ungespeicherte Puffer zuerst schreiben, sonst plant (und überschreibt) die Ersetzung einen alten Stand.
+        fileSyncBridge?.let { bridge ->
+            if (File(oldPath).isDirectory) bridge.requestFlushDirectory(oldPath) else bridge.requestFlush(setOf(oldPath))
+        }
+        _uiState.update { it.copy(isPlanningRename = true) }
+        val plan = runCatching { service?.plan(LspFileRename(oldPath, newPath), root) }.getOrNull()
+        _uiState.update { it.copy(isPlanningRename = false) }
+        if (plan == null) {
+            performRename(oldPath, newName, null)
+        } else {
+            _uiState.update { it.copy(renamePlan = RenamePlanState(plan, newName)) }
+        }
+    }
+
+    private fun confirmRenamePlan(adjustReferences: Boolean) = viewModelScope.launch {
+        val state = _uiState.value.renamePlan ?: return@launch
+        _uiState.update { it.copy(renamePlan = null) }
+        performRename(state.plan.rename.oldPath, state.newName, state.plan.takeIf { adjustReferences })
+    }
+
+    // Folgeänderungen schreiben (vor dem Umbenennen, wie bei `willRenameFiles` vorgesehen), dann umbenennen.
+    private suspend fun performRename(oldPath: String, newName: String, plan: RenameRefactorPlan?) {
+        if (plan != null) {
+            val failed = plan.changes.firstNotNullOfOrNull { change ->
+                fileSystemRepository.writeFile(change.path, change.newContent).exceptionOrNull()
+            }
+            if (failed != null) {
+                _effect.emit(FileTreeUiEffect.ShowSnackbar(failed.message ?: Res.string(R.string.filetree_aktion_fehlgeschlagen)))
+                return
+            }
+        }
+        fileSystemRepository.rename(oldPath, newName)
+            .onSuccess {
+                bumpRefreshToken()
+                if (plan == null) return@onSuccess
+                val oldPrefix = oldPath.trimEnd('/') + "/"
+                val newBase = plan.rename.newPath.trimEnd('/') + "/"
+                val changed = plan.changes.map { c -> if (c.path.startsWith(oldPrefix)) newBase + c.path.removePrefix(oldPrefix) else c.path }
+                fileSyncBridge?.notifyExternalChange(changed)
+                renameRefactoring?.completed(plan.rename)
+                _effect.emit(
+                    FileTreeUiEffect.ShowSnackbar(Res.string(R.string.filetree_rename_adjusted, plan.editCount, plan.fileCount))
+                )
+            }
+            .onFailure { _effect.emit(FileTreeUiEffect.ShowSnackbar(it.message ?: Res.string(R.string.filetree_aktion_fehlgeschlagen))) }
+        if (plan == null) {
+            val newPath = File(oldPath).parentFile?.let { File(it, newName).path } ?: return
+            if (File(newPath).exists()) renameRefactoring?.completed(LspFileRename(oldPath, newPath))
+        }
     }
 
     // ---- Plugin-Werkzeuge (PT-Menü) ----

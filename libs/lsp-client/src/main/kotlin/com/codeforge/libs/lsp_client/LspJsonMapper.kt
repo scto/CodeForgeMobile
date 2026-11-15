@@ -502,6 +502,8 @@ internal fun parseServerCapabilities(result: JsonElement?): LspServerCapabilitie
         return elem is JsonObject
     }
 
+    val fileOperations = (capabilities["workspace"] as? JsonObject)?.get("fileOperations") as? JsonObject
+
     return LspServerCapabilities(
         codeActionProvider = isEnabled("codeActionProvider"),
         renameProvider = isEnabled("renameProvider"),
@@ -517,9 +519,16 @@ internal fun parseServerCapabilities(result: JsonElement?): LspServerCapabilitie
         implementationProvider = isEnabled("implementationProvider"),
         signatureHelpProvider = capabilities["signatureHelpProvider"] is JsonObject,
         foldingRangeProvider = isEnabled("foldingRangeProvider"),
-        inlayHintProvider = isEnabled("inlayHintProvider")
+        inlayHintProvider = isEnabled("inlayHintProvider"),
+        executeCommands = stringList((capabilities["executeCommandProvider"] as? JsonObject)?.get("commands")),
+        codeActionKinds = stringList((capabilities["codeActionProvider"] as? JsonObject)?.get("codeActionKinds")),
+        willRenameFiles = fileOperations?.get("willRename") is JsonObject,
+        didRenameFiles = fileOperations?.get("didRename") is JsonObject
     )
 }
+
+private fun stringList(element: JsonElement?): List<String> =
+    (element as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }.orEmpty()
 
 /**
  * Wendet eine Liste von LSP-TextEdits (aus textDocument/formatting) auf den Original-Text an.

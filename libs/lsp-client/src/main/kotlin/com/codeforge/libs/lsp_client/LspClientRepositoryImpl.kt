@@ -4,6 +4,7 @@ package com.codeforge.libs.lsp_client
 import com.codeforge.core.domain.model.LspCodeAction
 import com.codeforge.core.domain.model.LspCompletionItem
 import com.codeforge.core.domain.model.LspDiagnostic
+import com.codeforge.core.domain.model.LspFileRename
 import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspLocation
@@ -253,6 +254,41 @@ class LspClientRepositoryImpl(
         return session.requestCodeActions(path, range, diagnostics)
     }
 
+    override suspend fun requestCodeActionsOfKind(
+        path: String,
+        range: LspRange,
+        only: List<String>
+    ): Result<List<LspCodeAction>> {
+        val session = sessionForPath(path)
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        if (!session.allows(LspFeature.CODE_ACTIONS)) return Result.success(emptyList())
+        // `only` ist für Server nur ein Hinweis – manche liefern trotzdem alles, daher zusätzlich filtern.
+        return session.requestCodeActions(path, range, emptyList(), only).map { actions ->
+            actions.filter { a -> val k = a.kind.orEmpty(); only.any { k == it || k.startsWith("$it.") } }
+        }
+    }
+
+    override fun supportsWillRenameFiles(): Boolean =
+        sessions.values.any { it.serverCapabilities.value?.willRenameFiles == true }
+
+    override suspend fun willRenameFiles(renames: List<LspFileRename>): Result<LspWorkspaceEdit?> = runCatching {
+        val edits = sessions.values
+            .filter { it.serverCapabilities.value?.willRenameFiles == true }
+            .mapNotNull { it.willRenameFiles(renames).getOrNull() }
+        if (edits.isEmpty()) {
+            null
+        } else {
+            LspWorkspaceEdit(
+                changes = edits.flatMap { it.changes.entries }.groupBy({ it.key }, { it.value }).mapValues { it.value.flatten() },
+                documentChanges = edits.flatMap { it.documentChanges }
+            ).takeIf { it.changes.isNotEmpty() || it.documentChanges.isNotEmpty() }
+        }
+    }
+
+    override suspend fun didRenameFiles(renames: List<LspFileRename>) {
+        sessions.values.filter { it.serverCapabilities.value?.didRenameFiles == true }.forEach { it.didRenameFiles(renames) }
+    }
+
     override suspend fun requestPrepareRename(path: String, position: LspPosition): Result<LspPrepareRenameResult?> {
         val session = sessionForPath(path)
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
@@ -320,7 +356,9 @@ class LspClientRepositoryImpl(
     }
 
     override suspend fun executeCommand(command: String, arguments: List<Any?>): Result<Unit> {
-        val session = sessionForPath(_activeDocumentPath.value ?: "")
+        // Zuerst der Server, der den Befehl gemeldet hat (bei mehreren Sitzungen nicht zwingend der aktive).
+        val session = sessions.values.firstOrNull { command in it.serverCapabilities.value?.executeCommands.orEmpty() }
+            ?: sessionForPath(_activeDocumentPath.value ?: "")
             ?: sessions.values.firstOrNull()
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
         return session.executeCommand(command, arguments)

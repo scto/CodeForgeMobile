@@ -4,6 +4,7 @@ package com.codeforge.libs.lsp_client
 import com.codeforge.core.domain.model.LspCodeAction
 import com.codeforge.core.domain.model.LspCompletionItem
 import com.codeforge.core.domain.model.LspDiagnostic
+import com.codeforge.core.domain.model.LspFileRename
 import com.codeforge.core.domain.model.LspDocumentSymbol
 import com.codeforge.core.domain.model.LspHoverInfo
 import com.codeforge.core.domain.model.LspLocation
@@ -203,6 +204,12 @@ class LspServerSession(
                     })
                     put("workspace", buildJsonObject {
                         put("applyEdit", true)
+                        put("executeCommand", buildJsonObject { put("dynamicRegistration", false) })
+                        put("fileOperations", buildJsonObject {
+                            put("dynamicRegistration", false)
+                            put("willRename", true)
+                            put("didRename", true)
+                        })
                         put("workspaceEdit", buildJsonObject {
                             put("documentChanges", true)
                             put("resourceOperations", buildJsonArray {
@@ -472,7 +479,8 @@ class LspServerSession(
     suspend fun requestCodeActions(
         path: String,
         range: LspRange,
-        diagnostics: List<LspDiagnostic>
+        diagnostics: List<LspDiagnostic>,
+        only: List<String>? = null
     ): Result<List<LspCodeAction>> = runCatching {
         touch()
         val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
@@ -483,6 +491,7 @@ class LspServerSession(
                 put("diagnostics", buildJsonArray {
                     diagnostics.forEach { add(diagnosticToJson(it)) }
                 })
+                if (!only.isNullOrEmpty()) put("only", buildJsonArray { only.forEach { add(JsonPrimitive(it)) } })
             })
         }
         val response = activeConnection.sendRequest("textDocument/codeAction", params)
@@ -686,6 +695,30 @@ class LspServerSession(
         }
         activeConnection.sendRequest("workspace/executeCommand", params)
         Unit
+    }
+
+    /** `workspace/willRenameFiles`: Folgeänderungen des Servers, anzuwenden vor dem Umbenennen. */
+    suspend fun willRenameFiles(renames: List<LspFileRename>): Result<LspWorkspaceEdit?> = runCatching {
+        touch()
+        val activeConnection = connection ?: error(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+        val response = activeConnection.sendRequest("workspace/willRenameFiles", renameFilesParams(renames))
+        parseWorkspaceEdit(response["result"])
+    }
+
+    /** `workspace/didRenameFiles` (Benachrichtigung nach dem Umbenennen). */
+    fun didRenameFiles(renames: List<LspFileRename>) {
+        connection?.sendNotification("workspace/didRenameFiles", renameFilesParams(renames))
+    }
+
+    private fun renameFilesParams(renames: List<LspFileRename>) = buildJsonObject {
+        put("files", buildJsonArray {
+            renames.forEach { r ->
+                add(buildJsonObject {
+                    put("oldUri", "file://${r.oldPath}")
+                    put("newUri", "file://${r.newPath}")
+                })
+            }
+        })
     }
 
     private fun handleNotification(method: String, params: JsonObject?) {

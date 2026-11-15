@@ -8,6 +8,7 @@ import com.codeforge.core.domain.model.LspPosition
 import com.codeforge.core.domain.model.LspRange
 import com.codeforge.core.domain.model.LspSymbolKind
 import com.codeforge.core.domain.model.LspTextEdit
+import com.codeforge.core.domain.model.supportsCodeActionKind
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -308,5 +309,22 @@ class LspJsonMapperTest {
         )
         assertTrue(caps.foldingRangeProvider)
         assertTrue(caps.inlayHintProvider)
+    }
+
+    @Test
+    fun parsesCommandsAndFileOps() {
+        val result = json.parseToJsonElement(
+            """
+                {"capabilities":{"codeActionProvider":{"codeActionKinds":["quickfix","refactor.extract"]},
+                "executeCommandProvider":{"commands":["java.edit.organizeImports"]},
+                "workspace":{"fileOperations":{"willRename":{"filters":[]},"didRename":{"filters":[]}}}}}
+            """.trimIndent()
+        )
+        val caps = parseServerCapabilities(result)
+        assertEquals(listOf("java.edit.organizeImports"), caps.executeCommands)
+        assertEquals(listOf("quickfix", "refactor.extract"), caps.codeActionKinds)
+        assertTrue(caps.willRenameFiles && caps.didRenameFiles)
+        assertTrue(caps.supportsCodeActionKind("refactor"))
+        assertTrue(!caps.supportsCodeActionKind("source.organizeImports"))
     }
 }

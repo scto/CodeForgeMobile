@@ -4,6 +4,13 @@
  */
 package com.codeforge.feature.editor
 
+import com.codeforge.feature.editor.palette.BuiltinPaletteAction
+import com.codeforge.feature.editor.palette.CommandPaletteSheet
+import com.codeforge.feature.editor.palette.PaletteAction
+import com.codeforge.feature.editor.palette.PaletteItem
+import com.codeforge.feature.editor.palette.PalettePluginCommand
+import androidx.compose.material.icons.filled.Handyman
+import androidx.compose.material.icons.filled.KeyboardCommandKey
 import com.codeforge.core.designsystem.OptionalThemedFileIcon
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -94,6 +101,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
@@ -185,6 +194,17 @@ fun EditorRoute(
         viewModel.onEvent(EditorUiEvent.TriggerQuickFix(pos.first, pos.second))
     }
 
+    fun triggerRefactor() {
+        val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
+        val selection = controller?.takeIf { it.hasSelection() }?.getSelectionLspRange()
+        viewModel.onEvent(EditorUiEvent.TriggerRefactor(pos.first, pos.second, selection))
+    }
+
+    fun openPalette() {
+        val plugins = pluginToolbarItems.map { PalettePluginCommand(it.pluginId, it.commandId, it.title) }
+        viewModel.onEvent(EditorUiEvent.OpenCommandPalette(plugins))
+    }
+
     fun triggerRename() {
         val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
         val word = controller?.getWordAtCursor() ?: ""
@@ -203,6 +223,42 @@ fun EditorRoute(
     }
 
     fun cursorPos() = controller?.getCursorLineAndColumn() ?: (0 to 0)
+
+    fun runBuiltin(action: BuiltinPaletteAction) {
+        val (line, col) = cursorPos()
+        when (action) {
+            BuiltinPaletteAction.QUICK_FIX -> triggerQuickFix()
+            BuiltinPaletteAction.REFACTOR -> triggerRefactor()
+            BuiltinPaletteAction.RENAME -> triggerRename()
+            BuiltinPaletteAction.EXTRACT_STRING -> viewModel.onEvent(EditorUiEvent.ExtractStringResource)
+            BuiltinPaletteAction.ORGANIZE_IMPORTS_SERVER -> viewModel.onEvent(EditorUiEvent.RunSourceAction("source.organizeImports"))
+            BuiltinPaletteAction.ORGANIZE_IMPORTS_LOCAL -> controller?.organizeImports(removeUnused = false)
+            BuiltinPaletteAction.FIX_ALL -> viewModel.onEvent(EditorUiEvent.RunSourceAction("source.fixAll"))
+            BuiltinPaletteAction.DEFINITION -> triggerDefinition()
+            BuiltinPaletteAction.TYPE_DEFINITION -> viewModel.onEvent(EditorUiEvent.GoToTypeDefinition(line, col))
+            BuiltinPaletteAction.IMPLEMENTATION ->
+                viewModel.onEvent(EditorUiEvent.GoToImplementation(line, col, controller?.getWordAtCursor().orEmpty()))
+            BuiltinPaletteAction.REFERENCES -> triggerReferences()
+            BuiltinPaletteAction.OUTLINE -> viewModel.onEvent(EditorUiEvent.ToggleOutline)
+            BuiltinPaletteAction.GO_TO_LINE -> showGoToLine = true
+            BuiltinPaletteAction.HOVER -> viewModel.onEvent(EditorUiEvent.ShowHover(line, col))
+            BuiltinPaletteAction.SIGNATURE_HELP -> viewModel.onEvent(EditorUiEvent.RequestSignatureHelp(line, col))
+            BuiltinPaletteAction.FORMAT -> formatCode()
+            BuiltinPaletteAction.SEARCH -> viewModel.onEvent(EditorUiEvent.ToggleSearchBar)
+            BuiltinPaletteAction.SAVE -> viewModel.onEvent(EditorUiEvent.Save)
+            BuiltinPaletteAction.LSP_SESSIONS -> viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog)
+            BuiltinPaletteAction.AI_ASSISTANT -> viewModel.onEvent(EditorUiEvent.ToggleAiAssistant(true))
+        }
+    }
+
+    fun runPaletteItem(item: PaletteItem) {
+        viewModel.onEvent(EditorUiEvent.DismissCommandPalette)
+        when (val action = item.action) {
+            is PaletteAction.Builtin -> runBuiltin(action.action)
+            is PaletteAction.ServerCommand -> viewModel.onEvent(EditorUiEvent.RunServerCommand(action.command))
+            is PaletteAction.Plugin -> viewModel.onEvent(EditorUiEvent.RunPluginCommand(action.pluginId, action.commandId))
+        }
+    }
 
     // Signaturhilfe automatisch bei „(“ und „,“ anzeigen, bei „)“ ausblenden.
     LaunchedEffect(activeContent, controller) {
@@ -242,11 +298,15 @@ fun EditorRoute(
         modifier = modifier
             .fillMaxSize()
             .onPreviewKeyEvent { event ->
-                // Alt+Enter Shortcut für Quick-Fix
-                if (event.isAltPressed && event.key == Key.Enter && event.type == KeyEventType.KeyDown) {
-                    triggerQuickFix()
-                    true
-                } else false
+                // Alt+Enter Quick-Fix, Strg+Umschalt+P Befehlspalette, Strg+Umschalt+R Refactoring, Umschalt+F6 Umbenennen
+                if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                when {
+                    event.isAltPressed && event.key == Key.Enter -> { triggerQuickFix(); true }
+                    event.isCtrlPressed && event.isShiftPressed && event.key == Key.P -> { openPalette(); true }
+                    event.isCtrlPressed && event.isShiftPressed && event.key == Key.R -> { triggerRefactor(); true }
+                    event.isShiftPressed && event.key == Key.F6 -> { triggerRename(); true }
+                    else -> false
+                }
             },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
@@ -339,6 +399,8 @@ fun EditorRoute(
                     }
                 },
                 onQuickFix = ::triggerQuickFix,
+                onRefactor = ::triggerRefactor,
+                onOpenPalette = ::openPalette,
                 onRename = ::triggerRename,
                 onOutline = { viewModel.onEvent(EditorUiEvent.ToggleOutline) },
                 onDefinition = ::triggerDefinition,
@@ -462,10 +524,22 @@ fun EditorRoute(
 
     // Task 31 Sheets & Dialogs
     if (uiState.isCodeActionsSheetVisible) {
+        val refactorMode = uiState.codeActionsMode == CodeActionsMode.REFACTOR
         QuickFixSheet(
             actions = uiState.codeActions,
+            title = stringRes(if (refactorMode) R.string.refactor_title else R.string.lsp_quick_fixes_title),
+            emptyText = stringRes(if (refactorMode) R.string.refactor_none else R.string.lsp_no_code_actions),
             onSelectAction = { viewModel.onEvent(EditorUiEvent.ApplyCodeAction(it)) },
             onDismiss = { viewModel.onEvent(EditorUiEvent.DismissQuickFix) }
+        )
+    }
+
+    uiState.commandPalette?.let { palette ->
+        CommandPaletteSheet(
+            state = palette,
+            onQueryChange = { viewModel.onEvent(EditorUiEvent.CommandPaletteQueryChanged(it)) },
+            onSelect = ::runPaletteItem,
+            onDismiss = { viewModel.onEvent(EditorUiEvent.DismissCommandPalette) }
         )
     }
 
@@ -718,6 +792,8 @@ private fun EditorToolbar(
     onToggleSearch: () -> Unit,
     onShare: () -> Unit,
     onQuickFix: () -> Unit,
+    onRefactor: () -> Unit,
+    onOpenPalette: () -> Unit,
     onRename: () -> Unit,
     onOutline: () -> Unit,
     onDefinition: () -> Unit,
@@ -739,6 +815,11 @@ private fun EditorToolbar(
         modifier = modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Befehlspalette: alle verfügbaren Befehle (eingebaut, Sprachserver, Plugins) durchsuchbar
+        TooltipIconButton(onClick = onOpenPalette, label = stringRes(R.string.palette_open)) {
+            Icon(Icons.Filled.KeyboardCommandKey, contentDescription = stringRes(R.string.palette_open))
+        }
+
         // KI-Assistent & Schnellaktionen
         TooltipIconButton(onClick = onOpenAiAssistant, label = stringRes(R.string.ai_assistant_title)) {
             Icon(
@@ -787,6 +868,13 @@ private fun EditorToolbar(
                     contentDescription = stringRes(R.string.lsp_quick_fix),
                     tint = if (hasDiagnostics) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        }
+
+        // Refactoring: Server-Refactorings (refactor.*, source.*) + „String-Ressource extrahieren“
+        if (!isImage && activePath != null) {
+            TooltipIconButton(onClick = onRefactor, label = stringRes(R.string.refactor_title)) {
+                Icon(Icons.Filled.Handyman, contentDescription = stringRes(R.string.refactor_title))
             }
         }
 

@@ -11,6 +11,23 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Befehlspalette, Refactoring-Menü, Verweise beim Umbenennen)
+- **Befehlspalette** im Editor (Werkzeugleiste ⌘-Symbol, `Strg+Umschalt+P`): durchsuchbare Liste aller Befehle, die
+  in der aktuellen Lage funktionieren – eingebaute Aktionen (Umbenennen, Refactoring, Definition, Verwendungen, Imports,
+  Formatieren …), die vom Sprachserver gemeldeten Befehle (`executeCommandProvider.commands`, ohne interne wie
+  `*.apply*`/`_…`) und Plugin-Befehle. Unscharfe Suche („imp org“, „gzz“), ohne Suchtext nach Gruppen.
+- **Refactoring-Menü** (Werkzeug-Symbol, `Strg+Umschalt+R`): Code-Actions der Arten `refactor.*` und `source.*` für
+  Cursor bzw. Auswahl (`context.only`), sortiert nach Extrahieren/Inline/Umschreiben/Verschieben/Imports, dazu
+  „String-Ressource extrahieren“. Palette: „Imports organisieren (Sprachserver)“ und „Alle behebbaren Probleme beheben“
+  (`source.organizeImports`/`source.fixAll`; eine Aktion wird direkt angewendet). `Umschalt+F6` = Umbenennen.
+- **Umbenennen im Dateibaum passt Verweise an:** zuerst `workspace/willRenameFiles` der Sprachserver; liefern sie nichts,
+  ändert CodeForge bei Ordnern in `src/*/java|kotlin` selbst `package`- und `import`-Zeilen (auch `import static`) sowie
+  voll qualifizierte Klassennamen in XML (Manifest, Layouts). Vorher Dialog mit Anzahl, Package `alt → neu` und
+  Dateiliste: „Umbenennen und anpassen“ / „Nur umbenennen“. Ungespeicherte Puffer werden vorher gespeichert, danach
+  `workspace/didRenameFiles`. Nicht erfasst: voll qualifizierte Namen im Code ohne `import`.
+- LSP-Client: liest `codeActionKinds`, `executeCommandProvider.commands`, `workspace.fileOperations`; meldet selbst
+  `workspace.fileOperations` und `executeCommand`. Server-Befehle gehen an den Server, der sie gemeldet hat.
+
 ### Behoben (Absturz `PatternSyntaxException`)
 - Absturz beim Öffnen von „String-Ressource extrahieren“ (3.0.7): Der Regex `\$\{[^}]*}` enthielt ein unescaptes `}`.
   Die JVM akzeptiert das (Tests grün), Androids ICU-Regex nicht. Jetzt `\}`, Regex einmalig als Konstante.

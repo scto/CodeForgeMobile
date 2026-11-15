@@ -32,6 +32,11 @@ import com.codeforge.feature.editor.outline.SymbolOutlineExtractor
 import com.codeforge.feature.editor.textmate.TextMateAssetLoader
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import com.codeforge.libs.dependency_updater_api.DependencyUpdateRepository
+import com.codeforge.feature.editor.palette.CommandPaletteState
+import com.codeforge.feature.editor.palette.PaletteContext
+import com.codeforge.feature.editor.palette.PalettePluginCommand
+import com.codeforge.feature.editor.palette.buildPaletteItems
+import com.codeforge.feature.editor.palette.codeActionKindRank
 import com.codeforge.libs.lsp_client.LspWorkspaceEditApplier
 import com.codeforge.libs.lsp_client.WorkspaceEditException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -647,6 +652,15 @@ class EditorViewModel @Inject constructor(
             // LSP Task 31 Events
             is EditorUiEvent.TriggerQuickFix -> triggerQuickFix(event.line, event.col)
             EditorUiEvent.DismissQuickFix -> _uiState.update { it.copy(isCodeActionsSheetVisible = false) }
+            is EditorUiEvent.OpenCommandPalette -> openCommandPalette(event.pluginCommands)
+            is EditorUiEvent.CommandPaletteQueryChanged -> _uiState.update { s ->
+                s.copy(commandPalette = s.commandPalette?.copy(query = event.query))
+            }
+            EditorUiEvent.DismissCommandPalette -> _uiState.update { it.copy(commandPalette = null) }
+            is EditorUiEvent.RunServerCommand -> runServerCommand(event.command)
+            EditorUiEvent.ExtractStringResource -> _uiState.value.activeFile?.path?.let(::extractStringAction)?.let(::applyCodeAction)
+            is EditorUiEvent.TriggerRefactor -> triggerRefactor(event.line, event.col, event.range)
+            is EditorUiEvent.RunSourceAction -> runSourceAction(event.kind)
             is EditorUiEvent.ApplyCodeAction -> applyCodeAction(event.action)
 
             is EditorUiEvent.TriggerRename -> triggerRename(event.line, event.col, event.fallbackName)
@@ -1194,24 +1208,76 @@ class EditorViewModel @Inject constructor(
         result.onSuccess { lspActions ->
             actions.addAll(lspActions)
         }
-        val ext = File(active.path).extension.lowercase()
-        if (ext in setOf("kt", "java", "xml")) {
-            actions.add(
-                LspCodeAction(
-                    title = Res.string(R.string.hardcoded_strings_extract_action),
-                    kind = "refactor.extract",
-                    command = LspCommand(
-                        title = Res.string(R.string.hardcoded_strings_extract_action),
-                        command = "codeforge.extractStringResource",
-                        arguments = listOf(active.path)
-                    )
-                )
-            )
-        }
+        extractStringAction(active.path)?.let { actions.add(it) }
         if (actions.isNotEmpty()) {
-            _uiState.update { it.copy(codeActions = actions, isCodeActionsSheetVisible = true) }
+            _uiState.update {
+                it.copy(codeActions = actions, isCodeActionsSheetVisible = true, codeActionsMode = CodeActionsMode.QUICK_FIX)
+            }
         } else {
             _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_no_code_actions)))
+        }
+    }
+
+    private fun extractStringAction(path: String): LspCodeAction? {
+        if (File(path).extension.lowercase() !in setOf("kt", "java", "xml")) return null
+        val title = Res.string(R.string.hardcoded_strings_extract_action)
+        return LspCodeAction(
+            title = title,
+            kind = "refactor.extract",
+            command = LspCommand(title = title, command = "codeforge.extractStringResource", arguments = listOf(path))
+        )
+    }
+
+    private fun openCommandPalette(pluginCommands: List<PalettePluginCommand>) {
+        val state = _uiState.value
+        val context = PaletteContext(
+            filePath = state.activeFile?.path,
+            isLspConnected = state.isLspConnected,
+            capabilities = state.serverCapabilities,
+            pluginCommands = pluginCommands
+        )
+        _uiState.update { it.copy(commandPalette = CommandPaletteState(allItems = buildPaletteItems(context) { id -> Res.string(id) })) }
+    }
+
+    private fun runServerCommand(command: String) = viewModelScope.launch {
+        _uiState.update { it.copy(commandPalette = null) }
+        lspClient.executeCommand(command, emptyList())
+            .onSuccess { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.palette_server_command_done, command))) }
+            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.palette_server_command_failed, it.message.orEmpty()))) }
+    }
+
+    // Refactorings (`refactor.*`, `source.*`) an Cursor/Auswahl, nach Art sortiert; dazu „String-Ressource extrahieren“.
+    private fun triggerRefactor(line: Int, col: Int, selection: LspRange?) = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        val range = selection ?: LspPosition(line, col).let { LspRange(it, it) }
+        val fromServer = if (_uiState.value.isLspConnected) {
+            lspClient.requestCodeActionsOfKind(active.path, range, REFACTOR_KINDS).getOrDefault(emptyList())
+        } else {
+            emptyList()
+        }
+        val actions = (fromServer + listOfNotNull(extractStringAction(active.path)))
+            .sortedWith(compareBy({ codeActionKindRank(it.kind) }, { !it.isPreferred }))
+        if (actions.isEmpty()) {
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.refactor_none)))
+            return@launch
+        }
+        _uiState.update {
+            it.copy(codeActions = actions, isCodeActionsSheetVisible = true, codeActionsMode = CodeActionsMode.REFACTOR)
+        }
+    }
+
+    // Quelltext-Aktion für die ganze Datei: genau eine → direkt anwenden, mehrere → Auswahl.
+    private fun runSourceAction(kind: String) = viewModelScope.launch {
+        val active = _uiState.value.activeFile ?: return@launch
+        val lastLine = active.content.count { it == '\n' }
+        val range = LspRange(LspPosition(0, 0), LspPosition(lastLine + 1, 0))
+        val actions = lspClient.requestCodeActionsOfKind(active.path, range, listOf(kind)).getOrDefault(emptyList())
+        when (actions.size) {
+            0 -> _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.refactor_no_organize_imports)))
+            1 -> applyCodeAction(actions.single())
+            else -> _uiState.update {
+                it.copy(codeActions = actions, isCodeActionsSheetVisible = true, codeActionsMode = CodeActionsMode.REFACTOR)
+            }
         }
     }
 
@@ -1633,6 +1699,8 @@ class EditorViewModel @Inject constructor(
     }
 
     companion object {
+        private val REFACTOR_KINDS = listOf("refactor", "source")
+
         fun languageIdFor(path: String): String {
             val extension = path.substringAfterLast('.', "").lowercase()
             return when (extension) {
