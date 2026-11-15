@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.0.9] - 2026-11-15
+
 ### Hinzugefügt (Plugin-API 3, Teil 5: Sprache, Ausführen, Oberfläche)
 - Vervollständigungs- und Hover-Quellen für Plugins (`PluginLanguagePoints.COMPLETION_PROVIDER`/`HOVER_PROVIDER`):
   Vorschläge werden mit denen des Sprachservers zusammengeführt, Hover greift, wenn der Server nichts liefert.
