@@ -56,4 +56,14 @@ class GradleTaskListParserTest {
         assertEquals(listOf(":app:lintDebug"), filterTasks(tasks, "LINT").map { it.name })
         assertEquals(listOf("clean"), filterTasks(tasks, "build").map { it.name })
     }
+
+    @Test
+    fun listAllTaskIsAddedToHelpGroup() {
+        val infos = listOf(GradleTaskInfo("assembleDebug", "Build"), GradleTaskInfo("help", "Help"), GradleTaskInfo("tasks", "Help"))
+        val result = GradleTaskListParser.withListAllTask(infos)
+        assertEquals(listOf("assembleDebug", "tasks --all", "help", "tasks"), result.map { it.name })
+        assertEquals("Help", result[1].group)
+        assertEquals(result, GradleTaskListParser.withListAllTask(result))
+        assertEquals("tasks --all", GradleTaskListParser.withListAllTask(emptyList()).single().name)
+    }
 }

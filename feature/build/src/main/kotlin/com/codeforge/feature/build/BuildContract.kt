@@ -46,7 +46,7 @@ data class BuildUiState(
     val problems: List<BuildProblem> = emptyList(),
     val problemFilter: ProblemFilter = ProblemFilter.ALL,
     val selectedTask: String = "assembleDebug",
-    val availableTasks: List<String> = listOf("assembleDebug", "assembleRelease", "clean", "test", "lint"),
+    val availableTasks: List<String> = listOf("assembleDebug", "assembleRelease", "clean", "test", "lint", GradleTaskListParser.LIST_ALL_TASK),
     /** Tasks mit Gruppe/Beschreibung (aus `tasks --all`); leer, bis das Projekt geladen wurde. */
     val availableTaskInfos: List<GradleTaskInfo> = emptyList(),
     val customTaskInput: String = "",

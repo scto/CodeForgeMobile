@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Build: `tasks --all`)
+- Task-Auswahl im Build-Bereich enthält `tasks --all` (Gruppe „Help“, auch vor dem ersten Sync). Startet man ihn dort, zeigt die Ausgabe alle Tasks samt Beschreibung und die Task-Liste wird zugleich aktualisiert (wie „Gradle-Sync“).
+- Test `testRunRequestBridgeTriggersTestsTabAndExecution` wartet auf den Tab-Wechsel statt fester 250 ms (war unter Last wackelig).
+
 ### Hinzugefügt (Editor: Ligaturen, Soft-Tab, Backspace)
 - Editor-Einstellungen, alle standardmäßig an: „Schriftart-Ligaturen“ (`isLigatureEnabled`), „Soft-Tab benutzen“ (Leerzeichen statt `\t`; gilt für TextMate, Tree-sitter und Klartext über die neue Hülle `TabPolicyLanguage`, TextMate-Einrückung folgt Tab-Breite und Soft-Tab), „Leere Zeilen mit Backspace löschen“ (`props.deleteEmptyLineFast`), „Tab mit Backspace löschen“ (`props.deleteMultiSpaces` = Tab-Breite). Proto invertiert gespeichert (`font_ligatures_disabled`, `hard_tabs`, `delete_empty_line_fast_disabled`, `backspace_deletes_tab_disabled`).
 - Zeilenumbruch, Sticky Scroll und Zeilennummern anheften: Beschreibungen ergänzt bzw. angepasst (die Funktionen gab es schon).

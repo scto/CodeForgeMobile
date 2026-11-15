@@ -40,8 +40,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-/** Task für den Gradle-Sync: konfiguriert alle Module und löst Plugins/Abhängigkeiten auf. */
-private const val SYNC_TASK = "tasks --all"
+// Task für den Gradle-Sync: konfiguriert alle Module und löst Plugins/Abhängigkeiten auf.
+private const val SYNC_TASK = GradleTaskListParser.LIST_ALL_TASK
 
 /** ViewModel des Build-Panels: Gradle-Builds, Probleme, Logcat, Tests, APK-Installation. */
 @HiltViewModel
@@ -199,7 +199,8 @@ class BuildViewModel internal constructor(
                 _uiState.update { it.copy(activeTab = intent.tab) }
             }
             is BuildUiIntent.StartBuild -> {
-                startBuild(intent.taskName, autoRunOnSuccess = false)
+                // `tasks --all` aus der Auswahl zeigt die Ausgabe und aktualisiert zugleich die Task-Liste.
+                startBuild(intent.taskName, autoRunOnSuccess = false, isSync = intent.taskName.trim() == SYNC_TASK)
             }
             is BuildUiIntent.StartBuildAndRun -> {
                 startBuild(intent.taskName, autoRunOnSuccess = true)
@@ -422,7 +423,7 @@ class BuildViewModel internal constructor(
                             _uiState.update { it.copy(isBuilding = false) }
                             if (event.success) {
                                 if (isSync) {
-                                    val infos = GradleTaskListParser.parseDetailed(syncOutput.orEmpty())
+                                    val infos = GradleTaskListParser.withListAllTask(GradleTaskListParser.parseDetailed(syncOutput.orEmpty()))
                                     if (infos.isNotEmpty()) {
                                         _uiState.update { it.copy(availableTasks = infos.map { t -> t.name }, availableTaskInfos = infos) }
                                     }

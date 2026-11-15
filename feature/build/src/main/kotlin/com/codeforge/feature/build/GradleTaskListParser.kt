@@ -13,6 +13,12 @@ data class GradleTaskInfo(val name: String, val group: String = "", val descript
 /** Liest die Tasks aus der Ausgabe von `gradlew tasks --all`. */
 internal object GradleTaskListParser {
 
+    /** Listet alle Tasks samt Beschreibung; auch als Eintrag in der Task-Auswahl. */
+    const val LIST_ALL_TASK = "tasks --all"
+
+    private const val HELP_GROUP = "Help"
+
+
     private val taskLine = Regex("""^([A-Za-z:][\w:.\-]*)(?: - (.*))?$""")
     private val underline = Regex("""^-{3,}$""")
 
@@ -36,5 +42,16 @@ internal object GradleTaskListParser {
             result.getOrPut(name) { GradleTaskInfo(name, group, m.groupValues[2].trim()) }
         }
         return result.values.sortedBy { it.name }
+    }
+
+    /**
+     * Ergänzt [LIST_ALL_TASK] in der Gruppe „Help“ (Gradle selbst zeigt dort nur `tasks`), damit die vollständige
+     * Liste aus der Task-Auswahl gestartet werden kann.
+     */
+    fun withListAllTask(infos: List<GradleTaskInfo>): List<GradleTaskInfo> {
+        if (infos.any { it.name == LIST_ALL_TASK }) return infos
+        val entry = GradleTaskInfo(LIST_ALL_TASK, HELP_GROUP, "Displays all tasks of the project, including those without a group.")
+        val helpIndex = infos.indexOfFirst { it.group.equals(HELP_GROUP, ignoreCase = true) }
+        return if (helpIndex < 0) infos + entry else infos.toMutableList().apply { add(helpIndex, entry) }
     }
 }

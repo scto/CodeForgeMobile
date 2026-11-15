@@ -129,7 +129,7 @@ class BuildViewModelTest {
 
         assertEquals("tasks --all", fakeRepository.lastTask)
         assertEquals("assembleRelease", viewModel.uiState.value.selectedTask)
-        assertEquals(listOf("assembleRelease", "customTask"), viewModel.uiState.value.availableTasks)
+        assertEquals(listOf("assembleRelease", "customTask", "tasks --all"), viewModel.uiState.value.availableTasks)
         assertFalse(viewModel.uiState.value.isBuilding)
     }
 
@@ -827,7 +827,10 @@ class BuildViewModelTest {
         )
 
         fakeTestRunBridge.requestRunTest(moduleGradlePath = ":core:domain", testFilter = "MyTest.testA")
-        delay(250)
+        // Auf den Tab-Wechsel warten statt fester Pause (unter Last brauchte er länger als 250 ms).
+        kotlinx.coroutines.withTimeoutOrNull(3_000) {
+            while (viewModel.uiState.value.activeTab != BuildTab.TESTS) delay(20)
+        }
 
         assertEquals(BuildTab.TESTS, viewModel.uiState.value.activeTab)
     }
