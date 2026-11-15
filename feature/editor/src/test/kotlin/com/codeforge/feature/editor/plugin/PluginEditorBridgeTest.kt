@@ -16,6 +16,8 @@ import com.codeforge.libs.plugin_api.DefinitionProvider
 import com.codeforge.libs.plugin_api.PluginFileEdit
 import com.codeforge.libs.plugin_api.PluginLanguagePoints
 import com.codeforge.libs.plugin_api.PluginLocation
+import com.codeforge.libs.plugin_api.PluginTestItem
+import com.codeforge.libs.plugin_api.TestProvider
 import com.codeforge.libs.plugin_api.ReferenceProvider
 import com.codeforge.libs.plugin_api.RenameProvider
 import com.codeforge.libs.plugin_api.RunConsole
@@ -206,5 +208,41 @@ class PluginEditorBridgeTest {
         assertEquals(setOf("file:///p/A.kt", "file:///p/B.kt"), edit.changes.keys)
         assertEquals("neu", edit.changes.getValue("file:///p/A.kt").single().newText)
         assertNull(PluginEditorBridge(ExtensionRegistryImpl(), null).rename(ctx, "neu"))
+    }
+
+    private fun provider(fail: Boolean = false) = object : TestProvider {
+        override val id = "t"
+        override fun appliesTo(filePath: String, languageId: String) = languageId == "kotlin"
+        override suspend fun discover(context: EditorContext) =
+            listOf(PluginTestItem("b", "B", 2), PluginTestItem("a", "A", 0), PluginTestItem("a", "Doppelt", 1), PluginTestItem("x", "Zu weit", 99))
+        override suspend fun run(filePath: String, tests: List<PluginTestItem>, console: RunConsole): Int {
+            if (fail) error("kaputt")
+            tests.forEach { console.reportTest(it.id, passed = it.id == "a", message = null) }
+            return tests.size
+        }
+    }
+
+    @Test
+    fun testsDiscoveredSortedAndRun() = runTest {
+        val reg = ExtensionRegistryImpl()
+        reg.register(PluginLanguagePoints.TEST_PROVIDER, provider(), "p")
+        val bridge = PluginEditorBridge(reg, null)
+        val found = bridge.discoverTests(ctx)
+        assertEquals(listOf("a" to 0, "b" to 2), found.map { it.filterTarget to it.line })
+        assertEquals("p/t", found.first().pluginRef)
+        assertTrue(bridge.discoverTests(ctx.copy(languageId = "java")).isEmpty())
+        val console = Console()
+        assertEquals(2, bridge.runTests("p/t", ctx.filePath, found, console))
+        assertEquals(listOf("a" to true, "b" to false), console.tests)
+        assertNull(bridge.runTests("p/weg", ctx.filePath, found, console))
+    }
+
+    @Test
+    fun failingTestRunIsLogged() = runTest {
+        val reg = ExtensionRegistryImpl()
+        reg.register(PluginLanguagePoints.TEST_PROVIDER, provider(fail = true), "p")
+        val logs = Logs()
+        assertEquals(-1, PluginEditorBridge(reg, logs).runTests("p/t", ctx.filePath, emptyList(), Console()))
+        assertEquals("p", logs.lines.single().first)
     }
 }

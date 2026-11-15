@@ -33,6 +33,9 @@ sealed interface PaletteAction {
     /** Ausführen-/Test-Eintrag eines Plugins; [ref] = `pluginId/taskId`. */
     data class PluginRunTask(val ref: String) : PaletteAction
 
+    /** Alle Plugin-Tests der aktiven Datei ausführen. */
+    data object PluginFileTests : PaletteAction
+
     /** Bereich (Oberfläche) eines Plugins; [ref] = `pluginId/panelId`. */
     data class PluginPanel(val ref: String) : PaletteAction
 }

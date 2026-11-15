@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -101,17 +102,24 @@ private fun RunHeader(state: PluginRunState, onCancel: () -> Unit, modifier: Mod
 @Composable
 private fun TestSummary(tests: List<PluginTestResult>, modifier: Modifier = Modifier) {
     val passed = remember(tests) { tests.count { it.passed } }
-    val failed = remember(tests) { tests.filterNot { it.passed }.take(MAX_FAILED_SHOWN) }
+    // Fehlgeschlagene zuerst, dann die bestandenen.
+    val shown = remember(tests) { tests.sortedBy { it.passed }.take(MAX_TESTS_SHOWN) }
     Column(modifier = modifier.padding(vertical = 4.dp)) {
         Text(
             stringRes(R.string.plugin_test_summary, passed, tests.size - passed),
             style = MaterialTheme.typography.labelLarge,
-            color = if (failed.isEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            color = if (passed == tests.size) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
         )
-        failed.forEach { t ->
-            Text("✗ ${t.name}" + t.message?.let { ": $it" }.orEmpty(), style = MaterialTheme.typography.bodySmall)
+        Column(modifier = Modifier.heightIn(max = 180.dp).verticalScroll(rememberScrollState())) {
+            shown.forEach { t ->
+                Text(
+                    (if (t.passed) "✓ " else "✗ ") + t.name + t.message?.takeIf { !t.passed }?.let { ": $it" }.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (t.passed) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }
 
-private const val MAX_FAILED_SHOWN = 20
+private const val MAX_TESTS_SHOWN = 200

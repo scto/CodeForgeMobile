@@ -387,6 +387,7 @@ public final class com/codeforge/libs/plugin_api/PluginLanguagePoints {
 	public final fun getREFERENCE_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
 	public final fun getRENAME_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
 	public final fun getRUN_TASK ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+	public final fun getTEST_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
 }
 
 public final class com/codeforge/libs/plugin_api/PluginLocation {
@@ -445,6 +446,21 @@ public abstract interface class com/codeforge/libs/plugin_api/PluginSettings {
 public final class com/codeforge/libs/plugin_api/PluginSettings$DefaultImpls {
 	public static fun getBoolean (Lcom/codeforge/libs/plugin_api/PluginSettings;Ljava/lang/String;)Z
 	public static fun getInt (Lcom/codeforge/libs/plugin_api/PluginSettings;Ljava/lang/String;)I
+}
+
+public final class com/codeforge/libs/plugin_api/PluginTestItem {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;I)Lcom/codeforge/libs/plugin_api/PluginTestItem;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginTestItem;Ljava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginTestItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLine ()I
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/PluginUi {
@@ -509,6 +525,13 @@ public final class com/codeforge/libs/plugin_api/RunTask$Companion {
 public final class com/codeforge/libs/plugin_api/RunTask$DefaultImpls {
 	public static fun appliesTo (Lcom/codeforge/libs/plugin_api/RunTask;Ljava/lang/String;)Z
 	public static fun getKind (Lcom/codeforge/libs/plugin_api/RunTask;)Ljava/lang/String;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/TestProvider {
+	public abstract fun appliesTo (Ljava/lang/String;Ljava/lang/String;)Z
+	public abstract fun discover (Lcom/codeforge/libs/plugin_api/EditorContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun run (Ljava/lang/String;Ljava/util/List;Lcom/codeforge/libs/plugin_api/RunConsole;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/codeforge/libs/plugin_api/TextEdit {

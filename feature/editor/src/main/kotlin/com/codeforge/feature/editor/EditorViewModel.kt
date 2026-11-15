@@ -39,6 +39,13 @@ import com.codeforge.feature.editor.palette.buildPaletteItems
 import com.codeforge.feature.editor.palette.codeActionKindRank
 import com.codeforge.feature.editor.plugin.BuiltInEditorActions
 import com.codeforge.feature.editor.plugin.PluginEditorBridge
+import com.codeforge.feature.editor.overlay.TestTarget
+import com.codeforge.feature.editor.plugin.discoverTests
+import com.codeforge.feature.editor.plugin.runTests
+import com.codeforge.feature.editor.palette.PaletteItem
+import com.codeforge.feature.editor.palette.PaletteAction
+import com.codeforge.feature.editor.palette.PaletteCategory
+import kotlinx.coroutines.flow.collectLatest
 import com.codeforge.feature.editor.plugin.definitions
 import com.codeforge.feature.editor.plugin.references
 import com.codeforge.feature.editor.plugin.rename
@@ -146,6 +153,8 @@ class EditorViewModel @Inject constructor(
 
     private var syncWorkspaceJob: Job? = null
     private var pluginRunJob: Job? = null
+    // Ergebnis des letzten Laufs je Plugin-Test: "Pfad|Name" → bestanden.
+    private val pluginTestResults = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
     private var pendingCloseAction: (() -> Unit)? = null
 
     /** Dokumentversion je Pfad, für LSP `textDocument/didChange` (versionierte Syncs). */
@@ -202,6 +211,7 @@ class EditorViewModel @Inject constructor(
         observeExternalChanges()
         observeDirectoryChanges()
         observeUpdateAnnotations()
+        observePluginTests()
         observeServerCapabilities()
         setupApplyEditHandler()
         observeBreakpoints()
@@ -781,9 +791,17 @@ class EditorViewModel @Inject constructor(
                 }
             }
             is EditorUiEvent.RunTestTarget -> {
-                viewModelScope.launch {
-                    testRunRequestBridge?.requestRunTest(testFilter = event.target.filterTarget)
+                val ref = event.target.pluginRef
+                if (ref != null) {
+                    runPluginTests(ref, listOf(event.target))
+                } else {
+                    viewModelScope.launch { testRunRequestBridge?.requestRunTest(testFilter = event.target.filterTarget) }
                 }
+            }
+            EditorUiEvent.RunPluginFileTests -> {
+                _uiState.update { it.copy(commandPalette = null) }
+                // Je Quelle ein Lauf; mehrere Quellen für dieselbe Datei sind die Ausnahme – die erste gewinnt.
+                _uiState.value.activePluginTests.firstOrNull()?.pluginRef?.let { runPluginTests(it, emptyList()) }
             }
             EditorUiEvent.ToggleLspSessionsDialog -> {
                 _uiState.update { it.copy(isLspSessionsDialogVisible = !it.isLspSessionsDialogVisible) }
@@ -1326,12 +1344,46 @@ class EditorViewModel @Inject constructor(
     fun panels(): Map<String, PluginPanel> =
         extensionRegistry?.contributions(PluginUiExtensionPoints.PANEL)?.associate { "${it.pluginId}/${it.value.id}" to it.value }.orEmpty()
 
+    private fun fileTestsItem(state: EditorUiState): List<PaletteItem> =
+        if (state.activePluginTests.isEmpty()) emptyList()
+        else listOf(PaletteItem(PaletteAction.PluginFileTests, Res.string(R.string.plugin_tests_file), PaletteCategory.PLUGIN))
+
+    // Sucht nach Änderungen (entprellt) die Tests der aktiven Datei bei den Test-Quellen der Plugins.
+    @OptIn(FlowPreview::class)
+    private fun observePluginTests() = viewModelScope.launch {
+        val bridge = editorActions ?: return@launch
+        _uiState.map { s -> s.activeFile?.let { it.path to it.content } }.distinctUntilChanged().debounce(TEST_DISCOVERY_DEBOUNCE_MS)
+            .collectLatest { active ->
+                val found = if (active == null) emptyList()
+                else bridge.discoverTests(EditorContext(active.first, languageIdFor(active.first), active.second, 0, 0, 0))
+                _uiState.update { it.copy(pluginTests = withResults(active?.first, found), pluginTestsPath = active?.first) }
+            }
+    }
+
+    private fun withResults(path: String?, tests: List<TestTarget>): List<TestTarget> = tests.map { t ->
+        t.copy(passed = pluginTestResults["$path|${t.filterTarget}"] ?: pluginTestResults["$path|${t.label}"])
+    }
+
+    private fun runPluginTests(ref: String, targets: List<TestTarget>) {
+        val bridge = editorActions ?: return
+        val path = _uiState.value.activeFile?.path ?: return
+        val title = targets.singleOrNull()?.label ?: Res.string(R.string.plugin_tests_file)
+        launchPluginRun(title, onTest = { name, passed ->
+            pluginTestResults["$path|$name"] = passed
+            _uiState.update { s -> if (s.pluginTestsPath == path) s.copy(pluginTests = withResults(path, s.pluginTests)) else s }
+        }) { console -> bridge.runTests(ref, path, targets, console) ?: -1 }
+    }
+
     private fun runPluginTask(ref: String) {
         val bridge = editorActions ?: return
         val task = bridge.runTask(ref) ?: return
+        launchPluginRun(task.value.title) { console -> bridge.execute(task, console) }
+    }
+
+    private fun launchPluginRun(title: String, onTest: (String, Boolean) -> Unit = { _, _ -> }, block: suspend (RunConsole) -> Int) {
         val root = projectRoot.value ?: _uiState.value.activeFile?.path?.let { File(it).parent } ?: return
         pluginRunJob?.cancel()
-        _uiState.update { it.copy(pluginRun = PluginRunState(task.value.title)) }
+        _uiState.update { it.copy(pluginRun = PluginRunState(title)) }
         val console = object : RunConsole {
             override val projectRoot: String = root
             override val activeFilePath: String? = _uiState.value.activeFile?.path
@@ -1340,13 +1392,16 @@ class EditorViewModel @Inject constructor(
                 s.copy(pluginRun = s.pluginRun?.let { it.copy(lines = (it.lines + line.take(MAX_RUN_LINE)).takeLast(MAX_RUN_LINES)) })
             }
 
-            override fun reportTest(name: String, passed: Boolean, message: String?) = _uiState.update { s ->
-                s.copy(pluginRun = s.pluginRun?.let { it.copy(tests = it.tests + PluginTestResult(name, passed, message)) })
+            override fun reportTest(name: String, passed: Boolean, message: String?) {
+                _uiState.update { s ->
+                    s.copy(pluginRun = s.pluginRun?.let { it.copy(tests = (it.tests + PluginTestResult(name, passed, message)).takeLast(MAX_RUN_LINES)) })
+                }
+                onTest(name, passed)
             }
         }
         pluginRunJob = viewModelScope.launch {
             val code = try {
-                bridge.execute(task, console)
+                block(console)
             } catch (e: kotlinx.coroutines.CancellationException) {
                 _uiState.update { s -> s.copy(pluginRun = s.pluginRun?.copy(exitCode = CANCELLED_EXIT)) }
                 throw e
@@ -1438,7 +1493,8 @@ class EditorViewModel @Inject constructor(
         val root = projectRoot.value ?: state.activeFile?.path?.let { File(it).parent }
         val registryItems = editorContext(lastCaret)?.let { editorActions?.paletteItems(it) }.orEmpty() +
             root?.let { editorActions?.runTaskItems(it, Res.string(R.string.plugin_run_prefix), Res.string(R.string.plugin_test_prefix)) }.orEmpty() +
-            editorActions?.panelItems(panels().mapValues { it.value.title }).orEmpty()
+            editorActions?.panelItems(panels().mapValues { it.value.title }).orEmpty() +
+            fileTestsItem(state)
         val items = buildPaletteItems(context) { id -> Res.string(id) } + registryItems
         _uiState.update { it.copy(commandPalette = CommandPaletteState(allItems = items)) }
     }
@@ -1920,6 +1976,7 @@ class EditorViewModel @Inject constructor(
         private val REFACTOR_KINDS = listOf("refactor", "source")
         private const val MAX_ACTION_MESSAGE = 500
         private const val MAX_RUN_LINES = 2_000
+        private const val TEST_DISCOVERY_DEBOUNCE_MS = 400L
         private const val MAX_RUN_LINE = 2_000
         private const val CANCELLED_EXIT = 130
 

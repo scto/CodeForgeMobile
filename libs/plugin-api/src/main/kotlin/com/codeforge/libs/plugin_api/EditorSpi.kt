@@ -226,6 +226,34 @@ fun interface RenameProvider {
     suspend fun rename(context: EditorContext, newName: String): List<PluginFileEdit>?
 }
 
+/** Seit API 3: ein einzelner Test in einer Datei; [line] zählt ab 0 und bestimmt, wo der Start-Knopf erscheint. */
+data class PluginTestItem(
+    /** Eindeutig je Datei; wird [TestProvider.run] übergeben (z. B. `test_add` oder `Klasse::methode`). */
+    val id: String,
+    /** Angezeigter Name. Ergebnisse aus [RunConsole.reportTest] werden über [id] oder [name] zugeordnet. */
+    val name: String,
+    val line: Int
+)
+
+/**
+ * Seit API 3: Tests einer Sprache. Die App zeigt an jeder Testzeile einen Start-Knopf (grün/rot nach dem letzten
+ * Lauf) und in der Befehlspalette „Tests dieser Datei ausführen“. Ergebnisse meldet [run] über
+ * [RunConsole.reportTest].
+ */
+interface TestProvider {
+    /** Eindeutig je Plugin. */
+    val id: String
+
+    /** Ob die Datei Tests dieser Quelle enthalten kann (schnell, ohne Dateizugriff). */
+    fun appliesTo(filePath: String, languageId: String): Boolean
+
+    /** Tests im aktuellen Text der Datei; wird nach Änderungen erneut gerufen (2 s Zeitlimit). */
+    suspend fun discover(context: EditorContext): List<PluginTestItem>
+
+    /** Führt [tests] aus [filePath] aus (leer = alle Tests der Datei). Rückgabe = Exit-Code (0 = Erfolg). */
+    suspend fun run(filePath: String, tests: List<PluginTestItem>, console: RunConsole): Int
+}
+
 /** Seit API 3: weitere Andockstellen für Sprachen und Ausführen. */
 object PluginLanguagePoints {
     /** Zusätzliche Vervollständigung. Berechtigung `editor`. */
@@ -242,6 +270,9 @@ object PluginLanguagePoints {
 
     /** Umbenennen, wenn kein Sprachserver antwortet. Berechtigung `editor`. */
     val RENAME_PROVIDER: ExtensionPoint<RenameProvider> = ExtensionPoint("editor.renameProvider", PluginPermissions.EDITOR)
+
+    /** Tests je Datei mit Start-Knöpfen im Editor. Berechtigung `run`. */
+    val TEST_PROVIDER: ExtensionPoint<TestProvider> = ExtensionPoint("run.testProvider", PluginPermissions.RUN)
 
     /** Ausführen- und Test-Einträge. Berechtigung `run`. */
     val RUN_TASK: ExtensionPoint<RunTask> = ExtensionPoint("run.task", PluginPermissions.RUN)

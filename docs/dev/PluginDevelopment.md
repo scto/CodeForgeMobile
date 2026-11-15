@@ -784,8 +784,8 @@ Grenzen:
 - Das Plugin muss gegen **dieselbe Compose-Version** wie die App gebaut sein (`compileOnly`, nicht mitliefern),
   sonst stürzt der Bereich beim Öffnen ab.
 - Compose kennt keine Fehlergrenze: eine Ausnahme im Composable beendet die App. Ausnahmen also im Plugin abfangen.
-- Gutter-Markierungen für einzelne Tests und ein eigener Test-Reiter gibt es noch nicht; Tests erscheinen nur als
-  Zusammenfassung im Ausgabeblatt.
+- Start-Knöpfe an einzelnen Tests liefert eine Test-Quelle (Abschnitt 9.12); `RunTask` der Art `test` zeigt nur das
+  Ausgabeblatt.
 
 ### 9.10 Seit API 3: Fortschritt, Rückfragen, Benachrichtigungen
 
@@ -834,6 +834,33 @@ context.register(PluginLanguagePoints.RENAME_PROVIDER, RenameProvider { ctx, new
 - Zeitlimit: 10 s für Definition/Verwendungen, 30 s für Umbenennen; höchstens 500 Stellen bzw. 5000 Änderungen.
 - Umbenennen läuft durch dieselbe Vorschau wie beim Sprachserver und lässt sich rückgängig machen; Änderungen dürfen
   mehrere Dateien betreffen.
+
+### 9.12 Seit API 3: Tests je Datei mit Start-Knöpfen
+
+Eine Test-Quelle (Berechtigung `run`) meldet die Tests der aktiven Datei. Die App zeigt an jeder Testzeile einen
+Start-Knopf – nach einem Lauf grün oder rot – und in der Befehlspalette „Tests dieser Datei ausführen“.
+
+```kotlin
+class PytestProvider : TestProvider {
+    override val id = "pytest"
+    override fun appliesTo(filePath: String, languageId: String) = languageId == "python"
+    override suspend fun discover(context: EditorContext): List<PluginTestItem> =
+        context.text.lineSequence().mapIndexedNotNull { line, text ->
+            Regex("""^def (test_\w+)""").find(text)?.let { PluginTestItem(it.groupValues[1], it.groupValues[1], line) }
+        }.toList()
+    override suspend fun run(filePath: String, tests: List<PluginTestItem>, console: RunConsole): Int {
+        // pytest starten (hostServices.buildShellCommand), Ausgabe mit console.println weiterreichen …
+        tests.forEach { console.reportTest(it.id, passed = true) }
+        return 0
+    }
+}
+context.register(PluginLanguagePoints.TEST_PROVIDER, PytestProvider())
+```
+
+- `discover` läuft nach jeder Änderung (entprellt, 2 s Zeitlimit) und sollte nur den Text auswerten.
+- `run` mit leerer Liste heißt „alle Tests der Datei“. Ergebnisse über `console.reportTest(id oder name, …)` färben
+  die Knöpfe; das Ausgabeblatt listet alle Tests, fehlgeschlagene zuerst.
+- Die Ergebnisse gelten bis zum Schließen des Projekts; ein eigener Test-Reiter mit Verlauf fehlt noch.
 
 ## 10. Beispiel 6: Hybrid – LSP-Plugin mit Download
 

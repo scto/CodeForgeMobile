@@ -101,12 +101,17 @@ class PluginEditorBridge(
 
     /** Führt [task] aus; Ausnahmen werden protokolliert und als Exit-Code -1 gemeldet, Abbruch wird weitergereicht. */
     @Suppress("TooGenericExceptionCaught")
-    suspend fun execute(task: Contribution<RunTask>, console: RunConsole): Int = try {
-        withContext(Dispatchers.Default) { task.value.run(console) }
+    suspend fun execute(task: Contribution<RunTask>, console: RunConsole): Int =
+        exitCodeOf(task.pluginId, "run(${task.value.id})", console) { task.value.run(console) }
+
+    /** Führt [block] im Hintergrund aus und liefert seinen Exit-Code; Ausnahme → Protokoll, Ausgabe und -1. */
+    @Suppress("TooGenericExceptionCaught")
+    internal suspend fun exitCodeOf(pluginId: String, what: String, console: RunConsole, block: suspend () -> Int): Int = try {
+        withContext(Dispatchers.Default) { block() }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Throwable) {
-        log(task.pluginId, PluginLogLevel.ERROR, "run(${task.value.id}) fehlgeschlagen", e)
+        log(pluginId, PluginLogLevel.ERROR, "$what fehlgeschlagen", e)
         console.println(e.toString())
         -1
     }

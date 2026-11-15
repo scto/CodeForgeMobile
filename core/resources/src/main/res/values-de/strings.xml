@@ -2719,4 +2719,5 @@
     <string name="plugin_run_exit">Beendet (Exit %1$d)</string>
     <string name="plugin_test_summary">%1$d bestanden, %2$d fehlgeschlagen</string>
     <string name="flashbar_plugin">%1$s</string>
+    <string name="plugin_tests_file">Tests dieser Datei ausführen</string>
 </resources>

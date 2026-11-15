@@ -182,12 +182,21 @@ internal fun EditorOverlayLayer(
     }
 }
 
+private val TestPassedColor = Color(0x664CAF50)
+
 @Composable
 private fun TestRunChipView(target: TestTarget, onClick: (TestTarget) -> Unit) {
     Row(
         modifier = Modifier
             .padding(end = 6.dp)
-            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(8.dp))
+            .background(
+                when (target.passed) {
+                    true -> TestPassedColor
+                    false -> MaterialTheme.colorScheme.errorContainer
+                    null -> MaterialTheme.colorScheme.primaryContainer
+                },
+                RoundedCornerShape(8.dp)
+            )
             .clickable { onClick(target) }
             .padding(horizontal = 6.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically

@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugin-API 3: Tests je Datei)
+- Test-Quellen für Plugins (`PluginLanguagePoints.TEST_PROVIDER`, Berechtigung `run`): Start-Knopf an jeder Testzeile
+  (nach dem Lauf grün oder rot), „Tests dieser Datei ausführen“ in der Befehlspalette; das Ausgabeblatt listet alle
+  Tests, fehlgeschlagene zuerst.
+
 ### Geändert (Sprachserver: weniger Anfragen)
 - Gleiche LSP-Anfragen, die gleichzeitig laufen, teilen sich eine Antwort. Hover, Definition, Verwendungen, Gliederung,
   Faltung und Inlay-Hints werden bis zur nächsten Änderung eines Dokuments (höchstens 30 s) gemerkt; leere Antworten

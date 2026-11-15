@@ -9,7 +9,11 @@ data class TestTarget(
     val line: Int,
     val label: String,
     val filterTarget: String,
-    val isClass: Boolean
+    val isClass: Boolean,
+    /** Quelle `pluginId/providerId`, wenn der Test von einem Plugin stammt; sonst Gradle-Test. */
+    val pluginRef: String? = null,
+    /** Ergebnis des letzten Laufs (`null` = noch nicht gelaufen). */
+    val passed: Boolean? = null
 )
 
 /** Findet Tests im Quelltext. */

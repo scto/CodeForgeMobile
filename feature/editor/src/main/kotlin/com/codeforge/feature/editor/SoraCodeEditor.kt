@@ -124,6 +124,7 @@ fun SoraCodeEditor(
     onEditBreakpoint: (Int) -> Unit = {},
     onUpdateChipClick: (DependencyUpdate) -> Unit = {},
     onTestTargetClick: (TestTarget) -> Unit = {},
+    pluginTests: List<TestTarget> = emptyList(),
     onContentChanged: (String) -> Unit,
     onControllerReady: (EditorController) -> Unit = {}
 ) {
@@ -170,7 +171,8 @@ fun SoraCodeEditor(
     val colorMatches = remember(path, content, settings.colorPreviewsEnabled) {
         if (settings.colorPreviewsEnabled) ColorLiteralScanner.scanForPath(path, content) else emptyList()
     }
-    val testTargets = remember(path, content) { TestTargetScanner.scan(path, content) }
+    val scannedTests = remember(path, content) { TestTargetScanner.scan(path, content) }
+    val testTargets = remember(scannedTests, pluginTests) { scannedTests + pluginTests }
     val lineOverlays = remember(colorMatches, updateAnnotations, testTargets) {
         buildLineOverlays(colorMatches, updateAnnotations.map { it.line to it.update }, testTargets)
     }

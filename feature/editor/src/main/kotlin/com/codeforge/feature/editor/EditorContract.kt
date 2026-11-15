@@ -95,6 +95,9 @@ data class EditorUiState(
     val pluginRun: PluginRunState? = null,
     /** Geöffneter Plugin-Bereich (`pluginId/panelId`), sonst `null`. */
     val openPanelRef: String? = null,
+    /** Tests aus Plugin-Quellen für die Datei [pluginTestsPath]. */
+    val pluginTests: List<com.codeforge.feature.editor.overlay.TestTarget> = emptyList(),
+    val pluginTestsPath: String? = null,
     /** Geöffnete Befehlspalette, sonst `null`. */
     val commandPalette: com.codeforge.feature.editor.palette.CommandPaletteState? = null,
     val renameDialog: RenameDialogState? = null,
@@ -162,6 +165,10 @@ data class EditorUiState(
     val hasDirtyFiles: Boolean get() = dirtyFiles.isNotEmpty()
     /** Ob der Language-Server läuft. */
     val isLspConnected: Boolean get() = lspServerState == LspServerState.RUNNING
+
+    /** Plugin-Tests der aktiven Datei. */
+    val activePluginTests: List<com.codeforge.feature.editor.overlay.TestTarget>
+        get() = if (pluginTestsPath != null && pluginTestsPath == activeFile?.path) pluginTests else emptyList()
 
     /** Update-Hinweise der aktiven Datei. */
     val activeUpdateAnnotations: List<FileUpdateAnnotation>
@@ -267,6 +274,8 @@ sealed interface EditorUiEvent {
     data class RunPluginTask(val ref: String) : EditorUiEvent
     /** Laufende Plugin-Aufgabe abbrechen. */
     data object CancelPluginRun : EditorUiEvent
+    /** Alle Plugin-Tests der aktiven Datei ausführen. */
+    data object RunPluginFileTests : EditorUiEvent
     /** Meldung eines Plugin-Bereichs anzeigen. */
     data class ShowPluginMessage(val text: String) : EditorUiEvent
     /** Ausgabe der Plugin-Aufgabe schließen. */

@@ -264,6 +264,7 @@ fun EditorRoute(
             is PaletteAction.Plugin -> viewModel.onEvent(EditorUiEvent.RunPluginCommand(action.pluginId, action.commandId))
             is PaletteAction.PluginEditorAction -> viewModel.onEvent(EditorUiEvent.RunEditorAction(action.ref, caret()))
             is PaletteAction.PluginRunTask -> viewModel.onEvent(EditorUiEvent.RunPluginTask(action.ref))
+            PaletteAction.PluginFileTests -> viewModel.onEvent(EditorUiEvent.RunPluginFileTests)
             is PaletteAction.PluginPanel -> viewModel.onEvent(EditorUiEvent.SetPluginPanel(action.ref))
         }
     }
@@ -496,6 +497,7 @@ fun EditorRoute(
                                 onEditBreakpoint = { viewModel.onEvent(EditorUiEvent.EditBreakpoint(it)) },
                                 onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
                                 onTestTargetClick = { viewModel.onEvent(EditorUiEvent.RunTestTarget(it)) },
+                                pluginTests = uiState.activePluginTests,
                                 onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
                                 onControllerReady = { controller = it }
                             )
