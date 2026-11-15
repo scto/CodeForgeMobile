@@ -42,6 +42,9 @@ import com.codeforge.feature.editor.plugin.PluginEditorBridge
 import com.codeforge.libs.plugin_api.EditorContext
 import com.codeforge.libs.plugin_api.EditorEffect
 import com.codeforge.libs.plugin_api.PluginDiagnostic
+import com.codeforge.libs.plugin_api.RunConsole
+import com.codeforge.libs.plugin_ui_api.PluginPanel
+import com.codeforge.libs.plugin_ui_api.PluginUiExtensionPoints
 import com.codeforge.libs.lsp_client.LspWorkspaceEditApplier
 import com.codeforge.libs.lsp_client.WorkspaceEditException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -139,6 +142,7 @@ class EditorViewModel @Inject constructor(
     }
 
     private var syncWorkspaceJob: Job? = null
+    private var pluginRunJob: Job? = null
     private var pendingCloseAction: (() -> Unit)? = null
 
     /** Dokumentversion je Pfad, für LSP `textDocument/didChange` (versionierte Syncs). */
@@ -166,7 +170,16 @@ class EditorViewModel @Inject constructor(
     private var pendingUpdates: List<DependencyUpdate> = emptyList()
 
     /** Vom Composable konsumiert, um LSP- und Snippet-Completion-Vorschläge in [LspAwareLanguage] einzuspeisen. */
-    val completionProvider = LspCompletionProvider(lspClient, snippetRepository) { _uiState.value.activeFile?.path }
+    val completionProvider = LspCompletionProvider(
+        lspClient,
+        snippetRepository,
+        activePathProvider = { _uiState.value.activeFile?.path },
+        extraCompletions = { path, line, col ->
+            val bridge = editorActions
+            val ctx = editorContextAt(path, line, col)
+            if (bridge == null || ctx == null) emptyList() else bridge.completions(ctx)
+        }
+    )
 
     private var breakpointObservationJob: Job? = null
     private var aiStreamJob: Job? = null
@@ -687,6 +700,17 @@ class EditorViewModel @Inject constructor(
                 lastCaret = event.caret ?: lastCaret
                 openCommandPalette(event.pluginCommands)
             }
+            is EditorUiEvent.RunPluginTask -> {
+                _uiState.update { it.copy(commandPalette = null) }
+                runPluginTask(event.ref)
+            }
+            EditorUiEvent.CancelPluginRun -> pluginRunJob?.cancel()
+            EditorUiEvent.DismissPluginRun -> {
+                pluginRunJob?.cancel()
+                _uiState.update { it.copy(pluginRun = null) }
+            }
+            is EditorUiEvent.SetPluginPanel -> _uiState.update { it.copy(openPanelRef = event.ref, commandPalette = null) }
+            is EditorUiEvent.ShowPluginMessage -> viewModelScope.launch { _effect.emit(EditorUiEffect.ShowSnackbar(event.text.take(MAX_ACTION_MESSAGE))) }
             is EditorUiEvent.RunEditorAction -> {
                 _uiState.update { it.copy(commandPalette = null) }
                 runEditorAction(event.ref, event.caret ?: lastCaret)
@@ -1278,6 +1302,56 @@ class EditorViewModel @Inject constructor(
         )
     }
 
+    private fun editorContextAt(path: String, line: Int, col: Int): EditorContext? {
+        val active = _uiState.value.activeFile?.takeIf { it.path == path } ?: return null
+        val offset = PluginEditorBridge.offsetOf(active.content, line, col)
+        return EditorContext(active.path, languageIdFor(active.path), active.content, offset, offset, offset)
+    }
+
+    private suspend fun pluginHover(path: String, line: Int, col: Int): String? {
+        val ctx = editorContextAt(path, line, col) ?: return null
+        return editorActions?.hover(ctx)
+    }
+
+    // ---- Plugin-Aufgaben (Ausführen/Tests) und Bereiche ----
+
+
+    /** Projektordner (für Plugin-Bereiche). */
+    fun projectRootPath(): String? = projectRoot.value
+
+    /** Plugin-Bereiche: `pluginId/panelId` → Bereich. */
+    fun panels(): Map<String, PluginPanel> =
+        extensionRegistry?.contributions(PluginUiExtensionPoints.PANEL)?.associate { "${it.pluginId}/${it.value.id}" to it.value }.orEmpty()
+
+    private fun runPluginTask(ref: String) {
+        val bridge = editorActions ?: return
+        val task = bridge.runTask(ref) ?: return
+        val root = projectRoot.value ?: _uiState.value.activeFile?.path?.let { File(it).parent } ?: return
+        pluginRunJob?.cancel()
+        _uiState.update { it.copy(pluginRun = PluginRunState(task.value.title)) }
+        val console = object : RunConsole {
+            override val projectRoot: String = root
+            override val activeFilePath: String? = _uiState.value.activeFile?.path
+
+            override fun println(line: String) = _uiState.update { s ->
+                s.copy(pluginRun = s.pluginRun?.let { it.copy(lines = (it.lines + line.take(MAX_RUN_LINE)).takeLast(MAX_RUN_LINES)) })
+            }
+
+            override fun reportTest(name: String, passed: Boolean, message: String?) = _uiState.update { s ->
+                s.copy(pluginRun = s.pluginRun?.let { it.copy(tests = it.tests + PluginTestResult(name, passed, message)) })
+            }
+        }
+        pluginRunJob = viewModelScope.launch {
+            val code = try {
+                bridge.execute(task, console)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                _uiState.update { s -> s.copy(pluginRun = s.pluginRun?.copy(exitCode = CANCELLED_EXIT)) }
+                throw e
+            }
+            _uiState.update { s -> s.copy(pluginRun = s.pluginRun?.copy(exitCode = code)) }
+        }
+    }
+
     private fun pluginDiagnostics(text: String, diagnostics: List<com.codeforge.core.domain.model.LspDiagnostic>): List<PluginDiagnostic> = diagnostics.map { d ->
         PluginDiagnostic(
             message = d.message,
@@ -1358,7 +1432,10 @@ class EditorViewModel @Inject constructor(
             capabilities = state.serverCapabilities,
             pluginCommands = pluginCommands
         )
-        val registryItems = editorContext(lastCaret)?.let { editorActions?.paletteItems(it) }.orEmpty()
+        val root = projectRoot.value ?: state.activeFile?.path?.let { File(it).parent }
+        val registryItems = editorContext(lastCaret)?.let { editorActions?.paletteItems(it) }.orEmpty() +
+            root?.let { editorActions?.runTaskItems(it, Res.string(R.string.plugin_run_prefix), Res.string(R.string.plugin_test_prefix)) }.orEmpty() +
+            editorActions?.panelItems(panels().mapValues { it.value.title }).orEmpty()
         val items = buildPaletteItems(context) { id -> Res.string(id) } + registryItems
         _uiState.update { it.copy(commandPalette = CommandPaletteState(allItems = items)) }
     }
@@ -1553,14 +1630,21 @@ class EditorViewModel @Inject constructor(
         val active = _uiState.value.activeFile ?: return@launch
         lspClient.requestHover(active.path, LspPosition(line, col))
             .onSuccess { info ->
-                val text = info?.contents?.trim().orEmpty()
+                val text = info?.contents?.trim().orEmpty().ifEmpty { pluginHover(active.path, line, col).orEmpty() }
                 if (text.isEmpty()) {
                     _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_hover_none)))
                 } else {
                     _uiState.update { it.copy(hoverText = text) }
                 }
             }
-            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_hover_none))) }
+            .onFailure {
+                val text = pluginHover(active.path, line, col)
+                if (text == null) {
+                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_hover_none)))
+                } else {
+                    _uiState.update { it.copy(hoverText = text) }
+                }
+            }
     }
 
     /**
@@ -1831,6 +1915,9 @@ class EditorViewModel @Inject constructor(
     companion object {
         private val REFACTOR_KINDS = listOf("refactor", "source")
         private const val MAX_ACTION_MESSAGE = 500
+        private const val MAX_RUN_LINES = 2_000
+        private const val MAX_RUN_LINE = 2_000
+        private const val CANCELLED_EXIT = 130
 
         fun languageIdFor(path: String): String {
             val extension = path.substringAfterLast('.', "").lowercase()

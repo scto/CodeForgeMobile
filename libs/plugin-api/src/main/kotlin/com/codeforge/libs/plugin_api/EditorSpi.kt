@@ -125,3 +125,75 @@ object PluginExtensionPoints {
     /** Schnellkorrekturen zu Diagnosen. Berechtigung `editor`. */
     val QUICK_FIX_PROVIDER: ExtensionPoint<QuickFixProvider> = ExtensionPoint("editor.quickFixProvider", PluginPermissions.EDITOR)
 }
+
+/** Seit API 3: Vorschlag der Vervollständigung aus einem Plugin. */
+data class PluginCompletionItem(val label: String, val insertText: String = label, val detail: String? = null)
+
+/** Seit API 3: ergänzt die Vervollständigung (zusätzlich zum Sprachserver) – schnell halten, läuft beim Tippen. */
+fun interface CompletionProvider {
+    /** Vorschläge für die Cursorposition von [context] (höchstens 200 werden übernommen). */
+    suspend fun complete(context: EditorContext): List<PluginCompletionItem>
+}
+
+/** Seit API 3: Hover-Text (Markdown oder Klartext), wenn der Sprachserver nichts liefert. */
+fun interface HoverProvider {
+    /** Text für die Cursorposition von [context] oder `null`. */
+    suspend fun hover(context: EditorContext): String?
+}
+
+/** Seit API 3: Ausgabe einer laufenden [RunTask]. */
+interface RunConsole {
+    /** Projektordner. */
+    val projectRoot: String
+
+    /** Aktive Datei beim Start oder `null`. */
+    val activeFilePath: String?
+
+    /** Schreibt eine Zeile in die Ausgabe. */
+    fun println(line: String)
+
+    /** Meldet ein Testergebnis (für Aufgaben der Art [RunTask.KIND_TEST]; erscheint in der Zusammenfassung). */
+    fun reportTest(name: String, passed: Boolean, message: String? = null)
+}
+
+/**
+ * Seit API 3: Ausführen- oder Test-Eintrag (Befehlspalette → „Ausführen: …“). [run] läuft im Hintergrund, bis es
+ * endet oder der Nutzer abbricht (Coroutine wird abgebrochen); Programme startet es selbst, z. B. über
+ * `hostServices.buildShellCommand` (Berechtigung `shell`). Rückgabe = Exit-Code (0 = Erfolg).
+ */
+interface RunTask {
+    /** Eindeutig je Plugin. */
+    val id: String
+
+    /** Angezeigter Titel. */
+    val title: String
+
+    /** [KIND_RUN] oder [KIND_TEST]. */
+    val kind: String get() = KIND_RUN
+
+    /** Ob der Eintrag für das Projekt [projectRoot] angeboten wird. */
+    fun appliesTo(projectRoot: String): Boolean = true
+
+    /** Führt die Aufgabe aus. */
+    suspend fun run(console: RunConsole): Int
+
+    companion object {
+        /** Programm ausführen. */
+        const val KIND_RUN = "run"
+
+        /** Tests ausführen (Ergebnisse über [RunConsole.reportTest]). */
+        const val KIND_TEST = "test"
+    }
+}
+
+/** Seit API 3: weitere Andockstellen für Sprachen und Ausführen. */
+object PluginLanguagePoints {
+    /** Zusätzliche Vervollständigung. Berechtigung `editor`. */
+    val COMPLETION_PROVIDER: ExtensionPoint<CompletionProvider> = ExtensionPoint("editor.completionProvider", PluginPermissions.EDITOR)
+
+    /** Hover-Texte. Berechtigung `editor`. */
+    val HOVER_PROVIDER: ExtensionPoint<HoverProvider> = ExtensionPoint("editor.hoverProvider", PluginPermissions.EDITOR)
+
+    /** Ausführen- und Test-Einträge. Berechtigung `run`. */
+    val RUN_TASK: ExtensionPoint<RunTask> = ExtensionPoint("run.task", PluginPermissions.RUN)
+}

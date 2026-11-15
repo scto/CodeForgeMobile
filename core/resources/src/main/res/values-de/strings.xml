@@ -2714,4 +2714,8 @@
     <string name="plugins_settings_hint">Änderungen werden sofort gespeichert. Sprachserver übernehmen sie beim nächsten Start.</string>
     <string name="plugins_settings_reset">Vorgabe wiederherstellen</string>
     <string name="plugins_settings_range">Bereich: %1$s bis %2$s</string>
+    <string name="plugin_run_prefix">Ausführen:</string>
+    <string name="plugin_test_prefix">Tests:</string>
+    <string name="plugin_run_exit">Beendet (Exit %1$d)</string>
+    <string name="plugin_test_summary">%1$d bestanden, %2$d fehlgeschlagen</string>
 </resources>

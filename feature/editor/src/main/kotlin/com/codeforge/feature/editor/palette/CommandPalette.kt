@@ -29,6 +29,12 @@ sealed interface PaletteAction {
 
     /** Editor-Aktion aus dem Register (Plugin oder App); [ref] = `pluginId/actionId`. */
     data class PluginEditorAction(val ref: String) : PaletteAction
+
+    /** Ausführen-/Test-Eintrag eines Plugins; [ref] = `pluginId/taskId`. */
+    data class PluginRunTask(val ref: String) : PaletteAction
+
+    /** Bereich (Oberfläche) eines Plugins; [ref] = `pluginId/panelId`. */
+    data class PluginPanel(val ref: String) : PaletteAction
 }
 
 /** Ein Eintrag der Befehlspalette (Titel bereits übersetzt). */

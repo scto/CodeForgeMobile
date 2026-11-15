@@ -19,6 +19,10 @@ public final class com/codeforge/libs/plugin_api/CommandArgs {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class com/codeforge/libs/plugin_api/CompletionProvider {
+	public abstract fun complete (Lcom/codeforge/libs/plugin_api/EditorContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/EditorAction {
 	public static final field Companion Lcom/codeforge/libs/plugin_api/EditorAction$Companion;
 	public static final field KIND_QUICKFIX Ljava/lang/String;
@@ -144,8 +148,28 @@ public final class com/codeforge/libs/plugin_api/EditorSpiKt {
 	public static final fun lineStart (Lcom/codeforge/libs/plugin_api/EditorContext;I)I
 }
 
+public abstract interface class com/codeforge/libs/plugin_api/HoverProvider {
+	public abstract fun hover (Lcom/codeforge/libs/plugin_api/EditorContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/PluginCommandHandler {
 	public abstract fun run (Lcom/codeforge/libs/plugin_api/CommandArgs;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginCompletionItem {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginCompletionItem;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginCompletionItem;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginCompletionItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDetail ()Ljava/lang/String;
+	public final fun getInsertText ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/PluginContext {
@@ -337,6 +361,13 @@ public final class com/codeforge/libs/plugin_api/PluginHostServices$DefaultImpls
 	public static synthetic fun buildShellCommand$default (Lcom/codeforge/libs/plugin_api/PluginHostServices;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/codeforge/libs/terminal_engine/ShellLaunchSpec;
 }
 
+public final class com/codeforge/libs/plugin_api/PluginLanguagePoints {
+	public static final field INSTANCE Lcom/codeforge/libs/plugin_api/PluginLanguagePoints;
+	public final fun getCOMPLETION_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+	public final fun getHOVER_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+	public final fun getRUN_TASK ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/PluginLogger {
 	public abstract fun debug (Ljava/lang/String;)V
 	public abstract fun error (Ljava/lang/String;Ljava/lang/Throwable;)V
@@ -377,6 +408,38 @@ public final class com/codeforge/libs/plugin_api/PluginSettings$DefaultImpls {
 
 public abstract interface class com/codeforge/libs/plugin_api/QuickFixProvider {
 	public abstract fun fixes (Lcom/codeforge/libs/plugin_api/EditorContext;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/RunConsole {
+	public abstract fun getActiveFilePath ()Ljava/lang/String;
+	public abstract fun getProjectRoot ()Ljava/lang/String;
+	public abstract fun println (Ljava/lang/String;)V
+	public abstract fun reportTest (Ljava/lang/String;ZLjava/lang/String;)V
+}
+
+public final class com/codeforge/libs/plugin_api/RunConsole$DefaultImpls {
+	public static synthetic fun reportTest$default (Lcom/codeforge/libs/plugin_api/RunConsole;Ljava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)V
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/RunTask {
+	public static final field Companion Lcom/codeforge/libs/plugin_api/RunTask$Companion;
+	public static final field KIND_RUN Ljava/lang/String;
+	public static final field KIND_TEST Ljava/lang/String;
+	public abstract fun appliesTo (Ljava/lang/String;)Z
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getKind ()Ljava/lang/String;
+	public abstract fun getTitle ()Ljava/lang/String;
+	public abstract fun run (Lcom/codeforge/libs/plugin_api/RunConsole;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/codeforge/libs/plugin_api/RunTask$Companion {
+	public static final field KIND_RUN Ljava/lang/String;
+	public static final field KIND_TEST Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/RunTask$DefaultImpls {
+	public static fun appliesTo (Lcom/codeforge/libs/plugin_api/RunTask;Ljava/lang/String;)Z
+	public static fun getKind (Lcom/codeforge/libs/plugin_api/RunTask;)Ljava/lang/String;
 }
 
 public final class com/codeforge/libs/plugin_api/TextEdit {

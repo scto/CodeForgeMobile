@@ -4,6 +4,9 @@
  */
 package com.codeforge.feature.editor
 
+import com.codeforge.feature.editor.plugin.PluginPanelSheet
+import com.codeforge.feature.editor.plugin.PluginRunSheet
+import com.codeforge.libs.plugin_ui_api.PanelHost
 import com.codeforge.feature.editor.palette.BuiltinPaletteAction
 import com.codeforge.feature.editor.palette.CommandPaletteSheet
 import com.codeforge.feature.editor.palette.PaletteAction
@@ -260,6 +263,8 @@ fun EditorRoute(
             is PaletteAction.ServerCommand -> viewModel.onEvent(EditorUiEvent.RunServerCommand(action.command))
             is PaletteAction.Plugin -> viewModel.onEvent(EditorUiEvent.RunPluginCommand(action.pluginId, action.commandId))
             is PaletteAction.PluginEditorAction -> viewModel.onEvent(EditorUiEvent.RunEditorAction(action.ref, caret()))
+            is PaletteAction.PluginRunTask -> viewModel.onEvent(EditorUiEvent.RunPluginTask(action.ref))
+            is PaletteAction.PluginPanel -> viewModel.onEvent(EditorUiEvent.SetPluginPanel(action.ref))
         }
     }
 
@@ -541,6 +546,30 @@ fun EditorRoute(
             onSelectAction = { viewModel.onEvent(EditorUiEvent.ApplyCodeAction(it)) },
             onDismiss = { viewModel.onEvent(EditorUiEvent.DismissQuickFix) }
         )
+    }
+
+    uiState.pluginRun?.let { run ->
+        PluginRunSheet(
+            state = run,
+            onCancel = { viewModel.onEvent(EditorUiEvent.CancelPluginRun) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.DismissPluginRun) }
+        )
+    }
+
+    uiState.openPanelRef?.let { ref ->
+        val panel = remember(ref) { viewModel.panels()[ref] }
+        if (panel != null) {
+            val host = remember(ref, uiState.activeFile?.path) {
+                object : PanelHost {
+                    override val activeFilePath: String? = uiState.activeFile?.path
+                    override val projectRoot: String? = viewModel.projectRootPath()
+                    override fun openFile(path: String) = viewModel.onEvent(EditorUiEvent.OpenFile(path))
+                    override fun showMessage(text: String) = viewModel.onEvent(EditorUiEvent.ShowPluginMessage(text))
+                    override fun close() = viewModel.onEvent(EditorUiEvent.SetPluginPanel(null))
+                }
+            }
+            PluginPanelSheet(panel = panel, host = host, onDismiss = { viewModel.onEvent(EditorUiEvent.SetPluginPanel(null)) })
+        }
     }
 
     uiState.commandPalette?.let { palette ->

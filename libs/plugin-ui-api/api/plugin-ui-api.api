@@ -1,0 +1,20 @@
+public abstract interface class com/codeforge/libs/plugin_ui_api/PanelHost {
+	public abstract fun close ()V
+	public abstract fun getActiveFilePath ()Ljava/lang/String;
+	public abstract fun getProjectRoot ()Ljava/lang/String;
+	public abstract fun openFile (Ljava/lang/String;)V
+	public abstract fun showMessage (Ljava/lang/String;)V
+}
+
+public abstract interface class com/codeforge/libs/plugin_ui_api/PluginPanel {
+	public abstract fun Content (Lcom/codeforge/libs/plugin_ui_api/PanelHost;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;I)V
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getTitle ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_ui_api/PluginUiExtensionPoints {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/codeforge/libs/plugin_ui_api/PluginUiExtensionPoints;
+	public final fun getPANEL ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+}
+

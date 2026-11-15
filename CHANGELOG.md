@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugin-API 3, Teil 5: Sprache, Ausführen, Oberfläche)
+- Vervollständigungs- und Hover-Quellen für Plugins (`PluginLanguagePoints.COMPLETION_PROVIDER`/`HOVER_PROVIDER`):
+  Vorschläge werden mit denen des Sprachservers zusammengeführt, Hover greift, wenn der Server nichts liefert.
+- Ausführen-/Test-Aufgaben (`RUN_TASK`, Berechtigung `run`) in der Befehlspalette; Ausgabe, Exit-Code und
+  Testzusammenfassung live in einem Blatt, abbrechbar.
+- Neues Modul `:libs:plugin-ui-api`: Plugins liefern eigene Compose-Bereiche (`PluginPanel`, Berechtigung `ui`), die
+  über die Befehlspalette geöffnet werden und Dateien öffnen oder Meldungen zeigen können.
+
 ### Hinzugefügt (Einstellungsseiten für Plugins)
 - `contributes.settings` im Manifest: Einstellungen vom Typ Text, Ja/Nein, Auswahl und Zahl (mit Bereich); Seite im
   Plugins-Bildschirm unter „Einstellungen“, sofort gespeichert, „Vorgabe wiederherstellen“ je Eintrag.

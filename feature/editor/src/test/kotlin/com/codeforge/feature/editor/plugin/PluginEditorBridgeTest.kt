@@ -8,13 +8,20 @@ import com.codeforge.libs.plugin_api.EditorAction
 import com.codeforge.libs.plugin_api.EditorContext
 import com.codeforge.libs.plugin_api.EditorEffect
 import com.codeforge.libs.plugin_api.PluginDiagnostic
+import com.codeforge.libs.plugin_api.CompletionProvider
+import com.codeforge.libs.plugin_api.HoverProvider
+import com.codeforge.libs.plugin_api.PluginCompletionItem
 import com.codeforge.libs.plugin_api.PluginExtensionPoints
+import com.codeforge.libs.plugin_api.PluginLanguagePoints
+import com.codeforge.libs.plugin_api.RunConsole
+import com.codeforge.libs.plugin_api.RunTask
 import com.codeforge.libs.plugin_api.QuickFixProvider
 import com.codeforge.libs.plugin_api.TextEdit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -94,5 +101,74 @@ class PluginEditorBridgeTest {
         val selected = ctx.copy(selectionStart = 2, selectionEnd = 7)
         val deduped = BuiltInEditorActions.RemoveDuplicateLines.perform(selected)
         assertEquals(EditorEffect.ApplyEdits(listOf(TextEdit(2, 7, lines("a", "c")))), deduped.first())
+    }
+
+    private fun task(id: String, kind: String = RunTask.KIND_RUN, applies: Boolean = true, fail: Boolean = false) =
+        object : RunTask {
+            override val id = id
+            override val title = "Task $id"
+            override val kind = kind
+            override fun appliesTo(projectRoot: String) = applies
+            override suspend fun run(console: RunConsole): Int {
+                if (fail) error("kaputt")
+                console.println("hallo")
+                console.reportTest("t1", passed = true, message = null)
+                return 0
+            }
+        }
+
+    private class Console : RunConsole {
+        val out = mutableListOf<String>()
+        val tests = mutableListOf<Pair<String, Boolean>>()
+        override val projectRoot = "/p"
+        override val activeFilePath: String? = null
+        override fun println(line: String) { out += line }
+        override fun reportTest(name: String, passed: Boolean, message: String?) { tests += name to passed }
+    }
+
+    @Test
+    fun completionsSurviveFailures() = runTest {
+        val reg = ExtensionRegistryImpl()
+        reg.register(PluginLanguagePoints.COMPLETION_PROVIDER, CompletionProvider { listOf(PluginCompletionItem("foo", detail = "d")) }, "a")
+        reg.register(PluginLanguagePoints.COMPLETION_PROVIDER, CompletionProvider { error("kaputt") }, "b")
+        val logs = Logs()
+        val items = PluginEditorBridge(reg, logs).completions(ctx)
+        assertEquals(listOf("foo"), items.map { it.label })
+        assertEquals("b", logs.lines.single().first)
+    }
+
+    @Test
+    fun hoverFirstNonNullWins() = runTest {
+        val reg = ExtensionRegistryImpl()
+        val bridge = PluginEditorBridge(reg, null)
+        assertNull(bridge.hover(ctx))
+        reg.register(PluginLanguagePoints.HOVER_PROVIDER, HoverProvider { null }, "a")
+        reg.register(PluginLanguagePoints.HOVER_PROVIDER, HoverProvider { "Doku" }, "b")
+        assertEquals("Doku", bridge.hover(ctx))
+    }
+
+    @Test
+    fun runTasksFilterAndExecute() = runTest {
+        val reg = ExtensionRegistryImpl()
+        reg.register(PluginLanguagePoints.RUN_TASK, task("build"), "p")
+        reg.register(PluginLanguagePoints.RUN_TASK, task("test", kind = RunTask.KIND_TEST), "p")
+        reg.register(PluginLanguagePoints.RUN_TASK, task("other", applies = false), "p")
+        val bridge = PluginEditorBridge(reg, null)
+        val items = bridge.runTaskItems("/p", "Run:", "Tests:")
+        assertEquals(listOf("Run: Task build", "Tests: Task test"), items.map { it.title })
+        val console = Console()
+        assertEquals(0, bridge.execute(bridge.runTask("p/build")!!, console))
+        assertEquals(listOf("hallo"), console.out)
+        assertEquals(listOf("t1" to true), console.tests)
+    }
+
+    @Test
+    fun failingRunTaskIsLogged() = runTest {
+        val reg = ExtensionRegistryImpl()
+        reg.register(PluginLanguagePoints.RUN_TASK, task("boom", fail = true), "p")
+        val logs = Logs()
+        val bridge = PluginEditorBridge(reg, logs)
+        assertEquals(-1, bridge.execute(bridge.runTask("p/boom")!!, Console()))
+        assertEquals("p", logs.lines.single().first)
     }
 }

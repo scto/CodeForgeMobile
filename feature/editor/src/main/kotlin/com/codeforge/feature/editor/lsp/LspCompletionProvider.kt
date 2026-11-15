@@ -19,7 +19,9 @@ import kotlinx.coroutines.runBlocking
 class LspCompletionProvider(
     private val lspClient: LspClientRepository,
     private val snippetRepository: SnippetRepository? = null,
-    private val activePathProvider: () -> String?
+    private val activePathProvider: () -> String?,
+    /** Zusätzliche Vorschläge (Plugins), an die Server-Vorschläge angehängt. */
+    private val extraCompletions: (suspend (path: String, line: Int, column: Int) -> List<LspCompletionItem>)? = null
 ) {
     /**
      * Blockierend (im Rahmen des von sora-editor für `requireAutoComplete` vorgesehenen
@@ -29,8 +31,9 @@ class LspCompletionProvider(
     fun fetchCompletions(line: Int, column: Int): List<LspCompletionItem> {
         val path = activePathProvider() ?: return emptyList()
         return runBlocking {
-            lspClient.requestCompletion(path, LspPosition(line, column))
-                .getOrDefault(emptyList())
+            val fromServer = lspClient.requestCompletion(path, LspPosition(line, column)).getOrDefault(emptyList())
+            val extra = extraCompletions?.invoke(path, line, column).orEmpty()
+            (fromServer + extra).distinctBy { it.label to it.insertText }
         }
     }
 

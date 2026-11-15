@@ -32,9 +32,15 @@ object PluginPermissions {
     const val BUILD_EVENTS = "build-events"
     /** Seit API 3: Projekt-Ereignisse (geöffnet, geschlossen). */
     const val PROJECT_EVENTS = "project-events"
+    /** Seit API 3: eigene Oberflächen (Compose) – läuft mit allen Rechten der App, nur von vertrauenswürdigen Quellen. */
+    const val UI = "ui"
+    /** Seit API 3: Ausführen- und Test-Einträge beisteuern. */
+    const val RUN = "run"
 
     /** Menge aller bekannten Berechtigungen. */
-    val ALL: Set<String> = setOf(COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT, EDITOR, BUILD_EVENTS, PROJECT_EVENTS)
+    val ALL: Set<String> = setOf(
+        COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT, EDITOR, BUILD_EVENTS, PROJECT_EVENTS, UI, RUN
+    )
 }
 
 /**

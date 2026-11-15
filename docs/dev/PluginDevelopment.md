@@ -733,6 +733,60 @@ umschalten“).
 Neue Ereignisse: `EditorActivated`, `DiagnosticsChanged` (`file-events`), `BuildStarted`, `BuildFinished`
 (`build-events`), `ProjectOpened`, `ProjectClosed` (`project-events`).
 
+### 9.9 Seit API 3: Vervollständigung, Hover, Ausführen/Tests, eigene Bereiche
+
+**Vervollständigung und Hover** (Berechtigung `editor`): Vorschläge werden mit denen des Sprachservers
+zusammengeführt (doppelte entfernt), Hover-Text erscheint, wenn der Server keinen liefert. Je Quelle 2 s Zeitlimit,
+zusammen höchstens 200 Vorschläge.
+
+```kotlin
+context.register(PluginLanguagePoints.COMPLETION_PROVIDER, CompletionProvider { ctx ->
+    if (ctx.languageId != "kotlin") emptyList()
+    else listOf(PluginCompletionItem("todo", insertText = "// TODO: ", detail = "Kommentar"))
+})
+context.register(PluginLanguagePoints.HOVER_PROVIDER, HoverProvider { ctx -> null })
+```
+
+**Ausführen- und Test-Aufgaben** (Berechtigung `run`): erscheinen in der Befehlspalette als „Ausführen: …“ bzw.
+„Tests: …“, wenn `appliesTo(projectRoot)` zutrifft. Ausgabe und Testergebnisse laufen live in ein Blatt mit
+Abbrechen-Knopf; der Rückgabewert ist der Exit-Code (Ausnahme → `-1`, Abbruch → `130`).
+
+```kotlin
+class PytestTask : RunTask {
+    override val id = "pytest"
+    override val title = "pytest"
+    override val kind = RunTask.KIND_TEST
+    override fun appliesTo(projectRoot: String) = File(projectRoot, "pyproject.toml").exists()
+    override suspend fun run(console: RunConsole): Int {
+        console.println("Starte pytest …")
+        console.reportTest("test_add", passed = true, message = null)
+        return 0
+    }
+}
+```
+
+**Eigene Bereiche** (Modul `:libs:plugin-ui-api`, Berechtigung `ui`): ein Plugin liefert ein Composable, das die App
+in einem Blatt zeigt; geöffnet über die Befehlspalette.
+
+```kotlin
+object TodoPanel : PluginPanel {
+    override val id = "todos"
+    override val title = "TODOs"
+    @Composable
+    override fun Content(host: PanelHost, modifier: Modifier) {
+        TextButton(onClick = { host.openFile("${host.projectRoot}/TODO.md") }, modifier = modifier) { Text("TODO.md öffnen") }
+    }
+}
+context.register(PluginUiExtensionPoints.PANEL, TodoPanel)
+```
+
+Grenzen:
+- Das Plugin muss gegen **dieselbe Compose-Version** wie die App gebaut sein (`compileOnly`, nicht mitliefern),
+  sonst stürzt der Bereich beim Öffnen ab.
+- Compose kennt keine Fehlergrenze: eine Ausnahme im Composable beendet die App. Ausnahmen also im Plugin abfangen.
+- Gutter-Markierungen für einzelne Tests und ein eigener Test-Reiter gibt es noch nicht; Tests erscheinen nur als
+  Zusammenfassung im Ausgabeblatt.
+
 ## 10. Beispiel 6: Hybrid – LSP-Plugin mit Download
 
 **Ziel:** Ein Language Server, der nicht als Paket vorliegt, sondern heruntergeladen werden muss. Das Manifest startet den Server (deklarativ), der Code stellt nur sicher, dass er da ist.

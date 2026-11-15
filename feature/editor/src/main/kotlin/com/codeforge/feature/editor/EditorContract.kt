@@ -25,6 +25,22 @@ data class OpenFile(
     val isDirty: Boolean = false
 )
 
+/** Ergebnis eines Tests aus einer Plugin-Aufgabe. */
+@Immutable
+data class PluginTestResult(val name: String, val passed: Boolean, val message: String? = null)
+
+/** Ausgabe einer Plugin-Aufgabe; [exitCode] `null` = läuft noch. */
+@Immutable
+data class PluginRunState(
+    val title: String,
+    val lines: List<String> = emptyList(),
+    val exitCode: Int? = null,
+    val tests: List<PluginTestResult> = emptyList()
+) {
+    /** Ob die Aufgabe noch läuft. */
+    val running: Boolean get() = exitCode == null
+}
+
 /** Cursor und Auswahl als Zeichen-Offsets (für Editor-Aktionen). */
 data class CaretSnapshot(val cursor: Int, val selectionStart: Int, val selectionEnd: Int)
 
@@ -75,6 +91,10 @@ data class EditorUiState(
     val isCodeActionsSheetVisible: Boolean = false,
     /** Ob das Code-Action-Sheet Schnellkorrekturen oder Refactorings zeigt (Titel, Leertext). */
     val codeActionsMode: CodeActionsMode = CodeActionsMode.QUICK_FIX,
+    /** Laufende oder beendete Plugin-Aufgabe (Ausführen/Tests), sonst `null`. */
+    val pluginRun: PluginRunState? = null,
+    /** Geöffneter Plugin-Bereich (`pluginId/panelId`), sonst `null`. */
+    val openPanelRef: String? = null,
     /** Geöffnete Befehlspalette, sonst `null`. */
     val commandPalette: com.codeforge.feature.editor.palette.CommandPaletteState? = null,
     val renameDialog: RenameDialogState? = null,
@@ -243,6 +263,16 @@ sealed interface EditorUiEvent {
         val pluginCommands: List<com.codeforge.feature.editor.palette.PalettePluginCommand> = emptyList(),
         val caret: CaretSnapshot? = null
     ) : EditorUiEvent
+    /** Ausführen-/Test-Aufgabe eines Plugins starten. */
+    data class RunPluginTask(val ref: String) : EditorUiEvent
+    /** Laufende Plugin-Aufgabe abbrechen. */
+    data object CancelPluginRun : EditorUiEvent
+    /** Meldung eines Plugin-Bereichs anzeigen. */
+    data class ShowPluginMessage(val text: String) : EditorUiEvent
+    /** Ausgabe der Plugin-Aufgabe schließen. */
+    data object DismissPluginRun : EditorUiEvent
+    /** Plugin-Bereich öffnen ([ref] = `pluginId/panelId`) bzw. schließen (`null`). */
+    data class SetPluginPanel(val ref: String?) : EditorUiEvent
     /** Editor-Aktion aus dem Register ausführen ([ref] = `pluginId/actionId`). */
     data class RunEditorAction(val ref: String, val caret: CaretSnapshot? = null) : EditorUiEvent
     /** Suchtext der Befehlspalette geändert. */

@@ -65,6 +65,7 @@ include(
     ":libs:debug-client",
     ":libs:template-engine",
     ":libs:plugin-api",
+    ":libs:plugin-ui-api",
     ":libs:plugin-impl",
 
     // Projekt-Indexierung + Dependency-Updater (siehe docs/indexing-and-dependency-updater.md)

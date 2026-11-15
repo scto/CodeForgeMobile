@@ -2714,4 +2714,8 @@
     <string name="plugins_settings_hint">Changes are saved immediately. Language servers pick them up on their next start.</string>
     <string name="plugins_settings_reset">Restore default</string>
     <string name="plugins_settings_range">Range: %1$s to %2$s</string>
+    <string name="plugin_run_prefix">Run:</string>
+    <string name="plugin_test_prefix">Tests:</string>
+    <string name="plugin_run_exit">Finished (exit %1$d)</string>
+    <string name="plugin_test_summary">%1$d passed, %2$d failed</string>
 </resources>
