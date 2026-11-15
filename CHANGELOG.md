@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-11-15
+
 ### Hinzugefügt (Plugin-API 3: Tests je Datei)
 - Test-Quellen für Plugins (`PluginLanguagePoints.TEST_PROVIDER`, Berechtigung `run`): Start-Knopf an jeder Testzeile
   (nach dem Lauf grün oder rot), „Tests dieser Datei ausführen“ in der Befehlspalette; das Ausgabeblatt listet alle
