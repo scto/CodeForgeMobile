@@ -61,6 +61,27 @@ interface PluginContext {
      * @throws PluginPermissionException wenn die Berechtigung fehlt.
      */
     fun <T : Any> register(point: ExtensionPoint<T>, value: T): Disposable
+
+    /**
+     * Seit API 3: Einstellungen dieses Plugins aus `contributes.settings` (Seite im Plugins-Bildschirm). Liefert für
+     * jeden Schlüssel den Wert des Nutzers oder die Vorgabe aus dem Manifest. Keine Berechtigung nötig.
+     */
+    fun settings(): PluginSettings
+}
+
+/** Seit API 3: Lesezugriff auf die Einstellungen eines Plugins (siehe [PluginContext.settings]). */
+interface PluginSettings {
+    /** Wert von [key] als Text (Vorgabe aus dem Manifest, wenn nicht geändert; leer bei unbekanntem Schlüssel). */
+    fun getString(key: String): String
+
+    /** Wert von [key] als Ja/Nein (`false` bei unbekanntem Schlüssel). */
+    fun getBoolean(key: String): Boolean = getString(key).toBooleanStrictOrNull() ?: false
+
+    /** Wert von [key] als Zahl (0 bei unbekanntem Schlüssel). */
+    fun getInt(key: String): Int = getString(key).toIntOrNull() ?: 0
+
+    /** Benachrichtigt bei jeder Änderung durch den Nutzer mit dem geänderten Schlüssel; wird beim Entladen entfernt. */
+    fun addChangeListener(listener: (key: String) -> Unit): Disposable
 }
 
 /** Seit API 3: Protokoll eines Plugins (siehe [PluginContext.logger]). */

@@ -109,6 +109,31 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 * `ExtensionPacks.missingMembers` liefert fehlende Mitglieder; `ExtensionPacks.resolveClosure` löst verschachtelte Bundles aus einem Katalog auf (ohne Zyklen, Tiefe ≤ 4).
 * Beim Installieren aus dem Store werden fehlende Mitglieder aus dem Katalog mit installiert (siehe Store-Integration, Phase 7).
 
+## Einstellungsseite (`settings`)
+
+```json
+"settings": {
+  "title": "Zig",
+  "items": [
+    { "key": "zigPath",  "type": "text",    "title": "Pfad zu zig", "default": "zig" },
+    { "key": "semantic", "type": "boolean", "title": "Semantische Hervorhebung", "default": true },
+    { "key": "style",    "type": "choice",  "title": "Stil",
+      "options": [{ "value": "std", "label": "Standard" }, { "value": "compact" }], "default": "std" },
+    { "key": "threads",  "type": "number",  "title": "Threads", "min": 1, "max": 8, "default": 2 }
+  ]
+}
+```
+
+* Erscheint im Plugins-Bildschirm unter **Einstellungen**; Änderungen werden sofort gespeichert
+  (`files/plugin-settings/<id>.json`, beim Entfernen gelöscht).
+* Typen `text`, `boolean`, `choice` (mit `options`), `number` (optional `min`/`max`); höchstens 50 Einträge, Schlüssel
+  `[A-Za-z][A-Za-z0-9_.-]*`. Ungültige Werte fallen auf `default` zurück.
+* **Deklarativ nutzbar:** `${setting:key}` in `lspServers` (`command`, `env`), `formatters` und `tools` (`command`)
+  wird durch den Wert ersetzt – z. B. `"command": ["${setting:zigPath}", "fmt", "--stdin"]`. Sprachserver übernehmen
+  Änderungen beim nächsten Start.
+* **Code-Plugins** lesen sie mit `context.settings().getString/getBoolean/getInt(key)` und hören mit
+  `addChangeListener { key -> … }` auf Änderungen.
+
 ## Language Server (`lspServers`)
 
 Alle Sprachserver kommen aus Plugins (die App hat keinen eingebauten Katalog mehr). Für eine Sprache gewinnt der erste aktivierte Plugin-Server, den der Nutzer nicht abgeschaltet hat (Einstellungen → Sprachserver).

@@ -13,6 +13,7 @@ dependencies {
     api(project(":libs:plugin-api"))
     implementation(project(":core:resources"))
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(project(":core:domain"))
     implementation(project(":libs:terminal-engine"))
 

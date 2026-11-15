@@ -2,6 +2,7 @@ package com.codeforge.core.data.repository
 
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.expandCommand
+import com.codeforge.core.domain.extension.withSettings
 import com.codeforge.core.domain.extension.formatterForPath
 import com.codeforge.core.domain.model.EditorConfigResolver
 import com.codeforge.core.domain.model.FormattedCode
@@ -156,7 +157,7 @@ class CodeFormatterRepositoryImpl @Inject constructor(
      */
     private suspend fun tryPluginFormat(path: String, content: String): Result<FormattedCode>? {
         val hit = contributionRepository.contributions.value.formatterForPath(path) ?: return null
-        val expanded = hit.item.expandCommand(path, hit.pluginDir, TERMUX_HOME)
+        val expanded = contributionRepository.withSettings(hit.pluginId, hit.item.expandCommand(path, hit.pluginDir, TERMUX_HOME))
         val program = expanded.first()
         val executable = if (program.startsWith("/")) {
             program.takeIf { File(it).canExecute() }

@@ -13,6 +13,7 @@ import com.codeforge.core.domain.extension.RequirementPolicy
 import com.codeforge.core.domain.extension.ToolRunEvent
 import com.codeforge.core.domain.extension.appliesTo
 import com.codeforge.core.domain.extension.expandCommand
+import com.codeforge.core.domain.extension.withSettings
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -103,7 +104,7 @@ class PluginToolRunnerImpl internal constructor(
             send(ToolRunEvent.Finished(-1))
             return@channelFlow
         }
-        val command = hit.item.expandCommand(projectDir, hit.pluginDir, TERMUX_HOME, input)
+        val command = contributionRepository.withSettings(hit.pluginId, hit.item.expandCommand(projectDir, hit.pluginDir, TERMUX_HOME, input))
         send(ToolRunEvent.Line("$ " + command.joinToString(" ")))
         val res = stream(command, dir, hit.item.timeoutSeconds.toLong())
         send(ToolRunEvent.Finished(res.exitCode, res.timedOut))

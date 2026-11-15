@@ -3,6 +3,7 @@ package com.codeforge.feature.settings.extensions
 
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.LspServerContribution
+import com.codeforge.core.domain.extension.withSettings
 import com.codeforge.core.domain.extension.RequirementPolicy
 import com.codeforge.core.domain.extension.expand
 import com.codeforge.core.domain.model.LspServerDefaults
@@ -44,7 +45,7 @@ class LspServerResolverImpl internal constructor(
         for (hit in candidates) {
             val key = LspServerDefaults.keyFor(hit.item.id)
             if (!lspSettings.of(key).enabled) continue
-            launchOf(hit.item, hit.pluginDir, key)?.let { return it }
+            launchOf(hit.item, hit.pluginDir, key, hit.pluginId)?.let { return it }
         }
         return null
     }
@@ -59,16 +60,19 @@ class LspServerResolverImpl internal constructor(
             .filter { r -> r.item.languages.any { it.equals(wanted, ignoreCase = true) } }
             .mapNotNull { hit ->
                 val key = LspServerDefaults.keyFor(hit.item.id)
-                if (!lspSettings.of(key).enabled) null else launchOf(hit.item, hit.pluginDir, key)
+                if (!lspSettings.of(key).enabled) null else launchOf(hit.item, hit.pluginDir, key, hit.pluginId)
             }
             .distinctBy { it.serverId }
         val primary = launches.firstOrNull { !it.alongside } ?: launches.firstOrNull() ?: return emptyList()
         return listOf(primary.copy(alongside = false)) + launches.filter { it.alongside && it !== primary }
     }
 
-    private suspend fun launchOf(server: LspServerContribution, pluginDir: String, key: String): LspServerLaunch? {
+    private suspend fun launchOf(server: LspServerContribution, pluginDir: String, key: String, pluginId: String): LspServerLaunch? {
         val jvmArgs = if (server.acceptsJvmOptions) lspSettings.jvmOptions(key)?.toArgs().orEmpty() else emptyList()
-        val (command, env) = server.expand(pluginDir, home, depsDir.absolutePath, jvmArgs)
+        val (rawCommand, rawEnv) = server.expand(pluginDir, home, depsDir.absolutePath, jvmArgs)
+        // `${'$'}{setting:key}` aus der Einstellungsseite des Plugins.
+        val command = contributionRepository.withSettings(pluginId, rawCommand)
+        val env = rawEnv.keys.zip(contributionRepository.withSettings(pluginId, rawEnv.values.toList())).toMap()
         // Absolute Pfade (Programm oder Downloads unter ${deps}) müssen existieren, sonst startet der Server nicht.
         val missing = command.withIndex().any { (i, arg) ->
             arg.startsWith("/") && (i == 0 || arg.startsWith(depsDir.absolutePath)) && !File(arg).exists()

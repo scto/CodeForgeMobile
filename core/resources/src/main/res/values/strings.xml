@@ -2691,8 +2691,8 @@
     <string name="filetree_rename_only">Rename only</string>
     <string name="filetree_rename_planning">Searching references …</string>
     <string name="filetree_rename_adjusted">Renamed – %1$d changes in %2$d files updated</string>
-    <string name="plugins_issue_dependency_unavailable">Not loaded: required plugin \'%1$s\' cannot be loaded itself.</string>
-    <string name="plugins_issue_dependency_cycle">Not loaded: dependency cycle in \'dependsOn\'.</string>
+    <string name="plugins_issue_dependency_unavailable">Not loaded: required plugin “%1$s” cannot be loaded itself.</string>
+    <string name="plugins_issue_dependency_cycle">Not loaded: dependency cycle in “dependsOn”.</string>
     <string name="plugins_log">Log</string>
     <string name="plugins_log_title">Log: %1$s</string>
     <string name="plugins_log_empty">No entries yet. Plugins write here with context.logger(…).</string>
@@ -2710,4 +2710,8 @@
     <string name="lspfeat_rename_sum">Rename symbols across the project</string>
     <string name="lspfeat_alongside">Start additionally</string>
     <string name="lspfeat_alongside_sum">Runs next to the main server of the same language. For each feature the first server that has it enabled answers – turn off here what the main server should handle.</string>
+    <string name="plugins_settings">Settings</string>
+    <string name="plugins_settings_hint">Changes are saved immediately. Language servers pick them up on their next start.</string>
+    <string name="plugins_settings_reset">Restore default</string>
+    <string name="plugins_settings_range">Range: %1$s to %2$s</string>
 </resources>

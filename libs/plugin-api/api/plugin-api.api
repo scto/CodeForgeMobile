@@ -153,6 +153,7 @@ public abstract interface class com/codeforge/libs/plugin_api/PluginContext {
 	public abstract fun getPluginId ()Ljava/lang/String;
 	public abstract fun logger (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginLogger;
 	public abstract fun register (Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;Ljava/lang/Object;)Lcom/codeforge/core/domain/extension/registry/Disposable;
+	public abstract fun settings ()Lcom/codeforge/libs/plugin_api/PluginSettings;
 }
 
 public final class com/codeforge/libs/plugin_api/PluginDiagnostic {
@@ -360,6 +361,18 @@ public final class com/codeforge/libs/plugin_api/PluginPermissionException : jav
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun getPermission ()Ljava/lang/String;
 	public final fun getPluginId ()Ljava/lang/String;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/PluginSettings {
+	public abstract fun addChangeListener (Lkotlin/jvm/functions/Function1;)Lcom/codeforge/core/domain/extension/registry/Disposable;
+	public abstract fun getBoolean (Ljava/lang/String;)Z
+	public abstract fun getInt (Ljava/lang/String;)I
+	public abstract fun getString (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginSettings$DefaultImpls {
+	public static fun getBoolean (Lcom/codeforge/libs/plugin_api/PluginSettings;Ljava/lang/String;)Z
+	public static fun getInt (Lcom/codeforge/libs/plugin_api/PluginSettings;Ljava/lang/String;)I
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/QuickFixProvider {

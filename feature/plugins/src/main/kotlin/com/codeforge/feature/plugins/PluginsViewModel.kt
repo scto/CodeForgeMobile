@@ -30,6 +30,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.codeforge.core.domain.extension.PluginLogRepository
+import com.codeforge.core.domain.extension.PluginSettingsRepository
+import com.codeforge.core.domain.extension.effectiveValues
+import com.codeforge.core.domain.extension.normalize
 
 /** ViewModel der Plugin-Verwaltung. */
 @HiltViewModel
@@ -38,8 +41,11 @@ class PluginsViewModel @Inject constructor(
     private val contributionRepository: ContributionRepository? = null,
     private val toolRunner: PluginToolRunner? = null,
     private val runtimeStats: com.codeforge.core.domain.model.LspRuntimeStatsProvider? = null,
-    private val pluginLogs: PluginLogRepository? = null
+    private val pluginLogs: PluginLogRepository? = null,
+    private val pluginSettings: PluginSettingsRepository? = null
 ) : ViewModel() {
+
+    private var settingsJob: Job? = null
 
     private var logJob: Job? = null
 
@@ -55,7 +61,10 @@ class PluginsViewModel @Inject constructor(
 
     init {
         contributionRepository?.let { repo ->
-            repo.contributions.onEach { refreshMissing() }.launchIn(viewModelScope)
+            repo.contributions.onEach { c ->
+                refreshMissing()
+                _uiState.update { it.copy(pluginsWithSettings = c.settings.map { s -> s.pluginId }.toSet()) }
+            }.launchIn(viewModelScope)
         }
         combine(
             pluginRepository.installedPlugins,
@@ -90,6 +99,16 @@ class PluginsViewModel @Inject constructor(
                 _uiState.update { it.copy(logDialog = null) }
             }
             PluginsUiEvent.LogCleared -> _uiState.value.logDialog?.let { pluginLogs?.clear(it.pluginId) }
+            is PluginsUiEvent.SettingsClicked -> openSettings(event.pluginId)
+            PluginsUiEvent.SettingsDismissed -> {
+                settingsJob?.cancel()
+                _uiState.update { it.copy(settingsSheet = null) }
+            }
+            is PluginsUiEvent.SettingChanged -> {
+                val sheet = _uiState.value.settingsSheet ?: return
+                val item = sheet.items.firstOrNull { it.key == event.key } ?: return
+                viewModelScope.launch { pluginSettings?.set(sheet.pluginId, item.key, event.value?.let(item::normalize)) }
+            }
             PluginsUiEvent.RequirementsDismissed -> {
                 installJob?.cancel()
                 _uiState.update { it.copy(requirementDialog = null) }
@@ -191,5 +210,17 @@ class PluginsViewModel @Inject constructor(
         logJob = logs.observe(pluginId)
             .onEach { lines -> _uiState.update { it.copy(logDialog = PluginLogDialog(pluginId, title, lines)) } }
             .launchIn(viewModelScope)
+    }
+
+    private fun openSettings(pluginId: String) {
+        val contribution = contributionRepository?.contributions?.value?.settings?.firstOrNull { it.pluginId == pluginId }?.item ?: return
+        val store = pluginSettings ?: return
+        val title = contribution.title ?: _uiState.value.plugins.firstOrNull { it.id == pluginId }?.name ?: pluginId
+        settingsJob?.cancel()
+        settingsJob = store.observe(pluginId).onEach { stored ->
+            _uiState.update {
+                it.copy(settingsSheet = PluginSettingsSheet(pluginId, title, contribution.items, contribution.items.effectiveValues(stored)))
+            }
+        }.launchIn(viewModelScope)
     }
 }

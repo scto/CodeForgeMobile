@@ -57,6 +57,11 @@ abstract class PluginApiModule {
     @Singleton
     abstract fun bindPluginEventSink(impl: PluginHooks): PluginEventSink
 
+    /** Bindet die gespeicherten Plugin-Einstellungen. */
+    @Binds
+    @Singleton
+    abstract fun bindPluginSettingsRepository(impl: PluginSettingsStore): com.codeforge.core.domain.extension.PluginSettingsRepository
+
     /** Bindet die Protokolle der Plugins. */
     @Binds
     @Singleton

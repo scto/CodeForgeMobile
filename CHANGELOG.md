@@ -11,6 +11,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Einstellungsseiten für Plugins)
+- `contributes.settings` im Manifest: Einstellungen vom Typ Text, Ja/Nein, Auswahl und Zahl (mit Bereich); Seite im
+  Plugins-Bildschirm unter „Einstellungen“, sofort gespeichert, „Vorgabe wiederherstellen“ je Eintrag.
+- `${setting:key}` in `lspServers`, `formatters` und `tools` – auch rein deklarative Plugins sind damit einstellbar.
+- Plugin-API 3: `context.settings()` mit `getString`/`getBoolean`/`getInt` und `addChangeListener`.
+
 ### Hinzugefügt (Sprachserver: Robustheit, mehrere Server)
 - Zeitlimit für jede LSP-Anfrage (je Methode, z. B. 10 s Vervollständigung, 60 s Umbenennen, 180 s Start) mit
   `$/cancelRequest`; auch ein abgebrochener Aufrufer bricht die Anfrage beim Server ab. Endet die Verbindung, scheitern

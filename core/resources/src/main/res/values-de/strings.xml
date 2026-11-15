@@ -2710,4 +2710,8 @@
     <string name="lspfeat_rename_sum">Symbole projektweit umbenennen</string>
     <string name="lspfeat_alongside">Zusätzlich starten</string>
     <string name="lspfeat_alongside_sum">Läuft neben dem Hauptserver derselben Sprache. Je Funktion antwortet der erste Server, bei dem sie eingeschaltet ist – schalte hier ab, was der Hauptserver übernehmen soll.</string>
+    <string name="plugins_settings">Einstellungen</string>
+    <string name="plugins_settings_hint">Änderungen werden sofort gespeichert. Sprachserver übernehmen sie beim nächsten Start.</string>
+    <string name="plugins_settings_reset">Vorgabe wiederherstellen</string>
+    <string name="plugins_settings_range">Bereich: %1$s bis %2$s</string>
 </resources>

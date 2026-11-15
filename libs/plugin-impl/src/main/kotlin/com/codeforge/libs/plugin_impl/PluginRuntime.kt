@@ -27,7 +27,17 @@ import com.codeforge.core.domain.extension.registry.Disposable
 import com.codeforge.core.domain.extension.registry.ExtensionPoint
 import com.codeforge.core.domain.extension.registry.ExtensionRegistry
 import com.codeforge.libs.plugin_api.PluginLogger
+import com.codeforge.core.domain.extension.PluginManifestParser
+import com.codeforge.core.domain.extension.PluginSettingItem
+import com.codeforge.core.domain.extension.PluginSettingsRepository
+import com.codeforge.core.domain.extension.normalize
+import com.codeforge.libs.plugin_api.PluginSettings
 import dalvik.system.DexClassLoader
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -46,7 +56,8 @@ internal class PluginRuntime(
     private val lspClientRepository: LspClientRepository,
     private val hooks: PluginHooks,
     private val registry: ExtensionRegistry,
-    private val logs: PluginLogRepository
+    private val logs: PluginLogRepository,
+    private val settingsRepository: PluginSettingsRepository
 ) {
 
     private class LoadedPlugin(val instance: CodeForgePlugin, val context: PluginContext)
@@ -76,12 +87,17 @@ internal class PluginRuntime(
         override fun jdkInstallPath(version: String): String = TermuxEnvironment.jdkHome(version)
     }
 
-    private fun contextFor(plugin: InstalledPlugin): PluginContext = HostPluginContext(
+    private fun contextFor(plugin: InstalledPlugin, pluginDir: File): HostPluginContext = HostPluginContext(
         plugin,
         PermissionedHostServices(plugin.id, plugin.apiVersion, plugin.permissions, baseServices, hooks),
         registry,
-        logs
+        logs,
+        HostPluginSettings(plugin.id, settingItemsOf(pluginDir), settingsRepository)
     )
+
+    private fun settingItemsOf(pluginDir: File): List<PluginSettingItem> = runCatching {
+        PluginManifestParser.parse(File(pluginDir, "plugin.json").readText()).getOrThrow().contributes.settings?.items
+    }.getOrNull().orEmpty()
 
     /**
      * Prüft, ob das Plugin aktuell geladen ist.
@@ -126,7 +142,7 @@ internal class PluginRuntime(
         val instance = pluginClass.getDeclaredConstructor().newInstance() as? CodeForgePlugin
             ?: error(Res.string(R.string.plugin_implementiert_nicht_codeforgeplugin, entryPointClassName))
 
-        val context = contextFor(plugin)
+        val context = contextFor(plugin, pluginDir)
         try {
             instance.onLoad(context)
         } catch (t: Throwable) {
@@ -146,6 +162,7 @@ internal class PluginRuntime(
     fun unload(pluginId: String): Result<Unit> = runCatching {
         val loaded = loadedPlugins.remove(pluginId) ?: return@runCatching
         hooks.unregisterAll(pluginId)
+        (loaded.context as? HostPluginContext)?.close()
         loaded.instance.onUnload()
     }
 
@@ -159,6 +176,7 @@ internal class PluginRuntime(
         val loaded = loadedPlugins.remove(pluginId) ?: return@runCatching
         hooks.unregisterAll(pluginId)
         loaded.instance.onUninstall(loaded.context)
+        (loaded.context as? HostPluginContext)?.close()
         loaded.instance.onUnload()
     }
 
@@ -167,9 +185,15 @@ internal class PluginRuntime(
         private val plugin: InstalledPlugin,
         override val hostServices: PluginHostServices,
         private val registry: ExtensionRegistry,
-        private val logs: PluginLogRepository
+        private val logs: PluginLogRepository,
+        private val settings: HostPluginSettings
     ) : PluginContext {
         override val pluginId: String get() = plugin.id
+
+        override fun settings(): PluginSettings = settings
+
+        /** Beendet Beobachter (Einstellungs-Listener) beim Entladen. */
+        fun close() = settings.close()
 
         override fun logger(tag: String): PluginLogger = HostPluginLogger(plugin.id, tag.ifBlank { "main" }, logs)
 
@@ -181,6 +205,32 @@ internal class PluginRuntime(
             }
             return registry.register(point, value, plugin.id)
         }
+    }
+
+    /** Einstellungen eines Plugins: gespeicherte Werte, sonst Vorgaben aus dem Manifest. */
+    private class HostPluginSettings(
+        private val pluginId: String,
+        private val items: List<PluginSettingItem>,
+        private val repository: PluginSettingsRepository
+    ) : PluginSettings {
+        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+        override fun getString(key: String): String =
+            items.firstOrNull { it.key == key }?.normalize(repository.observe(pluginId).value[key]).orEmpty()
+
+        override fun addChangeListener(listener: (key: String) -> Unit): Disposable {
+            val job = scope.launch {
+                var previous = repository.observe(pluginId).value
+                repository.observe(pluginId).collect { current ->
+                    (previous.keys + current.keys).filter { previous[it] != current[it] }
+                        .forEach { key -> runCatching { listener(key) } }
+                    previous = current
+                }
+            }
+            return Disposable { job.cancel() }
+        }
+
+        fun close() = scope.cancel()
     }
 
     /** Schreibt Plugin-Protokollzeilen in [PluginLogRepository]. */

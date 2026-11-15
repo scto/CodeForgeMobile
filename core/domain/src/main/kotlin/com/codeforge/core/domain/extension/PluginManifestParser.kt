@@ -16,6 +16,8 @@ import kotlinx.serialization.json.intOrNull
 /** Parst und validiert `plugin.json` (v1 abwärtskompatibel, v2 mit `contributes`). Reines Kotlin, ohne Android-Abhängigkeit. */
 object PluginManifestParser {
 
+    private const val VALUE = "value"
+
     private val ID_REGEX = Regex("[A-Za-z0-9][A-Za-z0-9._-]*")
     private val ENV_KEY = Regex("[A-Z_][A-Z0-9_]{0,63}")
     private val SHA256 = Regex("[0-9a-f]{64}")
@@ -206,8 +208,51 @@ object PluginManifestParser {
             }.also { list -> require(list.map { s -> s.name }.toSet().size == list.size) { "mcpServers: doppelte Namen" } },
             requires = obj.objects("requires").map { parseRequirement(it) },
             projectTemplates = obj.objects("projectTemplates").map { parseProjectTemplate(it) }
-                .also { list -> require(list.map { t -> t.id }.toSet().size == list.size) { "projectTemplates: doppelte IDs" } }
+                .also { list -> require(list.map { t -> t.id }.toSet().size == list.size) { "projectTemplates: doppelte IDs" } },
+            settings = (obj["settings"] as? JsonObject)?.let { parseSettings(it) }
         )
+    }
+
+    private fun parseSettings(obj: JsonObject): PluginSettingsContribution {
+        val items = obj.objects("items").map { parseSettingItem(it) }
+        require(items.isNotEmpty() && items.size <= PluginSettingsRules.MAX_ITEMS) {
+            "settings: 1 bis ${PluginSettingsRules.MAX_ITEMS} Einträge in 'items'"
+        }
+        require(items.map { it.key }.toSet().size == items.size) { "settings: doppelte Schlüssel" }
+        return PluginSettingsContribution(title = obj.string("title"), items = items)
+    }
+
+    private fun parseSettingItem(obj: JsonObject): PluginSettingItem {
+        val key = obj.req("key")
+        require(PluginSettingsRules.KEY.matches(key)) { "settings: ungültiger Schlüssel '$key'" }
+        val type = when (val t = obj.req("type")) {
+            "text" -> PluginSettingType.TEXT
+            "boolean" -> PluginSettingType.BOOLEAN
+            "choice" -> PluginSettingType.CHOICE
+            "number" -> PluginSettingType.NUMBER
+            else -> throw IllegalArgumentException("settings: unbekannter Typ '$t' (text, boolean, choice, number)")
+        }
+        val options = obj.objects("options").map { o -> o.req(VALUE).let { v -> PluginSettingOption(v, o.string("label") ?: v) } }
+        require(type != PluginSettingType.CHOICE || options.isNotEmpty()) { "settings: '$key' (choice) braucht 'options'" }
+        val default = (obj["default"] as? JsonPrimitive)?.content
+            ?: when (type) {
+                PluginSettingType.BOOLEAN -> "false"
+                PluginSettingType.CHOICE -> options.first().value
+                PluginSettingType.NUMBER -> (obj.int("min") ?: 0).toString()
+                PluginSettingType.TEXT -> ""
+            }
+        val item = PluginSettingItem(
+            key = key,
+            type = type,
+            title = obj.string("title") ?: key,
+            description = obj.string("description").orEmpty(),
+            default = default,
+            options = options,
+            min = obj.int("min"),
+            max = obj.int("max")
+        )
+        require(item.normalize(default) == default) { "settings: Vorgabe von '$key' ist ungültig" }
+        return item
     }
 
     private fun parseProjectTemplate(obj: JsonObject): ProjectTemplateContribution {
@@ -260,6 +305,8 @@ object PluginManifestParser {
         (this[key] as? JsonObject).orEmpty()
             .mapNotNull { (k, v) -> (v as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull?.let { k to it } }
             .toMap()
+
+    private fun JsonObject.int(key: String): Int? = (this[key] as? JsonPrimitive)?.takeIf { !it.isString }?.intOrNull
 
     private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
 

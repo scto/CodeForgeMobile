@@ -118,6 +118,7 @@ private fun PluginsScreen(
 ) {
     uiState.requirementDialog?.let { RequirementDialogView(it, onEvent) }
     uiState.logDialog?.let { PluginLogDialogView(it, onEvent) }
+    uiState.settingsSheet?.let { PluginSettingsSheetView(it, onEvent) }
     uiState.infoDialog?.let { info ->
         com.codeforge.core.ui.LspInfoDialog(
             model = info.model,
@@ -178,6 +179,7 @@ private fun PluginsScreen(
                         plugin = plugin,
                         isLoaded = plugin.id in uiState.loadedPluginIds,
                         missing = uiState.missingRequirements[plugin.id].orEmpty(),
+                        hasSettings = plugin.id in uiState.pluginsWithSettings,
                         issues = uiState.issues[plugin.id].orEmpty(),
                         onEvent = onEvent
                     )
@@ -193,7 +195,8 @@ private fun PluginRow(
     isLoaded: Boolean,
     missing: List<com.codeforge.core.domain.extension.RequirementContribution>,
     issues: List<com.codeforge.core.domain.extension.PluginIssue>,
-    onEvent: (PluginsUiEvent) -> Unit
+    onEvent: (PluginsUiEvent) -> Unit,
+    hasSettings: Boolean = false
 ) {
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -300,6 +303,11 @@ private fun PluginRow(
                         Text(stringRes(R.string.plugins_voraussetzungen_installieren))
                     }
                 }
+                if (hasSettings) {
+                    TextButton(onClick = { onEvent(PluginsUiEvent.SettingsClicked(plugin.id)) }) {
+                        Text(stringRes(R.string.plugins_settings))
+                    }
+                }
                 if (!plugin.isDeclarativeOnly) {
                     TextButton(onClick = { onEvent(PluginsUiEvent.LogClicked(plugin.id)) }) {
                         Text(stringRes(R.string.plugins_log))
@@ -387,6 +395,7 @@ fun InstalledPluginsPanel(
     }
     uiState.requirementDialog?.let { RequirementDialogView(it, viewModel::onEvent) }
     uiState.logDialog?.let { PluginLogDialogView(it, viewModel::onEvent) }
+    uiState.settingsSheet?.let { PluginSettingsSheetView(it, viewModel::onEvent) }
     uiState.infoDialog?.let { info ->
         com.codeforge.core.ui.LspInfoDialog(
             model = info.model,
@@ -428,6 +437,7 @@ fun InstalledPluginsPanel(
                         plugin = plugin,
                         isLoaded = plugin.id in uiState.loadedPluginIds,
                         missing = uiState.missingRequirements[plugin.id].orEmpty(),
+                        hasSettings = plugin.id in uiState.pluginsWithSettings,
                         issues = uiState.issues[plugin.id].orEmpty(),
                         onEvent = viewModel::onEvent,
                     )

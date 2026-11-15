@@ -79,7 +79,9 @@ data class Contributes(
     /** MCP-Server, die der Agent nach Freigabe durch den Nutzer verbindet (Berechtigungen `agent` + `shell`). */
     val mcpServers: List<McpServerContribution> = emptyList(),
     /** Projektvorlagen für den Projekt-Assistenten (Dateibäume mit Platzhaltern, kein Code wird ausgeführt). */
-    val projectTemplates: List<ProjectTemplateContribution> = emptyList()
+    val projectTemplates: List<ProjectTemplateContribution> = emptyList(),
+    /** Einstellungsseite des Plugins (Plugins-Bildschirm → „Einstellungen“). */
+    val settings: PluginSettingsContribution? = null
 ) {
     /** Ob das Plugin keinerlei Contributions enthält. */
     val isEmpty: Boolean
@@ -355,18 +357,20 @@ data class RequirementContribution(
 fun RequirementContribution.appliesTo(cpuArch: String): Boolean = arch == null || arch == cpuArch
 
 /** Namen der nicht leeren Contribution-Arten, wie sie in `contributes` heißen. */
-fun Contributes.kinds(): List<String> = buildList {
-    if (colorThemes.isNotEmpty()) add("colorThemes")
-    if (iconThemes.isNotEmpty()) add("iconThemes")
-    if (languagePacks.isNotEmpty()) add("languagePacks")
-    if (grammars.isNotEmpty()) add("grammars")
-    if (snippets.isNotEmpty()) add("snippets")
-    if (lspServers.isNotEmpty()) add("lspServers")
-    if (extensionPack.isNotEmpty()) add("extensionPack")
-    if (formatters.isNotEmpty()) add("formatters")
-    if (tools.isNotEmpty()) add("tools")
-    if (requires.isNotEmpty()) add("requires")
-    if (agentTools.isNotEmpty()) add("agentTools")
-    if (mcpServers.isNotEmpty()) add("mcpServers")
-    if (projectTemplates.isNotEmpty()) add("projectTemplates")
-}
+fun Contributes.kinds(): List<String> = listOf(
+    "colorThemes" to colorThemes.isNotEmpty(),
+    "iconThemes" to iconThemes.isNotEmpty(),
+    "languagePacks" to languagePacks.isNotEmpty(),
+    "grammars" to grammars.isNotEmpty(),
+    "snippets" to snippets.isNotEmpty(),
+    "lspServers" to lspServers.isNotEmpty(),
+    "extensionPack" to extensionPack.isNotEmpty(),
+    "formatters" to formatters.isNotEmpty(),
+    "tools" to tools.isNotEmpty(),
+    "requires" to requires.isNotEmpty(),
+    "agentTools" to agentTools.isNotEmpty(),
+    "mcpServers" to mcpServers.isNotEmpty(),
+    "projectTemplates" to projectTemplates.isNotEmpty(),
+    "settings" to (settings != null)
+).filter { it.second }.map { it.first }
+

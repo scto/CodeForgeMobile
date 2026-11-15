@@ -13,6 +13,7 @@ import com.codeforge.core.domain.extension.PluginIssue
 import com.codeforge.core.domain.extension.PluginLoadOrder
 import com.codeforge.core.domain.extension.PluginLogRepository
 import com.codeforge.core.domain.extension.PluginNode
+import com.codeforge.core.domain.extension.PluginSettingsRepository
 import com.codeforge.core.domain.extension.registry.ExtensionRegistry
 import com.codeforge.core.domain.extension.PluginManifestParser
 import com.codeforge.core.domain.extension.kinds
@@ -56,7 +57,8 @@ class PluginRepositoryImpl @Inject constructor(
     lspClientRepository: LspClientRepository,
     hooks: PluginHooks,
     extensionRegistry: ExtensionRegistry,
-    logs: PluginLogRepository
+    logs: PluginLogRepository,
+    private val pluginSettings: PluginSettingsRepository
 ) : PluginRepository, ContributionRepository {
 
     override val hostVersion: String = runCatching {
@@ -65,7 +67,7 @@ class PluginRepositoryImpl @Inject constructor(
 
     private val pluginsDir = File(context.filesDir, "plugins")
     private val registry = PluginRegistry(File(pluginsDir, "registry.json"))
-    private val runtime = PluginRuntime(context, lspClientRepository, hooks, extensionRegistry, logs)
+    private val runtime = PluginRuntime(context, lspClientRepository, hooks, extensionRegistry, logs, pluginSettings)
 
     private val _installedPlugins = MutableStateFlow<List<InstalledPlugin>>(emptyList())
     override val installedPlugins: Flow<List<InstalledPlugin>> = _installedPlugins.asStateFlow()
@@ -285,6 +287,7 @@ class PluginRepositoryImpl @Inject constructor(
             runtime.uninstall(pluginId)
             _loadedPluginIds.update { it - pluginId }
             File(pluginsDir, pluginId).deleteRecursively()
+            pluginSettings.clear(pluginId)
             val updated = _installedPlugins.value.filterNot { it.id == pluginId }
             registry.saveAll(updated)
             _installedPlugins.value = updated

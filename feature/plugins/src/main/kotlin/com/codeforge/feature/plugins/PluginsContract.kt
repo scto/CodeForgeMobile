@@ -7,6 +7,7 @@ package com.codeforge.feature.plugins
 import androidx.compose.runtime.Immutable
 import com.codeforge.core.domain.extension.PluginIssue
 import com.codeforge.core.domain.extension.PluginLogLine
+import com.codeforge.core.domain.extension.PluginSettingItem
 import com.codeforge.core.domain.extension.RequirementContribution
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.ui.LspInfoModel
@@ -27,7 +28,20 @@ data class PluginsUiState(
     /** Offener Info-Dialog eines Language-Server-Plugins (Zustand/Laufzeit/Allgemein). */
     val infoDialog: PluginInfoDialog? = null,
     /** Offenes Protokoll eines Plugins. */
-    val logDialog: PluginLogDialog? = null
+    val logDialog: PluginLogDialog? = null,
+    /** Plugins mit Einstellungsseite (`contributes.settings`). */
+    val pluginsWithSettings: Set<String> = emptySet(),
+    /** Offene Einstellungsseite. */
+    val settingsSheet: PluginSettingsSheet? = null
+)
+
+/** Einstellungsseite eines Plugins; [values] = wirksame Werte (Nutzer oder Vorgabe). */
+@Immutable
+data class PluginSettingsSheet(
+    val pluginId: String,
+    val title: String,
+    val items: List<PluginSettingItem>,
+    val values: Map<String, String>
 )
 
 /** Protokoll-Dialog eines Plugins (letzte Zeilen, älteste zuerst). */
@@ -78,6 +92,12 @@ sealed interface PluginsUiEvent {
     data object LogDismissed : PluginsUiEvent
     /** Protokoll des offenen Plugins leeren. */
     data object LogCleared : PluginsUiEvent
+    /** Einstellungsseite öffnen. */
+    data class SettingsClicked(val pluginId: String) : PluginsUiEvent
+    /** Einstellungsseite schließen. */
+    data object SettingsDismissed : PluginsUiEvent
+    /** Wert geändert; `null` = Vorgabe wiederherstellen. */
+    data class SettingChanged(val key: String, val value: String?) : PluginsUiEvent
 }
 
 /** Einmalige Effekte. */

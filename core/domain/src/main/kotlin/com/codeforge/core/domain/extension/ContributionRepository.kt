@@ -26,7 +26,8 @@ data class ActiveContributions(
     val requires: List<Resolved<RequirementContribution>> = emptyList(),
     val agentTools: List<Resolved<AgentToolContribution>> = emptyList(),
     val mcpServers: List<Resolved<McpServerContribution>> = emptyList(),
-    val projectTemplates: List<Resolved<ProjectTemplateContribution>> = emptyList()
+    val projectTemplates: List<Resolved<ProjectTemplateContribution>> = emptyList(),
+    val settings: List<Resolved<PluginSettingsContribution>> = emptyList()
 ) {
     companion object {
         /** Leere Gesamtsicht ohne Contributions. */
@@ -52,7 +53,8 @@ data class ActiveContributions(
                 agentTools = entries.flatMap { (m, dir) -> m.contributes.agentTools.map { Resolved(m.id, dir, it) } },
                 mcpServers = entries.flatMap { (m, dir) -> m.contributes.mcpServers.map { Resolved(m.id, dir, it) } },
                 // Vorlagen-IDs sind nur je Plugin eindeutig.
-                projectTemplates = entries.flatMap { (m, dir) -> m.contributes.projectTemplates.map { Resolved(m.id, dir, it) } }
+                projectTemplates = entries.flatMap { (m, dir) -> m.contributes.projectTemplates.map { Resolved(m.id, dir, it) } },
+                settings = entries.mapNotNull { (m, dir) -> m.contributes.settings?.let { Resolved(m.id, dir, it) } }
             )
         }
     }
@@ -96,4 +98,15 @@ fun FormatterContribution.expandCommand(file: String, pluginDir: String, home: S
 interface ContributionRepository {
     /** Aktuelle Gesamtsicht der Contributions aller aktivierten Plugins. */
     val contributions: StateFlow<ActiveContributions>
+
+    /** Wirksame Einstellungen von [pluginId] (Werte des Nutzers, sonst Vorgaben) für `${'$'}{setting:key}`. */
+    fun settingValues(pluginId: String): Map<String, String> =
+        contributions.value.settings.firstOrNull { it.pluginId == pluginId }?.item?.items?.effectiveValues(emptyMap()).orEmpty()
+}
+
+/** Ersetzt `${'$'}{setting:key}` in allen Elementen von [args] durch die Einstellungen von [pluginId]. */
+fun ContributionRepository.withSettings(pluginId: String, args: List<String>): List<String> {
+    if (args.none { PluginSettingsRules.PLACEHOLDER.containsMatchIn(it) }) return args
+    val values = settingValues(pluginId)
+    return args.map { resolveSettingPlaceholders(it, values) }
 }
