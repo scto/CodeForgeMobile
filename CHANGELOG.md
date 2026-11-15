@@ -11,44 +11,36 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-### Hinzugefügt (Befehlspalette, Refactoring-Menü, Verweise beim Umbenennen)
-- **Befehlspalette** im Editor (Werkzeugleiste ⌘-Symbol, `Strg+Umschalt+P`): durchsuchbare Liste aller Befehle, die
-  in der aktuellen Lage funktionieren – eingebaute Aktionen (Umbenennen, Refactoring, Definition, Verwendungen, Imports,
-  Formatieren …), die vom Sprachserver gemeldeten Befehle (`executeCommandProvider.commands`, ohne interne wie
-  `*.apply*`/`_…`) und Plugin-Befehle. Unscharfe Suche („imp org“, „gzz“), ohne Suchtext nach Gruppen.
-- **Refactoring-Menü** (Werkzeug-Symbol, `Strg+Umschalt+R`): Code-Actions der Arten `refactor.*` und `source.*` für
-  Cursor bzw. Auswahl (`context.only`), sortiert nach Extrahieren/Inline/Umschreiben/Verschieben/Imports, dazu
-  „String-Ressource extrahieren“. Palette: „Imports organisieren (Sprachserver)“ und „Alle behebbaren Probleme beheben“
-  (`source.organizeImports`/`source.fixAll`; eine Aktion wird direkt angewendet). `Umschalt+F6` = Umbenennen.
-- **Umbenennen im Dateibaum passt Verweise an:** zuerst `workspace/willRenameFiles` der Sprachserver; liefern sie nichts,
-  ändert CodeForge bei Ordnern in `src/*/java|kotlin` selbst `package`- und `import`-Zeilen (auch `import static`) sowie
-  voll qualifizierte Klassennamen in XML (Manifest, Layouts). Vorher Dialog mit Anzahl, Package `alt → neu` und
-  Dateiliste: „Umbenennen und anpassen“ / „Nur umbenennen“. Ungespeicherte Puffer werden vorher gespeichert, danach
-  `workspace/didRenameFiles`. Nicht erfasst: voll qualifizierte Namen im Code ohne `import`.
-- LSP-Client: liest `codeActionKinds`, `executeCommandProvider.commands`, `workspace.fileOperations`; meldet selbst
-  `workspace.fileOperations` und `executeCommand`. Server-Befehle gehen an den Server, der sie gemeldet hat.
-
-### Behoben (Absturz `PatternSyntaxException`)
-- Absturz beim Öffnen von „String-Ressource extrahieren“ (3.0.7): Der Regex `\$\{[^}]*}` enthielt ein unescaptes `}`.
-  Die JVM akzeptiert das (Tests grün), Androids ICU-Regex nicht. Jetzt `\}`, Regex einmalig als Konstante.
-- Gleicher Fehler in `GradleBuildParser` (Abhängigkeits-Updates, Variablen wie `${kotlinVersion}`) behoben.
-- Neu: `scripts/check_android_regex.py` findet solche Regex-Literale in `src/main`; läuft im Workflow „Build Debug APK“.
-
-## [3.0.7] - 2026-11-15
+### Highlights
+- **Befehlspalette** (`Strg+Umschalt+P`): alle Befehle, die gerade funktionieren – eingebaut, vom Sprachserver, von Plugins.
+- **Refactoring-Menü** (`Strg+Umschalt+R`): Extrahieren, Inline, Umschreiben, Imports – direkt vom Sprachserver.
+- **Package umbenennen im Dateibaum:** `package`- und `import`-Zeilen werden angepasst.
+- **Absturz in „String-Ressource extrahieren“ (3.0.7) behoben.**
 
 ### Hinzugefügt
-- build: tasks --all in der Task-Auswahl
-- editor: Ligaturen, Soft-Tab, Backspace-Optionen
-- editor: ICU-Wortgrenzen fuer Doppeltipp/langes Druecken, Lupen-Texte
+- Befehlspalette im Editor (⌘-Symbol, `Strg+Umschalt+P`): eingebaute Aktionen je nach Server-Fähigkeiten und Dateityp,
+  die vom Sprachserver gemeldeten Befehle (`executeCommandProvider.commands`, ohne interne wie `*.apply*`/`_…`) und
+  Plugin-Befehle. Unscharfe Suche („imp org“, „gzz“), ohne Suchtext nach Gruppen; Enter führt den ersten Treffer aus.
+- Refactoring-Menü (Werkzeug-Symbol, `Strg+Umschalt+R`): Code-Actions `refactor.*`/`source.*` für Cursor bzw. Auswahl
+  (`context.only`), sortiert nach Art, dazu „String-Ressource extrahieren“.
+- Palette: „Imports organisieren (Sprachserver)“ (`source.organizeImports`) und „Alle behebbaren Probleme beheben“
+  (`source.fixAll`); liefert der Server genau eine Aktion, wird sie direkt angewendet. `Umschalt+F6` = Umbenennen.
+- Umbenennen im Dateibaum passt Verweise an: zuerst `workspace/willRenameFiles` der Sprachserver; liefern sie nichts,
+  ändert CodeForge bei Ordnern in `src/*/java|kotlin` selbst `package`- und `import`-Zeilen (auch `import static`) sowie
+  voll qualifizierte Klassennamen in Manifest und Layouts. Vorher Dialog mit Anzahl, Package `alt → neu` und Dateiliste
+  („Umbenennen und anpassen“ / „Nur umbenennen“); danach `workspace/didRenameFiles`. Nicht erfasst: voll qualifizierte
+  Namen im Code ohne `import`.
+- `scripts/check_android_regex.py`: findet Regex-Literale, die auf Android abstürzen; läuft im Workflow „Build Debug APK“.
 
 ### Geändert
-- changelog: 3.0.7
-- changelog: 3.0.6 zusammengefasst
+- LSP-Client liest `codeActionKinds`, `executeCommandProvider.commands` und `workspace.fileOperations` und meldet selbst
+  `workspace.fileOperations`/`executeCommand`. Server-Befehle gehen an den Server, der sie gemeldet hat.
 
 ### Behoben
-- hardcoded-strings: eindeutige Schlüssel, keine Platzhalter-/Pfad-Texte, bessere Präfixe
-- lsp: JVM-Optionen fuer kmp-lsp (kmp-jar-indexer via JDK_JAVA_OPTIONS)
-- composepreview: Compose/Kotlin in Release-Builds fuer die Vorschau erhalten
+- Absturz `PatternSyntaxException` beim Öffnen von „String-Ressource extrahieren“: Der Regex `\$\{[^}]*}` enthielt ein
+  unescaptes `}` – die JVM akzeptiert das (Tests grün), Androids ICU-Regex nicht. Jetzt `\}`, als Konstante.
+- Gleicher Fehler in `GradleBuildParser` (Abhängigkeits-Updates bei Versionen wie `${kotlinVersion}`).
+- CHANGELOG: doppelter, aus Commits erzeugter Abschnitt `[3.0.7]` entfernt.
 
 ## [3.0.7] - 2026-11-15
 
