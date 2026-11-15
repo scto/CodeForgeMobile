@@ -173,12 +173,12 @@ public final class com/codeforge/libs/plugin_api/PluginCompletionItem {
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/PluginContext {
+	public abstract fun feedback ()Lcom/codeforge/libs/plugin_api/PluginUi;
 	public abstract fun getHostServices ()Lcom/codeforge/libs/plugin_api/PluginHostServices;
 	public abstract fun getPluginId ()Ljava/lang/String;
 	public abstract fun logger (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginLogger;
 	public abstract fun register (Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;Ljava/lang/Object;)Lcom/codeforge/core/domain/extension/registry/Disposable;
 	public abstract fun settings ()Lcom/codeforge/libs/plugin_api/PluginSettings;
-	public abstract fun ui ()Lcom/codeforge/libs/plugin_api/PluginUi;
 }
 
 public final class com/codeforge/libs/plugin_api/PluginDiagnostic {
