@@ -195,6 +195,12 @@ class PluginHooks @Inject constructor(
             is HostEvent.FileClosed -> PluginEvent.FileClosed(path)
             is HostEvent.GitCommitted -> PluginEvent.GitCommitted(repoPath, message)
             is HostEvent.GitBranchChanged -> PluginEvent.GitBranchChanged(repoPath, branch)
+            is HostEvent.EditorActivated -> PluginEvent.EditorActivated(path)
+            is HostEvent.DiagnosticsChanged -> PluginEvent.DiagnosticsChanged(path, errors, warnings)
+            is HostEvent.BuildStarted -> PluginEvent.BuildStarted(task)
+            is HostEvent.BuildFinished -> PluginEvent.BuildFinished(task, success)
+            is HostEvent.ProjectOpened -> PluginEvent.ProjectOpened(rootPath)
+            is HostEvent.ProjectClosed -> PluginEvent.ProjectClosed(rootPath)
         }
     }
 }

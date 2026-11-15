@@ -11,6 +11,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugin-API 3, Teil 2: Editor)
+- Editor-Aktionen für Plugins (`PluginExtensionPoints.EDITOR_ACTION`, Berechtigung `editor`): Zugriff auf Text, Cursor
+  und Auswahl der aktiven Datei (`EditorContext`), Änderungen als Effekte (`ApplyEdits`, `MoveCaret`, `Select`,
+  `CreateFile`, `OpenFile`, `ShowMessage`). Je nach Art in Befehlspalette, Refactoring-Menü oder Schnellkorrekturen;
+  30 s Zeitlimit, Fehler im Plugin-Protokoll.
+- Schnellkorrektur-Quellen (`QUICK_FIX_PROVIDER`): Vorschläge zu den Diagnosen am Cursor.
+- Eingebaute Aktionen über dieselbe Andockstelle: „Zeilen sortieren“, „Doppelte Zeilen entfernen“,
+  „Groß-/Kleinschreibung umschalten“.
+- Neue Plugin-Ereignisse: `EditorActivated`, `DiagnosticsChanged`, `BuildStarted`, `BuildFinished`, `ProjectOpened`,
+  `ProjectClosed`; neue Berechtigungen `editor`, `build-events`, `project-events`.
+
 ### Hinzugefügt (Plugin-API 3, Teil 1)
 - Gemeinsames `ExtensionRegistry` (`core:domain`): typisierte `ExtensionPoint<T>`, jeder Beitrag gehört einem Plugin
   (oder der App), einzeln per `Disposable` oder gesammelt per `unregisterAll` abmeldbar, beobachtbar als `StateFlow`.

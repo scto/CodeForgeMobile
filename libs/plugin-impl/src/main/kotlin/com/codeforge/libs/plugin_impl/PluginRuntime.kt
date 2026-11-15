@@ -214,6 +214,15 @@ internal class PluginRuntime(
         fun jdkInstallPath(version: String): String
     }
 
+    private companion object {
+        val EVENT_PERMISSIONS = listOf(
+            PluginPermissions.FILE_EVENTS,
+            PluginPermissions.GIT_EVENTS,
+            PluginPermissions.BUILD_EVENTS,
+            PluginPermissions.PROJECT_EVENTS
+        )
+    }
+
     /** Host-Dienste mit Berechtigungsprüfung je Plugin (siehe [PluginPermissionPolicy]). */
     private class PermissionedHostServices(
         private val pluginId: String,
@@ -257,9 +266,7 @@ internal class PluginRuntime(
 
         override fun addEventListener(listener: PluginEventListener) {
             // Mindestens eine der Ereignis-Berechtigungen ist nötig; je Ereignis wird beim Zustellen erneut geprüft.
-            if (!PluginPermissionPolicy.isAllowed(apiVersion, granted, PluginPermissions.FILE_EVENTS) &&
-                !PluginPermissionPolicy.isAllowed(apiVersion, granted, PluginPermissions.GIT_EVENTS)
-            ) {
+            if (EVENT_PERMISSIONS.none { PluginPermissionPolicy.isAllowed(apiVersion, granted, it) }) {
                 throw PluginPermissionException(pluginId, PluginPermissions.FILE_EVENTS)
             }
             hooks.addListener(pluginId, apiVersion, granted, listener)

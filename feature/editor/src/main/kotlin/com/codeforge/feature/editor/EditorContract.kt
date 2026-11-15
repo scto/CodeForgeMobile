@@ -25,6 +25,9 @@ data class OpenFile(
     val isDirty: Boolean = false
 )
 
+/** Cursor und Auswahl als Zeichen-Offsets (für Editor-Aktionen). */
+data class CaretSnapshot(val cursor: Int, val selectionStart: Int, val selectionEnd: Int)
+
 /** Inhalt des Code-Action-Sheets. */
 enum class CodeActionsMode { QUICK_FIX, REFACTOR }
 
@@ -229,16 +232,19 @@ sealed interface EditorUiEvent {
 
     // Task 31 Events
     /** Schnellkorrekturen an Position anfordern. */
-    data class TriggerQuickFix(val line: Int, val col: Int) : EditorUiEvent
+    data class TriggerQuickFix(val line: Int, val col: Int, val caret: CaretSnapshot? = null) : EditorUiEvent
     /** Schnellkorrekturen schließen. */
     data object DismissQuickFix : EditorUiEvent
     /** Code-Aktion anwenden. */
     data class ApplyCodeAction(val action: LspCodeAction) : EditorUiEvent
 
-    /** Befehlspalette öffnen; [pluginCommands] = Befehle der Code-Plugins. */
+    /** Befehlspalette öffnen; [pluginCommands] = Befehle der Code-Plugins, [caret] = Cursor/Auswahl. */
     data class OpenCommandPalette(
-        val pluginCommands: List<com.codeforge.feature.editor.palette.PalettePluginCommand> = emptyList()
+        val pluginCommands: List<com.codeforge.feature.editor.palette.PalettePluginCommand> = emptyList(),
+        val caret: CaretSnapshot? = null
     ) : EditorUiEvent
+    /** Editor-Aktion aus dem Register ausführen ([ref] = `pluginId/actionId`). */
+    data class RunEditorAction(val ref: String, val caret: CaretSnapshot? = null) : EditorUiEvent
     /** Suchtext der Befehlspalette geändert. */
     data class CommandPaletteQueryChanged(val query: String) : EditorUiEvent
     /** Befehlspalette schließen. */
@@ -248,7 +254,7 @@ sealed interface EditorUiEvent {
     /** Vom Server gemeldeten Befehl ausführen (`workspace/executeCommand`). */
     data class RunServerCommand(val command: String) : EditorUiEvent
     /** Refactorings für Cursor bzw. Auswahl [range] anfordern (`refactor.*`, `source.*`). */
-    data class TriggerRefactor(val line: Int, val col: Int, val range: LspRange? = null) : EditorUiEvent
+    data class TriggerRefactor(val line: Int, val col: Int, val range: LspRange? = null, val caret: CaretSnapshot? = null) : EditorUiEvent
     /** Quelltext-Aktion der Art [kind] (z. B. `source.organizeImports`) für die ganze Datei ausführen. */
     data class RunSourceAction(val kind: String) : EditorUiEvent
 
@@ -391,4 +397,6 @@ sealed interface EditorUiEffect {
     ) : EditorUiEffect
     /** Zu einer Route navigieren. */
     data class NavigateTo(val route: String) : EditorUiEffect
+    /** Ergebnis einer Editor-Aktion übernehmen: neuer Text (`null` = unverändert), danach Auswahl/Cursor. */
+    data class ApplyEditorText(val newText: String?, val selectionStart: Int?, val selectionEnd: Int?) : EditorUiEffect
 }

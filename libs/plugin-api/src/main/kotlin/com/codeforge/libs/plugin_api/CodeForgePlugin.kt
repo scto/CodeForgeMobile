@@ -130,7 +130,7 @@ interface PluginHostServices {
 /** Menüs, in denen Plugin-Befehle erscheinen können. */
 enum class PluginMenuTarget { EDITOR_MENU, FILE_CONTEXT_MENU }
 
-/** Kontext eines Befehlsaufrufs: aktive/ausgewählte Datei oder null. */
+/** Kontext eines Befehlsaufrufs: aktive/ausgewählte Datei oder null. Für Zugriff auf Text und Cursor: [EditorAction]. */
 data class CommandArgs(val activeFilePath: String?)
 
 /** Handler eines vom Plugin registrierten Befehls; wird auf Nutzeraktion aus einem Menü oder der Befehlsliste aufgerufen. */
@@ -155,6 +155,18 @@ sealed interface PluginEvent {
     data class GitCommitted(val repoPath: String, val message: String) : PluginEvent
     /** Der Branch eines Repositories hat gewechselt: [repoPath] = Repository-Stamm, [branch] = neuer Branch. */
     data class GitBranchChanged(val repoPath: String, val branch: String) : PluginEvent
+    /** Seit API 3 (`file-events`): eine andere geöffnete Datei ist jetzt aktiv. */
+    data class EditorActivated(val path: String) : PluginEvent
+    /** Seit API 3 (`file-events`): die Diagnosen einer Datei haben sich geändert. */
+    data class DiagnosticsChanged(val path: String, val errors: Int, val warnings: Int) : PluginEvent
+    /** Seit API 3 (`build-events`): ein Gradle-Task wurde gestartet. */
+    data class BuildStarted(val task: String) : PluginEvent
+    /** Seit API 3 (`build-events`): ein Gradle-Task ist beendet. */
+    data class BuildFinished(val task: String, val success: Boolean) : PluginEvent
+    /** Seit API 3 (`project-events`): ein Projekt wurde geöffnet. */
+    data class ProjectOpened(val rootPath: String) : PluginEvent
+    /** Seit API 3 (`project-events`): das Projekt wurde geschlossen. */
+    data class ProjectClosed(val rootPath: String) : PluginEvent
 }
 
 /** Empfänger für [PluginEvent]; wird mit [PluginHostServices.addEventListener] registriert. */

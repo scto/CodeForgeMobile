@@ -19,12 +19,26 @@ sealed interface HostEvent {
     data class GitCommitted(val repoPath: String, val message: String) : HostEvent
     /** Der aktuelle Branch hat gewechselt. */
     data class GitBranchChanged(val repoPath: String, val branch: String) : HostEvent
+    /** Eine andere geöffnete Datei wurde zur aktiven (Tab-Wechsel). */
+    data class EditorActivated(val path: String) : HostEvent
+    /** Die Diagnosen einer Datei haben sich geändert. */
+    data class DiagnosticsChanged(val path: String, val errors: Int, val warnings: Int) : HostEvent
+    /** Ein Gradle-Task wurde gestartet. */
+    data class BuildStarted(val task: String) : HostEvent
+    /** Ein Gradle-Task ist beendet ([success] = ohne Fehler). */
+    data class BuildFinished(val task: String, val success: Boolean) : HostEvent
+    /** Ein Projekt wurde geöffnet. */
+    data class ProjectOpened(val rootPath: String) : HostEvent
+    /** Das Projekt wurde geschlossen. */
+    data class ProjectClosed(val rootPath: String) : HostEvent
 
     /** Benötigte Plugin-Berechtigung (siehe [PluginPermissions]). */
     val permission: String
         get() = when (this) {
-            is FileOpened, is FileSaved, is FileClosed -> PluginPermissions.FILE_EVENTS
+            is FileOpened, is FileSaved, is FileClosed, is EditorActivated, is DiagnosticsChanged -> PluginPermissions.FILE_EVENTS
             is GitCommitted, is GitBranchChanged -> PluginPermissions.GIT_EVENTS
+            is BuildStarted, is BuildFinished -> PluginPermissions.BUILD_EVENTS
+            is ProjectOpened, is ProjectClosed -> PluginPermissions.PROJECT_EVENTS
         }
 }
 

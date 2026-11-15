@@ -37,6 +37,11 @@ import com.codeforge.feature.editor.palette.PaletteContext
 import com.codeforge.feature.editor.palette.PalettePluginCommand
 import com.codeforge.feature.editor.palette.buildPaletteItems
 import com.codeforge.feature.editor.palette.codeActionKindRank
+import com.codeforge.feature.editor.plugin.BuiltInEditorActions
+import com.codeforge.feature.editor.plugin.PluginEditorBridge
+import com.codeforge.libs.plugin_api.EditorContext
+import com.codeforge.libs.plugin_api.EditorEffect
+import com.codeforge.libs.plugin_api.PluginDiagnostic
 import com.codeforge.libs.lsp_client.LspWorkspaceEditApplier
 import com.codeforge.libs.lsp_client.WorkspaceEditException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -95,8 +100,17 @@ class EditorViewModel @Inject constructor(
     private val workspaceRepository: WorkspaceRepository? = null,
     private val gitRepository: com.codeforge.core.domain.repository.GitRepository? = null,
     private val pluginEvents: com.codeforge.core.domain.extension.PluginEventSink = com.codeforge.core.domain.extension.NoOpPluginEventSink,
-    private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null
+    private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null,
+    private val extensionRegistry: com.codeforge.core.domain.extension.registry.ExtensionRegistry? = null,
+    private val pluginLogs: com.codeforge.core.domain.extension.PluginLogRepository? = null
 ) : ViewModel() {
+
+    // Editor-Aktionen aus dem Register (eingebaute und von Plugins); `null` ohne Plugin-System (Tests).
+    private val editorActions: PluginEditorBridge? = extensionRegistry?.let { registry ->
+        BuiltInEditorActions.ensureRegistered(registry)
+        PluginEditorBridge(registry, pluginLogs)
+    }
+    private var lastCaret: CaretSnapshot? = null
 
     private val _uiState = MutableStateFlow(EditorUiState())
     /** UI-Zustand. */
@@ -546,6 +560,13 @@ class EditorViewModel @Inject constructor(
             _uiState.update { s ->
                 s.copy(diagnosticsByPath = s.diagnosticsByPath + (path to diagnostics))
             }
+            pluginEvents.publish(
+                com.codeforge.core.domain.extension.HostEvent.DiagnosticsChanged(
+                    path,
+                    errors = diagnostics.count { it.severity == com.codeforge.core.domain.model.DiagnosticSeverity.ERROR },
+                    warnings = diagnostics.count { it.severity == com.codeforge.core.domain.model.DiagnosticSeverity.WARNING }
+                )
+            )
         }
     }
 
@@ -583,6 +604,10 @@ class EditorViewModel @Inject constructor(
             is EditorUiEvent.SetProjectRoot -> {
                 val oldRoot = projectRoot.value
                 projectRoot.value = event.rootPath
+                if (oldRoot != event.rootPath) {
+                    oldRoot?.let { pluginEvents.publish(com.codeforge.core.domain.extension.HostEvent.ProjectClosed(it)) }
+                    event.rootPath?.let { pluginEvents.publish(com.codeforge.core.domain.extension.HostEvent.ProjectOpened(it)) }
+                }
                 if (event.rootPath == null && oldRoot != null) {
                     viewModelScope.launch { lspSessionController.onProjectClosed() }
                 } else if (event.rootPath != null) {
@@ -650,16 +675,29 @@ class EditorViewModel @Inject constructor(
             is EditorUiEvent.InsertText -> { }
 
             // LSP Task 31 Events
-            is EditorUiEvent.TriggerQuickFix -> triggerQuickFix(event.line, event.col)
+            is EditorUiEvent.TriggerQuickFix -> {
+                lastCaret = event.caret ?: lastCaret
+                triggerQuickFix(event.line, event.col)
+            }
             EditorUiEvent.DismissQuickFix -> _uiState.update { it.copy(isCodeActionsSheetVisible = false) }
-            is EditorUiEvent.OpenCommandPalette -> openCommandPalette(event.pluginCommands)
+            is EditorUiEvent.OpenCommandPalette -> {
+                lastCaret = event.caret ?: lastCaret
+                openCommandPalette(event.pluginCommands)
+            }
+            is EditorUiEvent.RunEditorAction -> {
+                _uiState.update { it.copy(commandPalette = null) }
+                runEditorAction(event.ref, event.caret ?: lastCaret)
+            }
             is EditorUiEvent.CommandPaletteQueryChanged -> _uiState.update { s ->
                 s.copy(commandPalette = s.commandPalette?.copy(query = event.query))
             }
             EditorUiEvent.DismissCommandPalette -> _uiState.update { it.copy(commandPalette = null) }
             is EditorUiEvent.RunServerCommand -> runServerCommand(event.command)
             EditorUiEvent.ExtractStringResource -> _uiState.value.activeFile?.path?.let(::extractStringAction)?.let(::applyCodeAction)
-            is EditorUiEvent.TriggerRefactor -> triggerRefactor(event.line, event.col, event.range)
+            is EditorUiEvent.TriggerRefactor -> {
+                lastCaret = event.caret ?: lastCaret
+                triggerRefactor(event.line, event.col, event.range)
+            }
             is EditorUiEvent.RunSourceAction -> runSourceAction(event.kind)
             is EditorUiEvent.ApplyCodeAction -> applyCodeAction(event.action)
 
@@ -1209,6 +1247,9 @@ class EditorViewModel @Inject constructor(
             actions.addAll(lspActions)
         }
         extractStringAction(active.path)?.let { actions.add(it) }
+        editorContext(lastCaret)?.let { ctx ->
+            editorActions?.quickFixActions(ctx, pluginDiagnostics(ctx.text, diagnosticsOnLine))?.let { actions.addAll(it) }
+        }
         if (actions.isNotEmpty()) {
             _uiState.update {
                 it.copy(codeActions = actions, isCodeActionsSheetVisible = true, codeActionsMode = CodeActionsMode.QUICK_FIX)
@@ -1216,6 +1257,84 @@ class EditorViewModel @Inject constructor(
         } else {
             _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_no_code_actions)))
         }
+    }
+
+    // ---- Editor-Aktionen aus dem Register (Plugins und eingebaute) ----
+
+    private fun editorContext(caret: CaretSnapshot?): EditorContext? {
+        val active = _uiState.value.activeFile ?: return null
+        val length = active.content.length
+        val cursor = (caret?.cursor ?: 0).coerceIn(0, length)
+        return EditorContext(
+            filePath = active.path,
+            languageId = languageIdFor(active.path),
+            text = active.content,
+            cursorOffset = cursor,
+            selectionStart = (caret?.selectionStart ?: cursor).coerceIn(0, length),
+            selectionEnd = (caret?.selectionEnd ?: cursor).coerceIn(0, length)
+        )
+    }
+
+    private fun pluginDiagnostics(text: String, diagnostics: List<com.codeforge.core.domain.model.LspDiagnostic>): List<PluginDiagnostic> = diagnostics.map { d ->
+        PluginDiagnostic(
+            message = d.message,
+            severity = d.severity.ordinal + 1,
+            startOffset = PluginEditorBridge.offsetOf(text, d.range.start.line, d.range.start.character),
+            endOffset = PluginEditorBridge.offsetOf(text, d.range.end.line, d.range.end.character),
+            source = d.source
+        )
+    }
+
+    private fun runEditorAction(ref: String, caret: CaretSnapshot?) = viewModelScope.launch {
+        val bridge = editorActions ?: return@launch
+        val context = editorContext(caret) ?: return@launch
+        bridge.run(ref, context)
+            .onSuccess { applyEditorEffects(context, it) }
+            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_plugin_action_failed, it.message.orEmpty()))) }
+    }
+
+    private suspend fun applyEditorEffects(context: EditorContext, effects: List<EditorEffect>) {
+        var text: String? = null
+        var selection: Pair<Int, Int>? = null
+        for (effect in effects) {
+            when (effect) {
+                is EditorEffect.ApplyEdits -> text = runCatching { PluginEditorBridge.applyEdits(text ?: context.text, effect.edits) }
+                    .getOrElse {
+                        _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_plugin_action_failed, it.message.orEmpty())))
+                        return
+                    }
+                is EditorEffect.MoveCaret -> selection = effect.offset to effect.offset
+                is EditorEffect.Select -> selection = effect.start to effect.end
+                is EditorEffect.CreateFile -> createFileFromAction(effect)
+                is EditorEffect.OpenFile -> openFile(resolveProjectPath(effect.path))
+                is EditorEffect.ShowMessage -> _effect.emit(EditorUiEffect.ShowSnackbar(effect.text.take(MAX_ACTION_MESSAGE)))
+            }
+        }
+        if (text != null || selection != null) {
+            val length = (text ?: context.text).length
+            _effect.emit(
+                EditorUiEffect.ApplyEditorText(
+                    newText = text,
+                    selectionStart = selection?.first?.coerceIn(0, length),
+                    selectionEnd = selection?.second?.coerceIn(0, length)
+                )
+            )
+        }
+    }
+
+    private fun resolveProjectPath(path: String): String =
+        if (File(path).isAbsolute) path else File(projectRoot.value ?: File(_uiState.value.activeFile?.path.orEmpty()).parent.orEmpty(), path).path
+
+    private suspend fun createFileFromAction(effect: EditorEffect.CreateFile) {
+        val target = resolveProjectPath(effect.path)
+        if (File(target).exists()) {
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_plugin_file_exists, target)))
+            return
+        }
+        File(target).parentFile?.mkdirs()
+        fileSystemRepository.writeFile(target, effect.content)
+            .onSuccess { openFile(target) }
+            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_plugin_action_failed, it.message.orEmpty()))) }
     }
 
     private fun extractStringAction(path: String): LspCodeAction? {
@@ -1236,7 +1355,9 @@ class EditorViewModel @Inject constructor(
             capabilities = state.serverCapabilities,
             pluginCommands = pluginCommands
         )
-        _uiState.update { it.copy(commandPalette = CommandPaletteState(allItems = buildPaletteItems(context) { id -> Res.string(id) })) }
+        val registryItems = editorContext(lastCaret)?.let { editorActions?.paletteItems(it) }.orEmpty()
+        val items = buildPaletteItems(context) { id -> Res.string(id) } + registryItems
+        _uiState.update { it.copy(commandPalette = CommandPaletteState(allItems = items)) }
     }
 
     private fun runServerCommand(command: String) = viewModelScope.launch {
@@ -1255,7 +1376,8 @@ class EditorViewModel @Inject constructor(
         } else {
             emptyList()
         }
-        val actions = (fromServer + listOfNotNull(extractStringAction(active.path)))
+        val fromRegistry = editorContext(lastCaret)?.let { editorActions?.refactorActions(it) }.orEmpty()
+        val actions = (fromServer + listOfNotNull(extractStringAction(active.path)) + fromRegistry)
             .sortedWith(compareBy({ codeActionKindRank(it.kind) }, { !it.isPreferred }))
         if (actions.isEmpty()) {
             _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.refactor_none)))
@@ -1285,6 +1407,10 @@ class EditorViewModel @Inject constructor(
         _uiState.update { it.copy(isCodeActionsSheetVisible = false) }
         val active = _uiState.value.activeFile
         val command = action.command
+        if (command != null && command.command == PluginEditorBridge.COMMAND) {
+            (command.arguments.firstOrNull() as? String)?.let { runEditorAction(it, lastCaret) }
+            return@launch
+        }
         if (command != null && command.command == "codeforge.extractStringResource" && active != null) {
             val root = projectRoot.value ?: File(active.path).parentFile?.absolutePath ?: active.path
             val route = "hardcoded_strings?targetPath=${Uri.encode(active.path)}&projectRoot=${Uri.encode(root)}"
@@ -1504,6 +1630,7 @@ class EditorViewModel @Inject constructor(
     private fun selectTab(index: Int) {
         if (index !in _uiState.value.openFiles.indices) return
         _uiState.update { it.copy(activeFileIndex = index) }
+        _uiState.value.activeFile?.path?.let { pluginEvents.publish(com.codeforge.core.domain.extension.HostEvent.EditorActivated(it)) }
         publishActiveFileToBridge()
         val file = _uiState.value.openFiles.getOrNull(index)
         if (file != null) {
@@ -1700,6 +1827,7 @@ class EditorViewModel @Inject constructor(
 
     companion object {
         private val REFACTOR_KINDS = listOf("refactor", "source")
+        private const val MAX_ACTION_MESSAGE = 500
 
         fun languageIdFor(path: String): String {
             val extension = path.substringAfterLast('.', "").lowercase()

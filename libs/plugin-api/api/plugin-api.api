@@ -19,6 +19,131 @@ public final class com/codeforge/libs/plugin_api/CommandArgs {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class com/codeforge/libs/plugin_api/EditorAction {
+	public static final field Companion Lcom/codeforge/libs/plugin_api/EditorAction$Companion;
+	public static final field KIND_QUICKFIX Ljava/lang/String;
+	public static final field KIND_REFACTOR Ljava/lang/String;
+	public static final field KIND_SOURCE Ljava/lang/String;
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getKind ()Ljava/lang/String;
+	public abstract fun getTitle ()Ljava/lang/String;
+	public abstract fun isAvailable (Lcom/codeforge/libs/plugin_api/EditorContext;)Z
+	public abstract fun perform (Lcom/codeforge/libs/plugin_api/EditorContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/codeforge/libs/plugin_api/EditorAction$Companion {
+	public static final field KIND_QUICKFIX Ljava/lang/String;
+	public static final field KIND_REFACTOR Ljava/lang/String;
+	public static final field KIND_SOURCE Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/EditorAction$DefaultImpls {
+	public static fun getKind (Lcom/codeforge/libs/plugin_api/EditorAction;)Ljava/lang/String;
+	public static fun isAvailable (Lcom/codeforge/libs/plugin_api/EditorAction;Lcom/codeforge/libs/plugin_api/EditorContext;)Z
+}
+
+public final class com/codeforge/libs/plugin_api/EditorContext {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;III)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;III)Lcom/codeforge/libs/plugin_api/EditorContext;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/EditorContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIIILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/EditorContext;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCursorLine ()I
+	public final fun getCursorOffset ()I
+	public final fun getFilePath ()Ljava/lang/String;
+	public final fun getHasSelection ()Z
+	public final fun getLanguageId ()Ljava/lang/String;
+	public final fun getSelectedText ()Ljava/lang/String;
+	public final fun getSelectionEnd ()I
+	public final fun getSelectionStart ()I
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/EditorEffect {
+}
+
+public final class com/codeforge/libs/plugin_api/EditorEffect$ApplyEdits : com/codeforge/libs/plugin_api/EditorEffect {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/codeforge/libs/plugin_api/EditorEffect$ApplyEdits;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/EditorEffect$ApplyEdits;Ljava/util/List;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/EditorEffect$ApplyEdits;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEdits ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/EditorEffect$CreateFile : com/codeforge/libs/plugin_api/EditorEffect {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/EditorEffect$CreateFile;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/EditorEffect$CreateFile;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/EditorEffect$CreateFile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/EditorEffect$MoveCaret : com/codeforge/libs/plugin_api/EditorEffect {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Lcom/codeforge/libs/plugin_api/EditorEffect$MoveCaret;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/EditorEffect$MoveCaret;IILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/EditorEffect$MoveCaret;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOffset ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/EditorEffect$OpenFile : com/codeforge/libs/plugin_api/EditorEffect {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/EditorEffect$OpenFile;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/EditorEffect$OpenFile;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/EditorEffect$OpenFile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/EditorEffect$Select : com/codeforge/libs/plugin_api/EditorEffect {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Lcom/codeforge/libs/plugin_api/EditorEffect$Select;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/EditorEffect$Select;IIILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/EditorEffect$Select;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()I
+	public final fun getStart ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/EditorEffect$ShowMessage : com/codeforge/libs/plugin_api/EditorEffect {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/EditorEffect$ShowMessage;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/EditorEffect$ShowMessage;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/EditorEffect$ShowMessage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/EditorSpiKt {
+	public static final fun lineEnd (Lcom/codeforge/libs/plugin_api/EditorContext;I)I
+	public static final fun lineStart (Lcom/codeforge/libs/plugin_api/EditorContext;I)I
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/PluginCommandHandler {
 	public abstract fun run (Lcom/codeforge/libs/plugin_api/CommandArgs;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -30,7 +155,79 @@ public abstract interface class com/codeforge/libs/plugin_api/PluginContext {
 	public abstract fun register (Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;Ljava/lang/Object;)Lcom/codeforge/core/domain/extension/registry/Disposable;
 }
 
+public final class com/codeforge/libs/plugin_api/PluginDiagnostic {
+	public fun <init> (Ljava/lang/String;IIILjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;IIILjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;IIILjava/lang/String;Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginDiagnostic;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginDiagnostic;Ljava/lang/String;IIILjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginDiagnostic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getEndOffset ()I
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getSeverity ()I
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getStartOffset ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/PluginEvent {
+}
+
+public final class com/codeforge/libs/plugin_api/PluginEvent$BuildFinished : com/codeforge/libs/plugin_api/PluginEvent {
+	public fun <init> (Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Lcom/codeforge/libs/plugin_api/PluginEvent$BuildFinished;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginEvent$BuildFinished;Ljava/lang/String;ZILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginEvent$BuildFinished;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSuccess ()Z
+	public final fun getTask ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginEvent$BuildStarted : com/codeforge/libs/plugin_api/PluginEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginEvent$BuildStarted;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginEvent$BuildStarted;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginEvent$BuildStarted;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTask ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginEvent$DiagnosticsChanged : com/codeforge/libs/plugin_api/PluginEvent {
+	public fun <init> (Ljava/lang/String;II)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun copy (Ljava/lang/String;II)Lcom/codeforge/libs/plugin_api/PluginEvent$DiagnosticsChanged;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginEvent$DiagnosticsChanged;Ljava/lang/String;IIILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginEvent$DiagnosticsChanged;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrors ()I
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getWarnings ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginEvent$EditorActivated : com/codeforge/libs/plugin_api/PluginEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginEvent$EditorActivated;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginEvent$EditorActivated;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginEvent$EditorActivated;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/codeforge/libs/plugin_api/PluginEvent$FileClosed : com/codeforge/libs/plugin_api/PluginEvent {
@@ -92,8 +289,36 @@ public final class com/codeforge/libs/plugin_api/PluginEvent$GitCommitted : com/
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/codeforge/libs/plugin_api/PluginEvent$ProjectClosed : com/codeforge/libs/plugin_api/PluginEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginEvent$ProjectClosed;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginEvent$ProjectClosed;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginEvent$ProjectClosed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRootPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginEvent$ProjectOpened : com/codeforge/libs/plugin_api/PluginEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginEvent$ProjectOpened;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginEvent$ProjectOpened;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginEvent$ProjectOpened;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRootPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/PluginEventListener {
 	public abstract fun onEvent (Lcom/codeforge/libs/plugin_api/PluginEvent;)V
+}
+
+public final class com/codeforge/libs/plugin_api/PluginExtensionPoints {
+	public static final field INSTANCE Lcom/codeforge/libs/plugin_api/PluginExtensionPoints;
+	public final fun getEDITOR_ACTION ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+	public final fun getQUICK_FIX_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/PluginHostServices {
@@ -135,5 +360,24 @@ public final class com/codeforge/libs/plugin_api/PluginPermissionException : jav
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun getPermission ()Ljava/lang/String;
 	public final fun getPluginId ()Ljava/lang/String;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/QuickFixProvider {
+	public abstract fun fixes (Lcom/codeforge/libs/plugin_api/EditorContext;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/codeforge/libs/plugin_api/TextEdit {
+	public fun <init> (IILjava/lang/String;)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (IILjava/lang/String;)Lcom/codeforge/libs/plugin_api/TextEdit;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/TextEdit;IILjava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/TextEdit;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()I
+	public final fun getNewText ()Ljava/lang/String;
+	public final fun getStart ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

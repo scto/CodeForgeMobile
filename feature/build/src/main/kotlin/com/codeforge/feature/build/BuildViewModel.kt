@@ -4,6 +4,9 @@
  */
 package com.codeforge.feature.build
 
+import com.codeforge.core.domain.extension.HostEvent
+import com.codeforge.core.domain.extension.NoOpPluginEventSink
+import com.codeforge.core.domain.extension.PluginEventSink
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -53,7 +56,8 @@ class BuildViewModel internal constructor(
     private val ownPackageName: String = "",
     private val testRunnerRepository: TestRunnerRepository? = null,
     private val testRunRequestBridge: TestRunRequestBridge? = null,
-    externalScope: CoroutineScope? = null
+    externalScope: CoroutineScope? = null,
+    private val pluginEvents: PluginEventSink = NoOpPluginEventSink
 ) : ViewModel() {
 
     @Inject
@@ -64,7 +68,8 @@ class BuildViewModel internal constructor(
         logcatRepository: LogcatRepository,
         testRunnerRepository: TestRunnerRepository,
         testRunRequestBridge: TestRunRequestBridge,
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        pluginEvents: PluginEventSink
     ) : this(
         gradleBuildRepository,
         openFileRequestBridge,
@@ -73,7 +78,8 @@ class BuildViewModel internal constructor(
         context.packageName,
         testRunnerRepository,
         testRunRequestBridge,
-        null
+        null,
+        pluginEvents
     )
 
     private val scope: CoroutineScope = externalScope ?: viewModelScope
@@ -404,6 +410,7 @@ class BuildViewModel internal constructor(
         }
 
         activeBuildJob = scope.launch {
+            pluginEvents.publish(HostEvent.BuildStarted(taskName))
             try {
                 gradleBuildRepository.runTask(taskName).collect { event ->
                     when (event) {
@@ -419,6 +426,7 @@ class BuildViewModel internal constructor(
                             }
                         }
                         is BuildEvent.BuildFinished -> {
+                            pluginEvents.publish(HostEvent.BuildFinished(taskName, event.success))
                             flushPendingLines()
                             _uiState.update { it.copy(isBuilding = false) }
                             if (event.success) {
@@ -446,6 +454,7 @@ class BuildViewModel internal constructor(
                                 )
                             }
                             _effects.send(BuildUiEffect.ShowSnackbar(event.message))
+                            pluginEvents.publish(HostEvent.BuildFinished(taskName, success = false))
                         }
                         else -> {
                             // Andere Events

@@ -2697,4 +2697,9 @@
     <string name="plugins_log_title">Protokoll: %1$s</string>
     <string name="plugins_log_empty">Noch keine Einträge. Plugins schreiben mit context.logger(…) hierher.</string>
     <string name="plugins_log_clear">Leeren</string>
+    <string name="editor_action_sort_lines">Zeilen sortieren</string>
+    <string name="editor_action_remove_duplicates">Doppelte Zeilen entfernen</string>
+    <string name="editor_action_toggle_case">Groß-/Kleinschreibung umschalten</string>
+    <string name="editor_plugin_action_failed">Aktion fehlgeschlagen: %1$s</string>
+    <string name="editor_plugin_file_exists">Datei existiert bereits: %1$s</string>
 </resources>

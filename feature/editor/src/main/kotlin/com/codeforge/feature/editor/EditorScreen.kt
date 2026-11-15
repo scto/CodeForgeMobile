@@ -189,20 +189,22 @@ fun EditorRoute(
         viewModel.onEvent(EditorUiEvent.FormatCode(range))
     }
 
+    fun caret(): CaretSnapshot? = controller?.selection()?.let { (start, end) -> CaretSnapshot(end, start, end) }
+
     fun triggerQuickFix() {
         val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
-        viewModel.onEvent(EditorUiEvent.TriggerQuickFix(pos.first, pos.second))
+        viewModel.onEvent(EditorUiEvent.TriggerQuickFix(pos.first, pos.second, caret()))
     }
 
     fun triggerRefactor() {
         val pos = controller?.getCursorLineAndColumn() ?: (0 to 0)
         val selection = controller?.takeIf { it.hasSelection() }?.getSelectionLspRange()
-        viewModel.onEvent(EditorUiEvent.TriggerRefactor(pos.first, pos.second, selection))
+        viewModel.onEvent(EditorUiEvent.TriggerRefactor(pos.first, pos.second, selection, caret()))
     }
 
     fun openPalette() {
         val plugins = pluginToolbarItems.map { PalettePluginCommand(it.pluginId, it.commandId, it.title) }
-        viewModel.onEvent(EditorUiEvent.OpenCommandPalette(plugins))
+        viewModel.onEvent(EditorUiEvent.OpenCommandPalette(plugins, caret()))
     }
 
     fun triggerRename() {
@@ -257,6 +259,7 @@ fun EditorRoute(
             is PaletteAction.Builtin -> runBuiltin(action.action)
             is PaletteAction.ServerCommand -> viewModel.onEvent(EditorUiEvent.RunServerCommand(action.command))
             is PaletteAction.Plugin -> viewModel.onEvent(EditorUiEvent.RunPluginCommand(action.pluginId, action.commandId))
+            is PaletteAction.PluginEditorAction -> viewModel.onEvent(EditorUiEvent.RunEditorAction(action.ref, caret()))
         }
     }
 
@@ -290,6 +293,12 @@ fun EditorRoute(
                     controller?.applyTextChange(effect.formattedText)
                 }
                 is EditorUiEffect.NavigateTo -> onNavigate(effect.route)
+                is EditorUiEffect.ApplyEditorText -> {
+                    effect.newText?.let { controller?.applyTextChange(it) }
+                    if (effect.selectionStart != null && effect.selectionEnd != null) {
+                        controller?.selectRange(effect.selectionStart, effect.selectionEnd)
+                    }
+                }
             }
         }
     }

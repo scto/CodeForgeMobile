@@ -26,6 +26,9 @@ sealed interface PaletteAction {
 
     /** Befehl eines Code-Plugins. */
     data class Plugin(val pluginId: String, val commandId: String) : PaletteAction
+
+    /** Editor-Aktion aus dem Register (Plugin oder App); [ref] = `pluginId/actionId`. */
+    data class PluginEditorAction(val ref: String) : PaletteAction
 }
 
 /** Ein Eintrag der Befehlspalette (Titel bereits übersetzt). */

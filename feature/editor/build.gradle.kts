@@ -21,6 +21,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":libs:code-tools"))
     implementation(project(":libs:debug-client"))
+    implementation(project(":libs:plugin-api"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

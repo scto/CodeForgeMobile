@@ -826,10 +826,13 @@ class BuildViewModelTest {
             BuildEvent.BuildFinished(success = true)
         )
 
-        fakeTestRunBridge.requestRunTest(moduleGradlePath = ":core:domain", testFilter = "MyTest.testA")
-        // Auf den Tab-Wechsel warten statt fester Pause (unter Last brauchte er länger als 250 ms).
-        kotlinx.coroutines.withTimeoutOrNull(3_000) {
-            while (viewModel.uiState.value.activeTab != BuildTab.TESTS) delay(20)
+        // Die Anfrage kann vor dem Abonnieren der Brücke durch das ViewModel eintreffen (SharedFlow ohne Replay):
+        // daher wiederholt senden, bis der Tab gewechselt hat, statt fester Pausen.
+        kotlinx.coroutines.withTimeoutOrNull(5_000) {
+            while (viewModel.uiState.value.activeTab != BuildTab.TESTS) {
+                fakeTestRunBridge.requestRunTest(moduleGradlePath = ":core:domain", testFilter = "MyTest.testA")
+                delay(100)
+            }
         }
 
         assertEquals(BuildTab.TESTS, viewModel.uiState.value.activeTab)

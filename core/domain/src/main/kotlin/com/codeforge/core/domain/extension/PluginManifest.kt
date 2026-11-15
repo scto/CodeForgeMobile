@@ -26,9 +26,15 @@ object PluginPermissions {
     const val LSP = "lsp"
     /** Werkzeuge und MCP-Server für den KI-Agenten beisteuern (zusätzlich zu [SHELL], da sie Programme starten). */
     const val AGENT = "agent"
+    /** Seit API 3: Inhalt der aktiven Datei lesen und ändern (Editor-Aktionen, Schnellkorrekturen). */
+    const val EDITOR = "editor"
+    /** Seit API 3: Build-Ereignisse (gestartet, beendet). */
+    const val BUILD_EVENTS = "build-events"
+    /** Seit API 3: Projekt-Ereignisse (geöffnet, geschlossen). */
+    const val PROJECT_EVENTS = "project-events"
 
     /** Menge aller bekannten Berechtigungen. */
-    val ALL: Set<String> = setOf(COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT)
+    val ALL: Set<String> = setOf(COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT, EDITOR, BUILD_EVENTS, PROJECT_EVENTS)
 }
 
 /**

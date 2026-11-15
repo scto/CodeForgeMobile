@@ -690,6 +690,49 @@ override fun onLoad(context: PluginContext) {
   Ketten mit einem nicht ladbaren Glied werden im Plugins-Bildschirm mit Grund angezeigt.
 * `apiVersion` 3 im Manifest, wenn das Plugin diese Funktionen nutzt (ältere Apps lehnen es dann mit Grund ab).
 
+### 9.8 Seit API 3: Editor-Aktionen, Schnellkorrekturen, mehr Ereignisse
+
+Mit der Berechtigung `editor` sieht ein Plugin Text, Cursor und Auswahl der aktiven Datei und kann sie ändern – nicht
+direkt, sondern über **Effekte**, die die App anwendet (ein Rückgängig-Schritt, Prüfung auf ungültige oder überlappende
+Bereiche).
+
+```kotlin
+class WrapInTry : EditorAction {
+    override val id = "wrapInTry"
+    override val title = "Mit try/catch umgeben"
+    override val kind = "refactor.rewrite"                    // → Refactoring-Menü + Palette
+    override fun isAvailable(context: EditorContext) = context.hasSelection && context.languageId == "kotlin"
+    override suspend fun perform(context: EditorContext): List<EditorEffect> {
+        val wrapped = "try {\n${context.selectedText}\n} catch (e: Exception) {\n}"
+        return listOf(
+            EditorEffect.ApplyEdits(listOf(TextEdit(context.selectionStart, context.selectionEnd, wrapped))),
+            EditorEffect.MoveCaret(context.selectionStart + wrapped.length)
+        )
+    }
+}
+
+override fun onLoad(context: PluginContext) {
+    context.register(PluginExtensionPoints.EDITOR_ACTION, WrapInTry())
+    context.register(PluginExtensionPoints.QUICK_FIX_PROVIDER, QuickFixProvider { ctx, diagnostics ->
+        diagnostics.filter { "unused" in it.message }.map { RemoveRange(it.startOffset, it.endOffset) }
+    })
+}
+```
+
+| Art (`kind`) | erscheint in |
+|---|---|
+| `quickfix` | Schnellkorrekturen (Alt+Enter / Glühbirne) und Befehlspalette |
+| `refactor…`, `source…` | Refactoring-Menü (Strg+Umschalt+R) und Befehlspalette |
+| sonst | nur Befehlspalette |
+
+Effekte: `ApplyEdits`, `MoveCaret`, `Select`, `CreateFile` (relativ zum Projekt, darf nicht existieren), `OpenFile`,
+`ShowMessage`. `perform` läuft außerhalb des UI-Threads mit 30 s Zeitlimit; Fehler stehen im Plugin-Protokoll.
+Die App nutzt dieselbe Andockstelle selbst („Zeilen sortieren“, „Doppelte Zeilen entfernen“, „Groß-/Kleinschreibung
+umschalten“).
+
+Neue Ereignisse: `EditorActivated`, `DiagnosticsChanged` (`file-events`), `BuildStarted`, `BuildFinished`
+(`build-events`), `ProjectOpened`, `ProjectClosed` (`project-events`).
+
 ## 10. Beispiel 6: Hybrid – LSP-Plugin mit Download
 
 **Ziel:** Ein Language Server, der nicht als Paket vorliegt, sondern heruntergeladen werden muss. Das Manifest startet den Server (deklarativ), der Code stellt nur sicher, dass er da ist.
