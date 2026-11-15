@@ -26,6 +26,11 @@ captures/
 *.jks
 *.keystore
 keystore.properties
+*.jks.b64
+*.keystore.b64
+
+# Lokaler Checkout des Plugin-Stores
+codeforge-store-checkout/
 
 # Schlüssel/Artefakte der Repo-Build-Pipeline (build_codeforge_repo.sh) – niemals einchecken
 .gpg/
