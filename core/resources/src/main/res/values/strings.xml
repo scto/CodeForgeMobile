@@ -2721,4 +2721,6 @@
     <string name="flashbar_plugin">%1$s</string>
     <string name="plugin_tests_file">Run tests in this file</string>
     <string name="build_tasks_haeufig">Common</string>
+    <string name="flashbar_expanded">Expanded, tap to collapse</string>
+    <string name="flashbar_collapsed">Collapsed, tap for details</string>
 </resources>

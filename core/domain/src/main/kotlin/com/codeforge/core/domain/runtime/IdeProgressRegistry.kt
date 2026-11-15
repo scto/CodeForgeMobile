@@ -23,6 +23,10 @@ data class IdeProgress(
     val detail: String = "",
     /** Fortschritt in Prozent oder `null`, wenn unbekannt. */
     val percent: Int? = null,
+    /** Letzte Detailtexte, älteste zuerst (höchstens [IdeProgressRegistry.HISTORY_SIZE]); für die aufgeklappte Leiste. */
+    val history: List<String> = emptyList(),
+    /** Startzeit (ms seit Epoche) für die Laufzeitanzeige. */
+    val startedAt: Long = 0L,
 )
 
 /**
@@ -30,6 +34,9 @@ data class IdeProgress(
  * Bildschirmen. Reines Kotlin, damit jedes Modul melden kann.
  */
 object IdeProgressRegistry {
+    /** Wie viele Detailtexte je Vorgang aufgehoben werden. */
+    const val HISTORY_SIZE = 8
+
     private val ids = AtomicLong()
     private val _items = MutableStateFlow<List<IdeProgress>>(emptyList())
     /** Laufende Vorgänge in Startreihenfolge. */
@@ -38,14 +45,19 @@ object IdeProgressRegistry {
     /** Meldet einen Vorgang an und liefert seine ID für [update] und [end]. */
     fun begin(kind: IdeProgressKind, title: String): Long {
         val id = ids.incrementAndGet()
-        _items.update { it + IdeProgress(id, kind, title) }
+        _items.update { it + IdeProgress(id, kind, title, startedAt = System.currentTimeMillis()) }
         return id
     }
 
     /** Aktualisiert Detailtext und Fortschritt; `percent = null` lässt den bisherigen Wert stehen. */
     fun update(id: Long, detail: String, percent: Int? = null) {
         _items.update { list ->
-            list.map { if (it.id == id) it.copy(detail = detail, percent = percent?.coerceIn(0, 100) ?: it.percent) else it }
+            list.map { item ->
+                if (item.id != id) return@map item
+                val unchanged = detail.isBlank() || item.history.lastOrNull() == detail
+                val history = if (unchanged) item.history else (item.history + detail).takeLast(HISTORY_SIZE)
+                item.copy(detail = detail, percent = percent?.coerceIn(0, 100) ?: item.percent, history = history)
+            }
         }
     }
 

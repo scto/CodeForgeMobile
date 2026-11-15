@@ -2721,4 +2721,6 @@
     <string name="flashbar_plugin">%1$s</string>
     <string name="plugin_tests_file">Tests dieser Datei ausführen</string>
     <string name="build_tasks_haeufig">Häufig</string>
+    <string name="flashbar_expanded">Aufgeklappt, tippen zum Zuklappen</string>
+    <string name="flashbar_collapsed">Zugeklappt, tippen für Details</string>
 </resources>

@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Fortschrittsleiste)
+- Die Leiste für laufende Vorgänge lässt sich per Tipp aufklappen: alle Vorgänge statt höchstens zwei, Laufzeit,
+  längere Detailtexte und die letzten Ausgabezeilen je Vorgang. Zugeklappt zeigt ein „+N“ weitere Vorgänge an.
+
 ### Geändert (Gradle-Sync beim Öffnen)
 - Der Sync beim Öffnen eines Projekts läuft als `tasks` statt `tasks --all`: deutlich weniger Arbeit für Gradle und
   nur noch Tasks mit Gruppe in der Auswahl. Die vollständige Liste bleibt als Eintrag „tasks --all“ abrufbar.
