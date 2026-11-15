@@ -2,7 +2,10 @@
 package com.codeforge.feature.editor.lsp
 
 import com.codeforge.core.datastore.SettingsRepository
+import com.codeforge.core.domain.model.LspServerLaunch
 import com.codeforge.core.domain.model.LspServerState
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import com.codeforge.core.domain.model.LspSessionInfo
 import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.domain.repository.LspServerResolver
@@ -57,6 +60,12 @@ class LspSessionController @Inject constructor(
     private var currentActiveSessionId: String? = null
 
     private val failedSessionTimestamps = ConcurrentHashMap<String, Long>()
+    private val sessionLaunches = ConcurrentHashMap<String, SessionLaunch>()
+    private val crashTimes = ConcurrentHashMap<String, List<Long>>()
+
+    private val _notices = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    /** Hinweise für den Nutzer (z. B. Server nach Absturz neu gestartet). */
+    val notices: SharedFlow<String> = _notices.asSharedFlow()
     private val sessionToLanguageMap = ConcurrentHashMap<String, String>()
 
     /** Informationen zu den Sitzungen. */
@@ -80,6 +89,7 @@ class LspSessionController @Inject constructor(
     init {
         observeSettings()
         startIdleTimer()
+        watchCrashes()
     }
 
     /** Setzt die Quelle der offenen Dokumente. */
@@ -135,24 +145,30 @@ class LspSessionController @Inject constructor(
             lspClient.setActiveDocument(path)
         }
 
-        val launch = try {
-            serverResolver.resolve(languageId)
+        val launches = try {
+            serverResolver.resolveAll(languageId)
         } catch (e: Exception) {
             _errors.tryEmit(e.message ?: "Failed to resolve LSP server")
             return
         }
-
-        if (launch == null) {
-            // Keine passende Extension installiert
-            return
+        // Hauptserver zuerst, dann die zusätzlichen (je Funktion antwortet der erste, der sie darf).
+        launches.forEachIndexed { index, launch ->
+            val root = rootFor(path, launch.rootMarkers, workspaceRoot)
+            val sessionId = "${launch.serverId}@$root"
+            if (index == 0 && path != null) currentActiveSessionId = sessionId
+            sessionLaunches[sessionId] = SessionLaunch(launch, languageId, root)
+            ensureSession(sessionId, forceRestart)
         }
+    }
 
-        val sessionId = "${launch.serverId}@$workspaceRoot"
+    private class SessionLaunch(val launch: LspServerLaunch, val languageId: String, val root: String)
+
+    private suspend fun ensureSession(sessionId: String, forceRestart: Boolean) {
+        val spec = sessionLaunches[sessionId] ?: return
+        val launch = spec.launch
+        val languageId = spec.languageId
         sessionToLanguageMap[sessionId] = languageId
-
-        if (path != null) {
-            currentActiveSessionId = sessionId
-        }
+        lspClient.setSessionAlongside(sessionId, launch.alongside)
 
         // Bereits aktiv / wird gerade gestartet?
         val currentRunning = lspClient.getRunningSessionIds()
@@ -169,22 +185,7 @@ class LspSessionController @Inject constructor(
             }
         }
 
-        // Begrenzung gleichzeitiger Server: Am längsten ungenutzte Sitzung beenden
-        val maxSessions = maxConcurrentSessions.coerceAtLeast(1)
-        val activeSessions = currentRunning.filter { it != sessionId }
-        if (activeSessions.size >= maxSessions) {
-            val evictCount = activeSessions.size - maxSessions + 1
-            // Schließe die am längsten ungenutzten Sitzungen ausgenommen die des aktiven Dokuments
-            val protectedSessionId = currentActiveSessionId
-
-            val candidates = activeSessions
-                .filter { it != protectedSessionId }
-                .sortedBy { lspClient.getSessionLastUsed(it) }
-
-            for (i in 0 until evictCount.coerceAtMost(candidates.size)) {
-                lspClient.stopSession(candidates[i])
-            }
-        }
+        evictForNewSession(currentRunning, sessionId)
 
         val languageSet = when (languageId.lowercase()) {
             "c", "cpp", "c_cpp" -> setOf("c", "cpp")
@@ -197,7 +198,7 @@ class LspSessionController @Inject constructor(
                 sessionId = sessionId,
                 languageIds = languageSet,
                 serverCommand = launch.command,
-                workspaceRootPath = workspaceRoot,
+                workspaceRootPath = spec.root,
                 extraProcessEnv = launch.env
             )
         }
@@ -213,10 +214,59 @@ class LspSessionController @Inject constructor(
         }
     }
 
+    // Begrenzung gleichzeitiger Server: am längsten ungenutzte Sitzungen beenden (nie die des aktiven Dokuments).
+    private suspend fun evictForNewSession(currentRunning: List<String>, sessionId: String) {
+        val maxSessions = maxConcurrentSessions.coerceAtLeast(1)
+        val activeSessions = currentRunning.filter { it != sessionId }
+        if (activeSessions.size < maxSessions) return
+        val evictCount = activeSessions.size - maxSessions + 1
+        val candidates = activeSessions
+            .filter { it != currentActiveSessionId }
+            .sortedBy { lspClient.getSessionLastUsed(it) }
+        candidates.take(evictCount).forEach { lspClient.stopSession(it) }
+    }
+
+    // ---- Automatischer Neustart nach Absturz ----
+
+    private fun watchCrashes() {
+        scope.launch {
+            var previous = emptyMap<String, LspServerState>()
+            lspClient.sessionStates.collect { states ->
+                states.forEach { (id, state) ->
+                    if (state == LspServerState.FAILED && previous[id] == LspServerState.RUNNING) onCrashed(id)
+                }
+                previous = states
+            }
+        }
+    }
+
+    private suspend fun onCrashed(sessionId: String) {
+        val now = timeSource()
+        val recent = (crashTimes[sessionId].orEmpty() + now).filter { now - it <= CRASH_WINDOW_MS }
+        crashTimes[sessionId] = recent
+        val serverId = sessionId.substringBefore('@')
+        if (recent.size > MAX_CRASHES || sessionLaunches[sessionId] == null) {
+            _notices.tryEmit(Res.string(R.string.lsp_server_crash_loop, serverId))
+            return
+        }
+        delay(RESTART_DELAY_MS)
+        lspClient.stopSession(sessionId)
+        failedSessionTimestamps.remove(sessionId)
+        ensureSession(sessionId, forceRestart = true)
+        if (lspClient.sessionStates.value[sessionId] == LspServerState.RUNNING) {
+            _notices.tryEmit(Res.string(R.string.lsp_server_restarted, serverId))
+        }
+    }
+
     /** Startet die Sitzung neu. */
     suspend fun restartSession(sessionId: String) {
         lspClient.stopSession(sessionId)
         failedSessionTimestamps.remove(sessionId)
+        crashTimes.remove(sessionId)
+        if (sessionLaunches[sessionId] != null) {
+            ensureSession(sessionId, forceRestart = true)
+            return
+        }
 
         val serverId = sessionId.substringBefore('@')
         val workspace = sessionId.substringAfter('@', activeWorkspaceRoot ?: "")
@@ -242,6 +292,8 @@ class LspSessionController @Inject constructor(
         currentActiveSessionId = null
         failedSessionTimestamps.clear()
         sessionToLanguageMap.clear()
+        sessionLaunches.clear()
+        crashTimes.clear()
         runCatching { lspClient.stopAll() }
     }
 
@@ -321,5 +373,27 @@ class LspSessionController @Inject constructor(
         "dart" -> "dart"
         "cmake" -> "cmake"
         else -> if (path.substringAfterLast('/').equals("CMakeLists.txt", ignoreCase = true)) "cmake" else "plaintext"
+    }
+
+    companion object {
+        private const val MAX_CRASHES = 3
+        private const val CRASH_WINDOW_MS = 3 * 60_000L
+        private const val RESTART_DELAY_MS = 1_000L
+
+        /**
+         * Arbeitsordner eines Servers für [path]: der nächste Ordner aufwärts (höchstens bis [projectRoot]), der eine
+         * der [markers] enthält; ohne Treffer oder ohne Marker der Projektordner.
+         */
+        fun rootFor(path: String?, markers: List<String>, projectRoot: String): String {
+            if (path == null || markers.isEmpty()) return projectRoot
+            val rootFile = java.io.File(projectRoot).absoluteFile
+            var dir = java.io.File(path).absoluteFile.parentFile
+            while (dir != null && dir.path.startsWith(rootFile.path)) {
+                if (markers.any { java.io.File(dir, it).exists() }) return dir.path
+                if (dir == rootFile) break
+                dir = dir.parentFile
+            }
+            return projectRoot
+        }
     }
 }

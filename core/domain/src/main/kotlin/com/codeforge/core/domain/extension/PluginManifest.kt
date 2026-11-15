@@ -170,7 +170,9 @@ data class LspServerContribution(
     val languages: List<String>,
     val command: List<String>,
     val installScript: String? = null,
-    val env: Map<String, String> = emptyMap()
+    val env: Map<String, String> = emptyMap(),
+    /** Dateinamen, die den Arbeitsordner markieren (z. B. `settings.gradle.kts`, `pyproject.toml`); leer = Projektordner. */
+    val rootMarkers: List<String> = emptyList()
 ) {
     /** Ob der Server JVM-Optionen annimmt (Platzhalter `${jvmArg}`/`${jvmArgs}` in Kommando oder Umgebung). */
     val acceptsJvmOptions: Boolean

@@ -123,6 +123,16 @@ Alle Sprachserver kommen aus Plugins (die App hat keinen eingebauten Katalog meh
 * JVM-Optionen: Ein Element mit `${jvmArg}` wird je Option des Nutzers wiederholt (ohne Optionen entfällt es); `${jvmArgs}` in einem `env`-Wert steht für alle Optionen. Nur Server mit einem dieser Platzhalter zeigen in den Einstellungen „JVM-Optionen“. Vorgaben für `kotlin-language-server`, `jdtls`, `lemminx` liegen in `LspServerDefaults`.
 * Einstellungen (an/aus, Fähigkeiten, JVM) hängen an der Server-`id`; `vscode-*-language-server` teilen sich den Schlüssel `vscode-langservers-extracted`.
 * Existiert das Programm (absoluter Pfad) oder eine Datei unter `${deps}` nicht, gibt es keinen Server. `env`-Werte werden an vorhandene Umgebungswerte angehängt.
+* `rootMarkers` (optional, Dateinamen ohne Pfad, z. B. `["pyproject.toml", "setup.py"]`): Arbeitsordner des Servers ist der
+  nächste Ordner oberhalb der Datei (höchstens bis zum Projektordner), der eine davon enthält; ohne Treffer der
+  Projektordner. Je Arbeitsordner läuft eine eigene Sitzung (Monorepos, Unterprojekte).
+* Mehrere Server je Sprache: Der erste eingeschaltete Server ist der Hauptserver. Weitere starten nur, wenn in ihren
+  Einstellungen „Zusätzlich starten“ an ist. Je Funktion (Vervollständigung, Hover, Navigation, Umbenennen …)
+  antwortet der erste Server, bei dem sie eingeschaltet ist und der sie meldet; Vervollständigung, Code-Actions und
+  Diagnosen werden zusammengeführt.
+* Robustheit: Jede Anfrage hat ein Zeitlimit (z. B. 10 s Vervollständigung, 60 s Umbenennen, 180 s `initialize`),
+  danach `$/cancelRequest`. Ein abgestürzter Server wird automatisch neu gestartet; nach mehr als 3 Abstürzen in
+  3 Minuten nicht mehr (Hinweis im Editor, Neustart über die Sitzungsliste).
 
 ## Projektvorlagen (`projectTemplates`)
 

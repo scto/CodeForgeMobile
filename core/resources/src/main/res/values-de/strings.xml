@@ -2702,4 +2702,12 @@
     <string name="editor_action_toggle_case">Groß-/Kleinschreibung umschalten</string>
     <string name="editor_plugin_action_failed">Aktion fehlgeschlagen: %1$s</string>
     <string name="editor_plugin_file_exists">Datei existiert bereits: %1$s</string>
+    <string name="lsp_server_restarted">Sprachserver %1$s war abgestürzt und wurde neu gestartet</string>
+    <string name="lsp_server_crash_loop">Sprachserver %1$s stürzt wiederholt ab – kein automatischer Neustart mehr. Neustart über die Sitzungsliste.</string>
+    <string name="lspfeat_navigation">Navigation</string>
+    <string name="lspfeat_navigation_sum">Gehe zu Definition, Implementierung, Verwendungen, Gliederung</string>
+    <string name="lspfeat_rename">Umbenennen</string>
+    <string name="lspfeat_rename_sum">Symbole projektweit umbenennen</string>
+    <string name="lspfeat_alongside">Zusätzlich starten</string>
+    <string name="lspfeat_alongside_sum">Läuft neben dem Hauptserver derselben Sprache. Je Funktion antwortet der erste Server, bei dem sie eingeschaltet ist – schalte hier ab, was der Hauptserver übernehmen soll.</string>
 </resources>

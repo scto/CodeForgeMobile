@@ -2702,4 +2702,12 @@
     <string name="editor_action_toggle_case">Toggle upper/lower case</string>
     <string name="editor_plugin_action_failed">Action failed: %1$s</string>
     <string name="editor_plugin_file_exists">File already exists: %1$s</string>
+    <string name="lsp_server_restarted">Language server %1$s crashed and was restarted</string>
+    <string name="lsp_server_crash_loop">Language server %1$s keeps crashing – no more automatic restarts. Restart it from the session list.</string>
+    <string name="lspfeat_navigation">Navigation</string>
+    <string name="lspfeat_navigation_sum">Go to definition, implementation, usages, outline</string>
+    <string name="lspfeat_rename">Rename</string>
+    <string name="lspfeat_rename_sum">Rename symbols across the project</string>
+    <string name="lspfeat_alongside">Start additionally</string>
+    <string name="lspfeat_alongside_sum">Runs next to the main server of the same language. For each feature the first server that has it enabled answers – turn off here what the main server should handle.</string>
 </resources>

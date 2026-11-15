@@ -21,6 +21,9 @@ import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,11 +58,16 @@ class LspClientRepositoryImpl(
         val serverId = sessions[sessionId]?.serverId ?: sessionId.substringBefore('@')
         val shown = if (allows(serverId, LspFeature.DIAGNOSTICS)) diags else emptyList()
         diagnosticsBySession.computeIfAbsent(sessionId) { ConcurrentHashMap() }[path] = shown
-        _diagnostics.tryEmit(path to shown)
+        // Mehrere Server je Datei: Diagnosen aller Sitzungen zusammen melden, sonst überschreibt einer den anderen.
+        _diagnostics.tryEmit(path to diagnosticsBySession.values.flatMap { it[path].orEmpty() })
     }
 
     private val sessions = ConcurrentHashMap<String, LspServerSession>()
     private val documentToSession = ConcurrentHashMap<String, String>()
+    private val documentSessions = ConcurrentHashMap<String, List<String>>()
+    private val alongsideSessions: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val startOrder = java.util.concurrent.atomic.AtomicLong()
+    private val startedAt = ConcurrentHashMap<String, Long>()
     private val diagnosticsBySession = ConcurrentHashMap<String, ConcurrentHashMap<String, List<LspDiagnostic>>>()
 
     private val _sessionStates = MutableStateFlow<Map<String, LspServerState>>(emptyMap())
@@ -138,6 +146,7 @@ class LspClientRepositoryImpl(
             onApplyEdit = { edit -> applyEditHandler?.invoke(edit) ?: false }
         )
         sessions[sessionId] = session
+        startedAt[sessionId] = startOrder.incrementAndGet()
         updateSessionStates()
 
         val result = session.start(serverCommand, extraProcessEnv)
@@ -148,7 +157,9 @@ class LspClientRepositoryImpl(
 
     override suspend fun stopSession(sessionId: String) {
         val session = sessions.remove(sessionId) ?: return
+        startedAt.remove(sessionId)
         session.stop()
+        documentSessions.replaceAll { _, ids -> ids - sessionId }
 
         // Diagnosen dieser Sitzung leeren
         val sessionDiags = diagnosticsBySession.remove(sessionId)
@@ -195,51 +206,47 @@ class LspClientRepositoryImpl(
     }
 
     override suspend fun didOpen(path: String, languageId: String, content: String) {
-        val session = findOrCreateRoutingForOpen(path, languageId)
-        if (session != null) {
-            documentToSession[path] = session.sessionId
-            session.didOpen(path, languageId, content)
-            updateActiveSessionState()
-        }
-    }
-
-    override suspend fun didChange(path: String, newContent: String, version: Int) {
-        val session = sessionForPath(path)
-        session?.didChange(path, newContent, version)
-    }
-
-    override suspend fun didClose(path: String) {
-        val session = sessionForPath(path)
-        session?.didClose(path)
-        documentToSession.remove(path)
+        val targets = sessionsForOpen(path, languageId)
+        if (targets.isEmpty()) return
+        documentToSession[path] = targets.first().sessionId
+        documentSessions[path] = targets.map { it.sessionId }
+        targets.forEach { it.didOpen(path, languageId, content) }
         updateActiveSessionState()
     }
 
-    override suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        if (!session.allows(LspFeature.COMPLETION)) return Result.success(emptyList())
-        return session.requestCompletion(path, position)
+    override suspend fun didChange(path: String, newContent: String, version: Int) {
+        sessionsForPath(path).forEach { it.didChange(path, newContent, version) }
     }
 
-    override suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        if (!session.allows(LspFeature.HOVER)) return Result.success(null)
-        return session.requestHover(path, position)
+    override suspend fun didClose(path: String) {
+        sessionsForPath(path).forEach { it.didClose(path) }
+        documentToSession.remove(path)
+        documentSessions.remove(path)
+        updateActiveSessionState()
     }
+
+    override fun setSessionAlongside(sessionId: String, alongside: Boolean) {
+        if (alongside) alongsideSessions += sessionId else alongsideSessions -= sessionId
+    }
+
+    override suspend fun requestCompletion(path: String, position: LspPosition): Result<List<LspCompletionItem>> =
+        merged(path, LspFeature.COMPLETION, { it.completionProvider }) { it.requestCompletion(path, position) }
+            .map { items -> items.distinctBy { it.label to it.insertText } }
+
+    override suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> =
+        first(path, LspFeature.HOVER, { it.hoverProvider }, null) { it.requestHover(path, position) }
 
     override suspend fun requestFormat(path: String, content: String): Result<String> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        if (!session.allows(LspFeature.FORMATTING)) return Result.failure(IllegalStateException(Res.string(R.string.lsp_formatting_disabled)))
+        if (sessionsForPath(path).isEmpty()) return Result.failure(noServer())
+        val session = route(path, LspFeature.FORMATTING) { it.formattingProvider }
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_formatting_disabled)))
         return session.requestFormat(path, content)
     }
 
     override suspend fun requestRangeFormat(path: String, content: String, range: LspRange): Result<String> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        if (!session.allows(LspFeature.FORMATTING)) return Result.failure(IllegalStateException(Res.string(R.string.lsp_formatting_disabled)))
+        if (sessionsForPath(path).isEmpty()) return Result.failure(noServer())
+        val session = route(path, LspFeature.FORMATTING) { it.rangeFormattingProvider }
+            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_formatting_disabled)))
         return session.requestRangeFormat(path, content, range)
     }
 
@@ -247,26 +254,17 @@ class LspClientRepositoryImpl(
         path: String,
         range: LspRange,
         diagnostics: List<LspDiagnostic>
-    ): Result<List<LspCodeAction>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        if (!session.allows(LspFeature.CODE_ACTIONS)) return Result.success(emptyList())
-        return session.requestCodeActions(path, range, diagnostics)
-    }
+    ): Result<List<LspCodeAction>> =
+        merged(path, LspFeature.CODE_ACTIONS, { it.codeActionProvider }) { it.requestCodeActions(path, range, diagnostics) }
 
     override suspend fun requestCodeActionsOfKind(
         path: String,
         range: LspRange,
         only: List<String>
-    ): Result<List<LspCodeAction>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        if (!session.allows(LspFeature.CODE_ACTIONS)) return Result.success(emptyList())
+    ): Result<List<LspCodeAction>> =
         // `only` ist für Server nur ein Hinweis – manche liefern trotzdem alles, daher zusätzlich filtern.
-        return session.requestCodeActions(path, range, emptyList(), only).map { actions ->
-            actions.filter { a -> val k = a.kind.orEmpty(); only.any { k == it || k.startsWith("$it.") } }
-        }
-    }
+        merged(path, LspFeature.CODE_ACTIONS, { it.codeActionProvider }) { it.requestCodeActions(path, range, emptyList(), only) }
+            .map { actions -> actions.filter { a -> val k = a.kind.orEmpty(); only.any { k == it || k.startsWith("$it.") } } }
 
     override fun supportsWillRenameFiles(): Boolean =
         sessions.values.any { it.serverCapabilities.value?.willRenameFiles == true }
@@ -289,70 +287,87 @@ class LspClientRepositoryImpl(
         sessions.values.filter { it.serverCapabilities.value?.didRenameFiles == true }.forEach { it.didRenameFiles(renames) }
     }
 
-    override suspend fun requestPrepareRename(path: String, position: LspPosition): Result<LspPrepareRenameResult?> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        return session.requestPrepareRename(path, position)
-    }
+    override suspend fun requestPrepareRename(path: String, position: LspPosition): Result<LspPrepareRenameResult?> =
+        first(path, LspFeature.RENAME, { it.renameProvider }, null) { it.requestPrepareRename(path, position) }
 
-    override suspend fun requestRename(path: String, position: LspPosition, newName: String): Result<LspWorkspaceEdit?> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        return session.requestRename(path, position, newName)
-    }
+    override suspend fun requestRename(path: String, position: LspPosition, newName: String): Result<LspWorkspaceEdit?> =
+        first(path, LspFeature.RENAME, { it.renameProvider }, null) { it.requestRename(path, position, newName) }
 
-    override suspend fun requestDocumentSymbols(path: String): Result<List<LspDocumentSymbol>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        return session.requestDocumentSymbols(path)
-    }
+    override suspend fun requestDocumentSymbols(path: String): Result<List<LspDocumentSymbol>> =
+        first(path, LspFeature.NAVIGATION, { it.documentSymbolProvider }, emptyList()) { it.requestDocumentSymbols(path) }
 
-    override suspend fun requestDefinition(path: String, position: LspPosition): Result<List<LspLocation>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        return session.requestDefinition(path, position)
-    }
+    override suspend fun requestDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
+        first(path, LspFeature.NAVIGATION, { it.definitionProvider }, emptyList()) { it.requestDefinition(path, position) }
 
-    override suspend fun requestTypeDefinition(path: String, position: LspPosition): Result<List<LspLocation>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        return session.requestTypeDefinition(path, position)
-    }
+    override suspend fun requestTypeDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
+        first(path, LspFeature.NAVIGATION, { it.typeDefinitionProvider }, emptyList()) { it.requestTypeDefinition(path, position) }
 
-    override suspend fun requestImplementation(path: String, position: LspPosition): Result<List<LspLocation>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        return session.requestImplementation(path, position)
-    }
+    override suspend fun requestImplementation(path: String, position: LspPosition): Result<List<LspLocation>> =
+        first(path, LspFeature.NAVIGATION, { it.implementationProvider }, emptyList()) { it.requestImplementation(path, position) }
 
-    override suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        if (!session.allows(LspFeature.SIGNATURE_HELP)) return Result.success(null)
-        return session.requestSignatureHelp(path, position)
-    }
+    override suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> =
+        first(path, LspFeature.SIGNATURE_HELP, { it.signatureHelpProvider }, null) { it.requestSignatureHelp(path, position) }
 
-    override suspend fun requestFoldingRanges(path: String): Result<List<LspFoldingRange>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        return session.requestFoldingRanges(path)
-    }
+    override suspend fun requestFoldingRanges(path: String): Result<List<LspFoldingRange>> =
+        first(path, null, { it.foldingRangeProvider }, emptyList()) { it.requestFoldingRanges(path) }
 
-    override suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        if (!session.allows(LspFeature.INLAY_HINTS)) return Result.success(emptyList())
-        return session.requestInlayHints(path, range)
-    }
+    override suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> =
+        first(path, LspFeature.INLAY_HINTS, { it.inlayHintProvider }, emptyList()) { it.requestInlayHints(path, range) }
 
     override suspend fun requestReferences(
         path: String,
         position: LspPosition,
         includeDeclaration: Boolean
-    ): Result<List<LspLocation>> {
-        val session = sessionForPath(path)
-            ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
-        return session.requestReferences(path, position, includeDeclaration)
+    ): Result<List<LspLocation>> =
+        first(path, LspFeature.NAVIGATION, { it.referencesProvider }, emptyList()) {
+            it.requestReferences(path, position, includeDeclaration)
+        }
+
+    // ---- Routing auf mehrere Server je Datei ----
+    // Hauptserver zuerst, dann die zusätzlichen; je Funktion antwortet der erste Server, der sie darf (Einstellungen)
+    // und kann (Fähigkeiten; unbekannt = kann). Vervollständigung und Code-Actions werden zusammengeführt.
+
+    private fun noServer() = IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet))
+
+    private fun sessionsForPath(path: String): List<LspServerSession> {
+        val listed = documentSessions[path]?.mapNotNull { sessions[it] }.orEmpty()
+        return listed.ifEmpty { listOfNotNull(sessionForPath(path)) }
+    }
+
+    private fun capable(session: LspServerSession, feature: LspFeature?, capability: (LspServerCapabilities) -> Boolean) =
+        (feature == null || session.allows(feature)) && session.serverCapabilities.value?.let(capability) != false
+
+    private fun route(
+        path: String,
+        feature: LspFeature?,
+        capability: (LspServerCapabilities) -> Boolean
+    ): LspServerSession? = sessionsForPath(path).firstOrNull { capable(it, feature, capability) }
+
+    private suspend fun <T> first(
+        path: String,
+        feature: LspFeature?,
+        capability: (LspServerCapabilities) -> Boolean,
+        disabled: T,
+        call: suspend (LspServerSession) -> Result<T>
+    ): Result<T> {
+        if (sessionsForPath(path).isEmpty()) return Result.failure(noServer())
+        val session = route(path, feature, capability) ?: return Result.success(disabled)
+        return call(session)
+    }
+
+    private suspend fun <T> merged(
+        path: String,
+        feature: LspFeature,
+        capability: (LspServerCapabilities) -> Boolean,
+        call: suspend (LspServerSession) -> Result<List<T>>
+    ): Result<List<T>> {
+        val all = sessionsForPath(path)
+        if (all.isEmpty()) return Result.failure(noServer())
+        val targets = all.filter { capable(it, feature, capability) }
+        val results = coroutineScope { targets.map { s -> async { call(s) } }.awaitAll() }
+        // Fehlschlag nur, wenn alle scheitern; sonst zählen die Antworten der übrigen.
+        val ok = results.filter { it.isSuccess }
+        return if (ok.isEmpty() && results.isNotEmpty()) results.first() else Result.success(ok.flatMap { it.getOrThrow() })
     }
 
     override suspend fun executeCommand(command: String, arguments: List<Any?>): Result<Unit> {
@@ -397,6 +412,16 @@ class LspClientRepositoryImpl(
 
     /** Liefert alle aktuell verwalteten Sitzungen. */
     fun getAllSessions(): List<LspServerSession> = sessions.values.toList()
+
+    // Alle Sitzungen für eine neu geöffnete Datei: passende Sprache, Hauptserver vor zusätzlichen, sonst Startreihenfolge.
+    private fun sessionsForOpen(path: String, languageId: String): List<LspServerSession> {
+        val lang = languageId.lowercase()
+        val matching = sessions.values.filter { s ->
+            lang in s.languageIds || (s.serverId == "clangd" && (lang == "c" || lang == "cpp"))
+        }
+        if (matching.isEmpty()) return listOfNotNull(findOrCreateRoutingForOpen(path, languageId))
+        return matching.sortedWith(compareBy({ it.sessionId in alongsideSessions }, { startedAt[it.sessionId] ?: Long.MAX_VALUE }))
+    }
 
     private fun findOrCreateRoutingForOpen(path: String, languageId: String): LspServerSession? {
         val existingSessionId = documentToSession[path]

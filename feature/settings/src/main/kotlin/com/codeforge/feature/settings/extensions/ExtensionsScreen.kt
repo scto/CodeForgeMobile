@@ -160,6 +160,7 @@ private fun ServerDialogs(
             item = item,
             settings = uiState.settingsOf(item.key),
             onFeatureChange = { feature, enabled -> onEvent(ExtensionsUiEvent.SetFeature(item.key, feature, enabled)) },
+            onAlongsideChange = { onEvent(ExtensionsUiEvent.SetAlongside(item.key, it)) },
             onOpenJvm = {
                 onSettingsFor(null)
                 onJvmFor(item.key)

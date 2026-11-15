@@ -577,6 +577,9 @@ class EditorViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            lspSessionController.notices.collect { _effect.emit(EditorUiEffect.ShowSnackbar(it)) }
+        }
+        viewModelScope.launch {
             lspSessionController.errors.collect {
                 _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_lsp_start_failed)))
             }

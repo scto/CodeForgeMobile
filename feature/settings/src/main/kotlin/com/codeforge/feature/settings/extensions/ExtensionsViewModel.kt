@@ -68,6 +68,9 @@ class ExtensionsViewModel @Inject constructor(
             is ExtensionsUiEvent.SetServerEnabled -> {
                 updateSettings(event.key) { it.copy(enabled = event.enabled) }
             }
+            is ExtensionsUiEvent.SetAlongside -> {
+                updateSettings(event.key) { it.copy(alongside = event.alongside) }
+            }
             is ExtensionsUiEvent.SetFeature -> {
                 updateSettings(event.key) {
                     val features = if (event.enabled) it.disabledFeatures - event.feature else it.disabledFeatures + event.feature

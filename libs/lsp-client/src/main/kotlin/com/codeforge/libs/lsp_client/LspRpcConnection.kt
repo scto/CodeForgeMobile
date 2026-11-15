@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -45,6 +46,13 @@ class LspRpcConnection(
     private var requestHandler: (suspend (method: String, id: JsonElement, params: JsonObject?) -> JsonElement?)? = null
     private var connectionScope: CoroutineScope? = null
     private var readerJob: Job? = null
+    private var closedHandler: (() -> Unit)? = null
+
+    @Volatile
+    private var closedByClient = false
+
+    /** Zeitlimit je Methode in ms; [Long.MAX_VALUE] = unbegrenzt. Über [timeoutFor] änderbar (Tests). */
+    var timeoutFor: (method: String) -> Long = ::defaultTimeout
 
     /**
      * Startet den Lese-Job des Servers.
@@ -52,27 +60,36 @@ class LspRpcConnection(
      * @param scope Scope, in dem gelesen wird.
      * @param onNotification Handler für Server-Benachrichtigungen.
      * @param onRequest optionaler Handler für Anfragen des Servers (z. B. `workspace/applyEdit`).
+     * @param onClosed wird aufgerufen, wenn der Server die Verbindung unerwartet beendet (nicht bei [close]).
      */
     fun start(
         scope: CoroutineScope,
         onNotification: (method: String, params: JsonObject?) -> Unit,
-        onRequest: (suspend (method: String, id: JsonElement, params: JsonObject?) -> JsonElement?)? = null
+        onRequest: (suspend (method: String, id: JsonElement, params: JsonObject?) -> JsonElement?)? = null,
+        onClosed: (() -> Unit)? = null
     ) {
         connectionScope = scope
         notificationHandler = onNotification
         requestHandler = onRequest
+        closedHandler = onClosed
         readerJob = scope.launch(Dispatchers.IO) { readLoop() }
     }
 
     private suspend fun readLoop() {
         try {
-            while (readerJob?.isActive == true) {
+            while (kotlinx.coroutines.currentCoroutineContext().isActive) {
                 val message = readMessage(input) ?: break
                 dispatch(message)
             }
         } catch (_: java.io.IOException) {
             // Strom wurde von close() geschlossen (z. B. Projektwechsel) oder der Server ist weg: Lesen endet leise.
             // Ohne diesen Fang beendet die unbehandelte Ausnahme im IO-Worker die ganze App.
+        } finally {
+            // Wartende Anfragen nicht ewig hängen lassen; unerwartetes Ende melden (Absturz des Servers).
+            val error = java.io.IOException("Language-Server-Verbindung beendet")
+            pendingRequests.values.forEach { it.completeExceptionally(error) }
+            pendingRequests.clear()
+            if (!closedByClient) closedHandler?.invoke()
         }
     }
 
@@ -121,9 +138,10 @@ class LspRpcConnection(
      *
      * @param method LSP-Methode.
      * @param params Parameter.
+     * @param timeoutMs Zeitlimit; danach `$/cancelRequest` und [LspRequestTimeoutException]. Standard je Methode.
      * @return die vollständige Antwort-Nachricht.
      */
-    suspend fun sendRequest(method: String, params: JsonObject): JsonObject {
+    suspend fun sendRequest(method: String, params: JsonObject, timeoutMs: Long = timeoutFor(method)): JsonObject {
         val id = requestIdCounter.incrementAndGet()
         val deferred = CompletableDeferred<JsonObject>()
         pendingRequests[id] = deferred
@@ -136,7 +154,21 @@ class LspRpcConnection(
         }
         writeMessage(output, payload)
 
-        return deferred.await()
+        var answered = false
+        try {
+            val response = if (timeoutMs == Long.MAX_VALUE) {
+                deferred.await()
+            } else {
+                withTimeoutOrNull(timeoutMs) { deferred.await() } ?: throw LspRequestTimeoutException(method, timeoutMs)
+            }
+            answered = true
+            return response
+        } finally {
+            // Zeitlimit oder abgebrochener Aufrufer: Server bitten, die Arbeit einzustellen ($/cancelRequest).
+            if (!answered && pendingRequests.remove(id) != null) {
+                runCatching { sendNotification("$/cancelRequest", buildJsonObject { put("id", id) }) }
+            }
+        }
     }
 
     /**
@@ -155,6 +187,7 @@ class LspRpcConnection(
 
     /** Beendet Lese-Job und Verbindung. */
     fun close() {
+        closedByClient = true
         readerJob?.cancel()
         pendingRequests.values.forEach { it.cancel() }
         pendingRequests.clear()
@@ -164,6 +197,25 @@ class LspRpcConnection(
 
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
+
+        /**
+         * Zeitlimits je Methode. Großzügiger als auf dem Desktop, weil Server auf dem Handy langsamer starten und
+         * indizieren; `initialize` darf lange dauern (JVM-Server indizieren beim Start).
+         */
+        fun defaultTimeout(method: String): Long = when (method) {
+            "initialize" -> 180_000L
+            "shutdown" -> 5_000L
+            "textDocument/completion", "completionItem/resolve" -> 10_000L
+            "textDocument/hover", "textDocument/signatureHelp", "textDocument/documentHighlight" -> 8_000L
+            "textDocument/inlayHint", "textDocument/foldingRange", "textDocument/codeAction" -> 15_000L
+            "textDocument/definition", "textDocument/typeDefinition", "textDocument/implementation",
+            "textDocument/documentSymbol" -> 20_000L
+            "textDocument/formatting", "textDocument/rangeFormatting" -> 30_000L
+            "textDocument/references", "textDocument/prepareRename", "textDocument/rename",
+            "workspace/willRenameFiles" -> 60_000L
+            "workspace/executeCommand" -> 120_000L
+            else -> 30_000L
+        }
 
         /**
          * Liest eine Nachricht im `Content-Length`-Rahmen.

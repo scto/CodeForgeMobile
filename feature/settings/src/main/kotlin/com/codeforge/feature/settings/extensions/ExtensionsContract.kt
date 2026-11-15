@@ -59,6 +59,8 @@ sealed interface ExtensionsUiEvent {
     data class SetServerEnabled(val key: String, val enabled: Boolean) : ExtensionsUiEvent
     /** Einzelne Fähigkeit eines Servers schalten. */
     data class SetFeature(val key: String, val feature: LspFeature, val enabled: Boolean) : ExtensionsUiEvent
+    /** Server zusätzlich zum Hauptserver seiner Sprache starten. */
+    data class SetAlongside(val key: String, val alongside: Boolean) : ExtensionsUiEvent
     /** JVM-Optionen speichern; `null` setzt auf die Vorgabe zurück. */
     data class SaveJvm(val key: String, val options: JvmOptions?) : ExtensionsUiEvent
     /** Fehlende Voraussetzungen des Plugins installieren. */

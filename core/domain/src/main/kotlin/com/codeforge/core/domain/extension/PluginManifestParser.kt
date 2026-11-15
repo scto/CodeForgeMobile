@@ -117,6 +117,11 @@ object PluginManifestParser {
                     installScript = it.string("installScript"),
                     env = it.stringMap("env").also { env ->
                         require(env.keys.all { k -> ENV_KEY.matches(k) }) { "lspServers: ungültiger Name in 'env'" }
+                    },
+                    rootMarkers = it.stringList("rootMarkers").also { markers ->
+                        require(markers.all { m -> m.isNotBlank() && '/' !in m && ".." !in m }) {
+                            "lspServers: 'rootMarkers' sind Dateinamen ohne Pfad"
+                        }
                     }
                 )
             },

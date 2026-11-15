@@ -49,6 +49,23 @@ class LspServerResolverImpl internal constructor(
         return null
     }
 
+    /**
+     * Hauptserver (erster eingeschalteter, startbarer Nicht-Zusatzserver, sonst der erste startbare) und alle
+     * startbaren Server mit „Zusätzlich starten“.
+     */
+    override suspend fun resolveAll(languageId: String): List<LspServerLaunch> {
+        val wanted = languageId.lowercase()
+        val launches = contributionRepository.contributions.value.lspServers
+            .filter { r -> r.item.languages.any { it.equals(wanted, ignoreCase = true) } }
+            .mapNotNull { hit ->
+                val key = LspServerDefaults.keyFor(hit.item.id)
+                if (!lspSettings.of(key).enabled) null else launchOf(hit.item, hit.pluginDir, key)
+            }
+            .distinctBy { it.serverId }
+        val primary = launches.firstOrNull { !it.alongside } ?: launches.firstOrNull() ?: return emptyList()
+        return listOf(primary.copy(alongside = false)) + launches.filter { it.alongside && it !== primary }
+    }
+
     private suspend fun launchOf(server: LspServerContribution, pluginDir: String, key: String): LspServerLaunch? {
         val jvmArgs = if (server.acceptsJvmOptions) lspSettings.jvmOptions(key)?.toArgs().orEmpty() else emptyList()
         val (command, env) = server.expand(pluginDir, home, depsDir.absolutePath, jvmArgs)
@@ -60,6 +77,12 @@ class LspServerResolverImpl internal constructor(
         val base = baseEnvironment()
         // Eigene Werte des Nutzers in der Umgebung bleiben erhalten (z. B. KOTLIN_LANGUAGE_SERVER_OPTS).
         val merged = base + env.filterValues { it.isNotBlank() }.mapValues { (k, v) -> listOfNotNull(base[k], v).joinToString(" ") }
-        return LspServerLaunch(command = command, env = merged, serverId = server.id)
+        return LspServerLaunch(
+            command = command,
+            env = merged,
+            serverId = server.id,
+            rootMarkers = server.rootMarkers,
+            alongside = lspSettings.of(key).alongside
+        )
     }
 }

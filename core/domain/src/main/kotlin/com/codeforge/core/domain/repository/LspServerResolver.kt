@@ -18,4 +18,7 @@ interface LspServerResolver {
      * @return Startkommando und Umgebung oder `null`, wenn kein Server verfügbar ist.
      */
     suspend fun resolve(languageId: String): LspServerLaunch?
+
+    /** Hauptserver und alle zusätzlich zu startenden Server (Einstellung „Zusätzlich starten“) für [languageId]. */
+    suspend fun resolveAll(languageId: String): List<LspServerLaunch> = listOfNotNull(resolve(languageId))
 }

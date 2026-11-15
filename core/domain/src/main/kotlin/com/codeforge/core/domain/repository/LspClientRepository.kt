@@ -159,6 +159,9 @@ interface LspClientRepository {
     /** `true`, wenn mindestens ein laufender Server `willRenameFiles` unterstützt. */
     fun supportsWillRenameFiles(): Boolean = false
 
+    /** Markiert eine Sitzung als zusätzlichen Server (antwortet nach dem Hauptserver derselben Sprache). */
+    fun setSessionAlongside(sessionId: String, alongside: Boolean) {}
+
     /** Prüft, ob Umbenennen an der Position möglich ist. */
     suspend fun requestPrepareRename(
         path: String,

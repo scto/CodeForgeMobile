@@ -55,6 +55,7 @@ class LspSettingsRepositoryImpl(private val file: File) : LspSettingsRepository 
         val enabled: Boolean = true,
         val disabled: List<String> = emptyList(),
         val jvm: JvmDto? = null,
+        val alongside: Boolean = false,
     )
 
     @Serializable
@@ -64,11 +65,13 @@ class LspSettingsRepositoryImpl(private val file: File) : LspSettingsRepository 
         enabled = enabled,
         disabled = disabledFeatures.map { it.name }.sorted(),
         jvm = jvm?.let { JvmDto(it.xms, it.xmx, it.maxMetaspace, it.extraFlags) },
+        alongside = alongside,
     )
 
     private fun Dto.toModel() = LspServerSettings(
         enabled = enabled,
         disabledFeatures = disabled.mapNotNull { name -> LspFeature.entries.firstOrNull { it.name == name } }.toSet(),
         jvm = jvm?.let { JvmOptions(it.xms, it.xmx, it.metaspace, it.flags) },
+        alongside = alongside,
     )
 }

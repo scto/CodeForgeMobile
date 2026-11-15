@@ -1,7 +1,7 @@
 package com.codeforge.core.domain.model
 
 /** Einzeln abschaltbare Fähigkeiten eines Language-Servers. */
-enum class LspFeature { COMPLETION, DIAGNOSTICS, HOVER, SIGNATURE_HELP, CODE_ACTIONS, FORMATTING, INLAY_HINTS }
+enum class LspFeature { COMPLETION, DIAGNOSTICS, HOVER, SIGNATURE_HELP, CODE_ACTIONS, FORMATTING, INLAY_HINTS, NAVIGATION, RENAME }
 
 /**
  * JVM-Optionen eines Java-basierten Servers oder Dienstes. Leere Felder bedeuten „JVM-Standard“.
@@ -46,6 +46,11 @@ data class LspServerSettings(
     val disabledFeatures: Set<LspFeature> = emptySet(),
     /** `null` = Standard des Servers ([LspServerDefaults.jvmFor]). */
     val jvm: JvmOptions? = null,
+    /**
+     * Zusätzlich zum Hauptserver derselben Sprache starten (z. B. kmp-lsp neben dem Kotlin Language Server). Welche
+     * Funktionen er übernimmt, steuern [disabledFeatures] beider Server: je Funktion antwortet der erste, der sie darf.
+     */
+    val alongside: Boolean = false,
 ) {
     /** Ob [feature] genutzt werden darf. */
     fun allows(feature: LspFeature): Boolean = enabled && feature !in disabledFeatures

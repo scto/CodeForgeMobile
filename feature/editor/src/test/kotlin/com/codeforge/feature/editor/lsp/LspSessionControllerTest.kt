@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -74,6 +75,12 @@ class LspSessionControllerTest {
                 _serverState.value = LspServerState.RUNNING
                 Result.success(Unit)
             }
+        }
+
+        /** Simuliert einen Absturz der Sitzung (RUNNING → FAILED). */
+        fun crash(sessionId: String) {
+            activeSessions[sessionId] = LspServerState.FAILED
+            _sessionStates.value = activeSessions.toMap()
         }
 
         override suspend fun stopSession(sessionId: String) {
@@ -158,10 +165,15 @@ class LspSessionControllerTest {
     ) : LspServerResolver {
         var shouldThrow = false
 
+        var all: Map<String, List<LspServerLaunch>> = emptyMap()
+
         override suspend fun resolve(languageId: String): LspServerLaunch? {
             if (shouldThrow) throw RuntimeException("Resolver error")
             return mapping[languageId]
         }
+
+        override suspend fun resolveAll(languageId: String): List<LspServerLaunch> =
+            all[languageId] ?: listOfNotNull(resolve(languageId))
     }
 
     @Test
@@ -384,4 +396,52 @@ class LspSessionControllerTest {
         assertEquals("val modified = 42", client.openedDocuments[0].third)
         assertEquals("/workspace/App.kt", client.openedDocuments[1].first)
     }
+
+    @Test
+    fun startsMainAndAlongsideServers() = runBlocking {
+        val client = FakeLspClientRepository()
+        val resolver = FakeLspServerResolver().apply {
+            all = mapOf(
+                "kotlin" to listOf(
+                    LspServerLaunch(command = listOf("/bin/kls"), serverId = "kls"),
+                    LspServerLaunch(command = listOf("/bin/kmp"), serverId = "kmp", alongside = true)
+                )
+            )
+        }
+        val controller = LspSessionController(client, resolver)
+        controller.onFileOpened(languageId = "kotlin", workspaceRoot = "/w")
+        assertEquals(setOf("kls@/w", "kmp@/w"), client.activeSessions.keys)
+    }
+
+    @Test
+    fun restartsAfterCrashUntilLoop() = runBlocking {
+        val client = FakeLspClientRepository()
+        val launch = LspServerLaunch(command = listOf("/bin/kls"), serverId = "kls")
+        val controller = LspSessionController(client, FakeLspServerResolver(mapOf("kotlin" to launch)))
+        val notices = java.util.concurrent.CopyOnWriteArrayList<String>()
+        val job = controller.scope.launch { controller.notices.collect { notices += it } }
+        controller.onFileOpened(languageId = "kotlin", workspaceRoot = "/w")
+        repeat(4) { round ->
+            kotlinx.coroutines.delay(100)
+            client.crash("kls@/w")
+            val until = System.currentTimeMillis() + 4_000
+            while (notices.size <= round && System.currentTimeMillis() < until) kotlinx.coroutines.delay(50)
+        }
+        assertEquals(4, client.startCount) // Erststart + 3 Neustarts, der 4. Absturz startet nicht mehr
+        assertEquals(4, notices.size)
+        job.cancel()
+    }
+
+    @Test
+    fun rootForUsesNearestMarker() {
+        val root = kotlin.io.path.createTempDirectory("cf-root").toFile()
+        val module = java.io.File(root, "lib").apply { mkdirs() }
+        java.io.File(module, "pyproject.toml").writeText("")
+        val file = java.io.File(module, "src/a.py").apply { parentFile.mkdirs(); writeText("") }
+        assertEquals(module.path, LspSessionController.rootFor(file.path, listOf("pyproject.toml"), root.path))
+        assertEquals(root.path, LspSessionController.rootFor(file.path, listOf("Cargo.toml"), root.path))
+        assertEquals(root.path, LspSessionController.rootFor(file.path, emptyList(), root.path))
+        root.deleteRecursively()
+    }
+
 }

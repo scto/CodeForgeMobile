@@ -34,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -58,6 +60,8 @@ private val FEATURE_ROWS = listOf(
     FeatureRow(LspFeature.CODE_ACTIONS, R.string.lspfeat_actions, R.string.lspfeat_actions_sum, Icons.Filled.Lightbulb),
     FeatureRow(LspFeature.FORMATTING, R.string.lspfeat_formatting, R.string.lspfeat_formatting_sum, Icons.AutoMirrored.Filled.FormatIndentIncrease),
     FeatureRow(LspFeature.INLAY_HINTS, R.string.lspfeat_inlay, R.string.lspfeat_inlay_sum, Icons.Filled.Visibility),
+    FeatureRow(LspFeature.NAVIGATION, R.string.lspfeat_navigation, R.string.lspfeat_navigation_sum, Icons.Filled.Explore),
+    FeatureRow(LspFeature.RENAME, R.string.lspfeat_rename, R.string.lspfeat_rename_sum, Icons.Filled.DriveFileRenameOutline),
 )
 
 /** Zeile eines Language-Servers: Name, Plugin bzw. fehlende Programme, Einstellungen und Ein/Aus-Schalter. */
@@ -141,6 +145,7 @@ internal fun LspFeatureSheet(
     item: LanguageServerItem,
     settings: LspServerSettings,
     onFeatureChange: (LspFeature, Boolean) -> Unit,
+    onAlongsideChange: (Boolean) -> Unit,
     onOpenJvm: () -> Unit,
     onInfo: () -> Unit,
     onDismiss: () -> Unit,
@@ -152,6 +157,7 @@ internal fun LspFeatureSheet(
         ) {
             SheetHeader(item)
             HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp))
+            AlongsideRow(settings, onAlongsideChange)
             FeatureRows(settings, onFeatureChange)
             if (!settings.enabled) {
                 Text(
@@ -166,6 +172,24 @@ internal fun LspFeatureSheet(
                 Text(stringRes(R.string.lspinfo_button))
             }
         }
+    }
+}
+
+@Composable
+private fun AlongsideRow(settings: LspServerSettings, onChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringRes(R.string.lspfeat_alongside), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringRes(R.string.lspfeat_alongside_sum),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(checked = settings.alongside, enabled = settings.enabled, onCheckedChange = onChange)
     }
 }
 

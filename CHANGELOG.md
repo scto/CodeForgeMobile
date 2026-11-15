@@ -11,6 +11,16 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Sprachserver: Robustheit, mehrere Server)
+- Zeitlimit für jede LSP-Anfrage (je Methode, z. B. 10 s Vervollständigung, 60 s Umbenennen, 180 s Start) mit
+  `$/cancelRequest`; auch ein abgebrochener Aufrufer bricht die Anfrage beim Server ab. Endet die Verbindung, scheitern
+  wartende Anfragen sofort, statt ewig zu hängen.
+- Automatischer Neustart abgestürzter Server (Hinweis im Editor); nach mehr als 3 Abstürzen in 3 Minuten nicht mehr.
+- Mehrere Server je Sprache: Einstellung „Zusätzlich starten“ je Server (z. B. kmp-lsp neben dem Kotlin Language
+  Server). Je Funktion antwortet der erste Server, bei dem sie eingeschaltet ist; Vervollständigung, Code-Actions und
+  Diagnosen werden zusammengeführt. Neue abschaltbare Funktionen: „Navigation“ und „Umbenennen“.
+- `lspServers[].rootMarkers`: Arbeitsordner je Datei (nächster Ordner mit z. B. `pyproject.toml`), eigene Sitzung je Ordner.
+
 ### Hinzugefügt (Plugin-API 3, Teil 2: Editor)
 - Editor-Aktionen für Plugins (`PluginExtensionPoints.EDITOR_ACTION`, Berechtigung `editor`): Zugriff auf Text, Cursor
   und Auswahl der aktiven Datei (`EditorContext`), Änderungen als Effekte (`ApplyEdits`, `MoveCaret`, `Select`,
