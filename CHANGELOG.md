@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+- Release-Build schlug fehl („InternalProblems … removed in Gradle 9.6.0“): Der Gradle-Wrapper war auf 9.9.1 gehoben
+  worden, AGP 8.13 läuft aber nur bis Gradle 9.5. Wrapper wieder auf 8.14.3.
+
 ## [3.0.9] - 2026-11-15
 
 ### Hinzugefügt (Plugin-API 3, Teil 5: Sprache, Ausführen, Oberfläche)
