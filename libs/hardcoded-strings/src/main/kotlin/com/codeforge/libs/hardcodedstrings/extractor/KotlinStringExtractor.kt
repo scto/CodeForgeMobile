@@ -33,7 +33,11 @@ class KotlinStringExtractor(
     private val nonUiFunctionNames = setOf(
         "error", "require", "check", "checknotnull", "requirenotnull",
         "throw", "fatalerror", "print", "println", "format",
-        "getstring", "stringresource", "gettext", "getquantitystring"
+        "getstring", "stringresource", "gettext", "getquantitystring",
+        // Dateien, Einstellungen, Intents, Datenbank: technische Namen, keine UI-Texte
+        "file", "getexternalfilesdir", "getdir", "getfilesdir", "getsharedpreferences", "opensharedpreferences",
+        "createtempfile", "resolve", "putextra", "getstringextra", "hasextra", "intent", "parse",
+        "getsystemservice", "rawquery", "execsql", "getcolumnindex", "getcolumnindexorthrow", "getproperty", "getenv"
     )
 
     private val loggingClasses = setOf("log", "timber", "logger", "system")
@@ -64,6 +68,8 @@ class KotlinStringExtractor(
         val isComposeFile = content.contains("@Composable") || content.contains("androidx.compose")
         val isAndroidContextFile = content.contains("Context") || content.contains("Activity") ||
                 content.contains("Fragment") || content.contains("android.view")
+        // Klassische Oberfläche (Views, Dialoge, Benachrichtigungen) – nicht schon jede Datei mit „Context“.
+        val isUiFile = UI_FILE_MARKERS.any { content.contains(it) }
 
         // Find comment ignore lines
         val ignoreLines = mutableSetOf<Int>()
@@ -117,7 +123,7 @@ class KotlinStringExtractor(
                 emptyList()
             }
 
-            val confidence = determineConfidence(tokens, i, rawContent, isComposeFile)
+            val confidence = determineConfidence(tokens, i, rawContent, isComposeFile, isUiFile)
             if (confidence < config.minConfidence) {
                 continue
             }
@@ -178,12 +184,18 @@ class KotlinStringExtractor(
     }
 
     private fun isViableCandidate(text: String): Boolean {
-        val trimmed = text.trim()
+        // Prüfungen auf den sichtbaren Text: `${...}`/`$name` zählen nicht als Buchstaben, Pfad oder Länge.
+        val trimmed = withoutTemplates(text).trim()
         if (trimmed.length < 2) return false
 
-        // Must contain at least one letter
+        // Must contain at least two letters outside templates (z. B. nicht "${a} ${b} (${c})")
         val letterCount = trimmed.count { it.isLetter() }
         if (letterCount < 2) return false
+
+        // Einzelnes kleingeschriebenes Wort ohne Leerzeichen (Ordner-/Dateiname, Schlüssel): "crash", "config.json"
+        if (trimmed.matches(Regex("^[a-z0-9_.\\-]+$"))) {
+            return false
+        }
 
         // Exclude URLs, URIs, file paths
         if (trimmed.startsWith("http://") || trimmed.startsWith("https://") ||
@@ -197,7 +209,7 @@ class KotlinStringExtractor(
         if (trimmed.matches(Regex(".*\\.(kt|java|xml|json|png|jpg|jpeg|webp|svg|gradle|kts|properties|txt)$", RegexOption.IGNORE_CASE))) {
             return false
         }
-        if (trimmed.contains("/") && !trimmed.contains(" ") && trimmed.length < 50) {
+        if (trimmed.contains("/") && !trimmed.contains(" ")) {
             return false
         }
 
@@ -275,7 +287,8 @@ class KotlinStringExtractor(
         tokens: List<Token>,
         index: Int,
         content: String,
-        isComposeFile: Boolean
+        isComposeFile: Boolean,
+        isUiFile: Boolean
     ): StringConfidence {
         val trimmed = content.trim()
         val hasSpaces = trimmed.contains(" ")
@@ -320,6 +333,12 @@ class KotlinStringExtractor(
             return StringConfidence.MEDIUM
         }
 
+        // Außerhalb von Compose ohne UI-Aufruf (Application, Repository, Crash-Handler …) nur niedrige Zuverlässigkeit:
+        // dort sind Texte mit Leerzeichen meist Log-, Diagnose- oder Protokolltexte.
+        if (!isComposeFile && !isUiFile) {
+            return StringConfidence.LOW
+        }
+
         // Title Case or sentence with spaces
         if (hasSpaces && startsWithCapital) {
             return StringConfidence.MEDIUM
@@ -349,6 +368,9 @@ class KotlinStringExtractor(
         return false
     }
 
+    private fun withoutTemplates(text: String): String =
+        text.replace(Regex("""\$\{[^}]*}"""), " ").replace(Regex("""\$[A-Za-z_][A-Za-z0-9_]*"""), " ")
+
     private fun containsKotlinTemplate(content: String): Boolean {
         for (i in 0 until content.length - 1) {
             if (content[i] == '$' && (i == 0 || content[i - 1] != '\\')) {
@@ -365,5 +387,12 @@ class KotlinStringExtractor(
         val snippetStart = (startOffset - 40).coerceAtLeast(0)
         val snippetEnd = (endOffset + 40).coerceAtMost(fullText.length)
         return fullText.substring(snippetStart, snippetEnd).trim()
+    }
+
+    private companion object {
+        val UI_FILE_MARKERS = listOf(
+            "android.widget", "android.view", "AlertDialog", "Toast", "Snackbar", "NotificationCompat",
+            ": Activity", ": AppCompatActivity", ": ComponentActivity", ": Fragment", ": DialogFragment"
+        )
     }
 }

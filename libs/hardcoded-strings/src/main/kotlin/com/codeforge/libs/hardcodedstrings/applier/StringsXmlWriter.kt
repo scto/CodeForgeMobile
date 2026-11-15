@@ -11,7 +11,9 @@ object StringsXmlWriter {
     /**
      * Generates updated content for strings.xml with new string entries added.
      */
-    fun mergeEntries(existingContent: String?, newEntries: List<Pair<String, String>>): String {
+    fun mergeEntries(existingContent: String?, entries: List<Pair<String, String>>): String {
+        // Jeder Schlüssel höchstens einmal (gleiche Werte mehrerer Fundstellen teilen sich einen Eintrag).
+        val newEntries = entries.distinctBy { it.first }
         if (newEntries.isEmpty()) {
             return existingContent ?: ""
         }

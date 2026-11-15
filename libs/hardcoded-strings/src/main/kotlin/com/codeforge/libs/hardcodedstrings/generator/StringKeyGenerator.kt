@@ -8,6 +8,12 @@ import java.util.Locale
  */
 object StringKeyGenerator {
 
+    private const val MAX_PREFIX_LENGTH = 20
+    private val CAMEL_BOUNDARY = Regex("([a-z0-9])([A-Z])")
+    private val PREFIX_SUFFIXES = listOf(
+        "Screen", "Activity", "Fragment", "Dialog", "BottomSheet", "Route", "View", "ViewModel", "Application", "Contract"
+    )
+
     private const val MAX_KEY_LENGTH = 40
 
     /**
@@ -100,27 +106,25 @@ object StringKeyGenerator {
         }
     }
 
-    /** Leitet den Schlüssel-Präfix aus dem Dateinamen ab (Endungen wie Screen/Activity entfallen, höchstens 15 Zeichen). */
+    /**
+     * Leitet den Schlüssel-Präfix aus dem Dateinamen ab: Endungen wie Screen/Activity/Application entfallen,
+     * CamelCase wird zu Wörtern (`CodeForgeApplication` → `code_forge`), höchstens [MAX_PREFIX_LENGTH] Zeichen aus
+     * ganzen Wörtern – nie mitten im Wort abgeschnitten.
+     */
     fun derivePrefix(sourceFile: File?): String {
         if (sourceFile == null) return ""
-        val nameWithoutExt = sourceFile.nameWithoutExtension
-
-        // Remove common suffixes like Screen, Activity, Fragment, Dialog, Component, View
-        val stripped = nameWithoutExt
-            .removeSuffix("Screen")
-            .removeSuffix("Activity")
-            .removeSuffix("Fragment")
-            .removeSuffix("Dialog")
-            .removeSuffix("BottomSheet")
-            .removeSuffix("Route")
-            .removeSuffix("View")
-
-        val prefixSnake = toSnakeCase(stripped)
-        return if (prefixSnake.length > 15) {
-            prefixSnake.substring(0, 15).trimEnd('_')
-        } else {
-            prefixSnake
+        val stripped = PREFIX_SUFFIXES.fold(sourceFile.nameWithoutExtension) { name, suffix ->
+            if (name.length > suffix.length) name.removeSuffix(suffix) else name
         }
+        val words = toSnakeCase(stripped.replace(CAMEL_BOUNDARY, "$1_$2")).split('_').filter { it.isNotBlank() }
+        val result = StringBuilder()
+        for (word in words) {
+            val extra = if (result.isEmpty()) word.length else word.length + 1
+            if (result.length + extra > MAX_PREFIX_LENGTH) break
+            if (result.isNotEmpty()) result.append('_')
+            result.append(word)
+        }
+        return result.toString().ifEmpty { words.firstOrNull()?.take(MAX_PREFIX_LENGTH).orEmpty() }
     }
 
     /** Bereinigt einen Schlüssel (Kleinbuchstaben, gültige Zeichen; beginnt er mit einer Ziffer, wird `str_` vorangestellt). */

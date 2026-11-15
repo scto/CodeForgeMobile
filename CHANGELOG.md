@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Quick Fix „String-Ressource extrahieren“)
+- Keine doppelten Einträge mehr in `strings.xml` („Duplicate resources“): gleicher Text → ein Schlüssel für alle Fundstellen (auch ein schon vorhandener Eintrag), gleicher Schlüssel mit anderem Text → `_2`, `_3` …; gilt auch nach manuellem Umbenennen.
+- Prüfungen laufen auf dem sichtbaren Text ohne `${…}`/`$name`: reine Platzhalter-Texte wie `"${a} ${b} (${c})"`, Pfade (`"${dir}/.cfm/crash"`) und einzelne kleingeschriebene Wörter (`"crash"`) werden nicht mehr vorgeschlagen.
+- Argumente von `File(…)`, `getExternalFilesDir`, `getSharedPreferences`, `Intent`/`putExtra`, `Uri.parse`, `getSystemService`, SQL-Aufrufen, `getProperty`/`getenv` u. a. gelten als technisch.
+- Texte in Dateien ohne Compose-/View-UI (z. B. `Application`, Repositories) haben niedrige Zuverlässigkeit und sind nicht mehr vorausgewählt.
+- Schlüssel-Präfix aus ganzen Wörtern des Dateinamens (`CodeForgeApplication` → `code_forge_…` statt `codeforgeapplic_…`).
+
 ### Behoben (kmp-lsp: JVM-Optionen)
 - kmp-lsp (Plugin 1.0.1) zeigt in Einstellungen → Sprachserver die JVM-Optionen. kmp-lsp selbst ist nativ; sie gelten für den Java-Helfer `kmp-jar-indexer.jar` (Symbole aus Bibliotheken), den kmp-lsp per `java -jar` startet – übergeben über `JDK_JAVA_OPTIONS`. Vorgabe: `-Xmx384m -XX:+UseSerialGC -XX:-UsePerfData`.
 

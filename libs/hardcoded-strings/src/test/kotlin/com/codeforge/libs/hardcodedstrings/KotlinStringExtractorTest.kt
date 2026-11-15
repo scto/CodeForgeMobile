@@ -90,4 +90,27 @@ class KotlinStringExtractorTest {
         assertTrue(finding.isTemplate)
         assertEquals(listOf("name"), finding.templatePlaceholders)
     }
+
+    @Test
+    fun crashHandlerNotPreselected() {
+        val code = """
+            package com.codeforge.mobile
+            import android.app.Application
+            import java.io.File
+
+            class CodeForgeApplication : Application() {
+                private fun installCrashHandler() {
+                    val appInfo = "${'$'}{BuildConfig.APPLICATION_ID} ${'$'}{BuildConfig.VERSION_NAME} (${'$'}{BuildConfig.VERSION_CODE})"
+                    val osInfo = "Android API ${'$'}{Build.VERSION.SDK_INT} (${'$'}{Build.VERSION.RELEASE})"
+                    val deviceInfo = "${'$'}{Build.MANUFACTURER} ${'$'}{Build.MODEL} (${'$'}{Build.DEVICE})"
+                    val dir = File(filesDir, "${'$'}{PROJECTS_DIR_NAME}/.cfm/crash")
+                    val fallback = getExternalFilesDir("crash") ?: File(filesDir, "crash")
+                }
+            }
+        """.trimIndent()
+
+        val findings = extractor.extract(File("CodeForgeApplication.kt"), code)
+        val preselectable = findings.filter { it.isExtractable && it.confidence != StringConfidence.LOW }
+        assertTrue(preselectable.joinToString { it.rawValue }, preselectable.isEmpty())
+    }
 }

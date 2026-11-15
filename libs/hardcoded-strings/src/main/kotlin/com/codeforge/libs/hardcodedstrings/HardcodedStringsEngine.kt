@@ -6,6 +6,7 @@ import com.codeforge.libs.hardcodedstrings.backup.BackupManager
 import com.codeforge.libs.hardcodedstrings.extractor.KotlinStringExtractor
 import com.codeforge.libs.hardcodedstrings.extractor.XmlStringExtractor
 import com.codeforge.libs.hardcodedstrings.generator.AndroidStringEscaper
+import com.codeforge.libs.hardcodedstrings.generator.KeyDeduplicator
 import com.codeforge.libs.hardcodedstrings.model.ExtractionPlan
 import com.codeforge.libs.hardcodedstrings.model.ExtractionResult
 import com.codeforge.libs.hardcodedstrings.model.FileReplacementPlan
@@ -113,7 +114,10 @@ class HardcodedStringsEngine {
         findings: List<HardcodedStringFinding>,
         projectRoot: File
     ): ExtractionPlan {
+        // Schlüssel je Ziel-strings.xml eindeutig machen, bevor Code und XML geplant werden – sonst „Duplicate resources“.
         val extractable = findings.filter { it.isExtractable }
+            .groupBy { targetXmlOf(it, projectRoot) }
+            .flatMap { (xmlFile, group) -> KeyDeduplicator.resolve(group, AndroidModuleResolver.loadExistingStringsXml(xmlFile)) }
 
         // 1. Group findings by source file to create replacement plans
         val byFile = extractable.groupBy { it.file }
@@ -125,11 +129,7 @@ class HardcodedStringsEngine {
         }
 
         // 2. Group findings by target strings.xml file
-        val byStringsXml = extractable.groupBy { finding ->
-            finding.targetStringsXmlFile ?: AndroidModuleResolver.findStringsXml(
-                AndroidModuleResolver.findEnclosingModule(finding.file, projectRoot).moduleDir
-            ) ?: File(projectRoot, "app/src/main/res/values/strings.xml")
-        }
+        val byStringsXml = extractable.groupBy { targetXmlOf(it, projectRoot) }
 
         val stringsXmlUpdates = mutableMapOf<File, String>()
         for ((xmlFile, xmlFindings) in byStringsXml) {
@@ -142,13 +142,19 @@ class HardcodedStringsEngine {
             stringsXmlUpdates[xmlFile] = merged
         }
 
+        val adjusted = extractable.associateBy { it.id }
         return ExtractionPlan(
-            findings = findings,
+            findings = findings.map { adjusted[it.id] ?: it },
             filePlans = filePlans,
             stringsXmlUpdates = stringsXmlUpdates,
             totalStringsCount = extractable.size
         )
     }
+
+    private fun targetXmlOf(finding: HardcodedStringFinding, projectRoot: File): File =
+        finding.targetStringsXmlFile ?: AndroidModuleResolver.findStringsXml(
+            AndroidModuleResolver.findEnclosingModule(finding.file, projectRoot).moduleDir
+        ) ?: File(projectRoot, "app/src/main/res/values/strings.xml")
 
     /**
      * Atomically executes the extraction plan with automatic rollback on error.

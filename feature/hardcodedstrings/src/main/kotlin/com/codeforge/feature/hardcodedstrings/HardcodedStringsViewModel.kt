@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.codeforge.libs.hardcodedstrings.HardcodedStringsEngine
 import com.codeforge.libs.hardcodedstrings.backup.BackupManager
 import com.codeforge.libs.hardcodedstrings.model.HardcodedStringFinding
+import com.codeforge.libs.hardcodedstrings.model.StringConfidence
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -73,7 +74,11 @@ class HardcodedStringsViewModel @Inject constructor() : ViewModel() {
             val hasBackup = backupManager.getLatestBackup() != null
 
             _uiState.update { state ->
-                val allExtractableIds = findings.filter { it.isExtractable }.map { it.id }.toSet()
+                // Vorausgewählt nur mittlere/hohe Zuverlässigkeit; niedrige (Log-, Pfad-, Diagnosetexte) wählt man selbst.
+                val allExtractableIds = findings
+                    .filter { it.isExtractable && it.confidence != StringConfidence.LOW }
+                    .map { it.id }
+                    .toSet()
                 state.copy(
                     isScanning = false,
                     findings = findings,

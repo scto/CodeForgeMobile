@@ -43,4 +43,10 @@ class StringKeyGeneratorTest {
         val key = StringKeyGenerator.generateKey("Title", sourceFile = file, existingKeys = existing)
         assertEquals("login_title_2", key)
     }
+
+    @Test
+    fun prefixKeepsWholeWords() {
+        assertEquals("code_forge", StringKeyGenerator.derivePrefix(File("CodeForgeApplication.kt")))
+        assertEquals("settings", StringKeyGenerator.derivePrefix(File("SettingsViewModel.kt")))
+    }
 }
