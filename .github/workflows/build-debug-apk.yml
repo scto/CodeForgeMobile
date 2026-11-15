@@ -58,6 +58,9 @@ jobs:
           [[ "$IN_RETENTION" =~ ^[0-9]+$ ]] && [ "$IN_RETENTION" -ge 1 ] && [ "$IN_RETENTION" -le 90 ] \
             || { echo "::error::retention_days muss 1-90 sein (war: $IN_RETENTION)"; exit 1; }
 
+      - name: Android-Regex prüfen (ICU)
+        run: python3 scripts/check_android_regex.py
+
       - name: JDK 21 einrichten
         uses: actions/setup-java@v6
         with:

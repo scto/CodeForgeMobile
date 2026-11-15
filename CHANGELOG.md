@@ -11,6 +11,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Absturz `PatternSyntaxException`)
+- Absturz beim Öffnen von „String-Ressource extrahieren“ (3.0.7): Der Regex `\$\{[^}]*}` enthielt ein unescaptes `}`.
+  Die JVM akzeptiert das (Tests grün), Androids ICU-Regex nicht. Jetzt `\}`, Regex einmalig als Konstante.
+- Gleicher Fehler in `GradleBuildParser` (Abhängigkeits-Updates, Variablen wie `${kotlinVersion}`) behoben.
+- Neu: `scripts/check_android_regex.py` findet solche Regex-Literale in `src/main`; läuft im Workflow „Build Debug APK“.
+
 ## [3.0.7] - 2026-11-15
 
 ### Hinzugefügt

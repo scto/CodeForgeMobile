@@ -368,8 +368,9 @@ class KotlinStringExtractor(
         return false
     }
 
+    // `}` muss escapt sein: Androids ICU-Regex wirft sonst PatternSyntaxException (die JVM nicht).
     private fun withoutTemplates(text: String): String =
-        text.replace(Regex("""\$\{[^}]*}"""), " ").replace(Regex("""\$[A-Za-z_][A-Za-z0-9_]*"""), " ")
+        text.replace(TEMPLATE_BLOCK, " ").replace(TEMPLATE_NAME, " ")
 
     private fun containsKotlinTemplate(content: String): Boolean {
         for (i in 0 until content.length - 1) {
@@ -390,6 +391,8 @@ class KotlinStringExtractor(
     }
 
     private companion object {
+        private val TEMPLATE_BLOCK = Regex("""\$\{[^}]*\}""")
+        private val TEMPLATE_NAME = Regex("""\$[A-Za-z_][A-Za-z0-9_]*""")
         val UI_FILE_MARKERS = listOf(
             "android.widget", "android.view", "AlertDialog", "Toast", "Snackbar", "NotificationCompat",
             ": Activity", ": AppCompatActivity", ": ComponentActivity", ": Fragment", ": DialogFragment"
