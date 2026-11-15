@@ -3,6 +3,8 @@
 | Plugin | Vorlage | Sprachen / DSL |
 |---|---|---|
 | `com.codeforge.plugin.compose-clean.template` | Compose · Clean Architecture: `:app`, `:core:domain` (reines Kotlin), `:core:data`, `:feature:home`; MVI mit StateFlow, Hilt, Material 3, Unit-Test | Kotlin / KTS, minSdk ≥ 24 |
+| `com.codeforge.plugin.compose-drawer.template` | Compose · Navigationsmenü: `ModalNavigationDrawer` mit Start (Übersicht), Notizen (Liste, Hinzufügen-Dialog, Löschen) und Einstellungen (Hell/Dunkel/System, dynamische Farben – wirken sofort); `:app`, `:core:domain`, `:core:data`, `:feature:home/notes/settings`; MVI, Hilt, typsichere Navigation, Unit-Tests | Kotlin / KTS, minSdk ≥ 24 |
+| `com.codeforge.plugin.compose-bottomnav.template` | Compose · Untere Navigationsleiste: `NavigationBar` mit Heute (Fortschrittsring, Tagesziel), Aufgaben (Filter-Chips, Abhaken, Hinzufügen, Löschen) und Profil (Name, Tagesziel, Statistik); Abzeichen mit offenen Aufgaben; `:app`, `:core:domain`, `:core:data`, `:feature:today/tasks/profile`; MVI, Hilt, typsichere Navigation, Unit-Tests | Kotlin / KTS, minSdk ≥ 24 |
 | `com.codeforge.plugin.jvm-cli.template` | Konsolenprogramm für die JVM (`./gradlew run`), JUnit-Test | Kotlin, Java / KTS, Groovy |
 
 * Format und Platzhalter: `docs/extensions.md` → „Projektvorlagen“. Autoren-Vorlage: `templates/project-template`.

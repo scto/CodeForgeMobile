@@ -38,7 +38,7 @@ class ProjectTemplatePluginsTest {
     @Test
     fun shippedTemplatePluginsAreValid() {
         val plugins = src.listFiles().orEmpty().filter { File(it, "plugin.json").isFile }
-        assertEquals(2, plugins.size)
+        assertEquals(4, plugins.size)
         plugins.forEach { dir ->
             val m = PluginManifestParser.parse(File(dir, "plugin.json").readText()).getOrThrow()
             assertEquals(dir.name, m.id)

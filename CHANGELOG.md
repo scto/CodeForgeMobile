@@ -11,6 +11,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Projektvorlagen)
+- Vorlage „Compose · Navigationsmenü“ (`compose-drawer`): `ModalNavigationDrawer` mit drei Bildschirmen – Start,
+  Notizen (Liste, Hinzufügen, Löschen) und Einstellungen (Hell/Dunkel, dynamische Farben).
+- Vorlage „Compose · Untere Navigationsleiste“ (`compose-bottomnav`): `NavigationBar` mit Heute (Fortschritt,
+  Tagesziel), Aufgaben (Filter, Abhaken, Hinzufügen) und Profil; Abzeichen mit offenen Aufgaben.
+- Beide: Clean Architecture in mehreren Modulen, MVI mit StateFlow, Hilt, typsichere Navigation, Texte in Englisch und
+  Deutsch, Unit-Tests für Use Cases und ViewModels.
+
 ### Geändert (Sprachserver)
 - Plugin „kmp-lsp“ 1.0.2 lädt kmp-lsp aus dem Release `termux-2`: keine falschen „expected at most 0 argument(s)“-
   Warnungen mehr bei Konstruktoren von Bibliotheks-Klassen und bei Compose-Aufrufen wie `Text(…)`/`Icon(…)`.

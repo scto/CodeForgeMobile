@@ -49,6 +49,48 @@ def jvm_cli():
     save(img, "com.codeforge.plugin.jvm-cli.template")
 
 
+def phone(d, x=96, y=12, w=128, h=176):
+    box(d, x, y, w, h, (28, 27, 31, 255), 20)                     # Gerät
+    box(d, x + 6, y + 6, w - 12, h - 12, (254, 247, 255, 255), 15)  # Bildschirm
+
+
+def compose_drawer():
+    img, d = canvas()
+    box(d, 20, 16, 280, 168, (232, 222, 248, 255), 22)
+    phone(d)
+    box(d, 102, 18, 116, 22, (103, 80, 164, 255), 12)             # obere Leiste
+    for i in range(3):                                            # Inhalt (Karten)
+        box(d, 150, 50 + i * 40, 62, 30, (232, 222, 248, 255), 8)
+    box(d, 102, 18, 64, 164, (243, 237, 247, 255), 14)            # geöffnetes Menü
+    box(d, 110, 52, 48, 16, (232, 222, 248, 255), 8)              # ausgewählter Eintrag
+    for i, y in enumerate((52, 78, 104)):
+        d.ellipse([114 * SS, (y + 4) * SS, 122 * SS, (y + 12) * SS], fill=(103, 80, 164, 255))
+        box(d, 126, y + 5, 26 if i else 24, 6, (73, 69, 79, 255), 3)
+    save(img, "com.codeforge.plugin.compose-drawer.template")
+
+
+def compose_bottomnav():
+    img, d = canvas()
+    box(d, 20, 16, 280, 168, (232, 222, 248, 255), 22)
+    phone(d)
+    box(d, 102, 18, 116, 22, (103, 80, 164, 255), 12)             # obere Leiste
+    for i in range(3):                                            # Liste mit Haken
+        y = 50 + i * 30
+        d.rounded_rectangle([110 * SS, y * SS, 122 * SS, (y + 12) * SS], radius=3 * SS,
+                            fill=(103, 80, 164, 255) if i == 0 else None, outline=(103, 80, 164, 255), width=2 * SS)
+        box(d, 128, y + 3, 80 - i * 14, 6, (73, 69, 79, 255), 3)
+    box(d, 102, 146, 116, 36, (243, 237, 247, 255), 14)           # untere Leiste
+    for i, x in enumerate((122, 160, 198)):
+        if i == 1:
+            box(d, x - 14, 152, 28, 14, (232, 222, 248, 255), 7)  # aktives Ziel
+        d.ellipse([(x - 5) * SS, 154 * SS, (x + 5) * SS, 164 * SS], fill=(103, 80, 164, 255))
+        box(d, x - 10, 170, 20, 4, (73, 69, 79, 255), 2)
+    d.ellipse([166 * SS, 148 * SS, 176 * SS, 158 * SS], fill=(179, 38, 30, 255))  # Abzeichen
+    save(img, "com.codeforge.plugin.compose-bottomnav.template")
+
+
 if __name__ == "__main__":
     compose_clean()
     jvm_cli()
+    compose_drawer()
+    compose_bottomnav()

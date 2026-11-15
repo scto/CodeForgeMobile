@@ -1,0 +1,27 @@
+{
+  "id": "com.codeforge.plugin.compose-bottomnav.template",
+  "name": "Compose · Untere Navigationsleiste (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage: Jetpack Compose mit NavigationBar und drei Bildschirmen (Heute, Aufgaben, Profil); MVI mit StateFlow, Hilt, typsichere Navigation, Clean Architecture in mehreren Modulen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "compose-bottomnav",
+        "label": "Compose · Untere Navigationsleiste",
+        "description": "Untere Leiste mit Heute (Fortschritt), Aufgaben (Filter, Abhaken, Hinzufügen) und Profil (Name, Tagesziel); Abzeichen mit offenen Aufgaben",
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "minSdk": 24,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

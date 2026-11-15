@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notes_empty">No notes yet. Tap + to add one.</string>
+    <string name="notes_add">Add note</string>
+    <string name="notes_delete">Delete note</string>
+    <string name="notes_new">New note</string>
+    <string name="notes_title">Title</string>
+    <string name="notes_title_missing">Please enter a title</string>
+    <string name="notes_body">Text</string>
+    <string name="notes_save">Save</string>
+    <string name="notes_cancel">Cancel</string>
+</resources>

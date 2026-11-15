@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_welcome">Welcome!</string>
+    <string name="home_welcome_text">Open the menu at the top left or swipe in from the left edge.</string>
+    <string name="home_latest">Latest</string>
+    <string name="home_open_notes">Open notes</string>
+    <plurals name="home_note_count">
+        <item quantity="one">%d note</item>
+        <item quantity="other">%d notes</item>
+    </plurals>
+</resources>

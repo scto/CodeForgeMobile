@@ -57,7 +57,7 @@ class PluginTemplateGeneratorTest {
     @Test
     fun everyCombinationIsComplete() {
         val projects = generateAll()
-        assertEquals(5, projects.size) // compose-clean (Kotlin, KTS) + jvm-cli (2 Sprachen x 2 DSL)
+        assertEquals(7, projects.size) // compose-clean, compose-drawer, compose-bottomnav (je Kotlin, KTS) + jvm-cli (2 Sprachen x 2 DSL)
         projects.forEach { p ->
             assertTrue(p.name, File(p, "gradlew").canExecute())
             assertTrue(p.name, File(p, "gradle/wrapper/gradle-wrapper.properties").isFile)
