@@ -2,6 +2,8 @@
 package com.codeforge.feature.settings.store
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -204,7 +206,6 @@ private fun StoreItemCard(
     onInstall: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val uriHandler = LocalUriHandler.current
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(item.name, style = MaterialTheme.typography.titleMedium)
@@ -241,46 +242,92 @@ private fun StoreItemCard(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val isServer = serverState != null
-                val installable = item.isInstallablePlugin
-                when {
-                    // Sprachserver: ein Knopf für Plugin + Server-Programm + Voraussetzungen, ein Knopf zum Entfernen.
-                    isServer && installable && !(installed && serverState != LspServerState.MISSING) -> {
-                        val busy = installing || installingServer
-                        Button(onClick = if (installed) onInstallServer else onInstall, enabled = !busy && !installBusy) {
-                            Text(stringRes(if (busy) R.string.store_installing else R.string.store_install))
-                        }
-                    }
-                    isServer && installed -> OutlinedButton(onClick = onUninstall, enabled = !installingServer && !installBusy) {
-                        Text(stringRes(R.string.store_remove))
-                    }
-                    item.isInstallablePlugin -> {
-                        Button(onClick = onInstall, enabled = !installBusy) {
-                            Text(
-                                stringRes(
-                                    when {
-                                        installing -> R.string.store_installing
-                                        installed -> R.string.store_reinstall
-                                        else -> R.string.store_install
-                                    }
-                                )
-                            )
-                        }
-                        if (installed) OutlinedButton(onClick = onUninstall, enabled = !installBusy) {
-                            Text(stringRes(R.string.store_remove))
-                        }
-                    }
-                    else -> item.downloadUrl?.let { url ->
-                        Button(onClick = { runCatching { uriHandler.openUri(url) } }) { Text(stringRes(R.string.store_download)) }
-                    }
-                }
-                item.homepageUrl?.let { url ->
-                    OutlinedButton(onClick = { runCatching { uriHandler.openUri(url) } }) { Text(stringRes(R.string.store_open_page)) }
-                }
-            }
+            StoreItemActions(
+                item = item,
+                installed = installed,
+                serverState = serverState,
+                installing = installing,
+                installingServer = installingServer,
+                installBusy = installBusy,
+                onInstall = onInstall,
+                onInstallServer = onInstallServer,
+                onUninstall = onUninstall,
+            )
         }
     }
+}
+
+// Knöpfe einer Store-Karte (Installieren/Entfernen/Seite). FlowRow statt Row: Passen die Knöpfe nicht in eine Zeile,
+// rutschen sie in die nächste. In einer Row bekam der letzte Knopf keine Breite mehr, sein Text brach Zeichen für
+// Zeichen um und blähte die Karte auf.
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StoreItemActions(
+    item: StoreItem,
+    installed: Boolean,
+    serverState: LspServerState?,
+    installing: Boolean,
+    installingServer: Boolean,
+    installBusy: Boolean,
+    onInstall: () -> Unit,
+    onInstallServer: () -> Unit,
+    onUninstall: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val uriHandler = LocalUriHandler.current
+    val serverBusy = installing || installingServer
+    val serverInstall = if (installed) onInstallServer else onInstall
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        when (storeMainAction(item, installed, serverState)) {
+            // Sprachserver: ein Knopf für Plugin + Server-Programm + Voraussetzungen, ein Knopf zum Entfernen.
+            StoreMainAction.INSTALL_SERVER ->
+                StoreButton(pluginInstallLabel(serverBusy, installed = false), serverInstall, enabled = !serverBusy && !installBusy)
+            StoreMainAction.REMOVE_SERVER ->
+                StoreButton(R.string.store_remove, onUninstall, enabled = !installingServer && !installBusy, outlined = true)
+            StoreMainAction.PLUGIN -> {
+                StoreButton(pluginInstallLabel(installing, installed), onInstall, enabled = !installBusy)
+                if (installed) StoreButton(R.string.store_remove, onUninstall, enabled = !installBusy, outlined = true)
+            }
+            StoreMainAction.DOWNLOAD -> item.downloadUrl?.let { url ->
+                StoreButton(R.string.store_download, { runCatching { uriHandler.openUri(url) } })
+            }
+        }
+        item.homepageUrl?.let { url ->
+            StoreButton(R.string.store_open_page, { runCatching { uriHandler.openUri(url) } }, outlined = true)
+        }
+    }
+}
+
+@Composable
+private fun StoreButton(label: Int, onClick: () -> Unit, enabled: Boolean = true, outlined: Boolean = false) {
+    if (outlined) {
+        OutlinedButton(onClick = onClick, enabled = enabled) { Text(stringRes(label), maxLines = 1) }
+    } else {
+        Button(onClick = onClick, enabled = enabled) { Text(stringRes(label), maxLines = 1) }
+    }
+}
+
+private enum class StoreMainAction { INSTALL_SERVER, REMOVE_SERVER, PLUGIN, DOWNLOAD }
+
+private fun storeMainAction(item: StoreItem, installed: Boolean, serverState: LspServerState?): StoreMainAction {
+    val isServer = serverState != null
+    val serverReady = installed && serverState != LspServerState.MISSING
+    return when {
+        isServer && item.isInstallablePlugin && !serverReady -> StoreMainAction.INSTALL_SERVER
+        isServer && installed -> StoreMainAction.REMOVE_SERVER
+        item.isInstallablePlugin -> StoreMainAction.PLUGIN
+        else -> StoreMainAction.DOWNLOAD
+    }
+}
+
+private fun pluginInstallLabel(installing: Boolean, installed: Boolean): Int = when {
+    installing -> R.string.store_installing
+    installed -> R.string.store_reinstall
+    else -> R.string.store_install
 }
 
 

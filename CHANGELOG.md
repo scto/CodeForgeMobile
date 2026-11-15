@@ -43,6 +43,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   unescaptes `}` – die JVM akzeptiert das (Tests grün), Androids ICU-Regex nicht. Jetzt `\}`, als Konstante.
 - Gleicher Fehler in `GradleBuildParser` (Abhängigkeits-Updates bei Versionen wie `${kotlinVersion}`).
 - CHANGELOG: doppelter, aus Commits erzeugter Abschnitt `[3.0.7]` entfernt.
+- Store: Karten installierter Plugins waren übermäßig hoch, „Entfernen“ brach um. Die drei Knöpfe standen in einer
+  festen Zeile; der letzte bekam keine Breite und sein Text brach zeichenweise um. Jetzt `FlowRow` (Umbruch in die
+  nächste Zeile) und einzeilige Knopftexte.
 
 ## [3.0.7] - 2026-11-15
 
