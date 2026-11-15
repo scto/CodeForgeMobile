@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.compose-bottomnav.template",
   "name": "Compose · Untere Navigationsleiste (Projektvorlage)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Projektvorlage: Jetpack Compose mit NavigationBar und drei Bildschirmen (Heute, Aufgaben, Profil); MVI mit StateFlow, Hilt, typsichere Navigation, Clean Architecture in mehreren Modulen.",

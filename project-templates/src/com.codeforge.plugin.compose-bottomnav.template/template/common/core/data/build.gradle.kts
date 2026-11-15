@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "{{packageName}}.core.data"
-    compileSdk = 35
+    compileSdk = 37
     defaultConfig { minSdk = {{minSdk}} }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

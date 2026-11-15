@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "{{packageName}}.feature.settings"
-    compileSdk = 35
+    compileSdk = 37
     defaultConfig { minSdk = {{minSdk}} }
     buildFeatures { compose = true }
     // Compose-Vorschau der IDE: Android-Ressourcen in Unit-Tests

@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.compose-drawer.template",
   "name": "Compose · Navigationsmenü (Drawer) (Projektvorlage)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Projektvorlage: Jetpack Compose mit ModalNavigationDrawer und drei Bildschirmen (Start, Notizen, Einstellungen); MVI mit StateFlow, Hilt, typsichere Navigation, Clean Architecture in mehreren Modulen.",

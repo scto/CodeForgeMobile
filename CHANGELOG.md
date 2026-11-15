@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Projektvorlagen)
+- „Compose · Navigationsmenü“ und „Compose · Untere Navigationsleiste“ 1.0.1: `compileSdk` 37 (Android 17); `targetSdk`
+  bleibt 35.
+
 ### Hinzugefügt (Projektvorlagen)
 - Vorlage „Compose · Navigationsmenü“ (`compose-drawer`): `ModalNavigationDrawer` mit drei Bildschirmen – Start,
   Notizen (Liste, Hinzufügen, Löschen) und Einstellungen (Hell/Dunkel, dynamische Farben).
