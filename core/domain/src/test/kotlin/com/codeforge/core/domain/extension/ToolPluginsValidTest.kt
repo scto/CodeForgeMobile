@@ -75,7 +75,7 @@ class ToolPluginsValidTest {
         val downloads = withRequires.filter { m -> m.contributes.requires.any { it.manager == RequirementManager.DOWNLOAD } }
         val servers = downloads.flatMap { it.contributes.lspServers }
         assertEquals(setOf("kotlin-language-server", "jdtls", "lemminx", "kmp-lsp"), servers.map { it.id }.toSet())
-        assertEquals(setOf("kotlin-language-server", "jdtls", "lemminx"), servers.filter { it.acceptsJvmOptions }.map { it.id }.toSet())
+        assertEquals(setOf("kotlin-language-server", "jdtls", "lemminx", "kmp-lsp"), servers.filter { it.acceptsJvmOptions }.map { it.id }.toSet())
         // Architektur-abhängige Downloads decken aarch64 und x86_64 ab.
         val kmp = downloads.single { m -> m.id.endsWith("kmp-lsp.lsp") }.contributes.requires
         assertEquals(setOf("aarch64", "x86_64"), kmp.mapNotNull { it.arch }.toSet())

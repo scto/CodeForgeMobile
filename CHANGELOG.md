@@ -11,6 +11,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (kmp-lsp: JVM-Optionen)
+- kmp-lsp (Plugin 1.0.1) zeigt in Einstellungen → Sprachserver die JVM-Optionen. kmp-lsp selbst ist nativ; sie gelten für den Java-Helfer `kmp-jar-indexer.jar` (Symbole aus Bibliotheken), den kmp-lsp per `java -jar` startet – übergeben über `JDK_JAVA_OPTIONS`. Vorgabe: `-Xmx384m -XX:+UseSerialGC -XX:-UsePerfData`.
+
 ### Behoben (Compose-Vorschau in Release-Builds)
 - „Failed resolution of: Landroidx/compose/runtime/Composer;“: R8 hatte Compose (und Kotlin-Stdlib/Coroutines/Lifecycle) im Release-Build umbenannt bzw. gekürzt; der Vorschau-Code des Nutzers linkt zur Laufzeit gegen genau diese Klassen der App. `feature/composepreview/consumer-rules.pro` behält jetzt `androidx.compose.{runtime,ui,foundation,animation,material3,material.ripple}`, die Standard-Symbole, `androidx.lifecycle`, `androidx.activity.compose`, `kotlin`, `kotlinx.coroutines` vollständig; erweiterte Symbole nur dem Namen nach (ungenutzte fehlen weiterhin). Die APK wird dadurch größer.
 - Vorschau-Fehler landen jetzt mit Stacktrace im App-Log (Tag `ComposePreview`). Dabei doppelte Hilt-Bindung von `CfmLogger` entfernt (`core:data` legte einen zweiten, ungesteuerten Datei-Logger an; maßgeblich ist `LoggingModule`/`CfmLogManager`).

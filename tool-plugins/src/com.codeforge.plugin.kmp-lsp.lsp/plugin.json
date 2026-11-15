@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.kmp-lsp.lsp",
   "name": "kmp-lsp (Kotlin/Java/Swift) (Language Server)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Bindet kmp-lsp (Kotlin/Java/Swift) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: Download kmp-lsp termux-1 von GitHub (aarch64/x86_64)).",
@@ -18,7 +18,10 @@
         ],
         "command": [
           "${deps}/kmp-lsp/kmp-lsp"
-        ]
+        ],
+        "env": {
+          "JDK_JAVA_OPTIONS": "${jvmArgs}"
+        }
       }
     ],
     "requires": [

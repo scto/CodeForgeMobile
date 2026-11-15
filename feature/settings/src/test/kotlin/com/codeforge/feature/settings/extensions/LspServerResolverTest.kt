@@ -116,4 +116,13 @@ class LspServerResolverTest {
         assertNull(resolver(repo, settings).resolve("css"))
         assertNull(resolver(repo, settings).resolve("json"))
     }
+
+    @Test
+    fun kmpLspPassesJvmToIndexer() = runBlocking {
+        File(tempFolder.root, "kmp-lsp").apply { mkdirs() }.resolve("kmp-lsp").writeText("bin")
+        val launch = resolver(toolPluginRepo("kmp-lsp")).resolve("kotlin")!!
+        assertEquals(1, launch.command.size)
+        val opts = launch.env.getValue("JDK_JAVA_OPTIONS")
+        assertTrue(opts, opts.contains("-Xmx384m") && opts.contains("-XX:+UseSerialGC"))
+    }
 }

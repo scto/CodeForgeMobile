@@ -62,7 +62,9 @@ LSP = [
     # Rust-Server (tree-sitter, ohne JVM/Gradle-Import); Alternative zu Kotlin LS/JDT LS – beide schaltet man in
     # Einstellungen → Sprachserver getrennt ab. Termux-Binary je Architektur aus dem Release termux-1 von scto/kmp-lsp.
     ("kmp-lsp", "kmp-lsp (Kotlin/Java/Swift)",
-     [("kmp-lsp", ["kotlin", "java", "swift"], ["${deps}/kmp-lsp/kmp-lsp"])],
+     # kmp-lsp startet für Bibliotheks-Symbole `java -jar kmp-jar-indexer.jar` (ohne eigene Optionen); der
+     # java-Launcher liest JDK_JAVA_OPTIONS – darüber kommen die JVM-Optionen aus den Einstellungen an.
+     [("kmp-lsp", ["kotlin", "java", "swift"], ["${deps}/kmp-lsp/kmp-lsp"], {"JDK_JAVA_OPTIONS": "${jvmArgs}"})],
      "Download kmp-lsp termux-1 von GitHub (aarch64/x86_64)"),
 ]
 
@@ -176,8 +178,12 @@ def dump(path, obj):
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+# Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
+VERSIONS = {"com.codeforge.plugin.kmp-lsp.lsp": "1.0.1"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer
+
+
 def manifest(pid, name, desc, contributes):
-    return {"id": pid, "name": name, "version": "1.0.0", "apiVersion": 2, "publisher": "codeforge",
+    return {"id": pid, "name": name, "version": VERSIONS.get(pid, "1.0.0"), "apiVersion": 2, "publisher": "codeforge",
             "description": desc, "permissions": [], "contributes": contributes}
 
 

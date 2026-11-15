@@ -54,7 +54,7 @@ data class LspServerSettings(
 /** Vorgaben und Schlüssel der Server-Einstellungen. */
 object LspServerDefaults {
     /** Server, die auf der JVM laufen und JVM-Optionen annehmen. */
-    val JVM_SERVERS: Set<String> = setOf("kotlin-language-server", "jdtls", "lemminx")
+    val JVM_SERVERS: Set<String> = setOf("kotlin-language-server", "jdtls", "lemminx", "kmp-lsp")
 
     /** Einstellungs-Schlüssel zu einer Server-ID (die drei Web-Server teilen sich ein Paket). */
     fun keyFor(serverId: String): String =
@@ -66,6 +66,8 @@ object LspServerDefaults {
         "kotlin-language-server" -> JvmOptions(extraFlags = "-XX:+UseSerialGC -XX:-UsePerfData")
         "jdtls" -> JvmOptions(extraFlags = "-XX:+UseSerialGC")
         "lemminx" -> JvmOptions(xmx = "256m", extraFlags = "-XX:+UseSerialGC")
+        // kmp-lsp selbst ist nativ; die Optionen gelten für seinen Java-Helfer kmp-jar-indexer.jar (Bibliotheks-Symbole).
+        "kmp-lsp" -> JvmOptions(xmx = "384m", extraFlags = "-XX:+UseSerialGC -XX:-UsePerfData")
         else -> null
     }
 }
