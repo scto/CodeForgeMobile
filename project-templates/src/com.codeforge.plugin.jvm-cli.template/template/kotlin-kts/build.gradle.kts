@@ -1,15 +1,6 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    application
+    // Kotlin/JVM, application, JUnit, detekt und ktlint – siehe build-logic
+    id("app.kotlin.application")
 }
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 
 application { mainClass.set("{{packageName}}.MainKt") }
-
-dependencies { testImplementation(libs.junit) }

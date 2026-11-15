@@ -6,6 +6,7 @@ import {{packageName}}.core.domain.usecase.AddNoteUseCase
 import {{packageName}}.core.domain.usecase.DeleteNoteUseCase
 import {{packageName}}.core.domain.usecase.ObserveNotesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** MVI: Liste aus dem Repository, Dialog-Eingabe als eigener Zustand. */
 @HiltViewModel

@@ -1,0 +1,21 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+indent_style = space
+indent_size = 4
+max_line_length = 140
+ktlint_code_style = android_studio
+# Composables heißen wie Typen (PascalCase)
+ktlint_function_naming_ignore_when_annotated_with = Composable
+ktlint_standard_filename = disabled
+# Die Paketnamen entstehen erst beim Anlegen des Projekts; ihre Sortierung wäre sonst vom gewählten Namen abhängig.
+ktlint_standard_import-ordering = disabled
+
+[*.{xml,json,toml,yml,yaml}]
+indent_size = 4

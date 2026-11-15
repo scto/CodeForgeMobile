@@ -2,13 +2,13 @@ package {{packageName}}.core.data
 
 import {{packageName}}.core.domain.model.Note
 import {{packageName}}.core.domain.repository.NoteRepository
+import java.util.concurrent.atomic.AtomicLong
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.util.concurrent.atomic.AtomicLong
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Hält die Notizen im Speicher; durch Room ersetzbar, ohne Domain und Oberfläche zu ändern. */
 @Singleton

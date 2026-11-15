@@ -26,7 +26,11 @@ class TasksViewModel @Inject constructor(
 ) : ViewModel() {
 
     // Eingaben, die nur diese Oberfläche betreffen.
-    private data class LocalState(val filter: TaskFilter = TaskFilter.ALL, val newTitle: String? = null, val showTitleError: Boolean = false)
+    private data class LocalState(
+        val filter: TaskFilter = TaskFilter.ALL,
+        val newTitle: String? = null,
+        val showTitleError: Boolean = false
+    )
 
     private val local = MutableStateFlow(LocalState())
 

@@ -1,0 +1,36 @@
+# Ergänzt die detekt-Standardregeln (buildUponDefaultConfig = true) um Ausnahmen für Jetpack Compose.
+complexity:
+  LongMethod:
+    # Compose-Layouts sind deklarativ lang.
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    allowedFunctionParameters: 6
+    ignoreDefaultParameters: true
+    # Bildschirme nehmen viele Callbacks, Hilt-Konstruktoren viele Abhängigkeiten.
+    ignoreAnnotated: ['Composable', 'Inject']
+  TooManyFunctions:
+    ignorePrivate: true
+    allowedFunctionsPerFile: 15
+
+naming:
+  MatchingDeclarationName:
+    # Dateien wie HomeContract.kt oder HomeNavigation.kt bündeln bewusst zusammengehörige Deklarationen.
+    active: false
+  FunctionNaming:
+    # @Composable-Funktionen heißen wie Typen (PascalCase).
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+
+style:
+  MagicNumber:
+    # dp-, sp- und Farbwerte in Compose sind Gestaltung, keine magischen Zahlen.
+    ignoreAnnotated: ['Composable', 'Preview']
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    excludes: ['**/test/**', '**/designsystem/**', '**/*.kts']
+  UnusedPrivateFunction:
+    # @Preview-Funktionen ruft nur die IDE auf.
+    ignoreAnnotated: ['Preview']
+  MaxLineLength:
+    maxLineLength: 140

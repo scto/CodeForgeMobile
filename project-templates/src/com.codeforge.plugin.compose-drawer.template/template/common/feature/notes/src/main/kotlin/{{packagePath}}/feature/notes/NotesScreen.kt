@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import {{packageName}}.core.domain.model.Note
+import {{packageName}}.core.resources.R
 
 /** Route: verbindet ViewModel und zustandslosen Bildschirm. */
 @Composable
@@ -106,7 +107,11 @@ private fun NoteDialog(draft: NoteDraft, onEvent: (NotesUiEvent) -> Unit) {
                     onValueChange = { onEvent(NotesUiEvent.TitleChanged(it)) },
                     label = { Text(stringResource(R.string.notes_title)) },
                     isError = draft.showTitleError,
-                    supportingText = if (draft.showTitleError) { { Text(stringResource(R.string.notes_title_missing)) } } else null,
+                    supportingText = if (draft.showTitleError) {
+                        { Text(stringResource(R.string.notes_title_missing)) }
+                    } else {
+                        null
+                    },
                     singleLine = true
                 )
                 OutlinedTextField(

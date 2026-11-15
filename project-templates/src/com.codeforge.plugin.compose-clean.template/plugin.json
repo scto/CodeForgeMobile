@@ -1,17 +1,17 @@
 {
   "id": "com.codeforge.plugin.compose-clean.template",
   "name": "Compose Clean Architecture (Projektvorlage)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Projektvorlage: Jetpack Compose, MVI mit StateFlow, Hilt und Clean Architecture in mehreren Modulen (:app, :core:domain, :core:data, :feature:home), Version Catalog.",
+  "description": "Projektvorlage: Jetpack Compose, MVI mit StateFlow, Hilt und Clean Architecture in mehreren Modulen (:app, :core:domain, :core:data, :feature:home), Version Catalog; build-logic mit Convention-Plugins, zentrales :core:resources (Texte Englisch/Deutsch), Hilt mit KSP, detekt und ktlint, compileSdk 37.",
   "permissions": [],
   "contributes": {
     "projectTemplates": [
       {
         "id": "compose-clean",
         "label": "Compose · Clean Architecture",
-        "description": "Mehrere Module (:app, :core:domain, :core:data, :feature:home), MVI, Hilt, Material 3",
+        "description": "Mehrere Module (:app, :core:domain, :core:data, :core:resources, :feature:home), MVI, Hilt, Material 3, build-logic, detekt, ktlint",
         "path": "template",
         "languages": [
           "kotlin"

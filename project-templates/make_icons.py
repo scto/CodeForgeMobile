@@ -89,8 +89,49 @@ def compose_bottomnav():
     save(img, "com.codeforge.plugin.compose-bottomnav.template")
 
 
+def compose_notes():
+    img, d = canvas()
+    box(d, 20, 16, 280, 168, (255, 236, 229, 255), 22)
+    phone(d)
+    # Verlaufs-Kopf (Violett → Pink, angenähert in Streifen)
+    for i in range(116):
+        t = i / 115
+        c = (int(127 + (228 - 127) * t), int(90 + (90 - 90) * t), int(240 + (201 - 240) * t), 255)
+        d.line([((102 + i) * SS, 18 * SS), ((102 + i) * SS, 52 * SS)], fill=c, width=SS)
+    box(d, 110, 40, 100, 10, (255, 255, 255, 200), 5)              # Suchfeld
+    tints = [(232, 221, 255, 255), (200, 242, 218, 255), (205, 229, 255, 255), (255, 241, 184, 255)]
+    heights = [44, 30, 30, 44]
+    for i, (c, h) in enumerate(zip(tints, heights)):
+        x = 108 + (i % 2) * 54
+        y = 60 + (0 if i < 2 else (heights[i - 2] + 6))
+        box(d, x, y, 50, h, c, 8)
+    box(d, 168, 156, 44, 18, (127, 90, 240, 255), 9)               # Knopf „Neue Notiz“
+    save(img, "com.codeforge.plugin.compose-notes.template")
+
+
+def compose_podcast():
+    img, d = canvas()
+    box(d, 20, 16, 280, 168, (255, 232, 214, 255), 22)
+    phone(d)
+    for i in range(116):                                          # Verlauf Orange → Gelb
+        t = i / 115
+        c = (255, int(107 + (179 - 107) * t), int(107 + (71 - 107) * t), 255)
+        d.line([((102 + i) * SS, 18 * SS), ((102 + i) * SS, 96 * SS)], fill=c, width=SS)
+    box(d, 130, 30, 60, 60, (255, 255, 255, 90), 12)               # Cover
+    d.polygon([(152 * SS, 48 * SS), (152 * SS, 72 * SS), (172 * SS, 60 * SS)], fill=(255, 255, 255, 255))  # Play
+    box(d, 112, 106, 96, 6, (73, 69, 79, 255), 3)                  # Fortschritt
+    box(d, 112, 106, 52, 6, (255, 107, 107, 255), 3)
+    for x in (126, 194):
+        d.ellipse([(x - 7) * SS, 122 * SS, (x + 7) * SS, 136 * SS], fill=(73, 69, 79, 255))
+    d.ellipse([146 * SS, 116 * SS, 174 * SS, 144 * SS], fill=(255, 107, 107, 255))
+    box(d, 102, 154, 116, 28, (243, 237, 247, 255), 14)            # Mini-Player/Leiste
+    save(img, "com.codeforge.plugin.compose-podcast.template")
+
+
 if __name__ == "__main__":
     compose_clean()
     jvm_cli()
     compose_drawer()
     compose_bottomnav()
+    compose_notes()
+    compose_podcast()

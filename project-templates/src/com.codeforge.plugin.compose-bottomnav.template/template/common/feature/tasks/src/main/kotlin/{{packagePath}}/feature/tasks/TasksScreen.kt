@@ -1,5 +1,6 @@
 package {{packageName}}.feature.tasks
 
+import {{packageName}}.core.resources.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -111,7 +112,11 @@ private fun NewTaskDialog(title: String, showError: Boolean, onEvent: (TasksUiEv
                 onValueChange = { onEvent(TasksUiEvent.TitleChanged(it)) },
                 label = { Text(stringResource(R.string.tasks_title)) },
                 isError = showError,
-                supportingText = if (showError) { { Text(stringResource(R.string.tasks_title_missing)) } } else null,
+                supportingText = if (showError) {
+                    { Text(stringResource(R.string.tasks_title_missing)) }
+                } else {
+                    null
+                },
                 singleLine = true
             )
         },

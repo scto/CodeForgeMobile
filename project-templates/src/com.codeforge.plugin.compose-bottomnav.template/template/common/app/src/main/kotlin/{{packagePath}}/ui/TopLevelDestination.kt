@@ -6,7 +6,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.graphics.vector.ImageVector
-import {{packageName}}.R
+import {{packageName}}.core.resources.R
 import {{packageName}}.feature.profile.ProfileDestination
 import {{packageName}}.feature.tasks.TasksDestination
 import {{packageName}}.feature.today.TodayDestination

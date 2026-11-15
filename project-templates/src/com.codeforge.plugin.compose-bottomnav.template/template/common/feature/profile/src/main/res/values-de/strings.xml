@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="profile_name">Name</string>
-    <string name="profile_goal">Tagesziel: %1$d Aufgaben</string>
-    <string name="profile_stat_total">Gesamt</string>
-    <string name="profile_stat_done">Erledigt</string>
-    <string name="profile_stat_open">Offen</string>
-</resources>

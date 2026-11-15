@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="common_back">Zurück</string>
+    <string name="nav_discover">Entdecken</string>
+    <string name="nav_library">Bibliothek</string>
+    <string name="nav_settings">Einstellungen</string>
+    <string name="discover_title">Entdecken</string>
+    <string name="discover_greeting_morning">Guten Morgen ☀️</string>
+    <string name="discover_greeting_day">Guten Tag 🎧</string>
+    <string name="discover_greeting_evening">Guten Abend 🌙</string>
+    <string name="discover_continue">Weiterhören</string>
+    <string name="discover_all">Alle</string>
+    <string name="discover_featured">Empfehlung</string>
+    <string name="discover_listen">Jetzt hören</string>
+    <string name="discover_trending">Im Trend</string>
+    <string name="discover_new_episodes">Neue Folgen</string>
+    <string name="discover_episode_meta">%1$s · %2$d Min.</string>
+    <string name="category_tech">Technik</string>
+    <string name="category_science">Wissen</string>
+    <string name="category_culture">Kultur</string>
+    <string name="category_news">Nachrichten</string>
+    <string name="category_comedy">Comedy</string>
+    <string name="library_title">Bibliothek</string>
+    <plurals name="library_count">
+        <item quantity="one">%d Abo</item>
+        <item quantity="other">%d Abos</item>
+    </plurals>
+    <string name="library_empty_title">Noch leer</string>
+    <string name="library_empty_text">Abonniere Podcasts unter „Entdecken“, dann erscheinen sie hier.</string>
+    <string name="podcast_subscribe">Abonnieren</string>
+    <string name="podcast_subscribed">Abonniert</string>
+    <string name="podcast_episodes">Folgen</string>
+    <string name="podcast_episode_meta">%1$s · %2$d Min.</string>
+    <plurals name="podcast_days_ago">
+        <item quantity="one">gestern</item>
+        <item quantity="other">vor %d Tagen</item>
+    </plurals>
+    <string name="player_play">Abspielen</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_close">Player schließen</string>
+    <string name="player_nothing">Es läuft gerade nichts</string>
+    <string name="player_back">%1$d Sekunden zurück</string>
+    <string name="player_forward">%1$d Sekunden vor</string>
+    <string name="player_speed">%1$s×</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_subtitle">Mach sie zu deiner App</string>
+    <string name="settings_appearance">Darstellung</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Hell</string>
+    <string name="settings_theme_dark">Dunkel</string>
+    <string name="settings_accent">Akzentfarbe</string>
+    <string name="settings_playback">Wiedergabe</string>
+    <string name="settings_speed">Standardtempo</string>
+    <string name="settings_speed_text">Gilt für neu gestartete Folgen</string>
+    <string name="settings_about">Info</string>
+    <string name="settings_version">Version %1$s</string>
+</resources>

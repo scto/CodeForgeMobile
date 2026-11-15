@@ -6,7 +6,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
-import {{packageName}}.R
+import {{packageName}}.core.resources.R
 import {{packageName}}.feature.home.HomeDestination
 import {{packageName}}.feature.notes.NotesDestination
 import {{packageName}}.feature.settings.SettingsDestination

@@ -3,12 +3,12 @@ package {{packageName}}.core.data
 import {{packageName}}.core.domain.model.AppSettings
 import {{packageName}}.core.domain.model.ThemeMode
 import {{packageName}}.core.domain.repository.SettingsRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Einstellungen im Speicher; für Dauerhaftigkeit durch DataStore ersetzen. */
 @Singleton

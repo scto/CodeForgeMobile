@@ -5,10 +5,10 @@ import {{packageName}}.core.domain.model.ThemeMode
 import {{packageName}}.core.domain.repository.SettingsRepository
 import {{packageName}}.core.domain.usecase.ObserveSettingsUseCase
 import {{packageName}}.core.domain.usecase.UpdateSettingsUseCase
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain

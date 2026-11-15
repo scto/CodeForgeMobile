@@ -4,7 +4,4 @@ package {{packageName}}.core.domain.model
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 /** Einstellungen der App. */
-data class AppSettings(
-    val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val dynamicColor: Boolean = true
-)
+data class AppSettings(val themeMode: ThemeMode = ThemeMode.SYSTEM, val dynamicColor: Boolean = true)

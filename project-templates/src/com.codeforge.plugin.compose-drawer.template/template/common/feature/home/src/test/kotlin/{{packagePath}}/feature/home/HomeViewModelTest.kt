@@ -3,9 +3,9 @@ package {{packageName}}.feature.home
 import {{packageName}}.core.domain.model.Note
 import {{packageName}}.core.domain.repository.NoteRepository
 import {{packageName}}.core.domain.usecase.ObserveNotesUseCase
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain

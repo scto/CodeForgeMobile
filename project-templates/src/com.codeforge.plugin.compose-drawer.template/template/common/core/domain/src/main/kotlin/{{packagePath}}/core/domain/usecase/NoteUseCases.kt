@@ -2,8 +2,8 @@ package {{packageName}}.core.domain.usecase
 
 import {{packageName}}.core.domain.model.Note
 import {{packageName}}.core.domain.repository.NoteRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /** Liefert alle Notizen, neueste zuerst. */
 class ObserveNotesUseCase @Inject constructor(private val repository: NoteRepository) {

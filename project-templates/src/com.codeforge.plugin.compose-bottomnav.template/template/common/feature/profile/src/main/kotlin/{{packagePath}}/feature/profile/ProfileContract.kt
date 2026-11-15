@@ -6,10 +6,7 @@ import {{packageName}}.core.domain.model.TaskStats
 
 /** Zustand des Profils. */
 @Immutable
-data class ProfileUiState(
-    val profile: Profile = Profile(),
-    val stats: TaskStats = TaskStats(0, 0)
-)
+data class ProfileUiState(val profile: Profile = Profile(), val stats: TaskStats = TaskStats(0, 0))
 
 /** Aktionen des Nutzers. */
 sealed interface ProfileUiEvent {

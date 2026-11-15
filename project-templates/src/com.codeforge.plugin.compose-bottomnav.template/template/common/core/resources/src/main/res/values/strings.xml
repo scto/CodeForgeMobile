@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">{{projectName}}</string>
+    <string name="nav_today">Today</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_profile">Profile</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_goal">Daily goal: %1$d tasks</string>
+    <string name="profile_stat_total">Total</string>
+    <string name="profile_stat_done">Done</string>
+    <string name="profile_stat_open">Open</string>
+    <string name="tasks_filter_all">All</string>
+    <string name="tasks_filter_open">Open</string>
+    <string name="tasks_filter_done">Done</string>
+    <string name="tasks_empty">No tasks here.</string>
+    <string name="tasks_add">Add task</string>
+    <string name="tasks_delete">Delete task</string>
+    <string name="tasks_new">New task</string>
+    <string name="tasks_title">Title</string>
+    <string name="tasks_title_missing">Please enter a title</string>
+    <string name="tasks_save">Save</string>
+    <string name="tasks_cancel">Cancel</string>
+    <string name="today_hello">Hello!</string>
+    <string name="today_hello_name">Hello, %1$s!</string>
+    <string name="today_next">Up next</string>
+    <string name="today_all_done">Everything done. Well done!</string>
+    <string name="today_open_tasks">All tasks</string>
+    <string name="today_done_of">%1$d of %2$d done</string>
+    <string name="today_goal">Daily goal: %1$d</string>
+    <string name="today_goal_reached">Goal reached</string>
+</resources>

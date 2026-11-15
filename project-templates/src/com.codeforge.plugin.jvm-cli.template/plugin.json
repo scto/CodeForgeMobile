@@ -1,10 +1,10 @@
 {
   "id": "com.codeforge.plugin.jvm-cli.template",
   "name": "Konsolenprogramm JVM (Projektvorlage)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Projektvorlage: Konsolenprogramm für die JVM in Kotlin oder Java, Gradle mit Kotlin- oder Groovy-DSL, application-Plugin und JUnit-Test.",
+  "description": "Projektvorlage: Konsolenprogramm für die JVM in Kotlin oder Java, Gradle mit Kotlin- oder Groovy-DSL, application-Plugin und JUnit-Test; build-logic mit Convention-Plugins, bei Kotlin zusätzlich detekt und ktlint.",
   "permissions": [],
   "contributes": {
     "projectTemplates": [

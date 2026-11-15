@@ -1,3 +1,12 @@
+pluginManagement {
+    // Convention-Plugins (Build-Konfiguration an einer Stelle)
+    includeBuild("build-logic")
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = "{{projectName}}"
 
 dependencyResolutionManagement {

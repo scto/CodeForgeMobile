@@ -1,5 +1,6 @@
 package {{packageName}}.feature.home
 
+import {{packageName}}.core.resources.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,13 +38,11 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeUiEvent) -> Unit, modifier: Mod
             CircularProgressIndicator()
         } else {
             Text(state.greeting, style = MaterialTheme.typography.headlineMedium)
-            Text(stringCount(state.count), style = MaterialTheme.typography.bodyLarge)
-            Button(onClick = { onEvent(HomeUiEvent.IncrementClicked) }) { Text("+1") }
+            Text(stringResource(R.string.home_count, state.count), style = MaterialTheme.typography.bodyLarge)
+            Button(onClick = { onEvent(HomeUiEvent.IncrementClicked) }) { Text(stringResource(R.string.home_increment)) }
         }
     }
 }
-
-private fun stringCount(count: Int): String = "Zähler: $count"
 
 @Preview(showBackground = true)
 @Composable

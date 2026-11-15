@@ -1,9 +1,17 @@
 [versions]
 kotlin = "2.3.21"
 junit = "4.13.2"
+detekt = "2.0.0-alpha.6"
+ktlint-gradle = "14.2.0"
+ktlint = "1.8.0"
 
 [libraries]
 junit = { module = "junit:junit", version.ref = "junit" }
+
+# Gradle-Plugins für build-logic
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+ktlint-gradlePlugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint-gradle" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

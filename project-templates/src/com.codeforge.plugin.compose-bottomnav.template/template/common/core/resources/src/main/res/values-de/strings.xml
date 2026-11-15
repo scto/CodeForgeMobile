@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_today">Heute</string>
+    <string name="nav_tasks">Aufgaben</string>
+    <string name="nav_profile">Profil</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_goal">Tagesziel: %1$d Aufgaben</string>
+    <string name="profile_stat_total">Gesamt</string>
+    <string name="profile_stat_done">Erledigt</string>
+    <string name="profile_stat_open">Offen</string>
+    <string name="tasks_filter_all">Alle</string>
+    <string name="tasks_filter_open">Offen</string>
+    <string name="tasks_filter_done">Erledigt</string>
+    <string name="tasks_empty">Hier gibt es keine Aufgaben.</string>
+    <string name="tasks_add">Aufgabe hinzufügen</string>
+    <string name="tasks_delete">Aufgabe löschen</string>
+    <string name="tasks_new">Neue Aufgabe</string>
+    <string name="tasks_title">Titel</string>
+    <string name="tasks_title_missing">Bitte einen Titel eingeben</string>
+    <string name="tasks_save">Speichern</string>
+    <string name="tasks_cancel">Abbrechen</string>
+    <string name="today_hello">Hallo!</string>
+    <string name="today_hello_name">Hallo, %1$s!</string>
+    <string name="today_next">Als Nächstes</string>
+    <string name="today_all_done">Alles erledigt. Gut gemacht!</string>
+    <string name="today_open_tasks">Alle Aufgaben</string>
+    <string name="today_done_of">%1$d von %2$d erledigt</string>
+    <string name="today_goal">Tagesziel: %1$d</string>
+    <string name="today_goal_reached">Ziel erreicht</string>
+</resources>

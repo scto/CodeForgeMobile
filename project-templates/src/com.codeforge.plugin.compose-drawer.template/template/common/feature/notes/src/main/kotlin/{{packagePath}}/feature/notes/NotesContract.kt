@@ -9,10 +9,7 @@ data class NoteDraft(val title: String = "", val body: String = "", val showTitl
 
 /** Zustand der Notizliste; [draft] ist `null`, solange der Dialog zu ist. */
 @Immutable
-data class NotesUiState(
-    val notes: List<Note> = emptyList(),
-    val draft: NoteDraft? = null
-)
+data class NotesUiState(val notes: List<Note> = emptyList(), val draft: NoteDraft? = null)
 
 /** Aktionen des Nutzers. */
 sealed interface NotesUiEvent {

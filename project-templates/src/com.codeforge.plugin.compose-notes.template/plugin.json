@@ -1,0 +1,27 @@
+{
+  "id": "com.codeforge.plugin.compose-notes.template",
+  "name": "Compose · Notizen-App (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage: Notizen-App mit eigenem Designsystem (:core:designsystem – Theme hell/dunkel, Akzentfarben, Formen, Verläufe, Komponenten), Übersicht mit Suche und Raster, Editor mit Notizfarben, Einstellungen; Clean Architecture, MVI, typsichere Navigation; build-logic mit Convention-Plugins, zentrales :core:resources (Texte Englisch/Deutsch), Hilt mit KSP, detekt und ktlint, compileSdk 37.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "compose-notes",
+        "label": "Compose · Notizen-App (Designsystem)",
+        "description": "Verlaufs-Kopf mit Suche, Notizkarten im Raster, Editor mit Farben und Anheften, Einstellungen mit Theme-Vorschau und Akzentfarben",
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "minSdk": 24,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

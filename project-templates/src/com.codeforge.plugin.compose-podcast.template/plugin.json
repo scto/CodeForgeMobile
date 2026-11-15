@@ -1,0 +1,27 @@
+{
+  "id": "com.codeforge.plugin.compose-podcast.template",
+  "name": "Compose · Podcast-App (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage: Podcast-App mit eigenem Designsystem (:core:designsystem – Theme hell/dunkel, Akzentfarben, Formen, Verläufe, Komponenten, eigene Symbole), Entdecken, Bibliothek, Podcast-Seite, Vollbild- und Mini-Player (simulierte Wiedergabe), Einstellungen; Clean Architecture, MVI, typsichere Navigation; build-logic mit Convention-Plugins, zentrales :core:resources (Texte Englisch/Deutsch), Hilt mit KSP, detekt und ktlint, compileSdk 37.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "compose-podcast",
+        "label": "Compose · Podcast-App (Designsystem)",
+        "description": "Entdecken mit Kategorien und Trends, Bibliothek, Podcast-Seite, Player mit animiertem Cover und Mini-Player, Einstellungen",
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "minSdk": 24,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

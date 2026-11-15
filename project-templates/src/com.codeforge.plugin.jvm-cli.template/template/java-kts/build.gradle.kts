@@ -1,12 +1,6 @@
 plugins {
-    application
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    // Java 17, application und JUnit – siehe build-logic
+    id("app.java.application")
 }
 
 application { mainClass.set("{{packageName}}.Main") }
-
-dependencies { testImplementation(libs.junit) }

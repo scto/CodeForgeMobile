@@ -24,7 +24,9 @@ fun AppTheme(themeMode: ThemeMode, dynamicColor: Boolean, content: @Composable (
             val context = LocalContext.current
             if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         dark -> darkColorScheme()
+
         else -> lightColorScheme()
     }
     MaterialTheme(colorScheme = colors, content = content)

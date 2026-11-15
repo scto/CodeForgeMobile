@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">{{projectName}}</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_notes">Notes</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_open_menu">Open menu</string>
+    <string name="home_welcome">Welcome!</string>
+    <string name="home_welcome_text">Open the menu at the top left or swipe in from the left edge.</string>
+    <string name="home_latest">Latest</string>
+    <string name="home_open_notes">Open notes</string>
+    <plurals name="home_note_count">
+        <item quantity="one">%d note</item>
+        <item quantity="other">%d notes</item>
+    </plurals>
+    <string name="notes_empty">No notes yet. Tap + to add one.</string>
+    <string name="notes_add">Add note</string>
+    <string name="notes_delete">Delete note</string>
+    <string name="notes_new">New note</string>
+    <string name="notes_title">Title</string>
+    <string name="notes_title_missing">Please enter a title</string>
+    <string name="notes_body">Text</string>
+    <string name="notes_save">Save</string>
+    <string name="notes_cancel">Cancel</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Dynamic colors</string>
+    <string name="settings_dynamic_color_text">Colors from your wallpaper</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version</string>
+</resources>

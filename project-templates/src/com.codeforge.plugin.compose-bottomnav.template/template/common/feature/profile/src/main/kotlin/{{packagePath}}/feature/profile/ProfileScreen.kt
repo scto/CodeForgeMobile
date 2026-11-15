@@ -1,5 +1,6 @@
 package {{packageName}}.feature.profile
 
+import {{packageName}}.core.resources.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,7 +54,12 @@ fun ProfileScreen(state: ProfileUiState, onEvent: (ProfileUiEvent) -> Unit, modi
             Modifier.size(96.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(56.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            Icon(
+                Icons.Filled.Person,
+                contentDescription = null,
+                modifier = Modifier.size(56.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
         OutlinedTextField(
             value = state.profile.name,

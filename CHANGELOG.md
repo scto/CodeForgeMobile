@@ -12,10 +12,21 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Geändert (Projektvorlagen)
-- „Compose · Navigationsmenü“ und „Compose · Untere Navigationsleiste“ 1.0.1: `compileSdk` 37 (Android 17); `targetSdk`
-  bleibt 35.
+- Alle Compose-Vorlagen (`compose-clean`, `compose-drawer`, `compose-bottomnav`) 1.1.0: `build-logic` mit
+  Convention-Plugins (`app.android.application`, `app.android.library`, `app.android.library.compose`,
+  `app.android.feature`, `app.android.hilt`, `app.jvm.library`, `app.quality`), Hilt über KSP, detekt 2.0 und ktlint
+  (`./gradlew detekt ktlintCheck`), alle Texte und Themes zentral in `:core:resources`, `compileSdk` 37 (Android 17);
+  `targetSdk` bleibt 35.
+- „Kotlin/Java · Konsole“ (`jvm-cli`) 1.1.0: `build-logic` mit Convention-Plugin; bei Kotlin zusätzlich detekt und
+  ktlint.
 
 ### Hinzugefügt (Projektvorlagen)
+- Vorlage „Compose · Notizen-App“ (`compose-notes`): eigenes Designsystem in `:core:designsystem` (Theme hell/dunkel,
+  vier Akzentfarben, Formen, Verläufe, Komponenten), Übersicht mit Suche und Raster, Editor mit Notizfarben und
+  Anheften, Einstellungen mit Theme-Vorschau.
+- Vorlage „Compose · Podcast-App“ (`compose-podcast`): gleiches Designsystem plus eigene Symbole; Entdecken (Kategorien,
+  Empfehlung, Trends), Bibliothek, Podcast-Seite mit Abo, Vollbild-Player mit animiertem Cover und Mini-Player
+  (simulierte Wiedergabe), Einstellungen inkl. Standardtempo.
 - Vorlage „Compose · Navigationsmenü“ (`compose-drawer`): `ModalNavigationDrawer` mit drei Bildschirmen – Start,
   Notizen (Liste, Hinzufügen, Löschen) und Einstellungen (Hell/Dunkel, dynamische Farben).
 - Vorlage „Compose · Untere Navigationsleiste“ (`compose-bottomnav`): `NavigationBar` mit Heute (Fortschritt,

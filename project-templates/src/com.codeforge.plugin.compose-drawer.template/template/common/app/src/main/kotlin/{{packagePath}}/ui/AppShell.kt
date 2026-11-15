@@ -32,7 +32,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import {{packageName}}.R
+import {{packageName}}.core.resources.R
 import {{packageName}}.feature.home.HomeDestination
 import {{packageName}}.feature.home.homeScreen
 import {{packageName}}.feature.notes.notesScreen

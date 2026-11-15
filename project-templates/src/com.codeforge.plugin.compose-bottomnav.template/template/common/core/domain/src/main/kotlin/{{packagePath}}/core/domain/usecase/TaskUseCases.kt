@@ -14,8 +14,7 @@ class ObserveTasksUseCase @Inject constructor(private val repository: TaskReposi
 
 /** Liefert den Fortschritt (erledigt/gesamt). */
 class ObserveTaskStatsUseCase @Inject constructor(private val repository: TaskRepository) {
-    operator fun invoke(): Flow<TaskStats> =
-        repository.tasks.map { tasks -> TaskStats(total = tasks.size, done = tasks.count { it.done }) }
+    operator fun invoke(): Flow<TaskStats> = repository.tasks.map { tasks -> TaskStats(total = tasks.size, done = tasks.count { it.done }) }
 }
 
 /** Legt eine Aufgabe an; ein leerer Titel wird abgelehnt. */

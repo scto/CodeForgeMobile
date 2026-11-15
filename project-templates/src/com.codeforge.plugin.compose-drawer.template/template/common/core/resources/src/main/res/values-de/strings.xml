@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">Start</string>
+    <string name="nav_notes">Notizen</string>
+    <string name="nav_settings">Einstellungen</string>
+    <string name="nav_open_menu">Menü öffnen</string>
+    <string name="home_welcome">Willkommen!</string>
+    <string name="home_welcome_text">Öffne das Menü oben links oder wische vom linken Rand herein.</string>
+    <string name="home_latest">Neueste</string>
+    <string name="home_open_notes">Notizen öffnen</string>
+    <plurals name="home_note_count">
+        <item quantity="one">%d Notiz</item>
+        <item quantity="other">%d Notizen</item>
+    </plurals>
+    <string name="notes_empty">Noch keine Notizen. Tippe auf +, um eine anzulegen.</string>
+    <string name="notes_add">Notiz hinzufügen</string>
+    <string name="notes_delete">Notiz löschen</string>
+    <string name="notes_new">Neue Notiz</string>
+    <string name="notes_title">Titel</string>
+    <string name="notes_title_missing">Bitte einen Titel eingeben</string>
+    <string name="notes_body">Text</string>
+    <string name="notes_save">Speichern</string>
+    <string name="notes_cancel">Abbrechen</string>
+    <string name="settings_appearance">Darstellung</string>
+    <string name="settings_theme_system">Wie das System</string>
+    <string name="settings_theme_light">Hell</string>
+    <string name="settings_theme_dark">Dunkel</string>
+    <string name="settings_dynamic_color">Dynamische Farben</string>
+    <string name="settings_dynamic_color_text">Farben aus dem Hintergrundbild</string>
+    <string name="settings_about">Info</string>
+    <string name="settings_version">Version</string>
+</resources>

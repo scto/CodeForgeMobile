@@ -14,10 +14,8 @@ import javax.inject.Inject
 
 /** MVI: Zustand als StateFlow, Aktionen über [onEvent]. */
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    observeGreeting: ObserveGreetingUseCase,
-    private val incrementGreeting: IncrementGreetingUseCase
-) : ViewModel() {
+class HomeViewModel @Inject constructor(observeGreeting: ObserveGreetingUseCase, private val incrementGreeting: IncrementGreetingUseCase) :
+    ViewModel() {
 
     val uiState: StateFlow<HomeUiState> = observeGreeting()
         .map { HomeUiState(greeting = it.text, count = it.count, isLoading = false) }

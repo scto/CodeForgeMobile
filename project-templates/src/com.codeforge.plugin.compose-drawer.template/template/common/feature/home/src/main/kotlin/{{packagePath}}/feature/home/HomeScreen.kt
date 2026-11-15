@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import {{packageName}}.core.resources.R
 
 /** Route: verbindet ViewModel und zustandslosen Bildschirm. */
 @Composable

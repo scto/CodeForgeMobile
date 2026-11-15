@@ -3,8 +3,8 @@ package {{packageName}}.core.domain.usecase
 import {{packageName}}.core.domain.model.AppSettings
 import {{packageName}}.core.domain.model.ThemeMode
 import {{packageName}}.core.domain.repository.SettingsRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 /** Liefert die Einstellungen. */
 class ObserveSettingsUseCase @Inject constructor(private val repository: SettingsRepository) {
