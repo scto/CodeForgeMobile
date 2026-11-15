@@ -1884,6 +1884,40 @@
       "sha256": "aaad64ffcdcb76550d278be9d9f8004d6731de01dd2158b16d537787d0299ca3"
     },
     {
+      "id": "com.codeforge.plugin.compose-bottomnav.template",
+      "category": "template",
+      "name": {
+        "de": "Compose · Untere Navigationsleiste (Projektvorlage)",
+        "en": "Compose · Bottom navigation (project template)"
+      },
+      "summary": {
+        "de": "Jetpack Compose mit NavigationBar und drei Bildschirmen: Heute (Fortschritt, Tagesziel), Aufgaben (Filter, Abhaken, Hinzufügen) und Profil. Abzeichen mit offenen Aufgaben. MVI, Hilt, typsichere Navigation, mehrere Module.",
+        "en": "Jetpack Compose with a NavigationBar and three screens: today (progress, daily goal), tasks (filter, check off, add) and profile. Badge with open tasks. MVI, Hilt, type-safe navigation, multi-module."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.compose-bottomnav.template.zip",
+      "sha256": "de1c35f914b987a1c834decf5df05c2c53893d562c4335ae2734f19c48735bb7"
+    },
+    {
+      "id": "com.codeforge.plugin.compose-drawer.template",
+      "category": "template",
+      "name": {
+        "de": "Compose · Navigationsmenü (Projektvorlage)",
+        "en": "Compose · Navigation drawer (project template)"
+      },
+      "summary": {
+        "de": "Jetpack Compose mit ModalNavigationDrawer und drei Bildschirmen: Start, Notizen (Liste, Hinzufügen, Löschen) und Einstellungen (Hell/Dunkel, dynamische Farben). MVI, Hilt, typsichere Navigation, mehrere Module.",
+        "en": "Jetpack Compose with a ModalNavigationDrawer and three screens: home, notes (list, add, delete) and settings (light/dark, dynamic colors). MVI, Hilt, type-safe navigation, multi-module."
+      },
+      "version": "1.0.0",
+      "author": "codeforge",
+      "homepage": "https://github.com/scto/CodeForgeMobile",
+      "downloadUrl": "https://scto.github.io/codeforge-store/packages/com.codeforge.plugin.compose-drawer.template.zip",
+      "sha256": "bd9d2b3db3e6e950dbfb1e54a0549ebfbe26bdc5892c33054cb37615e985c62a"
+    },
+    {
       "id": "com.codeforge.plugin.jvm-cli.template",
       "category": "template",
       "name": {
