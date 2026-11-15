@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Build)
+- `gradle.properties`: Locale (en_US) und UTF-8 jetzt über `org.gradle.jvmargs` statt `systemProp.*`, wo sie keine
+  Wirkung hatten; der Gradle-Daemon beendet sich nach 30 statt 180 Minuten Leerlauf.
+
 ## [3.1.2] - 2026-11-15
 
 ### Hinzugefügt
