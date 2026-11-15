@@ -186,6 +186,46 @@ interface RunTask {
     }
 }
 
+/**
+ * Seit API 3: Stelle in einer Datei. Zeilen und Spalten zählen ab 0 (wie im LSP); das Ende ist exklusiv und
+ * darf fehlen (dann = Anfang).
+ */
+data class PluginLocation(
+    /** Absoluter Pfad der Datei. */
+    val filePath: String,
+    val line: Int,
+    val column: Int,
+    val endLine: Int = line,
+    val endColumn: Int = column
+)
+
+/** Seit API 3: eine Textänderung in einer (auch nicht geöffneten) Datei; ersetzt den Bereich [range] durch [newText]. */
+data class PluginFileEdit(val range: PluginLocation, val newText: String)
+
+/**
+ * Seit API 3: „Gehe zur Definition“ für Sprachen ohne Sprachserver. Wird gefragt, wenn kein Server eine Definition
+ * liefert; [EditorContext.cursorOffset] ist die Stelle des Symbols. Leere Liste = nichts gefunden.
+ */
+fun interface DefinitionProvider {
+    /** Definitionen des Symbols am Cursor. */
+    suspend fun definition(context: EditorContext): List<PluginLocation>
+}
+
+/** Seit API 3: „Verwendungen suchen“ für Sprachen ohne Sprachserver (siehe [DefinitionProvider]). */
+fun interface ReferenceProvider {
+    /** Verwendungen des Symbols am Cursor. */
+    suspend fun references(context: EditorContext): List<PluginLocation>
+}
+
+/**
+ * Seit API 3: „Umbenennen“ für Sprachen ohne Sprachserver. Die App zeigt die Änderungen als Vorschau und wendet
+ * sie erst nach Bestätigung an (mit Rückgängig).
+ */
+fun interface RenameProvider {
+    /** Änderungen, die das Symbol am Cursor in [newName] umbenennen; `null`, wenn nicht zuständig. */
+    suspend fun rename(context: EditorContext, newName: String): List<PluginFileEdit>?
+}
+
 /** Seit API 3: weitere Andockstellen für Sprachen und Ausführen. */
 object PluginLanguagePoints {
     /** Zusätzliche Vervollständigung. Berechtigung `editor`. */
@@ -193,6 +233,15 @@ object PluginLanguagePoints {
 
     /** Hover-Texte. Berechtigung `editor`. */
     val HOVER_PROVIDER: ExtensionPoint<HoverProvider> = ExtensionPoint("editor.hoverProvider", PluginPermissions.EDITOR)
+
+    /** Definitionen, wenn kein Sprachserver antwortet. Berechtigung `editor`. */
+    val DEFINITION_PROVIDER: ExtensionPoint<DefinitionProvider> = ExtensionPoint("editor.definitionProvider", PluginPermissions.EDITOR)
+
+    /** Verwendungen, wenn kein Sprachserver antwortet. Berechtigung `editor`. */
+    val REFERENCE_PROVIDER: ExtensionPoint<ReferenceProvider> = ExtensionPoint("editor.referenceProvider", PluginPermissions.EDITOR)
+
+    /** Umbenennen, wenn kein Sprachserver antwortet. Berechtigung `editor`. */
+    val RENAME_PROVIDER: ExtensionPoint<RenameProvider> = ExtensionPoint("editor.renameProvider", PluginPermissions.EDITOR)
 
     /** Ausführen- und Test-Einträge. Berechtigung `run`. */
     val RUN_TASK: ExtensionPoint<RunTask> = ExtensionPoint("run.task", PluginPermissions.RUN)

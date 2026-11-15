@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugin-API 3: Navigation und Umbenennen ohne Sprachserver)
+- Neue Andockstellen `DEFINITION_PROVIDER`, `REFERENCE_PROVIDER` und `RENAME_PROVIDER`: Plugins beantworten „Gehe zur
+  Definition“, „Verwendungen suchen“ und „Umbenennen“, wenn kein Sprachserver ein Ergebnis liefert. Umbenennen nutzt
+  dieselbe Vorschau mit Rückgängig.
+
 ### Hinzugefügt (Plugin-API 3: Fortschritt, Rückfragen, Benachrichtigungen)
 - `context.feedback()`: `withProgress` (Leiste über allen Bildschirmen), `confirm` und `choose` (Dialoge, das Plugin
   wartet auf die Antwort) sowie `notify` (Systembenachrichtigung, neue Berechtigung `notifications`).

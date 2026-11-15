@@ -39,6 +39,9 @@ import com.codeforge.feature.editor.palette.buildPaletteItems
 import com.codeforge.feature.editor.palette.codeActionKindRank
 import com.codeforge.feature.editor.plugin.BuiltInEditorActions
 import com.codeforge.feature.editor.plugin.PluginEditorBridge
+import com.codeforge.feature.editor.plugin.definitions
+import com.codeforge.feature.editor.plugin.references
+import com.codeforge.feature.editor.plugin.rename
 import com.codeforge.libs.plugin_api.EditorContext
 import com.codeforge.libs.plugin_api.EditorEffect
 import com.codeforge.libs.plugin_api.PluginDiagnostic
@@ -1537,29 +1540,31 @@ class EditorViewModel @Inject constructor(
         val state = _uiState.value.renameDialog ?: return@launch
         if (state.newName.isBlank() || state.newName == state.currentName) return@launch
 
-        lspClient.requestRename(state.path, state.position, state.newName)
-            .onSuccess { edit ->
-                if (edit == null || (edit.changes.isEmpty() && edit.documentChanges.isEmpty())) {
-                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_rename_failed, "No changes returned")))
-                    return@launch
-                }
-                val allEdits = edit.allTextEdits()
-                val totalEditCount = allEdits.values.sumOf { it.size }
-                val totalFileCount = allEdits.keys.size
-                _uiState.update { s ->
-                    s.copy(
-                        renameDialog = s.renameDialog?.copy(
-                            pendingEdit = edit,
-                            pendingFileCount = totalFileCount,
-                            pendingEditCount = totalEditCount,
-                            isPreview = true
-                        )
-                    )
-                }
-            }
-            .onFailure {
-                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_rename_failed, it.message.orEmpty())))
-            }
+        val fromServer = lspClient.requestRename(state.path, state.position, state.newName)
+        // Liefert der Sprachserver nichts (oder gibt es keinen): Umbenennen-Quellen der Plugins fragen.
+        val edit = fromServer.getOrNull()?.takeIf { it.changes.isNotEmpty() || it.documentChanges.isNotEmpty() }
+            ?: pluginRename(state)
+        if (edit == null) {
+            val reason = fromServer.exceptionOrNull()?.message ?: "No changes returned"
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_rename_failed, reason)))
+            return@launch
+        }
+        val allEdits = edit.allTextEdits()
+        _uiState.update { s ->
+            s.copy(
+                renameDialog = s.renameDialog?.copy(
+                    pendingEdit = edit,
+                    pendingFileCount = allEdits.keys.size,
+                    pendingEditCount = allEdits.values.sumOf { it.size },
+                    isPreview = true
+                )
+            )
+        }
+    }
+
+    private suspend fun pluginRename(state: RenameDialogState): LspWorkspaceEdit? {
+        val ctx = editorContextAt(state.path, state.position.line, state.position.character) ?: return null
+        return editorActions?.rename(ctx, state.newName)
     }
 
     private fun confirmRename() = viewModelScope.launch {
@@ -1607,23 +1612,30 @@ class EditorViewModel @Inject constructor(
     private fun goToDefinition(line: Int, col: Int) = viewModelScope.launch {
         val active = _uiState.value.activeFile ?: return@launch
         val pos = LspPosition(line, col)
-        lspClient.requestDefinition(active.path, pos)
-            .onSuccess { locations ->
-                if (locations.isEmpty()) {
-                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_definition_not_found)))
-                } else {
-                    val first = locations.first()
-                    val targetPath = first.uri.removePrefix("file://")
-                    openFileRequestBridge.requestOpenAt(
-                        targetPath,
-                        first.range.start.line + 1,
-                        first.range.start.character + 1
-                    )
-                }
-            }
-            .onFailure {
-                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_definition_not_found)))
-            }
+        // Ohne Treffer vom Sprachserver: Definitions-Quellen der Plugins fragen.
+        val locations = lspClient.requestDefinition(active.path, pos).getOrDefault(emptyList())
+            .ifEmpty { pluginLocations(active.path, line, col) { bridge, ctx -> bridge.definitions(ctx) } }
+        val first = locations.firstOrNull()
+        if (first == null) {
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_definition_not_found)))
+        } else {
+            openFileRequestBridge.requestOpenAt(
+                first.uri.removePrefix("file://"),
+                first.range.start.line + 1,
+                first.range.start.character + 1
+            )
+        }
+    }
+
+    private suspend fun pluginLocations(
+        path: String,
+        line: Int,
+        col: Int,
+        query: suspend (PluginEditorBridge, EditorContext) -> List<com.codeforge.core.domain.model.LspLocation>
+    ): List<com.codeforge.core.domain.model.LspLocation> {
+        val bridge = editorActions ?: return emptyList()
+        val ctx = editorContextAt(path, line, col) ?: return emptyList()
+        return query(bridge, ctx)
     }
 
     private fun showHover(line: Int, col: Int) = viewModelScope.launch {
@@ -1695,23 +1707,15 @@ class EditorViewModel @Inject constructor(
     private fun findReferences(line: Int, col: Int, symbolName: String) = viewModelScope.launch {
         val active = _uiState.value.activeFile ?: return@launch
         val pos = LspPosition(line, col)
-        lspClient.requestReferences(active.path, pos)
-            .onSuccess { locations ->
-                if (locations.isEmpty()) {
-                    _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_references_not_found)))
-                } else {
-                    _uiState.update {
-                        it.copy(
-                            referencesList = locations,
-                            referencesSymbol = symbolName,
-                            isReferencesSheetVisible = true
-                        )
-                    }
-                }
+        val locations = lspClient.requestReferences(active.path, pos).getOrDefault(emptyList())
+            .ifEmpty { pluginLocations(active.path, line, col) { bridge, ctx -> bridge.references(ctx) } }
+        if (locations.isEmpty()) {
+            _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_references_not_found)))
+        } else {
+            _uiState.update {
+                it.copy(referencesList = locations, referencesSymbol = symbolName, isReferencesSheetVisible = true)
             }
-            .onFailure {
-                _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.lsp_references_not_found)))
-            }
+        }
     }
 
     private fun selectTab(index: Int) {

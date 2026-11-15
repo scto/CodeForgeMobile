@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong
  * Plugin-Protokoll vermerkt und als Fehlschlag gemeldet, nie an die App durchgereicht.
  */
 class PluginEditorBridge(
-    private val registry: ExtensionRegistry,
+    internal val registry: ExtensionRegistry,
     private val logs: PluginLogRepository?
 ) {
     // Aktionen aus Schnellkorrektur-Quellen gibt es nur für den Moment der Anzeige; Zugriff über ein Token.
@@ -136,7 +136,7 @@ class PluginEditorBridge(
 
     // Plugin-Code darf die App mit keiner Ausnahme erreichen, daher bewusst Throwable.
     @Suppress("TooGenericExceptionCaught")
-    private suspend fun <T> guarded(
+    internal suspend fun <T> guarded(
         pluginId: String,
         what: String,
         timeoutMs: Long = TIMEOUT_MS,

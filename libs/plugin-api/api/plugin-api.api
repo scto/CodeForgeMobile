@@ -23,6 +23,10 @@ public abstract interface class com/codeforge/libs/plugin_api/CompletionProvider
 	public abstract fun complete (Lcom/codeforge/libs/plugin_api/EditorContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public abstract interface class com/codeforge/libs/plugin_api/DefinitionProvider {
+	public abstract fun definition (Lcom/codeforge/libs/plugin_api/EditorContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/EditorAction {
 	public static final field Companion Lcom/codeforge/libs/plugin_api/EditorAction$Companion;
 	public static final field KIND_QUICKFIX Ljava/lang/String;
@@ -347,6 +351,19 @@ public final class com/codeforge/libs/plugin_api/PluginExtensionPoints {
 	public final fun getQUICK_FIX_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
 }
 
+public final class com/codeforge/libs/plugin_api/PluginFileEdit {
+	public fun <init> (Lcom/codeforge/libs/plugin_api/PluginLocation;Ljava/lang/String;)V
+	public final fun component1 ()Lcom/codeforge/libs/plugin_api/PluginLocation;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lcom/codeforge/libs/plugin_api/PluginLocation;Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginFileEdit;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginFileEdit;Lcom/codeforge/libs/plugin_api/PluginLocation;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginFileEdit;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNewText ()Ljava/lang/String;
+	public final fun getRange ()Lcom/codeforge/libs/plugin_api/PluginLocation;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/PluginHostServices {
 	public abstract fun addEventListener (Lcom/codeforge/libs/plugin_api/PluginEventListener;)V
 	public abstract fun buildShellCommand (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/codeforge/libs/terminal_engine/ShellLaunchSpec;
@@ -365,8 +382,31 @@ public final class com/codeforge/libs/plugin_api/PluginHostServices$DefaultImpls
 public final class com/codeforge/libs/plugin_api/PluginLanguagePoints {
 	public static final field INSTANCE Lcom/codeforge/libs/plugin_api/PluginLanguagePoints;
 	public final fun getCOMPLETION_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+	public final fun getDEFINITION_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
 	public final fun getHOVER_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+	public final fun getREFERENCE_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+	public final fun getRENAME_PROVIDER ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
 	public final fun getRUN_TASK ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginLocation {
+	public fun <init> (Ljava/lang/String;IIII)V
+	public synthetic fun <init> (Ljava/lang/String;IIIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun copy (Ljava/lang/String;IIII)Lcom/codeforge/libs/plugin_api/PluginLocation;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginLocation;Ljava/lang/String;IIIIILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginLocation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColumn ()I
+	public final fun getEndColumn ()I
+	public final fun getEndLine ()I
+	public final fun getFilePath ()Ljava/lang/String;
+	public final fun getLine ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/PluginLogger {
@@ -429,6 +469,14 @@ public final class com/codeforge/libs/plugin_api/ProgressReporter$DefaultImpls {
 
 public abstract interface class com/codeforge/libs/plugin_api/QuickFixProvider {
 	public abstract fun fixes (Lcom/codeforge/libs/plugin_api/EditorContext;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/ReferenceProvider {
+	public abstract fun references (Lcom/codeforge/libs/plugin_api/EditorContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/RenameProvider {
+	public abstract fun rename (Lcom/codeforge/libs/plugin_api/EditorContext;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/RunConsole {

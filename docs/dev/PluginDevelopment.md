@@ -812,6 +812,29 @@ scope.launch {
 - `notify` zeigt eine Systembenachrichtigung (Kanal „Plugins“); gleiche `tag` ersetzen die vorherige.
 - Nicht in `onLoad` blockierend aufrufen – eigene Coroutine starten und in `onUnload` abbrechen.
 
+### 9.11 Seit API 3: Definition, Verwendungen, Umbenennen ohne Sprachserver
+
+Für Sprachen ohne Sprachserver kann ein Plugin „Gehe zur Definition“, „Verwendungen suchen“ und „Umbenennen“ selbst
+beantworten (Berechtigung `editor`). Die Quellen werden nur gefragt, wenn kein Server ein Ergebnis liefert.
+
+```kotlin
+context.register(PluginLanguagePoints.DEFINITION_PROVIDER, DefinitionProvider { ctx ->
+    val word = wordAt(ctx.text, ctx.cursorOffset) ?: return@DefinitionProvider emptyList()
+    index.definitionsOf(word).map { PluginLocation(it.file, it.line, it.column) }
+})
+context.register(PluginLanguagePoints.REFERENCE_PROVIDER, ReferenceProvider { ctx -> emptyList() })
+context.register(PluginLanguagePoints.RENAME_PROVIDER, RenameProvider { ctx, newName ->
+    if (ctx.languageId != "ini") null                       // nicht zuständig → nächste Quelle
+    else occurrences(ctx).map { PluginFileEdit(it, newName) }
+})
+```
+
+- `PluginLocation`: absoluter Pfad, Zeile und Spalte ab 0, Ende exklusiv. Ungültige Stellen (relativer Pfad, Ende vor
+  Anfang) werden verworfen.
+- Zeitlimit: 10 s für Definition/Verwendungen, 30 s für Umbenennen; höchstens 500 Stellen bzw. 5000 Änderungen.
+- Umbenennen läuft durch dieselbe Vorschau wie beim Sprachserver und lässt sich rückgängig machen; Änderungen dürfen
+  mehrere Dateien betreffen.
+
 ## 10. Beispiel 6: Hybrid – LSP-Plugin mit Download
 
 **Ziel:** Ein Language Server, der nicht als Paket vorliegt, sondern heruntergeladen werden muss. Das Manifest startet den Server (deklarativ), der Code stellt nur sicher, dass er da ist.

@@ -12,7 +12,12 @@ import com.codeforge.libs.plugin_api.CompletionProvider
 import com.codeforge.libs.plugin_api.HoverProvider
 import com.codeforge.libs.plugin_api.PluginCompletionItem
 import com.codeforge.libs.plugin_api.PluginExtensionPoints
+import com.codeforge.libs.plugin_api.DefinitionProvider
+import com.codeforge.libs.plugin_api.PluginFileEdit
 import com.codeforge.libs.plugin_api.PluginLanguagePoints
+import com.codeforge.libs.plugin_api.PluginLocation
+import com.codeforge.libs.plugin_api.ReferenceProvider
+import com.codeforge.libs.plugin_api.RenameProvider
 import com.codeforge.libs.plugin_api.RunConsole
 import com.codeforge.libs.plugin_api.RunTask
 import com.codeforge.libs.plugin_api.QuickFixProvider
@@ -170,5 +175,36 @@ class PluginEditorBridgeTest {
         val bridge = PluginEditorBridge(reg, logs)
         assertEquals(-1, bridge.execute(bridge.runTask("p/boom")!!, Console()))
         assertEquals("p", logs.lines.single().first)
+    }
+
+    @Test
+    fun locationsValidatedAndDeduped() = runTest {
+        val reg = ExtensionRegistryImpl()
+        val good = PluginLocation("/p/B.kt", 3, 4, 3, 7)
+        reg.register(PluginLanguagePoints.DEFINITION_PROVIDER, DefinitionProvider { listOf(good, PluginLocation("rel.kt", 0, 0)) }, "a")
+        reg.register(PluginLanguagePoints.REFERENCE_PROVIDER, ReferenceProvider { listOf(good, good, PluginLocation("/p/C.kt", 2, 5, 1, 0)) }, "a")
+        reg.register(PluginLanguagePoints.REFERENCE_PROVIDER, ReferenceProvider { error("kaputt") }, "b")
+        val bridge = PluginEditorBridge(reg, null)
+        val def = bridge.definitions(ctx).single()
+        assertEquals("file:///p/B.kt", def.uri)
+        assertEquals(3, def.range.start.line)
+        assertEquals(7, def.range.end.character)
+        assertEquals(1, bridge.references(ctx).size)
+    }
+
+    @Test
+    fun renameUsesFirstResponsible() = runTest {
+        val reg = ExtensionRegistryImpl()
+        reg.register(PluginLanguagePoints.RENAME_PROVIDER, RenameProvider { _, _ -> null }, "a")
+        reg.register(
+            PluginLanguagePoints.RENAME_PROVIDER,
+            RenameProvider { _, name -> listOf(PluginFileEdit(PluginLocation("/p/A.kt", 0, 0, 0, 1), name), PluginFileEdit(PluginLocation("/p/B.kt", 1, 0, 1, 1), name)) },
+            "b"
+        )
+        val bridge = PluginEditorBridge(reg, null)
+        val edit = bridge.rename(ctx, "neu")!!
+        assertEquals(setOf("file:///p/A.kt", "file:///p/B.kt"), edit.changes.keys)
+        assertEquals("neu", edit.changes.getValue("file:///p/A.kt").single().newText)
+        assertNull(PluginEditorBridge(ExtensionRegistryImpl(), null).rename(ctx, "neu"))
     }
 }
