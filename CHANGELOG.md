@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Gradle-Sync beim Öffnen)
+- Der Sync beim Öffnen eines Projekts läuft als `tasks` statt `tasks --all`: deutlich weniger Arbeit für Gradle und
+  nur noch Tasks mit Gruppe in der Auswahl. Die vollständige Liste bleibt als Eintrag „tasks --all“ abrufbar.
+- Die Fortschrittsleiste zeigt beim Sync und Build die jeweils letzte Gradle-Ausgabe („Configure project :app“,
+  Downloads …), nicht mehr nur laufende Tasks.
+- Task-Auswahl mit Abschnitten: „Häufig“ zuerst, danach aufklappbare Gruppen (Build, Install, Verification …).
+
 ## [3.1.0] - 2026-11-15
 
 ### Hinzugefügt (Plugin-API 3: Tests je Datei)

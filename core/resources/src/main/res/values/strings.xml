@@ -2720,4 +2720,5 @@
     <string name="plugin_test_summary">%1$d passed, %2$d failed</string>
     <string name="flashbar_plugin">%1$s</string>
     <string name="plugin_tests_file">Run tests in this file</string>
+    <string name="build_tasks_haeufig">Common</string>
 </resources>

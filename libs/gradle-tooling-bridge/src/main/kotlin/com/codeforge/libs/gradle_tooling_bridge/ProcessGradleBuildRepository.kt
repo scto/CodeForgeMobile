@@ -176,8 +176,9 @@ class ProcessGradleBuildRepository(
 
             while (line != null) {
                 outputBuffer.add(line)
-                // „> Task :app:compileDebugKotlin UP-TO-DATE“ → laufender Task für die Fortschrittsleiste
-                if (line.startsWith("> Task ")) IdeProgressRegistry.update(progressId, line.removePrefix("> Task ").substringBefore(' '))
+                // Fortschrittsleiste: laufender Task („> Task :app:compileDebugKotlin“), sonst die letzte Ausgabezeile –
+                // so ist auch in der Konfigurationsphase (Sync) zu sehen, was Gradle gerade tut.
+                progressDetail(line)?.let { IdeProgressRegistry.update(progressId, it) }
                 emit(BuildEvent.Output(line))
 
                 val problems = parserSession.feedLine(line)
@@ -299,5 +300,20 @@ class ProcessGradleBuildRepository(
     override suspend fun disconnect() {
         cancelBuild()
         projectRootPath = null
+    }
+}
+
+private const val MAX_PROGRESS_DETAIL = 160
+
+/** Text für die Fortschrittsleiste zu einer Ausgabezeile von Gradle; `null` = Anzeige unverändert lassen. */
+internal fun progressDetail(line: String): String? {
+    val text = line.trim()
+    return when {
+        text.isEmpty() -> null
+        text.startsWith("> Task ") -> text.removePrefix("> Task ").substringBefore(' ')
+        text.startsWith("> Configure project ") -> text.removePrefix("> ")
+        // Die Task-Liste selbst (Trennlinien, „name - Beschreibung“) würde nur flackern.
+        text.all { it == '-' } || " - " in text -> null
+        else -> text.take(MAX_PROGRESS_DETAIL)
     }
 }

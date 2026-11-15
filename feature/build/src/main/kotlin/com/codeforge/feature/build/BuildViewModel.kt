@@ -43,8 +43,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-// Task für den Gradle-Sync: konfiguriert alle Module und löst Plugins/Abhängigkeiten auf.
-private const val SYNC_TASK = GradleTaskListParser.LIST_ALL_TASK
+// Task für den Gradle-Sync: konfiguriert alle Module (prüft damit settings/build-Dateien und build-logic) und liefert
+// die Tasks mit Gruppe. Die vollständige Liste (`tasks --all`) ist deutlich langsamer und bleibt ein eigener Eintrag.
+private const val SYNC_TASK = GradleTaskListParser.LIST_GROUPED_TASK
+
+private fun isTaskListing(taskName: String): Boolean =
+    taskName.trim().let { it == SYNC_TASK || it == GradleTaskListParser.LIST_ALL_TASK }
 
 /** ViewModel des Build-Panels: Gradle-Builds, Probleme, Logcat, Tests, APK-Installation. */
 @HiltViewModel
@@ -206,7 +210,7 @@ class BuildViewModel internal constructor(
             }
             is BuildUiIntent.StartBuild -> {
                 // `tasks --all` aus der Auswahl zeigt die Ausgabe und aktualisiert zugleich die Task-Liste.
-                startBuild(intent.taskName, autoRunOnSuccess = false, isSync = intent.taskName.trim() == SYNC_TASK)
+                startBuild(intent.taskName, autoRunOnSuccess = false, isSync = isTaskListing(intent.taskName))
             }
             is BuildUiIntent.StartBuildAndRun -> {
                 startBuild(intent.taskName, autoRunOnSuccess = true)

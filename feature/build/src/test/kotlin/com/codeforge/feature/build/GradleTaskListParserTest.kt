@@ -1,5 +1,6 @@
 package com.codeforge.feature.build
 
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.Assert.assertEquals
 
@@ -65,5 +66,26 @@ class GradleTaskListParserTest {
         assertEquals("Help", result[1].group)
         assertEquals(result, GradleTaskListParser.withListAllTask(result))
         assertEquals("tasks --all", GradleTaskListParser.withListAllTask(emptyList()).single().name)
+    }
+
+    @Test
+    fun groupedPutsCommonFirst() {
+        val tasks = listOf(
+            GradleTaskInfo("zeta"),
+            GradleTaskInfo("lint", "Verification"),
+            GradleTaskInfo("projects", "Help"),
+            GradleTaskInfo("assembleDebug", "Build"),
+            GradleTaskInfo("custom", "Aaa")
+        )
+        val sections = GradleTaskListParser.grouped(tasks)
+        assertTrue(GradleTaskListParser.isCommonGroup(sections.first().first))
+        assertEquals(listOf("assembleDebug", "lint"), sections.first().second.map { it.name })
+        assertEquals(listOf("Build", "Verification", "Help", "Aaa", ""), sections.drop(1).map { it.first })
+    }
+
+    @Test
+    fun groupedWithoutCommonTasks() {
+        val sections = GradleTaskListParser.grouped(listOf(GradleTaskInfo("foo", "Custom")))
+        assertEquals(listOf("Custom"), sections.map { it.first })
     }
 }

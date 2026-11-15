@@ -127,7 +127,7 @@ class BuildViewModelTest {
         viewModel.handleIntent(BuildUiIntent.SyncGradle)
         delay(300)
 
-        assertEquals("tasks --all", fakeRepository.lastTask)
+        assertEquals("tasks", fakeRepository.lastTask)
         assertEquals("assembleRelease", viewModel.uiState.value.selectedTask)
         assertEquals(listOf("assembleRelease", "customTask", "tasks --all"), viewModel.uiState.value.availableTasks)
         assertFalse(viewModel.uiState.value.isBuilding)

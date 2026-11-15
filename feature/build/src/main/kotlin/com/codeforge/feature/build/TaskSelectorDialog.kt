@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Search
@@ -91,7 +93,7 @@ fun TaskSelectorDialog(
     var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf(currentTask) }
     val filtered = remember(query, tasks) { filterTasks(tasks, query) }
-    val otherLabel = stringRes(R.string.build_tasks_sonstige)
+    val sections = remember(filtered) { GradleTaskListParser.grouped(filtered) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -130,16 +132,12 @@ fun TaskSelectorDialog(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
-                LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
-                    items(filtered, key = { it.name }) { task ->
-                        TaskRow(
-                            task = task,
-                            otherLabel = otherLabel,
-                            isSelected = task.name == selected,
-                            onClick = { selected = task.name }
-                        )
-                    }
-                }
+                TaskSections(
+                    sections = sections,
+                    searching = query.isNotBlank(),
+                    selected = selected,
+                    onSelect = { selected = it }
+                )
             }
         },
         confirmButton = {
@@ -157,6 +155,68 @@ fun TaskSelectorDialog(
         },
         modifier = modifier
     )
+}
+
+// Abschnitte mit aufklappbaren Überschriften; „Häufig“ und Suchtreffer sind immer offen.
+@Composable
+private fun TaskSections(
+    sections: List<Pair<String, List<GradleTaskInfo>>>,
+    searching: Boolean,
+    selected: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val otherLabel = stringRes(R.string.build_tasks_sonstige)
+    val commonLabel = stringRes(R.string.build_tasks_haeufig)
+    var expanded by remember { mutableStateOf(emptySet<String>()) }
+    LazyColumn(modifier = modifier.heightIn(max = 360.dp)) {
+        sections.forEach { (group, groupTasks) ->
+            val isCommon = GradleTaskListParser.isCommonGroup(group)
+            val open = isCommon || searching || sections.size == 1 || group in expanded
+            item(key = "h:$group") {
+                TaskGroupHeader(
+                    title = if (isCommon) commonLabel else group.ifBlank { otherLabel },
+                    count = groupTasks.size,
+                    expanded = open,
+                    onClick = { expanded = if (group in expanded) expanded - group else expanded + group }
+                )
+            }
+            if (open) {
+                items(groupTasks, key = { "$group/${it.name}" }) { task ->
+                    TaskRow(task = task, otherLabel = otherLabel, isSelected = task.name == selected, onClick = { onSelect(task.name) })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TaskGroupHeader(
+    title: String,
+    count: Int,
+    expanded: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "$title ($count)",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable
