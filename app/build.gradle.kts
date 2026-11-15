@@ -12,8 +12,8 @@ android {
 
     defaultConfig {
         applicationId = "com.codeforge.app"
-        versionCode = 30101
-        versionName = "3.1.1"
+        versionCode = 30102
+        versionName = "3.1.2"
 
         manifestPlaceholders["TERMUX_PACKAGE_NAME"] = "com.codeforge.app"
         manifestPlaceholders["TERMUX_APP_NAME"] = "CodeForge"

@@ -11,6 +11,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.1.2] - 2026-11-15
+
+### Hinzugefügt
+- app: Fortschrittsleiste aufklappbar (alle Vorgänge, Laufzeit, letzte Ausgabezeilen)
+- build: schnellerer Gradle-Sync (tasks statt tasks --all), Live-Ausgabe in der Fortschrittsleiste, Task-Auswahl mit Abschnitten
+
+### Geändert
+- release: Version 3.1.1
+
 ## [3.1.1] - 2026-11-15
 
 ### Geändert (Fortschrittsleiste)
