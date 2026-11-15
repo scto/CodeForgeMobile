@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Sprachserver: weniger Anfragen)
+- Gleiche LSP-Anfragen, die gleichzeitig laufen, teilen sich eine Antwort. Hover, Definition, Verwendungen, Gliederung,
+  Faltung und Inlay-Hints werden bis zur nächsten Änderung eines Dokuments (höchstens 30 s) gemerkt; leere Antworten
+  und Fehler nie.
+
 ### Hinzugefügt (Plugin-API 3: Navigation und Umbenennen ohne Sprachserver)
 - Neue Andockstellen `DEFINITION_PROVIDER`, `REFERENCE_PROVIDER` und `RENAME_PROVIDER`: Plugins beantworten „Gehe zur
   Definition“, „Verwendungen suchen“ und „Umbenennen“, wenn kein Sprachserver ein Ergebnis liefert. Umbenennen nutzt

@@ -63,6 +63,8 @@ class LspClientRepositoryImpl(
     }
 
     private val sessions = ConcurrentHashMap<String, LspServerSession>()
+    // Legt gleiche Anfragen zusammen und merkt sich Antworten, bis sich ein Dokument ändert.
+    private val coalescer = LspRequestCoalescer()
     private val documentToSession = ConcurrentHashMap<String, String>()
     private val documentSessions = ConcurrentHashMap<String, List<String>>()
     private val alongsideSessions: MutableSet<String> = ConcurrentHashMap.newKeySet()
@@ -107,6 +109,7 @@ class LspClientRepositoryImpl(
      * @param session die zu verwaltende Sitzung.
      */
     internal fun attachSession(session: LspServerSession) {
+        coalescer.invalidate()
         sessions[session.sessionId] = session
         updateSessionStates()
         updateActiveSessionState()
@@ -157,6 +160,7 @@ class LspClientRepositoryImpl(
 
     override suspend fun stopSession(sessionId: String) {
         val session = sessions.remove(sessionId) ?: return
+        coalescer.invalidate()
         startedAt.remove(sessionId)
         session.stop()
         documentSessions.replaceAll { _, ids -> ids - sessionId }
@@ -210,15 +214,18 @@ class LspClientRepositoryImpl(
         if (targets.isEmpty()) return
         documentToSession[path] = targets.first().sessionId
         documentSessions[path] = targets.map { it.sessionId }
+        coalescer.invalidate()
         targets.forEach { it.didOpen(path, languageId, content) }
         updateActiveSessionState()
     }
 
     override suspend fun didChange(path: String, newContent: String, version: Int) {
+        coalescer.invalidate()
         sessionsForPath(path).forEach { it.didChange(path, newContent, version) }
     }
 
     override suspend fun didClose(path: String) {
+        coalescer.invalidate()
         sessionsForPath(path).forEach { it.didClose(path) }
         documentToSession.remove(path)
         documentSessions.remove(path)
@@ -234,7 +241,7 @@ class LspClientRepositoryImpl(
             .map { items -> items.distinctBy { it.label to it.insertText } }
 
     override suspend fun requestHover(path: String, position: LspPosition): Result<LspHoverInfo?> =
-        first(path, LspFeature.HOVER, { it.hoverProvider }, null) { it.requestHover(path, position) }
+        first(path, LspFeature.HOVER, { it.hoverProvider }, null, memo = "hover:$position") { it.requestHover(path, position) }
 
     override suspend fun requestFormat(path: String, content: String): Result<String> {
         if (sessionsForPath(path).isEmpty()) return Result.failure(noServer())
@@ -284,42 +291,43 @@ class LspClientRepositoryImpl(
     }
 
     override suspend fun didRenameFiles(renames: List<LspFileRename>) {
+        coalescer.invalidate()
         sessions.values.filter { it.serverCapabilities.value?.didRenameFiles == true }.forEach { it.didRenameFiles(renames) }
     }
 
     override suspend fun requestPrepareRename(path: String, position: LspPosition): Result<LspPrepareRenameResult?> =
-        first(path, LspFeature.RENAME, { it.renameProvider }, null) { it.requestPrepareRename(path, position) }
+        first(path, LspFeature.RENAME, { it.renameProvider }, null, memo = "prepareRename:$position") { it.requestPrepareRename(path, position) }
 
     override suspend fun requestRename(path: String, position: LspPosition, newName: String): Result<LspWorkspaceEdit?> =
         first(path, LspFeature.RENAME, { it.renameProvider }, null) { it.requestRename(path, position, newName) }
 
     override suspend fun requestDocumentSymbols(path: String): Result<List<LspDocumentSymbol>> =
-        first(path, LspFeature.NAVIGATION, { it.documentSymbolProvider }, emptyList()) { it.requestDocumentSymbols(path) }
+        first(path, LspFeature.NAVIGATION, { it.documentSymbolProvider }, emptyList(), memo = "symbols") { it.requestDocumentSymbols(path) }
 
     override suspend fun requestDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
-        first(path, LspFeature.NAVIGATION, { it.definitionProvider }, emptyList()) { it.requestDefinition(path, position) }
+        first(path, LspFeature.NAVIGATION, { it.definitionProvider }, emptyList(), memo = "definition:$position") { it.requestDefinition(path, position) }
 
     override suspend fun requestTypeDefinition(path: String, position: LspPosition): Result<List<LspLocation>> =
-        first(path, LspFeature.NAVIGATION, { it.typeDefinitionProvider }, emptyList()) { it.requestTypeDefinition(path, position) }
+        first(path, LspFeature.NAVIGATION, { it.typeDefinitionProvider }, emptyList(), memo = "typeDefinition:$position") { it.requestTypeDefinition(path, position) }
 
     override suspend fun requestImplementation(path: String, position: LspPosition): Result<List<LspLocation>> =
-        first(path, LspFeature.NAVIGATION, { it.implementationProvider }, emptyList()) { it.requestImplementation(path, position) }
+        first(path, LspFeature.NAVIGATION, { it.implementationProvider }, emptyList(), memo = "implementation:$position") { it.requestImplementation(path, position) }
 
     override suspend fun requestSignatureHelp(path: String, position: LspPosition): Result<LspSignatureHelp?> =
-        first(path, LspFeature.SIGNATURE_HELP, { it.signatureHelpProvider }, null) { it.requestSignatureHelp(path, position) }
+        first(path, LspFeature.SIGNATURE_HELP, { it.signatureHelpProvider }, null, memo = "signature:$position", cacheable = false) { it.requestSignatureHelp(path, position) }
 
     override suspend fun requestFoldingRanges(path: String): Result<List<LspFoldingRange>> =
-        first(path, null, { it.foldingRangeProvider }, emptyList()) { it.requestFoldingRanges(path) }
+        first(path, null, { it.foldingRangeProvider }, emptyList(), memo = "folding") { it.requestFoldingRanges(path) }
 
     override suspend fun requestInlayHints(path: String, range: LspRange): Result<List<LspInlayHint>> =
-        first(path, LspFeature.INLAY_HINTS, { it.inlayHintProvider }, emptyList()) { it.requestInlayHints(path, range) }
+        first(path, LspFeature.INLAY_HINTS, { it.inlayHintProvider }, emptyList(), memo = "inlay:$range") { it.requestInlayHints(path, range) }
 
     override suspend fun requestReferences(
         path: String,
         position: LspPosition,
         includeDeclaration: Boolean
     ): Result<List<LspLocation>> =
-        first(path, LspFeature.NAVIGATION, { it.referencesProvider }, emptyList()) {
+        first(path, LspFeature.NAVIGATION, { it.referencesProvider }, emptyList(), memo = "references:$position:$includeDeclaration") {
             it.requestReferences(path, position, includeDeclaration)
         }
 
@@ -348,11 +356,14 @@ class LspClientRepositoryImpl(
         feature: LspFeature?,
         capability: (LspServerCapabilities) -> Boolean,
         disabled: T,
+        memo: String? = null,
+        cacheable: Boolean = true,
         call: suspend (LspServerSession) -> Result<T>
     ): Result<T> {
         if (sessionsForPath(path).isEmpty()) return Result.failure(noServer())
         val session = route(path, feature, capability) ?: return Result.success(disabled)
-        return call(session)
+        if (memo == null) return call(session)
+        return coalescer.run("${session.sessionId}|$path|$memo", cache = cacheable) { call(session) }
     }
 
     private suspend fun <T> merged(
@@ -376,6 +387,7 @@ class LspClientRepositoryImpl(
             ?: sessionForPath(_activeDocumentPath.value ?: "")
             ?: sessions.values.firstOrNull()
             ?: return Result.failure(IllegalStateException(Res.string(R.string.lsp_lsp_server_nicht_gestartet)))
+        coalescer.invalidate() // Befehle können Dateien oder den Serverzustand ändern
         return session.executeCommand(command, arguments)
     }
 
