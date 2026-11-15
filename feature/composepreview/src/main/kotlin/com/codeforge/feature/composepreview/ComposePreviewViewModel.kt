@@ -5,6 +5,7 @@
 package com.codeforge.feature.composepreview
 
 import androidx.lifecycle.ViewModel
+import com.codeforge.core.common.log.CfmLogger
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.domain.repository.ComposePreviewRenderer
 import com.codeforge.core.domain.repository.ComposeSourceAnalyzer
@@ -32,7 +33,8 @@ import kotlinx.coroutines.launch
 class ComposePreviewViewModel @Inject constructor(
     private val previewBridge: ActiveComposablePreviewBridge,
     private val composeSourceAnalyzer: ComposeSourceAnalyzer,
-    private val composePreviewRenderer: ComposePreviewRenderer
+    private val composePreviewRenderer: ComposePreviewRenderer,
+    private val logger: CfmLogger
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ComposePreviewUiState())
@@ -142,6 +144,8 @@ class ComposePreviewViewModel @Inject constructor(
                 }
                 .onFailure { throwable ->
                     ensureActive() // runCatching im Renderer verschluckt die Cancellation
+                    // Ins App-Log (Einstellungen → Debug), mit Stacktrace und Ursache – der Bildschirm zeigt nur die Meldung.
+                    logger.e(LOG_TAG, "Vorschau fehlgeschlagen: ${'$'}{throwable.javaClass.name}: ${'$'}{throwable.message}", throwable)
                     _uiState.update {
                         it.copy(
                             renderState = PreviewRenderState.Failed(
@@ -156,5 +160,6 @@ class ComposePreviewViewModel @Inject constructor(
     private companion object {
         /** Wartezeit nach der letzten Tippänderung, bevor neu gerendert wird. */
         const val TYPING_DEBOUNCE_MS = 250L
+        const val LOG_TAG = "ComposePreview"
     }
 }

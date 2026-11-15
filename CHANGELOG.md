@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben (Compose-Vorschau in Release-Builds)
+- „Failed resolution of: Landroidx/compose/runtime/Composer;“: R8 hatte Compose (und Kotlin-Stdlib/Coroutines/Lifecycle) im Release-Build umbenannt bzw. gekürzt; der Vorschau-Code des Nutzers linkt zur Laufzeit gegen genau diese Klassen der App. `feature/composepreview/consumer-rules.pro` behält jetzt `androidx.compose.{runtime,ui,foundation,animation,material3,material.ripple}`, die Standard-Symbole, `androidx.lifecycle`, `androidx.activity.compose`, `kotlin`, `kotlinx.coroutines` vollständig; erweiterte Symbole nur dem Namen nach (ungenutzte fehlen weiterhin). Die APK wird dadurch größer.
+- Vorschau-Fehler landen jetzt mit Stacktrace im App-Log (Tag `ComposePreview`). Dabei doppelte Hilt-Bindung von `CfmLogger` entfernt (`core:data` legte einen zweiten, ungesteuerten Datei-Logger an; maßgeblich ist `LoggingModule`/`CfmLogManager`).
+
 ### Hinzugefügt (Build: `tasks --all`)
 - Task-Auswahl im Build-Bereich enthält `tasks --all` (Gruppe „Help“, auch vor dem ersten Sync). Startet man ihn dort, zeigt die Ausgabe alle Tasks samt Beschreibung und die Task-Liste wird zugleich aktualisiert (wie „Gradle-Sync“).
 - Test `testRunRequestBridgeTriggersTestsTabAndExecution` wartet auf den Tab-Wechsel statt fester 250 ms (war unter Last wackelig).

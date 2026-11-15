@@ -19,13 +19,10 @@ import com.codeforge.core.domain.repository.GitRepository
 import com.codeforge.core.domain.repository.GitSettingsRepository
 import com.codeforge.core.domain.repository.ProjectImportRepository
 import com.codeforge.core.domain.repository.RecentProjectsRepository
-import com.codeforge.core.common.log.CfmLogger
-import com.codeforge.core.common.log.FileCfmLogger
 import com.codeforge.core.data.repository.LegacyProjectMigratorImpl
 import com.codeforge.core.data.repository.WorkspaceRepositoryImpl
 import com.codeforge.core.domain.repository.LegacyProjectMigrator
 import com.codeforge.core.domain.repository.WorkspaceRepository
-import java.io.File
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -46,15 +43,7 @@ object DataStoreProviderModule {
     fun providePreferencesDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
         context.preferencesDataStore
 
-    /** Stellt den [CfmLogger] bereit. */
-    @Provides
-    @Singleton
-    fun provideCfmLogger(projectsDirectoryProvider: ProjectsDirectoryProvider): CfmLogger =
-        FileCfmLogger(
-            logDirectoryProvider = {
-                File(projectsDirectoryProvider.getProjectsRoot(), ".cfm/log")
-            }
-        )
+    // CfmLogger kommt aus LoggingModule (:app, CfmLogManager mit den Debug-Einstellungen).
 }
 
 /** Hilt-Modul, das die Repository-Implementierungen an ihre Schnittstellen bindet. */

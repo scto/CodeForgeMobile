@@ -55,6 +55,7 @@ val withExtendedIcons = providers.gradleProperty("withExtendedIcons")
     .orElse(false)
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(project(":core:resources"))
     implementation(project(":core:domain"))
     implementation(project(":core:ui"))
