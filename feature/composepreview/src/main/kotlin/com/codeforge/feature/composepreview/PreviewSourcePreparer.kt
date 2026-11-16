@@ -55,15 +55,21 @@ internal object PreviewSourcePreparer {
      * @param keepPackage Wenn true, bleibt die `package`-Zeile unverändert.
      * @param stubProjectThemes Wenn true, wird ein Theme-Stub injiziert. Wenn false, wird das echte Theme erwartet.
      * @param stripThemeSideEffects Wenn true, werden bekannte `WindowCompat`/`Activity`-SideEffects in Theme.kt entfernt.
+     * @param unavailable Projektweit entfernte Deklarationen (ViewModels …); Funktionen, die sie benutzen, fallen weg.
+     * @param redirectResources Wenn true, gehen `stringResource` & Co. an die Vorschau-Ersatzfunktionen ([PreviewResourceStubs]).
      */
     fun prepare(
         source: String,
         keepPackage: Boolean = false,
         stubProjectThemes: Boolean = true,
-        stripThemeSideEffects: Boolean = true
+        stripThemeSideEffects: Boolean = true,
+        unavailable: Set<String> = emptySet(),
+        redirectResources: Boolean = false
     ): String {
         var text = if (keepPackage) source else source.replace(PACKAGE_LINE, "")
+        text = PreviewCodeStripper.strip(text, unavailable).text
         text = removeActivityClasses(text)
+        if (redirectResources) text = PreviewResourceStubs.redirectImports(text)
 
         if (stripThemeSideEffects) {
             text = removeThemeSideEffects(text)

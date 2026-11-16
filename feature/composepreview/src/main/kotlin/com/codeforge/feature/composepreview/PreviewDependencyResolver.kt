@@ -14,17 +14,25 @@ internal data class ResolvedPreviewSources(
     val targetClassName: String,
     val targetPackage: String,
     val siblingFiles: List<File>,
-    val warnings: List<String> = emptyList()
+    val warnings: List<String> = emptyList(),
+    /** Von der Vorschau entfernte Deklarationen (ViewModels, Activities, …), projektweit. */
+    val unavailableNames: Set<String> = emptySet(),
+    /** Wurzel des Gradle-Projekts (Ordner mit `settings.gradle(.kts)`), falls gefunden. */
+    val projectRoot: File? = null
 )
 
 /**
- * Analysiert eine Preview-Quelldatei und ermittelt die minimale transitive Menge von
- * Quell-Dateien aus demselben Modul (z. B. ui/theme/Theme.kt, Color.kt, Type.kt oder Nachbar-Composables).
+ * Analysiert eine Preview-Quelldatei und ermittelt die minimale transitive Menge von Quell-Dateien des Projekts
+ * (z. B. ui/theme/Theme.kt, Color.kt, Type.kt, Nachbar-Composables oder Klassen aus anderen Modulen wie
+ * `:core:designsystem` und `:core:domain`). Durchsucht werden zuerst das eigene Modul, dann alle übrigen Module.
  */
 internal object PreviewDependencyResolver {
 
-    const val MAX_SOURCE_FILES = 400
-    const val MAX_SOURCE_BYTES = 4L * 1024L * 1024L // 4 MiB
+    const val MAX_SOURCE_FILES = 4000
+    const val MAX_SOURCE_BYTES = 32L * 1024L * 1024L // 32 MiB
+
+    /** Ordner, die beim Suchen nach Modulen übersprungen werden. */
+    private val SKIPPED_DIRS = setOf("build", ".gradle", ".git", ".idea", ".kotlin", "node_modules", "build-logic", "buildSrc")
 
     private val PACKAGE_REGEX = Regex("""^\s*package\s+([\w.]+)\s*;?\s*$""", RegexOption.MULTILINE)
     private val IMPORT_REGEX = Regex("""^\s*import\s+([\w.*]+)(?:\s+as\s+(\w+))?\s*;?\s*$""", RegexOption.MULTILINE)
@@ -36,14 +44,11 @@ internal object PreviewDependencyResolver {
         RegexOption.MULTILINE
     )
 
-    private val PURE_EXCLUDED_CLASS_PATTERNS = listOf(
-        Regex("""\bclass\s+\w+[^{\n=]*:\s*[\w.]*(?:ComponentActivity|AppCompatActivity|Activity)\b"""),
-        Regex("""\bclass\s+\w+[^{\n=]*:\s*[\w.]*(?:AndroidViewModel|ViewModel)\b"""),
-        Regex("""\bclass\s+\w+[^{\n=]*:\s*[\w.]*Application\b"""),
-        Regex("""@(AndroidEntryPoint|HiltAndroidApp|HiltViewModel)\b""")
-    )
-
-    private val COMPOSABLE_ANNOTATION = Regex("""@(?:androidx\.compose\.runtime\.)?Composable\b""")
+    /** Zwischenspeicher je Datei (Pfad → Stand und Analyse), damit große Projekte nicht bei jedem Lauf neu gelesen werden. */
+    private val parseCache = object : LinkedHashMap<String, Pair<Long, ParsedKotlinFile>>(256, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<Long, ParsedKotlinFile>>?): Boolean =
+            size > MAX_SOURCE_FILES * 2
+    }
 
     /** Gelesene Kotlin-Datei (Paket, Importe, Symbole, Bezeichner). */
     internal data class ParsedKotlinFile(
@@ -52,7 +57,11 @@ internal object PreviewDependencyResolver {
         val topLevelSymbols: Set<String>,
         val imports: List<String>,
         val referencedIdentifiers: Set<String>,
-        val isExcludedSibling: Boolean
+        val isExcludedSibling: Boolean,
+        /** Text ohne ViewModels/Activities (Grundlage für die Bezeichner). */
+        val strippedText: String = "",
+        /** Entfernte Klassen dieser Datei. */
+        val removedClasses: Set<String> = emptySet()
     )
 
     /**
@@ -69,7 +78,8 @@ internal object PreviewDependencyResolver {
         val targetPackage = extractPackage(targetText)
         val targetClassName = determineTargetClassName(targetFile, targetText, targetPackage)
 
-        val roots = moduleSourceRoots ?: findModuleSourceRoots(targetFile)
+        val projectRoot = if (moduleSourceRoots == null) findProjectRoot(targetFile) else null
+        val roots = moduleSourceRoots ?: (findModuleSourceRoots(targetFile) + findProjectSourceRoots(projectRoot)).distinctBy { it.absolutePath }
         val allModuleFiles = scanKotlinFiles(roots)
 
         val warnings = mutableListOf<String>()
@@ -80,18 +90,13 @@ internal object PreviewDependencyResolver {
         val parsedFiles = mutableMapOf<File, ParsedKotlinFile>()
         for (f in allModuleFiles) {
             if (f.absolutePath == targetFile.absolutePath) continue
-            val text = try { f.readText() } catch (_: Exception) { "" }
-            parsedFiles[f] = parseFile(f, text)
+            parsedFiles[f] = parseCached(f)
         }
+        // Projektweit entfernte Klassen (ViewModels …): Funktionen, die sie benutzen, fallen ebenfalls weg.
+        val unavailable = parsedFiles.values.flatMapTo(linkedSetOf()) { it.removedClasses } +
+            PreviewCodeStripper.removeUnavailableClasses(targetText).removedNames
 
-        val targetParsed = ParsedKotlinFile(
-            file = targetFile,
-            packageName = targetPackage,
-            topLevelSymbols = extractTopLevelSymbols(targetText),
-            imports = extractImports(targetText),
-            referencedIdentifiers = extractReferencedIdentifiers(targetText),
-            isExcludedSibling = false
-        )
+        val targetParsed = parseFile(targetFile, targetText).let { it.withIdentifiersWithout(unavailable) }
 
         val selectedFiles = mutableSetOf<File>()
         val queue = ArrayDeque<ParsedKotlinFile>()
@@ -108,7 +113,7 @@ internal object PreviewDependencyResolver {
                 if (needed.file !in visited) {
                     visited.add(needed.file)
                     selectedFiles.add(needed.file)
-                    queue.add(needed)
+                    queue.add(needed.withIdentifiersWithout(unavailable))
                 }
             }
         }
@@ -118,7 +123,9 @@ internal object PreviewDependencyResolver {
             targetClassName = targetClassName,
             targetPackage = targetPackage,
             siblingFiles = selectedFiles.sortedBy { it.name },
-            warnings = warnings
+            warnings = warnings,
+            unavailableNames = unavailable,
+            projectRoot = projectRoot
         )
     }
 
@@ -167,31 +174,50 @@ internal object PreviewDependencyResolver {
         return needed.distinctBy { it.file.absolutePath }
     }
 
-    /** Liest eine Datei. */
+    /**
+     * Liest eine Datei. ViewModels, Activities u. Ä. zählen nicht als Symbole; enthält die Datei nichts anderes,
+     * wird sie gar nicht mitkompiliert.
+     */
     internal fun parseFile(file: File, text: String): ParsedKotlinFile {
-        val packageName = extractPackage(text)
-        val symbols = extractTopLevelSymbols(text)
-        val imports = extractImports(text)
-        val idents = extractReferencedIdentifiers(text)
-        val isExcluded = isExcludedSiblingFile(text)
+        val stripped = PreviewCodeStripper.removeUnavailableClasses(text)
+        val symbols = extractTopLevelSymbols(stripped.text)
         return ParsedKotlinFile(
             file = file,
-            packageName = packageName,
+            packageName = extractPackage(text),
             topLevelSymbols = symbols,
-            imports = imports,
-            referencedIdentifiers = idents,
-            isExcludedSibling = isExcluded
+            imports = extractImports(text),
+            referencedIdentifiers = extractReferencedIdentifiers(stripped.text),
+            isExcludedSibling = symbols.isEmpty() && stripped.removedNames.isNotEmpty(),
+            strippedText = stripped.text,
+            removedClasses = stripped.removedNames
         )
     }
 
-    /** Ob die Nachbardatei nicht mitkompiliert werden soll. */
-    internal fun isExcludedSiblingFile(text: String): Boolean {
-        val hasComposable = COMPOSABLE_ANNOTATION.containsMatchIn(text)
-        if (hasComposable) {
-            // Wenn die Datei Composable-Funktionen bereitstellt, ist sie keine reine Activity/ViewModel-Datei
-            return false
+    private fun parseCached(file: File): ParsedKotlinFile {
+        val stamp = file.lastModified() * 31 + file.length()
+        synchronized(parseCache) { parseCache[file.absolutePath]?.takeIf { it.first == stamp }?.let { return it.second } }
+        val text = try { file.readText() } catch (_: Exception) { "" }
+        val parsed = parseFile(file, text)
+        synchronized(parseCache) { parseCache[file.absolutePath] = stamp to parsed }
+        return parsed
+    }
+
+    /** Bezeichner ohne Funktionen, die nicht verfügbare Klassen benutzen (z. B. die Route vor dem Screen). */
+    private fun ParsedKotlinFile.withIdentifiersWithout(unavailable: Set<String>): ParsedKotlinFile {
+        val text = PreviewCodeStripper.removeFunctionsUsing(strippedText, unavailable).text
+        val body = IMPORT_REGEX.replace(text, "")
+        val identifiers = extractReferencedIdentifiers(body)
+        // Nur Importe, die im verbliebenen Code noch benutzt werden (die des entfernten ViewModels nicht).
+        val imported = extractImports(text).filter { imp ->
+            imp.endsWith(".*") || (imp.substringAfterLast('.') !in unavailable && imp.substringAfterLast('.') in identifiers)
         }
-        return PURE_EXCLUDED_CLASS_PATTERNS.any { it.containsMatchIn(text) }
+        return copy(referencedIdentifiers = identifiers, imports = imported)
+    }
+
+    /** Ob die Nachbardatei nicht mitkompiliert werden soll (nur ViewModels, Activities u. Ä.). */
+    internal fun isExcludedSiblingFile(text: String): Boolean {
+        val stripped = PreviewCodeStripper.removeUnavailableClasses(text)
+        return stripped.removedNames.isNotEmpty() && extractTopLevelSymbols(stripped.text).isEmpty()
     }
 
     /** Paketname. */
@@ -250,6 +276,31 @@ internal object PreviewDependencyResolver {
         )
         val existing = candidates.filter { it.isDirectory }
         return existing.ifEmpty { listOfNotNull(moduleRoot) }
+    }
+
+    /** Gradle-Projektwurzel: nächster Ordner aufwärts mit `settings.gradle(.kts)`. */
+    internal fun findProjectRoot(targetFile: File): File? {
+        var current: File? = targetFile.absoluteFile.parentFile
+        while (current != null) {
+            if (File(current, "settings.gradle.kts").isFile || File(current, "settings.gradle").isFile) return current
+            current = current.parentFile
+        }
+        return null
+    }
+
+    /** `src/main/kotlin` und `src/main/java` aller Module unterhalb von [projectRoot]. */
+    internal fun findProjectSourceRoots(projectRoot: File?): List<File> {
+        if (projectRoot == null) return emptyList()
+        val result = mutableListOf<File>()
+        fun visit(dir: File, depth: Int) {
+            if (depth > 6) return
+            listOf("src/main/kotlin", "src/main/java").map { File(dir, it) }.filterTo(result) { it.isDirectory }
+            dir.listFiles { f -> f.isDirectory && f.name !in SKIPPED_DIRS && !f.name.startsWith(".") && f.name != "src" }
+                ?.sortedBy { it.name }
+                ?.forEach { visit(it, depth + 1) }
+        }
+        visit(projectRoot, 0)
+        return result
     }
 
     /** Alle Kotlin-Dateien in den Ordnern. */

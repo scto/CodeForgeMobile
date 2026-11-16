@@ -4,8 +4,22 @@
  */
 package com.codeforge.feature.composepreview
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.material.icons.filled.ZoomOut
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,11 +97,77 @@ private fun ComposePreviewScreen(modifier: Modifier = Modifier, uiState: Compose
 
             ThemeModeRow(selected = uiState.themeMode, onSelected = { onEvent(ComposePreviewUiEvent.ThemeModeChanged(it)) })
 
-            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-                RenderStateContent(
-                    state = uiState.renderState,
-                    onRetry = { onEvent(ComposePreviewUiEvent.Rerender) }
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                ZoomedContent(zoom = uiState.zoom, modifier = Modifier.fillMaxSize()) {
+                    RenderStateContent(
+                        state = uiState.renderState,
+                        onRetry = { onEvent(ComposePreviewUiEvent.Rerender) }
+                    )
+                }
+                if (uiState.isRefreshing) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter))
+                }
+            }
+
+            ZoomBar(
+                zoom = uiState.zoom,
+                onZoomOut = { onEvent(ComposePreviewUiEvent.ZoomOut) },
+                onZoomIn = { onEvent(ComposePreviewUiEvent.ZoomIn) },
+                onReset = { onEvent(ComposePreviewUiEvent.ZoomReset) }
+            )
+        }
+    }
+}
+
+/**
+ * Vergrößert alles darin (Bild, Texte, Abstände) um [zoom], indem die Dichte skaliert wird; bei mehr als 100 %
+ * lässt sich der Inhalt in beide Richtungen verschieben.
+ */
+@Composable
+private fun ZoomedContent(zoom: Float, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    BoxWithConstraints(modifier = modifier) {
+        val baseWidth = maxWidth
+        val baseHeight = maxHeight
+        val density = LocalDensity.current
+        val zoomed = remember(density, zoom) { Density(density.density * zoom, density.fontScale) }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .horizontalScroll(rememberScrollState())
+        ) {
+            CompositionLocalProvider(LocalDensity provides zoomed) {
+                // In der vergrößerten Dichte entspricht baseWidth genau zoom × der verfügbaren Breite.
+                Box(
+                    modifier = Modifier.width(baseWidth).heightIn(min = baseHeight).padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    content()
+                }
+            }
+        }
+    }
+}
+
+/** Leiste unten: − links, + rechts, Zoomstufe in der Mitte (Tippen = 100 %). */
+@Composable
+private fun ZoomBar(zoom: Float, onZoomOut: () -> Unit, onZoomIn: () -> Unit, onReset: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier.fillMaxWidth(), tonalElevation = 3.dp) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onZoomOut, enabled = zoom > PreviewZoom.STEPS.first()) {
+                Icon(Icons.Filled.ZoomOut, contentDescription = stringRes(R.string.composepreview_verkleinern))
+            }
+            TextButton(onClick = onReset, modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${(zoom * 100).roundToInt()} %",
+                    style = MaterialTheme.typography.titleSmall
                 )
+            }
+            IconButton(onClick = onZoomIn, enabled = zoom < PreviewZoom.STEPS.last()) {
+                Icon(Icons.Filled.ZoomIn, contentDescription = stringRes(R.string.composepreview_vergroessern))
             }
         }
     }

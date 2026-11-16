@@ -71,9 +71,15 @@ class ComposePreviewViewModel @Inject constructor(
             }
 
             is ComposePreviewUiEvent.ThemeModeChanged -> {
+                if (event.mode == _uiState.value.themeMode) return
                 _uiState.update { it.copy(themeMode = event.mode) }
+                // Nur neu rendern: der kompilierte Stand kommt aus dem Cache, Hell/Dunkel ändert die Farben des Composables.
                 _uiState.value.selectedFunctionName?.let(::renderSelected)
             }
+
+            ComposePreviewUiEvent.ZoomIn -> _uiState.update { it.copy(zoom = PreviewZoom.zoomIn(it.zoom)) }
+            ComposePreviewUiEvent.ZoomOut -> _uiState.update { it.copy(zoom = PreviewZoom.zoomOut(it.zoom)) }
+            ComposePreviewUiEvent.ZoomReset -> _uiState.update { it.copy(zoom = PreviewZoom.DEFAULT) }
         }
     }
 
@@ -92,12 +98,14 @@ class ComposePreviewViewModel @Inject constructor(
         val selected = candidates.firstOrNull { it.hasPreviewAnnotation }?.functionName
             ?: candidates.firstOrNull { !it.hasParameters }?.functionName
 
+        val sameFile = file.path == _uiState.value.filePath
         _uiState.update {
             it.copy(
                 filePath = file.path,
                 availableComposables = candidates,
                 selectedFunctionName = selected,
-                renderState = PreviewRenderState.Idle
+                // Beim Tippen in derselben Datei bleibt das bisherige Bild bis zum neuen stehen.
+                renderState = if (sameFile) it.renderState else PreviewRenderState.Idle
             )
         }
 
@@ -106,7 +114,11 @@ class ComposePreviewViewModel @Inject constructor(
 
     private fun renderSelected(functionName: String, forceRefresh: Boolean = false) {
         val file = lastActiveFile ?: return
-        _uiState.update { it.copy(renderState = PreviewRenderState.PreparingRuntime(0)) }
+        // Bild vorhanden: stehen lassen und nur „wird aktualisiert“ anzeigen, statt die Fläche zu leeren.
+        val keepImage = _uiState.value.renderState is PreviewRenderState.Rendered
+        _uiState.update {
+            if (keepImage) it.copy(isRefreshing = true) else it.copy(renderState = PreviewRenderState.PreparingRuntime(0), isRefreshing = false)
+        }
 
         renderJob?.cancel()
         renderJob = viewModelScope.launch {
@@ -118,6 +130,7 @@ class ComposePreviewViewModel @Inject constructor(
                 themeMode = _uiState.value.themeMode,
                 forceRefresh = forceRefresh,
                 onPreparingRuntime = { pct ->
+                    if (keepImage) return@render
                     _uiState.update { state ->
                         val nextState = if (pct >= 100) {
                             PreviewRenderState.Rendering
@@ -138,7 +151,8 @@ class ComposePreviewViewModel @Inject constructor(
                                 compiledFiles = result.compiledFiles,
                                 isFallbackTheme = result.isFallbackTheme,
                                 fallbackReason = result.fallbackReason
-                            )
+                            ),
+                            isRefreshing = false
                         )
                     }
                 }
@@ -150,7 +164,8 @@ class ComposePreviewViewModel @Inject constructor(
                         it.copy(
                             renderState = PreviewRenderState.Failed(
                                 throwable.message ?: Res.string(R.string.composepreview_rendering_fehlgeschlagen)
-                            )
+                            ),
+                            isRefreshing = false
                         )
                     }
                 }

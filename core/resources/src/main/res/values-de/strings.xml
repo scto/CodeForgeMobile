@@ -116,6 +116,8 @@
     <string name="composepreview_laufzeit_wird_vorbereitet">Compiler-Laufzeit wird vorbereitet (%1$d%%)…</string>
     <string name="composepreview_mitkompilierte_quellen">Quellen: %1$s</string>
     <string name="composepreview_neu_rendern">Neu rendern</string>
+    <string name="composepreview_verkleinern">Verkleinern</string>
+    <string name="composepreview_vergroessern">Vergrößern</string>
     <string name="composepreview_oeffne_eine_datei_mit_composable">Öffne eine Datei mit @Composable-Funktionen im Editor.</string>
     <string name="composepreview_rendering_fehlgeschlagen">Rendering fehlgeschlagen.</string>
     <string name="composepreview_ressource_nicht_verfuegbar">Ressource \'%1$s\' steht in der Vorschau nicht zur Verfügung.</string>

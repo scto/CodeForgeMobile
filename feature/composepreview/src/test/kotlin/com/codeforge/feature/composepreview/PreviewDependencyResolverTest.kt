@@ -273,4 +273,66 @@ class PreviewDependencyResolverTest {
         assertTrue(resolved.siblingFiles.isEmpty())
         assertEquals("com.example.TargetKt", resolved.targetClassName)
     }
+
+    @Test
+    fun `resolves files from other modules and skips view models but keeps their state`() {
+        val root = tempFolder.newFolder("proj")
+        File(root, "settings.gradle.kts").writeText("include(\":feature:settings\", \":core:designsystem\", \":core:domain\")")
+        fun src(module: String, pkgPath: String, name: String, text: String) =
+            File(root, "$module/src/main/kotlin/$pkgPath/$name").apply { parentFile.mkdirs(); writeText(text.trimIndent()) }
+
+        val screen = src("feature/settings", "com/ex/feature/settings", "SettingsScreen.kt", """
+            package com.ex.feature.settings
+
+            import androidx.hilt.navigation.compose.hiltViewModel
+            import com.ex.core.designsystem.GradientHeader
+            import com.ex.core.domain.AppSettings
+
+            @Composable
+            fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
+                SettingsScreen(viewModel.state)
+            }
+
+            @Composable
+            fun SettingsScreen(state: SettingsUiState) {
+                GradientHeader(AppSettings().title)
+            }
+        """)
+        src("feature/settings", "com/ex/feature/settings", "SettingsViewModel.kt", """
+            package com.ex.feature.settings
+
+            import com.ex.core.domain.ObserveSettingsUseCase
+
+            data class SettingsUiState(val dark: Boolean = false)
+
+            @HiltViewModel
+            class SettingsViewModel @Inject constructor(private val observe: ObserveSettingsUseCase) : ViewModel() {
+                val state = SettingsUiState()
+            }
+        """)
+        src("core/designsystem", "com/ex/core/designsystem", "Header.kt", """
+            package com.ex.core.designsystem
+
+            @Composable
+            fun GradientHeader(title: String) {}
+        """)
+        src("core/domain", "com/ex/core/domain", "Models.kt", """
+            package com.ex.core.domain
+
+            data class AppSettings(val title: String = "")
+        """)
+        src("core/domain", "com/ex/core/domain", "UseCases.kt", """
+            package com.ex.core.domain
+
+            class ObserveSettingsUseCase @Inject constructor()
+        """)
+        // Ausgabeordner eines Builds werden nicht durchsucht
+        src("core/domain/build/generated", "com/ex/core/domain", "Generated.kt", "package com.ex.core.domain\n\nclass AppSettings")
+
+        val resolved = PreviewDependencyResolver.resolve(targetFile = screen)
+
+        assertEquals(root.absoluteFile, resolved.projectRoot?.absoluteFile)
+        assertEquals(listOf("Header.kt", "Models.kt", "SettingsViewModel.kt"), resolved.siblingFiles.map { it.name })
+        assertTrue("SettingsViewModel" in resolved.unavailableNames)
+    }
 }

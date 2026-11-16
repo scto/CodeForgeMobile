@@ -42,6 +42,8 @@ class ComposePreviewRendererImpl @Inject internal constructor(
     private val dexer = PreviewDexer()
     private val buildCache by lazy { PreviewBuildCache(File(context.cacheDir, "compose_preview_cache")) }
     private val resultCache = PreviewResultCache<PreviewRenderResult>()
+    /** Fehlermeldungen gescheiterter Builds je Build-Schlüssel (nur im Speicher). */
+    private val failedBuilds = PreviewResultCache<String>(maxEntries = 8)
     private val loaders = object : LinkedHashMap<String, ClassLoader>(8, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ClassLoader>?): Boolean = size > 4
     }
@@ -53,6 +55,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
     internal fun releaseMemoryCaches(): Int {
         val count = synchronized(loaders) { loaders.size.also { loaders.clear() } }
         resultCache.clear()
+        failedBuilds.clear()
         return count
     }
 
@@ -94,18 +97,29 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                 )
 
                 val siblingTexts = resolvedSources.siblingFiles.joinToString("\n") { f -> f.path + "\u0001" + runCatching { f.readText() }.getOrDefault("") }
+                // R-Ersatz aus den res/values-Ordnern aller Module (R entsteht sonst erst beim Gradle-Build).
+                val resourceStubs = PreviewResourceStubs.generate(
+                    resolvedSources.projectRoot,
+                    listOf(sourceCode) + resolvedSources.siblingFiles.map { f -> runCatching { f.readText() }.getOrDefault("") }
+                )
                 val buildKey = PreviewCacheKey.of(
-                    filePath, sourceCode, siblingTexts, resolvedSources.targetClassName,
+                    filePath, sourceCode, siblingTexts, resourceStubs.values.joinToString("\n"), resolvedSources.targetClassName,
                     runtimeDir.name, runtimeJars.joinToString { it.name + ":" + it.length() }, androidPlatformJar.path, d8Path
                 )
                 val resultKey = "$buildKey|$functionName|$options|$themeMode"
                 if (!forceRefresh) resultCache.get(resultKey)?.let { return@runCatching it }
+                // Derselbe Stand ist schon am Kompilieren gescheitert: Fehler sofort zeigen (z. B. beim Wechsel Hell/Dunkel).
+                if (!forceRefresh) failedBuilds.get(buildKey)?.let { error(it) }
 
                 if (forceRefresh) synchronized(loaders) { loaders.remove(buildKey) }
                 val tResolved = android.os.SystemClock.elapsedRealtime()
                 val cachedBuild = if (forceRefresh) null else buildCache.lookup(buildKey)
                 val build = cachedBuild
-                    ?: buildDex(buildKey, workDir, filePath, sourceCode, resolvedSources, runtimeJars, androidPlatformJar, d8Path)
+                    ?: runCatching {
+                        buildDex(buildKey, workDir, filePath, sourceCode, resolvedSources, resourceStubs, runtimeJars, androidPlatformJar, d8Path)
+                    }.onFailure { e ->
+                        if (e !is kotlinx.coroutines.CancellationException) failedBuilds.put(buildKey, e.message ?: e.javaClass.simpleName)
+                    }.getOrThrow()
                 val tBuilt = android.os.SystemClock.elapsedRealtime()
                 val dexFile = build.dexFile
                 val compiledFiles = build.compiledFiles
@@ -174,10 +188,13 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         filePath: String,
         sourceCode: String,
         resolvedSources: ResolvedPreviewSources,
+        resourceStubs: Map<String, String>,
         runtimeJars: List<File>,
         androidPlatformJar: File,
         d8Path: String
     ): CachedBuild {
+        val unavailable = resolvedSources.unavailableNames
+        val redirect = resourceStubs.isNotEmpty()
         val targetFile = File(filePath)
         val classesDir = File(workDir, "classes")
         val targetFileName = targetFile.name.ifEmpty { "PreviewTarget.kt" }
@@ -187,10 +204,13 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                 source = sourceCode,
                 keepPackage = true,
                 stubProjectThemes = resolvedSources.siblingFiles.isEmpty(),
-                stripThemeSideEffects = true
+                stripThemeSideEffects = true,
+                unavailable = unavailable,
+                redirectResources = redirect
             )
             writeText(prepared)
         }
+        val stubFiles = resourceStubs.map { (name, text) -> File(workDir, name).apply { writeText(text) } }
 
         val preparedSiblingFiles = resolvedSources.siblingFiles.mapIndexed { idx, sFile ->
             val siblingTargetName = if (sFile.name == targetFileName) "sibling_${idx}_${sFile.name}" else sFile.name
@@ -200,11 +220,13 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     source = originalText,
                     keepPackage = true,
                     stubProjectThemes = false,
-                    stripThemeSideEffects = true
+                    stripThemeSideEffects = true,
+                    unavailable = unavailable,
+                    redirectResources = redirect
                 )
                 writeText(prepared)
             }
-        }
+        } + stubFiles
 
         val primaryFiles = listOf(preparedTargetFile) + preparedSiblingFiles
         val tCompile0 = android.os.SystemClock.elapsedRealtime()
@@ -246,7 +268,9 @@ class ComposePreviewRendererImpl @Inject internal constructor(
             val fallback = PreviewCompileStep.determineFallback(
                 primaryResult = compileResult,
                 targetSourceCode = sourceCode,
-                siblingFiles = preparedSiblingFiles
+                siblingFiles = preparedSiblingFiles,
+                unavailable = unavailable,
+                redirectResources = redirect
             )
             if (fallback != null) {
                 val (reason, stubSource) = fallback
@@ -255,7 +279,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                 preparedTargetFile.writeText(stubSource)
 
                 val fallbackResult = compiler.compile(
-                    sourceFiles = listOf(preparedTargetFile),
+                    sourceFiles = listOf(preparedTargetFile) + stubFiles,
                     outputDir = classesDir,
                     runtimeClasspathJars = runtimeJars,
                     androidPlatformJar = androidPlatformJar
@@ -266,7 +290,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     siblingClassesDir = null
                     isFallbackTheme = true
                     fallbackReason = reason
-                    compiledFiles = listOf(preparedTargetFile.name)
+                    compiledFiles = listOf(preparedTargetFile.name) + stubFiles.map { it.name }
                 }
             }
         }
@@ -403,7 +427,9 @@ internal object PreviewCompileStep {
     fun determineFallback(
         primaryResult: CompileResult,
         targetSourceCode: String,
-        siblingFiles: List<File>
+        siblingFiles: List<File>,
+        unavailable: Set<String> = emptySet(),
+        redirectResources: Boolean = false
     ): Pair<String, String>? {
         if (primaryResult.success || siblingFiles.isEmpty()) return null
         val firstSiblingError = primaryResult.errorMessages.firstOrNull { err ->
@@ -414,7 +440,9 @@ internal object PreviewCompileStep {
             source = targetSourceCode,
             keepPackage = true,
             stubProjectThemes = true,
-            stripThemeSideEffects = true
+            stripThemeSideEffects = true,
+            unavailable = unavailable,
+            redirectResources = redirectResources
         )
         return firstSiblingError to fallbackSource
     }

@@ -11,6 +11,20 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert (Compose-Vorschau)
+- Mehrmodul-Projekte: die Vorschau findet Quellen aus allen Modulen des Gradle-Projekts (z. B. `:core:designsystem`,
+  `:core:domain`), nicht mehr nur aus dem eigenen Modul.
+- `R` aus anderen Modulen (z. B. `:core:resources`): Ersatzklassen aus den `res/values*`-Ordnern; `stringResource`,
+  `pluralStringResource`, `stringArrayResource`, `colorResource` und `dimensionResource` liefern die echten Texte und
+  Werte (passend zur Sprache der Vorschau), `painterResource` einen Platzhalter.
+- ViewModels, Activities, Hilt-Module und Funktionen, die ein ViewModel holen (`hiltViewModel()`, typischerweise die
+  „Route“), werden für die Vorschau entfernt; UI-Zustand und Ereignisse in derselben Datei bleiben, ebenso Konstanten
+  aus dem `companion object`. `@Inject` & Co. stören nicht mehr.
+- Zoom-Leiste unter der Vorschau (− / Zoomstufe / +, 50–400 %, Tippen auf die Stufe = 100 %); vergrößert Bild und
+  Texte, bei mehr als 100 % verschiebbar.
+- Wechsel Auto/Hell/Dunkel kompiliert nicht neu (der Build kommt aus dem Cache) und behält das bisherige Bild, bis das
+  neue fertig ist; ein fehlgeschlagener Stand wird nicht bei jedem Wechsel erneut kompiliert.
+
 ### Geändert (Projektvorlagen)
 - Alle Compose-Vorlagen (`compose-clean`, `compose-drawer`, `compose-bottomnav`) 1.1.0: `build-logic` mit
   Convention-Plugins (`app.android.application`, `app.android.library`, `app.android.library.compose`,

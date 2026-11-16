@@ -116,6 +116,8 @@
     <string name="composepreview_laufzeit_wird_vorbereitet">Preparing compiler runtime (%1$d%%)…</string>
     <string name="composepreview_mitkompilierte_quellen">Sources: %1$s</string>
     <string name="composepreview_neu_rendern">Re-render</string>
+    <string name="composepreview_verkleinern">Zoom out</string>
+    <string name="composepreview_vergroessern">Zoom in</string>
     <string name="composepreview_oeffne_eine_datei_mit_composable">Open a file containing @Composable functions in the editor.</string>
     <string name="composepreview_rendering_fehlgeschlagen">Rendering failed.</string>
     <string name="composepreview_ressource_nicht_verfuegbar">Resource \'%1$s\' is not available in the preview.</string>

@@ -35,8 +35,22 @@ data class ComposePreviewUiState(
     val availableComposables: List<ComposableCandidate> = emptyList(),
     val selectedFunctionName: String? = null,
     val renderState: PreviewRenderState = PreviewRenderState.Idle,
-    val themeMode: PreviewThemeMode = PreviewThemeMode.AUTO
+    val themeMode: PreviewThemeMode = PreviewThemeMode.AUTO,
+    /** Vergrößerung der Vorschau samt Texten (1.0 = 100 %). */
+    val zoom: Float = PreviewZoom.DEFAULT,
+    /** Ein neues Bild wird erzeugt; das bisherige bleibt so lange sichtbar. */
+    val isRefreshing: Boolean = false
 )
+
+/** Zoomstufen der Vorschau. */
+object PreviewZoom {
+    const val DEFAULT = 1f
+    /** Stufen in Prozent: fein um 100 %, gröber darüber. */
+    val STEPS = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f, 4f)
+
+    fun zoomIn(current: Float): Float = STEPS.firstOrNull { it > current + 0.001f } ?: STEPS.last()
+    fun zoomOut(current: Float): Float = STEPS.lastOrNull { it < current - 0.001f } ?: STEPS.first()
+}
 
 /** Aktionen der Compose-Vorschau. */
 sealed interface ComposePreviewUiEvent {
@@ -46,4 +60,10 @@ sealed interface ComposePreviewUiEvent {
     data object Rerender : ComposePreviewUiEvent
     /** Hell/Dunkel gewechselt. */
     data class ThemeModeChanged(val mode: PreviewThemeMode) : ComposePreviewUiEvent
+    /** Vergrößern. */
+    data object ZoomIn : ComposePreviewUiEvent
+    /** Verkleinern. */
+    data object ZoomOut : ComposePreviewUiEvent
+    /** Auf 100 % zurück. */
+    data object ZoomReset : ComposePreviewUiEvent
 }
