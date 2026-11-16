@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.1.4] - 2026-11-16
+
 ### Behoben (Compose-Vorschau)
 - „Funktion '…Preview' nicht in kompiliertem Code gefunden“ bei `private` `@Preview`-Funktionen (üblich in Android
   Studio und in allen Projektvorlagen): die Vorschau sucht jetzt auch private statische Methoden der Datei-Klasse.
