@@ -140,7 +140,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     classLoader.loadClass("PreviewTargetKt")
                 }
 
-                val targetMethod = hostClass.methods.firstOrNull { it.name == functionName }
+                val targetMethod = PreviewMethodLookup.find(hostClass, functionName)
                     ?: error(Res.string(R.string.composepreview_funktion_nicht_in_kompiliertem_code, functionName))
 
                 // Parameterlose Signatur prüfen (Composer, Int); Funktionen mit Parametern ablehnen
