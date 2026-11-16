@@ -281,6 +281,22 @@ private fun RenderStateContent(state: PreviewRenderState, onRetry: () -> Unit) {
                     )
                 }
 
+                Text(
+                    text = stringRes(
+                        if (state.engine == com.codeforge.core.domain.model.PreviewEngine.INTERPRETED) R.string.composepreview_engine_interpreted
+                        else R.string.composepreview_engine_compiled,
+                        state.durationMs.toInt()
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                state.engineNote?.let { note ->
+                    Text(
+                        text = stringRes(R.string.composepreview_engine_fallback, note),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
                 if (state.compiledFiles.size > 1) {
                     Text(
                         text = stringRes(R.string.composepreview_mitkompilierte_quellen, state.compiledFiles.joinToString(", ")),

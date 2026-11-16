@@ -43,5 +43,14 @@ data class PreviewRenderResult(
     val imageBytes: ByteArray?,
     val compiledFiles: List<String> = emptyList(),
     val isFallbackTheme: Boolean = false,
-    val fallbackReason: String? = null
+    val fallbackReason: String? = null,
+    /** Wie das Bild entstand (kompiliert oder interpretiert). */
+    val engine: PreviewEngine = PreviewEngine.COMPILED,
+    /** Dauer der Vorschau in Millisekunden (inkl. Kompilieren bzw. Interpretieren und Rendern). */
+    val durationMs: Long = 0,
+    /** Hinweis, warum der Interpreter nicht genutzt werden konnte (Rückfall auf kompiliert). */
+    val engineNote: String? = null
 )
+
+/** Weg, auf dem eine Vorschau entsteht. */
+enum class PreviewEngine { COMPILED, INTERPRETED }

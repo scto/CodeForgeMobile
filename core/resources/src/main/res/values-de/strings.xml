@@ -2725,4 +2725,13 @@
     <string name="build_tasks_haeufig">Häufig</string>
     <string name="flashbar_expanded">Aufgeklappt, tippen zum Zuklappen</string>
     <string name="flashbar_collapsed">Zugeklappt, tippen für Details</string>
+    <string name="settings_compose_preview_title">Compose-Vorschau</string>
+    <string name="settings_compose_preview_compiled">Kompilierte Vorschau</string>
+    <string name="settings_compose_preview_compiled_on">An: Die Datei wird mit kotlinc kompiliert und gedext (exakt, dauert aber Sekunden).</string>
+    <string name="settings_compose_preview_compiled_off">Aus: Die geöffnete Datei wird interpretiert (schnell, experimentell). Nicht unterstützter Code wird automatisch kompiliert.</string>
+    <string name="settings_compose_preview_compare_title">Vergleichen</string>
+    <string name="settings_compose_preview_compare_text">Jede Vorschau zeigt, wie sie entstanden ist und wie lange sie gedauert hat. Andere Dateien und Module werden in beiden Modi einmal kompiliert und zwischengespeichert.</string>
+    <string name="composepreview_engine_compiled">Kompiliert · %1$d ms</string>
+    <string name="composepreview_engine_interpreted">Interpretiert · %1$d ms</string>
+    <string name="composepreview_engine_fallback">Interpreter nicht möglich (%1$s) – stattdessen kompiliert</string>
 </resources>

@@ -11,6 +11,18 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Compose-Vorschau)
+- Einstellungen → „Compose-Vorschau“ (`ComposePreviewSettingsScreen`) mit Schalter „Kompilierte Vorschau“:
+  An = bisheriger Weg (kotlinc + D8, Standard), Aus = **interpretierte Vorschau** (experimentell). Der Wechsel
+  rendert die geöffnete Vorschau sofort neu.
+- Interpretierte Vorschau: Nur die geöffnete Datei wird von einem eigenen Kotlin-Interpreter ausgeführt;
+  Nachbardateien und andere Module werden wie bisher einmal kompiliert und zwischengespeichert, Compose/Material 3
+  laufen als echter Code (per Reflection inkl. Compose-Aufrufkonvention, Kotlin-Metadaten, Wertklassen wie `Dp`/`Color`,
+  `remember`/State, Lambdas, `R`-Ressourcen aus `res/values*`). Nicht Unterstütztes (z. B. Klassen in der Zieldatei,
+  `object`-Ausdrücke) fällt automatisch auf die kompilierte Vorschau zurück – mit Hinweis auf den Grund.
+- Jede Vorschau zeigt, wie sie entstanden ist und wie lange sie gedauert hat („Interpretiert · 85 ms“ bzw.
+  „Kompiliert · 12 400 ms“), für direkte Vergleiche.
+
 ## [3.1.4] - 2026-11-16
 
 ### Behoben (Compose-Vorschau)

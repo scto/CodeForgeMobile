@@ -67,6 +67,7 @@ internal object Routes {
     const val SETTINGS_LSP = "settings_lsp"
     const val SETTINGS_FORMATTERS = "settings_formatters"
     const val SETTINGS_GIT = "settings_git"
+    const val SETTINGS_COMPOSE_PREVIEW = "settings_compose_preview"
     const val SETTINGS_DEBUG = "settings_debug"
     const val SETTINGS_AI = "settings_ai"
     const val SETTINGS_HELP = "settings_help"
@@ -220,7 +221,8 @@ fun CodeForgeNavHost(
                 onNavigateToStore = { navController.navigate(Routes.SETTINGS_STORE) },
                 onNavigateToPackages = { navController.navigate(Routes.SETTINGS_PACKAGES) },
                 onNavigateToProjectsRoot = { navController.navigate(Routes.SETTINGS_PROJECTS_ROOT) },
-                onNavigateToBuildRun = { navController.navigate(Routes.SETTINGS_BUILD_RUN) }
+                onNavigateToBuildRun = { navController.navigate(Routes.SETTINGS_BUILD_RUN) },
+                onNavigateToComposePreview = { navController.navigate(Routes.SETTINGS_COMPOSE_PREVIEW) }
             )
         }
         composable(Routes.SETTINGS_THEME) {
@@ -287,6 +289,9 @@ fun CodeForgeNavHost(
             SdkManagerRoute(
                 onBack = { navigateBackOrStart() }
             )
+        }
+        composable(Routes.SETTINGS_COMPOSE_PREVIEW) {
+            com.codeforge.feature.settings.ComposePreviewSettingsRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_GIT) {
             GitSettingsRoute(

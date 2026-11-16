@@ -22,6 +22,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -34,7 +37,8 @@ class ComposePreviewViewModel @Inject constructor(
     private val previewBridge: ActiveComposablePreviewBridge,
     private val composeSourceAnalyzer: ComposeSourceAnalyzer,
     private val composePreviewRenderer: ComposePreviewRenderer,
-    private val logger: CfmLogger
+    private val logger: CfmLogger,
+    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ComposePreviewUiState())
@@ -55,6 +59,13 @@ class ComposePreviewViewModel @Inject constructor(
     init {
         activeFileFlow
             .onEach(::handleActiveFileChanged)
+            .launchIn(viewModelScope)
+        // Wechsel Kompiliert/Interpretiert in den Einstellungen: sofort neu rendern.
+        settingsRepository.appSettings
+            .map { it.composePreview.interpreted }
+            .distinctUntilChanged()
+            .drop(1)
+            .onEach { _uiState.value.selectedFunctionName?.let(::renderSelected) }
             .launchIn(viewModelScope)
     }
 
@@ -150,7 +161,10 @@ class ComposePreviewViewModel @Inject constructor(
                                 imageBytes = result.imageBytes,
                                 compiledFiles = result.compiledFiles,
                                 isFallbackTheme = result.isFallbackTheme,
-                                fallbackReason = result.fallbackReason
+                                fallbackReason = result.fallbackReason,
+                                engine = result.engine,
+                                durationMs = result.durationMs,
+                                engineNote = result.engineNote
                             ),
                             isRefreshing = false
                         )

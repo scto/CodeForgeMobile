@@ -60,6 +60,15 @@ class SettingsRepository @Inject constructor(
         }
     }
 
+    /** Ändert die Einstellungen der Compose-Vorschau. */
+    suspend fun updateComposePreview(
+        transform: (com.codeforge.core.datastore.proto.ComposePreviewConfig) -> com.codeforge.core.datastore.proto.ComposePreviewConfig
+    ) {
+        dataStore.updateData { current ->
+            current.toBuilder().setComposePreview(transform(current.composePreview)).build()
+        }
+    }
+
     /** Ändert die Dateibaum-Einstellungen. */
     suspend fun updateFileTree(transform: (com.codeforge.core.datastore.proto.FileTreeConfig) -> com.codeforge.core.datastore.proto.FileTreeConfig) {
         dataStore.updateData { current ->

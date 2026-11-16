@@ -2725,4 +2725,13 @@
     <string name="build_tasks_haeufig">Common</string>
     <string name="flashbar_expanded">Expanded, tap to collapse</string>
     <string name="flashbar_collapsed">Collapsed, tap for details</string>
+    <string name="settings_compose_preview_title">Compose preview</string>
+    <string name="settings_compose_preview_compiled">Compiled preview</string>
+    <string name="settings_compose_preview_compiled_on">On: the file is compiled with kotlinc and dexed (exact, but takes seconds).</string>
+    <string name="settings_compose_preview_compiled_off">Off: the open file is interpreted (fast, experimental). Unsupported code falls back to compiling automatically.</string>
+    <string name="settings_compose_preview_compare_title">Compare</string>
+    <string name="settings_compose_preview_compare_text">Every preview shows how it was produced and how long it took. Other files and modules are still compiled once and cached in both modes.</string>
+    <string name="composepreview_engine_compiled">Compiled · %1$d ms</string>
+    <string name="composepreview_engine_interpreted">Interpreted · %1$d ms</string>
+    <string name="composepreview_engine_fallback">Interpreter not possible (%1$s) – compiled instead</string>
 </resources>

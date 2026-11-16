@@ -14,6 +14,12 @@ message AppSettings {
   DebugConfig debug = 8;
   GitConfig git = 9;
   FileTreeConfig file_tree = 10;
+  ComposePreviewConfig compose_preview = 11;
+}
+
+message ComposePreviewConfig {
+  // Invertiert gespeichert: Standard (false) = kompilierte Vorschau (bisheriger Weg), true = interpretiert.
+  bool interpreted = 1;
 }
 
 message FileTreeConfig {

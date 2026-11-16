@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.SdCard
 import androidx.compose.material.icons.filled.Source
@@ -64,7 +65,8 @@ fun SettingsHubRoute(
     onNavigateToPackages: () -> Unit = {},
     onNavigateToProjectsRoot: () -> Unit = {},
     onNavigateToBuildRun: () -> Unit = {},
-    onNavigateToAi: () -> Unit = {}
+    onNavigateToAi: () -> Unit = {},
+    onNavigateToComposePreview: () -> Unit = {}
 ) {
     val entries = listOf(
         SettingsEntry(R.string.settings_hub_theme, Icons.Filled.Palette, onNavigateToTheme),
@@ -74,6 +76,7 @@ fun SettingsHubRoute(
         SettingsEntry(R.string.settings_hub_git, Icons.Filled.Source, onNavigateToGit),
         SettingsEntry(R.string.sdkmanager_title, Icons.Filled.SdCard, onNavigateToSdkManager),
         SettingsEntry(R.string.settings_hub_build_run, Icons.Filled.PlayArrow, onNavigateToBuildRun),
+        SettingsEntry(R.string.settings_compose_preview_title, Icons.Filled.Preview, onNavigateToComposePreview),
         SettingsEntry(R.string.settings_hub_projects_root, Icons.Filled.Folder, onNavigateToProjectsRoot),
         SettingsEntry(R.string.settings_hub_packages, Icons.Filled.Inventory2, onNavigateToPackages),
         SettingsEntry(R.string.settings_hub_ai, Icons.Filled.AutoAwesome, onNavigateToAi),

@@ -33,6 +33,17 @@ android {
         buildConfigField("String", "COMPILER_RUNTIME_ZIP_NAME", "\"$compilerRuntimeZipName\"")
         buildConfigField("String", "COMPILER_RUNTIME_BASE_URL", "\"$compilerRuntimeBaseUrl\"")
     }
+
+    // Interpreter-Tests rendern echte Compose-Oberflächen (Robolectric).
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all { test ->
+            System.getenv("ROBOLECTRIC_DEPS_DIR")?.let {
+                test.systemProperty("robolectric.offline", "true")
+                test.systemProperty("robolectric.dependency.dir", it)
+            }
+        }
+    }
 }
 
 val compilerRuntimeConfig: Configuration by configurations.creating {
@@ -58,6 +69,9 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:resources"))
     implementation(project(":core:domain"))
+    implementation(project(":core:datastore"))
+    // Interpretierte Vorschau: Kotlin-Metadaten (Parameternamen, Defaults, Wertklassen) per Reflection lesen
+    implementation(libs.kotlin.metadata.jvm)
     implementation(project(":core:ui"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
@@ -102,6 +116,9 @@ dependencies {
     }
 
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
     testImplementation(libs.kotlinx.coroutines.core)
 
     androidTestImplementation(libs.junit)

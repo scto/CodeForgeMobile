@@ -28,6 +28,7 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 /** Rendert `@Preview`-Funktionen: kompiliert den Code, wandelt ihn mit D8 und lädt ihn in einem Klassenlader. */
@@ -36,7 +37,8 @@ class ComposePreviewRendererImpl @Inject internal constructor(
     @ApplicationContext private val context: Context,
     private val sdkRepository: SdkRepository,
     private val compilerRuntimeProvider: CompilerRuntimeProvider,
-    private val compiler: PreviewCompiling
+    private val compiler: PreviewCompiling,
+    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository
 ) : ComposePreviewRenderer {
 
     private val dexer = PreviewDexer()
@@ -107,9 +109,39 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     runtimeDir.name, runtimeJars.joinToString { it.name + ":" + it.length() }, androidPlatformJar.path, d8Path
                 )
                 val resultKey = "$buildKey|$functionName|$options|$themeMode"
-                if (!forceRefresh) resultCache.get(resultKey)?.let { return@runCatching it }
+                val interpretedMode = runCatching { settingsRepository.appSettings.first().composePreview.interpreted }.getOrDefault(false)
+                if (!forceRefresh && !interpretedMode) resultCache.get(resultKey)?.let { return@runCatching it }
                 // Derselbe Stand ist schon am Kompilieren gescheitert: Fehler sofort zeigen (z. B. beim Wechsel Hell/Dunkel).
-                if (!forceRefresh) failedBuilds.get(buildKey)?.let { error(it) }
+                if (!forceRefresh && !interpretedMode) failedBuilds.get(buildKey)?.let { error(it) }
+
+                // Interpretierter Weg (Einstellung „Kompilierte Vorschau“ aus): nur die Zieldatei wird interpretiert.
+                var engineNote: String? = null
+                val interpreted = runCatching { settingsRepository.appSettings.first().composePreview.interpreted }.getOrDefault(false)
+                if (interpreted) {
+                    val interpKey = "interp|$resultKey"
+                    if (!forceRefresh) resultCache.get(interpKey)?.let { return@runCatching it }
+                    val attempt = runCatching {
+                        renderInterpreted(
+                            workDir, sourceCode, functionName, resolvedSources, runtimeJars, androidPlatformJar, d8Path,
+                            options, themeMode
+                        )
+                    }
+                    attempt.getOrNull()?.let { bytes ->
+                        val ms = android.os.SystemClock.elapsedRealtime() - t0
+                        android.util.Log.i("CFPreviewPerf", "interpretiert gesamt=${ms}ms")
+                        return@runCatching PreviewRenderResult(
+                            functionName = functionName,
+                            imageBytes = bytes,
+                            compiledFiles = listOf(File(filePath).name),
+                            engine = com.codeforge.core.domain.model.PreviewEngine.INTERPRETED,
+                            durationMs = ms
+                        ).also { resultCache.put(interpKey, it) }
+                    }
+                    val failure = attempt.exceptionOrNull()
+                    if (failure is kotlinx.coroutines.CancellationException) throw failure
+                    engineNote = interpreterFailureText(failure)
+                    android.util.Log.w("CFPreviewPerf", "Interpreter -> kompiliert: $engineNote", failure)
+                }
 
                 if (forceRefresh) synchronized(loaders) { loaders.remove(buildKey) }
                 val tResolved = android.os.SystemClock.elapsedRealtime()
@@ -172,14 +204,113 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     imageBytes = bitmap.toPngBytes(),
                     compiledFiles = compiledFiles,
                     isFallbackTheme = isFallbackTheme,
-                    fallbackReason = fallbackReason
-                ).also { resultCache.put(resultKey, it) }
+                    fallbackReason = fallbackReason,
+                    engine = com.codeforge.core.domain.model.PreviewEngine.COMPILED,
+                    durationMs = tRendered - t0,
+                    engineNote = engineNote
+                ).also { if (engineNote == null) resultCache.put(resultKey, it) }
             } finally {
                 workDir.deleteRecursively()
             }
         }
     }
 
+
+    private fun previewStyle(options: PreviewOptions, themeMode: PreviewThemeMode): PreviewStyle {
+        val dark = when (themeMode) {
+            PreviewThemeMode.LIGHT -> false
+            PreviewThemeMode.DARK -> true
+            PreviewThemeMode.AUTO -> options.darkMode ?: false
+        }
+        val background = options.backgroundColor?.toInt() ?: if (dark) 0xFF1C1B1F.toInt() else 0xFFFFFFFF.toInt()
+        return PreviewStyle(
+            dark = dark, backgroundArgb = background, widthDp = options.widthDp, heightDp = options.heightDp,
+            fontScale = options.fontScale, locale = options.locale
+        )
+    }
+
+    /** Kurzer, verständlicher Grund für den Rückfall vom Interpreter auf die kompilierte Vorschau. */
+    private fun interpreterFailureText(t: Throwable?): String {
+        var cause = t
+        while (cause != null && cause !is com.codeforge.feature.composepreview.interpreter.UnsupportedKotlinException && cause.cause != null && cause.cause !== cause) cause = cause.cause
+        val msg = (cause ?: t)?.let { it.message ?: it.javaClass.simpleName } ?: "?"
+        return msg.lineSequence().first().take(160)
+    }
+
+    /** Lader der vorkompilierten Nachbarn je Stand (sonst bei jeder Vorschau neu). */
+    private val siblingLoaders = object : LinkedHashMap<String, Pair<ClassLoader, List<String>>>(4, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<ClassLoader, List<String>>>?): Boolean = size > 3
+    }
+
+    /**
+     * Interpretierte Vorschau: Nachbardateien (und das Ersatz-`R` für sie) werden wie bisher einmal kompiliert und
+     * zwischengespeichert; die Zieldatei selbst wird interpretiert. Liefert das PNG oder wirft (→ Rückfall).
+     */
+    private suspend fun renderInterpreted(
+        workDir: File,
+        sourceCode: String,
+        functionName: String,
+        resolvedSources: ResolvedPreviewSources,
+        runtimeJars: List<File>,
+        androidPlatformJar: File,
+        d8Path: String,
+        options: PreviewOptions,
+        themeMode: PreviewThemeMode,
+    ): ByteArray {
+        val unavailable = resolvedSources.unavailableNames
+        val siblingTexts = resolvedSources.siblingFiles.map { runCatching { it.readText() }.getOrDefault("") }
+        // Ersatz-R nur für die Nachbarn: die Zieldatei löst R selbst auf (ändert sich also nicht beim Tippen).
+        val siblingStubs = PreviewResourceStubs.generate(resolvedSources.projectRoot, siblingTexts)
+        val siblingDir = File(workDir, "siblings").apply { mkdirs() }
+        val preparedSiblings = resolvedSources.siblingFiles.mapIndexed { idx, sFile ->
+            File(siblingDir, "${idx}_${sFile.name}").apply {
+                writeText(
+                    PreviewSourcePreparer.prepare(
+                        source = siblingTexts[idx], keepPackage = true, stubProjectThemes = false, stripThemeSideEffects = true,
+                        unavailable = unavailable, redirectResources = siblingStubs.isNotEmpty()
+                    )
+                )
+            }
+        } + siblingStubs.map { (name, text) -> File(siblingDir, name).apply { writeText(text) } }
+
+        val (loader, siblingClassNames) = if (preparedSiblings.isEmpty()) {
+            context.classLoader to emptyList()
+        } else {
+            val key = PreviewCacheKey.of("interp-siblings", preparedSiblings.joinToString("\n") { it.name + "\u0001" + it.readText() })
+            synchronized(siblingLoaders) { siblingLoaders[key] } ?: run {
+                val classesDir = precompileSiblings(preparedSiblings, runtimeJars, androidPlatformJar)
+                    ?: throw com.codeforge.feature.composepreview.interpreter.UnsupportedKotlinException("Nachbardateien lassen sich nicht ohne die Zieldatei kompilieren")
+                val dexDir = File(classesDir, "sibling-dex")
+                val dex = File(dexDir, "classes.dex")
+                if (!dex.isFile) {
+                    dexDir.deleteRecursively()
+                    val r = dexer.dex(classesDir.walkTopDown().filter { it.extension == "class" }.toList(), dexDir, d8Path)
+                    if (!r.success) throw com.codeforge.feature.composepreview.interpreter.UnsupportedKotlinException("Nachbardateien: D8 fehlgeschlagen")
+                }
+                dex.setReadOnly()
+                val optimizedDir = File(context.codeCacheDir, "compose_preview_dex").apply { mkdirs() }
+                val l = dalvik.system.DexClassLoader(dex.absolutePath, optimizedDir.absolutePath, null, context.classLoader)
+                val names = com.codeforge.feature.composepreview.interpreter.ClassIndexes.dexClassNames(dex.absolutePath)
+                (l to names).also { synchronized(siblingLoaders) { siblingLoaders[key] = it } }
+            }
+        }
+        val apkPaths = listOfNotNull(context.applicationInfo.sourceDir) + context.applicationInfo.splitSourceDirs.orEmpty()
+        val index = com.codeforge.feature.composepreview.interpreter.MapClassIndex(
+            com.codeforge.feature.composepreview.interpreter.ClassIndexes.hostClasses(apkPaths).asSequence() + siblingClassNames.asSequence()
+        )
+        val target = PreviewCodeStripper.strip(sourceCode, unavailable).text
+        val preview = com.codeforge.feature.composepreview.interpreter.InterpretedPreview.prepare(
+            source = target,
+            functionName = functionName,
+            loader = loader,
+            classIndex = index,
+            resourceValues = PreviewResourceStubs.loadValues(resolvedSources.projectRoot)
+        )
+        val bitmap = ComposeViewBitmapRenderer(context).renderToBitmap(style = previewStyle(options, themeMode)) { onError ->
+            preview.Content(onError)
+        }
+        return bitmap.toPngBytes()
+    }
 
     /** Kompiliert (Kotlin + Compose-Plugin) und dext; legt das Ergebnis im [buildCache] ab. */
     private suspend fun buildDex(

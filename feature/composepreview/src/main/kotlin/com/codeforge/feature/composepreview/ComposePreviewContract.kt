@@ -22,7 +22,10 @@ sealed interface PreviewRenderState {
         val imageBytes: ByteArray?,
         val compiledFiles: List<String> = emptyList(),
         val isFallbackTheme: Boolean = false,
-        val fallbackReason: String? = null
+        val fallbackReason: String? = null,
+        val engine: com.codeforge.core.domain.model.PreviewEngine = com.codeforge.core.domain.model.PreviewEngine.COMPILED,
+        val durationMs: Long = 0,
+        val engineNote: String? = null
     ) : PreviewRenderState
     /** Fehlgeschlagen. */
     data class Failed(val message: String) : PreviewRenderState
