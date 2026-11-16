@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.1.3] - 2026-11-16
+
 ### Geändert (Compose-Vorschau)
 - Mehrmodul-Projekte: die Vorschau findet Quellen aus allen Modulen des Gradle-Projekts (z. B. `:core:designsystem`,
   `:core:domain`), nicht mehr nur aus dem eigenen Modul.
