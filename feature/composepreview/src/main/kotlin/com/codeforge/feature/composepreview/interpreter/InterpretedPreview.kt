@@ -33,6 +33,7 @@ internal class InterpretedPreview private constructor(private val interpreter: I
             loader: ClassLoader,
             classIndex: ClassIndex,
             resourceValues: Map<String, PreviewResourceStubs.Values>,
+            compiledR: Boolean = false,
         ): InterpretedPreview {
             val file = try { KtParser(source).parseFile() } catch (e: UnsupportedKotlinException) {
                 throw UnsupportedKotlinException("Zeile ${KtParser.lineOf(source, e.offset)}: ${e.message}", e.offset)
@@ -41,7 +42,7 @@ internal class InterpretedPreview private constructor(private val interpreter: I
                 ?: throw UnsupportedKotlinException("Funktion '$functionName' nicht gefunden")
             if (fn.params.any { it.default == null }) throw UnsupportedKotlinException("'$functionName' hat Parameter ohne Standardwert")
             val reflect = KotlinReflect(loader, classIndex)
-            return InterpretedPreview(Interpreter(file, reflect, PreviewResourceTable(resourceValues, loader)), functionName)
+            return InterpretedPreview(Interpreter(file, reflect, PreviewResourceTable(resourceValues, loader), compiledR), functionName)
         }
     }
 }

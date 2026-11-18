@@ -2733,5 +2733,6 @@
     <string name="settings_compose_preview_compare_text">Every preview shows how it was produced and how long it took. Other files and modules are still compiled once and cached in both modes.</string>
     <string name="composepreview_engine_compiled">Compiled · %1$d ms</string>
     <string name="composepreview_engine_interpreted">Interpreted · %1$d ms</string>
+    <string name="composepreview_build_outputs">Classes and resources from the last Gradle build</string>
     <string name="composepreview_engine_fallback">Interpreter not possible (%1$s) – compiled instead</string>
 </resources>

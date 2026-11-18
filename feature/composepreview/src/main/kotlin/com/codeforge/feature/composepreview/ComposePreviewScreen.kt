@@ -290,6 +290,13 @@ private fun RenderStateContent(state: PreviewRenderState, onRetry: () -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
+                if (state.usesBuildOutputs) {
+                    Text(
+                        text = stringRes(R.string.composepreview_build_outputs),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 state.engineNote?.let { note ->
                     Text(
                         text = stringRes(R.string.composepreview_engine_fallback, note),

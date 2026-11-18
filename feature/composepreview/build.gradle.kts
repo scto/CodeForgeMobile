@@ -38,6 +38,10 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all { test ->
+            System.getenv("CF_GRADLE_SAMPLE")?.let { test.systemProperty("cf.gradleSample", it) }
+            listOf("CF_RES_APK" to "cf.resApk", "CF_RES_ID" to "cf.resId", "CF_RES_TEXT" to "cf.resText").forEach { (env, prop) ->
+                System.getenv(env)?.let { test.systemProperty(prop, it) }
+            }
             System.getenv("ROBOLECTRIC_DEPS_DIR")?.let {
                 test.systemProperty("robolectric.offline", "true")
                 test.systemProperty("robolectric.dependency.dir", it)

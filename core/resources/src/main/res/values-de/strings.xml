@@ -2733,5 +2733,6 @@
     <string name="settings_compose_preview_compare_text">Jede Vorschau zeigt, wie sie entstanden ist und wie lange sie gedauert hat. Andere Dateien und Module werden in beiden Modi einmal kompiliert und zwischengespeichert.</string>
     <string name="composepreview_engine_compiled">Kompiliert · %1$d ms</string>
     <string name="composepreview_engine_interpreted">Interpretiert · %1$d ms</string>
+    <string name="composepreview_build_outputs">Klassen und Ressourcen aus dem letzten Gradle-Build</string>
     <string name="composepreview_engine_fallback">Interpreter nicht möglich (%1$s) – stattdessen kompiliert</string>
 </resources>

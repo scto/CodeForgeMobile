@@ -164,7 +164,8 @@ class ComposePreviewViewModel @Inject constructor(
                                 fallbackReason = result.fallbackReason,
                                 engine = result.engine,
                                 durationMs = result.durationMs,
-                                engineNote = result.engineNote
+                                engineNote = result.engineNote,
+                                usesBuildOutputs = result.usesBuildOutputs
                             ),
                             isRefreshing = false
                         )

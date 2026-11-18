@@ -49,7 +49,9 @@ data class PreviewRenderResult(
     /** Dauer der Vorschau in Millisekunden (inkl. Kompilieren bzw. Interpretieren und Rendern). */
     val durationMs: Long = 0,
     /** Hinweis, warum der Interpreter nicht genutzt werden konnte (Rückfall auf kompiliert). */
-    val engineNote: String? = null
+    val engineNote: String? = null,
+    /** Klassen und Ressourcen kamen aus einem aktuellen Gradle-Build des Projekts. */
+    val usesBuildOutputs: Boolean = false
 )
 
 /** Weg, auf dem eine Vorschau entsteht. */

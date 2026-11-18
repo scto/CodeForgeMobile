@@ -98,6 +98,74 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     targetSourceOverride = sourceCode
                 )
 
+                val interpretedMode = runCatching { settingsRepository.appSettings.first().composePreview.interpreted }.getOrDefault(false)
+                // Aktueller Gradle-Build vorhanden? Dann echte Klassen, R und Ressourcen statt Nachbar-Kompilierung und Ersatz-R.
+                val gradle = gradleOutputs(resolvedSources.projectRoot, targetFile)
+
+                // Interpretierter Weg (Einstellung „Kompilierte Vorschau“ aus): nur die Zieldatei wird interpretiert.
+                var engineNote: String? = null
+                if (interpretedMode) {
+                    val interpKey = "interp|" + PreviewCacheKey.of(
+                        filePath, sourceCode, gradle?.stamp ?: siblingStamp(resolvedSources), functionName, "$options", "$themeMode"
+                    )
+                    if (!forceRefresh) resultCache.get(interpKey)?.let { return@runCatching it }
+                    val attempt = runCatching {
+                        renderInterpreted(
+                            workDir, sourceCode, functionName, resolvedSources, runtimeJars, androidPlatformJar, d8Path,
+                            options, themeMode, gradle
+                        )
+                    }
+                    attempt.getOrNull()?.let { bytes ->
+                        val ms = android.os.SystemClock.elapsedRealtime() - t0
+                        android.util.Log.i("CFPreviewPerf", "interpretiert gesamt=${ms}ms gradle=${gradle != null}")
+                        return@runCatching PreviewRenderResult(
+                            functionName = functionName,
+                            imageBytes = bytes,
+                            compiledFiles = listOf(File(filePath).name),
+                            engine = com.codeforge.core.domain.model.PreviewEngine.INTERPRETED,
+                            durationMs = ms,
+                            usesBuildOutputs = gradle != null
+                        ).also { resultCache.put(interpKey, it) }
+                    }
+                    val failure = attempt.exceptionOrNull()
+                    if (failure is kotlinx.coroutines.CancellationException) throw failure
+                    engineNote = interpreterFailureText(failure)
+                    android.util.Log.w("CFPreviewPerf", "Interpreter -> kompiliert: $engineNote", failure)
+                }
+
+                // Kompiliert mit Gradle-Build: nur die Zieldatei wird übersetzt, Rest kommt aus dem Build.
+                if (gradle != null) {
+                    val gradleKey = PreviewCacheKey.of(
+                        "gradle", filePath, sourceCode, gradle.stamp, resolvedSources.targetClassName,
+                        runtimeDir.name, runtimeJars.joinToString { it.name + ":" + it.length() }, androidPlatformJar.path, d8Path
+                    )
+                    val gradleResultKey = "$gradleKey|$functionName|$options|$themeMode"
+                    if (!forceRefresh && engineNote == null) resultCache.get(gradleResultKey)?.let { return@runCatching it }
+                    val attempt = runCatching {
+                        renderWithGradle(
+                            gradleKey, workDir, filePath, sourceCode, functionName, resolvedSources, gradle,
+                            runtimeJars, androidPlatformJar, d8Path, options, themeMode, forceRefresh
+                        )
+                    }
+                    attempt.getOrNull()?.let { bitmapBytes ->
+                        val ms = android.os.SystemClock.elapsedRealtime() - t0
+                        android.util.Log.i("CFPreviewPerf", "kompiliert mit Gradle-Build gesamt=${ms}ms")
+                        return@runCatching PreviewRenderResult(
+                            functionName = functionName,
+                            imageBytes = bitmapBytes,
+                            compiledFiles = listOf(File(filePath).name),
+                            engine = com.codeforge.core.domain.model.PreviewEngine.COMPILED,
+                            durationMs = ms,
+                            engineNote = engineNote,
+                            usesBuildOutputs = true
+                        ).also { if (engineNote == null) resultCache.put(gradleResultKey, it) }
+                    }
+                    val failure = attempt.exceptionOrNull()
+                    if (failure is kotlinx.coroutines.CancellationException) throw failure
+                    // Build-Klassen passen nicht (z. B. andere Compose-Version): wie ohne Gradle-Build weiter.
+                    android.util.Log.w("CFPreviewPerf", "Gradle-Build-Ergebnisse nicht nutzbar, eigener Weg", failure)
+                }
+
                 val siblingTexts = resolvedSources.siblingFiles.joinToString("\n") { f -> f.path + "\u0001" + runCatching { f.readText() }.getOrDefault("") }
                 // R-Ersatz aus den res/values-Ordnern aller Module (R entsteht sonst erst beim Gradle-Build).
                 val resourceStubs = PreviewResourceStubs.generate(
@@ -109,39 +177,9 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                     runtimeDir.name, runtimeJars.joinToString { it.name + ":" + it.length() }, androidPlatformJar.path, d8Path
                 )
                 val resultKey = "$buildKey|$functionName|$options|$themeMode"
-                val interpretedMode = runCatching { settingsRepository.appSettings.first().composePreview.interpreted }.getOrDefault(false)
-                if (!forceRefresh && !interpretedMode) resultCache.get(resultKey)?.let { return@runCatching it }
+                if (!forceRefresh && engineNote == null) resultCache.get(resultKey)?.let { return@runCatching it }
                 // Derselbe Stand ist schon am Kompilieren gescheitert: Fehler sofort zeigen (z. B. beim Wechsel Hell/Dunkel).
-                if (!forceRefresh && !interpretedMode) failedBuilds.get(buildKey)?.let { error(it) }
-
-                // Interpretierter Weg (Einstellung „Kompilierte Vorschau“ aus): nur die Zieldatei wird interpretiert.
-                var engineNote: String? = null
-                val interpreted = runCatching { settingsRepository.appSettings.first().composePreview.interpreted }.getOrDefault(false)
-                if (interpreted) {
-                    val interpKey = "interp|$resultKey"
-                    if (!forceRefresh) resultCache.get(interpKey)?.let { return@runCatching it }
-                    val attempt = runCatching {
-                        renderInterpreted(
-                            workDir, sourceCode, functionName, resolvedSources, runtimeJars, androidPlatformJar, d8Path,
-                            options, themeMode
-                        )
-                    }
-                    attempt.getOrNull()?.let { bytes ->
-                        val ms = android.os.SystemClock.elapsedRealtime() - t0
-                        android.util.Log.i("CFPreviewPerf", "interpretiert gesamt=${ms}ms")
-                        return@runCatching PreviewRenderResult(
-                            functionName = functionName,
-                            imageBytes = bytes,
-                            compiledFiles = listOf(File(filePath).name),
-                            engine = com.codeforge.core.domain.model.PreviewEngine.INTERPRETED,
-                            durationMs = ms
-                        ).also { resultCache.put(interpKey, it) }
-                    }
-                    val failure = attempt.exceptionOrNull()
-                    if (failure is kotlinx.coroutines.CancellationException) throw failure
-                    engineNote = interpreterFailureText(failure)
-                    android.util.Log.w("CFPreviewPerf", "Interpreter -> kompiliert: $engineNote", failure)
-                }
+                if (!forceRefresh && engineNote == null) failedBuilds.get(buildKey)?.let { error(it) }
 
                 if (forceRefresh) synchronized(loaders) { loaders.remove(buildKey) }
                 val tResolved = android.os.SystemClock.elapsedRealtime()
@@ -256,8 +294,29 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         d8Path: String,
         options: PreviewOptions,
         themeMode: PreviewThemeMode,
+        gradle: GradleOutputs?,
     ): ByteArray {
         val unavailable = resolvedSources.unavailableNames
+        if (gradle != null) {
+            // Klassen, R und Ressourcen aus dem Gradle-Build: keine Nachbar-Kompilierung, echte Ressourcen.
+            val project = projectDex(gradle, d8Path)
+            val loader = projectLoader(project, null)
+            val index = com.codeforge.feature.composepreview.interpreter.MapClassIndex(
+                com.codeforge.feature.composepreview.interpreter.ClassIndexes.hostClasses(hostApkPaths()).asSequence() +
+                    project.flatMap { com.codeforge.feature.composepreview.interpreter.ClassIndexes.dexClassNames(it.absolutePath) }.asSequence()
+            )
+            val target = PreviewCodeStripper.strip(sourceCode, unavailable).text
+            val preview = com.codeforge.feature.composepreview.interpreter.InterpretedPreview.prepare(
+                source = target,
+                functionName = functionName,
+                loader = loader,
+                classIndex = index,
+                resourceValues = emptyMap(),
+                compiledR = true
+            )
+            val style = previewStyle(options, themeMode).copy(resourceApk = gradle.resourceApk)
+            return ComposeViewBitmapRenderer(context).renderToBitmap(style = style) { onError -> preview.Content(onError) }.toPngBytes()
+        }
         val siblingTexts = resolvedSources.siblingFiles.map { runCatching { it.readText() }.getOrDefault("") }
         // Ersatz-R nur für die Nachbarn: die Zieldatei löst R selbst auf (ändert sich also nicht beim Tippen).
         val siblingStubs = PreviewResourceStubs.generate(resolvedSources.projectRoot, siblingTexts)
@@ -294,9 +353,8 @@ class ComposePreviewRendererImpl @Inject internal constructor(
                 (l to names).also { synchronized(siblingLoaders) { siblingLoaders[key] = it } }
             }
         }
-        val apkPaths = listOfNotNull(context.applicationInfo.sourceDir) + context.applicationInfo.splitSourceDirs.orEmpty()
         val index = com.codeforge.feature.composepreview.interpreter.MapClassIndex(
-            com.codeforge.feature.composepreview.interpreter.ClassIndexes.hostClasses(apkPaths).asSequence() + siblingClassNames.asSequence()
+            com.codeforge.feature.composepreview.interpreter.ClassIndexes.hostClasses(hostApkPaths()).asSequence() + siblingClassNames.asSequence()
         )
         val target = PreviewCodeStripper.strip(sourceCode, unavailable).text
         val preview = com.codeforge.feature.composepreview.interpreter.InterpretedPreview.prepare(
@@ -310,6 +368,143 @@ class ComposePreviewRendererImpl @Inject internal constructor(
             preview.Content(onError)
         }
         return bitmap.toPngBytes()
+    }
+
+    private fun hostApkPaths(): List<String> =
+        listOfNotNull(context.applicationInfo.sourceDir) + context.applicationInfo.splitSourceDirs.orEmpty()
+
+    // --- Gradle-Build-Ergebnisse ---------------------------------------------------------------------------
+
+    /** Kurzzeit-Cache der Suche (beim Tippen kommen viele Vorschauen kurz hintereinander). */
+    private var gradleProbe: Triple<String, Long, GradleOutputs?>? = null
+
+    private fun gradleOutputs(projectRoot: File?, target: File): GradleOutputs? {
+        val key = (projectRoot?.path ?: return null) + "|" + target.path
+        val now = android.os.SystemClock.elapsedRealtime()
+        gradleProbe?.let { (k, at, value) -> if (k == key && now - at < GRADLE_PROBE_TTL_MS) return value }
+        val found = runCatching { PreviewGradleOutputs.find(projectRoot, target) }.getOrNull()
+        gradleProbe = Triple(key, now, found)
+        return found
+    }
+
+    /** Stand von Nachbardateien und Ressourcen (Cache-Schlüssel des Interpreters ohne Gradle-Build). */
+    private fun siblingStamp(resolved: ResolvedPreviewSources): String {
+        val res = resolved.projectRoot?.let { root ->
+            PreviewGradleOutputs.moduleDirs(root).flatMap { m -> File(m, "src").listFiles().orEmpty().map { File(it, "res") } }
+                .filter { it.isDirectory }
+                .sumOf { dir -> dir.walkTopDown().filter { it.isFile }.sumOf { it.lastModified() xor it.length() } }
+        } ?: 0L
+        return resolved.siblingFiles.joinToString { it.path + ":" + it.lastModified() + ":" + it.length() } + "|" + res
+    }
+
+    /** Gedexte Build-Klassen samt `R` (einmal je Build-Stand) plus die gedexten Bibliotheken des Projekts. */
+    private suspend fun projectDex(gradle: GradleOutputs, d8Path: String): List<File> {
+        val root = File(context.cacheDir, "compose_preview_gradle").apply { mkdirs() }
+        val dir = File(root, PreviewCacheKey.of("project-dex", gradle.stamp, d8Path))
+        val done = File(dir, ".complete")
+        if (!done.isFile) {
+            dir.deleteRecursively(); dir.mkdirs()
+            val jar = File(dir, "project-classes.jar")
+            jarClassDirs(gradle.classDirs, jar)
+            val out = File(dir, "dex")
+            val r = dexer.dex(listOf(jar) + gradle.rJars, out, d8Path)
+            jar.delete()
+            if (!r.success) {
+                dir.deleteRecursively()
+                error(Res.string(R.string.composepreview_dexing_fehlgeschlagen, r.errorOutput))
+            }
+            out.listFiles { f -> f.extension == "dex" }.orEmpty().forEach { it.setReadOnly() }
+            // Bibliotheken kopieren: Android 14+ lädt keine beschreibbaren DEX-Dateien (die im Projektordner sind es).
+            val ext = File(dir, "ext").apply { mkdirs() }
+            gradle.externalDex.forEachIndexed { i, f -> f.copyTo(File(ext, "ext$i.dex"), overwrite = true).setReadOnly() }
+            done.writeText("ok")
+            root.listFiles()?.filter { it.isDirectory }?.sortedByDescending { it.lastModified() }?.drop(2)?.forEach { it.deleteRecursively() }
+        }
+        dir.setLastModified(System.currentTimeMillis())
+        val own = File(dir, "dex").listFiles { f -> f.extension == "dex" }.orEmpty().sortedBy { it.name }
+        val ext = File(dir, "ext").listFiles { f -> f.extension == "dex" }.orEmpty().sortedBy { it.name }
+        return own + ext
+    }
+
+    /** Packt die `.class`-Ordner in ein Jar (D8 bekommt eine Datei statt tausender Argumente). */
+    private fun jarClassDirs(dirs: List<File>, jar: File) {
+        val seen = HashSet<String>()
+        java.util.zip.ZipOutputStream(jar.outputStream().buffered()).use { zip ->
+            for (dir in dirs) {
+                dir.walkTopDown().filter { it.isFile && it.extension == "class" }.forEach { f ->
+                    val name = f.relativeTo(dir).invariantSeparatorsPath
+                    if (seen.add(name)) {
+                        zip.putNextEntry(java.util.zip.ZipEntry(name))
+                        f.inputStream().use { it.copyTo(zip) }
+                        zip.closeEntry()
+                    }
+                }
+            }
+        }
+    }
+
+    /** Lader: frisch kompilierte Zieldatei zuerst (überdeckt ihren alten Stand im Build), dann Projekt und Bibliotheken. */
+    private fun projectLoader(project: List<File>, targetDex: File?): ClassLoader {
+        val path = (listOfNotNull(targetDex) + project).joinToString(File.pathSeparator) { it.absolutePath }
+        return synchronized(loaders) {
+            loaders.getOrPut("gradle|$path|" + (targetDex?.lastModified() ?: 0)) {
+                val optimizedDir = File(context.codeCacheDir, "compose_preview_dex").apply { mkdirs() }
+                dalvik.system.DexClassLoader(path, optimizedDir.absolutePath, null, context.classLoader)
+            }
+        }
+    }
+
+    /** Kompiliert nur die Zieldatei gegen die Build-Klassen und rendert mit den echten Projekt-Ressourcen. */
+    private suspend fun renderWithGradle(
+        key: String,
+        workDir: File,
+        filePath: String,
+        sourceCode: String,
+        functionName: String,
+        resolvedSources: ResolvedPreviewSources,
+        gradle: GradleOutputs,
+        runtimeJars: List<File>,
+        androidPlatformJar: File,
+        d8Path: String,
+        options: PreviewOptions,
+        themeMode: PreviewThemeMode,
+        forceRefresh: Boolean,
+    ): ByteArray {
+        val project = projectDex(gradle, d8Path)
+        val build = (if (forceRefresh) null else buildCache.lookup(key)) ?: run {
+            val targetFile = File(workDir, File(filePath).name.ifEmpty { "PreviewTarget.kt" }).apply {
+                writeText(
+                    PreviewSourcePreparer.prepare(
+                        source = sourceCode, keepPackage = true, stubProjectThemes = false, stripThemeSideEffects = true,
+                        unavailable = resolvedSources.unavailableNames, redirectResources = false
+                    )
+                )
+            }
+            val classesDir = File(workDir, "gradle-classes")
+            val result = compiler.compile(
+                sourceFiles = listOf(targetFile),
+                outputDir = classesDir,
+                runtimeClasspathJars = runtimeJars + gradle.classDirs + gradle.rJars,
+                androidPlatformJar = androidPlatformJar
+            )
+            if (!result.success) error(Res.string(R.string.composepreview_kompilierung_fehlgeschlagen, result.errorMessages.joinToString("\n")))
+            val classes = classesDir.walkTopDown().filter { it.extension == "class" }.toList()
+            if (classes.isEmpty()) error(Res.string(R.string.composepreview_kompilierung_lieferte_keine_class_date))
+            val dex = dexer.dex(classes, File(workDir, "gradle-dex"), d8Path)
+            val dexFile = dex.dexFile
+            if (!dex.success || dexFile == null) error(Res.string(R.string.composepreview_dexing_fehlgeschlagen, dex.errorOutput))
+            buildCache.store(key, dexFile, resolvedSources.targetClassName, listOf(targetFile.name), false, null)
+                ?: CachedBuild(dexFile, resolvedSources.targetClassName, listOf(targetFile.name), false, null)
+        }
+        val loader = projectLoader(project, build.dexFile)
+        val hostClass = loader.loadClass(build.targetClassName)
+        val method = PreviewMethodLookup.find(hostClass, functionName)
+            ?: error(Res.string(R.string.composepreview_funktion_nicht_in_kompiliertem_code, functionName))
+        ReflectiveComposableValidator.validateParameterless(method)
+        val style = previewStyle(options, themeMode).copy(resourceApk = gradle.resourceApk)
+        return ComposeViewBitmapRenderer(context).renderToBitmap(style = style) { onError ->
+            ReflectiveComposableHost(method, onError = onError)
+        }.toPngBytes()
     }
 
     /** Kompiliert (Kotlin + Compose-Plugin) und dext; legt das Ergebnis im [buildCache] ab. */
@@ -544,6 +739,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
     }
 
     companion object {
+        private const val GRADLE_PROBE_TTL_MS = 3_000L
         internal fun resolveRuntimeJars(runtimeDir: File): List<File> = runtimeDir
             .listFiles { f -> f.isFile && f.extension == "jar" }
             ?.sortedBy { it.name }

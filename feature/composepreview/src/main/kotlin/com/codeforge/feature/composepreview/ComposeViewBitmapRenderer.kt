@@ -20,6 +20,10 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.text.font.createFontFamilyResolver
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
@@ -88,7 +92,9 @@ internal data class PreviewStyle(
     val widthDp: Int? = null,
     val heightDp: Int? = null,
     val fontScale: Float? = null,
-    val locale: String? = null
+    val locale: String? = null,
+    /** Gelinkte Projekt-Ressourcen aus dem Gradle-Build (`*.ap_`); `null` = Ressourcen der IDE. */
+    val resourceApk: java.io.File? = null
 )
 
 @Composable
@@ -103,6 +109,11 @@ private fun PreviewStyledContent(style: PreviewStyle, content: @Composable () ->
     }
     // isSystemInDarkTheme() liest LocalConfiguration; LocalContentColor deckt Texte ohne eigenes Theme ab.
     val density = LocalDensity.current
+    // Echte Projekt-Ressourcen (Gradle-Build): eigener Kontext samt Caches, damit sich IDs nicht mit der IDE mischen.
+    val hostContext = LocalContext.current
+    val projectContext = remember(hostContext, config, style.resourceApk) {
+        style.resourceApk?.let { PreviewProjectResources.contextFor(hostContext, it, config) }
+    }
     val rtl = style.locale?.let { android.text.TextUtils.getLayoutDirectionFromLocale(java.util.Locale.forLanguageTag(it)) == View.LAYOUT_DIRECTION_RTL }
     CompositionLocalProvider(
         LocalConfiguration provides config,
@@ -110,11 +121,40 @@ private fun PreviewStyledContent(style: PreviewStyle, content: @Composable () ->
         LocalDensity provides (style.fontScale?.let { Density(density.density, it) } ?: density),
         LocalLayoutDirection provides (when (rtl) { true -> LayoutDirection.Rtl; false -> LayoutDirection.Ltr; null -> LocalLayoutDirection.current })
     ) {
-        var size: Modifier = Modifier
-        style.widthDp?.let { size = size.width(it.dp) }
-        style.heightDp?.let { size = size.height(it.dp) }
-        Box(modifier = size.background(Color(style.backgroundArgb))) { content() }
+        if (projectContext == null) StyledBox(style, content) else CompositionLocalProvider(
+            LocalContext provides projectContext,
+            LocalResources provides projectContext.resources,
+            LocalFontFamilyResolver provides remember(projectContext) { createFontFamilyResolver(projectContext) },
+            *remember(projectContext) { ResourceCacheLocals.fresh() },
+        ) { StyledBox(style, content) }
     }
+}
+
+/**
+ * Frische Caches für `painterResource` & Co. (in Compose `internal`, daher per Reflection): Sie sind nach Ressourcen-ID
+ * geschlüsselt, und IDs des Projekts überschneiden sich mit denen der IDE.
+ */
+private object ResourceCacheLocals {
+    private val holder = runCatching { Class.forName("androidx.compose.ui.platform.AndroidCompositionLocals_androidKt") }.getOrNull()
+
+    @Suppress("UNCHECKED_CAST")
+    private fun local(getter: String, cacheClass: String): androidx.compose.runtime.ProvidedValue<*>? = runCatching {
+        val l = holder!!.getMethod(getter).invoke(null) as androidx.compose.runtime.ProvidableCompositionLocal<Any>
+        l provides Class.forName(cacheClass).getDeclaredConstructor().newInstance()
+    }.getOrNull()
+
+    fun fresh(): Array<androidx.compose.runtime.ProvidedValue<*>> = listOfNotNull(
+        local("getLocalImageVectorCache", "androidx.compose.ui.res.ImageVectorCache"),
+        local("getLocalResourceIdCache", "androidx.compose.ui.res.ResourceIdCache"),
+    ).toTypedArray()
+}
+
+@Composable
+private fun StyledBox(style: PreviewStyle, content: @Composable () -> Unit) {
+    var size: Modifier = Modifier
+    style.widthDp?.let { size = size.width(it.dp) }
+    style.heightDp?.let { size = size.height(it.dp) }
+    Box(modifier = size.background(Color(style.backgroundArgb))) { content() }
 }
 
 private class PreviewFallbackHostOwner :

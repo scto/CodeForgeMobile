@@ -25,7 +25,8 @@ sealed interface PreviewRenderState {
         val fallbackReason: String? = null,
         val engine: com.codeforge.core.domain.model.PreviewEngine = com.codeforge.core.domain.model.PreviewEngine.COMPILED,
         val durationMs: Long = 0,
-        val engineNote: String? = null
+        val engineNote: String? = null,
+        val usesBuildOutputs: Boolean = false
     ) : PreviewRenderState
     /** Fehlgeschlagen. */
     data class Failed(val message: String) : PreviewRenderState

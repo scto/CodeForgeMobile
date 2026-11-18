@@ -67,6 +67,8 @@ internal class Interpreter(
     val file: KtFile,
     val reflect: KotlinReflect,
     val resources: PreviewResourceTable,
+    /** `R` kommt als echte Klasse aus einem Gradle-Build (IDs passen zu den geladenen Projekt-Ressourcen). */
+    private val compiledR: Boolean = false,
 ) {
     private val functions: Map<String, List<FunDecl>> = file.functions.groupBy { it.name }
     private val propertyDecls: Map<String, PropDecl> = file.properties.associateBy { it.name }
@@ -304,7 +306,7 @@ internal class Interpreter(
         }
         functions[name]?.let { return InterpFn(it.first(), null, emptyList()) }
         if (propertyDecls.containsKey(name)) return topLevelProperty(name, f)
-        if (name == "R") return NativeR(file.packageName)
+        if (name == "R" && !compiledR) return NativeR(file.packageName)
         // Top-Level-Properties aus Importen/Paket
         for (pkg in candidatePackages(name)) {
             reflect.topLevelProperties(pkg, name).firstOrNull { !it.isExtension }?.let { return readProperty(it, null, null, f) }

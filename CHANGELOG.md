@@ -11,6 +11,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Compose-Vorschau)
+- **Gradle-Build-Ergebnisse nutzen:** Liegt ein aktueller Gradle-Build des Projekts vor (keine Quell- oder
+  Ressourcendatei neuer als der Build; AGP 8 und 9, Android- und reine Kotlin/JVM-Module), kompiliert die Vorschau nur
+  noch die geöffnete Datei gegen die Build-Klassen und das `R.jar` des App-Moduls. Nachbardateien und Ersatz-`R` entfallen;
+  Bibliotheken des Projekts (`mergeExtDex`) stehen zur Laufzeit bereit. Gilt für kompilierte und interpretierte Vorschau.
+  Ist der Build veraltet oder passt er nicht (z. B. andere Compose-Version), läuft die Vorschau wie bisher.
+- **Echte Ressourcen:** Mit Gradle-Build lädt die Vorschau die gelinkten Ressourcen (`*.ap_`) – Bilder
+  (`painterResource`), Fonts, Texte, Farben und Dimensionen kommen aus dem Projekt statt aus Platzhaltern. Ressourcen
+  der IDE (z. B. Texte für Bedienungshilfen in Material 3) bleiben als Rückfall erreichbar.
+- Hinweis unter der Vorschau: „Klassen und Ressourcen aus dem letzten Gradle-Build“.
+
 ## [3.1.5] - 2026-11-18
 
 ### Hinzugefügt (Compose-Vorschau)
