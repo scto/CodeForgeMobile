@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.1.5] - 2026-11-18
+
 ### Hinzugefügt (Compose-Vorschau)
 - Einstellungen → „Compose-Vorschau“ (`ComposePreviewSettingsScreen`) mit Schalter „Kompilierte Vorschau“:
   An = bisheriger Weg (kotlinc + D8, Standard), Aus = **interpretierte Vorschau** (experimentell). Der Wechsel
