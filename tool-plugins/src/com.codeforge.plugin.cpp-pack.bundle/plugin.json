@@ -1,0 +1,15 @@
+{
+  "id": "com.codeforge.plugin.cpp-pack.bundle",
+  "name": "C/C++ (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "C/C++-Unterstützung: clangd und neocmakelsp für CMake.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.clangd.lsp",
+      "com.codeforge.plugin.neocmakelsp.lsp"
+    ]
+  }
+}

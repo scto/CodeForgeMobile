@@ -84,7 +84,7 @@ class ToolPluginsValidTest {
     @Test
     fun `Bundles verweisen nur auf vorhandene Plugins`() {
         val bundles = manifests.values.filter { it.id.endsWith(".bundle") }
-        assertEquals(2, bundles.size)
+        assertEquals(10, bundles.size) // 2 Sammel-Bundles + 8 Sprachpakete
         bundles.forEach { b ->
             assertTrue(b.contributes.extensionPack.isNotEmpty())
             b.contributes.extensionPack.forEach { assertTrue(it, it in manifests) }

@@ -256,6 +256,34 @@ def main(out):
         dump(folder / "plugin.json", manifest(pid, f"{title} (Bundle)", f"{title} von CodeForge als Bundle. Die Programme selbst müssen installiert werden.",
                                                {"extensionPack": ids}))
         pack(out, pid, folder)
+    # Sprachpakete wie die „Extension Packs“ von VS Code: Server + Formatierer einer Sprache in einem Schritt.
+    for name, title, desc, members in LANGUAGE_PACKS:
+        pid = f"com.codeforge.plugin.{name}.bundle"
+        folder = ROOT / "src" / pid
+        missing = [m for m in members if m not in fmt_ids + lsp_ids]
+        assert not missing, f"{pid}: unbekannte Mitglieder {missing}"
+        dump(folder / "plugin.json", manifest(pid, f"{title} (Bundle)", desc, {"extensionPack": members}))
+        pack(out, pid, folder)
+
+
+LANGUAGE_PACKS = [
+    ("python-pack", "Python", "Python-Unterstützung: Pyright (Typen, Navigation), Ruff (Linting) und Ruff Format.",
+     ["com.codeforge.plugin.pyright.lsp", "com.codeforge.plugin.ruff.lsp", "com.codeforge.plugin.ruff-format.formatter"]),
+    ("rust-pack", "Rust", "Rust-Unterstützung: rust-analyzer, rustfmt und Taplo für Cargo.toml.",
+     ["com.codeforge.plugin.rust-analyzer.lsp", "com.codeforge.plugin.rustfmt.formatter", "com.codeforge.plugin.taplo.lsp"]),
+    ("go-pack", "Go", "Go-Unterstützung: gopls und gofmt.",
+     ["com.codeforge.plugin.gopls.lsp", "com.codeforge.plugin.gofmt.formatter"]),
+    ("web-pack", "Web (TypeScript, JavaScript, HTML, CSS)", "Web-Entwicklung: TypeScript/JavaScript-Server, HTML/CSS/JSON-Server und Prettier.",
+     ["com.codeforge.plugin.typescript-language-server.lsp", "com.codeforge.plugin.web-langservers.lsp", "com.codeforge.plugin.prettier.formatter"]),
+    ("cpp-pack", "C/C++", "C/C++-Unterstützung: clangd und neocmakelsp für CMake.",
+     ["com.codeforge.plugin.clangd.lsp", "com.codeforge.plugin.neocmakelsp.lsp"]),
+    ("shell-pack", "Shell", "Shell-Skripte: Bash Language Server und shfmt.",
+     ["com.codeforge.plugin.bash-language-server.lsp", "com.codeforge.plugin.shfmt.formatter"]),
+    ("config-pack", "Konfigurationsdateien (YAML, TOML, XML)", "YAML-, TOML- (Taplo) und XML-Server (LemMinX) samt Taplo-Formatierer.",
+     ["com.codeforge.plugin.yaml-language-server.lsp", "com.codeforge.plugin.taplo.lsp", "com.codeforge.plugin.lemminx.lsp", "com.codeforge.plugin.taplo-format.formatter"]),
+    ("jvm-pack", "Kotlin und Java", "Kotlin Language Server, Eclipse JDT LS (Java) und LemMinX für Android-XML.",
+     ["com.codeforge.plugin.kotlin-language-server.lsp", "com.codeforge.plugin.jdtls.lsp", "com.codeforge.plugin.lemminx.lsp"]),
+]
 
 
 if __name__ == "__main__":

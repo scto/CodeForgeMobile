@@ -1,0 +1,16 @@
+{
+  "id": "com.codeforge.plugin.web-pack.bundle",
+  "name": "Web (TypeScript, JavaScript, HTML, CSS) (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Web-Entwicklung: TypeScript/JavaScript-Server, HTML/CSS/JSON-Server und Prettier.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.typescript-language-server.lsp",
+      "com.codeforge.plugin.web-langservers.lsp",
+      "com.codeforge.plugin.prettier.formatter"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "com.codeforge.plugin.python-pack.bundle",
+  "name": "Python (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Python-Unterstützung: Pyright (Typen, Navigation), Ruff (Linting) und Ruff Format.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.pyright.lsp",
+      "com.codeforge.plugin.ruff.lsp",
+      "com.codeforge.plugin.ruff-format.formatter"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "com.codeforge.plugin.rust-pack.bundle",
+  "name": "Rust (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Rust-Unterstützung: rust-analyzer, rustfmt und Taplo für Cargo.toml.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.rust-analyzer.lsp",
+      "com.codeforge.plugin.rustfmt.formatter",
+      "com.codeforge.plugin.taplo.lsp"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "com.codeforge.plugin.go-pack.bundle",
+  "name": "Go (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Go-Unterstützung: gopls und gofmt.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.gopls.lsp",
+      "com.codeforge.plugin.gofmt.formatter"
+    ]
+  }
+}

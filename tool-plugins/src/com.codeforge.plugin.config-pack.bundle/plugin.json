@@ -1,0 +1,17 @@
+{
+  "id": "com.codeforge.plugin.config-pack.bundle",
+  "name": "Konfigurationsdateien (YAML, TOML, XML) (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "YAML-, TOML- (Taplo) und XML-Server (LemMinX) samt Taplo-Formatierer.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.yaml-language-server.lsp",
+      "com.codeforge.plugin.taplo.lsp",
+      "com.codeforge.plugin.lemminx.lsp",
+      "com.codeforge.plugin.taplo-format.formatter"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "com.codeforge.plugin.shell-pack.bundle",
+  "name": "Shell (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Shell-Skripte: Bash Language Server und shfmt.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.bash-language-server.lsp",
+      "com.codeforge.plugin.shfmt.formatter"
+    ]
+  }
+}
