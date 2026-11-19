@@ -62,6 +62,9 @@ interface PluginContext {
      */
     fun <T : Any> register(point: ExtensionPoint<T>, value: T): Disposable
 
+    /** Seit API 4: Dienste, die Plugins einander anbieten. */
+    fun services(): PluginServices
+
     /**
      * Seit API 3: Einstellungen dieses Plugins aus `contributes.settings` (Seite im Plugins-Bildschirm). Liefert für
      * jeden Schlüssel den Wert des Nutzers oder die Vorgabe aus dem Manifest. Keine Berechtigung nötig.
@@ -190,6 +193,14 @@ interface PluginHostServices {
 
     /** Zeigt eine kurze Nachricht (max. 500 Zeichen) in der App an. Keine Berechtigung nötig. */
     fun showMessage(text: String)
+
+    // --- Seit API 4 ---
+
+    /** Projektmodell und Build-Ergebnisse; ohne Berechtigung `project`: PluginPermissionException. */
+    val project: ProjectService
+
+    /** Gradle-Aufgaben ausführen; ohne Berechtigung `build`: PluginPermissionException. */
+    val build: BuildService
 }
 
 /** Menüs, in denen Plugin-Befehle erscheinen können. */

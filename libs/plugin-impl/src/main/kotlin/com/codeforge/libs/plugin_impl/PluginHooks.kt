@@ -145,7 +145,22 @@ class PluginHooks @Inject constructor(
         }
     }
 
+    /** Wird vor der Verteilung jedes Ereignisses aufgerufen (Aktivierung von Plugins mit `activationEvents`). */
+    @Volatile
+    internal var beforePublish: ((HostEvent) -> Unit)? = null
+
+    /** Zuletzt geöffnetes Projekt (für den Projekt-Dienst der Plugins). */
+    @Volatile
+    var activeProjectRoot: String? = null
+        private set
+
     override fun publish(event: HostEvent) {
+        when (event) {
+            is HostEvent.ProjectOpened -> activeProjectRoot = event.rootPath
+            is HostEvent.ProjectClosed -> if (activeProjectRoot == event.rootPath) activeProjectRoot = null
+            else -> Unit
+        }
+        beforePublish?.let { hook -> runCatching { hook(event) } }
         val targets = registry.contributions(LISTENER_POINT)
             .filter { PluginPermissionPolicy.isAllowed(it.value.apiVersion, it.value.granted, event.permission) }
         if (targets.isEmpty()) return

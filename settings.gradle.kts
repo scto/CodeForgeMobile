@@ -93,6 +93,15 @@ include(
     // einkompiliert.
     ":templates:code-plugin",
     ":examples:guide-commit-notes",
+
+    // Code-Plugins (API 4, sideload): code-plugins/<name>, Paket: ./gradlew :code-plugins:<name>:packagePlugin
+    ":code-plugins:markdown-preview",
+    ":code-plugins:data-viewer",
+    ":code-plugins:sqlite-viewer",
+    ":code-plugins:script-tasks",
+    ":code-plugins:rest-client",
+    ":code-plugins:gradle-tasks",
+    ":code-plugins:python-tests",
 )
 
 // Beispiel-Plugin aus dem Plugin-Leitfaden (docs/dev/PluginDevelopment.md) liegt unter examples/guide/

@@ -48,3 +48,6 @@ templates/build/
 theme-plugins/build/
 textmate-plugins/build/
 tool-plugins/build/
+
+# Gebaute Code-Plugins (./gradlew :code-plugins:packageAll)
+code-plugins/out/

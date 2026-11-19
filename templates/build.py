@@ -9,6 +9,9 @@ und gibt je ZIP die SHA-256 aus (für den Store-Katalog). Das Code-Plugin baut G
 """
 import hashlib, json, sys, zipfile
 from pathlib import Path
+import os as _os
+sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "scripts"))
+from build_info import build_info  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "build"
@@ -51,6 +54,8 @@ def build(folder, out=None, prefix=""):
         for f in sorted(folder.rglob("*")):
             if f.is_file() and "__pycache__" not in f.parts and f.suffix not in (".pyc", ".pyo"):
                 z.write(f, f.relative_to(folder).as_posix())
+        if not (folder / "build-info.json").is_file():
+            z.writestr("build-info.json", build_info(folder, "templates/build.py"))
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     try:
         shown = target.relative_to(ROOT.parent)

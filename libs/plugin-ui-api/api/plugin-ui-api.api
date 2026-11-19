@@ -12,9 +12,31 @@ public abstract interface class com/codeforge/libs/plugin_ui_api/PluginPanel {
 	public abstract fun getTitle ()Ljava/lang/String;
 }
 
+public abstract interface class com/codeforge/libs/plugin_ui_api/PluginPreview {
+	public abstract fun Content (Lcom/codeforge/libs/plugin_ui_api/PreviewFile;Lcom/codeforge/libs/plugin_ui_api/PanelHost;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;I)V
+	public abstract fun getFilePatterns ()Ljava/util/List;
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getTitle ()Ljava/lang/String;
+}
+
 public final class com/codeforge/libs/plugin_ui_api/PluginUiExtensionPoints {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/codeforge/libs/plugin_ui_api/PluginUiExtensionPoints;
 	public final fun getPANEL ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+	public final fun getPREVIEW ()Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;
+}
+
+public final class com/codeforge/libs/plugin_ui_api/PreviewFile {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/codeforge/libs/plugin_ui_api/PreviewFile;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_ui_api/PreviewFile;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_ui_api/PreviewFile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

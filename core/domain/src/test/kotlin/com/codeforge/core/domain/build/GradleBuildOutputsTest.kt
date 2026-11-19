@@ -1,4 +1,4 @@
-package com.codeforge.feature.composepreview
+package com.codeforge.core.domain.build
 
 import java.io.File
 import java.nio.file.Files
@@ -10,7 +10,7 @@ import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 
-class PreviewGradleOutputsTest {
+class GradleBuildOutputsTest {
 
     private lateinit var root: File
     private lateinit var appSource: File
@@ -46,7 +46,7 @@ class PreviewGradleOutputsTest {
     fun `aktueller Build wird mit allen Teilen gefunden`() {
         File(root, "app/src/main/res/values/strings.xml").let(::age)
         File(root, "feature/home/src/main/res/values/strings.xml").let(::age)
-        val outputs = PreviewGradleOutputs.find(root, libSource)
+        val outputs = GradleBuildOutputs.find(root, libSource)
         assertNotNull(outputs)
         outputs!!
         assertEquals("debug", outputs.variant)
@@ -60,26 +60,26 @@ class PreviewGradleOutputsTest {
     fun `geänderte Nachbardatei macht den Build ungültig`() {
         listOf("app", "feature/home").forEach { File(root, "$it/src/main/res/values/strings.xml").let(::age) }
         appSource.setLastModified(System.currentTimeMillis() + 60_000)
-        assertNull(PreviewGradleOutputs.find(root, libSource))
+        assertNull(GradleBuildOutputs.find(root, libSource))
     }
 
     @Test
     fun `die offene Datei selbst darf neuer sein`() {
         listOf("app", "feature/home").forEach { File(root, "$it/src/main/res/values/strings.xml").let(::age) }
         libSource.setLastModified(System.currentTimeMillis() + 60_000)
-        assertNotNull(PreviewGradleOutputs.find(root, libSource))
+        assertNotNull(GradleBuildOutputs.find(root, libSource))
     }
 
     @Test
     fun `geänderte Ressource macht den Build ungültig`() {
         File(root, "feature/home/src/main/res/values/strings.xml").setLastModified(System.currentTimeMillis() + 60_000)
-        assertNull(PreviewGradleOutputs.find(root, libSource))
+        assertNull(GradleBuildOutputs.find(root, libSource))
     }
 
     @Test
     fun `nie gebautes Modul mit Code liefert nichts`() {
         File(root, "feature/home/build").deleteRecursively()
-        assertNull(PreviewGradleOutputs.find(root, appSource))
+        assertNull(GradleBuildOutputs.find(root, appSource))
     }
 
     /** Gegen ein echtes, gebautes Projekt: `-Dcf.gradleSample=/pfad/zum/projekt`. */
@@ -87,7 +87,7 @@ class PreviewGradleOutputsTest {
     fun `echtes Projekt`() {
         val sample = System.getProperty("cf.gradleSample")?.let(::File)
         assumeTrue(sample?.isDirectory == true)
-        val outputs = PreviewGradleOutputs.find(sample, null)
+        val outputs = GradleBuildOutputs.find(sample, null)
         println("Gradle-Ergebnisse: $outputs")
         assertNotNull(outputs)
     }

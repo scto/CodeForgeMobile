@@ -10,6 +10,9 @@ Schreibt Quellen nach tool-plugins/src/<id>/ und ZIPs nach <ausgabeordner>/<id>.
 """
 import hashlib, json, sys, zipfile
 from pathlib import Path
+import os as _os
+sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "scripts"))
+from build_info import build_info  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 F = "${file}"
@@ -193,6 +196,7 @@ def pack(out, pid, folder):
         for f in sorted(folder.rglob("*")):
             if f.is_file():
                 z.write(f, f.relative_to(folder).as_posix())
+        z.writestr("build-info.json", build_info(Path(__file__).parent / "src" / pid if (Path(__file__).parent / "src" / pid).exists() else Path(__file__).parent, "tool-plugins/generate.py"))
     print(f"{target.name}  sha256={hashlib.sha256(target.read_bytes()).hexdigest()}")
 
 

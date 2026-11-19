@@ -1,0 +1,12 @@
+{
+  "id": "com.codeforge.plugin.sqlite-viewer.code",
+  "name": "SQLite-Betrachter",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "codeforge",
+  "description": "Findet SQLite-Datenbanken im Projekt (.db, .sqlite, .sqlite3), zeigt Tabellen, Schema und Zeilen und führt lesende Abfragen aus (SELECT, PRAGMA, EXPLAIN, WITH).",
+  "entryPointClass": "com.codeforge.plugin.sqlite.SqliteViewerPlugin",
+  "permissions": ["ui"],
+  "categories": ["tools/database", "previews/data"],
+  "tags": ["sqlite", "database", "sql", "room", "viewer"]
+}

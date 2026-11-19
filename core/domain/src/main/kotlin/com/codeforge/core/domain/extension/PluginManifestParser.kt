@@ -24,6 +24,8 @@ object PluginManifestParser {
     private val TEMPLATE_LANGUAGES = setOf(ProjectTemplateContribution.LANGUAGE_KOTLIN, ProjectTemplateContribution.LANGUAGE_JAVA)
     private val TEMPLATE_DSL = setOf(ProjectTemplateContribution.DSL_KTS, ProjectTemplateContribution.DSL_GROOVY)
     private val MIN_SDK_RANGE = 21..36
+    private val CATEGORY_REGEX = Regex("[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*){0,3}")
+    private const val MAX_TAGS = 20
 
     /** Parst und validiert ein Plugin-Manifest (JSON); Fehler werden als Failure geliefert. */
     fun parse(text: String): Result<PluginManifest> = runCatching {
@@ -54,6 +56,13 @@ object PluginManifestParser {
         require(dependsOn.all { ID_REGEX.matches(it) && !it.contains("..") }) { "dependsOn enthält eine ungültige Plugin-ID" }
         require(id !in dependsOn) { "Ein Plugin kann nicht von sich selbst abhängen" }
 
+        val activationEvents = root.stringList("activationEvents")
+        activationEvents.forEach { e -> require(ActivationEvents.isValid(e)) { "Ungültiges Aktivierungsereignis: $e" } }
+        val categories = root.stringList("categories").map { it.trim().trim('/') }.filter { it.isNotEmpty() }
+        require(categories.all { CATEGORY_REGEX.matches(it) }) { "Ungültige Kategorie (erlaubt: a-z, 0-9, -, / als Trenner)" }
+        val tags = root.stringList("tags").map { it.trim().lowercase() }.filter { it.isNotEmpty() }.distinct()
+        require(tags.size <= MAX_TAGS && tags.all { it.length <= 30 }) { "Höchstens $MAX_TAGS Tags mit je bis zu 30 Zeichen" }
+
         val parsedContributes = parseContributes(root["contributes"] as? JsonObject)
         require(parsedContributes.tools.isEmpty() || PluginPermissions.SHELL in permissions) {
             "contributes.tools benötigt die Berechtigung '${PluginPermissions.SHELL}'"
@@ -73,6 +82,9 @@ object PluginManifestParser {
             permissions = permissions,
             minHostVersion = minHostVersion,
             dependsOn = dependsOn,
+            activationEvents = activationEvents,
+            categories = categories,
+            tags = tags,
             contributes = parsedContributes
         )
     }

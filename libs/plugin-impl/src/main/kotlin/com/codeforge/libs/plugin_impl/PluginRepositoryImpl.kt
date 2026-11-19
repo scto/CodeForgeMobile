@@ -5,15 +5,19 @@
 package com.codeforge.libs.plugin_impl
 
 import android.content.Context
+import com.codeforge.core.domain.extension.ActivationEvents
 import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.DeclarativeOnly
+import com.codeforge.core.domain.extension.HostEvent
 import com.codeforge.core.domain.extension.PluginCompatibility
 import com.codeforge.core.domain.extension.PluginIssue
 import com.codeforge.core.domain.extension.PluginLoadOrder
 import com.codeforge.core.domain.extension.PluginLogRepository
 import com.codeforge.core.domain.extension.PluginNode
 import com.codeforge.core.domain.extension.PluginSettingsRepository
+import com.codeforge.core.domain.extension.PluginSignatures
+import com.codeforge.core.domain.extension.PluginBuildInfo
 import com.codeforge.core.domain.extension.registry.ExtensionRegistry
 import com.codeforge.core.domain.extension.PluginManifestParser
 import com.codeforge.core.domain.extension.kinds
@@ -58,7 +62,8 @@ class PluginRepositoryImpl @Inject constructor(
     hooks: PluginHooks,
     extensionRegistry: ExtensionRegistry,
     logs: PluginLogRepository,
-    private val pluginSettings: PluginSettingsRepository
+    private val pluginSettings: PluginSettingsRepository,
+    gradleBuild: javax.inject.Provider<com.codeforge.core.domain.repository.GradleBuildRepository>
 ) : PluginRepository, ContributionRepository {
 
     override val hostVersion: String = runCatching {
@@ -67,7 +72,10 @@ class PluginRepositoryImpl @Inject constructor(
 
     private val pluginsDir = File(context.filesDir, "plugins")
     private val registry = PluginRegistry(File(pluginsDir, "registry.json"))
-    private val runtime = PluginRuntime(context, lspClientRepository, hooks, extensionRegistry, logs, pluginSettings)
+    private val runtime = PluginRuntime(
+        context, lspClientRepository, hooks, extensionRegistry, logs, pluginSettings,
+        gradleBuild = { runCatching { gradleBuild.get() }.getOrNull() }
+    )
 
     private val _installedPlugins = MutableStateFlow<List<InstalledPlugin>>(emptyList())
     override val installedPlugins: Flow<List<InstalledPlugin>> = _installedPlugins.asStateFlow()
@@ -90,6 +98,24 @@ class PluginRepositoryImpl @Inject constructor(
         // blockieren — Fehler werden daher bewusst verschluckt, sichtbar über
         // loadedPluginIds (enthält den Eintrag dann schlicht nicht).
         loadOrder(plugins.filter { it.isEnabled }).forEach { plugin -> attemptLoad(plugin) }
+        // Plugins mit activationEvents laden erst beim passenden Ereignis (Datei/Projekt geöffnet).
+        hooks.beforePublish = { event -> activateFor(event) }
+    }
+
+    /** Lädt aktivierte, noch nicht geladene Plugins, deren Aktivierungsereignis [event] ist. */
+    private fun activateFor(event: HostEvent) {
+        val pending = _installedPlugins.value.filter {
+            it.isEnabled && !it.isDeclarativeOnly && it.id !in _loadedPluginIds.value &&
+                !ActivationEvents.isEager(it.activationEvents) &&
+                ActivationEvents.triggers(it.activationEvents, event, ActivationEvents::languageOf)
+        }
+        if (pending.isEmpty()) return
+        synchronized(this) {
+            // Abhängigkeiten werden mitgeladen (auch wenn sie selbst auf ein Ereignis warten).
+            val needed = pending.flatMap { PluginLoadOrder.dependenciesClosure(it.id, _installedPlugins.value.associate { p -> p.id to p.dependsOn }) + it.id }.toSet()
+            loadOrder(_installedPlugins.value.filter { it.id in needed && it.isEnabled && it.id !in _loadedPluginIds.value })
+                .forEach { attemptLoad(it, force = true) }
+        }
     }
 
     /** Liest die Manifeste aller aktivierten Plugins neu ein (deklarativ, unabhängig davon, ob Plugin-Code lädt). */
@@ -113,6 +139,7 @@ class PluginRepositoryImpl @Inject constructor(
     private fun loadNow(plugin: InstalledPlugin) {
         issuesOf(plugin).firstOrNull()?.let { error(it.describe()) }
         if (plugin.isDeclarativeOnly) return
+        if (!ActivationEvents.isEager(plugin.activationEvents)) return // lädt beim passenden Ereignis
         runtime.load(plugin, File(pluginsDir, plugin.id)).getOrThrow()
         _loadedPluginIds.update { it + plugin.id }
     }
@@ -144,9 +171,10 @@ class PluginRepositoryImpl @Inject constructor(
     }
 
 
-    private fun attemptLoad(plugin: InstalledPlugin) {
+    private fun attemptLoad(plugin: InstalledPlugin, force: Boolean = false) {
         if (issuesOf(plugin).isNotEmpty()) return // inkompatibel: bleibt installiert, wird aber nicht geladen
         if (plugin.isDeclarativeOnly) return // nichts zu laden, Contributions werden deklarativ gelesen
+        if (!force && !ActivationEvents.isEager(plugin.activationEvents)) return // wartet auf sein Ereignis
         runtime.load(plugin, File(pluginsDir, plugin.id))
             .onSuccess { _loadedPluginIds.update { it + plugin.id } }
     }
@@ -200,6 +228,12 @@ class PluginRepositoryImpl @Inject constructor(
                 DeclarativeOnly.violation(files, manifest, allowTools)?.let { error("Nur deklarative Plugins erlaubt: $it") }
             }
 
+            // Signatur (falls vorhanden) prüfen; ein signiertes Plugin darf nur mit demselben Schlüssel aktualisiert werden.
+            val signature = PluginSignatures.verify(tempDir)
+            val previous = _installedPlugins.value.firstOrNull { it.id == id }
+            PluginSignatures.updateViolation(previous?.signerFingerprint.orEmpty(), signature)?.let { error(it) }
+            val buildInfo = PluginBuildInfo.summary(File(tempDir, PluginBuildInfo.FILE_NAME))
+
             // Zu neue Anforderung: vor jeder Änderung ablehnen, die installierte Version bleibt unangetastet.
             if (manifest.minHostVersion.isNotBlank() && hostVersion.isNotBlank() &&
                 PluginCompatibility.compareVersions(hostVersion, manifest.minHostVersion) < 0
@@ -236,7 +270,10 @@ class PluginRepositoryImpl @Inject constructor(
                 contributionKinds = manifest.contributes.kinds(),
                 packMembers = manifest.contributes.extensionPack,
                 minHostVersion = manifest.minHostVersion,
-                dependsOn = manifest.dependsOn
+                dependsOn = manifest.dependsOn,
+                activationEvents = manifest.activationEvents,
+                signerFingerprint = (signature as? PluginSignatures.Result.Signed)?.fingerprint.orEmpty(),
+                buildInfo = buildInfo
             )
 
             val updated = _installedPlugins.value.filterNot { it.id == id } + plugin

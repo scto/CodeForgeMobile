@@ -1,0 +1,13 @@
+{
+  "id": "com.codeforge.plugin.markdown-preview.code",
+  "name": "Markdown-Vorschau",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "codeforge",
+  "description": "Vorschau für Markdown-Dateien (Überschriften, Listen, Aufgaben, Code, Zitate, Tabellen, Links) direkt aus dem Editor-Inhalt.",
+  "entryPointClass": "com.codeforge.plugin.markdown.MarkdownPreviewPlugin",
+  "permissions": ["ui"],
+  "activationEvents": ["onLanguage:markdown"],
+  "categories": ["previews/markdown", "languages/markup"],
+  "tags": ["markdown", "preview", "readme", "docs"]
+}

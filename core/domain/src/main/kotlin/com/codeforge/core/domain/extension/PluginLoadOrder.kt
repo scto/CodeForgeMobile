@@ -62,4 +62,15 @@ object PluginLoadOrder {
         }
         return false
     }
+
+    /** Alle (transitiven) Abhängigkeiten von [pluginId], ohne das Plugin selbst; Zyklen werden toleriert. */
+    fun dependenciesClosure(pluginId: String, dependsOn: Map<String, List<String>>): Set<String> {
+        val out = LinkedHashSet<String>()
+        val stack = ArrayDeque(dependsOn[pluginId].orEmpty())
+        while (stack.isNotEmpty()) {
+            val id = stack.removeFirst()
+            if (id != pluginId && out.add(id)) stack.addAll(dependsOn[id].orEmpty())
+        }
+        return out
+    }
 }

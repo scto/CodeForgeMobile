@@ -13,12 +13,14 @@ package com.codeforge.feature.composepreview
 
 import android.content.Context
 import android.graphics.Bitmap
+import com.codeforge.core.domain.build.GradleBuildOutputs
+import com.codeforge.core.domain.build.GradleOutputs
 import com.codeforge.core.domain.model.PreviewOptions
 import com.codeforge.core.domain.model.PreviewRenderResult
 import com.codeforge.core.domain.model.PreviewThemeMode
+import com.codeforge.core.domain.model.ToolItem
 import com.codeforge.core.domain.repository.CompilerRuntimeProvider
 import com.codeforge.core.domain.repository.ComposePreviewRenderer
-import com.codeforge.core.domain.model.ToolItem
 import com.codeforge.core.domain.repository.SdkRepository
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
@@ -382,7 +384,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
         val key = (projectRoot?.path ?: return null) + "|" + target.path
         val now = android.os.SystemClock.elapsedRealtime()
         gradleProbe?.let { (k, at, value) -> if (k == key && now - at < GRADLE_PROBE_TTL_MS) return value }
-        val found = runCatching { PreviewGradleOutputs.find(projectRoot, target) }.getOrNull()
+        val found = runCatching { GradleBuildOutputs.find(projectRoot, target) }.getOrNull()
         gradleProbe = Triple(key, now, found)
         return found
     }
@@ -390,7 +392,7 @@ class ComposePreviewRendererImpl @Inject internal constructor(
     /** Stand von Nachbardateien und Ressourcen (Cache-Schlüssel des Interpreters ohne Gradle-Build). */
     private fun siblingStamp(resolved: ResolvedPreviewSources): String {
         val res = resolved.projectRoot?.let { root ->
-            PreviewGradleOutputs.moduleDirs(root).flatMap { m -> File(m, "src").listFiles().orEmpty().map { File(it, "res") } }
+            GradleBuildOutputs.moduleDirs(root).flatMap { m -> File(m, "src").listFiles().orEmpty().map { File(it, "res") } }
                 .filter { it.isDirectory }
                 .sumOf { dir -> dir.walkTopDown().filter { it.isFile }.sumOf { it.lastModified() xor it.length() } }
         } ?: 0L

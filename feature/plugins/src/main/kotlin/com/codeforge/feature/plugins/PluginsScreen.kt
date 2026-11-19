@@ -245,6 +245,25 @@ private fun PluginRow(
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
+            // Herkunft: Signatur (TOFU) und Build-Angaben aus build-info.json.
+            if (!plugin.isDeclarativeOnly || plugin.signerFingerprint.isNotBlank() || plugin.buildInfo.isNotBlank()) {
+                val signer = if (plugin.signerFingerprint.isBlank()) stringRes(R.string.plugins_unsigned)
+                else stringRes(R.string.plugins_signed, com.codeforge.core.domain.extension.PluginSignatures.shortFingerprint(plugin.signerFingerprint))
+                Text(
+                    listOf(signer, plugin.buildInfo).filter { it.isNotBlank() }.joinToString(" · "),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+            if (plugin.activationEvents.isNotEmpty()) {
+                Text(
+                    stringRes(R.string.plugins_activation, plugin.activationEvents.joinToString()),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
             if (plugin.description.isNotBlank()) {
                 Text(
                     plugin.description,

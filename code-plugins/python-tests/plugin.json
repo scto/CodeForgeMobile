@@ -1,0 +1,16 @@
+{
+  "id": "com.codeforge.plugin.python-tests.code",
+  "name": "Python-Tests (pytest)",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "codeforge",
+  "description": "Erkennt pytest-Tests (test_*-Funktionen, Test*-Klassen) in test_*.py und *_test.py, zeigt Start-Knöpfe an jeder Testzeile und meldet bestandene/fehlgeschlagene Tests.",
+  "entryPointClass": "com.codeforge.plugin.pytest.PythonTestsPlugin",
+  "permissions": ["run", "shell"],
+  "activationEvents": ["onLanguage:python"],
+  "categories": ["testing/python", "languages/python"],
+  "tags": ["python", "pytest", "testing"],
+  "contributes": {
+    "requires": [{ "manager": "pip", "name": "pytest", "check": "pytest" }]
+  }
+}

@@ -22,7 +22,13 @@ data class InstalledPlugin(
     /** Mindestversion der App; leer = keine Einschränkung. */
     val minHostVersion: String = "",
     /** IDs der Plugins, von denen dieses abhängt. */
-    val dependsOn: List<String> = emptyList()
+    val dependsOn: List<String> = emptyList(),
+    /** Wann der Code geladen wird (leer = beim Start); siehe `ActivationEvents`. */
+    val activationEvents: List<String> = emptyList(),
+    /** SHA-256 des Signaturschlüssels (leer = nicht signiert); Updates müssen denselben Schlüssel nutzen. */
+    val signerFingerprint: String = "",
+    /** Herkunft aus `build-info.json` (z. B. Commit und Build-Zeit); leer = unbekannt. */
+    val buildInfo: String = ""
 ) {
     /** Ob das Plugin keinen ausführbaren Code enthält. */
     val isDeclarativeOnly: Boolean get() = entryPointClass == null

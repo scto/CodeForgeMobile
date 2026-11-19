@@ -2735,4 +2735,7 @@
     <string name="composepreview_engine_interpreted">Interpretiert · %1$d ms</string>
     <string name="composepreview_build_outputs">Klassen und Ressourcen aus dem letzten Gradle-Build</string>
     <string name="composepreview_engine_fallback">Interpreter nicht möglich (%1$s) – stattdessen kompiliert</string>
+    <string name="plugins_unsigned">Nicht signiert</string>
+    <string name="plugins_signed">Signiert: %1$s</string>
+    <string name="plugins_activation">Lädt bei: %1$s</string>
 </resources>

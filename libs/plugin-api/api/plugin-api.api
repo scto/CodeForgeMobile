@@ -1,3 +1,12 @@
+public abstract interface class com/codeforge/libs/plugin_api/BuildService {
+	public abstract fun cancel (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun runTasks (Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/codeforge/libs/plugin_api/BuildService$DefaultImpls {
+	public static synthetic fun runTasks$default (Lcom/codeforge/libs/plugin_api/BuildService;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/CodeForgePlugin {
 	public abstract fun onLoad (Lcom/codeforge/libs/plugin_api/PluginContext;)V
 	public abstract fun onUninstall (Lcom/codeforge/libs/plugin_api/PluginContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -156,6 +165,20 @@ public abstract interface class com/codeforge/libs/plugin_api/HoverProvider {
 	public abstract fun hover (Lcom/codeforge/libs/plugin_api/EditorContext;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/codeforge/libs/plugin_api/PluginBuildResult {
+	public fun <init> (ZLjava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginBuildResult;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginBuildResult;ZLjava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginBuildResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getSuccess ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/PluginCommandHandler {
 	public abstract fun run (Lcom/codeforge/libs/plugin_api/CommandArgs;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -182,6 +205,7 @@ public abstract interface class com/codeforge/libs/plugin_api/PluginContext {
 	public abstract fun getPluginId ()Ljava/lang/String;
 	public abstract fun logger (Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginLogger;
 	public abstract fun register (Lcom/codeforge/core/domain/extension/registry/ExtensionPoint;Ljava/lang/Object;)Lcom/codeforge/core/domain/extension/registry/Disposable;
+	public abstract fun services ()Lcom/codeforge/libs/plugin_api/PluginServices;
 	public abstract fun settings ()Lcom/codeforge/libs/plugin_api/PluginSettings;
 }
 
@@ -367,8 +391,10 @@ public final class com/codeforge/libs/plugin_api/PluginFileEdit {
 public abstract interface class com/codeforge/libs/plugin_api/PluginHostServices {
 	public abstract fun addEventListener (Lcom/codeforge/libs/plugin_api/PluginEventListener;)V
 	public abstract fun buildShellCommand (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/codeforge/libs/terminal_engine/ShellLaunchSpec;
+	public abstract fun getBuild ()Lcom/codeforge/libs/plugin_api/BuildService;
 	public abstract fun getHomeDir ()Ljava/lang/String;
 	public abstract fun getLspClientRepository ()Lcom/codeforge/core/domain/repository/LspClientRepository;
+	public abstract fun getProject ()Lcom/codeforge/libs/plugin_api/ProjectService;
 	public abstract fun jdkInstallPath (Ljava/lang/String;)Ljava/lang/String;
 	public abstract fun registerCommand (Ljava/lang/String;Ljava/lang/String;Lcom/codeforge/libs/plugin_api/PluginCommandHandler;)V
 	public abstract fun registerMenuItem (Ljava/lang/String;Ljava/lang/String;Lcom/codeforge/libs/plugin_api/PluginMenuTarget;Ljava/lang/String;)V
@@ -430,10 +456,48 @@ public final class com/codeforge/libs/plugin_api/PluginMenuTarget : java/lang/En
 	public static fun values ()[Lcom/codeforge/libs/plugin_api/PluginMenuTarget;
 }
 
+public final class com/codeforge/libs/plugin_api/PluginModule {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/codeforge/libs/plugin_api/PluginModule;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginModule;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginModule;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDirectory ()Ljava/lang/String;
+	public final fun getGradlePath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/PluginModuleContext {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;)Lcom/codeforge/libs/plugin_api/PluginModuleContext;
+	public static synthetic fun copy$default (Lcom/codeforge/libs/plugin_api/PluginModuleContext;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/codeforge/libs/plugin_api/PluginModuleContext;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClassDirectories ()Ljava/util/List;
+	public final fun getExternalDex ()Ljava/util/List;
+	public final fun getRJars ()Ljava/util/List;
+	public final fun getResourceApk ()Ljava/lang/String;
+	public final fun getVariant ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/codeforge/libs/plugin_api/PluginPermissionException : java/lang/SecurityException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun getPermission ()Ljava/lang/String;
 	public final fun getPluginId ()Ljava/lang/String;
+}
+
+public abstract interface class com/codeforge/libs/plugin_api/PluginServices {
+	public abstract fun all (Lcom/codeforge/libs/plugin_api/ServiceKey;)Ljava/util/List;
+	public abstract fun get (Lcom/codeforge/libs/plugin_api/ServiceKey;)Ljava/lang/Object;
+	public abstract fun provide (Lcom/codeforge/libs/plugin_api/ServiceKey;Ljava/lang/Object;)Lcom/codeforge/core/domain/extension/registry/Disposable;
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/PluginSettings {
@@ -483,6 +547,12 @@ public final class com/codeforge/libs/plugin_api/ProgressReporter$DefaultImpls {
 	public static synthetic fun report$default (Lcom/codeforge/libs/plugin_api/ProgressReporter;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)V
 }
 
+public abstract interface class com/codeforge/libs/plugin_api/ProjectService {
+	public abstract fun buildOutputs ()Lcom/codeforge/libs/plugin_api/PluginModuleContext;
+	public abstract fun getRootPath ()Ljava/lang/String;
+	public abstract fun modules ()Ljava/util/List;
+}
+
 public abstract interface class com/codeforge/libs/plugin_api/QuickFixProvider {
 	public abstract fun fixes (Lcom/codeforge/libs/plugin_api/EditorContext;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -525,6 +595,14 @@ public final class com/codeforge/libs/plugin_api/RunTask$Companion {
 public final class com/codeforge/libs/plugin_api/RunTask$DefaultImpls {
 	public static fun appliesTo (Lcom/codeforge/libs/plugin_api/RunTask;Ljava/lang/String;)Z
 	public static fun getKind (Lcom/codeforge/libs/plugin_api/RunTask;)Ljava/lang/String;
+}
+
+public final class com/codeforge/libs/plugin_api/ServiceKey {
+	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class com/codeforge/libs/plugin_api/TestProvider {

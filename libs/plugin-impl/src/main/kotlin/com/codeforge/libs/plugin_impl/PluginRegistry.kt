@@ -43,6 +43,10 @@ internal class PluginRegistry(private val registryFile: File) {
                     packMembers = obj.optJSONArray("packMembers")?.let { a -> (0 until a.length()).map { a.getString(it) } }
                         ?: emptyList(),
                     minHostVersion = obj.optString("minHostVersion", ""),
+                    signerFingerprint = obj.optString("signerFingerprint", ""),
+                    buildInfo = obj.optString("buildInfo", ""),
+                    activationEvents = obj.optJSONArray("activationEvents")?.let { a -> (0 until a.length()).map { a.getString(it) } }
+                        .orEmpty(),
                     dependsOn = obj.optJSONArray("dependsOn")?.let { a -> (0 until a.length()).map { a.getString(it) } }
                         ?: emptyList()
                 )
@@ -73,6 +77,9 @@ internal class PluginRegistry(private val registryFile: File) {
                     put("packMembers", JSONArray(plugin.packMembers))
                     put("minHostVersion", plugin.minHostVersion)
                     put("dependsOn", JSONArray(plugin.dependsOn))
+                    put("activationEvents", JSONArray(plugin.activationEvents))
+                    put("signerFingerprint", plugin.signerFingerprint)
+                    put("buildInfo", plugin.buildInfo)
                 }
             )
         }

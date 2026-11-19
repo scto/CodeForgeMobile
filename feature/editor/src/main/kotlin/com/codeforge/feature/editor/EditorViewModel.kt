@@ -54,6 +54,8 @@ import com.codeforge.libs.plugin_api.EditorEffect
 import com.codeforge.libs.plugin_api.PluginDiagnostic
 import com.codeforge.libs.plugin_api.RunConsole
 import com.codeforge.libs.plugin_ui_api.PluginPanel
+import com.codeforge.core.domain.extension.ActivationEvents
+import com.codeforge.feature.editor.plugin.PreviewAsPanel
 import com.codeforge.libs.plugin_ui_api.PluginUiExtensionPoints
 import com.codeforge.libs.lsp_client.LspWorkspaceEditApplier
 import com.codeforge.libs.lsp_client.WorkspaceEditException
@@ -1340,9 +1342,23 @@ class EditorViewModel @Inject constructor(
     /** Projektordner (für Plugin-Bereiche). */
     fun projectRootPath(): String? = projectRoot.value
 
-    /** Plugin-Bereiche: `pluginId/panelId` → Bereich. */
-    fun panels(): Map<String, PluginPanel> =
-        extensionRegistry?.contributions(PluginUiExtensionPoints.PANEL)?.associate { "${it.pluginId}/${it.value.id}" to it.value }.orEmpty()
+    /**
+     * Plugin-Bereiche: `pluginId/panelId` → Bereich. Vorschauen (API 4), die auf die aktive Datei passen, erscheinen
+     * als Bereich `pluginId/preview:id` mit dem aktuellen Editor-Inhalt.
+     */
+    fun panels(): Map<String, PluginPanel> {
+        val registry = extensionRegistry ?: return emptyMap()
+        val base = registry.contributions(PluginUiExtensionPoints.PANEL).associate { "${it.pluginId}/${it.value.id}" to it.value }
+        val active = _uiState.value.activeFile ?: return base
+        val previews = registry.contributions(PluginUiExtensionPoints.PREVIEW)
+            .filter { c -> c.value.filePatterns.any { ActivationEvents.globMatches(it, java.io.File(active.path).name) } }
+            .associate { c ->
+                "${c.pluginId}/preview:${c.value.id}" to PreviewAsPanel(c.value, active.path) {
+                    _uiState.value.openFiles.firstOrNull { it.path == active.path }?.content
+                }
+            }
+        return base + previews
+    }
 
     private fun fileTestsItem(state: EditorUiState): List<PaletteItem> =
         if (state.activePluginTests.isEmpty()) emptyList()

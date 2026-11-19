@@ -4,10 +4,13 @@
  */
 package com.codeforge.core.domain.extension
 
-/** Versionen des Manifest-/SDK-Vertrags. v1 = nur id/name/version/entryPointClass, v2 = + contributes/permissions. */
+/**
+ * Versionen des Manifest-/SDK-Vertrags. v1 = nur id/name/version/entryPointClass, v2 = + contributes/permissions,
+ * v3 = Editor/UI/Run, v4 = Projekt-/Build-Dienst, Plugin-Dienste, Vorschauen, Aktivierungsereignisse, Katalogangaben.
+ */
 object PluginApiVersion {
     /** Aktuelle Version des Plugin-API-Vertrags. */
-    const val CURRENT: Int = 3
+    const val CURRENT: Int = 4
 }
 
 /** Berechtigungen, die ein Code-Plugin im Manifest anfordern muss (rein deklarative Plugins brauchen keine). */
@@ -38,11 +41,20 @@ object PluginPermissions {
     const val RUN = "run"
     /** Seit API 3: Systembenachrichtigungen zeigen. */
     const val NOTIFICATIONS = "notifications"
+    /** Seit API 4: Projektmodell lesen (Module, Build-Ergebnisse eines Moduls). */
+    const val PROJECT = "project"
+    /** Seit API 4: Gradle-Aufgaben ausführen. */
+    const val BUILD = "build"
+    /**
+     * Seit API 4: Netzwerkzugriff. Nur eine Angabe für den Nutzer (Code-Plugins laufen im App-Prozess und können
+     * technisch ohnehin ins Netz); der Store und die Plugin-Ansicht zeigen sie an.
+     */
+    const val NETWORK = "network"
 
     /** Menge aller bekannten Berechtigungen. */
     val ALL: Set<String> = setOf(
         COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT, EDITOR, BUILD_EVENTS, PROJECT_EVENTS, UI, RUN,
-        NOTIFICATIONS
+        NOTIFICATIONS, PROJECT, BUILD, NETWORK
     )
 }
 
@@ -62,6 +74,12 @@ data class PluginManifest(
     val minHostVersion: String = "",
     /** IDs von Plugins, die installiert und aktiviert sein müssen. */
     val dependsOn: List<String> = emptyList(),
+    /** Seit API 4: wann der Code geladen wird (leer = beim Start); siehe [ActivationEvents]. */
+    val activationEvents: List<String> = emptyList(),
+    /** Seit API 4: Store-Kategorien als Pfade, z. B. `languages/jvm/kotlin` (siehe Store-Doku). */
+    val categories: List<String> = emptyList(),
+    /** Seit API 4: Schlagwörter für Suche und Filter im Store. */
+    val tags: List<String> = emptyList(),
     val contributes: Contributes = Contributes()
 ) {
     /** true, wenn das Plugin keinen ausführbaren Code mitbringt (im Store erlaubt). */

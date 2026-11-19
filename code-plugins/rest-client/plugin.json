@@ -1,0 +1,13 @@
+{
+  "id": "com.codeforge.plugin.rest-client.code",
+  "name": "REST-Client (.http)",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "codeforge",
+  "description": "Sendet HTTP-Anfragen aus .http/.rest-Dateien (Format wie REST Client für VS Code: ### als Trenner, @variable = wert, {{variable}}) und zeigt Status, Zeit, Header und Antwort (JSON formatiert).",
+  "entryPointClass": "com.codeforge.plugin.rest.RestClientPlugin",
+  "permissions": ["ui", "network"],
+  "activationEvents": ["onFileOpen:*.{http,rest}"],
+  "categories": ["tools/http", "languages/web"],
+  "tags": ["http", "rest", "api", "curl", "json"]
+}

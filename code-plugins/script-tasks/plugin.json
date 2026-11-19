@@ -1,0 +1,13 @@
+{
+  "id": "com.codeforge.plugin.script-tasks.code",
+  "name": "Projekt-Skripte (npm, Make, Cargo, Go, just)",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "codeforge",
+  "description": "Findet Aufgaben im geöffneten Projekt – npm/pnpm/yarn-Skripte aus package.json, Makefile-Ziele, Cargo, Go-Module und justfile-Rezepte – und bietet sie unter „Ausführen: …“ in der Befehlspalette an.",
+  "entryPointClass": "com.codeforge.plugin.scripts.ScriptTasksPlugin",
+  "permissions": ["run", "shell", "project", "project-events"],
+  "activationEvents": ["onProject:package.json", "onProject:Makefile", "onProject:Cargo.toml", "onProject:go.mod", "onProject:justfile"],
+  "categories": ["build/tasks", "languages/web", "languages/rust", "languages/go"],
+  "tags": ["npm", "make", "cargo", "go", "just", "tasks", "run"]
+}

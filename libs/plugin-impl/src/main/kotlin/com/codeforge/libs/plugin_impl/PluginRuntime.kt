@@ -9,7 +9,11 @@ import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.domain.extension.PluginPermissionPolicy
 import com.codeforge.core.domain.extension.PluginPermissions
+import com.codeforge.core.domain.repository.GradleBuildRepository
+import com.codeforge.libs.plugin_api.BuildService
 import com.codeforge.libs.plugin_api.CodeForgePlugin
+import com.codeforge.libs.plugin_api.PluginServices
+import com.codeforge.libs.plugin_api.ProjectService
 import com.codeforge.libs.plugin_api.PluginCommandHandler
 import com.codeforge.libs.plugin_api.PluginEventListener
 import com.codeforge.libs.plugin_api.PluginMenuTarget
@@ -58,7 +62,8 @@ internal class PluginRuntime(
     private val hooks: PluginHooks,
     private val registry: ExtensionRegistry,
     private val logs: PluginLogRepository,
-    private val settingsRepository: PluginSettingsRepository
+    private val settingsRepository: PluginSettingsRepository,
+    private val gradleBuild: () -> GradleBuildRepository? = { null }
 ) {
 
     private class LoadedPlugin(val instance: CodeForgePlugin, val context: PluginContext)
@@ -87,6 +92,8 @@ internal class PluginRuntime(
         }
 
         override fun jdkInstallPath(version: String): String = TermuxEnvironment.jdkHome(version)
+        override val project: ProjectService = HostProjectService { hooks.activeProjectRoot }
+        override val build: BuildService = HostBuildService(gradleBuild) { hooks.activeProjectRoot }
     }
 
     private fun contextFor(plugin: InstalledPlugin, pluginDir: File): HostPluginContext = HostPluginContext(
@@ -196,6 +203,8 @@ internal class PluginRuntime(
         override val pluginId: String get() = plugin.id
 
         override fun settings(): PluginSettings = settings
+        private val services = HostPluginServices(plugin.id, registry)
+        override fun services(): PluginServices = services
 
         override fun feedback(): PluginUi = ui
 
@@ -272,6 +281,8 @@ internal class PluginRuntime(
         val homeDir: String
         fun buildShellCommand(script: String, workingDirectory: String, extraPathEntries: List<String>): ShellLaunchSpec
         fun jdkInstallPath(version: String): String
+        val project: ProjectService
+        val build: BuildService
     }
 
     private companion object {
@@ -309,6 +320,10 @@ internal class PluginRuntime(
         }
 
         override fun jdkInstallPath(version: String): String = base.jdkInstallPath(version)
+        override val project: ProjectService
+            get() { require(PluginPermissions.PROJECT); return base.project }
+        override val build: BuildService
+            get() { require(PluginPermissions.BUILD); return base.build }
 
         override fun registerCommand(id: String, title: String, handler: PluginCommandHandler) {
             require(PluginPermissions.COMMANDS)

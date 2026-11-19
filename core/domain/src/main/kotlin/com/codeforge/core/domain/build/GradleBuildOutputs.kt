@@ -1,18 +1,18 @@
 /**
- * Modul: :feature:composepreview
+ * Modul: :core:domain
  * @author Thomas Schmid
  *
- * Ergebnisse eines vorhandenen Gradle-Builds (AGP 8 und 9) für die Vorschau: Klassen aller Module, `R.jar`,
- * gelinkte Ressourcen (`*.ap_`) und gedexte Bibliotheken. Sind sie aktuell, muss die Vorschau weder Nachbardateien
- * selbst kompilieren noch `R` ersetzen, und Bilder, Fonts und Themes kommen aus den echten Ressourcen.
+ * Ergebnisse eines vorhandenen Gradle-Builds (AGP 8 und 9): Klassen aller Module, `R.jar`, gelinkte Ressourcen
+ * (`*.ap_`) und gedexte Bibliotheken. Genutzt von der Compose-Vorschau (keine Nachbar-Kompilierung, echte
+ * Ressourcen) und vom Projekt-Dienst der Plugins (`ProjectService.moduleContext`).
  */
-package com.codeforge.feature.composepreview
+package com.codeforge.core.domain.build
 
 import java.io.File
 import java.util.zip.ZipFile
 
 /** Gefundene Build-Ergebnisse eines Projekts (eine Variante, meist `debug`). */
-internal data class GradleOutputs(
+data class GradleOutputs(
     val variant: String,
     /** `.class`-Ordner (Kotlin und Java) aller Module. */
     val classDirs: List<File>,
@@ -26,7 +26,7 @@ internal data class GradleOutputs(
     val stamp: String,
 )
 
-internal object PreviewGradleOutputs {
+object GradleBuildOutputs {
 
     private val SKIPPED = setOf("build", ".gradle", ".git", ".idea", ".kotlin", "node_modules", "src")
     private val SOURCE_EXT = setOf("kt", "java")
@@ -81,7 +81,7 @@ internal object PreviewGradleOutputs {
 
     // --- Suche ----------------------------------------------------------------------------------------------
 
-    internal fun moduleDirs(root: File): List<File> {
+    fun moduleDirs(root: File): List<File> {
         val out = ArrayList<File>()
         fun visit(dir: File, depth: Int) {
             if (File(dir, "build.gradle.kts").isFile || File(dir, "build.gradle").isFile) {
@@ -110,7 +110,7 @@ internal object PreviewGradleOutputs {
         }
     }
 
-    internal fun classDirsOf(module: File, variant: String, cap: String): List<File> = listOf(
+    fun classDirsOf(module: File, variant: String, cap: String): List<File> = listOf(
         File(module, "build/intermediates/built_in_kotlinc/$variant/compile${cap}Kotlin/classes"), // AGP 9
         File(module, "build/tmp/kotlin-classes/$variant"), // AGP 8
         File(module, "build/intermediates/javac/$variant/compile${cap}JavaWithJavac/classes"),
@@ -137,7 +137,7 @@ internal object PreviewGradleOutputs {
     private fun newestFile(dir: File): Long =
         if (dir.isFile) dir.lastModified() else dir.walkTopDown().filter { it.isFile }.maxOfOrNull { it.lastModified() } ?: 0L
 
-    internal fun resourceApkOf(module: File, variant: String): File? = listOf(
+    fun resourceApkOf(module: File, variant: String): File? = listOf(
         File(module, "build/intermediates/linked_resources_binary_format/$variant"),
         File(module, "build/intermediates/processed_res/$variant"),
     ).filter { it.isDirectory }

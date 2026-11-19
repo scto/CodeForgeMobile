@@ -1,0 +1,14 @@
+{
+  "id": "com.codeforge.plugin.gradle-tasks.code",
+  "name": "Gradle-Aufgaben",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "codeforge",
+  "description": "Bereich mit allen Modulen des Projekts und ihren üblichen Gradle-Aufgaben (assemble, test, lint, clean, dependencies) plus freier Eingabe; zeigt die Ausgabe live und den Stand des letzten Gradle-Builds.",
+  "entryPointClass": "com.codeforge.plugin.gradle.GradleTasksPlugin",
+  "permissions": ["ui", "project", "build"],
+  "activationEvents": ["onProject:settings.gradle.kts", "onProject:settings.gradle"],
+  "minHostVersion": "3.2.0",
+  "categories": ["build/gradle", "languages/jvm/kotlin"],
+  "tags": ["gradle", "android", "build", "tasks"]
+}

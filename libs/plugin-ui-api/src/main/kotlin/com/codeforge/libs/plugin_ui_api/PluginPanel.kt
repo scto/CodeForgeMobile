@@ -50,4 +50,34 @@ interface PanelHost {
 object PluginUiExtensionPoints {
     /** Bereiche im Editor. Berechtigung `ui`. */
     val PANEL: ExtensionPoint<PluginPanel> = ExtensionPoint("ui.panel", PluginPermissions.UI)
+
+    /** Seit API 4: Vorschauen für Dateitypen. */
+    val PREVIEW: ExtensionPoint<PluginPreview> = ExtensionPoint("ui.preview", PluginPermissions.UI)
+}
+
+/** Datei, die eine [PluginPreview] anzeigt. */
+data class PreviewFile(
+    /** Absoluter Pfad. */
+    val path: String,
+    /** Aktueller Editor-Inhalt (auch ungespeichert); `null` bei Binärdateien – dann selbst von [path] lesen. */
+    val text: String?
+)
+
+/**
+ * Seit API 4: Vorschau bzw. eigener Betrachter für Dateitypen (wie `customEditors` in VS Code), z. B. Markdown,
+ * CSV oder SQLite. Erscheint in der Befehlspalette, sobald die aktive Datei auf [filePatterns] passt.
+ * Berechtigung `ui`. Für [Content] gilt dasselbe wie bei [PluginPanel].
+ */
+interface PluginPreview {
+    /** Eindeutig je Plugin. */
+    val id: String
+
+    /** Titel in der Befehlspalette, z. B. „Markdown-Vorschau“. */
+    val title: String
+
+    /** Dateinamen-Muster: `*.md`, `*.{csv,tsv}`, `Makefile`. */
+    val filePatterns: List<String>
+
+    @Composable
+    fun Content(file: PreviewFile, host: PanelHost, modifier: Modifier)
 }

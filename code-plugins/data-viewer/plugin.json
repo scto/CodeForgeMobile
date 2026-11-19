@@ -1,0 +1,13 @@
+{
+  "id": "com.codeforge.plugin.data-viewer.code",
+  "name": "Daten-Betrachter (CSV, TSV, JSON)",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "codeforge",
+  "description": "Zeigt CSV/TSV als sortierbare Tabelle und JSON als aufklappbaren Baum – direkt aus dem Editor-Inhalt.",
+  "entryPointClass": "com.codeforge.plugin.data.DataViewerPlugin",
+  "permissions": ["ui"],
+  "activationEvents": ["onFileOpen:*.{csv,tsv,json,geojson}"],
+  "categories": ["previews/data", "languages/data"],
+  "tags": ["csv", "tsv", "json", "table", "viewer"]
+}
