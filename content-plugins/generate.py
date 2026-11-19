@@ -58,11 +58,12 @@ def main(out):
         dump(folder / "plugin.json", manifest(pid, f"{name} (Snippets)", f"{len(items)} Code-Snippets für {name}.", {"snippets": [{"languageId": lang_id, "path": f"snippets/{sid}.json"}]}))
         pack(out, pid, folder); sids.append(pid)
     keys = langs.load_keys(STRINGS)
-    langs.check(keys)
-    for lid, locale, name, vals in langs.PACKS:
+    valid = langs.check(keys)
+    en = dict(keys)
+    for lid, locale, name, _ in langs.PACKS:
         pid = f"com.codeforge.plugin.lang-{lid.lower()}.language"
         folder = out / "src" / pid
-        strings = {k: v for (k, en), v in zip(keys, vals) if v != en}
+        strings = {k: v for k, v in valid[lid].items() if v != en[k]}
         dump(folder / "lang" / f"{lid}.json", {"strings": strings})
         dump(folder / "plugin.json", manifest(pid, f"{name} (Sprachpaket)", f"Teilübersetzung der Oberfläche ({len(strings)} Texte: Allgemeines und Dateibaum); übrige Texte bleiben in der App-Sprache.",
                                               {"languagePacks": [{"locale": locale, "label": name, "path": f"lang/{lid}.json"}]}))

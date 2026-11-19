@@ -135,7 +135,8 @@
   }
 
   function boot() {
-    var s = document.getElementById("cf-store"); if (s) initStore(s);
+    var s = document.getElementById("cf-store");
+    if (s) (window.cfInitStore || initStore)(s); // Marktplatz aus store.js, sonst die einfache Liste
     var a = document.getElementById("cf-apt"); if (a) initApt(a);
   }
   if (window.document$ && window.document$.subscribe) window.document$.subscribe(boot);

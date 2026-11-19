@@ -1,0 +1,25 @@
+# Lädt neue Paketversionen ins Release „packages“ (dort zählt GitHub die Downloads; store.json verweist darauf).
+name: Store-Pakete
+
+on:
+  push:
+    branches: [main]
+    paths: ["packages/**", "store.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: store-packages
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Neue Versionen hochladen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/upload_packages.py

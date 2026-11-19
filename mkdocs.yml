@@ -33,6 +33,7 @@ theme:
 extra_css:
   - stylesheets/store.css
 extra_javascript:
+  - javascripts/store.js
   - javascripts/portal.js
 markdown_extensions:
   - attr_list

@@ -2738,4 +2738,21 @@
     <string name="plugins_unsigned">Nicht signiert</string>
     <string name="plugins_signed">Signiert: %1$s</string>
     <string name="plugins_activation">Lädt bei: %1$s</string>
+    <string name="store_search_hint">Plugins, Themes, Sprachen suchen …</string>
+    <string name="store_sort_relevance">Relevanz</string>
+    <string name="store_sort_downloads">Downloads</string>
+    <string name="store_sort_rating">Bewertung</string>
+    <string name="store_sort_name">Name</string>
+    <string name="store_sort_updated">Aktualisiert</string>
+    <string name="store_sort_newest">Neu</string>
+    <string name="store_result_count">%1$d von %2$d</string>
+    <string name="store_clear_filters">Filter zurücksetzen</string>
+    <string name="store_sideload_badge">Sideload</string>
+    <string name="store_sideload_hint">Code-Plugin: ZIP herunterladen und unter Einstellungen → Plugins → „+“ installieren.</string>
+    <string name="store_ratings_title">%1$d Bewertungen</string>
+    <string name="store_no_ratings">Noch keine Bewertungen.</string>
+    <string name="store_rate">Auf GitHub bewerten</string>
+    <string name="store_detail_size">Größe: %1$s</string>
+    <string name="store_detail_updated">Aktualisiert: %1$s</string>
+    <string name="store_detail_permissions">Berechtigungen: %1$s</string>
 </resources>

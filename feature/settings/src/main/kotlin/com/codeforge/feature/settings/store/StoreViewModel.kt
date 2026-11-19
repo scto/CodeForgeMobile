@@ -91,6 +91,13 @@ class StoreViewModel @Inject constructor(
             is StoreUiEvent.Uninstall -> uninstall(event.item)
             is StoreUiEvent.ShowMessage -> _uiState.update { it.copy(message = event.text) }
             StoreUiEvent.MessageShown -> _uiState.update { it.copy(message = null) }
+            is StoreUiEvent.Search -> _uiState.update { it.copy(query = event.query.take(MAX_QUERY)) }
+            is StoreUiEvent.ToggleTag -> _uiState.update {
+                it.copy(selectedTags = if (event.tag in it.selectedTags) it.selectedTags - event.tag else it.selectedTags + event.tag)
+            }
+            is StoreUiEvent.SetSort -> _uiState.update { it.copy(sort = event.sort) }
+            is StoreUiEvent.ShowDetail -> _uiState.update { it.copy(detailId = event.id) }
+            StoreUiEvent.ClearFilters -> _uiState.update { it.copy(query = "", selectedTags = emptySet(), selectedCategoryId = null) }
         }
     }
 
@@ -153,10 +160,15 @@ class StoreViewModel @Inject constructor(
                 }
             }
             refreshServerStates()
+            _uiState.value.catalog?.let { catalog ->
+                val stats = repository.loadStats(catalog.statsUrl)
+                _uiState.update { it.copy(stats = stats) }
+            }
         }
     }
 
     private companion object {
         const val CONTRIBUTIONS_TIMEOUT_MS = 5_000L
+        const val MAX_QUERY = 100
     }
 }

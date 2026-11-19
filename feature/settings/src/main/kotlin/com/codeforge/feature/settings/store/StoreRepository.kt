@@ -35,6 +35,17 @@ class StoreRepository internal constructor(
         @ApplicationContext context: Context,
     ) : this(fetcher, File(context.filesDir, "store-catalog.json"))
 
+    /** Lädt die Statistik (Downloads, Bewertungen); offline die zuletzt geladene, sonst leer. */
+    suspend fun loadStats(url: String): StoreStats = withContext(Dispatchers.IO) {
+        val cache = File(cacheFile.parentFile, "store-stats.json")
+        fetcher.fetch(url).getOrNull()?.let { body ->
+            val stats = StoreCatalogParser.parseStats(body)
+            if (stats.items.isNotEmpty()) runCatching { cache.writeText(body) }
+            return@withContext stats
+        }
+        runCatching { cache.takeIf { it.isFile }?.readText() }.getOrNull()?.let(StoreCatalogParser::parseStats) ?: StoreStats()
+    }
+
     /** Lädt den Katalog (online, sonst Zwischenspeicher). */
     suspend fun load(language: String): StoreLoadResult = withContext(Dispatchers.IO) {
         val fetched = fetcher.fetch(url)

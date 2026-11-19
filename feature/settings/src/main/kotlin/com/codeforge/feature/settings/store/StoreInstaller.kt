@@ -64,8 +64,13 @@ class StoreInstaller internal constructor(
         }
         val target = File(tempDir, "${item.id.filter { it.isLetterOrDigit() || it in "._-" }}.zip")
         try {
-            val download = downloader.download(url, target) { done, total ->
+            var download = downloader.download(url, target) { done, total ->
                 if (total > 0) onDownloadProgress(done.toFloat() / total)
+            }
+            // Release nicht erreichbar (z. B. Upload noch nicht fertig): Spiegel auf GitHub Pages versuchen.
+            val mirror = item.mirrorUrl
+            if (download.isFailure && mirror != null && mirror != url) {
+                download = downloader.download(mirror, target) { done, total -> if (total > 0) onDownloadProgress(done.toFloat() / total) }
             }
             download.exceptionOrNull()?.let { return StoreInstallResult.Failed(it.message ?: it.javaClass.simpleName) }
             if (!Sha256Utils.verifySha256(target, expected)) return StoreInstallResult.HashMismatch

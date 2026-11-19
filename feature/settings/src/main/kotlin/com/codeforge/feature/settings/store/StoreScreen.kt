@@ -2,6 +2,7 @@
 package com.codeforge.feature.settings.store
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.mutableStateOf
+import java.util.Locale
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
@@ -122,18 +140,42 @@ private fun StoreContent(
     modifier: Modifier = Modifier,
 ) {
     val filter = uiState.filter
+    val hasTree = catalog.tree.isNotEmpty()
+    val titles = remember(catalog) { catalog.tree.associate { it.id to it.title } }
+    // Kategoriepfad (Baum) bzw. flache Kategorie-ID älterer Kataloge; null = alle.
+    val path = filter.takeIf { it != StoreUiState.FILTER_ALL && it != StoreUiState.FILTER_INSTALLED }
+    val base = remember(catalog, path, uiState.query) { StoreQuery.filter(catalog.items, path, emptySet(), uiState.query, titles) }
+    val entries = remember(base, uiState.selectedTags, uiState.sort, uiState.stats) {
+        StoreQuery.sort(base.filter { item -> uiState.selectedTags.all { it in item.tags } }, uiState.sort, uiState.stats, uiState.query)
+    }
     Column(modifier = modifier.fillMaxSize()) {
+        StoreSearchBar(
+            query = uiState.query,
+            sort = uiState.sort,
+            onQuery = { onEvent(StoreUiEvent.Search(it)) },
+            onSort = { onEvent(StoreUiEvent.SetSort(it)) },
+        )
         StoreFilterChips(
-            categories = catalog.categories,
-            selected = filter,
+            categories = if (hasTree) StoreQuery.children(catalog.tree, catalog.items, null).map { it.first } else catalog.categories,
+            selected = if (hasTree && path != null) path.substringBefore('/') else filter,
             onSelect = { onEvent(StoreUiEvent.SelectCategory(it)) },
         )
-        val note = when {
-            uiState.cachedAt != null -> stringRes(R.string.store_offline_cached, uiState.cachedAt)
-            catalog.updated.isNotBlank() -> stringRes(R.string.store_updated, catalog.updated)
-            else -> null
+        if (hasTree && path != null) {
+            StoreSubCategories(tree = catalog.tree, items = catalog.items, path = path, onSelect = { onEvent(StoreUiEvent.SelectCategory(it)) })
         }
-        if (note != null) {
+        if (filter != StoreUiState.FILTER_INSTALLED) {
+            val tags = remember(base) { StoreQuery.topTags(base) }
+            StoreTagChips(tags = tags, selected = uiState.selectedTags, onToggle = { onEvent(StoreUiEvent.ToggleTag(it)) })
+        }
+        val note = listOfNotNull(
+            when {
+                uiState.cachedAt != null -> stringRes(R.string.store_offline_cached, uiState.cachedAt)
+                catalog.updated.isNotBlank() -> stringRes(R.string.store_updated, catalog.updated)
+                else -> null
+            },
+            stringRes(R.string.store_result_count, entries.size, catalog.items.size).takeIf { filter != StoreUiState.FILTER_INSTALLED },
+        ).joinToString(" · ")
+        if (note.isNotEmpty()) {
             Text(
                 note,
                 style = MaterialTheme.typography.labelSmall,
@@ -141,10 +183,17 @@ private fun StoreContent(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
         }
-        val entries = when (filter) {
-            StoreUiState.FILTER_ALL -> catalog.items
-            StoreUiState.FILTER_INSTALLED -> emptyList()
-            else -> catalog.itemsOf(filter)
+        uiState.detailId?.let { id ->
+            catalog.items.firstOrNull { it.id == id }?.let { item ->
+                StoreDetailSheet(
+                    item = item,
+                    stats = uiState.stats[item.id],
+                    titles = titles,
+                    ratingUrl = catalog.ratingUrl,
+                    onDismiss = { onEvent(StoreUiEvent.ShowDetail(null)) },
+                    onTag = { onEvent(StoreUiEvent.ShowDetail(null)); onEvent(StoreUiEvent.ToggleTag(it)) },
+                )
+            }
         }
         var pendingTool by remember { androidx.compose.runtime.mutableStateOf<StoreItem?>(null) }
         pendingTool?.let { tool ->
@@ -166,7 +215,14 @@ private fun StoreContent(
         if (filter == StoreUiState.FILTER_INSTALLED) {
             com.codeforge.feature.plugins.InstalledPluginsPanel(onMessage = { onEvent(StoreUiEvent.ShowMessage(it)) })
         } else if (entries.isEmpty()) {
-            Text(stringRes(R.string.store_empty_category), modifier = Modifier.padding(16.dp))
+            Column(Modifier.padding(16.dp)) {
+                Text(stringRes(R.string.store_empty_category))
+                if (uiState.query.isNotBlank() || uiState.selectedTags.isNotEmpty()) {
+                    androidx.compose.material3.TextButton(onClick = { onEvent(StoreUiEvent.ClearFilters) }) {
+                        Text(stringRes(R.string.store_clear_filters))
+                    }
+                }
+            }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -176,6 +232,8 @@ private fun StoreContent(
                 items(entries, key = { it.id }) { entry ->
                     StoreItemCard(
                         item = entry,
+                        stats = uiState.stats[entry.id],
+                        onOpen = { onEvent(StoreUiEvent.ShowDetail(entry.id)) },
                         installed = entry.id in uiState.installedPluginIds,
                         onUninstall = { onEvent(StoreUiEvent.Uninstall(entry)) },
                         serverState = uiState.serverStates[entry.id],
@@ -195,6 +253,8 @@ private fun StoreContent(
 @Composable
 private fun StoreItemCard(
     item: StoreItem,
+    stats: StoreItemStats,
+    onOpen: () -> Unit,
     installed: Boolean,
     onUninstall: () -> Unit,
     serverState: LspServerState?,
@@ -206,9 +266,10 @@ private fun StoreItemCard(
     onInstall: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
+    Card(onClick = onOpen, modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(item.name, style = MaterialTheme.typography.titleMedium)
+            StoreRatingLine(item, stats)
             val meta = listOfNotNull(
                 item.version.takeIf { it.isNotBlank() }?.let { stringRes(R.string.store_version, it) },
                 item.author.takeIf { it.isNotBlank() }?.let { stringRes(R.string.store_by_author, it) },
@@ -356,4 +417,202 @@ private fun StoreFilterChips(
             )
         }
     }
+}
+
+
+/** Suchfeld und Sortierung. */
+@Composable
+private fun StoreSearchBar(
+    query: String,
+    sort: StoreSort,
+    onQuery: (String) -> Unit,
+    onSort: (StoreSort) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var menu by remember { mutableStateOf(false) }
+    Row(
+        modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQuery,
+            singleLine = true,
+            placeholder = { Text(stringRes(R.string.store_search_hint)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = {
+                if (query.isNotEmpty()) {
+                    TooltipIconButton(onClick = { onQuery("") }, label = stringRes(R.string.store_clear_filters)) {
+                        Icon(Icons.Filled.Close, contentDescription = stringRes(R.string.store_clear_filters))
+                    }
+                }
+            },
+            modifier = Modifier.weight(1f),
+        )
+        Box {
+            TextButton(onClick = { menu = true }) { Text(stringRes(sortLabel(sort)), maxLines = 1) }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                StoreSort.entries.forEach { s ->
+                    DropdownMenuItem(text = { Text(stringRes(sortLabel(s))) }, onClick = { menu = false; onSort(s) })
+                }
+            }
+        }
+    }
+}
+
+private fun sortLabel(sort: StoreSort): Int = when (sort) {
+    StoreSort.RELEVANCE -> R.string.store_sort_relevance
+    StoreSort.DOWNLOADS -> R.string.store_sort_downloads
+    StoreSort.RATING -> R.string.store_sort_rating
+    StoreSort.NAME -> R.string.store_sort_name
+    StoreSort.UPDATED -> R.string.store_sort_updated
+    StoreSort.NEWEST -> R.string.store_sort_newest
+}
+
+/** Zweite Ebene des Kategorienbaums: zurück zur Elternkategorie und die Unterkategorien des gewählten Knotens. */
+@Composable
+private fun StoreSubCategories(
+    tree: List<StoreCategory>,
+    items: List<StoreItem>,
+    path: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val kids = remember(tree, items, path) { StoreQuery.children(tree, items, path) }
+    val parent = path.substringBeforeLast('/', "")
+    // Blatt: Geschwister zeigen, damit man seitlich wechseln kann.
+    val shown = if (kids.isEmpty() && parent.isNotEmpty()) StoreQuery.children(tree, items, parent) else kids
+    if (shown.isEmpty() && parent.isEmpty()) return
+    val title = tree.firstOrNull { it.id == path }?.title ?: path
+    androidx.compose.foundation.lazy.LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (parent.isNotEmpty()) {
+            item(key = "up") {
+                androidx.compose.material3.AssistChip(onClick = { onSelect(parent) }, label = { Text("‹ " + (tree.firstOrNull { it.id == parent }?.title ?: parent)) })
+            }
+        } else if (kids.isNotEmpty()) {
+            item(key = "self") { FilterChip(selected = true, onClick = {}, label = { Text(title) }) }
+        }
+        items(shown, key = { it.first.id }) { (node, count) ->
+            FilterChip(selected = node.id == path, onClick = { onSelect(node.id) }, label = { Text("${node.title} ($count)", maxLines = 1) })
+        }
+    }
+}
+
+/** Häufigste Tags der aktuellen Auswahl; mehrere wählbar. */
+@Composable
+private fun StoreTagChips(tags: List<Pair<String, Int>>, selected: Set<String>, onToggle: (String) -> Unit, modifier: Modifier = Modifier) {
+    if (tags.isEmpty() && selected.isEmpty()) return
+    val shown = (selected.map { it to 0 } + tags.filter { it.first !in selected })
+    androidx.compose.foundation.lazy.LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        items(shown, key = { "tag:" + it.first }) { (tag, count) ->
+            FilterChip(
+                selected = tag in selected,
+                onClick = { onToggle(tag) },
+                label = { Text(if (count > 0) "#$tag $count" else "#$tag", style = MaterialTheme.typography.labelSmall, maxLines = 1) },
+            )
+        }
+    }
+}
+
+/** Sterne, Downloads und Sideload-Hinweis einer Karte. */
+@Composable
+private fun StoreRatingLine(item: StoreItem, stats: StoreItemStats, modifier: Modifier = Modifier) {
+    val parts = listOfNotNull(
+        if (stats.ratings > 0) "${stars(stats.rating)} ${String.format(Locale.ROOT, "%.1f", stats.rating)} (${stats.ratings})" else null,
+        "⤓ ${stats.downloads}",
+        stringRes(R.string.store_sideload_badge).takeIf { item.isCodePlugin },
+    )
+    Text(parts.joinToString("  ·  "), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
+}
+
+private fun stars(rating: Double): String {
+    val full = Math.round(rating).toInt().coerceIn(0, 5)
+    return "★".repeat(full) + "☆".repeat(5 - full)
+}
+
+/** Detailansicht: Angaben, Kategorien und Tags, Bewertungen, „Bewerten“. */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+private fun StoreDetailSheet(
+    item: StoreItem,
+    stats: StoreItemStats,
+    titles: Map<String, String>,
+    ratingUrl: String,
+    onDismiss: () -> Unit,
+    onTag: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val uri = LocalUriHandler.current
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), modifier = modifier) {
+        Column(
+            Modifier.fillMaxWidth().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(item.name, style = MaterialTheme.typography.headlineSmall)
+            Text(item.id, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            StoreRatingLine(item, stats)
+            if (item.summary.isNotBlank()) Text(item.summary, style = MaterialTheme.typography.bodyMedium)
+            val facts = listOfNotNull(
+                stringRes(R.string.store_version, item.version).takeIf { item.version.isNotBlank() },
+                item.author.takeIf { it.isNotBlank() }?.let { stringRes(R.string.store_by_author, it) },
+                item.size.takeIf { it > 0 }?.let { stringRes(R.string.store_detail_size, formatSize(it)) },
+                item.updated.takeIf { it.isNotBlank() }?.let { stringRes(R.string.store_detail_updated, it) },
+                stringRes(R.string.store_detail_permissions, item.permissions.joinToString().ifEmpty { "–" }),
+            )
+            Text(facts.joinToString("\n"), style = MaterialTheme.typography.bodySmall)
+            if (item.categories.isNotEmpty() || item.tags.isNotEmpty()) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    item.categories.forEach { c ->
+                        val label = c.split('/').indices.joinToString(" › ") { i -> titles[c.split('/').take(i + 1).joinToString("/")] ?: c.split('/')[i] }
+                        androidx.compose.material3.AssistChip(onClick = {}, label = { Text(label, style = MaterialTheme.typography.labelSmall) })
+                    }
+                    item.tags.forEach { t -> androidx.compose.material3.AssistChip(onClick = { onTag(t) }, label = { Text("#$t", style = MaterialTheme.typography.labelSmall) }) }
+                }
+            }
+            if (item.isCodePlugin) {
+                Text(stringRes(R.string.store_sideload_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (stats.ratings > 0) {
+                Text(stringRes(R.string.store_ratings_title, stats.ratings), style = MaterialTheme.typography.titleSmall)
+                (5 downTo 1).forEach { n ->
+                    val count = stats.stars.getOrElse(n - 1) { 0 }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("$n★", style = MaterialTheme.typography.labelSmall, modifier = Modifier.width(28.dp))
+                        Box(Modifier.weight(1f).height(6.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(3.dp))) {
+                            Box(Modifier.fillMaxWidth(count.toFloat() / stats.ratings).height(6.dp).background(MaterialTheme.colorScheme.primary, RoundedCornerShape(3.dp)))
+                        }
+                        Text("$count", style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(start = 8.dp).width(24.dp))
+                    }
+                }
+                stats.reviews.forEach { r ->
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text("${stars(r.stars.toDouble())}  ${r.user} · ${r.date}", style = MaterialTheme.typography.labelMedium)
+                            if (r.text.isNotBlank()) Text(r.text, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            } else {
+                Text(stringRes(R.string.store_no_ratings), style = MaterialTheme.typography.bodySmall)
+            }
+            OutlinedButton(onClick = {
+                val url = ratingUrl + "&title=" + java.net.URLEncoder.encode("Bewertung: ${item.id}", "UTF-8") + "&plugin=" + java.net.URLEncoder.encode(item.id, "UTF-8")
+                runCatching { uri.openUri(url) }
+            }) { Text(stringRes(R.string.store_rate)) }
+        }
+    }
+}
+
+private fun formatSize(bytes: Long): String = when {
+    bytes < 1024 -> "$bytes B"
+    bytes < 1024 * 1024 -> String.format(Locale.ROOT, "%.1f KB", bytes / 1024.0)
+    else -> String.format(Locale.ROOT, "%.1f MB", bytes / 1024.0 / 1024.0)
 }

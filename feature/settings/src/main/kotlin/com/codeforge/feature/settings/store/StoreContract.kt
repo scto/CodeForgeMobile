@@ -24,6 +24,15 @@ data class StoreUiState(
     val installingServerIds: Set<String> = emptySet(),
     /** Einmalige Rückmeldung (fertiger Text) für die Snackbar. */
     val message: String? = null,
+    /** Suchtext. */
+    val query: String = "",
+    /** Ausgewählte Tags (alle müssen passen). */
+    val selectedTags: Set<String> = emptySet(),
+    val sort: StoreSort = StoreSort.RELEVANCE,
+    /** Downloads und Bewertungen (leer, solange nicht geladen). */
+    val stats: StoreStats = StoreStats(),
+    /** Geöffnete Detailansicht (Item-ID). */
+    val detailId: String? = null,
 ) {
     /** Gewählter Filter: [FILTER_ALL] (Standard), [FILTER_INSTALLED] oder eine Kategorie-ID. */
     val filter: String
@@ -53,6 +62,16 @@ sealed interface StoreUiEvent {
     data class ShowMessage(val text: String) : StoreUiEvent
     /** Meldung wurde angezeigt. */
     data object MessageShown : StoreUiEvent
+    /** Suchtext geändert. */
+    data class Search(val query: String) : StoreUiEvent
+    /** Tag an-/abwählen. */
+    data class ToggleTag(val tag: String) : StoreUiEvent
+    /** Sortierung wählen. */
+    data class SetSort(val sort: StoreSort) : StoreUiEvent
+    /** Detailansicht öffnen (`null` = schließen). */
+    data class ShowDetail(val id: String?) : StoreUiEvent
+    /** Suche, Tags und Kategorie zurücksetzen. */
+    data object ClearFilters : StoreUiEvent
 }
 
 /** Zustand der Programme eines installierten LSP-Plugins (`requires`). */

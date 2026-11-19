@@ -1,0 +1,35 @@
+name: Bewertung / Review
+description: Ein Paket aus dem CodeForge Store bewerten – rate a package from the CodeForge Store
+title: "Bewertung: "
+labels: ["rating"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fürs Bewerten! Je Paket zählt deine neueste Bewertung. Die Statistik der Website wird kurz danach aktualisiert.
+        Thanks for rating! Your latest review per package counts; the website statistics update shortly afterwards.
+  - type: input
+    id: plugin
+    attributes:
+      label: Paket-ID / Package ID
+      description: Steht auf der Paketseite im Store (z. B. com.codeforge.plugin.pyright.lsp).
+      placeholder: com.codeforge.plugin.…
+    validations:
+      required: true
+  - type: dropdown
+    id: stars
+    attributes:
+      label: Sterne / Stars
+      options:
+        - "★★★★★ (5)"
+        - "★★★★☆ (4)"
+        - "★★★☆☆ (3)"
+        - "★★☆☆☆ (2)"
+        - "★☆☆☆☆ (1)"
+    validations:
+      required: true
+  - type: textarea
+    id: review
+    attributes:
+      label: Bewertung / Review (optional)
+      description: Was gefällt dir, was fehlt? Fehler bitte als eigenes Issue melden.

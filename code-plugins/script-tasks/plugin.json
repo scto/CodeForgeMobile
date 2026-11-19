@@ -8,6 +8,6 @@
   "entryPointClass": "com.codeforge.plugin.scripts.ScriptTasksPlugin",
   "permissions": ["run", "shell", "project", "project-events"],
   "activationEvents": ["onProject:package.json", "onProject:Makefile", "onProject:Cargo.toml", "onProject:go.mod", "onProject:justfile"],
-  "categories": ["build/tasks", "languages/web", "languages/rust", "languages/go"],
+  "categories": ["build/tasks", "languages/web", "languages/systems/rust", "languages/go"],
   "tags": ["npm", "make", "cargo", "go", "just", "tasks", "run"]
 }
