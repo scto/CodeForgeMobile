@@ -77,7 +77,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 
 ### 🔌 6. Language Server & Plugins (`:libs:lsp-client`, `:libs:plugin-api`) ✅🧪
 * 🔌 LSP-Client (JSON-RPC) mit Code-Vervollständigung, Hover, Formatierung, Diagnosen, Quick-Fixes/Code-Aktionen, atomarem dateiübergreifendem Umbenennen mit Vorschau & Undo, Dokumentstruktur (Outline) mit Fallback, Definition & Referenzen sowie Beantwortung von `workspace/applyEdit`. Siehe [docs/lsp-code-actions-rename-report.md](docs/lsp-code-actions-rename-report.md).
-* 🧩 Plugin-API mit Beispiel-Plugins in `examples/` (Kotlin/Java). Extensions-Manager in `feature:plugins` (Task 23).
+* 🧩 Plugin-API 4 (Projekt-/Build-Dienst, Vorschauen, Dienste zwischen Plugins, Aktivierungsereignisse, Signaturen) mit sieben Code-Plugins à la VS Code in `code-plugins/` (Markdown, CSV/JSON, SQLite, REST-Client, Projekt-Skripte, Gradle-Aufgaben, pytest). Deklarative Plugins (Themes, LSP, Formatierer, Grammatiken, Snippets, Sprachpakete) im Store mit Kategorienbaum, Tags, Bewertungen und Downloads; VS-Code-Extensions per Konverter (`tool-plugins/scripts/vscode_import.py`). Liste: [Plugin-Liste](docs/dev/PluginCatalog.md).
 
 ### 📐 7. Indexierung & Dependency-Updater (`:libs:indexing-*`, `:libs:dependency-updater-*`) ✅
 * 🔄 Projektindexierung und Versions-Check (TOML-Katalog bzw. `build.gradle(.kts)` aller Module) mit Dialog Dismiss / Ask later / Update.
@@ -129,7 +129,8 @@ CodeForgeMobile/
 │   └── termux-emulator|view|shared|app/   # Vendort, GPLv3
 ├── agy-tasks/                    # Aufträge für den KI-Coding-Agenten agy
 ├── docs/                         # Architektur, Features, `sub/` mit Termux-/Lizenzdokumenten
-└── examples/                     # Beispiel-Plugins (Kotlin/Java LSP)
+├── code-plugins/                 # Code-Plugins (API 4, Sideload)
+└── examples/                     # Beispiel-Plugins des Leitfadens
 ```
 
 ---

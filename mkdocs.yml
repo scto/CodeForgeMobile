@@ -55,6 +55,8 @@ nav:
       - User Guide: user/UserGuide.md
       - Entwicklerhandbuch: dev/DeveloperGuide.md
       - Plugins entwickeln: dev/PluginDevelopment.md
+      - Plugin-Liste: dev/PluginCatalog.md
+      - Plugin-Signaturen: dev/PluginSigning.md
       - Release-Ablauf: dev/ReleaseProcess.md
       - Release-Signatur: dev/Signing.md
       - Modulgraph: dev/module-graph.md

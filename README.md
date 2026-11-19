@@ -78,7 +78,7 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 
 ### 🔌 6. Language Server & Plugins (`:libs:lsp-client`, `:libs:plugin-api`) ✅🧪
 * 🔌 LSP client (JSON-RPC) with code completion, hover, formatting, diagnostics, Quick-Fixes/Code Actions, atomic multi-file rename with preview & undo, document outline with fallback, definition & references, and `workspace/applyEdit` response support. See [docs/lsp-code-actions-rename-report.md](docs/lsp-code-actions-rename-report.md).
-* 🧩 Plugin API with example plugins in `examples/` (Kotlin/Java). Extensions manager in `feature:plugins` (Task 23).
+* 🧩 Plugin API 4 (project/build services, previews, services between plugins, activation events, signatures) with seven VS Code-style code plugins in `code-plugins/` (Markdown, CSV/JSON, SQLite, REST client, project scripts, Gradle tasks, pytest). Declarative plugins (themes, LSP, formatters, grammars, snippets, language packs) in the store with a category tree, tags, ratings and downloads; VS Code extensions via converter (`tool-plugins/scripts/vscode_import.py`). List: [plugin list](docs/dev/PluginCatalog.md).
 
 ### 📐 7. Indexing & Dependency Updater (`:libs:indexing-*`, `:libs:dependency-updater-*`) ✅
 * 🔄 Project indexing and version check (TOML catalog or `build.gradle(.kts)` of all modules) with a Dismiss / Ask later / Update dialog.
@@ -130,7 +130,8 @@ CodeForgeMobile/
 │   └── termux-emulator|view|shared|app/   # Vendored, GPLv3
 ├── agy-tasks/                    # Tasks for the AI coding agent agy
 ├── docs/                         # Architecture, features, `sub/` with Termux/license documents
-└── examples/                     # Example plugins (Kotlin/Java LSP)
+├── code-plugins/                 # Code plugins (API 4, sideload)
+└── examples/                     # Example plugins of the guide
 ```
 
 ---

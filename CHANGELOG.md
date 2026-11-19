@@ -11,6 +11,30 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt (Plugins, API 4)
+- **Plugin-API 4:** Projekt-Dienst (Module, Build-Ergebnisse des letzten Gradle-Builds), Build-Dienst (Gradle-Aufgaben
+  ausführen, nur Aufgabennamen), Dienste zwischen Plugins (`services()`), Vorschauen je Dateityp (`PluginPreview`, wie
+  `customEditors` in VS Code), Aktivierungsereignisse (`onLanguage`, `onFileOpen`, `onProject`), Katalogangaben
+  (`categories`, `tags`). Neue Berechtigungen `project`, `build`, `network`.
+- **Signaturen und Herkunft:** Plugins können signiert sein (EC P-256, `scripts/plugin-sign.py`); Updates müssen
+  denselben Schlüssel tragen. `build-info.json` (Commit, Datum) in allen Paketen; der Plugins-Bildschirm zeigt Signatur,
+  Herkunft und Aktivierung.
+- **Sieben Code-Plugins** (`code-plugins/`, Sideload): Markdown-Vorschau, Daten-Betrachter (CSV/TSV/JSON),
+  SQLite-Betrachter, Projekt-Skripte (npm/pnpm/yarn/bun, Make, Cargo, Go, just), REST-Client (`.http`),
+  Gradle-Aufgaben, Python-Tests (pytest).
+- **Acht Sprachpakete** als Bundles (Python, Rust, Go, Web, C/C++, Shell, Konfiguration, Kotlin/Java).
+- **VS-Code-Konverter:** übernimmt Farbschemata, Icon-Themes, Grammatiken samt Dateiendungen, Snippets und
+  Extension-Packs; lädt direkt von Open VSX (`openvsx:<publisher>.<name>`) und schreibt einen Bericht über nicht
+  Übertragbares.
+- **Store:** Kategorienbaum, Tags, Suche, sechs Sortierungen, Bewertungen (GitHub-Formular) und Downloads (Release des
+  Store-Repos), täglich aktualisiert; Detailansicht mit Rezensionen und „Bewerten“ in App und Website; Spiegel-Download
+  als Rückfall.
+- Doku: Leitfaden (API 4, Code-Plugins, VS Code → CodeForge), Plugin-Liste, Plugin-Signaturen.
+
+### Behoben
+- Sprachpakete der Oberfläche: Übersetzungen nach Schlüssel statt Position zugeordnet (neue Texte verschoben alle
+  folgenden; das Veröffentlichen des Stores brach ab).
+
 ### Hinzugefügt (Compose-Vorschau)
 - **Gradle-Build-Ergebnisse nutzen:** Liegt ein aktueller Gradle-Build des Projekts vor (keine Quell- oder
   Ressourcendatei neuer als der Build; AGP 8 und 9, Android- und reine Kotlin/JVM-Module), kompiliert die Vorschau nur

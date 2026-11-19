@@ -9,7 +9,8 @@ Vorlagen: `templates/`, Anleitung zum Selbermachen: `docs/extension-authoring.md
 
 | Modul | Inhalt |
 |---|---|
-| `:libs:plugin-api` | SDK für Code-Plugins: `CodeForgePlugin`, `PluginContext`, `PluginHostServices` |
+| `:libs:plugin-api` | SDK für Code-Plugins: `CodeForgePlugin`, `PluginContext`, `PluginHostServices` (ab API 4 mit `project`, `build`, `services()`) |
+| `:libs:plugin-ui-api` | Compose-Oberflächen: `PluginPanel`, ab API 4 `PluginPreview` (Vorschau je Dateityp) |
 | `:core:domain` (`…domain.extension`) | Manifest-Modelle, `PluginManifestParser`, `ActiveContributions`, `ContributionRepository`, Farbschema-Parser |
 | `:libs:plugin-impl` | Laufzeit: `PluginRuntime` (DexClassLoader), `PluginRegistry`, `PluginRepositoryImpl`, `ExtensionThemeRepositoryImpl`, Hilt-Modul |
 
@@ -43,7 +44,8 @@ Vorlagen: `templates/`, Anleitung zum Selbermachen: `docs/extension-authoring.md
 
 * v1-Manifeste (nur `id`, `name`, `version`, `description`, `entryPointClass`) bleiben gültig (`apiVersion` = 1).
 * `id`: `[A-Za-z0-9][A-Za-z0-9._-]*`, kein `..`. Alle `path`-Werte sind relativ zum Plugin-Verzeichnis, ohne `..` und ohne führenden `/`.
-* `permissions` (Code-Plugins und `tools`; `tools` verlangt `shell`): `commands`, `menus`, `file-events`, `git-events`, `shell`, `lsp`. Unbekannte Werte lehnen die Installation ab.
+* `permissions` (Code-Plugins und `tools`; `tools` verlangt `shell`): `commands`, `menus`, `file-events`, `git-events`, `shell`, `lsp`, `agent`, `editor`, `build-events`, `project-events`, `ui`, `run`, `notifications`, ab API 4 `project`, `build`, `network`. Unbekannte Werte lehnen die Installation ab.
+* Ab API 4 (`apiVersion: 4`): `activationEvents` (`onStartup`, `onLanguage:<id>`, `onFileOpen:<muster>`, `onProject:<datei>`), `categories` (Store-Pfade wie `languages/jvm/kotlin`) und `tags`. Optional signiert (`signature.json`, siehe `docs/dev/PluginSigning.md`) und mit Herkunft (`build-info.json`).
 * Eine neuere `apiVersion` als die App kennt wird abgelehnt.
 * Rein deklarative Plugins (ohne `entryPointClass`) laden keinen Code; ihre Beiträge werden direkt aus dem Manifest gelesen.
 * Aktivieren/Deaktivieren schaltet die Beiträge sofort (`ContributionRepository.contributions`).

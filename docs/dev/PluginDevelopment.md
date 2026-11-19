@@ -74,9 +74,14 @@ mein-plugin.zip
 | `id` | ja | eindeutig, `[A-Za-z0-9][A-Za-z0-9._-]*`, kein `..`; wird zum Verzeichnisnamen. Konvention: umgekehrte Domain, z. B. `com.example.nord` |
 | `name` | ja | Anzeigename |
 | `version` | ja | Freitext, üblich `MAJOR.MINOR.PATCH` |
-| `apiVersion` | nein | `1` (Standard) oder `2`; neu entwickelte Plugins nutzen `2`. Eine neuere als die der App wird abgelehnt |
-| `publisher`, `description` | nein | Anzeige im Plugins-Bildschirm |
-| `permissions` | nein | Liste aus `commands`, `menus`, `file-events`, `git-events`, `shell`, `lsp`; Unbekanntes lehnt die Installation ab |
+| `apiVersion` | nein | `1` (Standard) bis `4`; deklarative Plugins genügt `2`, Code-Plugins mit Projekt-/Build-Dienst, Vorschauen oder Aktivierungsereignissen brauchen `4`. Eine neuere als die der App wird abgelehnt |
+| `publisher`, `description` | nein | Anzeige im Plugins-Bildschirm und im Store |
+| `permissions` | nein | siehe [2.4](#24-berechtigungen); Unbekanntes lehnt die Installation ab |
+| `minHostVersion` | nein | Mindestversion der App, z. B. `3.2.0` |
+| `dependsOn` | nein | IDs von Plugins, die installiert und aktiv sein müssen (werden vorher geladen) |
+| `activationEvents` | nein | ab API 4: wann der Code geladen wird, siehe [9.13](#913-seit-api-4-projekt-build-dienste-vorschauen-aktivierung); leer = beim Start |
+| `categories` | nein | ab API 4: Store-Kategorien als Pfad, z. B. `languages/jvm/kotlin`, `previews/data` (Kleinbuchstaben, `/` als Trenner, max. 4 Ebenen) |
+| `tags` | nein | ab API 4: bis zu 20 Schlagwörter für Suche und Filter im Store |
 | `entryPointClass` | nein | voll qualifizierter Klassenname; macht das Plugin zum Code-Plugin |
 | `contributes` | nein | Beiträge, siehe Referenz |
 
@@ -112,6 +117,15 @@ Deklariere nur, was du brauchst. Fehlt eine Berechtigung, wirft der Zugriff `Plu
 | `git-events` | `GitCommitted`, `GitBranchChanged` | |
 | `shell` | `buildShellCommand`, `tools` | ab `apiVersion` 2 deklarationspflichtig |
 | `lsp` | `lspClientRepository` | ab `apiVersion` 2 deklarationspflichtig |
+| `agent` | `agentTools`, `mcpServers` (zusätzlich `shell`) | |
+| `editor` | Editor-Aktionen, Schnellkorrekturen, Vervollständigung, Hover, Navigation | API 3 |
+| `build-events`, `project-events` | `BuildStarted/Finished`, `ProjectOpened/Closed` | API 3 |
+| `ui` | eigene Bereiche (`PluginPanel`) und Vorschauen (`PluginPreview`) | API 3/4; Compose läuft mit allen Rechten der App |
+| `run` | Ausführen- und Test-Einträge, Test-Quellen | API 3 |
+| `notifications` | Systembenachrichtigungen | API 3 |
+| `project` | `hostServices.project` (Module, Build-Ergebnisse) | API 4 |
+| `build` | `hostServices.build` (Gradle-Aufgaben ausführen) | API 4; nur Aufgabennamen, keine Gradle-Optionen |
+| `network` | – | API 4; reine Angabe für Nutzer und Store (Code im App-Prozess kann technisch immer ins Netz) |
 
 ### 2.5 Installation, Ersetzen, Aktivieren
 
@@ -862,6 +876,68 @@ context.register(PluginLanguagePoints.TEST_PROVIDER, PytestProvider())
   die Knöpfe; das Ausgabeblatt listet alle Tests, fehlgeschlagene zuerst.
 - Die Ergebnisse gelten bis zum Schließen des Projekts; ein eigener Test-Reiter mit Verlauf fehlt noch.
 
+### 9.13 Seit API 4: Projekt, Build, Dienste, Vorschauen, Aktivierung
+
+**Aktivierungsereignisse** (wie `activationEvents` in VS Code): Der Code lädt erst, wenn er gebraucht wird. Ohne
+Angabe (oder mit `*`/`onStartup`) lädt er wie bisher beim Start.
+
+| Ereignis | Lädt, wenn … |
+|---|---|
+| `onLanguage:<id>` | eine Datei der Sprache geöffnet wird (`markdown`, `python`, `kotlin`, …) |
+| `onFileOpen:<muster>` | eine passende Datei geöffnet wird (`*.csv`, `*.{http,rest}`, `Makefile`) |
+| `onProject:<datei>` | ein Projekt geöffnet wird, das die Datei im Wurzelordner hat (`package.json`, `settings.gradle.kts`) |
+
+Abhängigkeiten aus `dependsOn` werden dabei mitgeladen. Beiträge eines noch nicht geladenen Plugins (Befehle, Bereiche)
+erscheinen erst nach dem Ereignis.
+
+**Projekt- und Build-Dienst** (Berechtigungen `project`, `build`):
+
+```kotlin
+val project = context.hostServices.project
+project.rootPath                       // Wurzel des geöffneten Projekts
+project.modules()                      // [PluginModule(":app", "/…/app"), …]
+project.buildOutputs()                 // Klassen, R.jar, Ressourcen-APK des letzten aktuellen Gradle-Builds oder null
+
+val result = context.hostServices.build.runTasks(listOf(":app:assembleDebug")) { line -> log(line) }
+if (!result.success) showError(result.message)
+```
+
+`runTasks` nimmt nur Aufgabennamen (`:modul:aufgabe`), keine Optionen wie `--init-script` (sie könnten fremde Skripte
+ausführen). Es nutzt dieselbe Gradle-Verbindung wie der Build-Bildschirm.
+
+**Dienste zwischen Plugins** (ohne Berechtigung): ein Plugin bietet an, andere nutzen.
+
+```kotlin
+val UPPER = ServiceKey<(String) -> String>("demo.upper")
+context.services().provide(UPPER) { it.uppercase() }        // Anbieter
+context.services().get(UPPER)?.invoke("hallo")               // Nutzer (anderes Plugin)
+```
+
+Jedes Plugin hat einen eigenen Klassenlader: Der Typ muss aus dem SDK oder der Plattform stammen (Funktionstypen,
+`java.util.function.*`, SDK-Datenklassen). Beim Entladen eines Plugins verschwinden seine Dienste automatisch.
+
+**Vorschauen** (wie `customEditors` in VS Code, Berechtigung `ui`): eine Compose-Ansicht für Dateitypen, erreichbar über
+die Befehlspalette, sobald die aktive Datei passt. `file.text` ist der aktuelle Editor-Inhalt (auch ungespeichert).
+
+```kotlin
+object CsvPreview : PluginPreview {
+    override val id = "table"
+    override val title = "Als Tabelle anzeigen"
+    override val filePatterns = listOf("*.{csv,tsv}")
+
+    @Composable
+    override fun Content(file: PreviewFile, host: PanelHost, modifier: Modifier) {
+        val rows = remember(file.text) { parse(file.text.orEmpty()) }
+        Table(rows, modifier)
+    }
+}
+context.register(PluginUiExtensionPoints.PREVIEW, CsvPreview)
+```
+
+UI-Plugins sind Android-Library-Module mit Compose, die nur ihre eigenen Klassen dexen; Compose, SDK und Coroutines
+kommen zur Laufzeit aus der App. Vorlage und gemeinsames Packen: `code-plugins/code-plugin.gradle.kts`
+(siehe [Code-Plugins](#10a-code-plugins-wie-in-vs-code)).
+
 ## 10. Beispiel 6: Hybrid – LSP-Plugin mit Download
 
 **Ziel:** Ein Language Server, der nicht als Paket vorliegt, sondern heruntergeladen werden muss. Das Manifest startet den Server (deklarativ), der Code stellt nur sicher, dass er da ist.
@@ -944,6 +1020,49 @@ Beobachte:
 
 **Wann Hybrid, wann deklarativ?** Liegt der Server als Termux-/npm-/pip-Paket vor (clangd, Pyright, Taplo …), reicht `requires` ohne Code. Hybrid brauchst du nur für Download, Entpacken, Patchen oder Aufräumen. Mehr dazu: [Plugin-Modelle im Vergleich](../plugin-modelle-vergleich.md).
 
+## 10a. Code-Plugins wie in VS Code
+
+`code-plugins/` enthält sieben fertige Code-Plugins (API 4) als Vorlage für eigene. Bauen:
+`./gradlew :code-plugins:packageAll` → `code-plugins/out/<modul>/<id>.zip` (mit `build-info.json`; signiert, wenn
+`CF_PLUGIN_SIGNING_KEY` gesetzt ist, siehe [Plugin-Signaturen](PluginSigning.md)).
+
+| Plugin | Entspricht in VS Code | Nutzt |
+|---|---|---|
+| Markdown-Vorschau | Markdown Preview | `PluginPreview`, `onLanguage:markdown` |
+| Daten-Betrachter (CSV/TSV/JSON) | Rainbow CSV, JSON-Viewer | 2 Vorschauen, `onFileOpen` |
+| SQLite-Betrachter | SQLite Viewer | `PluginPanel`, Android-SQLite schreibgeschützt |
+| Projekt-Skripte (npm, Make, Cargo, Go, just) | NPM Scripts, Task-Provider | `RunTask` je Projekt, `onProject`, `project-events` |
+| REST-Client (.http) | REST Client | `PluginPreview`, `network` |
+| Gradle-Aufgaben | Gradle for Java | `project` + `build` (API 4), `PluginPanel` |
+| Python-Tests (pytest) | Python Test Explorer | `TestProvider`, `requires` pip `pytest` |
+
+Dazu acht **Sprachpakete** als Bundles (wie die „Extension Packs“ von VS Code): Python, Rust, Go, Web, C/C++, Shell,
+Konfiguration, Kotlin/Java – je Sprachserver plus Formatierer in einem Schritt (`tool-plugins/`).
+
+## 10b. Von VS Code kommen
+
+| VS Code (`package.json`) | CodeForge (`plugin.json`) | Hinweis |
+|---|---|---|
+| `contributes.themes` | `colorThemes` (+ `textmateTheme`) | Konverter bildet Farben auf Material-3-Rollen ab |
+| `contributes.iconThemes` | `iconThemes` | SVG → PNG (librsvg) |
+| `contributes.grammars` + `languages` | `grammars` (mit Endungen) | Injektions-Grammatiken entfallen |
+| `contributes.snippets` | `snippets` | gleiches Format (JSONC → JSON) |
+| `extensionPack` | `extensionPack` | bekannte Extensions → CodeForge-Plugins |
+| Sprach-Extension mit Server | `lspServers` + `requires` | deklarativ, ohne JavaScript |
+| `activationEvents` | `activationEvents` (`onLanguage`, `onFileOpen`, `onProject`) | ab API 4 |
+| `commands`, `menus` | `registerCommand`, `registerMenuItem` | Code-Plugin |
+| `customEditors`, Webviews | `PluginPreview`, `PluginPanel` (Compose) | Code-Plugin, API 4 |
+| `taskDefinitions`, Task-Provider | `RunTask`, `tools` | |
+| Test-Explorer | `TestProvider` | |
+| `debuggers` | – | DAP-Adapter als Plugin-Beitrag fehlt noch (der eingebaute Java-Debugger nutzt DAP) |
+| `configuration` | `settings` | nur deklarativ genutzt (`${setting:key}`) |
+| Extension-API (`vscode.*`) in JavaScript | Kotlin-SDK | JavaScript-Extensions laufen nicht |
+
+**Konverter:** Das Werkzeug-Plugin „VS Code Import“ (PT-Menü) bzw. am Rechner
+`python3 tool-plugins/scripts/vscode_import.py <ausgabe> <eingabe>` übernimmt alle deklarativen Teile einer Extension
+(`.vsix`, Ordner, Theme-JSON oder direkt `openvsx:<publisher>.<name>` von Open VSX) und schreibt einen Bericht über
+alles, was nicht übertragbar ist.
+
 ## 11. Testen
 
 ### 11.1 Statisch (ohne Gerät)
@@ -986,6 +1105,12 @@ Beobachte:
 | Inhalt | alles, auch Code-Plugins und `tools` | nur deklarative Kategorien; Werkzeuge in `tool` |
 | Prüfung | Manifest-Parser | zusätzlich `DeclarativeOnly` (kein Code), SHA-256, `requires`-Freigabeliste |
 | Wege | ZIP per Datei teilen | Eintrag in `store.json` |
+
+**Kategorien, Tags, Bewertungen:** Der Store ordnet Pakete in einen Kategorienbaum (`languages/jvm/kotlin`,
+`previews/data`, …) und versieht sie mit Tags – aus `categories`/`tags` im Manifest oder abgeleitet aus den Beiträgen.
+Downloads zählt das Release `packages` des Store-Repos, Bewertungen kommen aus einem GitHub-Issue-Formular; beides
+fasst ein täglicher Workflow in `stats.json` zusammen (Details: `store-site/README.md`). Code-Plugins erscheinen dort
+als „Sideload“ (Download von der Website).
 
 **Store-Regeln** (`DeclarativeOnly`, `RequirementPolicy`): Das Archiv darf nicht enthalten: `entryPointClass`, `.dex`, `.jar`, `.so`, `.apk`, `.class`, `.aar`, `.sh`; es braucht mindestens einen Beitrag; `requires` nur mit freigegebenen Paketen:
 
@@ -1030,7 +1155,10 @@ Mit `python3 store-site/publish.py <checkout-von-codeforge-store>` baut das Repo
 | „plugin.json fehlt im Archiv“ | ZIP enthält einen Unterordner statt `plugin.json` im Wurzelverzeichnis (ZIP aus dem Inhalt des Ordners bauen, nicht aus dem Ordner) |
 | „Ungültige Plugin-ID“ | `id` enthält erlaubte Zeichen nicht oder `..` |
 | „Plugin benötigt API-Version …“ | `apiVersion` neuer als die App; `2` verwenden |
-| „Unbekannte Berechtigungen“ | Schreibfehler in `permissions` (erlaubt: `commands`, `menus`, `file-events`, `git-events`, `shell`, `lsp`) |
+| „Unbekannte Berechtigungen“ | Schreibfehler in `permissions` (Liste in [2.4](#24-berechtigungen)) |
+| „Ungültiges Aktivierungsereignis“ | nur `onStartup`, `*`, `onLanguage:`, `onFileOpen:`, `onProject:` (ohne `/`) |
+| Code-Plugin lädt nicht | `activationEvents` gesetzt und Ereignis noch nicht eingetreten (Plugins-Bildschirm: „Lädt bei: …“) |
+| „Update ist mit einem anderen Schlüssel signiert“ | Das installierte Plugin ist signiert; Update mit demselben Schlüssel signieren oder altes Plugin vorher entfernen |
 | `tools` abgelehnt | Berechtigung `shell` fehlt |
 | Beitrag erscheint nicht | Plugin nicht aktiviert oder `path` falsch (relativ, ohne `..`, ohne führenden `/`) |
 | Plugin installiert, aber nicht geladen | `classes.dex` fehlt oder enthält die Klasse nicht; `entryPointClass` falsch geschrieben |
@@ -1051,8 +1179,13 @@ Mit `python3 store-site/publish.py <checkout-von-codeforge-store>` baut das Repo
 * **Vertrauen:** Plugins mit `lspServers`, `formatters`, `tools` oder Code führen Programme auf dem Gerät aus. Installiere nur aus vertrauenswürdigen Quellen. Die App fragt vor `requires` und vor Werkzeugen aus dem Store nach.
 * **Kein Shell:** Kommandos haben keine Shell-Expansion; `${input}` ist ein einzelnes Argument.
 * **Archiv:** Einträge werden gegen Zip-Slip geprüft, Beitragsdateien dürfen das Plugin-Verzeichnis nicht verlassen, Plugin-Code wird vor dem Laden schreibgeschützt gesetzt (Android 14+).
-* **Store:** nur deklarativ, mit SHA-256 und Freigabeliste. Eine strengere Lösung (Signatur, Review) für Werkzeuge ist offen.
-* **Nicht abgedeckt:** Es gibt kein Plugin-API für eigene Bildschirme oder Compose-UI, nur Befehle, Menüs, Meldungen und Ereignisse. Eine allgemeine „aktive Datei“-Brücke für reaktive LSP-Plugins fehlt (siehe TODO in `CodeForgePlugin.kt`).
+* **Store:** nur deklarativ, mit SHA-256 und Freigabeliste. Code-Plugins nur per Sideload.
+* **Signaturen:** Plugins können signiert sein (EC P-256, `signature.json`). Die App merkt sich den Schlüssel beim
+  ersten Installieren; Updates müssen denselben Schlüssel tragen (Vertrauen beim ersten Mal). Herkunft steht in
+  `build-info.json` und im Plugins-Bildschirm. Siehe [Plugin-Signaturen](PluginSigning.md).
+* **Keine Sandbox:** Code-Plugins laufen im App-Prozess mit allen Rechten der App (wie bei VS Code und Code on the Go);
+  Berechtigungen sperren die Schnittstellen der App, nicht Java selbst. Eine Prozess-Sandbox (`isolatedProcess`) wäre
+  die Voraussetzung für Code-Plugins im Store.
 * **Gerätetests:** ausstehend, siehe oben.
 
 ## 16. Referenz
@@ -1069,3 +1202,7 @@ Mit `python3 store-site/publish.py <checkout-von-codeforge-store>` baut das Repo
 | Plugin-API | `libs/plugin-api/…/CodeForgePlugin.kt` ([API-Referenz](../api/index.html)) |
 | Manifest-Parser und Regeln | `core/domain/…/extension/` (`PluginManifestParser`, `DeclarativeOnly`, `Requirements`) |
 | Store | [Store](../store.md), `store-site/README.md` |
+| Liste aller Plugins | [Plugin-Liste](PluginCatalog.md) |
+| Code-Plugins à la VS Code | `code-plugins/` (`code-plugins/README.md`) |
+| Signieren | [Plugin-Signaturen](PluginSigning.md), `scripts/plugin-sign.py` |
+| VS-Code-Konverter | `tool-plugins/scripts/vscode_import.py` |
