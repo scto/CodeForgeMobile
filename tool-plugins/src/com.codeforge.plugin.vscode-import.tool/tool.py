@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
-"""VS-Code-Theme / Icon-Pack -> CodeForge-Plugin (Sideload-ZIP).
+"""VS-Code-Extension -> CodeForge-Plugin (Sideload-ZIP).
 
-Eingabe: Pfad (relativ zum Projekt oder absolut) zu einer .vsix, einem entpackten Extension-Ordner (mit package.json)
-oder einer einzelnen Theme-JSON. Ausgabe: <Projekt>/cf-plugin-out/<plugin-id>/ und <plugin-id>.zip.
+Eingabe (relativ zum Projekt oder absolut):
+  * eine .vsix, ein entpackter Extension-Ordner (mit package.json) oder eine einzelne Theme-JSON
+  * openvsx:<publisher>.<name>[@version] – lädt die Extension von open-vsx.org
+
+Übernommen werden alle deklarativen Teile, die CodeForge versteht:
+  Farbschemata (themes), Icon-Themes, TextMate-Grammatiken (grammars + languages), Snippets und Extension-Packs
+  (bekannte Extensions werden auf CodeForge-Plugins abgebildet, z. B. Language Server). Nicht übertragbar ist der
+  JavaScript-Code einer Extension (Befehle, Ansichten, Debugger …) – das steht im Bericht.
+
+Ausgabe: <Projekt>/cf-plugin-out/<plugin-id>/, <plugin-id>.zip und <plugin-id>.report.md.
 Icon-Packs mit SVG brauchen 'rsvg-convert' (pkg install librsvg); PNG/WebP/JPEG werden direkt übernommen.
+
+Auch am Rechner nutzbar: python3 tool-plugins/scripts/vscode_import.py <ausgabeordner> <vsix|ordner|openvsx:…>
 """
-import json, os, re, shutil, subprocess, tempfile, zipfile
+import json, os, re, shutil, subprocess, tempfile, urllib.request, zipfile
 from common import args
 
 # ---------- Farben ----------
@@ -204,80 +214,266 @@ def convert_icons(manifest_dir, icon_def, out_dir):
     return len(cache)
 
 
+# ---------- Grammatiken, Snippets, Pakete ----------
+
+# Bekannte VS-Code-Extensions → CodeForge-Plugins (für extensionPack und als Ergänzung zu Sprach-Extensions).
+KNOWN = {
+    "ms-python.python": ["com.codeforge.plugin.python-pack.bundle"],
+    "ms-python.vscode-pylance": ["com.codeforge.plugin.pyright.lsp"],
+    "charliermarsh.ruff": ["com.codeforge.plugin.ruff.lsp", "com.codeforge.plugin.ruff-format.formatter"],
+    "rust-lang.rust-analyzer": ["com.codeforge.plugin.rust-pack.bundle"],
+    "golang.go": ["com.codeforge.plugin.go-pack.bundle"],
+    "ms-vscode.cpptools": ["com.codeforge.plugin.cpp-pack.bundle"],
+    "llvm-vs-code-extensions.vscode-clangd": ["com.codeforge.plugin.clangd.lsp"],
+    "redhat.vscode-yaml": ["com.codeforge.plugin.yaml-language-server.lsp"],
+    "redhat.vscode-xml": ["com.codeforge.plugin.lemminx.lsp"],
+    "redhat.java": ["com.codeforge.plugin.jdtls.lsp"],
+    "fwcd.kotlin": ["com.codeforge.plugin.kotlin-language-server.lsp"],
+    "mathiasfrohlich.kotlin": [],
+    "tamasfe.even-better-toml": ["com.codeforge.plugin.taplo.lsp", "com.codeforge.plugin.taplo-format.formatter"],
+    "esbenp.prettier-vscode": ["com.codeforge.plugin.prettier.formatter"],
+    "dart-code.dart-code": ["com.codeforge.plugin.dart.lsp"],
+    "dart-code.flutter": ["com.codeforge.plugin.dart.lsp"],
+    "mads-hartmann.bash-ide-vscode": ["com.codeforge.plugin.shell-pack.bundle"],
+    "foxundermoon.shell-format": ["com.codeforge.plugin.shfmt.formatter"],
+    "ms-vscode.vscode-typescript-next": ["com.codeforge.plugin.web-pack.bundle"],
+    "vscode.typescript-language-features": ["com.codeforge.plugin.web-pack.bundle"],
+    "neocmakelsp.neocmakelsp": ["com.codeforge.plugin.neocmakelsp.lsp"],
+    "humao.rest-client": ["com.codeforge.plugin.rest-client.code"],
+    "yzhang.markdown-all-in-one": ["com.codeforge.plugin.markdown-preview.code"],
+    "mechatroner.rainbow-csv": ["com.codeforge.plugin.data-viewer.code"],
+    "alexcvzz.vscode-sqlite": ["com.codeforge.plugin.sqlite-viewer.code"],
+    "qwtel.sqlite-viewer": ["com.codeforge.plugin.sqlite-viewer.code"],
+    "vscjava.vscode-gradle": ["com.codeforge.plugin.gradle-tasks.code"],
+}
+
+# Beiträge, die Code der Extension brauchen und daher nicht übertragen werden (für den Bericht).
+CODE_ONLY = ["commands", "menus", "keybindings", "views", "viewsContainers", "viewsWelcome", "debuggers", "breakpoints",
+             "taskDefinitions", "problemMatchers", "customEditors", "notebooks", "webviews", "walkthroughs",
+             "authentication", "terminal", "submenus", "codeActions", "semanticTokenTypes", "jsonValidation",
+             "configuration", "chatParticipants", "languageModelTools"]
+
+LANGUAGE_ID = re.compile(r"[A-Za-z0-9._+-]{1,60}")
+
+
+def copy_json(src, dst):
+    """Liest JSONC (Kommentare, Kommata am Ende) und schreibt reines JSON (die App liest kein JSONC)."""
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    data = load_jsonc(src)
+    with open(dst, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=1)
+    return data
+
+
+def convert_grammars(root, contrib, out, report):
+    """grammars + languages → CodeForge-Grammatiken (eine Sprache je Eintrag, Endungen ohne Punkt)."""
+    langs = {}
+    for lang in contrib.get("languages", []) or []:
+        lid = lang.get("id")
+        if not lid:
+            continue
+        exts = [e.lstrip(".").lower() for e in lang.get("extensions", []) or [] if isinstance(e, str)]
+        names = [n for n in lang.get("filenames", []) or [] if isinstance(n, str)]
+        cur = langs.setdefault(lid, [])
+        cur += [x for x in exts + names if x and x not in cur]
+    result = []
+    for g in contrib.get("grammars", []) or []:
+        lid, scope, path = g.get("language"), g.get("scopeName"), g.get("path")
+        if not path or not scope:
+            continue
+        if not lid:
+            report.append(f"- Grammatik `{scope}` ist eine Injektion (ohne Sprache) – nicht übernommen.")
+            continue
+        if not LANGUAGE_ID.fullmatch(lid):
+            report.append(f"- Grammatik für `{lid}`: ungültige Sprach-ID – übersprungen.")
+            continue
+        src = os.path.normpath(os.path.join(root, path))
+        if not os.path.isfile(src):
+            report.append(f"- Grammatik `{path}` fehlt im Paket.")
+            continue
+        name = slug(scope) + (".tmLanguage.json" if src.lower().endswith(".json") else ".tmLanguage")
+        dst = os.path.join(out, "grammars", name)
+        if src.lower().endswith(".json"):
+            copy_json(src, dst)
+        else:
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copy(src, dst)
+        exts = langs.get(lid, [])
+        if not exts:
+            report.append(f"- Grammatik `{scope}`: Sprache `{lid}` hat keine Dateiendungen – nur über andere Plugins nutzbar.")
+        result.append({"languageId": lid, "scopeName": scope, "path": f"grammars/{name}", "extensions": exts})
+        report.append(f"- Grammatik `{scope}` für `{lid}` ({', '.join(exts) or 'ohne Endungen'}).")
+        if g.get("embeddedLanguages"):
+            report.append(f"- `{scope}`: eingebettete Sprachen werden als Teil der Grammatik gefärbt, ohne eigene Regeln.")
+    return result
+
+
+def convert_snippets(root, contrib, out, report):
+    result = []
+    for i, s in enumerate(contrib.get("snippets", []) or []):
+        lid, path = s.get("language"), s.get("path")
+        if not lid or not path:
+            continue
+        src = os.path.normpath(os.path.join(root, path))
+        if not os.path.isfile(src):
+            report.append(f"- Snippets `{path}` fehlen im Paket.")
+            continue
+        try:
+            data = copy_json(src, os.path.join(out, "snippets", f"{slug(lid)}-{i}.json"))
+        except (ValueError, json.JSONDecodeError) as e:
+            report.append(f"- Snippets `{path}`: ungültiges JSON ({e}).")
+            continue
+        # VS Code erlaubt mehrere Sprachen getrennt durch Komma; CodeForge je Eintrag eine.
+        for one in [x.strip() for x in lid.split(",") if x.strip()]:
+            result.append({"languageId": one, "path": f"snippets/{slug(lid)}-{i}.json"})
+        report.append(f"- Snippets für `{lid}`: {len(data)} Einträge.")
+    return result
+
+
+def convert_pack(pkg, report):
+    """extensionPack (VS-Code-IDs) und die Extension selbst → bekannte CodeForge-Plugins."""
+    ids = []
+    own = f"{pkg.get('publisher', '')}.{pkg.get('name', '')}".lower()
+    for ext in [own] + [e.lower() for e in pkg.get("extensionPack", []) or []]:
+        mapped = KNOWN.get(ext)
+        if mapped:
+            ids += [m for m in mapped if m not in ids]
+            report.append(f"- `{ext}` → {', '.join(f'`{m}`' for m in mapped) or '(nichts nötig)'}")
+        elif ext != own:
+            report.append(f"- `{ext}`: kein CodeForge-Gegenstück bekannt.")
+    return ids
+
+
+# ---------- Open VSX ----------
+
+def fetch_openvsx(spec, tmp):
+    """openvsx:<publisher>.<name>[@version] → Pfad der heruntergeladenen .vsix."""
+    m = re.fullmatch(r"([\w-]+)\.([\w.-]+?)(?:@([\w.+-]+))?", spec)
+    if not m:
+        raise SystemExit("Format: openvsx:<publisher>.<name>[@version], z. B. openvsx:redhat.vscode-yaml")
+    ns, name, ver = m.groups()
+    api = f"https://open-vsx.org/api/{ns}/{name}/{ver or 'latest'}"
+    with urllib.request.urlopen(api, timeout=60) as r:
+        meta = json.load(r)
+    url = (meta.get("files") or {}).get("download")
+    if not url or not url.startswith("https://"):
+        raise SystemExit(f"Keine Download-Adresse für {ns}.{name}")
+    dst = os.path.join(tmp, f"{ns}.{name}.vsix")
+    with urllib.request.urlopen(url, timeout=300) as r, open(dst, "wb") as f:
+        shutil.copyfileobj(r, f)
+    print(f"Geladen: {ns}.{name} {meta.get('version', '')} ({meta.get('license') or 'Lizenz unbekannt'})")
+    return dst
+
+
+# ---------- Ablauf ----------
+
+def convert(inp, project, tmp):
+    """Konvertiert [inp]; liefert (plugin-id, zip-pfad, bericht-pfad)."""
+    if inp.startswith("openvsx:"):
+        inp = fetch_openvsx(inp[len("openvsx:"):], tmp)
+    root = find_root(inp, project, os.path.join(tmp, "x"))
+    report = []
+    themes, icon_defs, ext_name, publisher, version, display, pkg = [], [], "theme", "imported", "1.0.0", None, {}
+    if os.path.isfile(root) and root.endswith(".json"):
+        themes = [{"label": os.path.basename(root)[:-5], "uiTheme": None, "path": os.path.basename(root)}]
+        manifest_dir = os.path.dirname(root)
+        ext_name = slug(os.path.basename(root)[:-5])
+        contrib = {}
+    else:
+        pkg = load_jsonc(os.path.join(root, "package.json"))
+        manifest_dir = root
+        ext_name = slug(pkg.get("name", "extension"))
+        publisher = slug(pkg.get("publisher", "imported"))
+        version = pkg.get("version", "1.0.0")
+        display = pkg.get("displayName") if not str(pkg.get("displayName", "")).startswith("%") else None
+        contrib = pkg.get("contributes", {}) or {}
+        themes, icon_defs = contrib.get("themes", []) or [], contrib.get("iconThemes", []) or []
+    pid = f"imported.{publisher}.{ext_name}"
+    out_root = os.path.join(project, "cf-plugin-out")
+    out = os.path.join(out_root, pid)
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    contributes = {}
+    if themes:
+        os.makedirs(os.path.join(out, "themes"))
+        os.makedirs(os.path.join(out, "syntax"))
+        ct = []
+        for t in themes:
+            vs = resolve_theme(os.path.join(manifest_dir, t["path"]))
+            ui = t.get("uiTheme") or ("dark" if vs.get("type", "dark") == "dark" else "light")
+            dark = ui in ("vs-dark", "hc-black", "dark")
+            tid = slug(t["label"])
+            syntax = {"name": t["label"], "type": "dark" if dark else "light",
+                      "colors": vs.get("colors", {}), "tokenColors": vs.get("tokenColors", [])}
+            with open(os.path.join(out, "syntax", f"{tid}.json"), "w", encoding="utf-8") as f:
+                json.dump(syntax, f, ensure_ascii=False, indent=2)
+            with open(os.path.join(out, "themes", f"{tid}.json"), "w", encoding="utf-8") as f:
+                json.dump({"colors": map_colors(vs, dark), "textmateTheme": f"syntax/{tid}.json"}, f, ensure_ascii=False, indent=2)
+            ct.append({"id": tid, "label": t["label"], "uiTheme": "dark" if dark else "light", "path": f"themes/{tid}.json"})
+        contributes["colorThemes"] = ct
+        report.append(f"- {len(ct)} Farbschema(s): Farben auf Material-3-Rollen abgebildet, Syntaxfarben unverändert.")
+    if icon_defs:
+        its = []
+        for d in icon_defs:
+            iid = slug(d.get("id") or d.get("label", "icons"))
+            sub = os.path.join(out, f"icons-{iid}")
+            os.makedirs(sub)
+            n = convert_icons(manifest_dir, d, sub)
+            its.append({"id": iid, "label": d.get("label", iid), "path": f"icons-{iid}/icons.json"})
+            report.append(f"- Icon-Theme `{iid}`: {n} Icon-Definitionen.")
+        contributes["iconThemes"] = its
+    grammars = convert_grammars(manifest_dir, contrib, out, report)
+    if grammars:
+        contributes["grammars"] = grammars
+    snippets = convert_snippets(manifest_dir, contrib, out, report)
+    if snippets:
+        contributes["snippets"] = snippets
+    pack = convert_pack(pkg, report) if pkg else []
+    if pack:
+        contributes["extensionPack"] = pack
+    skipped = [k for k in CODE_ONLY if contrib.get(k)]
+    if pkg.get("main") or pkg.get("browser"):
+        report.append("- Die Extension enthält JavaScript-Code (`main`/`browser`). Er läuft in CodeForge nicht; "
+                      "Funktionen daraus brauchen ein Code-Plugin (siehe docs/dev/PluginDevelopment.md).")
+    if skipped:
+        report.append("- Nicht übertragbar (brauchen Code der Extension): " + ", ".join(f"`{k}`" for k in skipped) + ".")
+    if not contributes:
+        shutil.rmtree(out, ignore_errors=True)
+        raise SystemExit("Nichts Übertragbares gefunden (keine Themes, Icons, Grammatiken, Snippets oder bekannten Pakete).\n"
+                         + "\n".join(report))
+    manifest = {"id": pid, "name": (display or ext_name) + " (VS Code Import)",
+                "version": version if re.fullmatch(r"[\w.\-+]+", str(version)) else "1.0.0",
+                "apiVersion": 4, "publisher": "imported",
+                "description": f"Aus VS Code importiert: {display or ext_name} ({publisher}). Lizenz des Originals beachten.",
+                "permissions": [], "contributes": contributes,
+                "tags": ["vscode", "imported"] + [slug(c) for c in (pkg.get("categories") or [])][:5]}
+    with open(os.path.join(out, "plugin.json"), "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+    zip_path = os.path.join(out_root, f"{pid}.zip")
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+        for d, _, files in os.walk(out):
+            for fn in sorted(files):
+                full = os.path.join(d, fn)
+                z.write(full, os.path.relpath(full, out).replace(os.sep, "/"))
+    report_path = os.path.join(out_root, f"{pid}.report.md")
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write(f"# Import: {display or ext_name}\n\nPlugin-ID: `{pid}`, Beiträge: {', '.join(contributes)}\n\n" + "\n".join(report) + "\n")
+    return pid, zip_path, report_path, report
+
+
 def main():
     project, inp = args()
     if not inp:
-        raise SystemExit("Bitte Pfad zu .vsix, Extension-Ordner oder Theme-JSON angeben.")
+        raise SystemExit("Bitte Pfad zu .vsix, Extension-Ordner, Theme-JSON oder openvsx:<publisher>.<name> angeben.")
     tmp = tempfile.mkdtemp(prefix="cf-vsc-")
     try:
-        root = find_root(inp, project, tmp)
-        themes, icon_defs, ext_name, publisher, version, display = [], [], "theme", "imported", "1.0.0", None
-        if os.path.isfile(root) and root.endswith(".json"):
-            themes = [{"label": os.path.basename(root)[:-5], "uiTheme": None, "path": os.path.basename(root)}]
-            manifest_dir = os.path.dirname(root)
-            ext_name = slug(os.path.basename(root)[:-5])
-        else:
-            pkg = load_jsonc(os.path.join(root, "package.json"))
-            manifest_dir = root
-            ext_name = slug(pkg.get("name", "theme"))
-            publisher = slug(pkg.get("publisher", "imported"))
-            version = pkg.get("version", "1.0.0")
-            display = pkg.get("displayName") if not str(pkg.get("displayName", "")).startswith("%") else None
-            contrib = pkg.get("contributes", {})
-            themes, icon_defs = contrib.get("themes", []), contrib.get("iconThemes", [])
-        if not themes and not icon_defs:
-            raise SystemExit("Keine Themes oder Icon-Themes in dieser Extension gefunden.")
-        pid = f"imported.{publisher}.{ext_name}"
-        out_root = os.path.join(project, "cf-plugin-out")
-        out = os.path.join(out_root, pid)
-        shutil.rmtree(out, ignore_errors=True)
-        os.makedirs(out)
-        contributes = {}
-        if themes:
-            os.makedirs(os.path.join(out, "themes"))
-            os.makedirs(os.path.join(out, "syntax"))
-            ct = []
-            for t in themes:
-                vs = resolve_theme(os.path.join(manifest_dir, t["path"]))
-                ui = t.get("uiTheme") or ("dark" if vs.get("type", "dark") == "dark" else "light")
-                dark = ui in ("vs-dark", "hc-black", "dark")
-                tid = slug(t["label"])
-                syntax = {"name": t["label"], "type": "dark" if dark else "light",
-                          "colors": vs.get("colors", {}), "tokenColors": vs.get("tokenColors", [])}
-                with open(os.path.join(out, "syntax", f"{tid}.json"), "w", encoding="utf-8") as f:
-                    json.dump(syntax, f, ensure_ascii=False, indent=2)
-                with open(os.path.join(out, "themes", f"{tid}.json"), "w", encoding="utf-8") as f:
-                    json.dump({"colors": map_colors(vs, dark), "textmateTheme": f"syntax/{tid}.json"}, f, ensure_ascii=False, indent=2)
-                ct.append({"id": tid, "label": t["label"], "uiTheme": "dark" if dark else "light", "path": f"themes/{tid}.json"})
-            contributes["colorThemes"] = ct
-            print(f"{len(ct)} Farbschema(s) konvertiert.")
-        if icon_defs:
-            its = []
-            for d in icon_defs:
-                iid = slug(d.get("id") or d.get("label", "icons"))
-                sub = os.path.join(out, f"icons-{iid}")
-                os.makedirs(sub)
-                n = convert_icons(manifest_dir, d, sub)
-                its.append({"id": iid, "label": d.get("label", iid), "path": f"icons-{iid}/icons.json"})
-                print(f"Icon-Theme '{iid}': {n} Icon-Definitionen verarbeitet.")
-            contributes["iconThemes"] = its
-        manifest = {"id": pid, "name": (display or ext_name) + " (VS Code Import)",
-                    "version": version if re.fullmatch(r"[\w.\-+]+", str(version)) else "1.0.0",
-                    "apiVersion": 2, "publisher": "imported",
-                    "description": f"Aus VS Code importiert: {display or ext_name} ({publisher}). Lizenz des Originals beachten.",
-                    "permissions": [], "contributes": contributes}
-        with open(os.path.join(out, "plugin.json"), "w", encoding="utf-8") as f:
-            json.dump(manifest, f, ensure_ascii=False, indent=2)
-        zip_path = os.path.join(out_root, f"{pid}.zip")
-        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-            for d, _, files in os.walk(out):
-                for fn in files:
-                    full = os.path.join(d, fn)
-                    z.write(full, os.path.relpath(full, out).replace(os.sep, "/"))
-        print(f"\nFertig: {os.path.relpath(zip_path, project)}\nIm Plugins-Bildschirm per 'Aus Datei installieren' hinzufügen.")
-        print("Hinweis: Lizenz der Original-Extension beachten; Farben werden automatisch auf Material-3-Rollen abgebildet.")
+        pid, zip_path, report_path, report = convert(inp, project, tmp)
+        print("\n".join(report))
+        print(f"\nFertig: {os.path.relpath(zip_path, project)}\nBericht: {os.path.relpath(report_path, project)}")
+        print("Im Plugins-Bildschirm per „Aus Datei installieren“ hinzufügen. Lizenz der Original-Extension beachten.")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-main()
+if __name__ == "__main__":
+    main()

@@ -146,9 +146,9 @@ LICENSE_PROMPT = {"label": "Lizenz", "default": "mit", "options": [
 
 # (name, label, beschreibung, tool-id, tool-label, tool-beschreibung, skript, prompt, confirm, requires, timeout)
 TOOLS = [
-    ("vscode-import", "VS Code Import", "Konvertiert VS-Code-Themes und Icon-Packs (.vsix, Ordner oder Theme-JSON) in ein CodeForge-Plugin (ZIP in cf-plugin-out/).",
-     "import", "VS-Code-Theme/Icon-Pack importieren", "Aus .vsix, Extension-Ordner oder Theme-JSON ein Plugin erzeugen", "vscode_import.py",
-     {"label": "Pfad zu .vsix / Ordner / Theme-JSON", "hint": "z. B. downloads/theme.vsix"}, None, [PY, _r("pkg", "librsvg", "rsvg-convert")], 300),
+    ("vscode-import", "VS Code Import", "Konvertiert VS-Code-Extensions (.vsix, Ordner, Theme-JSON oder direkt von Open VSX) in ein CodeForge-Plugin: Farbschemata, Icon-Themes, Grammatiken, Snippets und Extension-Packs; mit Bericht über nicht Übertragbares (ZIP in cf-plugin-out/).",
+     "import", "VS-Code-Extension importieren", "Aus .vsix, Extension-Ordner, Theme-JSON oder openvsx:<publisher>.<name> ein Plugin erzeugen", "vscode_import.py",
+     {"label": "Pfad oder openvsx:<publisher>.<name>", "hint": "z. B. downloads/theme.vsix oder openvsx:dracula-theme.theme-dracula"}, None, [PY, _r("pkg", "librsvg", "rsvg-convert")], 600),
     ("androidx-migrate", "AndroidX-Migration", "Ersetzt android.support.* / android.arch.* durch AndroidX (Imports, Layout-XML, Gradle) und setzt useAndroidX/Jetifier.",
      "migrate", "Nach AndroidX migrieren", "Bericht oder Umstellung der Quellen und Gradle-Dateien", "androidx_migrate.py",
      MODE_PROMPT, "Vor dem Umstellen (apply) bitte committen. Mit check gibt es nur einen Bericht.", [PY], 300),
@@ -182,7 +182,7 @@ def dump(path, obj):
 
 
 # Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
-VERSIONS = {"com.codeforge.plugin.kmp-lsp.lsp": "1.0.2"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
+VERSIONS = {"com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
 
 
 def manifest(pid, name, desc, contributes):

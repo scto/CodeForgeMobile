@@ -1,10 +1,10 @@
 {
   "id": "com.codeforge.plugin.vscode-import.tool",
   "name": "VS Code Import (Tool)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Konvertiert VS-Code-Themes und Icon-Packs (.vsix, Ordner oder Theme-JSON) in ein CodeForge-Plugin (ZIP in cf-plugin-out/). Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
+  "description": "Konvertiert VS-Code-Extensions (.vsix, Ordner, Theme-JSON oder direkt von Open VSX) in ein CodeForge-Plugin: Farbschemata, Icon-Themes, Grammatiken, Snippets und Extension-Packs; mit Bericht über nicht Übertragbares (ZIP in cf-plugin-out/). Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
   "permissions": [
     "shell"
   ],
@@ -12,18 +12,18 @@
     "tools": [
       {
         "id": "import",
-        "label": "VS-Code-Theme/Icon-Pack importieren",
-        "description": "Aus .vsix, Extension-Ordner oder Theme-JSON ein Plugin erzeugen",
+        "label": "VS-Code-Extension importieren",
+        "description": "Aus .vsix, Extension-Ordner, Theme-JSON oder openvsx:<publisher>.<name> ein Plugin erzeugen",
         "command": [
           "python3",
           "${pluginDir}/tool.py",
           "${projectDir}",
           "${input}"
         ],
-        "timeoutSeconds": 300,
+        "timeoutSeconds": 600,
         "prompt": {
-          "label": "Pfad zu .vsix / Ordner / Theme-JSON",
-          "hint": "z. B. downloads/theme.vsix"
+          "label": "Pfad oder openvsx:<publisher>.<name>",
+          "hint": "z. B. downloads/theme.vsix oder openvsx:dracula-theme.theme-dracula"
         }
       }
     ],

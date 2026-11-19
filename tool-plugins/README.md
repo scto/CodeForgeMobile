@@ -4,8 +4,14 @@ Plugins (`com.codeforge.plugin.<name>.formatter|lsp|tool`, Publisher `codeforge`
 
 * **Formatierer** (6): Prettier, shfmt, Ruff Format, gofmt, rustfmt, Taplo Format. Bundle: `com.codeforge.plugin.all-formatters.bundle`.
 * **Language Server** (16 Plugins, 18 Server): clangd, rust-analyzer, Taplo, gopls, Ruff, neocmakelsp, Dart, Bash, TypeScript/JavaScript, Pyright, HTML/CSS/JSON, YAML, Kotlin Language Server, Eclipse JDT LS, LemMinX, kmp-lsp. Bundle: `com.codeforge.plugin.all-lsp-servers.bundle`.
+* **Sprachpakete** (8 Bundles wie die „Extension Packs“ von VS Code): Python, Rust, Go, Web, C/C++, Shell, Konfiguration (YAML/TOML/XML), Kotlin/Java – `com.codeforge.plugin.<sprache>-pack.bundle`.
 * **Werkzeuge** (9, erscheinen im **PT**-Menü des Dateibaums, Store-Kategorie „Code-Tools“ oder Sideload, Berechtigung `shell`, Skripte in Python):
-  * `vscode-import` – VS-Code-Themes und Icon-Packs (.vsix / Ordner / Theme-JSON) → CodeForge-Plugin-ZIP (`cf-plugin-out/`); SVG-Icons brauchen `librsvg`.
+  * `vscode-import` – VS-Code-Extensions (.vsix / Ordner / Theme-JSON / `openvsx:<publisher>.<name>`) → CodeForge-Plugin-ZIP
+    (`cf-plugin-out/`) mit Farbschemata, Icon-Themes, Grammatiken (+ Dateiendungen aus `languages`), Snippets (JSONC → JSON)
+    und Extension-Packs (bekannte Extensions → CodeForge-Plugins, z. B. `redhat.vscode-yaml` → YAML-Server). Dazu ein
+    Bericht `<id>.report.md` mit allem, was nicht übertragbar ist (JavaScript-Code, Befehle, Debugger …). SVG-Icons brauchen
+    `librsvg`. Auch am Rechner: `python3 tool-plugins/scripts/vscode_import.py <ausgabeordner> <eingabe>`;
+    Tests: `python3 -m unittest tool-plugins/scripts/test_vscode_import.py`.
   * `androidx-migrate` – `android.support.*`/`android.arch.*` → AndroidX (Imports, Layout-XML, Gradle, `gradle.properties`); Modus `check`/`apply`.
   * `catalog-migrate` – hartcodierte Abhängigkeiten → `gradle/libs.versions.toml`; Modus `check`/`apply`.
   * `unused-resources` – unbenutzte Ressourcen finden, Dateien auf Wunsch löschen.

@@ -32,4 +32,5 @@ dependencies {
 // Optionaler Test gegen ein echtes, gebautes Projekt: CF_GRADLE_SAMPLE=/pfad ./gradlew :core:domain:testDebugUnitTest
 android.testOptions.unitTests.all { test ->
     System.getenv("CF_GRADLE_SAMPLE")?.let { test.systemProperty("cf.gradleSample", it) }
+    System.getenv("CF_IMPORTED_SAMPLE")?.let { test.systemProperty("cf.importedSample", it) }
 }

@@ -17,7 +17,7 @@ class ToolPluginsValidTest {
 
     @Test
     fun `alle Tool-Plugins sind gueltig, deklarativ und haben Publisher codeforge`() {
-        assertEquals(33, manifests.size)
+        assertEquals(41, manifests.size) // 33 + 8 Sprachpakete
         manifests.forEach { (dirName, m) ->
             assertEquals(dirName, m.id)
             assertEquals("codeforge", m.publisher)
