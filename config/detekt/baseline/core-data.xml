@@ -172,7 +172,6 @@
     <ID>TooGenericExceptionCaught:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$e: Exception</ID>
     <ID>TooManyFunctions:DataModule.kt:DataModule</ID>
-    <ID>TrimMultilineRawString:PluginToolRunnerImplTest.kt:PluginToolRunnerImplTest$"""{"id":"p.test","name":"T","version":"1","apiVersion":2,"permissions":["shell"], "contributes":{"tools":[$toolJson],"requires":$requires}}"""</ID>
     <ID>UndocumentedPublicFunction:SnippetRepositoryImpl.kt:SnippetRepositoryImpl.Companion$fun createAssetLoader: () -> String?</ID>
     <ID>UnnecessaryParentheses:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$(execResult.stdout == content)</ID>
     <ID>UnnecessaryParentheses:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$(formatted == content)</ID>

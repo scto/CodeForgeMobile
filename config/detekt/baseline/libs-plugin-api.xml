@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ClassOrdering:CodeForgePlugin.kt:PluginHostServices$/** Gradle-Aufgaben ausführen; ohne Berechtigung `build`: PluginPermissionException. */ val build: BuildService</ID>
+    <ID>ClassOrdering:CodeForgePlugin.kt:PluginHostServices$/** Projektmodell und Build-Ergebnisse; ohne Berechtigung `project`: PluginPermissionException. */ val project: ProjectService</ID>
+  </CurrentIssues>
+</SmellBaseline>

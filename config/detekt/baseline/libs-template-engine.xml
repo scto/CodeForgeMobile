@@ -96,6 +96,5 @@
     <ID>StringShouldBeRawString:ProjectGeneratorTest.kt:ProjectGeneratorTest$"&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>"</ID>
     <ID>TooGenericExceptionCaught:TemplateEngineRepositoryImpl.kt:TemplateEngineRepositoryImpl$t: Throwable</ID>
     <ID>UnusedParameter:AppManifest.kt:appId: String</ID>
-    <ID>UseIfInsteadOfWhen:AppBuildGradle.kt:when { !enableCompose -> "" else -> "androidComponents { beforeVariants { builder -> builder.enableUnitTest = true } }" }</ID>
   </CurrentIssues>
 </SmellBaseline>

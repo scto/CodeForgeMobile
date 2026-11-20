@@ -3,7 +3,6 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>BracesOnWhenStatements:ProjectWizardViewModel.kt:ProjectWizardViewModel$when</ID>
-    <ID>CascadingCallWrapping:ProjectWizardViewModel.kt:ProjectWizardViewModel$validated()</ID>
     <ID>CognitiveComplexMethod:ProjectDirectoryPickerDialog.kt:@Composable fun ProjectDirectoryPickerDialog</ID>
     <ID>CognitiveComplexMethod:ProjectWizardScreen.kt:@Composable private fun ConfigForm</ID>
     <ID>CyclomaticComplexMethod:ProjectDirectoryPickerDialog.kt:@Composable fun ProjectDirectoryPickerDialog</ID>

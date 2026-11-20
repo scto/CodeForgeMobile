@@ -14,7 +14,9 @@
     <ID>BracesOnWhenStatements:GitConflict.kt:ConflictParser$when</ID>
     <ID>BracesOnWhenStatements:GitDiff.kt:UnifiedDiffParser$when</ID>
     <ID>BracesOnWhenStatements:HunkPatcher.kt:HunkPatcher$when</ID>
-    <ID>CascadingCallWrapping:ExamplePluginsValidTest.kt:ExamplePluginsValidTest$first { it.isDirectory }</ID>
+    <ID>CascadingCallWrapping:CodePluginsValidTest.kt:CodePluginsValidTest$first { it.isDirectory }</ID>
+    <ID>CascadingCallWrapping:GradleBuildOutputs.kt:GradleBuildOutputs$maxDepth(2)</ID>
+    <ID>CascadingCallWrapping:GradleBuildOutputs.kt:GradleBuildOutputs$src.listFiles { f -> f.isDirectory &amp;&amp; !f.name.contains("test", ignoreCase = true) }.orEmpty() .flatMap { set -> listOf(File(set, "res"), File(set, "AndroidManifest.xml")) } .filter { it.exists() } .maxOfOrNull { newestFile(it) } ?: 0L</ID>
     <ID>CascadingCallWrapping:GuidePluginsValidTest.kt:GuidePluginsValidTest$first { it.isDirectory }</ID>
     <ID>CascadingCallWrapping:GuidePluginsValidTest.kt:GuidePluginsValidTest$toList()</ID>
     <ID>CascadingCallWrapping:LogcatParserTest.kt:LogcatParserTest$readLines()</ID>
@@ -23,14 +25,16 @@
     <ID>CascadingCallWrapping:TextMatePluginsValidTest.kt:TextMatePluginsValidTest$first { it.isDirectory }</ID>
     <ID>CascadingCallWrapping:ThemePluginsValidTest.kt:ThemePluginsValidTest$first { it.isDirectory }</ID>
     <ID>CascadingCallWrapping:ToolPluginsValidTest.kt:ToolPluginsValidTest$first { it.isDirectory }</ID>
+    <ID>ClassOrdering:ActivationEvents.kt:ActivationEvents$private val LANGUAGES = mapOf( "kt" to "kotlin", "kts" to "kotlin", "java" to "java", "md" to "markdown", "markdown" to "markdown", "py" to "python", "js" to "javascript", "mjs" to "javascript", "ts" to "typescript", "tsx" to "typescriptreact", "jsx" to "javascriptreact", "json" to "json", "xml" to "xml", "yaml" to "yaml", "yml" to "yaml", "toml" to "toml", "sh" to "shellscript", "bash" to "shellscript", "c" to "c", "h" to "c", "cpp" to "cpp", "cc" to "cpp", "hpp" to "cpp", "rs" to "rust", "go" to "go", "dart" to "dart", "html" to "html", "htm" to "html", "css" to "css", "scss" to "scss", "csv" to "csv", "tsv" to "tsv", "sql" to "sql", "http" to "http", "rest" to "http", "svg" to "svg", "gradle" to "groovy", "swift" to "swift", "lua" to "lua", "rb" to "ruby", "php" to "php", "zig" to "zig", )</ID>
     <ID>ClassOrdering:GitPatchTest.kt:GitPatchTest$private val conflicted = "head\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nours1\nours2\n=======\ntheirs1\n>>>>>>> feature\nmid\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nA\n=======\nB\n>>>>>>> feature\ntail\n"</ID>
     <ID>ClassOrdering:GradleOutputParser.kt:GradleOutputParser$Companion</ID>
     <ID>ClassOrdering:GradleRunSettings.kt:GradleRunSettings$/** Eigene Flags (aus [extraArgs]) in Eingabereihenfolge, ohne Doppelte. */ val customFlags: List&lt;String> get() = extraArgs.split(WHITESPACE).filter { it.isNotEmpty() }.distinct()</ID>
     <ID>ClassOrdering:LspClientRepository.kt:LspClientRepository$/** * Handler für eingehende `workspace/applyEdit`-Anfragen vom Server. * Liefert true, wenn der WorkspaceEdit erfolgreich angewendet wurde. */ var applyEditHandler: (suspend (LspWorkspaceEdit) -> Boolean)?</ID>
     <ID>ClassOrdering:LspModels.kt:LspWorkspaceEdit$/** Alle Dateioperationen des Edits in Reihenfolge. */ val allFileOperations: List&lt;LspFileOperation> get() = documentChanges.mapNotNull { (it as? LspDocumentChange.FileOp)?.operation }</ID>
+    <ID>ClassOrdering:PluginBuildInfo.kt:PluginBuildInfo$private const val MAX_SIZE = 4096L</ID>
     <ID>ClassOrdering:ProjectsDirectoryProvider.kt:ProjectsDirectoryProvider$/** * Absoluter Pfad des Stammverzeichnisses. */ val projectsRootPath: String get() = getProjectsRoot().absolutePath</ID>
     <ID>ClassOrdering:ProjectsDirectoryProvider.kt:ProjectsDirectoryProvider$Companion</ID>
-    <ID>ClassOrdering:Requirements.kt:RequirementPolicy$/** Pakete, die Store-Plugins anfordern dürfen (nur Programme, die CodeForge selbst als Tool-Plugins verwendet). */ private val STORE_ALLOWED: Map&lt;RequirementManager, Set&lt;String>> = mapOf( RequirementManager.PKG to setOf( "clang", "cmake", "nodejs", "python", "golang", "rust", "rust-analyzer", "ruff", "shfmt", "shellcheck", "taplo", "gopls", "dart", "neocmakelsp", "ktlint", "git", "jq", "ripgrep", "librsvg" ), RequirementManager.NPM to setOf( "prettier", "typescript", "typescript-language-server", "pyright", "bash-language-server", "vscode-langservers-extracted", "yaml-language-server" ), RequirementManager.PIP to emptySet() )</ID>
+    <ID>ClassOrdering:SandboxPolicyTest.kt:SandboxPolicyTest$private val ok = """{"id":"a.b","name":"A","version":"1","apiVersion":4,"sandbox":true,"entryPointClass":"a.B","permissions":["editor"]}"""</ID>
     <ID>ClassOrdering:SigningRepository.kt:SigningRepository$/** * Aktuell aktive Signatur-Umgebungsvariablen für Gradle-Builds (oder leer). */ val activeBuildSigning: StateFlow&lt;Map&lt;String, String>></ID>
     <ID>ClassOrdering:WorkspaceRepository.kt:WorkspaceRepository$Companion</ID>
     <ID>CognitiveComplexMethod:AaptBadgingParser.kt:AaptBadgingParser$fun parse: ApkDetailedMetadata</ID>
@@ -52,13 +56,14 @@
     <ID>CognitiveComplexMethod:KeytoolOutputParser.kt:KeytoolOutputParser$fun parse: ParsedKeystore</ID>
     <ID>CognitiveComplexMethod:LogcatModels.kt:LogcatFilter$fun matches: Boolean</ID>
     <ID>CognitiveComplexMethod:LogcatParser.kt:LogcatParser$fun parseLines: List&lt;LogEntry></ID>
-    <ID>CognitiveComplexMethod:PluginManifest.kt:fun Contributes.kinds: List&lt;String></ID>
     <ID>CognitiveComplexMethod:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$fun resolve: File?</ID>
     <ID>CognitiveComplexMethod:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
+    <ID>CollapsibleIfStatements:GradleBuildOutputs.kt:GradleBuildOutputs$if (File(dir, "build.gradle.kts").isFile || File(dir, "build.gradle").isFile) { if (File(dir, "src").isDirectory) out += dir }</ID>
     <ID>ComplexCondition:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$trimmed.contains(":") &amp;&amp; !trimmed.startsWith(">") &amp;&amp; !trimmed.startsWith("+---") &amp;&amp; !trimmed.startsWith("\\---") &amp;&amp; !trimmed.startsWith("|") &amp;&amp; !trimmed.startsWith("-") &amp;&amp; resolvedVersion.isEmpty()</ID>
     <ID>ComplexCondition:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$trimmed.contains(" - ") &amp;&amp; !trimmed.startsWith("+---") &amp;&amp; !trimmed.startsWith("\\---") &amp;&amp; !trimmed.startsWith("|")</ID>
     <ID>ComplexCondition:GradleOutputParser.kt:GradleOutputParser.Session$trimmed.contains("AAPT") || trimmed.contains("/res/") || trimmed.endsWith(".xml:") || trimmed.contains(".xml:")</ID>
     <ID>ComplexCondition:LogcatParser.kt:LogcatParser$prev != null &amp;&amp; prev.isCrash &amp;&amp; r.entry.tag.equals("AndroidRuntime", ignoreCase = true) &amp;&amp; prev.pid == r.entry.pid</ID>
+    <ID>ComplexCondition:SandboxPolicy.kt:SandboxPolicy$c.tools.isNotEmpty() || c.agentTools.isNotEmpty() || c.mcpServers.isNotEmpty() || c.lspServers.isNotEmpty() || c.formatters.isNotEmpty()</ID>
     <ID>ComplexCondition:SnippetModels.kt:SnippetParser$i &lt; len &amp;&amp; body[i] != ':' &amp;&amp; body[i] != '|' &amp;&amp; body[i] != '/' &amp;&amp; body[i] != '}'</ID>
     <ID>ComplexInterface:AiRepository.kt:AiRepository</ID>
     <ID>ComplexInterface:DebugRepository.kt:DebugRepository</ID>
@@ -77,6 +82,7 @@
     <ID>CyclomaticComplexMethod:HunkPatcher.kt:HunkPatcher$fun apply: String</ID>
     <ID>CyclomaticComplexMethod:LogcatModels.kt:LogcatFilter$fun matches: Boolean</ID>
     <ID>CyclomaticComplexMethod:LogcatParser.kt:LogcatParser$fun parseLines: List&lt;LogEntry></ID>
+    <ID>CyclomaticComplexMethod:PluginManifestParser.kt:PluginManifestParser$fun parse: Result&lt;PluginManifest></ID>
     <ID>CyclomaticComplexMethod:PluginManifestParser.kt:PluginManifestParser$private fun parseContributes: Contributes</ID>
     <ID>CyclomaticComplexMethod:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$fun resolve: File?</ID>
     <ID>CyclomaticComplexMethod:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
@@ -102,18 +108,22 @@
     <ID>DestructuringDeclarationWithTooManyEntries:LogcatParser.kt:LogcatParser$val (className, methodName, fileName, lineStr) = match.destructured</ID>
     <ID>DestructuringDeclarationWithTooManyEntries:LogcatParser.kt:LogcatParser$val (timestamp, pidStr, tidStr, levelStr, tag, message) = match.destructured</ID>
     <ID>DocumentationOverPrivateFunction:GitConflict.kt:ConflictParser$private fun readBlock: Pair&lt;ConflictSegment.Conflict, Int>?</ID>
+    <ID>DocumentationOverPrivateFunction:GradleBuildOutputsTest.kt:GradleBuildOutputsTest$private fun age</ID>
     <ID>DocumentationOverPrivateFunction:PluginManifestParser.kt:PluginManifestParser$private fun JsonObject.relPath: String</ID>
-    <ID>DocumentationOverPrivateProperty:Requirements.kt:RequirementPolicy$/** Pakete, die Store-Plugins anfordern dürfen (nur Programme, die CodeForge selbst als Tool-Plugins verwendet). */ private val STORE_ALLOWED: Map&lt;RequirementManager, Set&lt;String>> = mapOf( RequirementManager.PKG to setOf( "clang", "cmake", "nodejs", "python", "golang", "rust", "rust-analyzer", "ruff", "shfmt", "shellcheck", "taplo", "gopls", "dart", "neocmakelsp", "ktlint", "git", "jq", "ripgrep", "librsvg" ), RequirementManager.NPM to setOf( "prettier", "typescript", "typescript-language-server", "pyright", "bash-language-server", "vscode-langservers-extracted", "yaml-language-server" ), RequirementManager.PIP to emptySet() )</ID>
     <ID>ExpressionBodySyntax:AiSanitizer.kt:AiSanitizer$return if (text.length > maxChars) { val truncated = text.take(maxChars) + "\n\n[... Truncated ${text.length - maxChars} characters due to context limit ...]\n" Pair(truncated, true) } else { Pair(text, false) }</ID>
     <ID>ExpressionBodySyntax:AxmlManifestParser.kt:AxmlManifestParser$return try { parseStream(ByteArrayInputStream(bytes)) } catch (_: Exception) { null }</ID>
     <ID>ExpressionBodySyntax:LogcatRingBufferTest.kt:LogcatRingBufferTest$return LogEntry( id = id, timestamp = "10-19 12:00:00.000", pid = 1000, tid = 1000, level = level, tag = tag, message = "Message $id", isCrash = isCrash )</ID>
     <ID>FunctionNameMaxLength:AaptPermissionsParserTest.kt:AaptPermissionsParserTest$@Test fun parseEmptyOutputReturnsNullPackageAndEmptyList</ID>
+    <ID>FunctionNameMaxLength:ActivationEventsTest.kt:ActivationEventsTest$@Test fun `Projektereignis prüft Datei im Wurzelordner`</ID>
+    <ID>FunctionNameMaxLength:ActivationEventsTest.kt:ActivationEventsTest$@Test fun `sofort laden ohne Ereignisse oder mit Stern`</ID>
     <ID>FunctionNameMaxLength:ApkInstallStatusMapperTest.kt:ApkInstallStatusMapperTest$@Test fun mapIncompatibleSignatureFailure</ID>
     <ID>FunctionNameMaxLength:ApkMetadataParserTest.kt:ApkMetadataParserTest$@Test fun parseAbiSplitSelectsMatchingDeviceAbi</ID>
     <ID>FunctionNameMaxLength:ApkMetadataParserTest.kt:ApkMetadataParserTest$@Test fun parseUnsignedApkIdentifiesUnsignedState</ID>
     <ID>FunctionNameMaxLength:ApkReportFormatterTest.kt:ApkReportFormatterTest$@Test fun formatAnalysisToMarkdownGeneratesValidMarkdown</ID>
     <ID>FunctionNameMaxLength:ApkReportFormatterTest.kt:ApkReportFormatterTest$@Test fun formatBytesOutputsHumanReadableUnits</ID>
     <ID>FunctionNameMaxLength:ApksignerOutputParserTest.kt:ApksignerOutputParserTest$@Test fun parseSuccessfulVerificationWithDebugKey</ID>
+    <ID>FunctionNameMaxLength:CodePluginsValidTest.kt:CodePluginsValidTest$@Test fun `Einstiegsklasse existiert im Quelltext`</ID>
+    <ID>FunctionNameMaxLength:CodePluginsValidTest.kt:CodePluginsValidTest$@Test fun `Manifest mit Katalogangaben und ungültigen Werten`</ID>
     <ID>FunctionNameMaxLength:ColorThemeFileParserTest.kt:ColorThemeFileParserTest$@Test fun `Hex-Formate werden korrekt gelesen`</ID>
     <ID>FunctionNameMaxLength:ColorThemeFileParserTest.kt:ColorThemeFileParserTest$@Test fun `gueltiges Schema, unbekannte Rollen werden ignoriert`</ID>
     <ID>FunctionNameMaxLength:DeclarativeOnlyTest.kt:DeclarativeOnlyTest$@Test fun `ohne Beitraege ist es kein gueltiges deklaratives Plugin`</ID>
@@ -123,8 +133,6 @@
     <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `resolves kotlin file options from editorconfig`</ID>
     <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `resolves kts file options from editorconfig`</ID>
     <ID>FunctionNameMaxLength:EditorConfigResolverTest.kt:EditorConfigResolverTest$@Test fun `returns fallback options when editorconfig is null or blank`</ID>
-    <ID>FunctionNameMaxLength:ExamplePluginsValidTest.kt:ExamplePluginsValidTest$@Test fun `Plugin-IDs und Sprachen sind eindeutig`</ID>
-    <ID>FunctionNameMaxLength:ExamplePluginsValidTest.kt:ExamplePluginsValidTest$@Test fun `alle neun LSP-Plugins haben gueltige Code-Manifeste mit lspServers`</ID>
     <ID>FunctionNameMaxLength:ExtensionPacksTest.kt:ExtensionPacksTest$@Test fun `Closure loest verschachtelte Bundles ohne Zyklen auf`</ID>
     <ID>FunctionNameMaxLength:ExtensionPacksTest.kt:ExtensionPacksTest$@Test fun `fehlende Mitglieder ohne Duplikate und Selbstverweis`</ID>
     <ID>FunctionNameMaxLength:ExtensionSnippetsTest.kt:ExtensionSnippetsTest$@Test fun `Snippets bekommen deterministische ID, Scope der Sprache und sind unlöschbar markiert`</ID>
@@ -133,6 +141,11 @@
     <ID>FunctionNameMaxLength:FormattersTest.kt:FormattersTest$@Test fun `ungueltige Formatierer werden abgelehnt`</ID>
     <ID>FunctionNameMaxLength:GeneratedContentPluginsTest.kt:GeneratedContentPluginsTest$@Test fun `alle erzeugten Plugins sind gueltig und deklarativ`</ID>
     <ID>FunctionNameMaxLength:GitPatchTest.kt:GitPatchTest$@Test fun hasUnresolvedMarkersDetectsLeftoverMarkers</ID>
+    <ID>FunctionNameMaxLength:GradleBuildOutputsTest.kt:GradleBuildOutputsTest$@Test fun `aktueller Build wird mit allen Teilen gefunden`</ID>
+    <ID>FunctionNameMaxLength:GradleBuildOutputsTest.kt:GradleBuildOutputsTest$@Test fun `die offene Datei selbst darf neuer sein`</ID>
+    <ID>FunctionNameMaxLength:GradleBuildOutputsTest.kt:GradleBuildOutputsTest$@Test fun `geänderte Nachbardatei macht den Build ungültig`</ID>
+    <ID>FunctionNameMaxLength:GradleBuildOutputsTest.kt:GradleBuildOutputsTest$@Test fun `geänderte Ressource macht den Build ungültig`</ID>
+    <ID>FunctionNameMaxLength:GradleBuildOutputsTest.kt:GradleBuildOutputsTest$@Test fun `nie gebautes Modul mit Code liefert nichts`</ID>
     <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseConflictResolution_arrowParsedAndConflictDetected</ID>
     <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseFailedDependency_markedAsFailed</ID>
     <ID>FunctionNameMaxLength:GradleDependencyTreeParserTest.kt:GradleDependencyTreeParserTest$@Test fun parseProjectDependency_recognizedProperly</ID>
@@ -155,6 +168,7 @@
     <ID>FunctionNameMaxLength:IconThemeFileParserTest.kt:IconThemeFileParserTest$@Test fun `ungueltige Pfade und leere Themes scheitern`</ID>
     <ID>FunctionNameMaxLength:IdeActivityRegistryTest.kt:IdeActivityRegistryTest$@Test fun tasksTerminalsAndWakeLockDecideWhetherForegroundIsNeeded</ID>
     <ID>FunctionNameMaxLength:IdeActivityRegistryTest.kt:IdeActivityRegistryTest$@Test fun trackedFlowIsRegisteredOnlyWhileItRuns</ID>
+    <ID>FunctionNameMaxLength:ImportedVsCodePluginsTest.kt:ImportedVsCodePluginsTest$@Test fun `importierte Plugins sind gültig`</ID>
     <ID>FunctionNameMaxLength:JUnitXmlParserTest.kt:JUnitXmlParserTest$@Test fun buildTestRunResultCombinesModulesAndFiles</ID>
     <ID>FunctionNameMaxLength:JUnitXmlParserTest.kt:JUnitXmlParserTest$@Test fun parseFailedSuiteWithStacktraceAndComparison</ID>
     <ID>FunctionNameMaxLength:JUnitXmlParserTest.kt:JUnitXmlParserTest$@Test fun parseMultiSuitesInSingleDocument</ID>
@@ -168,6 +182,7 @@
     <ID>FunctionNameMaxLength:PluginCompatibilityTest.kt:PluginCompatibilityTest$@Test fun `Versionen werden numerisch je Segment verglichen`</ID>
     <ID>FunctionNameMaxLength:PluginCompatibilityTest.kt:PluginCompatibilityTest$@Test fun `fehlende und deaktivierte Abhaengigkeiten werden unterschieden`</ID>
     <ID>FunctionNameMaxLength:PluginCompatibilityTest.kt:PluginCompatibilityTest$@Test fun `ohne Anforderungen keine Probleme`</ID>
+    <ID>FunctionNameMaxLength:PluginLoadOrderDepsTest.kt:PluginLoadOrderDepsTest$@Test fun `transitive Abhängigkeiten auch bei Zyklen`</ID>
     <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:ActiveContributionsTest$@Test fun `erste Contribution mit gleicher ID gewinnt und Herkunft bleibt erhalten`</ID>
     <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:ActiveContributionsTest$@Test fun `kinds listet nur nicht leere Arten`</ID>
     <ID>FunctionNameMaxLength:PluginManifestParserTest.kt:GrammarLookupTest$@Test fun `Endung und Dateiname werden gefunden`</ID>
@@ -178,10 +193,14 @@
     <ID>FunctionNameMaxLength:PluginPermissionPolicyTest.kt:PluginPermissionPolicyTest$@Test fun `Ereignisse verlangen die passende Berechtigung`</ID>
     <ID>FunctionNameMaxLength:PluginPermissionPolicyTest.kt:PluginPermissionPolicyTest$@Test fun `v1 Plugins behalten shell und lsp, brauchen aber commands explizit`</ID>
     <ID>FunctionNameMaxLength:PluginPermissionPolicyTest.kt:PluginPermissionPolicyTest$@Test fun `v2 Plugins brauchen jede Berechtigung`</ID>
+    <ID>FunctionNameMaxLength:PluginSignaturesTest.kt:PluginSignaturesTest$@Test fun `Update-Regel (Vertrauen beim ersten Mal)`</ID>
+    <ID>FunctionNameMaxLength:PluginSignaturesTest.kt:PluginSignaturesTest$@Test fun `scripts plugin-sign py erzeugt gültige Signaturen`</ID>
     <ID>FunctionNameMaxLength:ProjectInputValidatorTest.kt:ProjectInputValidatorTest$@Test fun existingDirectoryAndBlankTarget</ID>
     <ID>FunctionNameMaxLength:ProjectStackFrameResolverTest.kt:ProjectStackFrameResolverTest$@Test fun resolvesFileViaTopDownFallbackWhenNotInStandardPath</ID>
     <ID>FunctionNameMaxLength:ProjectStackFrameResolverTest.kt:ProjectStackFrameResolverTest$@Test fun resolvesProjectTestFileSuccessfully</ID>
     <ID>FunctionNameMaxLength:ProjectStackFrameResolverTest.kt:ProjectStackFrameResolverTest$@Test fun returnsNullForFrameworkOrNativeFrames</ID>
+    <ID>FunctionNameMaxLength:SandboxPolicyTest.kt:SandboxPolicyTest$@Test fun `Manifest-Regeln für die Sandbox`</ID>
+    <ID>FunctionNameMaxLength:SandboxPolicyTest.kt:SandboxPolicyTest$@Test fun `Store nimmt Sandbox-Plugins mit genau einer classes dex`</ID>
     <ID>FunctionNameMaxLength:SdkSetupOptionsTest.kt:SdkSetupOptionsTest$@Test fun `feste Zielumgebung als Kommando`</ID>
     <ID>FunctionNameMaxLength:SdkSetupOptionsTest.kt:SdkSetupOptionsTest$@Test fun `unsichere Versionsangaben werden abgelehnt`</ID>
     <ID>FunctionNameMaxLength:SigningModelsTest.kt:SigningModelsTest$@Test fun gradleSigningSnippetContainsExpectedVariables</ID>
@@ -252,6 +271,7 @@
     <ID>LongMethod:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$fun parseNodeContent: DependencyNode</ID>
     <ID>LongMethod:GradleOutputParser.kt:GradleOutputParser.Session$fun feedLine: List&lt;BuildProblem></ID>
     <ID>LongMethod:KeytoolOutputParser.kt:KeytoolOutputParser$fun parse: ParsedKeystore</ID>
+    <ID>LongMethod:PluginManifestParser.kt:PluginManifestParser$fun parse: Result&lt;PluginManifest></ID>
     <ID>LongMethod:PluginManifestParser.kt:PluginManifestParser$private fun parseContributes: Contributes</ID>
     <ID>LongMethod:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
     <ID>LoopWithTooManyJumpStatements:ApkMetadataParser.kt:ApkMetadataParser$for</ID>
@@ -279,12 +299,14 @@
     <ID>OutdatedDocumentation:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$fun parse: DependencyInsight</ID>
     <ID>OutdatedDocumentation:HunkPatcher.kt:HunkPatcher$fun apply: String</ID>
     <ID>OutdatedDocumentation:WorkspaceRepository.kt:WorkspaceRepository$suspend fun updateModifiedFiles: Result&lt;Unit></ID>
+    <ID>ReturnCount:ActivationEvents.kt:ActivationEvents$fun languageOf: String?</ID>
     <ID>ReturnCount:AiPatchParser.kt:AiPatchParser$fun parseProposedChanges: List&lt;AiProposedChange></ID>
     <ID>ReturnCount:ApkMetadataParser.kt:ApkMetadataParser$private fun extractArrayContent: String?</ID>
     <ID>ReturnCount:AxmlManifestParser.kt:AxmlManifestParser$private fun parseStream: ApkDetailedMetadata?</ID>
     <ID>ReturnCount:ColorThemeFile.kt:ColorThemeFileParser$fun parseHex: Long?</ID>
     <ID>ReturnCount:DeclarativeOnly.kt:DeclarativeOnly$fun violation: String?</ID>
     <ID>ReturnCount:FormatModels.kt:EditorConfigResolver$internal fun matchesPattern: Boolean</ID>
+    <ID>ReturnCount:GradleBuildOutputs.kt:GradleBuildOutputs$fun find: GradleOutputs?</ID>
     <ID>ReturnCount:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$fun parseNodeContent: DependencyNode</ID>
     <ID>ReturnCount:GradleOutputParser.kt:GradleOutputParser.Session$fun feedLine: List&lt;BuildProblem></ID>
     <ID>ReturnCount:GradleRunSettings.kt:GradleRunSettings$fun addCustomFlag: GradleRunSettings</ID>
@@ -293,8 +315,10 @@
     <ID>ReturnCount:LogcatModels.kt:LogcatFilter$fun matches: Boolean</ID>
     <ID>ReturnCount:LogcatParser.kt:LogcatParser$fun parseLine: ParseLineResult</ID>
     <ID>ReturnCount:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$fun resolve: File?</ID>
+    <ID>ReturnCount:SandboxPolicy.kt:SandboxPolicy$fun storeViolation: String?</ID>
     <ID>ReturnCount:SnippetModels.kt:SnippetParser$fun validate: SnippetValidationResult</ID>
     <ID>StringLiteralDuplication:AaptBadgingParser.kt:AaptBadgingParser$"exported='true'"</ID>
+    <ID>StringLiteralDuplication:ActivationEvents.kt:ActivationEvents$"markdown"</ID>
     <ID>StringLiteralDuplication:AxmlManifestParser.kt:AxmlManifestParser$"exported"</ID>
     <ID>StringLiteralDuplication:GradleDependencyInsightParser.kt:GradleDependencyInsightParser$"\\---"</ID>
     <ID>StringLiteralDuplication:GradleDependencyTreeParser.kt:GradleDependencyTreeParser$"FAILED"</ID>
@@ -337,9 +361,13 @@
     <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"head\nours1\nours2\nmid\nB\nA\ntail\n"</ID>
     <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"head\ntheirs1\nmid\nA\nB\ntail\n"</ID>
     <ID>StringShouldBeRawString:GitPatchTest.kt:GitPatchTest$"some code\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\nours\n=======\ntheirs\n>>>>>>> branch\n"</ID>
+    <ID>StringShouldBeRawString:GradleBuildOutputsTest.kt:GradleBuildOutputsTest$"include(\":app\", \":feature:home\")"</ID>
     <ID>StringShouldBeRawString:GradleOutputParser.kt:GradleOutputParser.Companion$"\u001B\\[[;?0-9]*[a-zA-Z]|\u001B\\].*?\\u0007"</ID>
     <ID>StringShouldBeRawString:LogcatParserTest.kt:LogcatParserTest$"\"status\": \"ok\""</ID>
+    <ID>StringShouldBeRawString:PluginBuildInfo.kt:PluginBuildInfo$"\\d{4}-\\d{2}-\\d{2}"</ID>
     <ID>StringShouldBeRawString:PluginManifestParser.kt:PluginManifestParser$"\\d+(\\.\\d+)*([-+][A-Za-z0-9.]+)?"</ID>
+    <ID>StringShouldBeRawString:SandboxPolicyTest.kt:SandboxPolicyTest$",\"activationEvents\":[\"onProject:x\"]}"</ID>
+    <ID>StringShouldBeRawString:SandboxPolicyTest.kt:SandboxPolicyTest$",\"entryPointClass\":\"a.B\""</ID>
     <ID>StringShouldBeRawString:SnippetParserTest.kt:SnippetParserTest$"package \$PACKAGE\nclass \$CLASSNAME {\n // Year: \$CURRENT_YEAR\n}"</ID>
     <ID>StringShouldBeRawString:SnippetParserTest.kt:SnippetParserTest$"val cost = \\\$100\nval path = \"C:\\\\test\""</ID>
     <ID>StringShouldBeRawString:SnippetVariableResolverTest.kt:SnippetVariableResolverTest$"package \$PACKAGE\n\n// Copyright \$CURRENT_YEAR\nclass \$CLASSNAME"</ID>
@@ -354,6 +382,7 @@
     <ID>StringShouldBeRawString:VsCodeSnippetJsonSerializerTest.kt:VsCodeSnippetJsonSerializerTest$"android.util.Log.d(\"TAG\", \"\$1\");"</ID>
     <ID>ThrowsCount:ApkZipAnalyzer.kt:ApkZipAnalyzer$@Throws(ApkAnalysisException::class) fun analyze: ApkAnalysisResult</ID>
     <ID>ThrowsCount:PluginManifestParser.kt:PluginManifestParser$private fun parseContributes: Contributes</ID>
+    <ID>ThrowsCount:PluginSignatures.kt:PluginSignatures$fun verify: Result</ID>
     <ID>TooGenericExceptionCaught:ApkZipAnalyzer.kt:ApkZipAnalyzer$e: Exception</ID>
     <ID>TooManyFunctions:AiRepository.kt:AiRepository</ID>
     <ID>TooManyFunctions:DebugRepository.kt:DebugRepository</ID>
@@ -370,6 +399,16 @@
     <ID>UnderscoresInNumericLiterals:LogcatParserTest.kt:LogcatParserTest$32448</ID>
     <ID>UnderscoresInNumericLiterals:WordDiff.kt:WordDiff$20000</ID>
     <ID>UnderscoresInNumericLiterals:WorkspaceRepository.kt:WorkspaceRepository$10000</ID>
+    <ID>UndocumentedPublicClass:ActivationEvents.kt:ActivationEvents</ID>
+    <ID>UndocumentedPublicClass:GradleBuildOutputs.kt:GradleBuildOutputs</ID>
+    <ID>UndocumentedPublicClass:PluginBuildInfo.kt:PluginBuildInfo</ID>
+    <ID>UndocumentedPublicClass:PluginSignatures.kt:PluginSignatures</ID>
+    <ID>UndocumentedPublicClass:SandboxPolicy.kt:SandboxPolicy</ID>
+    <ID>UndocumentedPublicFunction:GradleBuildOutputs.kt:GradleBuildOutputs$fun classDirsOf: List&lt;File></ID>
+    <ID>UndocumentedPublicFunction:GradleBuildOutputs.kt:GradleBuildOutputs$fun moduleDirs: List&lt;File></ID>
+    <ID>UndocumentedPublicFunction:GradleBuildOutputs.kt:GradleBuildOutputs$fun resourceApkOf: File?</ID>
+    <ID>UnnecessaryBackticks:ActivationEventsTest.kt:ActivationEventsTest$`Schreibweisen`</ID>
+    <ID>UnnecessaryBackticks:PluginSignaturesTest.kt:PluginSignaturesTest$`Herkunftsangabe`</ID>
     <ID>UnnecessaryParentheses:AiPatchParser.kt:AiPatchParser$(currentFileContent ?: "")</ID>
     <ID>UnnecessaryParentheses:ApkComparator.kt:ApkComparator$(delta.toDouble() / baseSecSize.toDouble())</ID>
     <ID>UnnecessaryParentheses:ApkComparator.kt:ApkComparator$(totalDeltaBytes.toDouble() / baseFileSize.toDouble())</ID>

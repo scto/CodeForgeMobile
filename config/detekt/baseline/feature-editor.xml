@@ -26,8 +26,6 @@
     <ID>BracesOnWhenStatements:MergeConflicts.kt:MergeConflicts$when</ID>
     <ID>BracesOnWhenStatements:SoraCodeEditor.kt:&lt;no name provided>$when</ID>
     <ID>BracesOnWhenStatements:TextMateGrammarStructureTest.kt:TextMateGrammarStructureTest$when</ID>
-    <ID>CascadingCallWrapping:EditorLanguageFactory.kt:EditorLanguageFactory$runCatching { TextMateLanguage.create(languageType.scopeName, true) } .onFailure { Log.w(TAG, "Keine TextMate-Grammatik für Scope '${languageType.scopeName}' – Rückfall auf Klartext", it) } .getOrNull() ?: EmptyLanguage()</ID>
-    <ID>CascadingCallWrapping:EditorLanguageFactory.kt:EditorLanguageFactory$runCatching { TextMateLanguage.create(scopeOverride, true) } .onFailure { Log.w(TAG, "Grammatik '$scopeOverride' nicht nutzbar – Rückfall auf Klartext", it) } .getOrNull() ?: EmptyLanguage()</ID>
     <ID>CascadingCallWrapping:ImeAwareAutoCompletion.kt:ImeAwareAutoCompletion$bottom</ID>
     <ID>CascadingCallWrapping:TreeSitterLanguageSupport.kt:TreeSitterLanguageSupport$use { it.readText() }</ID>
     <ID>CascadingCallWrapping:WordCatalog.kt:WordCatalog$toList()</ID>
@@ -45,7 +43,6 @@
     <ID>CognitiveComplexMethod:AiSettingsDialog.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun AiSettingsDialog</ID>
     <ID>CognitiveComplexMethod:BreakpointDialogs.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun BreakpointsOverviewSheet</ID>
     <ID>CognitiveComplexMethod:BreakpointOverlay.kt:@Composable fun BreakpointOverlayLayer</ID>
-    <ID>CognitiveComplexMethod:EditorLanguageFactory.kt:EditorLanguageFactory$fun create: Language</ID>
     <ID>CognitiveComplexMethod:EditorOverlay.kt:@Composable internal fun EditorOverlayLayer</ID>
     <ID>CognitiveComplexMethod:EditorScreen.kt:@Composable private fun EditorToolbar</ID>
     <ID>CognitiveComplexMethod:EditorScreen.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class) @Composable fun EditorRoute</ID>
@@ -59,7 +56,6 @@
     <ID>CognitiveComplexMethod:ImageFilePreview.kt:private fun loadXmlDrawable: Drawable?</ID>
     <ID>CognitiveComplexMethod:LspInfoUi.kt:@Composable private fun HoverSignatureCard</ID>
     <ID>CognitiveComplexMethod:LspInfoUi.kt:internal fun parseHoverBlocks: List&lt;HoverBlock></ID>
-    <ID>CognitiveComplexMethod:LspSessionController.kt:LspSessionController$suspend fun onFileOpened</ID>
     <ID>CognitiveComplexMethod:QuickFixSheet.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun QuickFixSheet</ID>
     <ID>CognitiveComplexMethod:SaveOnCloseDialog.kt:@Composable fun SaveOnCloseDialog</ID>
     <ID>CognitiveComplexMethod:SoraCodeEditor.kt:@Composable fun SoraCodeEditor</ID>
@@ -72,13 +68,11 @@
     <ID>ComplexCondition:TestTargetScanner.kt:TestTargetScanner$i &lt; line.length &amp;&amp; (line[i].isLetterOrDigit() || line[i] == '_' || line[i] == '.')</ID>
     <ID>ComplexCondition:TestTargetScanner.kt:TestTargetScanner$line.contains('(') &amp;&amp; !line.startsWith("if") &amp;&amp; !line.startsWith("while") &amp;&amp; !line.startsWith("for")</ID>
     <ID>CyclomaticComplexMethod:BreakpointOverlay.kt:@Composable fun BreakpointOverlayLayer</ID>
-    <ID>CyclomaticComplexMethod:EditorLanguageFactory.kt:EditorLanguageFactory$fun create: Language</ID>
     <ID>CyclomaticComplexMethod:EditorScreen.kt:@Composable private fun EditorToolbar</ID>
     <ID>CyclomaticComplexMethod:EditorScreen.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class) @Composable fun EditorRoute</ID>
     <ID>CyclomaticComplexMethod:EditorSearchBar.kt:@Composable fun EditorSearchBar</ID>
     <ID>CyclomaticComplexMethod:GitGutterOverlay.kt:@Composable fun GitGutterOverlayLayer</ID>
     <ID>CyclomaticComplexMethod:ImageFilePreview.kt:@Composable fun ImageFilePreview</ID>
-    <ID>CyclomaticComplexMethod:LspSessionController.kt:LspSessionController$suspend fun onFileOpened</ID>
     <ID>CyclomaticComplexMethod:MergeConflicts.kt:MergeConflicts$fun scan: List&lt;ConflictBlock></ID>
     <ID>CyclomaticComplexMethod:SoraCodeEditor.kt:@Composable fun SoraCodeEditor</ID>
     <ID>CyclomaticComplexMethod:TestTargetScanner.kt:TestTargetScanner$fun scan: List&lt;TestTarget></ID>
@@ -97,7 +91,6 @@
     <ID>DocumentationOverPrivateFunction:EditorViewModel.kt:EditorViewModel$private suspend fun persistDirty: Boolean</ID>
     <ID>DocumentationOverPrivateFunction:ImeAwareAutoCompletion.kt:ImeAwareAutoCompletion$private fun visibleEditorHeight: Int</ID>
     <ID>DocumentationOverPrivateFunction:SoraCodeEditor.kt:private fun emphasizeBracketPair</ID>
-    <ID>DocumentationOverPrivateProperty:EditorDisplaySettingsWiringTest.kt:EditorDisplaySettingsWiringTest$/** * Belegt strukturiert für jedes Feld in [EditorDisplaySettings], * auf welche Eigenschaft / Komponente in [io.github.rosemoe.sora.widget.CodeEditor] * es in [applyDisplaySettings] bzw. [EditorLanguageFactory] abgebildet wird. */ private val expectedMappings = mapOf( "tabSize" to "editor.tabWidth", "useTreeSitter" to "EditorLanguageFactory.create(useTreeSitter)", "textmateTheme" to "TextMateAssetLoader.setActiveTheme", "fontSizeSp" to "editor.setTextSize", "fontFamilyAssetPath" to "editor.typefaceText", "wordWrap" to "editor.isWordwrap", "showNonPrintableChars" to "editor.nonPrintablePaintingFlags", "stickyScrollEnabled" to "EditorStickyScroll.isEnabled", "magnifierEnabled" to "Magnifier.isEnabled", "symbolPairAutocompleteEnabled" to "editor.props.symbolPairAutoCompletion", "minimapEnabled" to "EditorMinimap.isEnabled", "rainbowBracketsEnabled" to "editor.isHighlightBracketPair / BracketPairs.isEnabled", "pinchToZoomEnabled" to "editor.setScaleTextEnabled / setScaleTextSizes", "desktopShortcutsEnabled" to "editor.props.navigationMode" )</ID>
     <ID>DocumentationOverPrivateProperty:EditorLanguageFactory.kt:/** `true`, sobald TreeSitterLanguageSupport ein tsTheme-Mapping (Farben je Capture) setzt. */ private const val TREE_SITTER_THEMED = false</ID>
     <ID>DocumentationOverPrivateProperty:EditorViewModel.kt:EditorViewModel$/** * WICHTIG: Eigenschaften, auf die in Coroutinen zugegriffen wird, die im `init`-Block gestartet * werden (wie z. B. in [observeUpdateAnnotations]), MÜSSEN VOR dem `init`-Block deklariert werden! * * Grund: `viewModelScope.launch` verwendet zur Laufzeit `Dispatchers.Main.immediate`. Läuft der * Aufrufer auf dem Main-Thread (wie bei der Instanziierung des ViewModels via Hilt/Compose), * wird der Coroutinen-Block SOFORT synchron innerhalb des Konstruktors ausgeführt. * Da Kotlin Eigenschaften streng in Deklarationsreihenfolge initialisiert, sind Eigenschaften, * die unterhalb von `init` deklariert sind, zu diesem Zeitpunkt noch `null` im Java-Bytecode. */ private val projectRoot = MutableStateFlow&lt;String?>(null)</ID>
     <ID>DocumentationOverPrivateProperty:EditorViewModel.kt:EditorViewModel$/** Dokumentversion je Pfad, für LSP `textDocument/didChange` (versionierte Syncs). */ private val documentVersions = mutableMapOf&lt;String, Int>()</ID>
@@ -184,7 +177,6 @@
     <ID>LongMethod:EditorViewModel.kt:EditorViewModel$private fun assembleContext: com.codeforge.core.domain.ai.AiPreparedContext</ID>
     <ID>LongMethod:EditorViewModel.kt:EditorViewModel$private fun executeAiPrompt</ID>
     <ID>LongMethod:LspAwareLanguage.kt:LspAwareLanguage$override fun requireAutoComplete</ID>
-    <ID>LongMethod:LspSessionController.kt:LspSessionController$suspend fun onFileOpened</ID>
     <ID>LongMethod:SoraCodeEditor.kt:fun applyDisplaySettings</ID>
     <ID>LongMethod:TestTargetScanner.kt:TestTargetScanner$internal fun sanitizeCode: List&lt;String></ID>
     <ID>LoopWithTooManyJumpStatements:BreakpointOverlay.kt:for</ID>
@@ -195,7 +187,6 @@
     <ID>ReturnCount:ConflictOverlay.kt:fun band</ID>
     <ID>ReturnCount:EditorController.kt:internal fun mapCursorOffset: Int</ID>
     <ID>ReturnCount:ImageFilePreview.kt:fun isImageFilePath: Boolean</ID>
-    <ID>ReturnCount:LspSessionController.kt:LspSessionController$suspend fun onFileOpened</ID>
     <ID>ReturnCount:TestTargetScanner.kt:TestTargetScanner$private fun extractFunctionName: String?</ID>
     <ID>StringLiteralDuplication:EditorViewModel.kt:EditorViewModel$"file://"</ID>
     <ID>StringLiteralDuplication:EditorViewModel.kt:EditorViewModel.Companion$"cmake"</ID>

@@ -3,42 +3,190 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>BracesOnIfStatements:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$if</ID>
+    <ID>BracesOnIfStatements:ComposePreviewScreen.kt:if</ID>
+    <ID>BracesOnIfStatements:ComposeSupport.kt:ComposeSupport$else</ID>
+    <ID>BracesOnIfStatements:ComposeSupport.kt:ComposeSupport$if</ID>
+    <ID>BracesOnIfStatements:ComposeViewBitmapRenderer.kt:else</ID>
+    <ID>BracesOnIfStatements:ComposeViewBitmapRenderer.kt:if</ID>
+    <ID>BracesOnIfStatements:Interpreter.kt:Interpreter$else</ID>
+    <ID>BracesOnIfStatements:Interpreter.kt:Interpreter$if</ID>
     <ID>BracesOnIfStatements:KotlincDaemon.kt:KotlincDaemon$if</ID>
     <ID>BracesOnIfStatements:KotlincProcessCompiler.kt:KotlincOutputParser$else</ID>
+    <ID>BracesOnIfStatements:KtLexer.kt:KtLexer$if</ID>
+    <ID>BracesOnIfStatements:KtParser.kt:KtParser$else</ID>
+    <ID>BracesOnIfStatements:KtParser.kt:KtParser$if</ID>
+    <ID>BracesOnIfStatements:PreviewResourceStubs.kt:PreviewResourceStubs$if</ID>
+    <ID>BracesOnIfStatements:PreviewResourceTable.kt:PreviewResourceTable$if</ID>
+    <ID>BracesOnWhenStatements:BuiltinCalls.kt:BuiltinCalls$when</ID>
     <ID>BracesOnWhenStatements:ComposePreviewScreen.kt:when</ID>
+    <ID>BracesOnWhenStatements:ComposePreviewViewModel.kt:ComposePreviewViewModel$when</ID>
+    <ID>BracesOnWhenStatements:ComposeSupport.kt:ComposeSupport$when</ID>
+    <ID>BracesOnWhenStatements:Interpreter.kt:Interpreter$when</ID>
+    <ID>BracesOnWhenStatements:KtLexer.kt:KtLexer$when</ID>
+    <ID>BracesOnWhenStatements:KtParser.kt:KtParser$when</ID>
+    <ID>BracesOnWhenStatements:PreviewCodeStripper.kt:PreviewCodeStripper$when</ID>
+    <ID>BracesOnWhenStatements:PreviewResourceTable.kt:PreviewResourceTable$when</ID>
     <ID>BracesOnWhenStatements:PreviewSourcePreparer.kt:PreviewSourcePreparer$when</ID>
+    <ID>CascadingCallWrapping:KotlinReflect.kt:KotlinReflect$apply { isAccessible = true }</ID>
     <ID>ClassOrdering:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$private val mutex = Mutex()</ID>
+    <ID>ClassOrdering:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Kurzzeit-Cache der Suche (beim Tippen kommen viele Vorschauen kurz hintereinander). */ private var gradleProbe: Triple&lt;String, Long, GradleOutputs?>? = null</ID>
+    <ID>ClassOrdering:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Lader der vorkompilierten Nachbarn je Stand (sonst bei jeder Vorschau neu). */ private val siblingLoaders = object : LinkedHashMap&lt;String, Pair&lt;ClassLoader, List&lt;String>>>(4, 0.75f, true) { override fun removeEldestEntry(eldest: MutableMap.MutableEntry&lt;String, Pair&lt;ClassLoader, List&lt;String>>>?): Boolean = size > 3 }</ID>
     <ID>ClassOrdering:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Nachbarn, deren Vorkompilierung scheitert (z. B. Zyklus zur Zieldatei), nicht bei jedem Lauf neu versuchen. */ private val siblingFailures = java.util.Collections.synchronizedSet(HashSet&lt;String>())</ID>
+    <ID>ClassOrdering:Interpreter.kt:Interpreter$// Importe → Pakete, in denen ein Name gesucht wird (Reihenfolge = Priorität) private val explicitImports: Map&lt;String, List&lt;String>> = file.imports.filter { !it.star } .groupBy({ it.alias ?: it.path.substringAfterLast('.') }, { it.path })</ID>
+    <ID>ClassOrdering:Interpreter.kt:Interpreter$private val starPackages = file.imports.filter { it.star }.map { it.path }</ID>
+    <ID>ClassOrdering:KotlinReflect.kt:KotlinReflect$private val layoutCache = HashMap&lt;FnSym, List&lt;JvmLayout>>()</ID>
+    <ID>ClassOrdering:KotlinReflect.kt:KotlinReflect$private val memberFnCache = HashMap&lt;Pair&lt;Class&lt;*>, String>, List&lt;FnSym>>()</ID>
+    <ID>ClassOrdering:KotlinReflect.kt:KotlinReflect$private val memberPropCache = HashMap&lt;Pair&lt;Class&lt;*>, String>, PropSym?>()</ID>
+    <ID>ClassOrdering:KotlinReflect.kt:KotlinReflect$private val metaCache = HashMap&lt;Class&lt;*>, KotlinClassMetadata?>()</ID>
+    <ID>ClassOrdering:KotlinReflect.kt:KotlinReflect$private val packageCache = HashMap&lt;String, PackageSymbols>()</ID>
+    <ID>ClassOrdering:KotlinReflect.kt:KotlinReflect$private val valueCache = HashMap&lt;Class&lt;*>, Boolean>()</ID>
+    <ID>ClassOrdering:KtParser.kt:KtParser$private val modifierWords = setOf( "private", "internal", "public", "protected", "inline", "noinline", "crossinline", "suspend", "override", "operator", "infix", "tailrec", "const", "data", "enum", "sealed", "open", "abstract", "final", "annotation", "value", "inner", "lateinit", "external", "expect", "actual", "reified", "fun" )</ID>
+    <ID>ClassOrdering:KtParser.kt:KtParser$private val notInfix = setOf("is", "in", "as", "else", "by", "get", "set", "catch", "finally", "where")</ID>
+    <ID>ClassOrdering:PreviewCodeStripper.kt:PreviewCodeStripper$private val COMPANION = Regex("""^([ \t]*)((?:public|internal|private|protected)[ \t]+)?companion[ \t]+object(?:[ \t]+\w+)?[ \t]*\{""", RegexOption.MULTILINE)</ID>
+    <ID>ClassOrdering:PreviewCodeStripper.kt:PreviewCodeStripper$private val IDENTIFIER = Regex("""\b[A-Za-z_]\w*\b""")</ID>
+    <ID>ClassOrdering:PreviewResourceStubs.kt:PreviewResourceStubs$private val xmlCache = HashMap&lt;String, Pair&lt;Long, Values>>()</ID>
+    <ID>CognitiveComplexMethod:BuiltinCalls.kt:BuiltinCalls$fun call: Interpreter.Result?</ID>
     <ID>CognitiveComplexMethod:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$override suspend fun ensureInstalled: Result&lt;File></ID>
     <ID>CognitiveComplexMethod:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$override suspend fun download: Result&lt;File></ID>
     <ID>CognitiveComplexMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$override suspend fun render: Result&lt;PreviewRenderResult></ID>
     <ID>CognitiveComplexMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun buildDex: CachedBuild</ID>
     <ID>CognitiveComplexMethod:ComposePreviewScreen.kt:@Composable private fun RenderStateContent</ID>
+    <ID>CognitiveComplexMethod:ComposeSupport.kt:ComposeSupport$private fun handle: Any?</ID>
     <ID>CognitiveComplexMethod:ComposeViewBitmapRenderer.kt:ComposeViewBitmapRenderer$private suspend fun renderToBitmapInternal: Bitmap</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$fun binary: Any?</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$fun callMember: Any?</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$fun eval: Any?</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$private fun assign</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$private fun bind: Bound?</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$private fun bindInterpretedParams</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$private fun callByName: Any?</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$private fun construct: Any?</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Interpreter$private fun whileLoop</ID>
+    <ID>CognitiveComplexMethod:Interpreter.kt:Numbers$fun arithmetic: Any?</ID>
+    <ID>CognitiveComplexMethod:KotlinReflect.kt:KotlinReflect$fun layouts: List&lt;JvmLayout></ID>
+    <ID>CognitiveComplexMethod:KotlinReflect.kt:KotlinReflect$fun memberProperty: PropSym?</ID>
     <ID>CognitiveComplexMethod:KotlincDaemon.kt:KotlincDaemon$suspend fun run: DaemonRun?</ID>
     <ID>CognitiveComplexMethod:KotlincProcessCompiler.kt:KotlincOutputParser$fun parseErrors: List&lt;String></ID>
     <ID>CognitiveComplexMethod:KotlincProcessCompiler.kt:KotlincProcessCompiler$override suspend fun compile: CompileResult</ID>
+    <ID>CognitiveComplexMethod:KtLexer.kt:KtLexer$private fun number</ID>
+    <ID>CognitiveComplexMethod:KtLexer.kt:KtLexer$private fun string</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$fun parseFile: KtFile</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$fun typeRef: TypeRef</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$private fun lambda: LambdaExpr</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$private fun namedChecks: Expr</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$private fun postfix: Expr</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$private fun primary: Expr</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$private fun simpleType: TypeRef</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$private fun skipDeclaration</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$private fun statement: Stmt</ID>
+    <ID>CognitiveComplexMethod:KtParser.kt:KtParser$private fun whenExpr: Expr</ID>
+    <ID>CognitiveComplexMethod:PreviewCodeStripper.kt:PreviewCodeStripper$fun removeUnavailableClasses: Stripped</ID>
+    <ID>CognitiveComplexMethod:PreviewCodeStripper.kt:PreviewCodeStripper$private fun functionEnd: Int</ID>
     <ID>CognitiveComplexMethod:PreviewDependencyResolver.kt:PreviewDependencyResolver$private fun findDependencies: List&lt;ParsedKotlinFile></ID>
     <ID>CognitiveComplexMethod:PreviewSourcePreparer.kt:PreviewSourcePreparer$internal fun matchingBrace: Int</ID>
     <ID>CognitiveComplexMethod:PreviewSourcePreparer.kt:PreviewSourcePreparer$internal fun removeThemeSideEffects: String</ID>
     <ID>CollapsibleIfStatements:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$if (hadExisting &amp;&amp; backupDir.exists()) { if (!backupDir.renameTo(targetDir)) { backupDir.copyRecursively(targetDir, overwrite = true) backupDir.deleteRecursively() } }</ID>
     <ID>CollapsibleIfStatements:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$if (hadExisting) { if (!targetDir.renameTo(backupDir)) { targetDir.copyRecursively(backupDir, overwrite = true) targetDir.deleteRecursively() } }</ID>
+    <ID>CollapsibleIfStatements:KtParser.kt:KtParser$if (cur.isIdent("out") || cur.isIdent("in")) { if (peek().kind == Tok.IDENT || peek().isOp("(")) next() }</ID>
     <ID>CollapsibleIfStatements:PreviewDependencyResolver.kt:PreviewDependencyResolver$if (cand.packageName == consumerPackage) { if (cand.topLevelSymbols.any { it in consumer.referencedIdentifiers }) { needed += cand } }</ID>
     <ID>CollapsibleIfStatements:PreviewDependencyResolver.kt:PreviewDependencyResolver$if (cand.packageName == wildPkg) { // Prüfen, ob der Consumer mindestens ein Symbol aus dieser Datei verwendet if (cand.topLevelSymbols.any { it in consumer.referencedIdentifiers }) { needed += cand } }</ID>
     <ID>ComplexCondition:CompilerRuntimeProviderImpl.kt:CompilerRuntimeManifest.Companion$name.isBlank() || name.contains('/') || name.contains('\\') || name.contains("..")</ID>
+    <ID>ComplexCondition:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$cause != null &amp;&amp; cause !is com.codeforge.feature.composepreview.interpreter.UnsupportedKotlinException &amp;&amp; cause.cause != null &amp;&amp; cause.cause !== cause</ID>
+    <ID>ComplexCondition:Interpreter.kt:Interpreter$(op == "&lt;" || op == ">" || op == "&lt;=" || op == ">=")</ID>
+    <ID>ComplexCondition:Interpreter.kt:Interpreter$a is Double || a is Float || b is Double || b is Float</ID>
+    <ID>ComplexCondition:Interpreter.kt:Numbers$op == "&lt;" || op == ">" || op == "&lt;=" || op == ">="</ID>
+    <ID>ComplexCondition:KotlinReflect.kt:KotlinReflect$existing == null || defaults > existingDefaults || (defaults == existingDefaults &amp;&amp; publicOwner &amp;&amp; !Modifier.isPublic(existing.owner.modifiers))</ID>
+    <ID>ComplexCondition:KotlinReflect.kt:KotlinReflect$staticWithDispatch &amp;&amp; !(isValueClass(fn.owner) &amp;&amp; sigTypes.size > ownParams &amp;&amp; m.name == jvmName)</ID>
+    <ID>ComplexCondition:KotlinReflect.kt:KotlinReflect$value is Int &amp;&amp; (boxed == java.lang.Long::class.java || boxed == java.lang.Short::class.java || boxed == java.lang.Byte::class.java)</ID>
+    <ID>ComplexCondition:KtLexer.kt:KtLexer$i &lt; src.length &amp;&amp; (src[i] == '0' || src[i] == '1' || src[i] == '_')</ID>
+    <ID>ComplexCondition:KtParser.kt:KtParser$!cur.isOp(close) &amp;&amp; cur.kind != Tok.NEWLINE &amp;&amp; !cur.isOp(";") &amp;&amp; cur.kind != Tok.EOF</ID>
+    <ID>ComplexCondition:KtParser.kt:KtParser$!n.isOp("{") &amp;&amp; !n.isOp(":") &amp;&amp; !n.isOp(",") &amp;&amp; !n.isIdent("where")</ID>
+    <ID>ComplexCondition:KtParser.kt:KtParser$cur.isOp("{") || (cur.kind == Tok.IDENT &amp;&amp; peek().isOp("@") &amp;&amp; peek(2).isOp("{"))</ID>
+    <ID>ComplexCondition:KtParser.kt:KtParser$cur.kind == Tok.IDENT &amp;&amp; (peek().isOp(":") || peek().isOp("=") || peek().kind == Tok.NEWLINE || peek().isIdent("by") || peek().kind == Tok.EOF)</ID>
+    <ID>ComplexCondition:KtParser.kt:KtParser$cur.kind == Tok.IDENT &amp;&amp; cur.text in modifierWords &amp;&amp; peek().kind == Tok.IDENT &amp;&amp; !(cur.text == "fun" &amp;&amp; !peek().isIdent("interface"))</ID>
+    <ID>ComplexCondition:KtParser.kt:KtParser$cur.kind == Tok.NEWLINE || cur.isOp("}") || cur.isOp(")") || cur.isOp(";") || cur.kind == Tok.EOF</ID>
+    <ID>ComplexCondition:KtParser.kt:KtParser$op == ")" || op == "]" || op == "}" || op == "->" || op == "=" || op == ":" || op == "{"</ID>
+    <ID>ComplexCondition:KtParser.kt:KtParser$ta != null &amp;&amp; (cur.isOp("(") || cur.isOp("{") || cur.isOp("::"))</ID>
+    <ID>CyclomaticComplexMethod:BuiltinCalls.kt:BuiltinCalls$fun call: Interpreter.Result?</ID>
     <ID>CyclomaticComplexMethod:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$override suspend fun download: Result&lt;File></ID>
+    <ID>CyclomaticComplexMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$override suspend fun render: Result&lt;PreviewRenderResult></ID>
     <ID>CyclomaticComplexMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun buildDex: CachedBuild</ID>
+    <ID>CyclomaticComplexMethod:ComposeSupport.kt:ComposeSupport$private fun handle: Any?</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Interpreter$fun binary: Any?</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Interpreter$fun callMember: Any?</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Interpreter$fun toJvm: Any?</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Interpreter$private fun assign</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Interpreter$private fun bind: Bound?</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Interpreter$private fun bindInterpretedParams</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Interpreter$private fun callByName: Any?</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Interpreter$private fun construct: Any?</ID>
+    <ID>CyclomaticComplexMethod:Interpreter.kt:Numbers$fun arithmetic: Any?</ID>
+    <ID>CyclomaticComplexMethod:KotlinReflect.kt:KotlinReflect$fun layouts: List&lt;JvmLayout></ID>
+    <ID>CyclomaticComplexMethod:KotlinReflect.kt:KotlinReflect$fun memberProperty: PropSym?</ID>
     <ID>CyclomaticComplexMethod:KotlincProcessCompiler.kt:KotlincProcessCompiler$override suspend fun compile: CompileResult</ID>
+    <ID>CyclomaticComplexMethod:KtLexer.kt:KtLexer$private fun number</ID>
+    <ID>CyclomaticComplexMethod:KtLexer.kt:KtLexer$private fun string</ID>
+    <ID>CyclomaticComplexMethod:KtParser.kt:KtParser$fun parseFile: KtFile</ID>
+    <ID>CyclomaticComplexMethod:KtParser.kt:KtParser$fun typeRef: TypeRef</ID>
+    <ID>CyclomaticComplexMethod:KtParser.kt:KtParser$private fun postfix: Expr</ID>
+    <ID>CyclomaticComplexMethod:KtParser.kt:KtParser$private fun primary: Expr</ID>
+    <ID>CyclomaticComplexMethod:KtParser.kt:KtParser$private fun simpleType: TypeRef</ID>
+    <ID>CyclomaticComplexMethod:KtParser.kt:KtParser$private fun skipDeclaration</ID>
+    <ID>CyclomaticComplexMethod:KtParser.kt:KtParser$private fun statement: Stmt</ID>
     <ID>CyclomaticComplexMethod:PreviewDependencyResolver.kt:PreviewDependencyResolver$private fun findDependencies: List&lt;ParsedKotlinFile></ID>
+    <ID>CyclomaticComplexMethod:PreviewResourceTable.kt:PreviewResourceTable$fun resolve: Any?</ID>
     <ID>CyclomaticComplexMethod:PreviewSourcePreparer.kt:PreviewSourcePreparer$internal fun matchingBrace: Int</ID>
     <ID>CyclomaticComplexMethod:PreviewSourcePreparer.kt:PreviewSourcePreparer$internal fun removeThemeSideEffects: String</ID>
+    <ID>DataClassContainsFunctions:KtLexer.kt:Token$fun isIdent</ID>
+    <ID>DataClassContainsFunctions:KtLexer.kt:Token$fun isOp</ID>
     <ID>DestructuringDeclarationWithTooManyEntries:KotlincProcessCompiler.kt:KotlincOutputParser$val (file, line, col, msg) = match.destructured</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private fun interpreterFailureText: String</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private fun jarClassDirs</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private fun projectLoader: ClassLoader</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private fun siblingStamp: String</ID>
     <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun buildDex: CachedBuild</ID>
     <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun precompileSiblings: File?</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun projectDex: List&lt;File></ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun renderInterpreted: ByteArray</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun renderWithGradle: ByteArray</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewScreen.kt:@Composable private fun ZoomBar</ID>
+    <ID>DocumentationOverPrivateFunction:ComposePreviewScreen.kt:@Composable private fun ZoomedContent</ID>
+    <ID>DocumentationOverPrivateFunction:Interpreter.kt:Interpreter$private fun bind: Bound?</ID>
+    <ID>DocumentationOverPrivateFunction:Interpreter.kt:Interpreter$private fun realName: String</ID>
+    <ID>DocumentationOverPrivateFunction:KotlinReflect.kt:KotlinReflect$private fun parseDescriptorParams: List&lt;String></ID>
+    <ID>DocumentationOverPrivateFunction:KtParser.kt:KtParser$private fun Call.withTrailingLambdas: Call</ID>
+    <ID>DocumentationOverPrivateFunction:KtParser.kt:KtParser$private fun branchBlock: Block</ID>
+    <ID>DocumentationOverPrivateFunction:KtParser.kt:KtParser$private fun peekNl: Token</ID>
+    <ID>DocumentationOverPrivateFunction:KtParser.kt:KtParser$private fun skipAnnotation: String</ID>
+    <ID>DocumentationOverPrivateFunction:KtParser.kt:KtParser$private fun skipDeclaration</ID>
+    <ID>DocumentationOverPrivateFunction:KtParser.kt:KtParser$private fun typeArgs: List&lt;TypeRef>?</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewCodeStripper.kt:PreviewCodeStripper$private fun endOfDeclarationHeader: Int</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewCodeStripper.kt:PreviewCodeStripper$private fun expressionEnd: Int</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewCodeStripper.kt:PreviewCodeStripper$private fun findBodyOpen: Int?</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewCodeStripper.kt:PreviewCodeStripper$private fun functionEnd: Int</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewCodeStripper.kt:PreviewCodeStripper$private fun publicCompanionBody: String?</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewCodeStripper.kt:PreviewCodeStripper$private fun removeImportsOnlyUsedBy: String</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewCodeStripper.kt:PreviewCodeStripper$private fun supertypeList: String?</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewCodeStripper.kt:PreviewCodeStripper$private fun withLeadingAnnotations: Int</ID>
+    <ID>DocumentationOverPrivateFunction:PreviewDependencyResolver.kt:PreviewDependencyResolver$private fun ParsedKotlinFile.withIdentifiersWithout: ParsedKotlinFile</ID>
     <ID>DocumentationOverPrivateFunction:PreviewDexer.kt:PreviewDexer$private suspend fun dexWarm: DexResult?</ID>
+    <ID>DocumentationOverPrivateProperty:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Fehlermeldungen gescheiterter Builds je Build-Schlüssel (nur im Speicher). */ private val failedBuilds = PreviewResultCache&lt;String>(maxEntries = 8)</ID>
+    <ID>DocumentationOverPrivateProperty:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Kurzzeit-Cache der Suche (beim Tippen kommen viele Vorschauen kurz hintereinander). */ private var gradleProbe: Triple&lt;String, Long, GradleOutputs?>? = null</ID>
+    <ID>DocumentationOverPrivateProperty:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Lader der vorkompilierten Nachbarn je Stand (sonst bei jeder Vorschau neu). */ private val siblingLoaders = object : LinkedHashMap&lt;String, Pair&lt;ClassLoader, List&lt;String>>>(4, 0.75f, true) { override fun removeEldestEntry(eldest: MutableMap.MutableEntry&lt;String, Pair&lt;ClassLoader, List&lt;String>>>?): Boolean = size > 3 }</ID>
     <ID>DocumentationOverPrivateProperty:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$/** Nachbarn, deren Vorkompilierung scheitert (z. B. Zyklus zur Zieldatei), nicht bei jedem Lauf neu versuchen. */ private val siblingFailures = java.util.Collections.synchronizedSet(HashSet&lt;String>())</ID>
     <ID>DocumentationOverPrivateProperty:ComposePreviewViewModel.kt:ComposePreviewViewModel$/** Laufender Render; wird bei neuer Eingabe abgebrochen, damit veraltete Läufe nicht weiterkompilieren. */ private var renderJob: Job? = null</ID>
     <ID>DocumentationOverPrivateProperty:ComposePreviewViewModel.kt:ComposePreviewViewModel$/** Wird für Re-Render (FunctionSelected/Rerender) benötigt, ohne den Quelltext im UiState zu duplizieren. */ private var lastActiveFile: ActiveComposableFile? = null</ID>
+    <ID>DocumentationOverPrivateProperty:PreviewDependencyResolver.kt:PreviewDependencyResolver$/** Ordner, die beim Suchen nach Modulen übersprungen werden. */ private val SKIPPED_DIRS = setOf("build", ".gradle", ".git", ".idea", ".kotlin", "node_modules", "build-logic", "buildSrc")</ID>
+    <ID>DocumentationOverPrivateProperty:PreviewDependencyResolver.kt:PreviewDependencyResolver$/** Zwischenspeicher je Datei (Pfad → Stand und Analyse), damit große Projekte nicht bei jedem Lauf neu gelesen werden. */ private val parseCache = object : LinkedHashMap&lt;String, Pair&lt;Long, ParsedKotlinFile>>(256, 0.75f, true) { override fun removeEldestEntry(eldest: MutableMap.MutableEntry&lt;String, Pair&lt;Long, ParsedKotlinFile>>?): Boolean = size > MAX_SOURCE_FILES * 2 }</ID>
+    <ID>DocumentationOverPrivateProperty:PreviewResourceStubs.kt:PreviewResourceStubs$/** Erste ID der Stubs; liegt bewusst unterhalb des App-Bereichs `0x7f…`. */ private const val FIRST_ID = 0x7e000000</ID>
+    <ID>DocumentationOverPrivateProperty:PreviewResourceStubs.kt:PreviewResourceStubs$/** Umgeleitete Funktionen: echter Name → Name im [STUB_PACKAGE]. */ private val REDIRECTED = listOf( "androidx.compose.ui.res.stringResource", "androidx.compose.ui.res.pluralStringResource", "androidx.compose.ui.res.stringArrayResource", "androidx.compose.ui.res.colorResource", "androidx.compose.ui.res.dimensionResource", "androidx.compose.ui.res.painterResource" )</ID>
+    <ID>EmptyElseBlock:Interpreter.kt:Interpreter$if (!slot.mutable) throw UnsupportedKotlinException("'${t.name}' ist nicht veränderbar")</ID>
+    <ID>EmptyElseBlock:KtLexer.kt:KtLexer$if (src[j] == '\\') j++</ID>
+    <ID>EmptyElseBlock:KtParser.kt:KtParser$if (!acceptOp(",")) break</ID>
+    <ID>EmptyElseBlock:KtParser.kt:KtParser$if (!cur.isOp(op)) fail("'$op' erwartet, gefunden '${cur.text}'")</ID>
+    <ID>EmptyElseBlock:KtParser.kt:KtParser$if (cur.isOp(":")) { next(); typeRef() }</ID>
+    <ID>EmptyElseBlock:KtParser.kt:KtParser$if (cur.isOp("@")) { next(); ident() }</ID>
+    <ID>EmptyElseBlock:KtParser.kt:KtParser$if (cur.kind != Tok.IDENT) fail("Bezeichner erwartet, gefunden '${cur.text}'")</ID>
     <ID>EmptyElseBlock:PreviewSourcePreparer.kt:PreviewSourcePreparer$if (s[i] == '\\') i++</ID>
     <ID>ExpressionBodySyntax:PreviewDexer.kt:PreviewDexer$return try { val command = buildList { add(d8BinaryPath) // minSdk der App = 26: weniger Desugaring-Arbeit; Debug-Modus spart Optimierungsläufe. add("--min-api"); add("26") add("--debug") add("-JXmx512m") SHORT_RUN_JVM_FLAGS.split(' ').forEach { add("-J$it") } add("--output") add(outputDir.absolutePath) addAll(classFiles.map { it.absolutePath }) } // d8 ist ein Shell-Skript und braucht `java` im PATH bzw. JAVA_HOME (Termux-Umgebung, wie kotlinc). val builder = ProcessBuilder(command) .redirectErrorStream(true) .redirectInput(File("/dev/null")) // JAVA_HOME/bin zuerst im PATH: unabhängig davon, ob update-alternatives `java` verlinkt hat // (gilt für jedes installierte JDK – 17, 21, 25; es wird das höchste installierte gewählt). val javaHome = TermuxEnvironment.environment()["JAVA_HOME"] builder.environment().putAll(TermuxEnvironment.environment(extraPath = listOfNotNull(javaHome?.let { "$it/bin" }))) val process = builder.start() val output = process.inputStream.bufferedReader().readText() val exitCode = process.waitFor() val dexFile = File(outputDir, "classes.dex").takeIf { it.isFile } DexResult(success = exitCode == 0 &amp;&amp; dexFile != null, dexFile = dexFile, errorOutput = output) } catch (e: Exception) { val defaultMessage = Res.string(R.string.composepreview_d8_konnte_nicht_gestartet_werden) DexResult(success = false, dexFile = null, errorOutput = e.message ?: defaultMessage) }</ID>
     <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `gradle generated manifest json matches generated jars in build compiler-runtime`</ID>
@@ -50,6 +198,9 @@
     <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test fun `zip slip entry is rejected and existing installation remains intact`</ID>
     <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test(expected = IllegalArgumentException::class) fun `manifest parser rejects empty files array`</ID>
     <ID>FunctionNameMaxLength:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$@Test(expected = IllegalArgumentException::class) fun `manifest parser rejects missing bom`</ID>
+    <ID>FunctionNameMaxLength:InterpreterComposeTest.kt:InterpreterComposeTest$@Test fun `renders an interpreted preview with state resources and lazy lists`</ID>
+    <ID>FunctionNameMaxLength:InterpreterJvmTest.kt:InterpreterJvmTest$@Test fun `evaluates kotlin against compiled classes`</ID>
+    <ID>FunctionNameMaxLength:InterpreterJvmTest.kt:InterpreterJvmTest$@Test fun `supports local functions defaults named args and control flow`</ID>
     <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `buildCommandLine constructs expected argument list with multiple source files`</ID>
     <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `buildCommandLine constructs expected argument list`</ID>
     <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `compile returns failure when kotlinc or plugin jar is missing`</ID>
@@ -57,14 +208,30 @@
     <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `output parser attaches resource note on R reference errors`</ID>
     <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `output parser extracts line-based compiler errors`</ID>
     <ID>FunctionNameMaxLength:KotlincProcessCompilerTest.kt:KotlincProcessCompilerTest$@Test fun `output parser filters out jansi noise and returns fallback message`</ID>
+    <ID>FunctionNameMaxLength:KtParserTest.kt:KtParserTest$@Test fun `attaches trailing lambdas and parses multiline chains`</ID>
+    <ID>FunctionNameMaxLength:KtParserTest.kt:KtParserTest$@Test fun `distinguishes generics from comparisons`</ID>
+    <ID>FunctionNameMaxLength:KtParserTest.kt:KtParserTest$@Test fun `parses declarations imports and unsupported classes`</ID>
     <ID>FunctionNameMaxLength:PreviewCacheTest.kt:PreviewCacheTest$@Test fun `Build wird gespeichert, wiedergefunden und aelteste Eintraege fallen heraus`</ID>
     <ID>FunctionNameMaxLength:PreviewCacheTest.kt:PreviewCacheTest$@Test fun `Schluessel haengt von allen Teilen und der Reihenfolge ab`</ID>
+    <ID>FunctionNameMaxLength:PreviewCodeStripperTest.kt:PreviewCodeStripperTest$@Test fun `keeps classes with lambda parameters and ordinary supertypes`</ID>
+    <ID>FunctionNameMaxLength:PreviewCodeStripperTest.kt:PreviewCodeStripperTest$@Test fun `keeps public companion constants of a removed view model and drops its imports`</ID>
+    <ID>FunctionNameMaxLength:PreviewCodeStripperTest.kt:PreviewCodeStripperTest$@Test fun `removes injection annotations from use cases`</ID>
+    <ID>FunctionNameMaxLength:PreviewCodeStripperTest.kt:PreviewCodeStripperTest$@Test fun `removes route that looks up a view model and its imports`</ID>
+    <ID>FunctionNameMaxLength:PreviewCodeStripperTest.kt:PreviewCodeStripperTest$@Test fun `removes view model but keeps state and events`</ID>
     <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `determines target class name correctly for custom JvmName and empty package`</ID>
     <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `excludes pure Activity and ViewModel sibling files`</ID>
     <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `handles cyclic dependencies without infinite recursion`</ID>
     <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `handles missing and external symbols gracefully without errors`</ID>
+    <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `resolves files from other modules and skips view models but keeps their state`</ID>
     <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `resolves sibling in same package without explicit import`</ID>
     <ID>FunctionNameMaxLength:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `resolves transitive theme chain Theme Color and Type`</ID>
+    <ID>FunctionNameMaxLength:PreviewMethodLookupTest.kt:PreviewMethodLookupTest$@Test fun `finds private top-level preview functions and makes them callable`</ID>
+    <ID>FunctionNameMaxLength:PreviewMethodLookupTest.kt:PreviewMethodLookupTest$@Test fun `finds public functions and returns null for unknown names`</ID>
+    <ID>FunctionNameMaxLength:PreviewProjectResourcesTest.kt:PreviewProjectResourcesTest$@Test fun `Text aus den Projekt-Ressourcen, sonst aus der IDE`</ID>
+    <ID>FunctionNameMaxLength:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$@Test fun `generates R stubs only for referenced entries`</ID>
+    <ID>FunctionNameMaxLength:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$@Test fun `reads values per locale and ignores other qualifiers`</ID>
+    <ID>FunctionNameMaxLength:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$@Test fun `redirects resource functions to the stubs`</ID>
+    <ID>FunctionNameMaxLength:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$@Test fun `stubs own package R when not imported and skips files without R`</ID>
     <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `Datei ohne Activity bleibt inhaltlich unveraendert`</ID>
     <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `Klammern in Strings stoeren die Klassenentfernung nicht`</ID>
     <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `Theme in derselben Datei bekommt keinen Stub`</ID>
@@ -74,36 +241,151 @@
     <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `entfernt WindowCompat und SideEffect aus Theme`</ID>
     <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `entfernt package, Activity-Klasse und Activity-Imports`</ID>
     <ID>FunctionNameMaxLength:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$@Test fun `ersetzt Projekt-Theme durch Material3-Stub`</ID>
+    <ID>FunctionNameMinLength:KtLexer.kt:KtLexer$private fun op</ID>
     <ID>FunctionNameMinLength:PreviewCache.kt:PreviewCacheKey$fun of: String</ID>
+    <ID>FunctionOnlyReturningConstant:KtParser.kt:KtParser$private fun peekNlIsRange: Boolean</ID>
+    <ID>FunctionOnlyReturningConstant:PreviewMethodLookupTest.kt:@Suppress("unused") fun publicPreviewSample: String</ID>
+    <ID>FunctionOnlyReturningConstant:PreviewMethodLookupTest.kt:@Suppress("unused") private fun privatePreviewSample: String</ID>
+    <ID>LargeClass:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl : ComposePreviewRenderer</ID>
+    <ID>LargeClass:Interpreter.kt:Interpreter</ID>
+    <ID>LargeClass:KtParser.kt:KtParser</ID>
     <ID>LongMethod:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$override suspend fun download: Result&lt;File></ID>
     <ID>LongMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$override suspend fun render: Result&lt;PreviewRenderResult></ID>
     <ID>LongMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun buildDex: CachedBuild</ID>
+    <ID>LongMethod:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun renderInterpreted: ByteArray</ID>
     <ID>LongMethod:ComposeViewBitmapRenderer.kt:ComposeViewBitmapRenderer$private suspend fun renderToBitmapInternal: Bitmap</ID>
     <ID>LongMethod:KotlincProcessCompiler.kt:KotlincProcessCompiler$override suspend fun compile: CompileResult</ID>
     <ID>LongMethod:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$@Test fun `resolves transitive theme chain Theme Color and Type`</ID>
+    <ID>LongMethod:PreviewResourceStubs.kt:PreviewResourceStubs$private fun helperSource: String</ID>
     <ID>LoopWithTooManyJumpStatements:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$while</ID>
+    <ID>LoopWithTooManyJumpStatements:Interpreter.kt:Interpreter$for</ID>
+    <ID>LoopWithTooManyJumpStatements:Interpreter.kt:Interpreter$while</ID>
+    <ID>LoopWithTooManyJumpStatements:KotlinReflect.kt:KotlinReflect$for</ID>
+    <ID>LoopWithTooManyJumpStatements:KtLexer.kt:KtLexer$while</ID>
+    <ID>LoopWithTooManyJumpStatements:KtParser.kt:KtParser$while</ID>
+    <ID>LoopWithTooManyJumpStatements:PreviewResourceStubs.kt:PreviewResourceStubs$for</ID>
     <ID>LoopWithTooManyJumpStatements:PreviewSourcePreparer.kt:PreviewSourcePreparer$while</ID>
+    <ID>MayBeConstant:Fixtures.kt:Config$val greeting = "Hallo"</ID>
     <ID>MultilineRawStringIndentation:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$""" { "bom": "2024.01.00", "kotlin": "1.9.22", "files": [ { "name": "old-runtime.jar", "sha256": "$existingSha", "size": ${existingJar.length()} } ] } """</ID>
     <ID>MultilineRawStringIndentation:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$""" { "bom": "2024.01.00", "kotlin": "1.9.22", "files": [ { "name": "safe.jar", "sha256": "$existingSha", "size": ${existingJar.length()} } ] } """</ID>
     <ID>MultilineRawStringIndentation:CompilerRuntimeProviderTest.kt:CompilerRuntimeProviderTest$""" { "bom": "2024.09.00", "kotlin": "2.0.20", "files": [ { "name": "old.jar", "sha256": "$oldSha", "size": ${oldJar.length()} } ] } """</ID>
+    <ID>MultilineRawStringIndentation:PreviewResourceStubs.kt:PreviewResourceStubs$""" @Composable private fun localeKeys(): List&lt;String> { val locale = LocalConfiguration.current.locales[0] return listOf(locale.language + "-" + locale.country, locale.language, "").distinct() } private fun &lt;V> lookup(table: Map&lt;String, Map&lt;Int, V>>, keys: List&lt;String>, id: Int): V? = keys.firstNotNullOfOrNull { table[it]?.get(id) } @Composable fun stringResource(id: Int): String = if (isStub(id)) lookup(STRINGS, localeKeys(), id) ?: "?" else androidx.compose.ui.res.stringResource(id) @Composable fun stringResource(id: Int, vararg formatArgs: Any): String = if (isStub(id)) (lookup(STRINGS, localeKeys(), id) ?: "?").format(*formatArgs) else androidx.compose.ui.res.stringResource(id, *formatArgs) @Composable private fun pluralForm(id: Int, count: Int): String { val forms = lookup(PLURALS, localeKeys(), id) ?: return "?" val locale = LocalConfiguration.current.locales[0] val quantity = runCatching { android.icu.text.PluralRules.forLocale(locale).select(count.toDouble()) } .getOrDefault(if (count == 1) "one" else "other") return forms[quantity] ?: forms["other"] ?: forms.values.firstOrNull() ?: "?" } @Composable fun pluralStringResource(id: Int, count: Int): String = if (isStub(id)) pluralForm(id, count) else androidx.compose.ui.res.pluralStringResource(id, count) @Composable fun pluralStringResource(id: Int, count: Int, vararg formatArgs: Any): String = if (isStub(id)) pluralForm(id, count).format(*formatArgs) else androidx.compose.ui.res.pluralStringResource(id, count, *formatArgs) @Composable fun stringArrayResource(id: Int): Array&lt;String> = if (isStub(id)) lookup(ARRAYS, localeKeys(), id) ?: emptyArray() else androidx.compose.ui.res.stringArrayResource(id) @Composable fun colorResource(id: Int): Color { if (!isStub(id)) return androidx.compose.ui.res.colorResource(id) val raw = COLORS[id]?.removePrefix("#") ?: return Color.Magenta val argb = when (raw.length) { 3 -> "FF" + raw.map { "${'$'}it${'$'}it" }.joinToString("") 4 -> raw.map { "${'$'}it${'$'}it" }.joinToString("") 6 -> "FF" + raw else -> raw } return argb.toLongOrNull(16)?.let { Color(it.toInt()) } ?: Color.Magenta } @Composable fun dimensionResource(id: Int): Dp { if (!isStub(id)) return androidx.compose.ui.res.dimensionResource(id) val raw = DIMENS[id] ?: return 0.dp return raw.removeSuffix("dip").removeSuffix("dp").removeSuffix("sp").removeSuffix("px").toFloatOrNull()?.dp ?: 0.dp } /** Bilder aus `res/drawable` kennt die Vorschau nicht: Platzhalter statt Absturz. */ @Composable fun painterResource(id: Int): Painter = if (isStub(id)) ColorPainter(Color(0x33888888)) else androidx.compose.ui.res.painterResource(id) """</ID>
+    <ID>MultilineRawStringIndentation:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$""" &lt;resources> &lt;string name="app_name">Demo&lt;/string> &lt;string name="quote">It\'s \"fine\"\nnext line&lt;/string> &lt;string name="price">%1${'$'}s costs ${'$'}5&lt;/string> &lt;plurals name="count">&lt;item quantity="one">%d item&lt;/item>&lt;item quantity="other">%d items&lt;/item>&lt;/plurals> &lt;string-array name="speeds">&lt;item>1×&lt;/item>&lt;item>2×&lt;/item>&lt;/string-array> &lt;color name="brand">#FF6B6B&lt;/color> &lt;string name="unused">nope&lt;/string> &lt;/resources> """</ID>
+    <ID>NestedBlockDepth:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private fun jarClassDirs</ID>
+    <ID>NestedBlockDepth:KtLexer.kt:KtLexer$private fun string</ID>
+    <ID>NestedBlockDepth:KtParser.kt:KtParser$private fun lambda: LambdaExpr</ID>
+    <ID>NestedBlockDepth:PreviewCodeStripper.kt:PreviewCodeStripper$fun removeUnavailableClasses: Stripped</ID>
     <ID>NestedBlockDepth:PreviewDependencyResolver.kt:PreviewDependencyResolver$private fun findDependencies: List&lt;ParsedKotlinFile></ID>
+    <ID>NestedBlockDepth:PreviewResourceStubs.kt:PreviewResourceStubs$internal fun unescape: String</ID>
     <ID>OutdatedDocumentation:PreviewSourcePreparer.kt:PreviewSourcePreparer$fun prepare: String</ID>
+    <ID>ReturnCount:ClassIndex.kt:ClassIndexes$fun hostClasses: List&lt;String></ID>
     <ID>ReturnCount:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$private suspend fun precompileSiblings: File?</ID>
+    <ID>ReturnCount:ComposeSupport.kt:ComposeSupport$fun intrinsic: Found?</ID>
+    <ID>ReturnCount:ComposeSupport.kt:ComposeSupport$private fun resource: Found?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$fun binary: Any?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$fun callMember: Any?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$fun property: Any?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$fun resolveClassByName: Class&lt;*>?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$fun toJvm: Any?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$private fun bind: Bound?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$private fun callByName: Any?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$private fun callStatic: Any?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$private fun callableRef: Any?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$private fun extensionProperty: Found?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$private fun nameValue: Any?</ID>
+    <ID>ReturnCount:Interpreter.kt:Interpreter$private fun staticProperty: Any?</ID>
+    <ID>ReturnCount:KotlinReflect.kt:KotlinReflect$fun accepts: Boolean</ID>
+    <ID>ReturnCount:KotlinReflect.kt:KotlinReflect$fun classForKm: Class&lt;*>?</ID>
     <ID>ReturnCount:KotlincDaemon.kt:KotlincDaemon$private fun ensureStarted: Process?</ID>
+    <ID>ReturnCount:KtParser.kt:KtParser$fun typeRef: TypeRef</ID>
+    <ID>ReturnCount:KtParser.kt:KtParser$private fun typeArgs: List&lt;TypeRef>?</ID>
+    <ID>ReturnCount:PreviewCodeStripper.kt:PreviewCodeStripper$private fun findBodyOpen: Int?</ID>
+    <ID>ReturnCount:PreviewCodeStripper.kt:PreviewCodeStripper$private fun functionEnd: Int</ID>
+    <ID>ReturnCount:PreviewCodeStripper.kt:PreviewCodeStripper$private fun withLeadingKDoc: Int</ID>
+    <ID>ReturnCount:PreviewProjectResources.kt:PreviewProjectResources$private fun assetsFor: AssetManager?</ID>
+    <ID>ReturnCount:PreviewResourceTable.kt:PreviewResourceTable$fun resolve: Any?</ID>
+    <ID>StringLiteralDuplication:ClassIndex.kt:ClassIndexes$".class"</ID>
     <ID>StringLiteralDuplication:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$"CFPreviewPerf"</ID>
+    <ID>StringLiteralDuplication:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$"\u0001"</ID>
     <ID>StringLiteralDuplication:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$"class"</ID>
+    <ID>StringLiteralDuplication:ComposePreviewRendererImpl.kt:ComposePreviewRendererImpl$"compose_preview_dex"</ID>
+    <ID>StringLiteralDuplication:ComposeSupport.kt:ComposeSupport.Companion$"androidx.compose.ui.res"</ID>
+    <ID>StringLiteralDuplication:Interpreter.kt:Interpreter$"Operator $op"</ID>
+    <ID>StringLiteralDuplication:Interpreter.kt:Interpreter$"invoke"</ID>
+    <ID>StringLiteralDuplication:KtParser.kt:KtParser$"class"</ID>
+    <ID>StringLiteralDuplication:KtParser.kt:KtParser$"interface"</ID>
+    <ID>StringLiteralDuplication:KtParser.kt:KtParser$"object"</ID>
+    <ID>StringLiteralDuplication:KtParser.kt:KtParser$"suspend"</ID>
+    <ID>StringLiteralDuplication:KtParser.kt:KtParser$"where"</ID>
+    <ID>StringLiteralDuplication:PreviewResourceStubs.kt:PreviewResourceStubs$" ${lit(loc)} to mapOf(${entries.joinToString(", ")}),"</ID>
+    <ID>StringShouldBeRawString:InterpreterComposeTest.kt:InterpreterComposeTest$"&lt;resources>&lt;string name=\"app_title\">Mein Titel&lt;/string>&lt;plurals name=\"items\">&lt;item quantity=\"one\">%d Eintrag&lt;/item>&lt;item quantity=\"other\">%d Einträge&lt;/item>&lt;/plurals>&lt;/resources>"</ID>
+    <ID>StringShouldBeRawString:PreviewCodeStripperTest.kt:PreviewCodeStripperTest$"package a\n\nclass AppViewModel : ViewModel()\n\nfun keep() = 1\n"</ID>
+    <ID>StringShouldBeRawString:PreviewCodeStripperTest.kt:PreviewCodeStripperTest$"package a\n\nimport javax.inject.Inject\n\nclass Load @Inject constructor(private val repo: Repo) {\n operator fun invoke() = repo.all()\n}\n"</ID>
+    <ID>StringShouldBeRawString:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$"include(\":feature:settings\", \":core:designsystem\", \":core:domain\")"</ID>
+    <ID>StringShouldBeRawString:PreviewResourceStubs.kt:PreviewResourceStubs$"@file:Suppress(\"ClassName\", \"unused\")"</ID>
+    <ID>StringShouldBeRawString:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$"It's \"fine\"\nnext line"</ID>
+    <ID>StringShouldBeRawString:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$"\"one\" to \"%d item\""</ID>
+    <ID>StringShouldBeRawString:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$"package a\n\nimport androidx.compose.ui.res.*\n\nfun x() = stringResource(1)\n"</ID>
+    <ID>StringShouldBeRawString:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$"package com.example.app\n\nfun t() = R.string.price\n"</ID>
+    <ID>StringShouldBeRawString:PreviewResourceStubsTest.kt:PreviewResourceStubsTest$"package other\n\nfun x() = 1\n"</ID>
     <ID>StringShouldBeRawString:PreviewSourcePreparer.kt:PreviewSourcePreparer$body + "\n\n" + stubs.distinct().joinToString("\n\n") + "\n"</ID>
     <ID>StringShouldBeRawString:PreviewSourcePreparerTest.kt:PreviewSourcePreparerTest$"import androidx.compose.material3.Text\n@androidx.compose.runtime.Composable\nfun P() { Text(\"x\") }\n"</ID>
+    <ID>SwallowedException:InterpretedPreview.kt:InterpretedPreview.Companion$e: UnsupportedKotlinException</ID>
+    <ID>SwallowedException:Interpreter.kt:Interpreter$iae: IllegalArgumentException</ID>
     <ID>ThrowsCount:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$internal fun verifyDirectoryOrThrow</ID>
+    <ID>ThrowsCount:InterpretedPreview.kt:InterpretedPreview.Companion$fun prepare: InterpretedPreview</ID>
+    <ID>ThrowsCount:Interpreter.kt:Interpreter$fun binary: Any?</ID>
+    <ID>ThrowsCount:Interpreter.kt:Interpreter$fun callInterpreted: Any?</ID>
+    <ID>ThrowsCount:Interpreter.kt:Interpreter$fun callMember: Any?</ID>
+    <ID>ThrowsCount:Interpreter.kt:Interpreter$fun readProperty: Any?</ID>
+    <ID>ThrowsCount:Interpreter.kt:Interpreter$private fun assign</ID>
+    <ID>ThrowsCount:Interpreter.kt:Interpreter$private fun bindInterpretedParams</ID>
+    <ID>ThrowsCount:Interpreter.kt:Interpreter$private fun construct: Any?</ID>
+    <ID>ThrowsCount:InterpreterComposeTest.kt:InterpreterComposeTest$@Test fun `renders an interpreted preview with state resources and lazy lists`</ID>
     <ID>TooGenericExceptionCaught:CompilerRuntimeProviderImpl.kt:CompilerRuntimeProviderImpl$e: Exception</ID>
     <ID>TooGenericExceptionCaught:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ComposeViewBitmapRenderer.kt:ComposeViewBitmapRenderer$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:InterpretedPreview.kt:InterpretedPreview$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:Interpreter.kt:Interpreter$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:KotlincProcessCompiler.kt:KotlincProcessCompiler$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PreviewDexer.kt:PreviewDexer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ReflectiveComposableHost.kt:e: Throwable</ID>
+    <ID>TooManyFunctions:Interpreter.kt:Interpreter</ID>
+    <ID>TooManyFunctions:KotlinReflect.kt:KotlinReflect</ID>
+    <ID>TrimMultilineRawString:InterpreterJvmTest.kt:InterpreterJvmTest$""" fun label(n: Int, unit: String = "x", upper: Boolean = false): String { val s = if (n == 1) "ein ${'$'}unit" else "${'$'}n ${'$'}{unit}e" return if (upper) s.uppercase() else s } fun run(): String { fun twice(v: Int) = v * 2 val parts = mutableListOf&lt;String>() parts += label(1) parts += label(twice(2), upper = true, unit = "Abo") var i = 0 while (i &lt; 3) { i++ } val first = parts.firstOrNull { it.startsWith("4") } ?: "keins" return parts.joinToString(separator = " | ") + " / " + first + " / " + i + " / " + (7 / 2) + " / " + (7 / 2.0) } """</ID>
+    <ID>TrimMultilineRawString:InterpreterJvmTest.kt:InterpreterJvmTest$""" package demo import com.codeforge.feature.composepreview.interpreter.fixtures.* fun run(): String { val people = listOf(Person("Anna"), Person("Ben", age = 40)) val names = people.filter { it.age > 35 }.map { p -> p.name } val mood = Mood.HAPPY val text = when (mood) { Mood.HAPPY -> ":)" Mood.SAD -> ":(" } var sum = 0 for (i in 1..4) sum += i val d = (2.m + 3.m).value return "${'$'}{Config.greeting} ${'$'}{names.joinToString()} ${'$'}text ${'$'}sum ${'$'}{people[0].describe()} ${'$'}{5.doubled} ${'$'}{total(1, 2, 3)} ${'$'}d ${'$'}{Config.shout("ja")}" } """</ID>
+    <ID>TrimMultilineRawString:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$""" package com.ex.core.designsystem @Composable fun GradientHeader(title: String) {} """</ID>
+    <ID>TrimMultilineRawString:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$""" package com.ex.core.domain class ObserveSettingsUseCase @Inject constructor() """</ID>
+    <ID>TrimMultilineRawString:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$""" package com.ex.core.domain data class AppSettings(val title: String = "") """</ID>
+    <ID>TrimMultilineRawString:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$""" package com.ex.feature.settings import androidx.hilt.navigation.compose.hiltViewModel import com.ex.core.designsystem.GradientHeader import com.ex.core.domain.AppSettings @Composable fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) { SettingsScreen(viewModel.state) } @Composable fun SettingsScreen(state: SettingsUiState) { GradientHeader(AppSettings().title) } """</ID>
+    <ID>TrimMultilineRawString:PreviewDependencyResolverTest.kt:PreviewDependencyResolverTest$""" package com.ex.feature.settings import com.ex.core.domain.ObserveSettingsUseCase data class SettingsUiState(val dark: Boolean = false) @HiltViewModel class SettingsViewModel @Inject constructor(private val observe: ObserveSettingsUseCase) : ViewModel() { val state = SettingsUiState() } """</ID>
     <ID>UnconditionalJumpStatementInLoop:CompilerRuntimeProviderImpl.kt:HttpCompilerRuntimeDownloader$while (true) { val conn = URI(currentUrl).toURL().openConnection() as HttpURLConnection conn.connectTimeout = 15_000 conn.readTimeout = 30_000 conn.instanceFollowRedirects = false conn.setRequestProperty("User-Agent", "CodeForgeMobile/3.0.0") conn.connect() val responseCode = conn.responseCode if (responseCode in listOf( HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_SEE_OTHER, 307, 308 ) ) { if (++redirects > maxRedirects) { conn.disconnect() throw IOException("Too many redirects ($redirects) for $url") } val location = conn.getHeaderField("Location") ?: throw IOException("HTTP redirect $responseCode without Location header") val resolved = URI(currentUrl).resolve(location).toString() requireAllowedRedirectUrl(resolved) currentUrl = resolved conn.disconnect() continue } if (responseCode !in 200..299) { conn.disconnect() throw IllegalStateException("HTTP error $responseCode while downloading $url") } connection = conn break }</ID>
+    <ID>UnconditionalJumpStatementInLoop:KtParser.kt:KtParser$while (true) { if (cur.isOp("&lt;")) { args = typeArgs() ?: fail("Typargumente erwartet") } if (cur.isOp(".") &amp;&amp; peek().kind == Tok.IDENT) { if (stopBeforeCallName &amp;&amp; peek(2).isOp("(")) break if (stopBeforeCallName &amp;&amp; peek(2).isOp("&lt;")) break if (stopBeforeLastSegment &amp;&amp; !peek(2).isOp(".") &amp;&amp; !peek(2).isOp("&lt;")) break next(); sb.append('.').append(ident()) continue } break }</ID>
+    <ID>UndocumentedPublicFunction:ComposePreviewContract.kt:PreviewZoom$fun zoomIn: Float</ID>
+    <ID>UndocumentedPublicFunction:ComposePreviewContract.kt:PreviewZoom$fun zoomOut: Float</ID>
+    <ID>UnnecessaryParentheses:BuiltinCalls.kt:BuiltinCalls$(a[0] as Boolean)</ID>
     <ID>UnnecessaryParentheses:ComposePreviewScreen.kt:(state.progress.coerceIn(0, 100))</ID>
     <ID>UnnecessaryParentheses:ComposeViewBitmapRenderer.kt:(when (rtl) { true -> LayoutDirection.Rtl; false -> LayoutDirection.Ltr; null -> LocalLayoutDirection.current })</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(cls.enumConstants?.toList() ?: emptyList&lt;Any>())</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(d.init?.let { eval(it, root) })</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(eval(e.value, f) as? Throwable ?: IllegalStateException("throw ohne Throwable"))</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(f.composer ?: throw UnsupportedKotlinException("'${p.name}' braucht eine Komposition"))</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(k % per)</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(l is String)</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(op == "&lt;" || op == ">" || op == "&lt;=" || op == ">=")</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(resolveType(d.receiver!!)?.isInstance(r) ?: true)</ID>
+    <ID>UnnecessaryParentheses:Interpreter.kt:Interpreter$(resolveType(it.receiver)?.isInstance(recv) ?: true)</ID>
+    <ID>UnnecessaryParentheses:KotlinReflect.kt:KotlinReflect$(if (hasExt) 1 else 0)</ID>
+    <ID>UnnecessaryParentheses:KtParser.kt:KtParser$(cur.text in setOf("private", "inline", "suspend"))</ID>
+    <ID>UnnecessaryParentheses:KtParser.kt:KtParser$(e is Call)</ID>
+    <ID>UnnecessaryParentheses:KtParserTest.kt:KtParserTest$(chain.callee)</ID>
     <ID>UnnecessaryParentheses:PreviewDependencyResolver.kt:PreviewDependencyResolver$(totalBytes + size)</ID>
+    <ID>UnusedParameter:Interpreter.kt:Interpreter$at: Int</ID>
+    <ID>UnusedParameter:Interpreter.kt:Interpreter$f: Frame</ID>
+    <ID>UseIfInsteadOfWhen:ComposeSupport.kt:ComposeSupport$when (value) { is InterpLambda -> interp.invokeLambda(value, actual, composer) else -> interp.invokeValue(value, frameArgs, Frame(Env(null), emptyList(), composer, null), -1) }</ID>
+    <ID>UseIfInsteadOfWhen:ComposeSupport.kt:ComposeSupport$when { t.isInterface -> t else -> { val arity = interp.reflect.functionArity(kmType) ?: (value as? InterpLambda)?.expr?.params?.size ?: 1 Class.forName("kotlin.jvm.functions.Function$arity") } }</ID>
+    <ID>UseIfInsteadOfWhen:Interpreter.kt:Interpreter$when (d) { is androidx.compose.runtime.MutableState&lt;*> -> (d as androidx.compose.runtime.MutableState&lt;Any?>).value = v else -> callMember(d, "setValue", listOf(EvalArg(null, null, false), EvalArg(null, null, false), EvalArg(null, v, false)), f, -1) }</ID>
+    <ID>UseIfInsteadOfWhen:Interpreter.kt:Interpreter$when (e.op) { "!!" -> eval(e.operand, f) ?: throw NullPointerException("!! auf null") else -> { val old = eval(e.operand, f) exec(Assign(e.operand, if (e.op == "++") "+=" else "-=", Literal(1, e.at), e.at), f) old } }</ID>
+    <ID>UseLet:Interpreter.kt:Interpreter$if (composer != null) v.javaClass.methods.firstOrNull { it.name == "invoke" &amp;&amp; it.parameterCount == args.size + 2 }?.let(reflect::publicVersion) else null</ID>
   </CurrentIssues>
 </SmellBaseline>

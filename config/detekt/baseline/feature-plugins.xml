@@ -10,6 +10,7 @@
     <ID>ClassOrdering:PluginsViewModel.kt:PluginsViewModel$private var infoJob: Job? = null</ID>
     <ID>CognitiveComplexMethod:PluginsScreen.kt:@Composable private fun PluginRow</ID>
     <ID>CognitiveComplexMethod:PluginsScreen.kt:@Composable private fun RequirementDialogView</ID>
+    <ID>CyclomaticComplexMethod:PluginsScreen.kt:@Composable private fun PluginRow</ID>
     <ID>DocumentationOverPrivateFunction:PluginsScreen.kt:private fun copyToCacheFile: File?</ID>
     <ID>DocumentationOverPrivateFunction:PluginsViewModel.kt:PluginsViewModel$private fun openInfo</ID>
     <ID>DocumentationOverPrivateFunction:PluginsViewModel.kt:PluginsViewModel$private fun refreshMissing</ID>

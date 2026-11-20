@@ -4,13 +4,23 @@
   <CurrentIssues>
     <ID>CascadingCallWrapping:PluginRepositoryImpl.kt:PluginRepositoryImpl$toList()</ID>
     <ID>CascadingCallWrapping:UserToolsRepositoryImpl.kt:UserToolsRepositoryImpl$put("command", JSONArray(it.command))</ID>
-    <ID>ClassOrdering:PluginRepositoryImpl.kt:PluginRepositoryImpl$init { pluginsDir.mkdirs() val plugins = registry.loadAll() _installedPlugins.value = plugins refreshContributions() // Best-effort: Plugins, die in einer vorherigen Sitzung aktiviert waren, werden // beim Neustart erneut geladen. Ein einzelnes defektes Plugin (z.B. fehlendes // classes.dex nach manueller Manipulation) darf App-Start/andere Plugins nicht // blockieren — Fehler werden daher bewusst verschluckt, sichtbar über // loadedPluginIds (enthält den Eintrag dann schlicht nicht). plugins.filter { it.isEnabled }.forEach { plugin -> attemptLoad(plugin) } }</ID>
+    <ID>ClassOrdering:PluginHooks.kt:PluginHooks$/** Wird vor der Verteilung jedes Ereignisses aufgerufen (Aktivierung von Plugins mit `activationEvents`). */ @Volatile internal var beforePublish: ((HostEvent) -> Unit)? = null</ID>
+    <ID>ClassOrdering:PluginHooks.kt:PluginHooks$/** Zuletzt geöffnetes Projekt (für den Projekt-Dienst der Plugins). */ @Volatile var activeProjectRoot: String? = null private set</ID>
+    <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.&lt;no name provided>$override val build: BuildService = HostBuildService(gradleBuild) { hooks.activeProjectRoot }</ID>
+    <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.&lt;no name provided>$override val project: ProjectService = HostProjectService { hooks.activeProjectRoot }</ID>
+    <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.BaseHostServices$val build: BuildService</ID>
+    <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.BaseHostServices$val project: ProjectService</ID>
+    <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.HostPluginContext$private val services = HostPluginServices(plugin.id, registry)</ID>
+    <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.PermissionedHostServices$override val build: BuildService get() { require(PluginPermissions.BUILD); return base.build }</ID>
+    <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.PermissionedHostServices$override val project: ProjectService get() { require(PluginPermissions.PROJECT); return base.project }</ID>
     <ID>ClassOrdering:PluginRuntime.kt:PluginRuntime.PermissionedHostServices$private fun require</ID>
     <ID>CognitiveComplexMethod:PluginRepositoryImpl.kt:PluginRepositoryImpl$override fun installFromFile: Flow&lt;PluginInstallEvent></ID>
     <ID>CyclomaticComplexMethod:PluginRepositoryImpl.kt:PluginRepositoryImpl$override fun installFromFile: Flow&lt;PluginInstallEvent></ID>
+    <ID>DocumentationOverPrivateFunction:PluginRepositoryImpl.kt:PluginRepositoryImpl$private fun activateFor</ID>
     <ID>DocumentationOverPrivateFunction:PluginRepositoryImpl.kt:PluginRepositoryImpl$private fun issuesOf: List&lt;PluginIssue></ID>
     <ID>DocumentationOverPrivateFunction:PluginRepositoryImpl.kt:PluginRepositoryImpl$private fun refreshContributions</ID>
-    <ID>DocumentationOverPrivateProperty:PluginRuntime.kt:PluginRuntime$/** Basisdienste ohne Berechtigungsprüfung; Plugins sehen nur die geprüfte Hülle [PermissionedHostServices]. */ private val baseServices = object : BaseHostServices { override val lspClientRepository: LspClientRepository get() = this@PluginRuntime.lspClientRepository override val homeDir: String get() = TermuxEnvironment.home override fun buildShellCommand( script: String, workingDirectory: String, extraPathEntries: List&lt;String> ): ShellLaunchSpec { check(TermuxEnvironment.isBootstrapInstalled()) { Res.string(R.string.common_termux_umgebung_ist_noch_nicht) } return ShellLaunchSpec( command = listOf(TermuxEnvironment.bashPath, "-lc", script), processEnv = TermuxEnvironment.environment(extraPathEntries), workingDirectory = workingDirectory ) } override fun jdkInstallPath(version: String): String = TermuxEnvironment.jdkHome(version) }</ID>
+    <ID>DocumentationOverPrivateFunction:PluginRuntime.kt:PluginRuntime$private fun loadSandboxed</ID>
+    <ID>DocumentationOverPrivateProperty:PluginRuntime.kt:PluginRuntime$/** Basisdienste ohne Berechtigungsprüfung; Plugins sehen nur die geprüfte Hülle [PermissionedHostServices]. */ private val baseServices = object : BaseHostServices { override val lspClientRepository: LspClientRepository get() = this@PluginRuntime.lspClientRepository override val homeDir: String get() = TermuxEnvironment.home override fun buildShellCommand( script: String, workingDirectory: String, extraPathEntries: List&lt;String> ): ShellLaunchSpec { check(TermuxEnvironment.isBootstrapInstalled()) { Res.string(R.string.common_termux_umgebung_ist_noch_nicht) } return ShellLaunchSpec( command = listOf(TermuxEnvironment.bashPath, "-lc", script), processEnv = TermuxEnvironment.environment(extraPathEntries), workingDirectory = workingDirectory ) } override fun jdkInstallPath(version: String): String = TermuxEnvironment.jdkHome(version) override val project: ProjectService = HostProjectService { hooks.activeProjectRoot } override val build: BuildService = HostBuildService(gradleBuild) { hooks.activeProjectRoot } }</ID>
     <ID>FunctionNameMaxLength:ExtensionThemeLoaderTest.kt:ExtensionThemeLoaderTest$@Test fun `Icon-Theme wird geladen, Pfade ausserhalb des Plugins verwerfen das Theme`</ID>
     <ID>FunctionNameMaxLength:ExtensionThemeLoaderTest.kt:ExtensionThemeLoaderTest$@Test fun `Sprachpaket wird geladen, defektes uebersprungen`</ID>
     <ID>FunctionNameMaxLength:ExtensionThemeLoaderTest.kt:ExtensionThemeLoaderTest$@Test fun `TextMate-Datei fehlt - Theme bleibt ohne Editor-Theme, Pfad ausserhalb wird ignoriert`</ID>
@@ -22,7 +32,11 @@
     <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `Nachrichten werden gekuerzt, Grenzen fuer Befehle gelten`</ID>
     <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `unregisterAll entfernt Befehle, Menues und Listener`</ID>
     <ID>FunctionNameMaxLength:PluginHooksTest.kt:PluginHooksTest$@Test fun `werfender Listener stoert andere nicht`</ID>
+    <ID>FunctionNameMaxLength:PluginProjectServicesTest.kt:PluginProjectServicesTest$@Test fun `Build ohne Gradle oder Projekt und ungültige Aufgaben`</ID>
+    <ID>FunctionNameMaxLength:PluginProjectServicesTest.kt:PluginProjectServicesTest$@Test fun `Dienste zwischen Plugins und Aufräumen beim Entladen`</ID>
+    <ID>FunctionNameMaxLength:PluginProjectServicesTest.kt:PluginProjectServicesTest$@Test fun `Projektmodell aus dem Wurzelordner`</ID>
     <ID>LongMethod:PluginRepositoryImpl.kt:PluginRepositoryImpl$override fun installFromFile: Flow&lt;PluginInstallEvent></ID>
+    <ID>ReturnCount:PluginProjectServices.kt:HostBuildService$override suspend fun runTasks: PluginBuildResult</ID>
     <ID>StringLiteralDuplication:PluginRegistry.kt:PluginRegistry$"entryPointClass"</ID>
     <ID>StringLiteralDuplication:UserToolsRepositoryImpl.kt:UserToolsRepositoryImpl$"command"</ID>
     <ID>StringLiteralDuplication:UserToolsRepositoryImpl.kt:UserToolsRepositoryImpl$"label"</ID>

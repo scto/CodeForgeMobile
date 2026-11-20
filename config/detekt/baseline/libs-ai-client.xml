@@ -29,9 +29,6 @@
     <ID>CyclomaticComplexMethod:GeminiClient.kt:GeminiClient$fun stream: Flow&lt;AiEvent></ID>
     <ID>CyclomaticComplexMethod:OpenAiClient.kt:OpenAiClient$fun stream: Flow&lt;AiEvent></ID>
     <ID>DocumentationOverPrivateFunction:GeminiClient.kt:GeminiClient$private fun errorMessage: String</ID>
-    <ID>ExpressionBodySyntax:CompositeAiProvider.kt:CompositeAiProvider$return when (options.provider) { AiProviderType.ANTHROPIC -> Result.success(options.provider.suggestedModels) AiProviderType.OPENAI -> { val remote = openAiClient.fetchModels(options) if (remote.isSuccess &amp;&amp; remote.getOrNull()?.isNotEmpty() == true) { remote } else { Result.success(options.provider.suggestedModels) } } AiProviderType.GEMINI -> { val remote = geminiClient.fetchModels(options) if (remote.isSuccess &amp;&amp; remote.getOrNull()?.isNotEmpty() == true) { remote } else { Result.success(options.provider.suggestedModels) } } }</ID>
-    <ID>ExpressionBodySyntax:CompositeAiProvider.kt:CompositeAiProvider$return when (options.provider) { AiProviderType.ANTHROPIC -> anthropicClient.stream(messages, options) AiProviderType.OPENAI -> openAiClient.stream(messages, options) AiProviderType.GEMINI -> geminiClient.stream(messages, options) }</ID>
-    <ID>ExpressionBodySyntax:CompositeAiProvider.kt:CompositeAiProvider$return when (options.provider) { AiProviderType.ANTHROPIC -> anthropicClient.testConnection(options) AiProviderType.OPENAI -> openAiClient.testConnection(options) AiProviderType.GEMINI -> geminiClient.testConnection(options) }</ID>
     <ID>FunctionNameMaxLength:AiHttpSupportTest.kt:AiHttpSupportTest$@Test fun `api key in an error message is never shown`</ID>
     <ID>FunctionNameMaxLength:AiHttpSupportTest.kt:AiHttpSupportTest$@Test fun `base url is cleaned and pasted endpoints are stripped`</ID>
     <ID>FunctionNameMaxLength:AiHttpSupportTest.kt:AiHttpSupportTest$@Test fun `blank base url falls back to the default instead of an invalid url`</ID>

@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnIfStatements:SandboxGuest.kt:SandboxGuest$if</ID>
+    <ID>BracesOnWhenStatements:SandboxGuest.kt:SandboxGuest$when</ID>
+    <ID>FunctionNameMaxLength:SandboxLoopbackTest.kt:SandboxLoopbackTest$@Test fun `Beiträge erscheinen als Stellvertreter und rufen die Sandbox`</ID>
+    <ID>FunctionNameMaxLength:SandboxLoopbackTest.kt:SandboxLoopbackTest$@Test fun `Dienste der App sind gesperrt, Entladen entfernt alles`</ID>
+    <ID>FunctionNameMaxLength:SandboxLoopbackTest.kt:SandboxLoopbackTest$@Test fun `Laufzeit lädt asynchron und meldet Fehler`</ID>
+    <ID>FunctionNameMaxLength:SandboxLoopbackTest.kt:SandboxLoopbackTest$@Test fun `PluginPermissionException kommt in der Sandbox an`</ID>
+    <ID>FunctionNameMaxLength:SandboxLoopbackTest.kt:SandboxLoopbackTest$@Test fun `Schnellkorrekturen als kurzlebige Aktionen`</ID>
+    <ID>FunctionNameMaxLength:ServiceTransportTest.kt:ServiceTransportTest$@Test fun `Anfragen gehen über den Dienst und kommen zugeordnet zurück`</ID>
+    <ID>FunctionNameMinLength:SandboxCodec.kt:SandboxCodec$fun JsonObject.i: Int</ID>
+    <ID>FunctionNameMinLength:SandboxCodec.kt:SandboxCodec$fun JsonObject.s: String</ID>
+    <ID>FunctionNameMinLength:SandboxCodec.kt:SandboxCodec$fun JsonObject.sn: String?</ID>
+    <ID>FunctionNameMinLength:SandboxGuest.kt:SandboxGuest$private fun ok</ID>
+    <ID>LateinitUsage:PluginSandboxService.kt:PluginSandboxService$private lateinit var messenger: Messenger</ID>
+    <ID>LateinitUsage:PluginSandboxService.kt:PluginSandboxService$private lateinit var thread: HandlerThread</ID>
+    <ID>StringLiteralDuplication:SandboxCodec.kt:SandboxCodec$"edits"</ID>
+    <ID>StringLiteralDuplication:SandboxGuest.kt:SandboxGuest$"pluginId"</ID>
+    <ID>StringLiteralDuplication:SandboxHost.kt:SandboxHost$"handle"</ID>
+    <ID>StringLiteralDuplication:SandboxHost.kt:SandboxHost$"pluginId"</ID>
+    <ID>TooGenericExceptionCaught:SandboxGuest.kt:SandboxGuest$t: Throwable</ID>
+    <ID>TooManyFunctions:SandboxCodec.kt:SandboxCodec</ID>
+    <ID>UndocumentedPublicClass:PluginSandboxService.kt:PluginSandboxService : Service</ID>
+    <ID>UndocumentedPublicClass:SandboxGuest.kt:SandboxGuest</ID>
+    <ID>UndocumentedPublicClass:SandboxHost.kt:SandboxHost</ID>
+    <ID>UndocumentedPublicClass:SandboxRuntime.kt:SandboxRuntime</ID>
+    <ID>UndocumentedPublicClass:ServiceSandboxTransport.kt:ServiceSandboxTransport : SandboxTransport</ID>
+    <ID>UndocumentedPublicFunction:SandboxGuest.kt:PluginInstantiator$fun create: CodeForgePlugin</ID>
+    <ID>UndocumentedPublicFunction:SandboxRuntime.kt:SandboxRuntime$fun isLoaded: Boolean</ID>
+    <ID>UndocumentedPublicFunction:SandboxRuntime.kt:SandboxRuntime$fun unload</ID>
+    <ID>UnnecessaryParentheses:SandboxCodec.kt:SandboxCodec$(this[key] as? JsonArray)</ID>
+    <ID>UnnecessaryParentheses:SandboxCodec.kt:SandboxCodec$(this[key] as? JsonObject)</ID>
+  </CurrentIssues>
+</SmellBaseline>
