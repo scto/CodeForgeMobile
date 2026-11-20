@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-11-20
+
 ### Hinzugefügt (Plugins, API 4)
 - **Plugin-API 4:** Projekt-Dienst (Module, Build-Ergebnisse des letzten Gradle-Builds), Build-Dienst (Gradle-Aufgaben
   ausführen, nur Aufgabennamen), Dienste zwischen Plugins (`services()`), Vorschauen je Dateityp (`PluginPreview`, wie
