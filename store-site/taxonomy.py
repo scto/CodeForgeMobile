@@ -52,6 +52,7 @@ TITLES = {
     "tools/import": ("Import", "Import"),
     "tools/database": ("Datenbanken", "Databases"),
     "tools/http": ("HTTP/APIs", "HTTP/APIs"),
+    "tools/text": ("Text", "Text"),
     "previews": ("Vorschauen", "Previews"),
     "previews/markdown": ("Markdown", "Markdown"),
     "previews/data": ("Daten", "Data"),
@@ -172,7 +173,7 @@ def derive(manifest, category):
         cats.append("bundles/language-packs" if pid.endswith("-pack.bundle") else "bundles/collections")
         tags.append("bundle")
     elif category == "plugin":
-        tags += ["code-plugin", "sideload"]
+        tags += ["code-plugin", "sandbox"] if manifest.get("sandbox") else ["code-plugin", "sideload"]
 
     for p in manifest.get("categories", []) or []:
         if p not in cats:

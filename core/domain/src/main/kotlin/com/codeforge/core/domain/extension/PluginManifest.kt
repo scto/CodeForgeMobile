@@ -80,6 +80,11 @@ data class PluginManifest(
     val categories: List<String> = emptyList(),
     /** Seit API 4: Schlagwörter für Suche und Filter im Store. */
     val tags: List<String> = emptyList(),
+    /**
+     * Seit API 4: Code läuft in der Sandbox (eigener, isolierter Prozess ohne Berechtigungen, Dateien und Netz).
+     * Erlaubt nur reine Editor-Beiträge (Berechtigung `editor`); dafür auch aus dem Store installierbar.
+     */
+    val sandbox: Boolean = false,
     val contributes: Contributes = Contributes()
 ) {
     /** true, wenn das Plugin keinen ausführbaren Code mitbringt (im Store erlaubt). */

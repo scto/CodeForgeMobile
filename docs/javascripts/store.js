@@ -11,7 +11,7 @@
     de: {
       search: "Plugins, Themes, Sprachen suchen …", all: "Alle", sort: "Sortierung", relevance: "Relevanz",
       downloads: "Downloads", rating: "Bewertung", name: "Name", updated: "Aktualisiert", newest: "Neu",
-      categories: "Kategorien", tags: "Tags", kind: "Art", declarative: "Deklarativ (In-App)", code: "Code-Plugin (Sideload)",
+      categories: "Kategorien", tags: "Tags", kind: "Art", declarative: "Deklarativ (In-App)", code: "Code-Plugin (Sideload)", sandbox: "Sandbox-Plugin (In-App)",
       results: "{n} von {t} Paketen", download: "Herunterladen", back: "← Zurück", rate: "Bewerten",
       ratings: "{n} Bewertungen", noRatings: "Noch keine Bewertungen", reviews: "Rezensionen", version: "Version",
       size: "Größe", published: "Veröffentlicht", author: "Herausgeber", permissions: "Berechtigungen", none: "keine",
@@ -24,7 +24,7 @@
     en: {
       search: "Search plugins, themes, languages …", all: "All", sort: "Sort", relevance: "Relevance",
       downloads: "Downloads", rating: "Rating", name: "Name", updated: "Updated", newest: "Newest",
-      categories: "Categories", tags: "Tags", kind: "Kind", declarative: "Declarative (in-app)", code: "Code plugin (sideload)",
+      categories: "Categories", tags: "Tags", kind: "Kind", declarative: "Declarative (in-app)", code: "Code plugin (sideload)", sandbox: "Sandbox plugin (in-app)",
       results: "{n} of {t} packages", download: "Download", back: "← Back", rate: "Rate",
       ratings: "{n} ratings", noRatings: "No ratings yet", reviews: "Reviews", version: "Version",
       size: "Size", published: "Published", author: "Publisher", permissions: "Permissions", none: "none",
@@ -152,7 +152,7 @@
 
       side.appendChild(el("h4", null, t("kind")));
       var kinds = el("div", "cf-chips");
-      [["", t("all")], ["declarative", t("declarative")], ["code", t("code")]].forEach(function (k) {
+      [["", t("all")], ["declarative", t("declarative")], ["sandbox", t("sandbox")], ["code", t("code")]].forEach(function (k) {
         var b = el("button", "cf-chip", k[1]);
         b.type = "button"; b.setAttribute("aria-pressed", String(state.kind === k[0]));
         b.onclick = function () { state.kind = k[0]; update(); };
@@ -226,7 +226,8 @@
       var foot = el("div", "cf-card-foot");
       foot.appendChild(el("span", "cf-stars", i._s.ratings ? stars(i._s.rating) + " " + i._s.rating.toFixed(1) + " (" + i._s.ratings + ")" : "☆☆☆☆☆"));
       foot.appendChild(el("span", "cf-dl", "⤓ " + fmtNum(i._s.downloads || 0)));
-      if ((i.kind || "") === "code" || i.category === "plugin") foot.appendChild(el("span", "cf-badge", t("sideload")));
+      if (i.kind === "sandbox") foot.appendChild(el("span", "cf-badge", "Sandbox"));
+      else if ((i.kind || "") === "code" || i.category === "plugin") foot.appendChild(el("span", "cf-badge", t("sideload")));
       c.appendChild(foot);
       return c;
     }
@@ -284,7 +285,7 @@
       fact(t("size"), i.size ? fmtSize(i.size) : "");
       fact(t("updated"), i.updated);
       fact(t("published"), i.published);
-      fact(t("kind"), i.kind === "code" || i.category === "plugin" ? t("code") : t("declarative"));
+      fact(t("kind"), i.kind === "sandbox" ? t("sandbox") : (i.kind === "code" || i.category === "plugin" ? t("code") : t("declarative")));
       fact(t("permissions"), (i.permissions || []).join(", ") || t("none"));
       fact("SHA-256", i.sha256);
       detail.appendChild(facts);
@@ -303,7 +304,7 @@
       detail.appendChild(chips);
 
       detail.appendChild(el("h3", null, t("install")));
-      detail.appendChild(el("p", null, i.kind === "code" || i.category === "plugin" ? t("installSideload") : t("installStore")));
+      detail.appendChild(el("p", null, i.kind === "code" ? t("installSideload") : t("installStore")));
 
       if (i._s.ratings) {
         detail.appendChild(el("h3", null, t("rating")));

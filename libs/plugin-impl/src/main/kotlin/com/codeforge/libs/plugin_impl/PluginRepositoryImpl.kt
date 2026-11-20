@@ -17,6 +17,7 @@ import com.codeforge.core.domain.extension.PluginLogRepository
 import com.codeforge.core.domain.extension.PluginNode
 import com.codeforge.core.domain.extension.PluginSettingsRepository
 import com.codeforge.core.domain.extension.PluginSignatures
+import com.codeforge.core.domain.extension.SandboxPolicy
 import com.codeforge.core.domain.extension.PluginBuildInfo
 import com.codeforge.core.domain.extension.registry.ExtensionRegistry
 import com.codeforge.core.domain.extension.PluginManifestParser
@@ -74,7 +75,10 @@ class PluginRepositoryImpl @Inject constructor(
     private val registry = PluginRegistry(File(pluginsDir, "registry.json"))
     private val runtime = PluginRuntime(
         context, lspClientRepository, hooks, extensionRegistry, logs, pluginSettings,
-        gradleBuild = { runCatching { gradleBuild.get() }.getOrNull() }
+        gradleBuild = { runCatching { gradleBuild.get() }.getOrNull() },
+        sandbox = com.codeforge.libs.plugin_sandbox.SandboxRuntime(
+            com.codeforge.libs.plugin_sandbox.ServiceSandboxTransport(context), extensionRegistry
+        )
     )
 
     private val _installedPlugins = MutableStateFlow<List<InstalledPlugin>>(emptyList())
@@ -225,7 +229,8 @@ class PluginRepositoryImpl @Inject constructor(
             if (declarativeOnly) {
                 val files = tempDir.walkTopDown().filter { it.isFile }
                     .map { it.relativeTo(tempDir).invariantSeparatorsPath }.toList()
-                DeclarativeOnly.violation(files, manifest, allowTools)?.let { error("Nur deklarative Plugins erlaubt: $it") }
+                SandboxPolicy.storeInstallViolation(files, manifest, allowTools)?.let { error("Nur deklarative oder Sandbox-Plugins erlaubt: $it") }
+                if (manifest.sandbox && File(tempDir, "classes.dex").length() > SandboxPolicy.MAX_DEX_BYTES) error("classes.dex ist für die Sandbox zu groß")
             }
 
             // Signatur (falls vorhanden) prüfen; ein signiertes Plugin darf nur mit demselben Schlüssel aktualisiert werden.
@@ -273,7 +278,8 @@ class PluginRepositoryImpl @Inject constructor(
                 dependsOn = manifest.dependsOn,
                 activationEvents = manifest.activationEvents,
                 signerFingerprint = (signature as? PluginSignatures.Result.Signed)?.fingerprint.orEmpty(),
-                buildInfo = buildInfo
+                buildInfo = buildInfo,
+                sandboxed = manifest.sandbox
             )
 
             val updated = _installedPlugins.value.filterNot { it.id == id } + plugin

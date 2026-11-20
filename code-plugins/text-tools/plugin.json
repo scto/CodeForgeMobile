@@ -1,0 +1,13 @@
+{
+  "id": "com.codeforge.plugin.text-tools.code",
+  "name": "Text-Werkzeuge (Sandbox)",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "codeforge",
+  "description": "Schreibweisen umwandeln (camelCase, snake_case, kebab-case, PascalCase, KONSTANTE, Groß/klein), Zeilen sortieren/umkehren/entdoppeln/zählen, Base64 und URL kodieren/dekodieren. Läuft in der Sandbox – ohne Zugriff auf Dateien, Netz oder Programme.",
+  "entryPointClass": "com.codeforge.plugin.text.TextToolsPlugin",
+  "sandbox": true,
+  "permissions": ["editor"],
+  "categories": ["tools/text"],
+  "tags": ["text", "case", "sort", "base64", "url", "sandbox"]
+}

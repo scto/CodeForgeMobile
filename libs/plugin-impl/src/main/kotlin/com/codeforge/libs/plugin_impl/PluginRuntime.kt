@@ -10,6 +10,8 @@ import com.codeforge.core.domain.repository.LspClientRepository
 import com.codeforge.core.domain.extension.PluginPermissionPolicy
 import com.codeforge.core.domain.extension.PluginPermissions
 import com.codeforge.core.domain.repository.GradleBuildRepository
+import com.codeforge.core.domain.extension.SandboxPolicy
+import com.codeforge.libs.plugin_sandbox.SandboxRuntime
 import com.codeforge.libs.plugin_api.BuildService
 import com.codeforge.libs.plugin_api.CodeForgePlugin
 import com.codeforge.libs.plugin_api.PluginServices
@@ -63,7 +65,9 @@ internal class PluginRuntime(
     private val registry: ExtensionRegistry,
     private val logs: PluginLogRepository,
     private val settingsRepository: PluginSettingsRepository,
-    private val gradleBuild: () -> GradleBuildRepository? = { null }
+    private val gradleBuild: () -> GradleBuildRepository? = { null },
+    /** Sandbox für Plugins mit `"sandbox": true` (isolierter Prozess); `null` = Sandbox-Plugins laden nicht. */
+    private val sandbox: SandboxRuntime? = null
 ) {
 
     private class LoadedPlugin(val instance: CodeForgePlugin, val context: PluginContext)
@@ -114,7 +118,7 @@ internal class PluginRuntime(
      *
      * @param pluginId Plugin-ID.
      */
-    fun isLoaded(pluginId: String): Boolean = loadedPlugins.containsKey(pluginId)
+    fun isLoaded(pluginId: String): Boolean = loadedPlugins.containsKey(pluginId) || sandbox?.isLoaded(pluginId) == true
 
     /**
      * Lädt ein Code-Plugin per `DexClassLoader` und ruft `onLoad` auf; bereits geladene Plugins bleiben unverändert.
@@ -128,6 +132,11 @@ internal class PluginRuntime(
 
         val entryPointClassName = plugin.entryPointClass
             ?: error(Res.string(R.string.plugin_plugin_hat_keine_entrypointclass_im, plugin.id))
+
+        if (plugin.sandboxed) {
+            loadSandboxed(plugin, pluginDir, entryPointClassName)
+            return@runCatching
+        }
 
         val dexSource = File(pluginDir, "classes.dex").takeIf { it.isFile }
             ?: pluginDir.listFiles { file -> file.extension == "jar" || file.extension == "dex" }?.firstOrNull()
@@ -171,6 +180,10 @@ internal class PluginRuntime(
      * @return Erfolg oder der aufgetretene Fehler.
      */
     fun unload(pluginId: String): Result<Unit> = runCatching {
+        if (sandbox?.isLoaded(pluginId) == true) {
+            sandbox.unload(pluginId)
+            return@runCatching
+        }
         val loaded = loadedPlugins.remove(pluginId) ?: return@runCatching
         hooks.unregisterAll(pluginId)
         (loaded.context as? HostPluginContext)?.close()
@@ -184,11 +197,30 @@ internal class PluginRuntime(
      * Rootfs entfernen kann, BEVOR sein eigenes Plugin-Verzeichnis gelöscht wird.
      */
     suspend fun uninstall(pluginId: String): Result<Unit> = runCatching {
+        if (sandbox?.isLoaded(pluginId) == true) {
+            sandbox.unload(pluginId) // onUninstall gibt es in der Sandbox nicht (kein Zugriff auf Dateien)
+            return@runCatching
+        }
         val loaded = loadedPlugins.remove(pluginId) ?: return@runCatching
         hooks.unregisterAll(pluginId)
         loaded.instance.onUninstall(loaded.context)
         (loaded.context as? HostPluginContext)?.close()
         loaded.instance.onUnload()
+    }
+
+    /** Schickt den Code an den Sandbox-Prozess; Beiträge erscheinen, sobald er geantwortet hat. */
+    private fun loadSandboxed(plugin: InstalledPlugin, pluginDir: File, entryPointClassName: String) {
+        val runtime = sandbox ?: error("Sandbox nicht verfügbar")
+        val dex = File(pluginDir, "classes.dex").takeIf { it.isFile } ?: error(Res.string(R.string.plugin_kein_classes_dex_oder_jar))
+        require(dex.length() <= SandboxPolicy.MAX_DEX_BYTES) { "classes.dex ist für die Sandbox zu groß" }
+        val items = settingItemsOf(pluginDir)
+        val settings = HostPluginSettings(plugin.id, items, settingsRepository)
+        val snapshot = items.associate { it.key to settings.getString(it.key) }
+        val log = HostPluginLogger(plugin.id, "sandbox", logs)
+        runtime.load(SandboxRuntime.Spec(plugin.id, entryPointClassName, dex.readBytes(), snapshot)) { result ->
+            result.onSuccess { n -> log.info("In der Sandbox geladen: $n Beiträge") }
+                .onFailure { log.error("Laden in der Sandbox fehlgeschlagen", it) }
+        }
     }
 
     /** Kontext eines geladenen Plugins: Dienste, Protokoll, Andockstellen (mit Berechtigungsprüfung). */

@@ -11,6 +11,18 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt / Added
+- Plugin-Sandbox (`libs/plugin-sandbox`): Code-Plugins mit `"sandbox": true` laufen im isolierten Prozess
+  `:plugin_sandbox` (eigene UID, ohne Rechte), Messenger-IPC, `InMemoryDexClassLoader`; Editor-Aktionen,
+  Quick-Fixes, Vervollständigung, Hover, Definition, Referenzen, Umbenennen. Sandbox-Plugins sind aus dem Store
+  installierbar. / Plugin sandbox: code plugins with `"sandbox": true` run in an isolated process without
+  permissions and can be installed from the store.
+- Code-Plugin „Textwerkzeuge“ (`text-tools`, Sandbox): 17 Textaktionen. / Code plugin “Text tools” (sandboxed).
+
+### Behoben / Fixed
+- REST-Client: Regex mit unescapter `}` warf auf Android `PatternSyntaxException`. / REST client regex crash on
+  Android (unescaped `}`).
+
 ## [3.2.0] - 2026-11-20
 
 ### Hinzugefügt (Plugins, API 4)

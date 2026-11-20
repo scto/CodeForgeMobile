@@ -2755,4 +2755,6 @@
     <string name="store_detail_size">Größe: %1$s</string>
     <string name="store_detail_updated">Aktualisiert: %1$s</string>
     <string name="store_detail_permissions">Berechtigungen: %1$s</string>
+    <string name="store_sandbox_badge">Sandbox</string>
+    <string name="store_sandbox_hint">Läuft in einem isolierten Prozess ohne Zugriff auf deine Dateien, das Netz oder Programme; es sieht nur den Text, den es bearbeitet.</string>
 </resources>

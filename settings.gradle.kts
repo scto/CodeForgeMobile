@@ -67,6 +67,7 @@ include(
     ":libs:plugin-api",
     ":libs:plugin-ui-api",
     ":libs:plugin-impl",
+    ":libs:plugin-sandbox",
 
     // Projekt-Indexierung + Dependency-Updater (siehe docs/indexing-and-dependency-updater.md)
     ":libs:indexing-api",
@@ -102,6 +103,7 @@ include(
     ":code-plugins:rest-client",
     ":code-plugins:gradle-tasks",
     ":code-plugins:python-tests",
+    ":code-plugins:text-tools",
 )
 
 // Beispiel-Plugin aus dem Plugin-Leitfaden (docs/dev/PluginDevelopment.md) liegt unter examples/guide/

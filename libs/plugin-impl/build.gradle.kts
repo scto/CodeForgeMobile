@@ -11,6 +11,7 @@ android {
 // Laufzeit des Erweiterungssystems: Laden (DexClassLoader), Registry, Contribution-Registry, Installer.
 dependencies {
     api(project(":libs:plugin-api"))
+    implementation(project(":libs:plugin-sandbox"))
     implementation(project(":core:resources"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

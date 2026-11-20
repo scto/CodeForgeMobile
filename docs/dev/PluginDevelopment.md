@@ -1022,7 +1022,7 @@ Beobachte:
 
 ## 10a. Code-Plugins wie in VS Code
 
-`code-plugins/` enthält sieben fertige Code-Plugins (API 4) als Vorlage für eigene. Bauen:
+`code-plugins/` enthält acht fertige Code-Plugins (API 4) als Vorlage für eigene. Bauen:
 `./gradlew :code-plugins:packageAll` → `code-plugins/out/<modul>/<id>.zip` (mit `build-info.json`; signiert, wenn
 `CF_PLUGIN_SIGNING_KEY` gesetzt ist, siehe [Plugin-Signaturen](PluginSigning.md)).
 
@@ -1035,9 +1035,35 @@ Beobachte:
 | REST-Client (.http) | REST Client | `PluginPreview`, `network` |
 | Gradle-Aufgaben | Gradle for Java | `project` + `build` (API 4), `PluginPanel` |
 | Python-Tests (pytest) | Python Test Explorer | `TestProvider`, `requires` pip `pytest` |
+| Textwerkzeuge | Text Power Tools, Change Case | 17 `EditorAction`s, **Sandbox** (10a.1) |
 
 Dazu acht **Sprachpakete** als Bundles (wie die „Extension Packs“ von VS Code): Python, Rust, Go, Web, C/C++, Shell,
 Konfiguration, Kotlin/Java – je Sprachserver plus Formatierer in einem Schritt (`tool-plugins/`).
+
+## 10a.1 Sandbox-Plugins (Store-fähiger Code)
+
+Code-Plugins mit `"sandbox": true` laufen **nicht** im App-Prozess, sondern im isolierten Prozess
+`:plugin_sandbox` (`android:isolatedProcess="true"`): eigene UID ohne Rechte, kein Netz, kein Zugriff auf
+App-Dateien, keine Shell. Die App schickt den DEX über Messenger-IPC dorthin; das Plugin lädt per
+`InMemoryDexClassLoader`. Deshalb dürfen Sandbox-Plugins in den Store.
+
+```json
+{ "id": "com.example.text-tools", "apiVersion": 4, "entryPointClass": "com.example.TextToolsPlugin",
+  "sandbox": true, "permissions": ["editor"], "activationEvents": ["onStartup"] }
+```
+
+| Regel | Grund |
+|---|---|
+| `apiVersion` 4, `entryPointClass` gesetzt | Code-Plugin |
+| Berechtigungen nur `editor` | alles andere bräuchte Zugriff außerhalb der Sandbox |
+| kein `onProject:` | die Sandbox sieht keine Projektdateien |
+| DEX ≤ 900 KB | IPC-Grenze (Binder-Puffer) |
+| Beiträge: `EDITOR_ACTION`, `QUICK_FIX_PROVIDER`, `COMPLETION`, `HOVER`, `DEFINITION`, `REFERENCE`, `RENAME` | rein textbasiert, als JSON serialisierbar |
+
+`hostServices` wirft in der Sandbox `PluginPermissionException`; Einstellungen kommen als Momentaufnahme,
+Rückmeldungen (`showMessage`, Fortschritt) sind ohne Wirkung. Antworten kommen asynchron (Zeitlimit 30 s);
+stirbt der Prozess, lädt die App alle Sandbox-Plugins neu. Vorlage: `code-plugins/text-tools`
+(17 Textaktionen: Groß/klein, Sortieren, Duplikate, Base64, URL, Hash, Statistik …).
 
 ## 10b. Von VS Code kommen
 
@@ -1102,7 +1128,7 @@ alles, was nicht übertragbar ist.
 
 | | Sideload | Store |
 |---|---|---|
-| Inhalt | alles, auch Code-Plugins und `tools` | nur deklarative Kategorien; Werkzeuge in `tool` |
+| Inhalt | alles, auch Code-Plugins und `tools` | deklarative Kategorien, Werkzeuge in `tool`, Sandbox-Plugins (10a.1) |
 | Prüfung | Manifest-Parser | zusätzlich `DeclarativeOnly` (kein Code), SHA-256, `requires`-Freigabeliste |
 | Wege | ZIP per Datei teilen | Eintrag in `store.json` |
 
@@ -1110,9 +1136,9 @@ alles, was nicht übertragbar ist.
 `previews/data`, …) und versieht sie mit Tags – aus `categories`/`tags` im Manifest oder abgeleitet aus den Beiträgen.
 Downloads zählt das Release `packages` des Store-Repos, Bewertungen kommen aus einem GitHub-Issue-Formular; beides
 fasst ein täglicher Workflow in `stats.json` zusammen (Details: `store-site/README.md`). Code-Plugins erscheinen dort
-als „Sideload“ (Download von der Website).
+als „Sideload“ (Download von der Website), Sandbox-Plugins sind direkt installierbar (Art `sandbox`).
 
-**Store-Regeln** (`DeclarativeOnly`, `RequirementPolicy`): Das Archiv darf nicht enthalten: `entryPointClass`, `.dex`, `.jar`, `.so`, `.apk`, `.class`, `.aar`, `.sh`; es braucht mindestens einen Beitrag; `requires` nur mit freigegebenen Paketen:
+**Store-Regeln** (`DeclarativeOnly`, `RequirementPolicy`; Ausnahme: Sandbox-Plugins nach `SandboxPolicy`): Das Archiv darf nicht enthalten: `entryPointClass`, `.dex`, `.jar`, `.so`, `.apk`, `.class`, `.aar`, `.sh`; es braucht mindestens einen Beitrag; `requires` nur mit freigegebenen Paketen:
 
 | Manager | Freigegeben |
 |---|---|
@@ -1179,13 +1205,13 @@ Mit `python3 store-site/publish.py <checkout-von-codeforge-store>` baut das Repo
 * **Vertrauen:** Plugins mit `lspServers`, `formatters`, `tools` oder Code führen Programme auf dem Gerät aus. Installiere nur aus vertrauenswürdigen Quellen. Die App fragt vor `requires` und vor Werkzeugen aus dem Store nach.
 * **Kein Shell:** Kommandos haben keine Shell-Expansion; `${input}` ist ein einzelnes Argument.
 * **Archiv:** Einträge werden gegen Zip-Slip geprüft, Beitragsdateien dürfen das Plugin-Verzeichnis nicht verlassen, Plugin-Code wird vor dem Laden schreibgeschützt gesetzt (Android 14+).
-* **Store:** nur deklarativ, mit SHA-256 und Freigabeliste. Code-Plugins nur per Sideload.
+* **Store:** deklarativ oder Sandbox-Code, mit SHA-256 und Freigabeliste. Übrige Code-Plugins nur per Sideload.
 * **Signaturen:** Plugins können signiert sein (EC P-256, `signature.json`). Die App merkt sich den Schlüssel beim
   ersten Installieren; Updates müssen denselben Schlüssel tragen (Vertrauen beim ersten Mal). Herkunft steht in
   `build-info.json` und im Plugins-Bildschirm. Siehe [Plugin-Signaturen](PluginSigning.md).
-* **Keine Sandbox:** Code-Plugins laufen im App-Prozess mit allen Rechten der App (wie bei VS Code und Code on the Go);
-  Berechtigungen sperren die Schnittstellen der App, nicht Java selbst. Eine Prozess-Sandbox (`isolatedProcess`) wäre
-  die Voraussetzung für Code-Plugins im Store.
+* **Sandbox:** Normale Code-Plugins laufen im App-Prozess mit allen Rechten der App (wie bei VS Code und Code on the
+  Go); Berechtigungen sperren die Schnittstellen der App, nicht Java selbst. Plugins mit `"sandbox": true` laufen im
+  isolierten Prozess ohne Rechte (10a.1) – nur sie kommen als Code in den Store.
 * **Gerätetests:** ausstehend, siehe oben.
 
 ## 16. Referenz

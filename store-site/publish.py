@@ -91,7 +91,7 @@ def item_for(m, data, cat, old, today):
     desc = m.get("description", "")
     return {
         "id": pid, "category": cat, "categories": cats, "tags": tags,
-        "kind": "code" if cat == "plugin" else "declarative",
+        "kind": ("sandbox" if m.get("sandbox") else "code") if cat == "plugin" else "declarative",
         "name": {"de": m["name"], "en": m["name"]},
         "summary": {"de": desc, "en": desc},
         "version": version, "author": m.get("publisher", "codeforge"),

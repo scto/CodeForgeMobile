@@ -28,7 +28,9 @@ data class InstalledPlugin(
     /** SHA-256 des Signaturschlüssels (leer = nicht signiert); Updates müssen denselben Schlüssel nutzen. */
     val signerFingerprint: String = "",
     /** Herkunft aus `build-info.json` (z. B. Commit und Build-Zeit); leer = unbekannt. */
-    val buildInfo: String = ""
+    val buildInfo: String = "",
+    /** Code läuft im isolierten Sandbox-Prozess (siehe `SandboxPolicy`). */
+    val sandboxed: Boolean = false
 ) {
     /** Ob das Plugin keinen ausführbaren Code enthält. */
     val isDeclarativeOnly: Boolean get() = entryPointClass == null

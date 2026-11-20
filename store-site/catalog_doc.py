@@ -11,7 +11,7 @@ import publish  # noqa: E402
 import taxonomy  # noqa: E402
 
 GROUPS = [
-    ("plugin", "Code-Plugins (API 4, nur Sideload)", "`code-plugins/`"),
+    ("plugin", "Code-Plugins (API 4; Sideload, Sandbox-Plugins auch im Store)", "`code-plugins/`"),
     ("bundle", "Bundles und Sprachpakete", "`tool-plugins/`, `content-plugins/`"),
     ("lsp", "Sprachserver", "`tool-plugins/`"),
     ("formatter", "Formatierer", "`tool-plugins/`"),

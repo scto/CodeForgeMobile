@@ -45,6 +45,7 @@ internal class PluginRegistry(private val registryFile: File) {
                     minHostVersion = obj.optString("minHostVersion", ""),
                     signerFingerprint = obj.optString("signerFingerprint", ""),
                     buildInfo = obj.optString("buildInfo", ""),
+                    sandboxed = obj.optBoolean("sandboxed", false),
                     activationEvents = obj.optJSONArray("activationEvents")?.let { a -> (0 until a.length()).map { a.getString(it) } }
                         .orEmpty(),
                     dependsOn = obj.optJSONArray("dependsOn")?.let { a -> (0 until a.length()).map { a.getString(it) } }
@@ -80,6 +81,7 @@ internal class PluginRegistry(private val registryFile: File) {
                     put("activationEvents", JSONArray(plugin.activationEvents))
                     put("signerFingerprint", plugin.signerFingerprint)
                     put("buildInfo", plugin.buildInfo)
+                    put("sandboxed", plugin.sandboxed)
                 }
             )
         }

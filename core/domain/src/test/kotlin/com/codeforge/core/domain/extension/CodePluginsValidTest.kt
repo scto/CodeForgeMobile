@@ -16,14 +16,15 @@ class CodePluginsValidTest {
 
     @Test
     fun `alle Manifeste sind gültig`() {
-        assertEquals(7, manifests.size)
+        assertEquals(8, manifests.size)
         manifests.forEach { (name, m) ->
             assertEquals(name, 4, m.apiVersion)
             assertNotNull(name, m.entryPointClass)
             assertTrue(name, m.id.startsWith("com.codeforge.plugin.$name"))
             assertTrue(name, m.categories.isNotEmpty() && m.tags.isNotEmpty())
-            // Code-Plugins gibt es nur per Sideload.
-            assertNotNull(name, DeclarativeOnly.violation(listOf("plugin.json", "classes.dex"), m))
+            // Code-Plugins gibt es nur per Sideload – außer in der Sandbox.
+            val v = SandboxPolicy.storeInstallViolation(listOf("plugin.json", "classes.dex"), m)
+            if (m.sandbox) assertEquals(name, null, v) else assertNotNull(name, v)
         }
     }
 

@@ -42,9 +42,14 @@ data class StoreItem(
     val permissions: List<String> = emptyList(),
     /** Zweite Download-Adresse (GitHub Pages), falls die erste nicht erreichbar ist. */
     val mirrorUrl: String? = null,
+    /** `declarative`, `code` (nur Sideload) oder `sandbox` (Code im isolierten Prozess, installierbar). */
+    val kind: String = "",
 ) {
-    /** Code-Plugin (nur Sideload). */
-    val isCodePlugin: Boolean get() = categoryId == PLUGIN_CATEGORY
+    /** Sandbox-Plugin: Code läuft isoliert und darf aus dem Store installiert werden. */
+    val isSandboxPlugin: Boolean get() = categoryId == PLUGIN_CATEGORY && kind == KIND_SANDBOX
+
+    /** Code-Plugin ohne Sandbox (nur Sideload). */
+    val isCodePlugin: Boolean get() = categoryId == PLUGIN_CATEGORY && !isSandboxPlugin
     /**
      * Direkt installierbar: deklarative Kategorie (Theme, Icons, Sprache, Grammatik, Snippets, LSP, Projektvorlage, Bundle),
      * HTTPS-Download und SHA-256. Die Item-ID ist die Plugin-ID. Code-Plugins (Kategorie „plugin“) gibt es
@@ -55,7 +60,7 @@ data class StoreItem(
 
     /** Ob der Eintrag direkt installierbar ist. */
     val isInstallablePlugin: Boolean
-        get() = categoryId in DECLARATIVE_CATEGORIES && sha256 != null && downloadUrl?.startsWith("https://") == true
+        get() = (categoryId in DECLARATIVE_CATEGORIES || isSandboxPlugin) && sha256 != null && downloadUrl?.startsWith("https://") == true
 
     companion object {
         /** Kategorie der Sprachserver (Store-Plugins und lokale Server werden hier zusammengeführt). */
@@ -64,6 +69,8 @@ data class StoreItem(
         const val TOOL_CATEGORY = "tool"
         /** Projektvorlagen für den Projekt-Assistenten. */
         const val TEMPLATE_CATEGORY = "template"
+        const val KIND_SANDBOX = "sandbox"
+
         val DECLARATIVE_CATEGORIES =
             setOf("theme", "icons", "language", "grammar", "snippets", "lsp", "formatter", "bundle", TEMPLATE_CATEGORY, TOOL_CATEGORY)
     }

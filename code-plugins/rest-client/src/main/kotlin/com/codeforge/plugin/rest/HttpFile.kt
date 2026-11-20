@@ -31,7 +31,7 @@ data class HttpRequest(
 object HttpFile {
     private val METHODS = setOf("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS")
     private val VARIABLE = Regex("^@([A-Za-z_][A-Za-z0-9_.-]*)\\s*=\\s*(.*)$")
-    private val PLACEHOLDER = Regex("\\{\\{\\s*([A-Za-z_][A-Za-z0-9_.-]*)\\s*}}")
+    private val PLACEHOLDER = Regex("\\{\\{\\s*([A-Za-z_][A-Za-z0-9_.-]*)\\s*\\}\\}")
     private val HEADER = Regex("^([A-Za-z0-9-]+)\\s*:\\s*(.*)$")
 
     fun parse(text: String): List<HttpRequest> {
@@ -103,6 +103,6 @@ object HttpFile {
             }
             i++
         }
-        return sb.toString().replace(Regex("\\{\\n\\s*}"), "{}").replace(Regex("\\[\\n\\s*]"), "[]")
+        return sb.toString().replace(Regex("\\{\\n\\s*\\}"), "{}").replace(Regex("\\[\\n\\s*]"), "[]")
     }
 }

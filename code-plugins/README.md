@@ -1,7 +1,8 @@
 # Code-Plugins (API 4)
 
-Sieben Code-Plugins nach dem Vorbild beliebter VS-Code-Extensions – zugleich Vorlagen für eigene. Nur per Sideload
-(Einstellungen → Plugins → „+“); im Store als Download.
+Acht Code-Plugins nach dem Vorbild beliebter VS-Code-Extensions – zugleich Vorlagen für eigene. Sieben laufen im
+App-Prozess (nur Sideload, im Store als Download); `text-tools` läuft in der Prozess-Sandbox und ist direkt aus dem
+Store installierbar.
 
 | Modul | Plugin-ID | Inhalt | Berechtigungen | Aktivierung |
 |---|---|---|---|---|
@@ -12,6 +13,7 @@ Sieben Code-Plugins nach dem Vorbild beliebter VS-Code-Extensions – zugleich V
 | `rest-client` | `com.codeforge.plugin.rest-client.code` | `.http`/`.rest`: Anfragen senden, Antwort ansehen | `ui`, `network` | `onFileOpen:*.{http,rest}` |
 | `gradle-tasks` | `com.codeforge.plugin.gradle-tasks.code` | Module und Gradle-Aufgaben, Ausgabe live, Stand des letzten Builds | `ui`, `project`, `build` | `onProject:settings.gradle(.kts)` |
 | `python-tests` | `com.codeforge.plugin.python-tests.code` | pytest-Tests mit Start-Knöpfen und Ergebnissen | `run`, `shell` | `onLanguage:python` |
+| `text-tools` | `com.codeforge.plugin.text-tools.code` | 17 Textaktionen (Groß/klein, Sortieren, Base64, URL, Hash, Statistik …) – **Sandbox** | `editor` | Start |
 
 ## Bauen
 
@@ -31,9 +33,12 @@ CF_PLUGIN_SIGNING_KEY=~/key.pem ./gradlew :code-plugins:packageAll   # signiert 
    aus der App. `code-plugin.gradle.kts` dext nur die eigenen Klassen.
 4. Logik in reine Kotlin-Dateien legen und testen; Compose-Code klein halten (Ausnahmen in der Komposition beenden die App).
 
-Leitfaden: `docs/dev/PluginDevelopment.md` (Kapitel 9.13, 10a, 10b).
+Sandbox-Plugin: Vorlage `text-tools`, `"sandbox": true`, nur `editor`, keine UI (Regeln in Kapitel 10a.1).
+
+Leitfaden: `docs/dev/PluginDevelopment.md` (Kapitel 9.13, 10a, 10a.1, 10b).
 
 ## Geprüft / offen
 
 - Gebaut, gedext und mit Unit-Tests der Plugin-Logik geprüft; Manifeste mit dem App-Parser (`CodePluginsValidTest`).
-- **Nicht auf einem Gerät** installiert und ausprobiert.
+- Sandbox: Protokoll per Loopback-Test, Messenger-Transport per Robolectric geprüft.
+- **Nicht auf einem Gerät** installiert und ausprobiert (auch der isolierte Prozess nicht).

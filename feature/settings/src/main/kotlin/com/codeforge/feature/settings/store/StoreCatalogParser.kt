@@ -51,6 +51,7 @@ object StoreCatalogParser {
                 updated = o.str("updated").orEmpty(),
                 permissions = o.strings("permissions"),
                 mirrorUrl = o.str("mirrorUrl")?.takeIf { it.startsWith("https://") },
+                kind = o.str("kind").orEmpty().take(20),
             )
         }
         val tree = (root["tree"] as? JsonArray).orEmpty().mapNotNull { el ->

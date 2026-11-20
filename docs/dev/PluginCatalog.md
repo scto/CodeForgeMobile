@@ -1,9 +1,9 @@
 # Plugin-Liste
 
-Alle 147 Plugins, die das Repository baut (erzeugt von `store-site/catalog_doc.py`; nicht von Hand ändern).
+Alle 148 Plugins, die das Repository baut (erzeugt von `store-site/catalog_doc.py`; nicht von Hand ändern).
 Deklarative Plugins gibt es im [Store](../store.md), Code-Plugins als Sideload-ZIP. Kategorien und Tags wie im Store.
 
-## Code-Plugins (API 4, nur Sideload) (7)
+## Code-Plugins (API 4; Sideload, Sandbox-Plugins auch im Store) (8)
 
 Quelle: `code-plugins/`
 
@@ -16,6 +16,7 @@ Quelle: `code-plugins/`
 | Python-Tests (pytest) | `com.codeforge.plugin.python-tests.code` | 1.0.0 | Tests › Python, Sprachen › Python | Erkennt pytest-Tests (test_*-Funktionen, Test*-Klassen) in test_*.py und *_test.py, zeigt Start-Knöpfe an jeder Testzeile und meldet best … |
 | REST-Client (.http) | `com.codeforge.plugin.rest-client.code` | 1.0.0 | Werkzeuge › HTTP/APIs, Sprachen › Web | Sendet HTTP-Anfragen aus .http/.rest-Dateien (Format wie REST Client für VS Code: ### als Trenner, @variable = wert, {{variable}}) und ze … |
 | SQLite-Betrachter | `com.codeforge.plugin.sqlite-viewer.code` | 1.0.0 | Werkzeuge › Datenbanken, Vorschauen › Daten | Findet SQLite-Datenbanken im Projekt (.db, .sqlite, .sqlite3), zeigt Tabellen, Schema und Zeilen und führt lesende Abfragen aus (SELECT, … |
+| Text-Werkzeuge (Sandbox) | `com.codeforge.plugin.text-tools.code` | 1.0.0 | Werkzeuge › Text | Schreibweisen umwandeln (camelCase, snake_case, kebab-case, PascalCase, KONSTANTE, Groß/klein), Zeilen sortieren/umkehren/entdoppeln/zähl … |
 
 ## Bundles und Sprachpakete (14)
 

@@ -529,6 +529,7 @@ private fun StoreRatingLine(item: StoreItem, stats: StoreItemStats, modifier: Mo
         if (stats.ratings > 0) "${stars(stats.rating)} ${String.format(Locale.ROOT, "%.1f", stats.rating)} (${stats.ratings})" else null,
         "⤓ ${stats.downloads}",
         stringRes(R.string.store_sideload_badge).takeIf { item.isCodePlugin },
+        stringRes(R.string.store_sandbox_badge).takeIf { item.isSandboxPlugin },
     )
     Text(parts.joinToString("  ·  "), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
 }
@@ -576,6 +577,9 @@ private fun StoreDetailSheet(
                     }
                     item.tags.forEach { t -> androidx.compose.material3.AssistChip(onClick = { onTag(t) }, label = { Text("#$t", style = MaterialTheme.typography.labelSmall) }) }
                 }
+            }
+            if (item.isSandboxPlugin) {
+                Text(stringRes(R.string.store_sandbox_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (item.isCodePlugin) {
                 Text(stringRes(R.string.store_sideload_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -63,6 +63,18 @@ object PluginManifestParser {
         val tags = root.stringList("tags").map { it.trim().lowercase() }.filter { it.isNotEmpty() }.distinct()
         require(tags.size <= MAX_TAGS && tags.all { it.length <= 30 }) { "Höchstens $MAX_TAGS Tags mit je bis zu 30 Zeichen" }
 
+        val sandbox = (root["sandbox"] as? JsonPrimitive)?.booleanOrNull == true
+        if (sandbox) {
+            require(apiVersion >= 4) { "sandbox braucht apiVersion 4" }
+            require(!root.string("entryPointClass").isNullOrBlank()) { "sandbox braucht entryPointClass" }
+            require(permissions.all { it in SandboxPolicy.PERMISSIONS }) {
+                "In der Sandbox sind nur diese Berechtigungen möglich: ${SandboxPolicy.PERMISSIONS.joinToString()}"
+            }
+            require(activationEvents.isEmpty() || activationEvents.all { !it.startsWith("onProject:") }) {
+                "Sandbox-Plugins kennen kein Projekt (onProject nicht möglich)"
+            }
+        }
+
         val parsedContributes = parseContributes(root["contributes"] as? JsonObject)
         require(parsedContributes.tools.isEmpty() || PluginPermissions.SHELL in permissions) {
             "contributes.tools benötigt die Berechtigung '${PluginPermissions.SHELL}'"
@@ -85,6 +97,7 @@ object PluginManifestParser {
             activationEvents = activationEvents,
             categories = categories,
             tags = tags,
+            sandbox = sandbox,
             contributes = parsedContributes
         )
     }
