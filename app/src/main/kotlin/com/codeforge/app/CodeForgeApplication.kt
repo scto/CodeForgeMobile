@@ -10,6 +10,8 @@ import com.codeforge.core.common.log.CfmLogManager
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.domain.repository.ProjectsDirectoryProvider
 import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.android.migration.CustomInject
+import dagger.hilt.android.migration.CustomInjection
 import java.io.File
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /** Anwendungsklasse: initialisiert Hilt, Protokollierung, Absturzbehandlung und Hintergrunddienste. */
+@CustomInject
 @HiltAndroidApp
 class CodeForgeApplication : Application() {
 
@@ -37,8 +40,16 @@ class CodeForgeApplication : Application() {
         const val TRIM_MIN_INTERVAL_MILLIS = 60_000L
     }
 
+    // true im isolierten Plugin-Sandbox-Prozess (`:plugin_sandbox`).
+    private val isSandboxProcess: Boolean by lazy { SandboxProcess.isCurrent() }
+
     override fun onCreate() {
         super.onCreate()
+        // Application.onCreate läuft in JEDEM Prozess der App, auch im isolierten Sandbox-Prozess. Der hat keine
+        // Dateirechte, darf keine Dienste starten und braucht keinen Hilt-Graphen: nichts initialisieren,
+        // sonst stirbt der Prozess, bevor PluginSandboxService antworten kann.
+        if (isSandboxProcess) return
+        CustomInjection.inject(this)
         installCrashHandler()
         observeLogSetting()
         TermuxApplication.initTermuxApplication(this)
@@ -53,6 +64,7 @@ class CodeForgeApplication : Application() {
     @Suppress("DEPRECATION") // RUNNING_*-Stufen liefert Android 14+ nicht mehr, ältere Geräte schon.
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
+        if (isSandboxProcess) return
         val pressure = when {
             level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL ||
                 level >= android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE ->

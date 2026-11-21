@@ -20,6 +20,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Code-Plugin „Textwerkzeuge“ (`text-tools`, Sandbox): 17 Textaktionen. / Code plugin “Text tools” (sandboxed).
 
 ### Behoben / Fixed
+- Sandbox-Plugins luden nicht (Zeitüberschreitung): `Application.onCreate` lief auch im isolierten Prozess
+  `:plugin_sandbox` und brachte ihn zum Absturz (Hilt, DataStore, Termux, Dienste). Dort wird jetzt nichts
+  initialisiert (`@CustomInject`). Der Transport bricht bei totem Prozess sofort mit klarer Meldung ab und gibt die
+  Bindung frei. / Sandboxed plugins failed to load (timeout): the app no longer initialises inside the isolated
+  sandbox process; the transport fails fast with a clear message.
 - REST-Client: Regex mit unescapter `}` warf auf Android `PatternSyntaxException`. / REST client regex crash on
   Android (unescaped `}`).
 
