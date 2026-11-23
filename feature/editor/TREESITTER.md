@@ -141,5 +141,17 @@ Neuere Releases auf `main` erzeugen teilweise ABI 15. Daher sind exakt jene Upst
   `feature/editor/src/main/assets/treesitter/<sprache>/highlights.scm` **vorhanden und verifiziert** ✅.
 - Erkennung von `CMakeLists.txt` und aller 10 Spracherweiterungen in `TreeSitterGrammar.fromPath(path)` **implementiert und unit-getestet** ✅.
 - Automatisches Build-Skript `scripts/build-treesitter-lib.sh` dokumentiert, idempotent und funktionsfähig ✅.
-
+- **Farben (2026-11-24) ✅:** Bis dahin war Tree-sitter abgeschaltet (`TREE_SITTER_THEMED = false`), weil die Sprache
+  ohne Farbzuordnung erzeugt wurde – alles erschien in Textfarbe. Jetzt:
+  - `TsCaptureMapping` ordnet jede Capture (`@keyword`, `@function.method`, …) einer `TsColorGroup` zu
+    (Rückfall auf den Namen vor dem letzten Punkt, wie `TsTheme`).
+  - Jede Gruppe hat eine feste Farbkennung (ab 5000). `TreeSitterColors.apply` setzt deren Farben bei jedem
+    Theme-Wechsel aus den TextMate-Regeln des aktiven Editor-Themes (`Theme.match(scope)`), also auch für
+    Theme-Plugins. Ohne TextMate-Theme gelten die Standardfarben von sora-editor.
+  - Zusätzliche Prädikate `#eq?`, `#any-of?`, `#lua-match?` (je auch `not-`) in `TsExtraPredicates`; sora-editor
+    bringt nur `#match?` und `#set!` mit.
+  - Tree-sitter ersetzt nur die Basissprache; Wortliste und LSP-Vervollständigung liegen wie bei TextMate darüber.
+  - Tests: `TreeSitterColorsTest` (jede Capture der zehn Abfragen hat eine Farbe, Lua-Muster gültig, Farben aus Dark+).
+  - **Nicht auf einem Gerät geprüft.** Schlägt das Laden fehl, gilt TextMate; abschaltbar unter
+    Einstellungen → Editor → „Tree-sitter verwenden“.
 

@@ -7,18 +7,9 @@
  * Parser-Bibliothek (libtree-sitter-kotlin.so etc.) — siehe TREESITTER.md, analog zur
  * proot/libtalloc-Problematik in :libs:terminal-engine.
  *
- * TODO(Thomas)-WICHTIG: Zusätzlich zu den Pro-Sprache-Bibliotheken (`libtree-sitter-<sprache>.so`)
- * wird eine gemeinsame CORE-Bibliothek benötigt — die eigentliche JNI-Bridge/Tree-sitter-Runtime,
- * auf der `io.github.rosemoe.sora.langs.treesitter.*` (TsLanguage/TsLanguageSpec) aufsetzt. Das
- * `language-treesitter`-Modul von sora-editor bringt diese NICHT automatisch mit — laut
- * sora-editor-Doku ("du musst die Sprachimplementierungen aus android-tree-sitter beziehen")
- * ist das AndroidIDEOfficial/android-tree-sitter-Projekt (Maven-Gruppe
- * `com.itsaky.androidide.treesitter`) die De-facto-Quelle dafür. Siehe TREESITTER.md für den
- * vollständigen, recherchierten Stand (Artefakt-Koordinaten, welche Sprachen dort bereits
- * vorkompiliert vorliegen). Ohne diese Core-Library schlägt JEDER `loadLibrary`-Aufruf unten
- * fehl (das Pro-Sprache-`.so` hat ungelöste Symbole ohne die Runtime) — das Laden wird daher
- * jetzt zentral in [ensureCoreLibraryLoaded] vorgenommen, bevor eine Pro-Sprache-Bibliothek
- * geladen wird.
+ * Die Core-Laufzeit (`libandroid-tree-sitter.so`) und die Parser für Kotlin, Java, JSON, XML, C, C++ kommen als AARs
+ * aus `com.itsaky.androidide.treesitter`, Bash/CMake/TOML/YAML aus `src/main/jniLibs` (siehe TREESITTER.md). Farben:
+ * [TsCaptureMapping] + [TreeSitterColors]; zusätzliche Prädikate: [ExtraPredicate].
  *
  * Diese Klasse kapselt den Verfügbarkeits-Check und liefert `null`, wenn die native
  * Parser-Bibliothek für eine Sprache nicht gebunden ist, sodass [EditorLanguageFactory]
@@ -32,6 +23,8 @@ import com.codeforge.core.resources.Res
 import com.itsaky.androidide.treesitter.TSLanguage
 import io.github.rosemoe.sora.editor.ts.TsLanguage
 import io.github.rosemoe.sora.editor.ts.TsLanguageSpec
+import io.github.rosemoe.sora.editor.ts.predicate.builtin.MatchPredicate
+import io.github.rosemoe.sora.editor.ts.predicate.builtin.SetCapturePredicate
 import io.github.rosemoe.sora.lang.Language
 
 /** Unterstützte Tree-sitter-Grammatiken. */
@@ -168,9 +161,15 @@ object TreeSitterLanguageSupport {
                 highlightScmSource = highlightScm,
                 codeBlocksScmSource = blocksScm,
                 bracketsScmSource = "",
-                localsScmSource = localsScm
+                localsScmSource = localsScm,
+                predicates = listOf(MatchPredicate, SetCapturePredicate, ExtraPredicate),
             )
-            TsLanguage(spec) { }
+            // Jede Capture-Gruppe bekommt ihre Farbkennung; die Farben setzt TreeSitterColors.apply je Theme.
+            TsLanguage(spec) {
+                for ((capture, group) in TsCaptureMapping.rules) {
+                    group.style applyTo capture
+                }
+            }
         }.onFailure {
             android.util.Log.w(
                 "TreeSitterLanguageSupport",

@@ -85,7 +85,7 @@ unterschiedlich gepflegt.
 Vorschlag (langfristig): die eingebauten Arten ebenfalls als `.template`-Plugins ausliefern (vorinstalliert) und
 `ProjectGenerator` auf die Plugin-Engine reduzieren.
 
-## 5. Nebenbefund außerhalb des Plugin-Systems
+## 5. Nebenbefund außerhalb des Plugin-Systems — **erledigt (2026-11-24): Tree-sitter fertiggestellt**
 
 **Tree-sitter ist eingebunden, aber abgeschaltet.**
 - Die Abhängigkeiten `language-treesitter`, `treesitter-core/kotlin/java` mit nativen Bibliotheken sowie
@@ -114,7 +114,7 @@ damaligen Stand.
 ## 7. Empfohlene Reihenfolge vor dem Commit
 
 **Stand 2026-11-24:** Schritte 1–5 erledigt (✅ in Abschnitt 3; L7: gemeinsames `gradle/code-plugin.gradle.kts`,
-Vorlage und Leitfaden-Beispiel auf API 4). Tree-sitter (§ 5) wird als Nächstes fertiggestellt. Offen: 4.2, 4.3, L6, L8.
+Vorlage und Leitfaden-Beispiel auf API 4). Tree-sitter (§ 5) fertiggestellt (Farben aus dem Editor-Theme, zusätzliche Prädikate). Offen: 4.2, 4.3, L6, L8.
 
 
 1. **L1** – `PluginsRoute`/privaten `PluginsScreen` löschen; `:feature:plugins` kompilieren und testen.

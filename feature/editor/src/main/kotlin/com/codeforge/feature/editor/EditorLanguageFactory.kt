@@ -72,15 +72,6 @@ object EditorLanguageFactory {
         completionProvider: LspCompletionProvider?,
         extensionScope: String?
     ): Language {
-        // Tree-sitter nur, wenn die Sprache ein Farbschema bekommt: TsLanguage wird unten mit leerem
-        // Theme-Block erzeugt -> alle Token in Standardfarbe (kein Highlighting). Bis ein tsTheme-Mapping
-        // existiert, übernimmt TextMate (TextMateColorScheme) das Highlighting.
-        if (useTreeSitter && TREE_SITTER_THEMED) {
-            TreeSitterGrammar.fromPath(path)?.let { grammar ->
-                TreeSitterLanguageSupport.createLanguage(context, grammar)?.let { return it }
-            }
-        }
-
         // TextMateLanguage.create(scope, autoCompleteSymbols) — zweiter Parameter aktiviert
         // sora-editors eingebaute Symbol-Vervollständigung (Klammern/Bezeichner aus dem
         // aktuellen Dokument). Die LSP-gestützte Vervollständigung (Snippets, Member-Access)
@@ -94,7 +85,15 @@ object EditorLanguageFactory {
             null
         }
         val scopeOverride = extensionScope ?: bundledScope
-        val base = baseLanguage(languageType, scopeOverride)
+        // Tree-sitter (Einstellung „Tree-sitter verwenden“) für Sprachen mit eingebautem Parser (Kotlin, Java, JSON, XML,
+        // C, C++) ersetzt nur die Basissprache; Wortliste und LSP liegen wie bei TextMate darüber. Farben überträgt
+        // TreeSitterColors aus dem aktiven TextMate-Theme. Fehlt der Parser oder scheitert das Laden, gilt TextMate.
+        val treeSitter = if (useTreeSitter) {
+            TreeSitterGrammar.fromPath(path)?.let { TreeSitterLanguageSupport.createLanguage(context, it) }
+        } else {
+            null
+        }
+        val base = treeSitter ?: baseLanguage(languageType, scopeOverride)
         val languageId = when (languageType) {
             EditorLanguageType.KOTLIN, EditorLanguageType.GRADLE_KTS -> "kotlin"
             EditorLanguageType.JAVA -> "java"
@@ -123,6 +122,3 @@ private fun baseLanguage(languageType: EditorLanguageType, scopeOverride: String
         .getOrNull()
     return textMate ?: EmptyLanguage()
 }
-
-/** `true`, sobald TreeSitterLanguageSupport ein tsTheme-Mapping (Farben je Capture) setzt. */
-private const val TREE_SITTER_THEMED = false

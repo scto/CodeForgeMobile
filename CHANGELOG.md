@@ -12,6 +12,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- Tree-sitter-Highlighting aktiv (Einstellung „Tree-sitter verwenden“) für Kotlin, Java, JSON, XML, C, C++, Bash,
+  CMake, TOML, YAML: Farben kommen aus dem aktiven Editor-Theme (auch Theme-Plugins), zusätzliche Abfrage-Prädikate
+  `#eq?`, `#any-of?`, `#lua-match?`; LSP-Vervollständigung bleibt erhalten, bei Ladefehlern gilt TextMate. /
+  Tree-sitter highlighting enabled with colors from the active editor theme.
 - Theme-Builder neu als Projekt-Werkzeug (Seitenleiste → Theme), nach dem Vorbild von materialkolor.com: Material-3-Theme
   aus einer Grundfarbe oder einem Bild, 9 Palettenstile, 3 Kontraststufen, eigene Sekundär-/Tertiär-/Neutral-/Fehler-
   Paletten, Live-Vorschau hell/dunkel, alle 36 Farbrollen mit Kontrastwerten. „Ins Projekt übernehmen“ zeigt die

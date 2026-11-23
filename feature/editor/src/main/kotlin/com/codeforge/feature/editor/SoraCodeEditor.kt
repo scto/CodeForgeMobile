@@ -196,7 +196,7 @@ fun SoraCodeEditor(
             // dem Erzeugen der View -> Grammatiken waren noch nicht registriert (kein Highlighting).
             TextMateAssetLoader.ensureInitialized(ctx)
             CodeEditor(ctx).apply {
-                colorScheme = EditorColorScheme()
+                colorScheme = EditorColorScheme().also(com.codeforge.feature.editor.treesitter.TreeSitterColors::apply)
                 setText(content)
 
                 setEditorLanguage(
@@ -472,6 +472,8 @@ private fun applyTextMateTheme(editor: CodeEditor, themeName: String) {
 
 /** Klammerpaar-Farben aus der Vordergrundfarbe des Themes ableiten, damit sie in jedem Theme klar sichtbar sind. */
 private fun emphasizeBracketPair(scheme: EditorColorScheme) {
+    // Tree-sitter-Farben aus demselben Theme übernehmen (feste Kennungen, siehe TreeSitterColors).
+    com.codeforge.feature.editor.treesitter.TreeSitterColors.apply(scheme)
     val fg = scheme.getColor(EditorColorScheme.TEXT_NORMAL)
     val accent = fg
     scheme.setColor(EditorColorScheme.HIGHLIGHTED_DELIMITERS_FOREGROUND, accent)
