@@ -34,6 +34,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.codeforge.core.resources.Res
 import org.robolectric.annotation.GraphicsMode
 
+private const val FRAME_MS = 500L
+
 /**
  * Erzeugt die Screenshots für die README (hell/dunkel) nach `docs/screenshots/`.
  *
@@ -44,9 +46,6 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34], qualifiers = RobolectricDeviceQualifiers.Pixel7)
 class ScreenshotTest {
-    private companion object {
-        const val FRAME_MS = 500L
-    }
 
     @get:Rule
     val composeRule = createComposeRule()
