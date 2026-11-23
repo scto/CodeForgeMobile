@@ -12,6 +12,30 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- Theme-Builder neu als Projekt-Werkzeug (Seitenleiste → Theme), nach dem Vorbild von materialkolor.com: Material-3-Theme
+  aus einer Grundfarbe oder einem Bild, 9 Palettenstile, 3 Kontraststufen, eigene Sekundär-/Tertiär-/Neutral-/Fehler-
+  Paletten, Live-Vorschau hell/dunkel, alle 36 Farbrollen mit Kontrastwerten. „Ins Projekt übernehmen“ zeigt die
+  Änderungen vorab und schreibt `ui/theme/ThemeColors.kt` + passt `Theme.kt` an (Compose) bzw. `theme_colors.xml` +
+  App-Style in `themes.xml` (XML); Sicherung in `.codeforge/backup/`, Einstellungen in `.codeforge/theme.json`.
+  „Als App-Farbschema“ installiert das Theme als Farbschema-Plugin. / New theme builder as a project tool (like
+  materialkolor.com) with live preview, apply to Compose/XML projects, or install as app color scheme.
+- `:libs:color-utilities` (Googles material-color-utilities, Kotlin, Apache 2.0) und `:libs:theme-kit` (Engine,
+  Code-Erzeugung, Projekt-Übernahme, Plugin-Export). / Google's color utilities and a theme kit module.
+
+### Geändert / Changed
+- Eigene CodeForge-Farbgebung (Indigo `#6366F1` aus dem Icon, Cyan `#06B6D4` als Akzent) statt Material-Standard-Lila.
+  / CodeForge's own color scheme from the app icon.
+- Einstellungen → Erscheinungsbild ersetzt den bisherigen Theme-Bildschirm: Hell/Dunkel/System, dynamische Farben,
+  CodeForge oder Farbschemata aus dem Store, Icon- und Sprachpakete. / New appearance settings page.
+- Store-Farbschemata werden aus ihren Grundfarben vollständig abgeleitet (Container, Flächen, Ränder) und folgen dem
+  Hell/Dunkel-Modus, wenn das Paket beide Varianten hat. / Store color schemes derive a full scheme and follow
+  light/dark mode.
+
+### Entfernt / Removed
+- Die 15 eingebauten Farb-Presets und die eigene Palette in der App; die Presets gibt es weiter im Store, eine frühere
+  Auswahl wird beim Installieren des Pakets übernommen. / Built-in presets and custom palette (presets remain in the store).
+
+### Hinzugefügt / Added
 - Plugin-Sandbox (`libs/plugin-sandbox`): Code-Plugins mit `"sandbox": true` laufen im isolierten Prozess
   `:plugin_sandbox` (eigene UID, ohne Rechte), Messenger-IPC, `InMemoryDexClassLoader`; Editor-Aktionen,
   Quick-Fixes, Vervollständigung, Hover, Definition, Referenzen, Umbenennen. Sandbox-Plugins sind aus dem Store

@@ -14,7 +14,14 @@ import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.feature.settings.AboutBastiScreen
 import com.codeforge.feature.settings.AboutInfo
 import com.codeforge.feature.settings.AboutSettingsScreen
+import com.codeforge.feature.settings.appearance.AppearanceContent
+import com.codeforge.feature.settings.appearance.AppearanceUiState
+import com.codeforge.feature.settings.appearance.SchemeOption
+import com.codeforge.feature.themebuilder.ThemeBuilderContent
+import com.codeforge.feature.themebuilder.ThemeBuilderUiState
 import com.codeforge.feature.welcome.WelcomeContent
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
 import com.codeforge.feature.welcome.WelcomeUiState
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -37,6 +44,9 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34], qualifiers = RobolectricDeviceQualifiers.Pixel7)
 class ScreenshotTest {
+    private companion object {
+        const val FRAME_MS = 500L
+    }
 
     @get:Rule
     val composeRule = createComposeRule()
@@ -55,7 +65,10 @@ class ScreenshotTest {
 
     private fun shot(name: String, dark: Boolean, content: @Composable () -> Unit) {
         Res.init(ApplicationProvider.getApplicationContext())
+        // Endlos-Animationen (Basti) ließen Compose nie zur Ruhe kommen: Uhr anhalten, ein Bild weiter, dann aufnehmen.
+        composeRule.mainClock.autoAdvance = false
         composeRule.setContent { CodeForgeTheme(themeState = theme(dark)) { content() } }
+        composeRule.mainClock.advanceTimeBy(FRAME_MS)
         composeRule.onRoot().captureRoboImage("../docs/screenshots/$name-${if (dark) "dark" else "light"}.png")
     }
 
@@ -70,6 +83,38 @@ class ScreenshotTest {
     @Test fun aboutLight() = shot("about", false) { about() }
 
     @Test fun aboutDark() = shot("about", true) { about() }
+
+    @Test fun themeBuilderLight() = shot("theme-builder", false) { themeBuilder(dark = false) }
+
+    @Test fun themeBuilderDark() = shot("theme-builder", true) { themeBuilder(dark = true) }
+
+    @Test fun appearanceLight() = shot("appearance", false) { appearance() }
+
+    @Test fun appearanceDark() = shot("appearance", true) { appearance() }
+
+    @Composable
+    private fun themeBuilder(dark: Boolean) = ThemeBuilderContent(
+        state = ThemeBuilderUiState(projectRoot = "/p/ComposeSamples", projectName = "ComposeSamples", previewDark = dark),
+        snackbar = remember { SnackbarHostState() },
+        onBack = {},
+        onEvent = {},
+    )
+
+    @Composable
+    private fun appearance() = AppearanceContent(
+        state = AppearanceUiState(
+            loading = false,
+            schemes = listOf(
+                SchemeOption("", "", "CodeForge", "", listOf(0xFF4F5B92.toInt(), 0xFF00687A.toInt(), 0xFFEEEDF4.toInt()), true, true),
+                SchemeOption("m", "m", "Monokai", "k", listOf(0xFF4C6700.toInt(), 0xFF00687A.toInt(), 0xFFEEEFE3.toInt()), true, true),
+                SchemeOption("s", "s", "Solarized", "k2", listOf(0xFF39608F.toInt(), 0xFF6B5778.toInt(), 0xFFEDEDF4.toInt()), true, true),
+            ),
+        ),
+        onEvent = {},
+        onBack = {},
+        onOpenStore = {},
+        onOpenThemeBuilder = {},
+    )
 
     @Test fun aboutBastiLight() = shot("about-basti", false) { AboutBastiScreen() }
 

@@ -747,17 +747,12 @@
     <!-- themebuilder -->
     <string name="themebuilder_dunkel">Dark</string>
     <string name="themebuilder_dynamische_farben">Dynamic colors</string>
-    <string name="themebuilder_eigene_farben">Custom colors</string>
     <string name="themebuilder_farbschema">Color scheme</string>
     <string name="themebuilder_hell">Light</string>
     <string name="themebuilder_nicht_verfuegbar_auf_diesem_geraet">Not available on this device (Android 12+ required).</string>
-    <string name="themebuilder_primaer">Primary</string>
-    <string name="themebuilder_primaer_button">Primary button</string>
     <string name="themebuilder_sekundaer">Secondary</string>
-    <string name="themebuilder_so_sehen_text_und_oberflaechen">Preview of text and surfaces with this theme.</string>
     <string name="themebuilder_system">System</string>
     <string name="themebuilder_tertiaer">Tertiary</string>
-    <string name="themebuilder_theme">Theme</string>
     <string name="themebuilder_verwendet_die_systemfarben_deines_wall">Uses your wallpaper system colors (Android 12+).</string>
 
     <!-- welcome -->
@@ -805,21 +800,6 @@
     <string name="drawer_files">Files</string>
     <string name="drawer_search">Search</string>
     <string name="drawer_modules">Modules</string>
-    <string name="theme_preset_forest">Forest</string>
-    <string name="theme_preset_ocean">Ocean</string>
-    <string name="theme_preset_sunset">Sunset</string>
-    <string name="theme_preset_monochrome">Monochrome</string>
-    <string name="theme_preset_violet">Violet</string>
-    <string name="theme_preset_monokai">Monokai</string>
-    <string name="theme_preset_darcula">Darcula</string>
-    <string name="theme_preset_quiet_light">Quiet Light</string>
-    <string name="theme_preset_ayu_dark">Ayu Dark</string>
-    <string name="theme_preset_solarized_dark">Solarized Dark</string>
-    <string name="theme_preset_github_light">GitHub Light</string>
-    <string name="theme_preset_vscode_dark_plus">VS Code Dark+</string>
-    <string name="theme_preset_notepad_plus_plus">Notepad++</string>
-    <string name="theme_preset_eclipse">Eclipse</string>
-    <string name="theme_preset_cyberpunk_neon">Cyberpunk Neon</string>
     <string name="themebuilder_farbauswahl">Pick Color</string>
     <string name="themebuilder_rot">Red</string>
     <string name="themebuilder_gruen">Green</string>
@@ -827,7 +807,6 @@
     <string name="themebuilder_farbwert">Hex Code</string>
     <string name="themebuilder_schnellauswahl">Quick Presets</string>
     <string name="themebuilder_farbe_anwenden">Apply</string>
-    <string name="themebuilder_palette_anpassen">Adjust color</string>
     <string name="domain_ungueltige_versionsangabe">Invalid version specification</string>
 
     <!-- projectwizard (aus :feature:projectwizard übernommen) -->
@@ -1082,7 +1061,6 @@
     <string name="plugins_version_status">v%1$s · %2$s</string>
     <string name="settings_textmate_theme">TextMate theme</string>
     <string name="settings_lsp_server_pfad">LSP server path</string>
-    <string name="themebuilder_beispiel_karte">Example card</string>
 
     <!-- Editor Ultimate Setup & Erweiterungen (Task 16) -->
     <string name="settings_editor_section_indexing">Project indexing</string>
@@ -2197,7 +2175,6 @@
     <string name="store_install_success">Plugin “%1$s” installed.</string>
     <string name="store_hash_mismatch">Checksum mismatch – installation aborted.</string>
     <string name="store_install_failed">Installation failed: %1$s</string>
-    <string name="themebuilder_aus_erweiterungen">From extensions</string>
     <string name="themebuilder_erweiterung_hell">Light</string>
     <string name="themebuilder_erweiterung_dunkel">Dark</string>
     <string name="themebuilder_icon_pakete">Icon packs</string>
@@ -2757,4 +2734,79 @@
     <string name="store_detail_permissions">Permissions: %1$s</string>
     <string name="store_sandbox_badge">Sandbox</string>
     <string name="store_sandbox_hint">Runs in an isolated process without access to your files, the network or programs; it only sees the text it works on.</string>
+    <!-- Theme-Builder (Projekt-Werkzeug) -->
+    <string name="themebuilder_title">Theme builder</string>
+    <string name="themebuilder_title_project">Theme · %1$s</string>
+    <string name="themebuilder_no_project">No project open: you can design a theme and install it as an app color scheme. To apply it to an app, open the theme builder from a project.</string>
+    <string name="themebuilder_seed">Seed color</string>
+    <string name="themebuilder_pick_color">Pick color</string>
+    <string name="themebuilder_from_image">From image</string>
+    <string name="themebuilder_image_seeds">Suggested from the image</string>
+    <string name="themebuilder_style">Palette style</string>
+    <string name="themebuilder_contrast">Contrast</string>
+    <string name="themebuilder_contrast_standard">Standard</string>
+    <string name="themebuilder_contrast_medium">Medium</string>
+    <string name="themebuilder_contrast_high">High</string>
+    <string name="themebuilder_style_tonal_spot">Tonal spot</string>
+    <string name="themebuilder_style_neutral">Neutral</string>
+    <string name="themebuilder_style_vibrant">Vibrant</string>
+    <string name="themebuilder_style_expressive">Expressive</string>
+    <string name="themebuilder_style_fidelity">Fidelity</string>
+    <string name="themebuilder_style_content">Content</string>
+    <string name="themebuilder_style_rainbow">Rainbow</string>
+    <string name="themebuilder_style_fruit_salad">Fruit salad</string>
+    <string name="themebuilder_style_monochrome">Monochrome</string>
+    <string name="themebuilder_overrides">Custom palettes (optional)</string>
+    <string name="themebuilder_override_hint">Off = derived from the seed color.</string>
+    <string name="themebuilder_override_auto">Derived</string>
+    <string name="themebuilder_neutral">Neutral</string>
+    <string name="themebuilder_error">Error</string>
+    <string name="themebuilder_roles">Color roles</string>
+    <string name="themebuilder_ratio">%1$s:1</string>
+    <string name="themebuilder_apply">Apply to project</string>
+    <string name="themebuilder_install_app">Use as app theme</string>
+    <string name="themebuilder_install_title">Install as app color scheme</string>
+    <string name="themebuilder_install_body">Installs the theme as a color scheme plugin (light and dark) and activates it for CodeForgeMobile.</string>
+    <string name="themebuilder_install_name">Name</string>
+    <string name="themebuilder_install_confirm">Install</string>
+    <string name="themebuilder_install_done">Color scheme “%1$s” installed and activated</string>
+    <string name="themebuilder_failed">Failed: %1$s</string>
+    <string name="themebuilder_plan_title">Changes in the project</string>
+    <string name="themebuilder_targets">Targets</string>
+    <string name="themebuilder_target_compose">Compose theme · %1$s</string>
+    <string name="themebuilder_target_views">XML theme · %1$s</string>
+    <string name="themebuilder_no_targets">No theme found: neither ui/theme/Theme.kt nor an app style in AndroidManifest.xml.</string>
+    <string name="themebuilder_file_new">new</string>
+    <string name="themebuilder_file_changed">+%1$d / −%2$d</string>
+    <string name="themebuilder_note_schemes">%1$s: lightColorScheme/darkColorScheme not found. Use AppLightColorScheme/AppDarkColorScheme from ThemeColors.kt yourself.</string>
+    <string name="themebuilder_note_dynamic">%1$s: dynamicColor was on by default and is now off; otherwise the theme would never show on Android 12+.</string>
+    <string name="themebuilder_note_style">Style %1$s not found in themes.xml/styles.xml.</string>
+    <string name="themebuilder_note_family">%1$s does not use a Material3 parent theme; only the basic colors are set.</string>
+    <string name="themebuilder_confirm">Apply (%1$d files)</string>
+    <string name="themebuilder_applied">Theme applied (%1$d files). Backup: %2$s</string>
+    <string name="themebuilder_nothing">No changes: the project already uses this theme.</string>
+    <string name="themebuilder_loaded">Loaded the project\'s saved theme</string>
+    <string name="themebuilder_reset">Reset</string>
+    <string name="themebuilder_sample_title">Sample app</string>
+    <string name="themebuilder_sample_card">Weekly summary</string>
+    <string name="themebuilder_sample_body">This is how text, surfaces and progress look in your theme.</string>
+    <string name="themebuilder_sample_primary">Save</string>
+    <string name="themebuilder_sample_tonal">Share</string>
+    <string name="themebuilder_sample_outlined">Cancel</string>
+    <string name="themebuilder_sample_chip">Filter</string>
+    <string name="themebuilder_sample_assist">Help</string>
+    <string name="themebuilder_sample_input">Name</string>
+    <string name="themebuilder_sample_input_value">CodeForge</string>
+    <string name="themebuilder_sample_accent">Accent</string>
+    <string name="themebuilder_sample_error">Error</string>
+    <string name="themebuilder_sample_nav_home">Home</string>
+    <string name="themebuilder_sample_nav_search">Search</string>
+    <string name="themebuilder_sample_nav_profile">Profile</string>
+    <string name="drawer_themes">Theme</string>
+    <!-- Erscheinungsbild -->
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_scheme_hint">CodeForge is the app\'s own color scheme. More color schemes come from the store and follow light/dark mode automatically.</string>
+    <string name="appearance_more_in_store">More in the store</string>
+    <string name="appearance_create_own">Create your own</string>
+    <string name="appearance_variant_both">Light &amp; dark</string>
 </resources>

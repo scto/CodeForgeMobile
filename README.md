@@ -45,6 +45,10 @@ The development environment (shell, JDK, Android SDK, NDK) runs inside a **Termu
 | *Welcome screen without projects* | *Welcome screen without projects* |
 | <img src="docs/screenshots/about-light.png" width="260" alt="About CodeForge Mobile (Light)"> | <img src="docs/screenshots/about-dark.png" width="260" alt="About CodeForge Mobile (Dark)"> |
 | *About CodeForge Mobile* | *About CodeForge Mobile* |
+| <img src="docs/screenshots/theme-builder-light.png" width="260" alt="Theme builder (light preview)"> | <img src="docs/screenshots/theme-builder-dark.png" width="260" alt="Theme builder (dark preview)"> |
+| *Theme builder (project tool)* | *Theme builder (project tool)* |
+| <img src="docs/screenshots/appearance-light.png" width="260" alt="Appearance settings (Light)"> | <img src="docs/screenshots/appearance-dark.png" width="260" alt="Appearance settings (Dark)"> |
+| *Settings → Appearance* | *Settings → Appearance* |
 
 > Generated with Compose screenshot tests (Roborazzi + Robolectric, sample data): `./gradlew :app:recordRoborazziDebug`. Fonts and system bars may differ from a real device.
 
@@ -84,7 +88,7 @@ Legend: ✅ implemented (unbuilt) · 🧪 logic JVM-tested · 🟡 partial
 * 🔄 Project indexing and version check (TOML catalog or `build.gradle(.kts)` of all modules) with a Dismiss / Ask later / Update dialog.
 
 ### 🎭 8. Theme & Design (`:core:designsystem`, `:feature:themebuilder`) ✅
-* 🎨 Material 3 Expressive, dynamic color, 5 presets, custom palettes; adaptive layouts and edge-to-edge. The Fluent 2 guide ([FLUENT2_JETPACK_COMPOSE_GUIDE.md](FLUENT2_JETPACK_COMPOSE_GUIDE.md)) is a design direction only and not yet implemented.
+* 🎨 Material 3 Expressive, CodeForge's own color scheme (indigo/cyan from the icon), dynamic color, more color schemes from the store (follow light/dark); **theme builder** for your projects like materialkolor.com (seed color or image, 9 palette styles, contrast, live preview, applies to Compose `ui/theme` and XML `themes.xml`, can also be installed as app color scheme); adaptive layouts and edge-to-edge. The Fluent 2 guide ([FLUENT2_JETPACK_COMPOSE_GUIDE.md](FLUENT2_JETPACK_COMPOSE_GUIDE.md)) is a design direction only and not yet implemented.
 
 ### 🌍 9. Centralized Strings (`:core:resources`) ✅🧪
 * 📝 All visible texts in one `strings.xml` (~880 entries), accessed via `Res`/`stringRes`; `TestRes` for JVM tests.

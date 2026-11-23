@@ -81,6 +81,8 @@ include(
     ":libs:ai-client",
     ":libs:j2k",
     ":libs:x2c",
+    ":libs:color-utilities",
+    ":libs:theme-kit",
 
     // Termux-Vendoring (siehe docs/sub/TERMUX-PORTING.md) — :libs:terminal-engine nutzt
     // diese jetzt statt PRoot für die interaktive :feature:terminal-Session

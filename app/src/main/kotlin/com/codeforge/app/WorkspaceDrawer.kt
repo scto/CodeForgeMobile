@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Insights
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -80,6 +81,7 @@ enum class DrawerSection(@StringRes val labelRes: Int, val icon: ImageVector, va
     MODULES(R.string.drawer_modules, Icons.Filled.CreateNewFolder),
     LAYOUTS(R.string.drawer_layouts, Icons.Filled.GridView),
     ASSETS(R.string.assetstudio_title, Icons.Filled.Brush),
+    THEME(R.string.drawer_themes, Icons.Filled.Palette, isPanel = false),
     PROJECT_INFO(R.string.projectinfo_title, Icons.Filled.Insights, isPanel = false),
     DEPENDENCIES(R.string.drawer_dependencies, Icons.Filled.AccountTree, isPanel = false),
     TERMINAL(R.string.settings_hub_terminal, Icons.Filled.Terminal, isPanel = false),
@@ -147,6 +149,7 @@ fun WorkspaceDrawer(
                                     DrawerSection.TERMINAL -> Routes.TERMINAL
                                     DrawerSection.DEPENDENCIES -> Routes.dependencies(rootPath)
                                     DrawerSection.PROJECT_INFO -> Routes.projectInfo(rootPath)
+                                    DrawerSection.THEME -> Routes.themeBuilder(rootPath)
                                     else -> Routes.SETTINGS
                                 }
                             )
@@ -216,7 +219,8 @@ fun WorkspaceDrawer(
                                 onNavigate(Routes.assetStudio(rootPath, action.name))
                             }
                         )
-                        DrawerSection.TERMINAL, DrawerSection.SETTINGS, DrawerSection.DEPENDENCIES, DrawerSection.PROJECT_INFO -> Unit
+                        DrawerSection.TERMINAL, DrawerSection.SETTINGS, DrawerSection.DEPENDENCIES, DrawerSection.PROJECT_INFO,
+                        DrawerSection.THEME -> Unit
                     }
                 }
             }

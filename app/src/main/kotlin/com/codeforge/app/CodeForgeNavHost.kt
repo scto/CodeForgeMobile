@@ -39,6 +39,7 @@ import com.codeforge.feature.settings.AiSettingsRoute
 import com.codeforge.feature.settings.DebugSettingsRoute
 import com.codeforge.feature.settings.EditorSettingsRoute
 import com.codeforge.feature.settings.extensions.ExtensionsRoute
+import com.codeforge.feature.settings.appearance.AppearanceRoute
 import com.codeforge.feature.settings.store.StoreRoute
 import com.codeforge.feature.settings.GitSettingsRoute
 import com.codeforge.feature.settings.HelpRoute
@@ -88,6 +89,7 @@ internal object Routes {
     const val DEPENDENCIES_PATTERN = "dependencies?rootPath={rootPath}"
     const val PROJECT_SETTINGS_PATTERN = "project_settings/{projectPath}"
     const val PROJECT_INFO_PATTERN = "project_info?rootPath={rootPath}"
+    const val THEME_BUILDER_PATTERN = "theme_builder?rootPath={rootPath}"
 
     /** Route der Projekteinstellungen. */
     fun projectSettings(projectPath: String) = "project_settings/${Uri.encode(projectPath)}"
@@ -101,6 +103,8 @@ internal object Routes {
     fun layoutDesigner(filePath: String) = "layout_designer/${Uri.encode(filePath)}"
     /** Route des Asset-Studios. */
     fun assetStudio(rootPath: String, action: String = "STUDIO") = "asset_studio?rootPath=${Uri.encode(rootPath)}&action=$action"
+    /** Route des Theme-Builders (leerer Pfad = ohne Projekt). */
+    fun themeBuilder(rootPath: String = "") = "theme_builder?rootPath=${Uri.encode(rootPath)}"
     /** Route der Abhängigkeitsansicht. */
     fun dependencies(rootPath: String) = "dependencies?rootPath=${Uri.encode(rootPath)}"
     fun projectInfo(rootPath: String) = "project_info?rootPath=${Uri.encode(rootPath)}"
@@ -226,9 +230,17 @@ fun CodeForgeNavHost(
             )
         }
         composable(Routes.SETTINGS_THEME) {
-            ThemeBuilderRoute(
-                onBack = { navigateBackOrStart() }
+            AppearanceRoute(
+                onBack = { navigateBackOrStart() },
+                onOpenStore = { navController.navigate(Routes.SETTINGS_STORE) },
+                onOpenThemeBuilder = { navController.navigate(Routes.themeBuilder()) },
             )
+        }
+        composable(
+            route = Routes.THEME_BUILDER_PATTERN,
+            arguments = listOf(navArgument("rootPath") { type = NavType.StringType; defaultValue = "" }),
+        ) {
+            ThemeBuilderRoute(onBack = { navController.popBackStack() })
         }
         composable(Routes.SETTINGS_EDITOR) {
             EditorSettingsRoute(

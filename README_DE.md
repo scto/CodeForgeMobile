@@ -45,6 +45,10 @@ Die Entwicklungsumgebung (Shell, JDK, Android SDK, NDK) läuft in einem **Termux
 | *Startseite ohne Projekte* | *Startseite ohne Projekte* |
 | <img src="docs/screenshots/about-light.png" width="260" alt="Über CodeForge Mobile (Hell)"> | <img src="docs/screenshots/about-dark.png" width="260" alt="Über CodeForge Mobile (Dunkel)"> |
 | *Über CodeForge Mobile* | *Über CodeForge Mobile* |
+| <img src="docs/screenshots/theme-builder-light.png" width="260" alt="Theme-Builder (Vorschau hell)"> | <img src="docs/screenshots/theme-builder-dark.png" width="260" alt="Theme-Builder (Vorschau dunkel)"> |
+| *Theme-Builder (Projekt-Werkzeug)* | *Theme-Builder (Projekt-Werkzeug)* |
+| <img src="docs/screenshots/appearance-light.png" width="260" alt="Erscheinungsbild (Hell)"> | <img src="docs/screenshots/appearance-dark.png" width="260" alt="Erscheinungsbild (Dunkel)"> |
+| *Einstellungen → Erscheinungsbild* | *Einstellungen → Erscheinungsbild* |
 
 > Erzeugt mit Compose-Screenshot-Tests (Roborazzi + Robolectric, Beispieldaten): `./gradlew :app:recordRoborazziDebug`. Schriften und Systemleisten können vom echten Gerät abweichen.
 
@@ -83,7 +87,7 @@ Legende: ✅ umgesetzt (ungebaut) · 🧪 Logik JVM-getestet · 🟡 teilweise
 * 🔄 Projektindexierung und Versions-Check (TOML-Katalog bzw. `build.gradle(.kts)` aller Module) mit Dialog Dismiss / Ask later / Update.
 
 ### 🎭 8. Theme & Design (`:core:designsystem`, `:feature:themebuilder`) ✅
-* 🎨 Material 3 Expressive, Dynamic Color, 5 Presets, eigene Paletten; adaptive Layouts und Edge-to-Edge. Der Fluent-2-Leitfaden ([FLUENT2_JETPACK_COMPOSE_GUIDE.md](FLUENT2_JETPACK_COMPOSE_GUIDE.md)) ist bisher nur Designrichtung, nicht umgesetzt.
+* 🎨 Material 3 Expressive, eigene CodeForge-Farbgebung (Indigo/Cyan aus dem Icon), Dynamic Color, weitere Farbschemata aus dem Store (folgen Hell/Dunkel); **Theme-Builder** für eigene Projekte wie materialkolor.com (Grundfarbe oder Bild, 9 Palettenstile, Kontrast, Live-Vorschau, Übernahme in Compose `ui/theme` und XML `themes.xml`, auch als App-Farbschema installierbar); adaptive Layouts und Edge-to-Edge. Der Fluent-2-Leitfaden ([FLUENT2_JETPACK_COMPOSE_GUIDE.md](FLUENT2_JETPACK_COMPOSE_GUIDE.md)) ist bisher nur Designrichtung, nicht umgesetzt.
 
 ### 🌍 9. Zentrale Strings (`:core:resources`) ✅🧪
 * 📝 Alle sichtbaren Texte in einer `strings.xml` (~880 Einträge), Zugriff über `Res`/`stringRes`; `TestRes` für JVM-Tests.

@@ -62,7 +62,8 @@ Diff, Commit, Push/Pull, Graph, Stash, Tags, Rebase, Cherry-Pick, Revert, Reset,
 |---|---|
 | Compose-Vorschau | `@Composable`-Funktionen live rendern (Kompilierung über `kotlinc` im Terminal) |
 | Layout-Designer | Android-Layout-XML visuell bearbeiten (Palette, Vorschau, Baum, Eigenschaften, Undo/Redo) |
-| Theme-Builder | eigene Farbpaletten, 5 Voreinstellungen, dynamische Farben |
+| Erscheinungsbild (Einstellungen) | Hell/Dunkel/System, dynamische Farben, CodeForge-Farbgebung, Farbschemata aus dem Store |
+| Theme-Builder (Projekt-Seitenleiste → Theme) | Material-3-Theme aus Grundfarbe oder Bild, Palettenstil, Kontrast, Live-Vorschau; Übernahme in `ui/theme` (Compose) und `themes.xml` (XML) des Projekts mit Sicherung in `.codeforge/backup/`, oder Installation als App-Farbschema |
 | Abhängigkeits-Updates | Versionsprüfung für TOML-Katalog und `build.gradle(.kts)` |
 | Signierung, SDK-Manager, Modul-Maker, Asset-Studio, Java→Kotlin, Debugger | siehe jeweilige Bereiche im Seitenmenü |
 

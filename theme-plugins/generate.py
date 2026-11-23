@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt aus den 15 eingebauten Farbschemata (ThemePresets.kt) je ein deklaratives Theme-Plugin.
+"""Erzeugt aus den 15 früheren App-Presets (bis 3.2 eingebaut, jetzt nur noch im Store) je ein deklaratives Theme-Plugin.
 
 ID:        com.codeforge.plugin.<name>.theme   (name = Preset-ID, '_' → '-')
 Publisher: codeforge
@@ -13,7 +13,9 @@ import hashlib, json, sys, zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-# (preset-id, Anzeigename, primary, secondary, tertiary) – synchron zu core/designsystem/ThemePresets.kt
+# (preset-id, Anzeigename, primary, secondary, tertiary) – Quelle der Store-Pakete; die App leitet daraus ein
+# vollständiges Material-3-Schema ab (core/designsystem/ExtensionColorScheme.kt). Preset-IDs nutzt die Migration
+# alter Auswahlen (LegacyThemeMigration.kt).
 PRESETS = [
     ("monokai", "Monokai", "#A6E22E", "#F92672", "#66D9EF"),
     ("darcula", "Darcula", "#CC7832", "#6897BB", "#9876AA"),

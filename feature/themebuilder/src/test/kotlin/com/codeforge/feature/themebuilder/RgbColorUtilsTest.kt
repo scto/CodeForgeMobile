@@ -1,6 +1,5 @@
 package com.codeforge.feature.themebuilder
 
-import com.codeforge.core.designsystem.ThemePresets
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -56,43 +55,9 @@ class RgbColorUtilsTest {
 
     @Test
     fun testQuickPresetsCountAndValidity() {
-        assertEquals(10, RgbColorUtils.QUICK_PRESETS.size)
+        assertEquals(12, RgbColorUtils.QUICK_PRESETS.size)
         for (hex in RgbColorUtils.QUICK_PRESETS) {
             assertTrue("Expected valid hex: $hex", RgbColorUtils.isValidHex(hex))
-        }
-    }
-
-    @Test
-    fun testThemePresetsTotal15() {
-        assertEquals(15, ThemePresets.all.size)
-        val ids = ThemePresets.all.map { it.id }.toSet()
-        assertEquals(15, ids.size)
-
-        val expectedIds = listOf(
-            "monokai",
-            "darcula",
-            "quiet_light",
-            "ayu_dark",
-            "solarized_dark",
-            "github_light",
-            "vscode_dark_plus",
-            "notepad_plus_plus",
-            "eclipse",
-            "cyberpunk_neon",
-            "forest",
-            "ocean",
-            "sunset",
-            "monochrome",
-            "violet"
-        )
-
-        for (expected in expectedIds) {
-            val preset = ThemePresets.findById(expected)
-            assertNotNull("Preset $expected should exist", preset)
-            assertTrue("Primary hex should be valid", RgbColorUtils.isValidHex(preset!!.primaryHex))
-            assertTrue("Secondary hex should be valid", RgbColorUtils.isValidHex(preset.secondaryHex))
-            assertTrue("Tertiary hex should be valid", RgbColorUtils.isValidHex(preset.tertiaryHex))
-            assertTrue("LabelRes should be non-zero", preset.labelRes != 0)
         }
     }
 }

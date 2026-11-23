@@ -15,6 +15,7 @@ import com.codeforge.core.designsystem.resolveIsDark
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.designsystem.CodeForgeTheme
+import com.codeforge.core.designsystem.LegacyThemeMigration
 import com.codeforge.core.designsystem.findExtensionTheme
 import com.codeforge.core.designsystem.findIconTheme
 import com.codeforge.core.resources.LanguageOverrides
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
             // Edge-to-Edge: Systemleisten transparent; Icon-Farbe folgt dem App-Theme (nicht nur dem System).
             val systemDark = isSystemInDarkTheme()
             val extensionThemes by extensionThemeRepository.themes.collectAsStateWithLifecycle()
-            val extensionTheme = settings.theme.findExtensionTheme(extensionThemes)
+            val extensionTheme = settings.theme.findExtensionTheme(extensionThemes, systemDark)
             val iconThemes by extensionThemeRepository.iconThemes.collectAsStateWithLifecycle()
             val iconTheme = settings.theme.findIconTheme(iconThemes)
             val activeContributions by contributionRepository.contributions.collectAsStateWithLifecycle()
@@ -62,6 +63,14 @@ class MainActivity : ComponentActivity() {
                 LanguageOverrides.set(pack?.strings.orEmpty())
             }
             val isDark = settings.theme.resolveIsDark(systemDark, extensionTheme)
+            // Auswahl aus Versionen bis 3.2 (eingebaute Presets, eigene Palette) auf Store-Pakete umstellen.
+            LaunchedEffect(settings.theme.colorSchemeId, extensionThemes) {
+                val current = settings.theme.colorSchemeId
+                if (LegacyThemeMigration.isLegacy(current)) {
+                    LegacyThemeMigration.migrate(current, extensionThemes, settings.theme.resolveIsDark(systemDark))
+                        ?.let { key -> settingsRepository.updateTheme { it.toBuilder().setColorSchemeId(key).build() } }
+                }
+            }
             LaunchedEffect(isDark) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { isDark },

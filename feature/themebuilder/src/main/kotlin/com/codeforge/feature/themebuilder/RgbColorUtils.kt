@@ -11,6 +11,8 @@ object RgbColorUtils {
 
     /** Schnellauswahl-Farben. */
     val QUICK_PRESETS: List<String> = listOf(
+        "#6366F1", // CodeForge Indigo
+        "#06B6D4", // CodeForge Cyan
         "#F44336", // Material Red
         "#E91E63", // Material Pink
         "#9C27B0", // Material Purple

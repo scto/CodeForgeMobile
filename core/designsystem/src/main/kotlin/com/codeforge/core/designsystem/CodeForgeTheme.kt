@@ -35,16 +35,34 @@ fun ThemeConfig.resolveIsDark(systemDark: Boolean, extensionTheme: ExtensionColo
 fun ThemeConfig.findIconTheme(available: List<ExtensionIconTheme>): ExtensionIconTheme? =
     if (ExtensionColorTheme.isExtensionKey(iconThemeId)) available.firstOrNull { it.key == iconThemeId } else null
 
-/** Findet das in [ThemeConfig.getColorSchemeId] gewählte Plugin-Farbschema (Schlüssel `ext:<plugin>/<theme>`). */
-fun ThemeConfig.findExtensionTheme(available: List<ExtensionColorTheme>): ExtensionColorTheme? =
-    if (!(useDynamicColor && supportsDynamicColor()) && ExtensionColorTheme.isExtensionKey(colorSchemeId)) {
-        available.firstOrNull { it.key == colorSchemeId }
-    } else {
-        null
-    }
+/**
+ * Findet das in [ThemeConfig.getColorSchemeId] gewählte Plugin-Farbschema (Schlüssel `ext:<plugin>/<theme>`).
+ *
+ * Bringt dasselbe Plugin eine Variante in der anderen Helligkeit mit, folgt die Auswahl dem Modus Hell/Dunkel/System:
+ * „Monokai“ ist dann bei hellem System hell und bei dunklem dunkel. Ohne passende Variante gilt das gewählte Schema.
+ */
+fun ThemeConfig.findExtensionTheme(available: List<ExtensionColorTheme>, systemDark: Boolean): ExtensionColorTheme? {
+    if (useDynamicColor && supportsDynamicColor()) return null
+    if (!ExtensionColorTheme.isExtensionKey(colorSchemeId)) return null
+    val chosen = available.firstOrNull { it.key == colorSchemeId } ?: return null
+    return pairedVariant(chosen, available, resolveIsDark(systemDark))
+}
+
+/** Variante von [chosen] in der gewünschten Helligkeit aus demselben Plugin, sonst [chosen]. */
+fun pairedVariant(chosen: ExtensionColorTheme, available: List<ExtensionColorTheme>, wantDark: Boolean): ExtensionColorTheme {
+    if (chosen.isDark == wantDark) return chosen
+    val siblings = available.filter { it.pluginId == chosen.pluginId && it.isDark == wantDark }
+    // Bei mehreren Familien in einem Plugin die mit dem ähnlichsten Namen (gemeinsamer Anfang) nehmen.
+    return siblings.maxByOrNull { it.themeId.commonPrefixWith(chosen.themeId).length } ?: chosen
+}
+
+private val VARIANT_SUFFIX = Regex("""\s*[(\[]?\b(dark|light|dunkel|hell)\b[)\]]?\s*$""", RegexOption.IGNORE_CASE)
+
+/** Basisname einer Theme-Familie ohne Hell/Dunkel-Zusatz („Monokai Dark“ → „Monokai“). */
+fun ExtensionColorTheme.familyLabel(): String = label.replace(VARIANT_SUFFIX, "").ifBlank { label }
 
 /**
- * App-Theme: wählt Farbschema (Plugin, dynamisch, Preset oder eigene Palette), Typografie, Editor-Theme und Icon-Theme.
+ * App-Theme: wählt Farbschema (Plugin, dynamisch oder CodeForge-Standard), Typografie, Editor-Theme und Icon-Theme.
  *
  * @param themeState Theme-Einstellungen.
  * @param extensionTheme Aktives Plugin-Farbschema.
@@ -67,7 +85,7 @@ fun CodeForgeTheme(
         themeState.useDynamicColor && supportsDynamicColor() ->
             if (isDark) dynamicDarkColorScheme(LocalContext.current)
             else dynamicLightColorScheme(LocalContext.current)
-        else -> resolveCustomScheme(themeState.colorSchemeId, themeState.customPalette, isDark)
+        else -> codeForgeColorScheme(isDark)
     }
 
     val editorOverride = remember(extensionTheme) {
