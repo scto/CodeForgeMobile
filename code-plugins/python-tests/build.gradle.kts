@@ -15,4 +15,4 @@ dependencies {
     testImplementation(libs.junit)
 }
 
-apply(from = "../code-plugin.gradle.kts")
+apply(from = rootProject.file("gradle/code-plugin.gradle.kts"))

@@ -6,7 +6,7 @@
 > `requires`-Download mit SHA-256 nach `$PREFIX/opt/plugin-deps/<name>`. Format: `docs/extensions.md`.
 > Die Tabelle unten beschreibt die Server; „Quelle“ ist jetzt die `requires`-Angabe des jeweiligen Plugins.
 
-Dieses Dokument beschreibt die im Extensions-Manager (`:feature:settings`) verfügbaren Language Server, deren Sprach-Zuordnung, Startbefehle und Voraussetzungen.
+Dieses Dokument beschreibt die als Store-Plugins verfügbaren Language Server, deren Sprach-Zuordnung, Startbefehle und Voraussetzungen.
 
 ---
 
@@ -29,8 +29,8 @@ Dieses Dokument beschreibt die im Extensions-Manager (`:feature:settings`) verf�
 
 ## 2. Installation & Abhängigkeiten
 
-- **Download-Archive:** Werden über `ExtensionsManager` in den privaten App-Speicher (`filesDir/extensions/<id>`) geladen und anhand ihrer SHA-256 verifiziert.
-- **npm-Server (YAML, Bash):** Da `yaml-language-server` und `bash-language-server` im npm-Tarball ungebündelte Laufzeit-Abhängigkeiten haben, führt der `ExtensionsManager` nach dem Entpacken automatisch ein `npm install --omit=dev` im Erweiterungsverzeichnis aus.
+- **Download-Archive:** Werden über die `requires`-Angabe des Plugins nach `$PREFIX/opt/plugin-deps/<name>` geladen und anhand ihrer SHA-256 verifiziert – erst nach Bestätigung im Plugins-Bereich.
+- **npm-Server (YAML, Bash):** Kommen über `requires` (npm); die ungebündelten Laufzeit-Abhängigkeiten installiert der `requires`-Schritt mit `npm install --omit=dev`.
 - **Termux-Pakete (`clangd`, `rust-analyzer`, `taplo`):** Werden nativ über das Termux-Paketverwaltungssystem (`pkg install <name>`) bereitgestellt.
 - **Optionale Tools:** `shellcheck` ist für `bash-language-server` optional; ohne `shellcheck` startet der Server normal, bietet jedoch keine linter-gestützten Diagnosen.
 

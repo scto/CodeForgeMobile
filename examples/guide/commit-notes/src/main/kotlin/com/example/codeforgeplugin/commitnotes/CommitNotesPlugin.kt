@@ -2,7 +2,7 @@
  * Modul: :examples:guide-commit-notes
  * @author Thomas Schmid
  *
- * Beispiel-Code-Plugin (API v2): hört auf Git-Commits, schreibt sie in `$HOME/.codeforge-commit-notes.log` und
+ * Beispiel-Code-Plugin (API v4): hört auf Git-Commits, schreibt sie in `$HOME/.codeforge-commit-notes.log` und
  * zeigt die letzten Einträge über einen Befehl im Editor-Menü an. Berechtigungen: `commands`, `menus`, `git-events`.
  */
 package com.example.codeforgeplugin.commitnotes

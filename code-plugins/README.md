@@ -30,7 +30,7 @@ CF_PLUGIN_SIGNING_KEY=~/key.pem ./gradlew :code-plugins:packageAll   # signiert 
 1. Ordner kopieren (UI: `markdown-preview`, ohne UI: `python-tests`), `namespace`, Paket und `plugin.json` anpassen.
 2. In `settings.gradle.kts` unter „Code-Plugins“ eintragen.
 3. SDK, Compose und Coroutines nur `compileOnly` bzw. über die Compose-Konvention einbinden – sie kommen zur Laufzeit
-   aus der App. `code-plugin.gradle.kts` dext nur die eigenen Klassen.
+   aus der App. `gradle/code-plugin.gradle.kts` (gemeinsam für alle Code-Plugins) dext nur die eigenen Klassen.
 4. Logik in reine Kotlin-Dateien legen und testen; Compose-Code klein halten (Ausnahmen in der Komposition beenden die App).
 
 Sandbox-Plugin: Vorlage `text-tools`, `"sandbox": true`, nur `editor`, keine UI (Regeln in Kapitel 10a.1).

@@ -34,6 +34,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Entfernt / Removed
 - Die 15 eingebauten Farb-Presets und die eigene Palette in der App; die Presets gibt es weiter im Store, eine frühere
   Auswahl wird beim Installieren des Pakets übernommen. / Built-in presets and custom palette (presets remain in the store).
+- Altlasten des früheren Erweiterungs-Managers: toter Plugins-Vollbildschirm (`PluginsRoute`), 97 ungenutzte Texte
+  (DE/EN). / Leftovers of the former extensions manager: dead plugins screen and 97 unused strings.
+- `code-plugins/code-plugin.gradle.kts` und `examples/plugin-packaging.gradle.kts` → ein gemeinsames
+  `gradle/code-plugin.gradle.kts` für alle Code-Plugins (Android-Library und Kotlin, Build-Info, Signatur); Vorlage
+  und Leitfaden-Beispiel auf API 4. / One shared packaging script for all code plugins.
+
+### Doku / Docs
+- Veraltete Aussagen korrigiert (Store mit Sandbox-Plugins, kein Extensions-Manager mehr, Wege „Einstellungen →
+  Store → Installiert“ und „Erscheinungsbild“); Inventur `docs/plugin-system-inventur.md`. / Outdated docs fixed.
 
 ### Hinzugefügt / Added
 - Plugin-Sandbox (`libs/plugin-sandbox`): Code-Plugins mit `"sandbox": true` laufen im isolierten Prozess
@@ -931,7 +940,6 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 * **Manuelle Gerätetest-Checkliste**:
   * [`docs/device-test-checklist.md`](file:///data/data/com.termux/files/home/CodeForgeMobile/docs/device-test-checklist.md) mit 28 detaillierten Testfällen in 6 Kategorien (Bootstrap/W^X, Adaptive Layouts, IME/Input, Themes, Sora Editor, Filetree & Wizard) erstellt; Play-Store-Einschränkung bei `targetSdk = 28` dokumentiert.
 
-
 ### 📦 APT-Repo-Pipeline: Verifikation der Etappen & Paketliste (Task 21)
 
 * **Skript-Bereinigung & Linter-Härtung**:
@@ -945,7 +953,6 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 * **Speicher- & Laufzeitanalyse**:
   * Bestandsaufnahme von `gh-pages`: 420 Pakete mit 181,6 MB (17,7% des 1 GB Pages-Limits).
   * Risikobetrachtung für Langläufer (`libllvm`, `openjdk`, `dart`) und Ausführungsempfehlung dokumentiert in `docs/apt-stages-verification.md`.
-
 
 ### ⌨️ Editor: Wiederherstellung verlorener Editor-Funktionen (Task 19)
 
@@ -1028,7 +1035,6 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 * **Lokalisierung & Tests**:
   * Vollständige englische und deutsche Ressourcen in `values/` und `values-en/`; 0 hartcodierte Strings (`python3 scripts/find_hardcoded_strings.py --check`).
   * 4 Unit-Tests in `ImageFilePreviewTest` erfolgreich; `:feature:editor:testDebugUnitTest`, `:feature:settings:testDebugUnitTest` und `:app:assembleDebug` erfolgreich ausgeführt.
-
 
 ### 🌳 Tree-sitter Core-Library, native Sprachbibliotheken & Query-Assets (Task 02)
 

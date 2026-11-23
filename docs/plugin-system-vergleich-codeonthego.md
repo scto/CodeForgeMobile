@@ -1,5 +1,9 @@
 # Plugin-System: Code on the Go vs. CodeForge Mobile
 
+> **Stand-Hinweis (2026-11-21):** Seit dieser Analyse gibt es in CFM eine Prozess-Sandbox (`:libs:plugin-sandbox`,
+> `isolatedProcess`) und Signaturen (`signature.json`). Sandbox-Code-Plugins sind aus dem Store installierbar; die
+> Zeilen „Sandbox“, „Verteilung“ und „Updates/Vertrauen“ unten beschreiben den Stand davor.
+
 Stand: 2026-11-18. Quellen: `scto/CodeOnTheGo` (Branch `stage`: `plugin-api/`, `plugin-manager/`,
 `docs/plugin-api.md`, `docs/PLUGIN_AUTHORING.md`), `appdevforall/plugin-examples` (HEAD `83c8f60`: `libs/`,
 `plugins/`, `scripts/`), CodeForge Mobile `main` (`libs/plugin-api`, `libs/plugin-ui-api`, `libs/plugin-impl`,

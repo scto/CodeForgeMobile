@@ -29,7 +29,7 @@ Fertige Formatierer-, Language-Server- und Werkzeug-Plugins: `tool-plugins/` (Ge
 1. Vorlage kopieren: `cp -r templates/color-theme mein-theme`
 2. In `plugin.json` `id` (eindeutig, `[A-Za-z0-9][A-Za-z0-9._-]*`), `name`, `version` ändern; Dateien anpassen.
 3. Bauen: `python3 templates/build.py mein-theme` (bzw. ZIP von Hand: `plugin.json` muss im Wurzelverzeichnis des ZIPs liegen, nicht in einem Unterordner).
-4. Aufs Gerät kopieren, Einstellungen → Plugins → „+“, Plugin aktivieren, dann in Einstellungen → Design auswählen.
+4. Aufs Gerät kopieren, Einstellungen → Store → Installiert → „+“, Plugin aktivieren, dann unter Einstellungen → Erscheinungsbild (Farbschema) auswählen.
 
 ## 3. Schnellstart (Code-Plugin)
 

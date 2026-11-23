@@ -1,5 +1,8 @@
 # CodeForge: Nacharbeiten nach Task 36–47, Paket-Installation, Compiler-Runtime und Language Server
 
+> **Stand 2026-11:** Historisches Planungsdokument. Den Extensions-Manager (`ExtensionsScreen`, `ExtensionsManager`) gibt es
+> nicht mehr; Language Server kommen als Store-Plugins mit `requires` (siehe `docs/lsp-extensions.md`).
+
 Stand: 2026-10-21 · Projekt CodeForgeMobile · Prefix `/data/data/com.codeforge.app/files/usr`
 
 **Wie belastbar ist das?** Jede Aussage trägt eine Kennzeichnung:

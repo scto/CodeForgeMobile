@@ -36,7 +36,7 @@ flowchart LR
 
 ### Sprachserver (LSP)
 
-Für Vervollständigung, Hover, Diagnose, Quick-Fixes, Umbenennen (mehrere Dateien, mit Vorschau und Undo), Gliederung, Definition und Referenzen werden Sprachserver als **Plugins** eingebunden (Einstellungen → Plugins). Beispiel-Plugins liegen unter `examples/out/<name>/<name>.zip` (Kotlin, Java, XML, C/C++, Bash, YAML, TOML, Python, kmp-lsp). Pakete wie `clang` oder `taplo` installiert die App nach Bestätigung. Sind für dieselbe Sprache zwei Plugins aktiv, gilt das zuerst geladene.
+Für Vervollständigung, Hover, Diagnose, Quick-Fixes, Umbenennen (mehrere Dateien, mit Vorschau und Undo), Gliederung, Definition und Referenzen werden Sprachserver als **Plugins** eingebunden (Einstellungen → Store → Installiert). Beispiel-Plugins liegen unter `examples/out/<name>/<name>.zip` (Kotlin, Java, XML, C/C++, Bash, YAML, TOML, Python, kmp-lsp). Pakete wie `clang` oder `taplo` installiert die App nach Bestätigung. Sind für dieselbe Sprache zwei Plugins aktiv, gilt das zuerst geladene.
 
 Läuft ein Server nicht, hilft das Logcat mit dem Tag `CF-LSP` (Start, stderr, Exit-Code).
 

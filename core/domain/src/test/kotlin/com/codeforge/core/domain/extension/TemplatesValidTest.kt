@@ -19,7 +19,8 @@ class TemplatesValidTest {
     fun `alle Vorlagen haben gueltige Manifeste`() {
         val folders = dir.listFiles { f -> File(f, "plugin.json").isFile }.orEmpty()
         assertTrue(folders.size >= 9)
-        folders.forEach { assertEquals(it.name, 2, manifest(it.name).apiVersion) }
+        // Deklarative Vorlagen bleiben auf API 2 (läuft auch auf älteren Apps), die Code-Vorlage nutzt API 4.
+        folders.forEach { assertEquals(it.name, if (it.name == "code-plugin") 4 else 2, manifest(it.name).apiVersion) }
     }
 
     @Test

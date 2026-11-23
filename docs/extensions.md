@@ -1,8 +1,9 @@
 # Erweiterungssystem (Plugins / Extensions)
 
 Ein Plugin ist ein ZIP mit `plugin.json` im Wurzelverzeichnis. Es kann **deklarative Beiträge** (`contributes`)
-und/oder **Code** (`entryPointClass`, `classes.dex`) enthalten. Der Store listet nur rein deklarative Plugins;
-Code-Plugins gibt es nur per manuellem Sideload (Einstellungen → Plugins).
+und/oder **Code** (`entryPointClass`, `classes.dex`) enthalten. Der Store listet deklarative Plugins und
+Sandbox-Code-Plugins (`"sandbox": true`, isolierter Prozess, siehe `docs/dev/PluginDevelopment.md` Kapitel 10a.1);
+übrige Code-Plugins gibt es nur per Sideload (Store → Installiert → „+“).
 Vorlagen: `templates/`, Anleitung zum Selbermachen: `docs/extension-authoring.md`.
 
 ## Module
@@ -62,7 +63,7 @@ Datei (`path`):
 * Schlüssel sind Material-3-Rollen (`primary`, `onPrimary`, `primaryContainer`, `secondary`, `tertiary`, `error`, `background`, `surface`, `surfaceVariant`, `outline`, `surfaceContainer*`, …; Liste in `ColorThemeFileParser.ROLES`). Nicht angegebene Rollen kommen aus dem Standardschema der Helligkeit (`uiTheme`: `dark`/`light`). Unbekannte Rollen werden ignoriert.
 * Farben als `#RGB`, `#RRGGBB` oder `#AARRGGBB`.
 * `textmateTheme` (optional): VS-Code/TextMate-Theme-JSON für den Editor; Pfad **relativ zum Plugin-Verzeichnis** (nicht zur Theme-Datei), z. B. `syntax/dark.json`. Gilt, wenn in den Editor-Einstellungen „auto“ gewählt ist.
-* Auswahl: Einstellungen → Design → „Aus Erweiterungen“. Gespeichert wird `ThemeConfig.color_scheme_id = "ext:<pluginId>/<themeId>"`; ist das Plugin weg oder deaktiviert, fällt die App auf das Standardschema zurück. Dynamic Color hat Vorrang, wenn aktiviert.
+* Auswahl: Einstellungen → Erscheinungsbild → „Aus Erweiterungen“. Gespeichert wird `ThemeConfig.color_scheme_id = "ext:<pluginId>/<themeId>"`; ist das Plugin weg oder deaktiviert, fällt die App auf das Standardschema zurück. Dynamic Color hat Vorrang, wenn aktiviert.
 
 ## Icon-Pakete (`iconThemes`)
 
@@ -78,7 +79,7 @@ Datei (`path`); alle Werte sind Bilddateien (PNG, WebP oder JPEG — **kein SVG*
 * Auflösung Datei: exakter Name → längste passende Endung (`tar.gz` vor `gz`) → `file` → App-Standardicon. Ordner: Name (offen/zu) → `folderOpen`/`folder`. Groß-/Kleinschreibung egal.
 * Bilder werden auf ~96 px verkleinert geladen und gecacht; fehlende/defekte Bilder fallen auf das Standardicon zurück. Plugin-Icons werden nicht eingefärbt.
 * Gilt in: Dateibaum, Editor-Tabs, Suchergebnissen, Git-Änderungen.
-* Auswahl: Einstellungen → Design → „Icon-Pakete“ (`ThemeConfig.icon_theme_id`, leer = Standard).
+* Auswahl: Einstellungen → Erscheinungsbild → „Icon-Pakete“ (`ThemeConfig.icon_theme_id`, leer = Standard).
 
 ## Sprachpakete (`languagePacks`)
 
@@ -87,7 +88,7 @@ Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Tex
 * Schlüssel = **Ressourcenname** aus `core/resources/src/main/res/values/strings.xml` (z. B. `common_abbrechen`). Platzhalter (`%1$s`, `%2$d`) müssen wie im Original stehen; passen sie nicht, gilt der Originaltext.
 * Fehlende Schlüssel fallen auf die App-Sprache zurück — ein Paket darf unvollständig sein.
 * Wirkt auf `Res.string(...)` und `stringRes(...)` (alle UI-Texte). **Nicht abgedeckt:** Plurals, direkte `Context.getString(...)`-Aufrufe, System-Benachrichtigungen, native Terminal-Texte.
-* Auswahl: Einstellungen → Design → „Sprachpakete“ (`ThemeConfig.language_pack_id`, leer = App-Sprache). Max. 20 000 Einträge je Paket.
+* Auswahl: Einstellungen → Erscheinungsbild → „Sprachpakete“ (`ThemeConfig.language_pack_id`, leer = App-Sprache). Max. 20 000 Einträge je Paket.
 
 ## Grammatiken (`grammars`)
 
@@ -308,7 +309,7 @@ Die öffentliche Binär-API des SDK ist in `libs/plugin-api/api/plugin-api.api` 
 | `agentTools` / `mcpServers` | umgesetzt (Sideload); nicht auf Gerät getestet |
 | `requires` | umgesetzt: Prüfung + Installation nach Bestätigung (Plugins-Bildschirm, PT-Menü); nicht auf Gerät getestet |
 | `extensionPack` | umgesetzt (Phase 5/7): Store installiert fehlende Mitglieder aus dem Katalog (Tiefe ≤ 4) |
-| Store-Policy | umgesetzt (Phase 7): nur deklarative Kategorien (`theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `bundle`); `installFromFile(declarativeOnly = true)` lehnt Archive mit `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge ab; Code-Plugins nur per Sideload |
+| Store-Policy | umgesetzt (Phase 7): nur deklarative Kategorien (`theme`, `icons`, `language`, `grammar`, `snippets`, `lsp`, `bundle`); `installFromFile(declarativeOnly = true)` lehnt Archive mit `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge ab – Ausnahme Sandbox-Plugins nach `SandboxPolicy`; übrige Code-Plugins nur per Sideload |
 | Code-Plugin-Hooks | umgesetzt (Phase 6): Befehle, Menüs, Datei-/Git-Ereignisse, Berechtigungen |
 | `lspServers` | umgesetzt (Resolver) |
 | `projectTemplates` | umgesetzt: Projekt-Assistent, Store-Kategorie „Projektvorlagen“; nicht auf Gerät getestet |

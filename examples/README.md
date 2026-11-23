@@ -21,8 +21,8 @@ export ANDROID_HOME=/pfad/zum/android/sdk   # für das Code-Plugin des Leitfaden
 python3 templates/build.py --out examples/out examples/web-search-plugin
 ```
 
-Installation: ZIP aufs Gerät, **Einstellungen → Plugins → „+“**, Plugin aktivieren. Code-Plugins sind **nur per Sideload**
-installierbar, nicht über den Store.
+Installation: ZIP aufs Gerät, **Einstellungen → Store → Installiert → „+“**, Plugin aktivieren. Code-Plugins sind **nur per Sideload**
+installierbar; Ausnahme sind Sandbox-Plugins (`"sandbox": true`), die auch aus dem Store kommen dürfen.
 
 ## Beispiele des Plugin-Leitfadens
 

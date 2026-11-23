@@ -14,7 +14,7 @@ Deklaratives Plugin ohne Code in der App: zwei Agent-Werkzeuge, die ein Python-S
   über Weiterleitungen), lädt höchstens 2 MiB und liefert nur Text.
 * **Grenzen:** Die HTML-Ergebnisseite von DuckDuckGo ist keine offizielle Schnittstelle; ändert sich ihr Aufbau oder verlangt
   DuckDuckGo eine Bestätigung (zu viele Anfragen), meldet das Werkzeug das.
-* **Einschalten/ausschalten:** Einstellungen → Plugins. Ein abgeschaltetes Plugin steuert keine Werkzeuge bei.
+* **Einschalten/ausschalten:** Einstellungen → Store → Installiert. Ein abgeschaltetes Plugin steuert keine Werkzeuge bei.
 
 Bauen: `./gradlew :examples:packageAll` (→ `examples/out/web-search-plugin/`) oder
 `python3 templates/build.py --out examples/out examples/web-search-plugin`.

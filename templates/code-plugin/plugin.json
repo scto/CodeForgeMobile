@@ -2,7 +2,7 @@
   "id": "com.example.template.code-plugin",
   "name": "Template: Code-Plugin",
   "version": "1.0.0",
-  "apiVersion": 2,
+  "apiVersion": 4,
   "publisher": "example",
   "description": "Beispiel für Befehl, Menüeintrag und Ereignis (nur per Sideload).",
   "permissions": [

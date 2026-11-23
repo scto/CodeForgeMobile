@@ -36,7 +36,7 @@ flowchart LR
 
 ### Language servers (LSP)
 
-Completion, hover, diagnostics, quick fixes, multi-file rename (with preview and undo), outline, definition and references come from language servers installed as **plugins** (Settings → Plugins). Example plugins are in `examples/out/<name>/<name>.zip` (Kotlin, Java, XML, C/C++, Bash, YAML, TOML, Python, kmp-lsp). Packages such as `clang` or `taplo` are installed by the app after confirmation. If two plugins serve the same language, the one loaded first wins.
+Completion, hover, diagnostics, quick fixes, multi-file rename (with preview and undo), outline, definition and references come from language servers installed as **plugins** (Settings → Store → Installed). Example plugins are in `examples/out/<name>/<name>.zip` (Kotlin, Java, XML, C/C++, Bash, YAML, TOML, Python, kmp-lsp). Packages such as `clang` or `taplo` are installed by the app after confirmation. If two plugins serve the same language, the one loaded first wins.
 
 If a server does not run, check Logcat with the tag `CF-LSP` (start, stderr, exit code).
 

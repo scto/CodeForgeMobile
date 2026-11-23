@@ -33,7 +33,7 @@ Prüfung: `core/domain/…/extension/PluginSignatures.kt`; Gegenprobe mit dem Sk
 
 ## Herkunft (`build-info.json`)
 
-Die Paketskripte (`templates/build.py`, `tool-plugins/generate.py`, `code-plugins/code-plugin.gradle.kts`) legen
+Die Paketskripte (`templates/build.py`, `tool-plugins/generate.py`, `gradle/code-plugin.gradle.kts`) legen
 `build-info.json` bei: Commit, ob der Ordner geändert war (`dirty`), Datum, Werkzeug und API-Version. Der
 Plugins-Bildschirm zeigt sie zusammen mit dem Fingerabdruck des Schlüssels („Signiert: AB:CD:…“).
 

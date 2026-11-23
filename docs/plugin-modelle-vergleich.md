@@ -37,7 +37,7 @@ Die migrierten Beispiele sind **Hybride**: Manifest v2 (`contributes.lspServers`
 * + Kein Android SDK nötig (deklarativ); Store-fähig; statisch testbar (`ExamplePluginsValidTest`, `TemplatesValidTest`).
 * + Server gehört zum aktiven Projekt; mehrere Plugins kollidieren nicht beim Start.
 * − Nur, was die Beitragstypen vorsehen: kein eigener Download, keine bedingte Logik, keine Ereignisreaktion (dafür ist `entryPointClass` nötig).
-* − Priorität: ein in der App installierter Server (Extensions-Manager) hat Vorrang vor Plugin-Servern; je Sprache gewinnt der erste Treffer.
+* − Priorität: Plugin-Server haben Vorrang vor von Hand eingetragenen Servern (Eigene Werkzeuge); je Sprache gewinnt der erste Treffer. (Der frühere Extensions-Manager ist entfernt.)
 
 **Code-Modell (alt)**
 * + Volle Kontrolle: beliebige Installationslogik, Versionswahl, Konfigurationsdialoge, Ereignisse, Befehle/Menüs (ab v2 mit Berechtigungen).

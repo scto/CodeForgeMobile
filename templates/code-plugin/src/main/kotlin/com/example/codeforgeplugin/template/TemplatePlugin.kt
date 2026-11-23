@@ -2,7 +2,7 @@
  * Modul: :templates:code-plugin
  * @author Thomas Schmid
  *
- * Vorlage für ein Code-Plugin (API v2): ein Befehl, ein Dateibaum-Menüeintrag und ein Ereignis-Listener.
+ * Vorlage für ein Code-Plugin (API v4): ein Befehl, ein Dateibaum-Menüeintrag und ein Ereignis-Listener.
  * Benötigte Berechtigungen stehen in plugin.json (`commands`, `menus`, `file-events`).
  */
 package com.example.codeforgeplugin.template

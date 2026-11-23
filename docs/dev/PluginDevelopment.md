@@ -129,7 +129,7 @@ Deklariere nur, was du brauchst. Fehlt eine Berechtigung, wirft der Zugriff `Plu
 
 ### 2.5 Installation, Ersetzen, Aktivieren
 
-* Sideload: Einstellungen → Plugins → „+“, ZIP wählen. Die App entpackt (mit Zip-Slip-Schutz), validiert und aktiviert das Plugin sofort.
+* Sideload: Einstellungen → Store → Installiert → „+“, ZIP wählen. Die App entpackt (mit Zip-Slip-Schutz), validiert und aktiviert das Plugin sofort.
 * **Gleiche `id` ersetzt das installierte Plugin vollständig** (altes Verzeichnis wird gelöscht). `version` wird dabei nicht verglichen: Du kannst also jederzeit eine neue Fassung über die alte installieren.
 * Lässt sich der Code nicht laden (z. B. fehlendes `classes.dex`), bleibt das Plugin installiert, wird aber nicht geladen. Die Installation gilt trotzdem als erfolgreich: Prüfe, ob der Beitrag bzw. Befehl wirksam ist.
 * Deaktivieren (Schalter) ruft `onUnload()`, Entfernen zusätzlich vorher `onUninstall()`.
@@ -245,7 +245,7 @@ Der Pfad `textmateTheme` ist **relativ zum Plugin-Verzeichnis**, nicht zur Theme
 python3 templates/build.py examples/guide/nord-night   # → templates/build/nord-night.zip
 ```
 
-ZIP aufs Gerät, Einstellungen → Plugins → „+“, dann Einstellungen → Design → „Aus Erweiterungen“ → *Nord Night*. Ist das Plugin später weg oder deaktiviert, fällt die App auf das Standardschema zurück; Dynamic Color hat Vorrang, wenn es aktiviert ist.
+ZIP aufs Gerät, Einstellungen → Store → Installiert → „+“, dann Einstellungen → Erscheinungsbild → Farbschema → *Nord Night*. Ist das Plugin später weg oder deaktiviert, fällt die App auf das Standardschema zurück; Dynamic Color hat Vorrang, wenn es aktiviert ist.
 
 **Gestaltungstipps:** Kontrast zwischen `onSurface`/`surface` und `onPrimary`/`primary` prüfen (WCAG 4,5:1 für Text), beide Helligkeiten als zwei `colorThemes`-Einträge anbieten (`uiTheme` `dark` und `light`), `surfaceContainer*`-Rollen für Karten und Menüs setzen, wenn der Standard nicht zum Schema passt.
 
@@ -299,7 +299,7 @@ Was die einzelnen Beiträge tun:
 * **`grammars`**: TextMate-Grammatik. Die Zuordnung läuft über die Dateiendung (ohne Punkt) oder einen exakten Dateinamen. Sie gilt nur für Dateitypen **ohne eingebaute Grammatik** (eingebaut: Kotlin, Java, XML, JSON). Sie liefert nur Syntaxfarben, keine Klammerpaare oder Kommentarzeichen.
 * **`snippets`**: VS-Code-Format, `languageId` bestimmt den Geltungsbereich. Erscheinen in der Auto-Vervollständigung, sind dort schreibgeschützt.
 * **`formatters`**: Der Editor schreibt den Dateiinhalt auf **stdin** des Kommandos und ersetzt ihn durch **stdout**. Exit-Code ≠ 0 ist ein Fehler (erste stderr-Zeile wird angezeigt). Reihenfolge beim Formatieren: Plugin-Formatierer → LSP → ktlint/google-java-format → eingebauter Formatierer. Bereichsformatierung (Auswahl) unterstützen Plugin-Formatierer nicht.
-* **`lspServers`**: Die App startet den Server bei Bedarf mit dem **aktiven Projekt als Workspace**. Ein in der App installierter Server (Extensions-Manager) hat Vorrang vor Plugin-Servern.
+* **`lspServers`**: Die App startet den Server bei Bedarf mit dem **aktiven Projekt als Workspace**. Plugin-Server haben Vorrang vor Servern, die unter Einstellungen → Eigene Werkzeuge von Hand eingetragen sind; diese ergänzen nur Sprachen ohne Plugin-Server.
 * **`requires`**: Programme, die vorhanden sein müssen. Die App prüft das und bietet die Installation an, aber **nie automatisch**: der Plugins-Bildschirm zeigt „Fehlende Programme“ und installiert erst nach Bestätigung (Live-Ausgabe, abbrechbar).
 
 **`grammars/zig.tmLanguage.json`**: Jedes Muster hat einen TextMate-Bereichsnamen (`name`). Der Editor färbt sie über das aktive Theme (Beispiel [Nord Night](#5-beispiel-1-farbschema-nord-night)): `comment.*`, `string.*`, `constant.numeric.*`, `keyword.*`, `storage.*`.
@@ -541,7 +541,7 @@ Grenzen: höchstens 100 Befehle/Menüeinträge je Plugin, Titel ≤ 120 Zeichen,
   "id": "com.example.guide.commit-notes",
   "name": "Commit-Notizen",
   "version": "1.0.0",
-  "apiVersion": 2,
+  "apiVersion": 4,
   "publisher": "example",
   "description": "Protokolliert Git-Commits in einer Logdatei und zeigt die letzten Einträge über einen Editor-Befehl an (nur per Sideload).",
   "permissions": ["commands", "menus", "git-events"],
@@ -558,7 +558,7 @@ Es werden genau die benötigten Berechtigungen deklariert (`GuidePluginsValidTes
  * Modul: :examples:guide-commit-notes
  * @author Thomas Schmid
  *
- * Beispiel-Code-Plugin (API v2): hört auf Git-Commits, schreibt sie in `$HOME/.codeforge-commit-notes.log` und
+ * Beispiel-Code-Plugin (API v4): hört auf Git-Commits, schreibt sie in `$HOME/.codeforge-commit-notes.log` und
  * zeigt die letzten Einträge über einen Befehl im Editor-Menü an. Berechtigungen: `commands`, `menus`, `git-events`.
  */
 package com.example.codeforgeplugin.commitnotes
@@ -649,13 +649,17 @@ kotlin {
     jvmToolchain(21)
 }
 
-// Gemeinsames Packaging aller Beispiel-Plugins: d8 → classes.dex, ZIP nach examples/out/<modul>/
-apply(from = rootProject.file("examples/plugin-packaging.gradle.kts"))
+// Gemeinsames Packen aller Code-Plugins: d8 → classes.dex, build-info.json, optional Signatur.
+// Ausgabe wie bisher nach examples/out/<modul>/<modul>.zip (Standard wäre code-plugins/out/<modul>/<id>.zip).
+extra["pluginOutDir"] = "examples/out/${project.name}"
+extra["pluginArchiveName"] = "${project.name}.zip"
+extra["pluginUnpackedCopy"] = true
+apply(from = rootProject.file("gradle/code-plugin.gradle.kts"))
 ```
 
 * `compileOnly`: SDK (`:libs:plugin-api`) und Coroutines liegen zur Laufzeit im App-Prozess (Parent-Delegation im `DexClassLoader`). Nichts davon darf ins `classes.dex`, sonst gibt es doppelte Klassen.
 * `d8` wandelt die `.class`-Dateien in `classes.dex` um; `DexClassLoader` lädt **keine** rohen `.class`-/`.jar`-Dateien.
-* `packagePlugin` (aus `examples/plugin-packaging.gradle.kts`) packt `plugin.json` und `classes.dex` als ZIP; das ZIP enthält also **nur** diese zwei Dateien im Wurzelverzeichnis.
+* `packagePlugin` (aus `gradle/code-plugin.gradle.kts`, dasselbe Skript für alle Code-Plugins – reine Kotlin- und Android-Library-Module) packt `plugin.json`, `classes.dex` und `build-info.json` als ZIP, mit gesetztem `CF_PLUGIN_SIGNING_KEY` zusätzlich `signature.json`.
 * Gebaut wird mit der JDK-21-Toolchain, der Bytecode zielt auf Java 17 – wie `:libs:plugin-api` und die App.
 
 ### 9.5 Bauen, installieren, ausprobieren
@@ -667,7 +671,7 @@ export ANDROID_HOME=/pfad/zum/android/sdk
 ./gradlew :examples:packageAll   # alle Beispiel-Plugins nach examples/out/
 ```
 
-Sideload (Einstellungen → Plugins → „+“, aktivieren). Dann in einem Git-Projekt committen und über die Plugin-Schaltfläche der Editor-Leiste „Letzte Commits“ wählen. Auf dem Gerät noch nicht geprüft.
+Sideload (Einstellungen → Store → Installiert → „+“, aktivieren). Dann in einem Git-Projekt committen und über die Plugin-Schaltfläche der Editor-Leiste „Letzte Commits“ wählen. Auf dem Gerät noch nicht geprüft.
 
 ### 9.6 Eigenes Code-Plugin anlegen
 
@@ -694,7 +698,7 @@ override fun onLoad(context: PluginContext) {
 ```
 
 * **Protokoll:** `context.logger(tag)` mit `debug`/`info`/`warn`/`error(…, throwable)`. Die letzten 500 Zeilen je Plugin
-  zeigt Einstellungen → Plugins → **Protokoll**; zusätzlich landen sie mit dem Tag `plugin/<id>/<tag>` im App-Log.
+  zeigt Einstellungen → Store → Installiert → **Protokoll**; zusätzlich landen sie mit dem Tag `plugin/<id>/<tag>` im App-Log.
   Ein fehlgeschlagenes `onLoad` wird dort automatisch mit Stacktrace protokolliert.
 * **Andockstellen:** `context.register(point, value)` meldet einen Beitrag an einem `ExtensionPoint` an. Alles hängt am
   gemeinsamen `ExtensionRegistry` der App (`core/domain/…/extension/registry`); Befehle, Menüs und Ereignis-Empfänger
@@ -935,7 +939,7 @@ context.register(PluginUiExtensionPoints.PREVIEW, CsvPreview)
 ```
 
 UI-Plugins sind Android-Library-Module mit Compose, die nur ihre eigenen Klassen dexen; Compose, SDK und Coroutines
-kommen zur Laufzeit aus der App. Vorlage und gemeinsames Packen: `code-plugins/code-plugin.gradle.kts`
+kommen zur Laufzeit aus der App. Vorlage und gemeinsames Packen: `gradle/code-plugin.gradle.kts`
 (siehe [Code-Plugins](#10a-code-plugins-wie-in-vs-code)).
 
 ## 10. Beispiel 6: Hybrid – LSP-Plugin mit Download
@@ -1106,7 +1110,7 @@ alles, was nicht übertragbar ist.
 
 ### 11.2 Auf dem Gerät
 
-1. ZIP aufs Gerät, Einstellungen → Plugins → „+“.
+1. ZIP aufs Gerät, Einstellungen → Store → Installiert → „+“.
 2. Im Plugins-Bildschirm prüfen, dass das Plugin aktiviert ist und der Beitrag bzw. Befehl wirksam ist (ein Code-Plugin kann installiert, aber nicht geladen sein); bei `requires` die Meldung „Fehlende Programme“ bestätigen.
 3. Beitrag nutzen (Design wählen, PT-Menü öffnen, Datei formatieren, Befehl ausführen).
 4. Deaktivieren und wieder aktivieren: Beitrag verschwindet und kommt zurück.

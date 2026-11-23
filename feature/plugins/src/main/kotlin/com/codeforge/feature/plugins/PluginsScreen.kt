@@ -25,14 +25,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -49,50 +43,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.InstalledPlugin
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.EmbeddedActionsBar
-import com.codeforge.core.ui.SettingsTopBar
-import com.codeforge.core.ui.embeddedAwareInsets
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
-
-/** Route der Plugin-Verwaltung. */
-@Composable
-fun PluginsRoute(
-    modifier: Modifier = Modifier,
-    onBack: () -> Unit = {},
-    embedded: Boolean = false,
-    viewModel: PluginsViewModel = hiltViewModel()
-) {
-    val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        uri ?: return@rememberLauncherForActivityResult
-        val cachedFile = copyToCacheFile(context, uri) ?: return@rememberLauncherForActivityResult
-        viewModel.onEvent(PluginsUiEvent.InstallFromFile(cachedFile.path))
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.effect.collectLatest { effect ->
-            when (effect) {
-                is PluginsUiEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
-            }
-        }
-    }
-
-    PluginsScreen(
-        modifier = modifier,
-        uiState = uiState,
-        snackbarHostState = snackbarHostState,
-        onBack = onBack,
-        embedded = embedded,
-        onEvent = viewModel::onEvent,
-        onImportClicked = { filePickerLauncher.launch(arrayOf("application/zip", "application/octet-stream")) }
-    )
-}
 
 /**
  * SAF liefert nur eine content://-Uri, aber PluginRepository.installFromFile erwartet
@@ -105,89 +57,6 @@ private fun copyToCacheFile(context: android.content.Context, uri: Uri): File? =
     } ?: return null
     targetFile
 }.getOrNull()
-
-@Composable
-private fun PluginsScreen(
-    modifier: Modifier = Modifier,
-    uiState: PluginsUiState,
-    snackbarHostState: SnackbarHostState,
-    onBack: () -> Unit = {},
-    embedded: Boolean = false,
-    onEvent: (PluginsUiEvent) -> Unit,
-    onImportClicked: () -> Unit
-) {
-    uiState.requirementDialog?.let { RequirementDialogView(it, onEvent) }
-    uiState.logDialog?.let { PluginLogDialogView(it, onEvent) }
-    uiState.settingsSheet?.let { PluginSettingsSheetView(it, onEvent) }
-    uiState.infoDialog?.let { info ->
-        com.codeforge.core.ui.LspInfoDialog(
-            model = info.model,
-            runtime = info.runtime,
-            onDismiss = { onEvent(PluginsUiEvent.InfoDismissed) }
-        )
-    }
-    Scaffold(
-        modifier = modifier,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        contentWindowInsets = embeddedAwareInsets(embedded),
-        topBar = {
-            val importAction: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {
-                IconButton(onClick = onImportClicked) {
-                    Icon(Icons.Filled.Add, contentDescription = stringRes(R.string.plugins_plugin_installieren))
-                }
-            }
-            if (embedded) EmbeddedActionsBar(actions = importAction)
-            else SettingsTopBar(title = stringRes(R.string.plugins_plugins), onBack = onBack, actions = importAction)
-        }
-    ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            uiState.installProgressPercent?.let { percent ->
-                LinearProgressIndicator(
-                    progress = { percent / 100f },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            if (uiState.isLoading) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-                return@Scaffold
-            }
-
-            if (uiState.plugins.isEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        stringRes(R.string.plugins_keine_plugins_installiert_tippe_oben),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                return@Scaffold
-            }
-
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                items(uiState.plugins, key = { it.id }) { plugin ->
-                    PluginRow(
-                        plugin = plugin,
-                        isLoaded = plugin.id in uiState.loadedPluginIds,
-                        missing = uiState.missingRequirements[plugin.id].orEmpty(),
-                        hasSettings = plugin.id in uiState.pluginsWithSettings,
-                        issues = uiState.issues[plugin.id].orEmpty(),
-                        onEvent = onEvent
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 private fun PluginRow(

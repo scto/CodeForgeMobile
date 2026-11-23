@@ -15,4 +15,8 @@ kotlin {
     jvmToolchain(21)
 }
 
-apply(from = rootProject.file("examples/plugin-packaging.gradle.kts"))
+// Ausgabe wie bisher: examples/out/guide-commit-notes/guide-commit-notes.zip (+ entpackte Kopie).
+extra["pluginOutDir"] = "examples/out/${project.name}"
+extra["pluginArchiveName"] = "${project.name}.zip"
+extra["pluginUnpackedCopy"] = true
+apply(from = rootProject.file("gradle/code-plugin.gradle.kts"))
