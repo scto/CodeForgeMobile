@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-11-25
+
 ### Hinzugefügt / Added
 - Store: Einreichungen werden automatisch geprüft (Workflow `submission.yml`, `check_submission.py`: Archiv, Manifest,
   Store-Regeln, Version bei Updates) und mit Bericht samt SHA-256 kommentiert. / Automatic checks for store submissions.
