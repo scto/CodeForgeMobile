@@ -192,7 +192,13 @@ class PluginsViewModel @Inject constructor(
 
                 is PluginInstallEvent.Success -> {
                     _uiState.update { it.copy(installProgressPercent = null) }
-                    _effect.emit(PluginsUiEffect.ShowSnackbar(Res.string(R.string.common_installiert, installEvent.plugin.name)))
+                    val p = installEvent.plugin
+                    val text = if (com.codeforge.core.domain.extension.PluginApiVersion.isDeprecated(p.apiVersion, p.entryPointClass)) {
+                        Res.string(R.string.plugins_installed_api1_deprecated, p.name, com.codeforge.core.domain.extension.PluginApiVersion.API1_REMOVED_IN)
+                    } else {
+                        Res.string(R.string.common_installiert, p.name)
+                    }
+                    _effect.emit(PluginsUiEffect.ShowSnackbar(text))
                 }
 
                 is PluginInstallEvent.Failed -> {

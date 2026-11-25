@@ -54,7 +54,7 @@ zusammengeführt (Abschnitt 2.2). An zwei Stellen erzeugt das aber Doppelungen (
 | L5 | `LegacyLspInstalls` | `feature/settings/lsp/` | Räumt `opt/extensions` und `filesDir/extensions` alter Installationen auf | **behalten** (Aufräumhilfe für Geräte mit alter Version); später mit Datum entfernen |
 | L6 ✅ | Paketname `feature.settings.extensions` | `:feature:settings` | Enthält nur noch die Sprachserver-Verwaltung von Plugin-Servern | umbenannt in `…settings.lsp` (2026-11-25), Klassen `LspServers*` |
 | L7 ✅ | Drei Packaging-Wege für Code-Plugins | `examples/plugin-packaging.gradle.kts`, `templates/code-plugin/build.gradle.kts` (inline), `code-plugins/code-plugin.gradle.kts` | Nur letzterer schreibt `build-info.json` und signiert; die beiden anderen sind JVM-Module mit API 2 | auf `code-plugin.gradle.kts` vereinheitlichen, Vorlage und Leitfaden-Beispiel auf API 4 heben |
-| L8 | API 1 noch zulässig (`apiVersion in 1..4`, `LEGACY_OPEN` für `shell`/`lsp`) | `PluginManifestParser`, `PluginHooks.kt` (domain) | Kein eigenes Plugin nutzt API 1 oder 3 (98× API 2, 8× API 4) | bewusst als Kompatibilität behalten oder mit Ankündigung auf ≥ 2 anheben |
+| L8 ✅ | API 1 noch zulässig (`apiVersion in 1..4`, `LEGACY_OPEN` für `shell`/`lsp`) | `PluginManifestParser`, `PluginHooks.kt` (domain) | Kein eigenes Plugin nutzt API 1 oder 3 (98× API 2, 8× API 4) | abgekündigt (2026-11-25): Code-Plugins mit API 1 laufen mit Warnung, ab 3.4.0 abgelehnt |
 
 ## 4. Doppelungen (kein toter Code, aber unnötig)
 

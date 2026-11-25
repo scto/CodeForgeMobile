@@ -27,6 +27,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Code-Erzeugung, Projekt-Übernahme, Plugin-Export). / Google's color utilities and a theme kit module.
 
 ### Geändert / Changed
+- Plugin-API 1 für Code-Plugins abgekündigt (erlaubt `shell`/`lsp` ohne Berechtigung): Warnung in der Plugin-Liste und
+  nach der Installation, ab CodeForge 3.4.0 abgelehnt. / Plugin API 1 for code plugins is deprecated (rejected from 3.4.0).
 - Eigene CodeForge-Farbgebung (Indigo `#6366F1` aus dem Icon, Cyan `#06B6D4` als Akzent) statt Material-Standard-Lila.
   / CodeForge's own color scheme from the app icon.
 - Einstellungen → Erscheinungsbild ersetzt den bisherigen Theme-Bildschirm: Hell/Dunkel/System, dynamische Farben,

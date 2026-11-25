@@ -141,6 +141,14 @@ private fun PluginRow(
                 )
             }
 
+            if (com.codeforge.core.domain.extension.PluginApiVersion.isDeprecated(plugin.apiVersion, plugin.entryPointClass)) {
+                Text(
+                    stringRes(R.string.plugins_api1_deprecated, com.codeforge.core.domain.extension.PluginApiVersion.API1_REMOVED_IN),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
             issues.forEach { issue ->
                 Text(
                     when (issue) {

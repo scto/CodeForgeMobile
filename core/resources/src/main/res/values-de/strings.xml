@@ -2712,4 +2712,6 @@
     <string name="appearance_more_in_store">Mehr im Store</string>
     <string name="appearance_create_own">Eigenes erstellen</string>
     <string name="appearance_variant_both">Hell &amp; dunkel</string>
+    <string name="plugins_api1_deprecated">Nutzt die abgekündigte Plugin-API 1. Ab CodeForge %1$s wird es nicht mehr geladen; bitte beim Autor ein Update auf API 4 anfragen.</string>
+    <string name="plugins_installed_api1_deprecated">%1$s installiert. Hinweis: Es nutzt die abgekündigte Plugin-API 1 und wird ab CodeForge %2$s nicht mehr geladen.</string>
 </resources>

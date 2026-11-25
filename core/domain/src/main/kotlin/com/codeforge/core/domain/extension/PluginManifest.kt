@@ -11,6 +11,20 @@ package com.codeforge.core.domain.extension
 object PluginApiVersion {
     /** Aktuelle Version des Plugin-API-Vertrags. */
     const val CURRENT: Int = 4
+
+    /**
+     * Code-Plugins unter dieser Version sind abgekündigt: API 1 erlaubt `shell` und `lsp` ohne Berechtigung im Manifest.
+     * Sie laufen noch, zeigen aber eine Warnung; ab CodeForge [API1_REMOVED_IN] werden sie abgelehnt.
+     * Deklarative Plugins betrifft das nicht (für sie macht die Version keinen Unterschied).
+     */
+    const val DEPRECATED_BELOW: Int = 2
+
+    /** App-Version, ab der Code-Plugins mit API 1 nicht mehr geladen werden. */
+    const val API1_REMOVED_IN: String = "3.4.0"
+
+    /** Ob ein Plugin die abgekündigte API 1 für Code nutzt. */
+    fun isDeprecated(apiVersion: Int, entryPointClass: String?): Boolean =
+        !entryPointClass.isNullOrBlank() && apiVersion < DEPRECATED_BELOW
 }
 
 /** Berechtigungen, die ein Code-Plugin im Manifest anfordern muss (rein deklarative Plugins brauchen keine). */
