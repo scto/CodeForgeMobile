@@ -74,6 +74,9 @@ val LocalActiveGrammars = staticCompositionLocalOf<List<Resolved<GrammarContribu
 /** `null`, wenn kein Plugin-Farbschema mit eigenem Editor-Theme aktiv ist. */
 val LocalEditorThemeOverride = staticCompositionLocalOf<EditorThemeOverride?> { null }
 
+/** Alle Editor-Themes installierter Plugins (für eine ausdrückliche Auswahl in den Editor-Einstellungen). */
+val LocalEditorThemes = staticCompositionLocalOf<List<EditorThemeOverride>> { emptyList() }
+
 private const val ROLE_PRIMARY = "primary"
 
 private fun ExtensionColorTheme.derivedBase(): ColorScheme? {

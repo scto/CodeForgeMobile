@@ -66,6 +66,7 @@ fun ExtensionColorTheme.familyLabel(): String = label.replace(VARIANT_SUFFIX, ""
  *
  * @param themeState Theme-Einstellungen.
  * @param extensionTheme Aktives Plugin-Farbschema.
+ * @param extensionThemes Alle Plugin-Farbschemata (deren Editor-Themes sind im Editor wählbar).
  * @param iconTheme Aktives Plugin-Icon-Theme.
  * @param grammars Aktive Grammatiken.
  * @param content Inhalt.
@@ -74,6 +75,7 @@ fun ExtensionColorTheme.familyLabel(): String = label.replace(VARIANT_SUFFIX, ""
 fun CodeForgeTheme(
     themeState: ThemeConfig,
     extensionTheme: ExtensionColorTheme? = null,
+    extensionThemes: List<ExtensionColorTheme> = emptyList(),
     iconTheme: ExtensionIconTheme? = null,
     grammars: List<Resolved<GrammarContribution>> = emptyList(),
     content: @Composable () -> Unit
@@ -91,6 +93,9 @@ fun CodeForgeTheme(
     val editorOverride = remember(extensionTheme) {
         extensionTheme?.textMateThemePath?.let { EditorThemeOverride(extensionTheme.key, it, extensionTheme.isDark) }
     }
+    val editorThemes = remember(extensionThemes) {
+        extensionThemes.mapNotNull { t -> t.textMateThemePath?.let { EditorThemeOverride(t.key, it, t.isDark) } }
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,
@@ -98,6 +103,7 @@ fun CodeForgeTheme(
     ) {
         CompositionLocalProvider(
             LocalEditorThemeOverride provides editorOverride,
+            LocalEditorThemes provides editorThemes,
             LocalIconTheme provides iconTheme,
             LocalActiveGrammars provides grammars,
             content = content

@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme, iconTheme = iconTheme, grammars = activeContributions.grammars) {
+            CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme, extensionThemes = extensionThemes, iconTheme = iconTheme, grammars = activeContributions.grammars) {
                 androidx.compose.foundation.layout.Box {
                     CodeForgeNavHost(
                         startOnboarding = !settings.onboardingCompleted,

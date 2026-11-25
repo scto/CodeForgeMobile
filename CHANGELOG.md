@@ -27,6 +27,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Code-Erzeugung, Projekt-Übernahme, Plugin-Export). / Google's color utilities and a theme kit module.
 
 ### Geändert / Changed
+- Editor-Einstellungen → Editor-Theme: Neben „Automatisch“, Dark+ und Light+ sind jetzt die Editor-Themes aller
+  installierten Theme-Plugins (Store) wählbar, unabhängig vom App-Farbschema; wird das Plugin entfernt, gilt wieder
+  „Automatisch“. Der tote Ordner `extensions/themes` wird nicht mehr gelesen. / Editor themes from installed store
+  plugins are selectable in editor settings.
 - Projektvorlagen: Die 9 mitgelieferten Android-Vorlagen (Keine/Leere Activity, Native C++, Basic, Navigation Drawer,
   Bottom Navigation, Tabs, Ohne AndroidX, Jetpack Compose) sind jetzt normale Vorlagen-Plugins
   (`com.codeforge.plugin.android-*.template`), werden beim Start vorinstalliert und lassen sich wie Store-Vorlagen

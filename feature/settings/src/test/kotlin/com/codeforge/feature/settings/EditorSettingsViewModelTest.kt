@@ -71,7 +71,7 @@ class EditorSettingsViewModelTest {
                 .build()
         )
         settingsRepository = SettingsRepository(fakeDataStore)
-        viewModel = EditorSettingsViewModel(settingsRepository, themesDir = null)
+        viewModel = EditorSettingsViewModel(settingsRepository, pluginThemes = kotlinx.coroutines.flow.flowOf(emptyList()))
     }
 
     @After
@@ -244,7 +244,7 @@ class EditorSettingsViewModelTest {
     fun `backward compatibility with default empty proto`() = runTest(testDispatcher) {
         val emptyDataStore = FakeDataStore(AppSettings.getDefaultInstance())
         val emptyRepo = SettingsRepository(emptyDataStore)
-        val vm = EditorSettingsViewModel(emptyRepo, themesDir = null)
+        val vm = EditorSettingsViewModel(emptyRepo, pluginThemes = kotlinx.coroutines.flow.flowOf(emptyList()))
 
         val state = vm.uiState.first { !it.isLoading }
         assertEquals(4, state.tabSize)

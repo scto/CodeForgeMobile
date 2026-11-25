@@ -156,9 +156,17 @@ fun SoraCodeEditor(
             }?.item?.scopeName
         }
     }
-    val themedSettings = remember(settings, isDarkUi, overrideId) {
+    // Ausdrücklich gewähltes Editor-Theme eines Plugins (`ext:<plugin>/<theme>`); fehlt das Plugin, gilt "auto".
+    val pluginEditorThemes = com.codeforge.core.designsystem.LocalEditorThemes.current
+    val storedTheme = remember(settings.textmateTheme, pluginEditorThemes, context) {
+        selectPluginEditorTheme(settings.textmateTheme, pluginEditorThemes) { theme ->
+            TextMateAssetLoader.ensureInitialized(context)
+            TextMateAssetLoader.registerExternalTheme(theme.id, theme.filePath, theme.isDark)
+        }
+    }
+    val themedSettings = remember(settings, storedTheme, isDarkUi, overrideId) {
         settings.copy(
-            textmateTheme = resolveEditorTheme(settings.textmateTheme, isDarkUi, overrideId),
+            textmateTheme = resolveEditorTheme(storedTheme, isDarkUi, overrideId),
             wordWrap = settings.wordWrap || (settings.txtWordWrap && path.endsWith(".txt", ignoreCase = true))
         )
     }
@@ -479,6 +487,20 @@ private fun emphasizeBracketPair(scheme: EditorColorScheme) {
     scheme.setColor(EditorColorScheme.HIGHLIGHTED_DELIMITERS_FOREGROUND, accent)
     scheme.setColor(EditorColorScheme.HIGHLIGHTED_DELIMITERS_BACKGROUND, androidx.core.graphics.ColorUtils.setAlphaComponent(accent, 0x44))
     scheme.setColor(EditorColorScheme.HIGHLIGHTED_DELIMITERS_UNDERLINE, accent)
+}
+
+/**
+ * Gespeichertes Editor-Theme für die Auflösung: Plugin-Schlüssel (`ext:…`) nur, wenn das Plugin-Theme in [available]
+ * liegt und sich laden lässt ([register]), sonst "auto"; alle anderen Werte unverändert.
+ */
+internal fun selectPluginEditorTheme(
+    stored: String,
+    available: List<com.codeforge.core.designsystem.EditorThemeOverride>,
+    register: (com.codeforge.core.designsystem.EditorThemeOverride) -> Boolean
+): String {
+    if (!com.codeforge.core.domain.extension.ExtensionColorTheme.isExtensionKey(stored)) return stored
+    val theme = available.firstOrNull { it.id == stored } ?: return "auto"
+    return if (register(theme)) stored else "auto"
 }
 
 /** "auto"/leer -> dark_plus bzw. light_plus je nach effektivem App-Theme; sonst unverändert. */

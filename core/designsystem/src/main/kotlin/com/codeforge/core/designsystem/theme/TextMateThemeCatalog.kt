@@ -1,16 +1,20 @@
 package com.codeforge.core.designsystem.theme
 
 import com.codeforge.core.datastore.proto.ThemeMode
-import java.io.File
+import com.codeforge.core.domain.extension.ExtensionColorTheme
 
-/** Ein Editor-Theme (TextMate) mit ID und Anzeigename. */
+/**
+ * Ein Editor-Theme (TextMate) mit ID und Anzeigename. Themes aus Plugins haben als [id] den Schlüssel
+ * `ext:<plugin>/<theme>` und in [filePath] die TextMate-Datei.
+ */
 data class TextMateThemeItem(
     val id: String,
     val displayName: String,
-    val isDark: Boolean = true
+    val isDark: Boolean = true,
+    val filePath: String? = null
 )
 
-/** Verfügbare Editor-Themes: eingebaute und installierte. */
+/** Verfügbare Editor-Themes: eingebaute und die aus installierten Plugins (Store). */
 object TextMateThemeCatalog {
     const val AUTO_THEME_ID = "auto"
     const val DEFAULT_DARK_THEME = "dark_plus"
@@ -22,36 +26,11 @@ object TextMateThemeCatalog {
         TextMateThemeItem(DEFAULT_LIGHT_THEME, "Light+ (Standard Hell)", isDark = false)
     )
 
-    /** Liefert eingebaute und im Ordner [extensionsThemesDir] gefundene Themes. */
-    fun getAvailableThemes(extensionsThemesDir: File? = null): List<TextMateThemeItem> {
-        val result = mutableListOf<TextMateThemeItem>()
-        result.addAll(BUNDLED_THEMES)
-
-        if (extensionsThemesDir != null && extensionsThemesDir.isDirectory) {
-            val installedFiles = extensionsThemesDir.listFiles { file ->
-                file.isFile && (file.name.endsWith(".json") || file.name.endsWith(".tmTheme"))
-            }
-            if (installedFiles != null) {
-                for (file in installedFiles) {
-                    val id = file.nameWithoutExtension
-                    if (result.none { it.id.equals(id, ignoreCase = true) }) {
-                        result.add(
-                            TextMateThemeItem(
-                                id = id,
-                                displayName = id.replace('_', ' ').replace('-', ' ')
-                                    .split(' ')
-                                    .filter { it.isNotBlank() }
-                                    .joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } },
-                                isDark = !id.lowercase().contains("light")
-                            )
-                        )
-                    }
-                }
-            }
+    /** Eingebaute Themes und alle Plugin-Farbschemata mit TextMate-Editor-Theme ([pluginThemes]). */
+    fun getAvailableThemes(pluginThemes: List<ExtensionColorTheme> = emptyList()): List<TextMateThemeItem> =
+        BUNDLED_THEMES + pluginThemes.mapNotNull { theme ->
+            theme.textMateThemePath?.let { TextMateThemeItem(theme.key, theme.label, theme.isDark, it) }
         }
-
-        return result
-    }
 
     /**
      * Löst das anzuwendende TextMate-Theme auf:

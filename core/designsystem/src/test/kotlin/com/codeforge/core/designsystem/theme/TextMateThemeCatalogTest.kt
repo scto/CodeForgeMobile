@@ -1,17 +1,12 @@
 package com.codeforge.core.designsystem.theme
 
 import com.codeforge.core.datastore.proto.ThemeMode
+import com.codeforge.core.domain.extension.ExtensionColorTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
-import java.io.File
 
 class TextMateThemeCatalogTest {
-
-    @get:Rule
-    val tempFolder = TemporaryFolder()
 
     @Test
     fun `bundled themes appear in catalog`() {
@@ -21,18 +16,15 @@ class TextMateThemeCatalogTest {
     }
 
     @Test
-    fun `installed themes from extensions dir appear in catalog`() {
-        val extensionsDir = tempFolder.newFolder("themes")
-        File(extensionsDir, "monokai.json").writeText("{}")
-        File(extensionsDir, "nord.tmTheme").writeText("<plist></plist>")
-        File(extensionsDir, "ignored.txt").writeText("ignored")
-
-        val themes = TextMateThemeCatalog.getAvailableThemes(extensionsDir)
+    fun `plugin editor themes listed`() {
+        val withTm = ExtensionColorTheme("p.ayu", "ayu-dark", "Ayu Dark", true, emptyMap(), "/x/dark.json")
+        val withoutTm = ExtensionColorTheme("p.plain", "plain", "Plain", false, emptyMap())
+        val themes = TextMateThemeCatalog.getAvailableThemes(listOf(withTm, withoutTm))
         assertTrue(themes.any { it.id == "dark_plus" })
-        assertTrue(themes.any { it.id == "light_plus" })
-        assertTrue(themes.any { it.id == "monokai" })
-        assertTrue(themes.any { it.id == "nord" })
-        assertTrue(themes.none { it.id == "ignored" })
+        val ayu = themes.single { it.id == withTm.key }
+        assertEquals("Ayu Dark", ayu.displayName)
+        assertEquals("/x/dark.json", ayu.filePath)
+        assertTrue(themes.none { it.id == withoutTm.key })
     }
 
     @Test

@@ -633,7 +633,11 @@ private fun ThemeDropdown(
                     expanded = false
                 }
             )
-            availableThemes.forEach { theme ->
+            availableThemes.forEachIndexed { index, theme ->
+                // Trennlinie vor den Themes aus installierten Plugins (Store).
+                if (theme.filePath != null && availableThemes.getOrNull(index - 1)?.filePath == null) {
+                    androidx.compose.material3.HorizontalDivider()
+                }
                 DropdownMenuItem(
                     text = { Text(theme.displayName) },
                     onClick = {

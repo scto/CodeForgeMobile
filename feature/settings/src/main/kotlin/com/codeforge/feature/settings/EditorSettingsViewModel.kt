@@ -4,39 +4,33 @@
  */
 package com.codeforge.feature.settings
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.datastore.SettingsRepository
 import com.codeforge.core.designsystem.theme.TextMateThemeCatalog
+import com.codeforge.core.domain.extension.ExtensionColorTheme
+import com.codeforge.core.domain.extension.ExtensionThemeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 /** ViewModel der Editor-Einstellungen. */
 @HiltViewModel
 class EditorSettingsViewModel internal constructor(
     private val settingsRepository: SettingsRepository,
-    themesDir: File?
+    pluginThemes: Flow<List<ExtensionColorTheme>>
 ) : ViewModel() {
 
-    @Inject
-    constructor(
-        settingsRepository: SettingsRepository,
-        @ApplicationContext context: Context
-    ) : this(settingsRepository, File(context.filesDir, "extensions/themes"))
-
-    private val availableThemes = TextMateThemeCatalog.getAvailableThemes(themesDir)
-
-    /** UI-Zustand. */
+    /** UI-Zustand; Editor-Themes: eingebaute und die der installierten Theme-Plugins. */
     val uiState: StateFlow<EditorSettingsUiState> = settingsRepository.appSettings
-        .map { settings ->
+        .combine(pluginThemes) { settings, themes -> settings to TextMateThemeCatalog.getAvailableThemes(themes) }
+        .map { (settings, availableThemes) ->
             EditorSettingsUiState(
                 tabSize = settings.editor.tabSize.takeIf { it > 0 } ?: 4,
                 useTreeSitter = settings.editor.useTreeSitter,
@@ -82,7 +76,13 @@ class EditorSettingsViewModel internal constructor(
                 isLoading = false
             )
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EditorSettingsUiState(availableThemes = availableThemes))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EditorSettingsUiState())
+
+    @Inject
+    constructor(
+        settingsRepository: SettingsRepository,
+        extensionThemes: ExtensionThemeRepository
+    ) : this(settingsRepository, extensionThemes.themes)
 
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: EditorSettingsUiEvent) {
