@@ -40,6 +40,9 @@ object TermuxPropertiesText {
 
 /** Liest/schreibt `~/.termux/termux.properties`; Änderungen gelten für neue Terminal-Sitzungen. */
 class TermuxPropertiesStore(private val file: File = defaultFile()) {
+    /** Pfad der Datei (Anzeige). */
+    val path: String get() = file.path
+
     /** Liest den Wert von [key] aus der Datei. */
     fun read(key: String): String? =
         runCatching { if (file.isFile) TermuxPropertiesText.get(file.readText(), key) else null }.getOrNull()
@@ -51,7 +54,47 @@ class TermuxPropertiesStore(private val file: File = defaultFile()) {
         file.writeText(TermuxPropertiesText.set(old, key, value))
     }.isSuccess
 
+    /** Ganzer Inhalt; leer, wenn die Datei fehlt. */
+    fun readText(): String = runCatching { if (file.isFile) file.readText() else "" }.getOrDefault("")
+
+    /**
+     * Ersetzt den ganzen Inhalt durch [text]. Eine vorhandene Datei wird vorher nach
+     * `~/.termux/backup/termux.properties.<zeit>.bak` gesichert (die neuesten [MAX_BACKUPS] bleiben).
+     *
+     * @return Sicherungsdatei oder `null`, wenn es noch keine Datei gab.
+     */
+    fun replaceAll(text: String, now: java.util.Date = java.util.Date()): Result<File?> = runCatching {
+        val dir = requireNotNull(file.parentFile) { "kein Ordner: ${file.path}" }
+        val backup = if (file.isFile) {
+            val backups = File(dir, BACKUP_DIR).apply { mkdirs() }
+            val stamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss", java.util.Locale.ROOT).format(now)
+            File(backups, "${file.name}.$stamp.bak").also { file.copyTo(it, overwrite = true) }
+                .also { prune(backups) }
+        } else {
+            dir.mkdirs()
+            null
+        }
+        val tmp = File(dir, "${file.name}.tmp")
+        tmp.writeText(if (text.isEmpty() || text.endsWith("\n")) text else text + "\n")
+        if (!tmp.renameTo(file)) {
+            tmp.copyTo(file, overwrite = true)
+            tmp.delete()
+        }
+        backup
+    }
+
+    private fun prune(backups: File) {
+        backups.listFiles { f -> f.name.startsWith(file.name) && f.name.endsWith(".bak") }.orEmpty()
+            .sortedByDescending { it.name }
+            .drop(MAX_BACKUPS)
+            .forEach { it.delete() }
+    }
+
     companion object {
+        /** Unterordner der Sicherungen (neben termux.properties). */
+        const val BACKUP_DIR = "backup"
+        /** So viele Sicherungen bleiben erhalten. */
+        const val MAX_BACKUPS = 10
         const val KEY_TRANSCRIPT_ROWS = "terminal-transcript-rows"
         const val KEY_CURSOR_STYLE = "terminal-cursor-style"
         const val KEY_EXTRA_KEYS = "extra-keys"

@@ -300,11 +300,19 @@ private fun TerminalSettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            TermuxIntegrationCard(uiState = uiState, onEvent = onEvent)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             BackupCard(uiState = uiState, onEvent = onEvent)
 
             Spacer(modifier = Modifier.height(16.dp))
 
             ExtraKeysCard(uiState = uiState, onEvent = onEvent)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TermuxPropertiesCard(uiState = uiState, onEvent = onEvent)
         }
     }
 }

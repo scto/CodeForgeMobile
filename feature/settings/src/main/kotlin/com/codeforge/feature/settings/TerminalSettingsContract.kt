@@ -28,6 +28,20 @@ data class TerminalSettingsUiState(
     /** Aktuelle `extra-keys` (Einzeiler) – eigene Belegung oder Termux-Standard. */
     val extraKeys: String = ExtraKeysConfig.DEFAULT,
     val extraKeysCustom: Boolean = false,
+    /** „Über anderen Apps einblenden“ ist erlaubt (Terminal darf sich aus dem Hintergrund öffnen). */
+    val overlayGranted: Boolean = false,
+    /** Akku-Optimierung für die App ist aus (lange Sitzungen/Builds im Hintergrund). */
+    val batteryUnrestricted: Boolean = false,
+    /** `allow-external-apps=true` in termux.properties. */
+    val allowExternalApps: Boolean = false,
+    /** Rückmeldung „Einstellungen neu geladen“ anzeigen. */
+    val settingsReloaded: Boolean = false,
+    /** Pfad von termux.properties (Anzeige). */
+    val propertiesPath: String = "",
+    /** Inhalt im Editor, solange er offen ist; sonst null. */
+    val propertiesDraft: String? = null,
+    /** Ergebnis des letzten Speicherns (fertiger Text) oder null. */
+    val propertiesMessage: String? = null,
     /** Einmalige Rückmeldung zur Schriftinstallation (Resource-ID) oder null. */
     val fontMessageRes: Int? = null,
     val isLoading: Boolean = true
@@ -67,6 +81,20 @@ sealed interface TerminalSettingsUiEvent {
     data object FontReset : TerminalSettingsUiEvent
     /** Die Schrift-Rückmeldung wurde angezeigt. */
     data object FontMessageShown : TerminalSettingsUiEvent
+    /** Berechtigungsstatus neu lesen (z. B. nach Rückkehr aus den Systemeinstellungen). */
+    data object PermissionsRefresh : TerminalSettingsUiEvent
+    /** termux.properties neu laden (wie `termux-reload-settings`). */
+    data object ReloadSettings : TerminalSettingsUiEvent
+    /** Die Rückmeldung zum Neuladen wurde angezeigt. */
+    data object ReloadShown : TerminalSettingsUiEvent
+    /** termux.properties im Editor öffnen. */
+    data object PropertiesEditRequested : TerminalSettingsUiEvent
+    /** Editor ohne Speichern schließen. */
+    data object PropertiesEditCancelled : TerminalSettingsUiEvent
+    /** Inhalt speichern (vorher Sicherung der bisherigen Datei). */
+    data class PropertiesSaved(val text: String) : TerminalSettingsUiEvent
+    /** Die Speicher-Rückmeldung wurde angezeigt. */
+    data object PropertiesMessageShown : TerminalSettingsUiEvent
 }
 
 /** Umrechnung zwischen Einstellungs-sp (8–32) und der Pixel-Schriftgröße des Termux-Terminals. */

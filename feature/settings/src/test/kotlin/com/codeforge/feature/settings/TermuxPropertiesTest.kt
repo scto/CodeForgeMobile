@@ -43,6 +43,20 @@ class TermuxPropertiesTest {
         assertEquals(true, store.write("terminal-transcript-rows", "5000"))
         assertEquals("5000", store.read("terminal-transcript-rows"))
     }
+
+    @Test
+    fun `Ersetzen sichert alte Datei`() {
+        val file = tmp.root.resolve("home/.termux/termux.properties")
+        val store = TermuxPropertiesStore(file)
+        assertNull(store.replaceAll("bell-character=ignore").getOrThrow())
+        assertEquals("bell-character=ignore\n", store.readText())
+        val backup = store.replaceAll("bell-character=vibrate\n", java.util.Date(0)).getOrThrow()!!
+        assertEquals("bell-character=ignore\n", backup.readText())
+        assertEquals("backup", backup.parentFile.name)
+        assertEquals("bell-character=vibrate\n", store.readText())
+        repeat(12) { store.replaceAll("x=$it", java.util.Date(it * 1000L + 5000)) }
+        assertEquals(TermuxPropertiesStore.MAX_BACKUPS, backup.parentFile.listFiles()!!.size)
+    }
 }
 
 class TerminalFontSizeTest {

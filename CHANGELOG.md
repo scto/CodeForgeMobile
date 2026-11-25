@@ -12,6 +12,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- Terminal-Einstellungen → „Berechtigungen & Integration“: erklärt, warum das eingebaute Terminal keine
+  Termux-Berechtigung „Befehle ausführen“ und kein `allow-external-apps` braucht, zeigt den Status von „Über anderen
+  Apps einblenden“ und der Akku-Optimierung (mit „Erlauben“, Prüfung bei Rückkehr) und lädt `termux.properties` neu. /
+  Terminal settings: permissions & integration section.
+- Terminal-Einstellungen → „termux.properties“: ganze Datei im Vollbild-Editor bearbeiten; vor dem Speichern wird die
+  bisherige Datei nach `~/.termux/backup/termux.properties.<Zeit>.bak` gesichert (die letzten 10 bleiben), danach werden
+  die Einstellungen neu geladen. / Edit termux.properties with automatic backups.
 - Projektvorlagen für Plugin-Autoren (13, auch im Store): je Plugin-Art ein eigenständiges Projekt – Farbschema,
   Icon-Theme, Sprachpaket, Grammatik, Snippets, Sprachserver, Formatierer, Werkzeug, Bundle, Projektvorlage,
   Agent-Werkzeug, Code (Sandbox) und Code (voll). Plugin-ID ist das Package, `./gradlew packagePlugin` prüft und packt

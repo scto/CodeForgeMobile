@@ -30,8 +30,6 @@ class TerminalSettingsViewModel @Inject constructor(
         runCatching { com.codeforge.shared.termux.settings.preferences.TermuxAppSharedPreferences.build(context, false) }.getOrNull()
     }
 
-    private fun readTermuxFontSp(): Int? = runCatching { termuxPrefs?.fontSize }.getOrNull()
-        ?.let { TerminalFontSize.pxToSp(it, density) }
     private val termuxFontSp = MutableStateFlow(readTermuxFontSp())
 
     private val fontInstaller = TerminalFontInstaller()
@@ -40,7 +38,6 @@ class TerminalSettingsViewModel @Inject constructor(
     private val properties = TermuxPropertiesStore()
     private val termuxState = MutableStateFlow(readTermuxState())
 
-    private fun readExtraKeys(): String? = properties.read(TermuxPropertiesStore.KEY_EXTRA_KEYS)?.takeIf { it.isNotBlank() }
     private val extraKeysState = MutableStateFlow(readExtraKeys())
     private val killOnExitState = MutableStateFlow(readKillOnExit())
     private val backupState = MutableStateFlow(false to (null as String?))
@@ -52,24 +49,22 @@ class TerminalSettingsViewModel @Inject constructor(
         )
     }
     private val clipboardState = MutableStateFlow(readClipboardShortcuts())
-    private fun readClipboardShortcuts(): Boolean = runCatching { termuxPrefs?.areClipboardShortcutsEnabled() }.getOrNull() == true
-    private fun readKillOnExit(): Boolean = runCatching { termuxPrefs?.shouldKillSessionsOnExit() }.getOrNull() == true
+    // Overlay erlaubt, Akku-Optimierung aus, allow-external-apps, „neu geladen“-Hinweis.
+    private val integrationState = MutableStateFlow(readIntegration(reloaded = false))
 
-    private fun readTermuxState(): Pair<Int, String> {
-        val rows = properties.read(TermuxPropertiesStore.KEY_TRANSCRIPT_ROWS)?.toIntOrNull()
-            ?.coerceIn(100, 50_000) ?: TerminalScrollback.DEFAULT
-        val style = properties.read(TermuxPropertiesStore.KEY_CURSOR_STYLE)
-            ?.takeIf { it in setOf("block", "bar", "underline") } ?: "block"
-        return rows to style
-    }
+    // Editor-Entwurf von termux.properties (null = geschlossen) und letzte Rückmeldung.
+    private val propsState = MutableStateFlow(null as String? to (null as String?))
 
     /** UI-Zustand. */
-    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState, backupState) { e, k, c, b -> listOf(e, k, c, b) }) { settings, termux, fontSp, font, extra ->
+    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState, backupState, combine(propsState, integrationState) { p, i -> p to i }) { e, k, c, b, p -> listOf(e, k, c, b, p) }) { settings, termux, fontSp, font, extra ->
             @Suppress("UNCHECKED_CAST")
             val extraKeys = extra[0] as String?
             val killOnExit = extra[1] as Boolean
             val clipboard = extra[2] as Boolean
             val backup = extra[3] as Pair<Boolean, String?>
+            @Suppress("UNCHECKED_CAST")
+            val propsAndIntegration = extra[4] as Pair<Pair<String?, String?>, TermuxIntegration>
+            val (props, integration) = propsAndIntegration
             TerminalSettingsUiState(
                 fontSize = fontSp ?: settings.terminal.fontSize.takeIf { it > 0 } ?: 14,
                 useCompactTerminal = settings.terminal.useCompactTerminal,
@@ -83,10 +78,34 @@ class TerminalSettingsViewModel @Inject constructor(
                 extraKeys = extraKeys ?: ExtraKeysConfig.DEFAULT,
                 extraKeysCustom = extraKeys != null,
                 fontMessageRes = font.second,
+                overlayGranted = integration.overlayGranted,
+                batteryUnrestricted = integration.batteryUnrestricted,
+                allowExternalApps = integration.allowExternalApps,
+                settingsReloaded = integration.reloaded,
+                propertiesPath = properties.path,
+                propertiesDraft = props.first,
+                propertiesMessage = props.second,
                 isLoading = false
             )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TerminalSettingsUiState())
+
+    private fun readTermuxFontSp(): Int? = runCatching { termuxPrefs?.fontSize }.getOrNull()
+        ?.let { TerminalFontSize.pxToSp(it, density) }
+
+    private fun readExtraKeys(): String? = properties.read(TermuxPropertiesStore.KEY_EXTRA_KEYS)?.takeIf { it.isNotBlank() }
+
+    private fun readClipboardShortcuts(): Boolean = runCatching { termuxPrefs?.areClipboardShortcutsEnabled() }.getOrNull() == true
+
+    private fun readKillOnExit(): Boolean = runCatching { termuxPrefs?.shouldKillSessionsOnExit() }.getOrNull() == true
+
+    private fun readTermuxState(): Pair<Int, String> {
+        val rows = properties.read(TermuxPropertiesStore.KEY_TRANSCRIPT_ROWS)?.toIntOrNull()
+            ?.coerceIn(100, 50_000) ?: TerminalScrollback.DEFAULT
+        val style = properties.read(TermuxPropertiesStore.KEY_CURSOR_STYLE)
+            ?.takeIf { it in setOf("block", "bar", "underline") } ?: "block"
+        return rows to style
+    }
 
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: TerminalSettingsUiEvent) {
@@ -158,12 +177,63 @@ class TerminalSettingsViewModel @Inject constructor(
                 }
                 TerminalSettingsUiEvent.FontMessageShown ->
                     fontState.value = fontState.value.first to null
+                TerminalSettingsUiEvent.PermissionsRefresh, TerminalSettingsUiEvent.ReloadSettings,
+                TerminalSettingsUiEvent.ReloadShown, TerminalSettingsUiEvent.PropertiesEditRequested,
+                TerminalSettingsUiEvent.PropertiesEditCancelled, is TerminalSettingsUiEvent.PropertiesSaved,
+                TerminalSettingsUiEvent.PropertiesMessageShown -> onPropertiesEvent(event)
                 is TerminalSettingsUiEvent.CursorStyleChanged -> {
                     properties.write(TermuxPropertiesStore.KEY_CURSOR_STYLE, event.style.takeIf { it != "block" })
                     termuxState.value = readTermuxState()
                     notifyTermuxStylingReload()
                 }
             }
+        }
+    }
+
+    private fun readIntegration(reloaded: Boolean) = TermuxIntegration(
+        overlayGranted = TermuxIntegration.overlayGranted(context),
+        batteryUnrestricted = TermuxIntegration.batteryUnrestricted(context),
+        allowExternalApps = properties.read(TermuxIntegration.KEY_ALLOW_EXTERNAL_APPS)?.trim()?.lowercase() == "true",
+        reloaded = reloaded,
+    )
+
+    // termux.properties (Editor, Neuladen) und Systemrechte.
+    private suspend fun onPropertiesEvent(event: TerminalSettingsUiEvent) {
+        when (event) {
+            TerminalSettingsUiEvent.PermissionsRefresh -> integrationState.value = readIntegration(integrationState.value.reloaded)
+            TerminalSettingsUiEvent.ReloadSettings -> {
+                notifyTermuxStylingReload()
+                termuxState.value = readTermuxState()
+                extraKeysState.value = readExtraKeys()
+                integrationState.value = readIntegration(reloaded = true)
+            }
+            TerminalSettingsUiEvent.ReloadShown -> integrationState.value = integrationState.value.copy(reloaded = false)
+            TerminalSettingsUiEvent.PropertiesEditRequested -> {
+                val text = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { properties.readText() }
+                propsState.value = text to null
+            }
+            TerminalSettingsUiEvent.PropertiesEditCancelled -> propsState.value = null to propsState.value.second
+            is TerminalSettingsUiEvent.PropertiesSaved -> saveProperties(event.text)
+            TerminalSettingsUiEvent.PropertiesMessageShown -> propsState.value = propsState.value.first to null
+            else -> Unit
+        }
+    }
+
+    private suspend fun saveProperties(text: String) {
+        val result = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { properties.replaceAll(text) }
+        result.onSuccess { backup ->
+            val r = com.codeforge.core.resources.R.string.settings_terminal_properties_saved
+            val message = if (backup != null) context.getString(r, backup.path)
+            else context.getString(com.codeforge.core.resources.R.string.settings_terminal_properties_saved_new)
+            propsState.value = null to message
+            // Werte der übrigen Abschnitte aus der neuen Datei übernehmen.
+            termuxState.value = readTermuxState()
+            extraKeysState.value = readExtraKeys()
+            integrationState.value = readIntegration(reloaded = false)
+            notifyTermuxStylingReload()
+        }.onFailure { e ->
+            val r = com.codeforge.core.resources.R.string.settings_terminal_properties_failed
+            propsState.value = text to context.getString(r, e.message ?: e.javaClass.simpleName)
         }
     }
 
