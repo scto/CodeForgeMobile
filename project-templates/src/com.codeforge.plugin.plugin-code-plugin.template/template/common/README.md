@@ -11,7 +11,7 @@ Plugin: Code (voll) – Kotlin-Plugin mit Befehl, Menü und Ereignissen (nur Sid
 
 ## Bauen und testen
 
-* `src/main/kotlin/…` enthält den Code, `plugin.json` das Manifest. `./gradlew packagePlugin` kompiliert, dext (d8, braucht `ANDROID_HOME` mit build-tools) und schreibt `build/plugin/<id>.zip`. `libs/codeforge-plugin-sdk.jar` ist die Plugin-API (nur zum Kompilieren).
+* `src/main/kotlin/…` enthält den Code, `plugin.json` das Manifest. `./gradlew packagePlugin` kompiliert, dext (d8 aus den Android-Build-Tools) und schreibt `build/plugin/<id>.zip`. Im Terminal von CodeForge ist `ANDROID_HOME` bereits gesetzt; fehlen die Build-Tools, im SDK-Manager installieren. `libs/codeforge-plugin-sdk.jar` ist die Plugin-API (nur zum Kompilieren).
 * Im Terminal von CodeForge: `./gradlew packagePlugin`
 * Installieren: Einstellungen → Store → Installiert → „+“ → ZIP aus `build/plugin/` wählen. Nach Änderungen
   `version` erhöhen und erneut installieren.

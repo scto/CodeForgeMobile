@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.android-no-activity.template",
   "name": "Keine Activity (Projektvorlage)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Eingebaute Projektvorlage: Nur Gradle-Grundgerüst ohne Quellcode.",

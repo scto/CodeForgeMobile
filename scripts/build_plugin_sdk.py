@@ -8,6 +8,7 @@ App diese Klassen bereit.
 Vorher:  ./gradlew :libs:plugin-api:bundleLibCompileToJarRelease :core:domain:bundleLibCompileToJarRelease \
              :libs:terminal-engine:bundleLibCompileToJarRelease
 Aufruf:  python3 scripts/build_plugin_sdk.py <ziel.jar>
+         python3 scripts/build_plugin_sdk.py --check   (CI: Vorlagen-JARs aktuell? sonst Exit 1)
 """
 import re
 import struct
@@ -54,7 +55,10 @@ def load(jar):
         return {n: z.read(n) for n in z.namelist() if not n.endswith("/")}
 
 
-def main(target):
+TEMPLATE_JARS = sorted((ROOT / "project-templates/src").glob("*/template/common/libs/codeforge-plugin-sdk.jar.tpl"))
+
+
+def build_entries():
     for jar in [API, *DEPS]:
         if not jar.is_file():
             raise SystemExit(f"Fehlt: {jar.relative_to(ROOT)} (Gradle-Aufruf siehe Kopf dieses Skripts)")
@@ -75,6 +79,27 @@ def main(target):
     entries = {n: b for n, b in api.items() if n.endswith(".class") or n.endswith(".kotlin_module")}
     entries.update({f"{k}.class": classes[k] for k in keep})
     entries.update({n: b for n, b in deps.items() if n.endswith(".kotlin_module")})
+    return entries
+
+
+def check():
+    expected = build_entries()
+    stale = []
+    for jar in TEMPLATE_JARS:
+        with zipfile.ZipFile(jar) as z:
+            actual = {n: z.read(n) for n in z.namelist()}
+        if actual != expected:
+            stale.append(jar.relative_to(ROOT))
+    if not TEMPLATE_JARS or stale:
+        for s in stale:
+            print(f"veraltet: {s}")
+        raise SystemExit("Plugin-SDK der Code-Vorlagen passt nicht zu :libs:plugin-api → "
+                         "python3 project-templates/make_plugin_templates.py ausführen und committen")
+    print(f"Plugin-SDK aktuell ({len(TEMPLATE_JARS)} Vorlagen, {len(expected)} Einträge)")
+
+
+def main(target):
+    entries = build_entries()
     target = Path(target)
     target.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
@@ -88,4 +113,7 @@ def main(target):
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         raise SystemExit(__doc__)
-    main(sys.argv[1])
+    if sys.argv[1] == "--check":
+        check()
+    else:
+        main(sys.argv[1])

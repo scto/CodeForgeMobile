@@ -1,0 +1,47 @@
+# Prüft Einreichungen (Issue-Formular „Plugin einreichen“, Label submission) automatisch und kommentiert das Ergebnis.
+# Übernommen wird erst nach Durchsicht durch einen Maintainer (Quelle ins App-Repo, publish.py).
+name: Einreichung prüfen
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: submission-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: contains(github.event.issue.labels.*.name, 'submission')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prüfen
+        id: check
+        env:
+          BODY: ${{ github.event.issue.body }}
+        run: |
+          printf '%s' "$BODY" > /tmp/body.md
+          if python3 scripts/check_submission.py /tmp/body.md /tmp/report.md; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Ergebnis kommentieren
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+          OK: ${{ steps.check.outputs.ok }}
+        run: |
+          gh issue comment "$ISSUE" --body-file /tmp/report.md
+          gh label create check-passed --color 0E8A16 --description "Automatische Prüfung bestanden" 2>/dev/null || true
+          gh label create check-failed --color D93F0B --description "Automatische Prüfung fehlgeschlagen" 2>/dev/null || true
+          if [ "$OK" = "true" ]; then
+            gh issue edit "$ISSUE" --add-label check-passed --remove-label check-failed
+          else
+            gh issue edit "$ISSUE" --add-label check-failed --remove-label check-passed
+          fi

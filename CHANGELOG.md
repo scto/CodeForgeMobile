@@ -12,6 +12,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- Store: Einreichungen werden automatisch geprüft (Workflow `submission.yml`, `check_submission.py`: Archiv, Manifest,
+  Store-Regeln, Version bei Updates) und mit Bericht samt SHA-256 kommentiert. / Automatic checks for store submissions.
+- CI prüft, ob das Plugin-SDK der Code-Vorlagen zu `:libs:plugin-api` passt (`build_plugin_sdk.py --check`). /
+  CI checks that the code templates' plugin SDK is current.
 - Terminal-Einstellungen → „Berechtigungen & Integration“: erklärt, warum das eingebaute Terminal keine
   Termux-Berechtigung „Befehle ausführen“ und kein `allow-external-apps` braucht, zeigt den Status von „Über anderen
   Apps einblenden“ und der Akku-Optimierung (mit „Erlauben“, Prüfung bei Rückkehr) und lädt `termux.properties` neu. /
@@ -42,6 +46,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Code-Erzeugung, Projekt-Übernahme, Plugin-Export). / Google's color utilities and a theme kit module.
 
 ### Geändert / Changed
+- Vorlage „Keine Activity“ (1.0.1) legt den Quellordner des Packages wieder an; Code-Vorlagen erklären, dass
+  `ANDROID_HOME` im Terminal gesetzt ist und die Build-Tools aus dem SDK-Manager kommen. / Small template fixes.
 - Editor-Einstellungen → Editor-Theme: Neben „Automatisch“, Dark+ und Light+ sind jetzt die Editor-Themes aller
   installierten Theme-Plugins (Store) wählbar, unabhängig vom App-Farbschema; wird das Plugin entfernt, gilt wieder
   „Automatisch“. Der tote Ordner `extensions/themes` wird nicht mehr gelesen. / Editor themes from installed store

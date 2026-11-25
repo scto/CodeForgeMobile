@@ -100,6 +100,13 @@ jobs:
           chmod +x gradlew
           ./gradlew :app:assembleDebug --stacktrace
 
+      - name: Plugin-SDK der Code-Vorlagen aktuell
+        # Code-Vorlagen (project-templates/src/*code*) bringen die Plugin-API als compileOnly-JAR mit.
+        run: |
+          ./gradlew :libs:plugin-api:bundleLibCompileToJarRelease :core:domain:bundleLibCompileToJarRelease \
+            :libs:terminal-engine:bundleLibCompileToJarRelease --stacktrace
+          python3 scripts/build_plugin_sdk.py --check
+
       - name: APK suchen, Prüfsumme und Zusammenfassung
         id: apk
         run: |

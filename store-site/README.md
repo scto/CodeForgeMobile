@@ -21,10 +21,15 @@ Formatierer, Werkzeuge, Bundles, Projektvorlagen), nimmt die gebauten Code-Plugi
 | Workflow | Auslöser | Wirkung |
 |---|---|---|
 | `packages.yml` | Push mit geänderten Paketen | lädt neue Versionen als `<id>-<version>.zip` ins Release `packages` (dort zählt GitHub Downloads) |
+| `submission.yml` | Issue mit Label `submission` (neu/bearbeitet) | prüft die Einreichung, kommentiert den Bericht, Label `check-passed`/`check-failed` |
 | `stats.yml` | täglich 23:17 UTC (≈ 00:17 Schweiz), jede Bewertung, nach `packages.yml` | `scripts/stats.py` → `stats.json` (Downloads aller Versionen, Bewertungen, Rezensionen) |
 
-Einreichen: Issue-Formular `submit.yml` (Label `submission`, ZIP als Anhang). Nach Prüfung kommt das Paket unter
-seiner ID als Quelle ins App-Repo (passender `*/src/`-Ordner) und wird mit `publish.py` veröffentlicht.
+Einreichen: Issue-Formular `submit.yml` (Label `submission`, ZIP als Anhang). Der Workflow `submission.yml` lädt das
+ZIP, prüft Archiv, Manifest und Store-Regeln (`scripts/check_submission.py`: Pfade, JSON, ID/Version passend zum
+Formular, keine `com.codeforge.`-IDs, kein Code außer Sandbox-`classes.dex`, keine `.sh`/Agent-Werkzeuge, Verweise,
+höhere Version bei Updates), kommentiert einen Bericht mit SHA-256 und setzt `check-passed`/`check-failed`.
+Übernommen wird nach Durchsicht durch einen Maintainer: Paket als Quelle ins App-Repo (passender `*/src/`-Ordner),
+dann `publish.py`.
 
 Bewerten: Issue-Formular `rating.yml` (Paket-ID, 1–5 Sterne, Text). Je Nutzer und Paket zählt die neueste Bewertung;
 Issues mit Label `spam`/`invalid` werden ignoriert. App und Website öffnen das Formular vorausgefüllt.
