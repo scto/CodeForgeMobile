@@ -17,6 +17,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import taxonomy  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+import pluginkit  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 SITE = Path(__file__).resolve().parent / "site"
@@ -128,8 +130,7 @@ def main(store):
           "description": f"Alle Farbschemata von CodeForge als Bundle ({len(theme_ids)} Pakete).", "permissions": [],
           "contributes": {"extensionPack": theme_ids}}
     bzip = pk / f"{bid}.zip"
-    with zipfile.ZipFile(bzip, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("plugin.json", json.dumps(bm, ensure_ascii=False, indent=2) + "\n")
+    pluginkit.pack_manifest_only(bm, bzip, "store-site/publish.py", source=Path(__file__).resolve().parent)
     seen.add(bid)
     items.append(item_for(bm, bzip.read_bytes(), "bundle", old, today))
     # Bundles: Mitglieder müssen im Katalog stehen

@@ -9,8 +9,10 @@ Aufruf: python3 theme-plugins/generate.py [ausgabeordner]   (Standard: theme-plu
 Schreibt Quellordner nach theme-plugins/src/<id>/ und ZIPs nach <ausgabeordner>/<id>.zip.
 Farben: nur primary/secondary/tertiary wie in der App; alle übrigen Rollen kommen vom Material-3-Standardschema.
 """
-import hashlib, json, sys, zipfile
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+import pluginkit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 # (preset-id, Anzeigename, primary, secondary, tertiary) – Quelle der Store-Pakete; die App leitet daraus ein
@@ -35,11 +37,6 @@ PRESETS = [
 ]
 
 
-def dump(path, obj):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
 def main(out):
     out.mkdir(parents=True, exist_ok=True)
     for pid, label, p, s, t in PRESETS:
@@ -47,9 +44,9 @@ def main(out):
         plugin_id = f"com.codeforge.plugin.{slug}.theme"
         folder = ROOT / "src" / plugin_id
         colors = {"colors": {"primary": p, "secondary": s, "tertiary": t}}
-        dump(folder / "themes" / "dark.json", colors)
-        dump(folder / "themes" / "light.json", colors)
-        dump(folder / "plugin.json", {
+        pluginkit.dump_json(folder / "themes" / "dark.json", colors)
+        pluginkit.dump_json(folder / "themes" / "light.json", colors)
+        pluginkit.dump_json(folder / "plugin.json", {
             "id": plugin_id,
             "name": f"{label} (Farbschema)",
             "version": "1.0.0",
@@ -62,12 +59,7 @@ def main(out):
                 {"id": f"{slug}-light", "label": f"{label} Light", "uiTheme": "light", "path": "themes/light.json"},
             ]},
         })
-        target = out / f"{plugin_id}.zip"
-        with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-            for f in sorted(folder.rglob("*")):
-                if f.is_file():
-                    z.write(f, f.relative_to(folder).as_posix())
-        print(f"{target.name}  sha256={hashlib.sha256(target.read_bytes()).hexdigest()}")
+        pluginkit.pack(folder, out / f"{plugin_id}.zip", "theme-plugins/generate.py")
 
 
 if __name__ == "__main__":

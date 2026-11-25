@@ -67,7 +67,7 @@ ab und wechselt zwischen deren Hell- und Dunkel-Variante passend zum Modus. Frü
 sobald das Paket installiert ist (`LegacyThemeMigration`). Eigene Farbschemata entstehen im neuen Theme-Builder
 („Als App-Farbschema“).
 
-### 4.2 Sechs Generatoren mit ähnlicher Logik
+### 4.2 Sechs Generatoren mit ähnlicher Logik — **erledigt (2026-11-25): `scripts/pluginkit.py`**
 
 `theme-plugins/`, `textmate-plugins/`, `icon-plugins/`, `content-plugins/`, `tool-plugins/` und `project-templates/`
 haben je ein eigenes `generate.py`. Dazu kommen `templates/build.py` und `store-site/publish.py`. ZIP-Bau, Manifest und
@@ -114,7 +114,7 @@ damaligen Stand.
 ## 7. Empfohlene Reihenfolge vor dem Commit
 
 **Stand 2026-11-24:** Schritte 1–5 erledigt (✅ in Abschnitt 3; L7: gemeinsames `gradle/code-plugin.gradle.kts`,
-Vorlage und Leitfaden-Beispiel auf API 4). Tree-sitter (§ 5) fertiggestellt (Farben aus dem Editor-Theme, zusätzliche Prädikate). Offen: 4.2, 4.3, L6, L8.
+Vorlage und Leitfaden-Beispiel auf API 4). Tree-sitter (§ 5) fertiggestellt (Farben aus dem Editor-Theme, zusätzliche Prädikate). Erledigt seit 2026-11-25: L6, L8, 4.2. Offen: 4.3.
 
 
 1. **L1** – `PluginsRoute`/privaten `PluginsScreen` löschen; `:feature:plugins` kompilieren und testen.

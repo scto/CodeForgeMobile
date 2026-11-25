@@ -8,8 +8,10 @@ Aufruf: python3 icon-plugins/generate.py [ausgabeordner]   (Standard: icon-plugi
 Schreibt Quellordner nach <ausgabe>/src/<id>/ und ZIPs nach <ausgabe>/<id>.zip.
 Benötigt Pillow und DejaVu Sans Bold. Es werden keine Dateien im Repo erzeugt (build/ ist ignoriert).
 """
-import hashlib, json, os, sys, zipfile
+import json, os, sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+import pluginkit  # noqa: E402
 
 try:
     from PIL import Image, ImageDraw, ImageFont
@@ -240,12 +242,7 @@ def build_pack(theme, out_dir):
     for group in ("fileExtensions", "fileNames", "folderNames", "folderNamesOpen"):
         for rel in theme_json[group].values():
             assert (folder / rel).is_file(), rel
-    target = out_dir / f"{pid}.zip"
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(folder.rglob("*")):
-            if f.is_file():
-                z.write(f, f.relative_to(folder).as_posix())
-    print(f"{target.name}  {target.stat().st_size // 1024} KB  sha256={hashlib.sha256(target.read_bytes()).hexdigest()}")
+    pluginkit.pack(folder, out_dir / f"{pid}.zip", "icon-plugins/generate.py", source=Path(__file__).resolve().parent)
 
 
 def main(out):
@@ -261,10 +258,7 @@ def main(out):
         "permissions": [],
         "contributes": {"extensionPack": [f"com.codeforge.plugin.{t[0]}.icons" for t in THEMES]},
     }, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    target = out / f"{pid}.zip"
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-        z.write(folder / "plugin.json", "plugin.json")
-    print(f"{target.name}  sha256={hashlib.sha256(target.read_bytes()).hexdigest()}")
+    pluginkit.pack(folder, out / f"{pid}.zip", "icon-plugins/generate.py", source=Path(__file__).resolve().parent)
 
 
 if __name__ == "__main__":

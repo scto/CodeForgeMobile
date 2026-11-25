@@ -4,34 +4,28 @@
 IDs:  com.codeforge.plugin.<name>.grammar | .snippets | .language   und   com.codeforge.plugin.all-grammars|all-snippets|all-languages.bundle
 Aufruf: python3 content-plugins/generate.py [ausgabeordner]   (Standard: content-plugins/build)
 """
-import hashlib, json, sys, zipfile
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 import grammars, langs, snippets  # noqa: E402
+sys.path.insert(0, str(ROOT.parent / "scripts"))
+import pluginkit  # noqa: E402
 
 REPO = ROOT.parent
 STRINGS = REPO / "core/resources/src/main/res/values/strings.xml"
 
 
-def dump(path, obj):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+dump = pluginkit.dump_json
+manifest = pluginkit.manifest
 
 
 def pack(out, pid, folder):
+    # Quelle für build-info.json: die Python-Definitionen dieses Generators (die Ordner unter out/ sind erzeugt).
     target = out / f"{pid}.zip"
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(folder.rglob("*")):
-            if f.is_file():
-                z.write(f, f.relative_to(folder).as_posix())
+    pluginkit.pack(folder, target, "content-plugins/generate.py", source=ROOT, quiet=True)
     return target
-
-
-def manifest(pid, name, desc, contributes):
-    return {"id": pid, "name": name, "version": "1.0.0", "apiVersion": 2, "publisher": "codeforge",
-            "description": desc, "permissions": [], "contributes": contributes}
 
 
 def bundle(out, kind, title, ids):

@@ -8,11 +8,11 @@ Benötigte Programme stehen in `contributes.requires`; die App installiert sie n
 Aufruf: python3 tool-plugins/generate.py [ausgabeordner]   (Standard: tool-plugins/build)
 Schreibt Quellen nach tool-plugins/src/<id>/ und ZIPs nach <ausgabeordner>/<id>.zip sowie je Art ein Sammelpaket (Bundle).
 """
-import hashlib, json, sys, zipfile
+import sys
 from pathlib import Path
 import os as _os
 sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "scripts"))
-from build_info import build_info  # noqa: E402
+import pluginkit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 F = "${file}"
@@ -176,9 +176,7 @@ TOOLS = [
 ]
 
 
-def dump(path, obj):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+dump = pluginkit.dump_json
 
 
 # Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
@@ -186,18 +184,11 @@ VERSIONS = {"com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.v
 
 
 def manifest(pid, name, desc, contributes):
-    return {"id": pid, "name": name, "version": VERSIONS.get(pid, "1.0.0"), "apiVersion": 2, "publisher": "codeforge",
-            "description": desc, "permissions": [], "contributes": contributes}
+    return pluginkit.manifest(pid, name, desc, contributes, version=VERSIONS.get(pid, "1.0.0"))
 
 
 def pack(out, pid, folder):
-    target = out / f"{pid}.zip"
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(folder.rglob("*")):
-            if f.is_file():
-                z.write(f, f.relative_to(folder).as_posix())
-        z.writestr("build-info.json", build_info(Path(__file__).parent / "src" / pid if (Path(__file__).parent / "src" / pid).exists() else Path(__file__).parent, "tool-plugins/generate.py"))
-    print(f"{target.name}  sha256={hashlib.sha256(target.read_bytes()).hexdigest()}")
+    pluginkit.pack(folder, out / f"{pid}.zip", "tool-plugins/generate.py")
 
 
 def main(out):
@@ -245,11 +236,8 @@ def main(out):
         (folder / "tool.py").write_text((ROOT / "scripts" / script).read_text(encoding="utf-8"), encoding="utf-8")
         (folder / "common.py").write_text((ROOT / "scripts" / "common.py").read_text(encoding="utf-8"), encoding="utf-8")
         pack(out, pid, folder)
-    import zipfile as _z
-    allzip = out / "codeforge-tool-plugins-alle.zip"
-    with _z.ZipFile(allzip, "w", _z.ZIP_DEFLATED) as z:
-        for pid in tool_ids:
-            z.write(out / f"{pid}.zip", f"{pid}.zip")
+    pluginkit.write_zip(out / "codeforge-tool-plugins-alle.zip",
+                        [(f"{pid}.zip", (out / f"{pid}.zip").read_bytes(), 0o644) for pid in tool_ids])
     for kind, ids, title in (("formatters", fmt_ids, "Alle Formatierer"), ("lsp-servers", lsp_ids, "Alle Language Server")):
         pid = f"com.codeforge.plugin.all-{kind}.bundle"
         folder = ROOT / "src" / pid

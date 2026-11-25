@@ -7,22 +7,16 @@ Aufruf: python3 project-templates/generate.py [ausgabeordner]   (Standard: proje
 Quellen liegen fertig unter project-templates/src/<id>/ (plugin.json, icon.png, template/<Ebene>/…).
 Vorschaubilder neu zeichnen: python3 project-templates/make_icons.py (Pillow).
 """
-import hashlib, sys, zipfile
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT.parent / "scripts"))
+import pluginkit  # noqa: E402
 
 
 def pack(out, folder):
-    target = out / f"{folder.name}.zip"
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(folder.rglob("*")):
-            if f.is_file() and "__pycache__" not in f.parts:
-                info = zipfile.ZipInfo(f.relative_to(folder).as_posix(), date_time=(2026, 1, 1, 0, 0, 0))
-                info.compress_type = zipfile.ZIP_DEFLATED
-                info.external_attr = (f.stat().st_mode & 0o777) << 16
-                z.writestr(info, f.read_bytes())
-    print(f"{target.name}  sha256={hashlib.sha256(target.read_bytes()).hexdigest()}")
+    pluginkit.pack(folder, out / f"{folder.name}.zip", "project-templates/generate.py")
 
 
 def main(out):

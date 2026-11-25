@@ -38,6 +38,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   light/dark mode.
 
 ### Intern / Internal
+- `scripts/pluginkit.py`: gemeinsames Packen für alle Generatoren, `templates/build.py` und den Store – überall
+  `build-info.json`, optionale Signatur und reproduzierbare ZIPs (gleiche Quelle → gleiche SHA-256, der Store meldet
+  nur echte Änderungen); versehentlich mitgepackte `.pyc` im Readme-Tool entfernt. Tests: `scripts/test_pluginkit.py`.
+  / Shared plugin packaging with build info, optional signing and reproducible archives.
 - Paket `feature.settings.extensions` → `feature.settings.lsp`, Klassen `Extensions*` → `LspServers*` (enthält nur noch
   die Sprachserver-Verwaltung). / Package renamed to match its content.
 

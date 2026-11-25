@@ -9,8 +9,10 @@ Die Paletten sind den bekannten Themes nachempfunden (Farbwerte aus dem Gedächt
 
 Aufruf: python3 textmate-plugins/generate.py [ausgabeordner]   (Standard: textmate-plugins/build)
 """
-import hashlib, json, sys, zipfile
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+import pluginkit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 
@@ -166,11 +168,6 @@ def textmate(label, p, dark):
     }
 
 
-def dump(path, obj):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
 def main(out):
     out.mkdir(parents=True, exist_ok=True)
     for slug, label, dark_p, light_p in FAMILIES:
@@ -178,20 +175,15 @@ def main(out):
         folder = ROOT / "src" / plugin_id
         themes = []
         for mode, p in (("dark", dark_p), ("light", light_p)):
-            dump(folder / "themes" / f"{mode}.json", {"colors": app_colors(p, mode == "dark"), "textmateTheme": f"syntax/{mode}.json"})
-            dump(folder / "syntax" / f"{mode}.json", textmate(f"{label} {mode.capitalize()}", p, mode == "dark"))
+            pluginkit.dump_json(folder / "themes" / f"{mode}.json", {"colors": app_colors(p, mode == "dark"), "textmateTheme": f"syntax/{mode}.json"})
+            pluginkit.dump_json(folder / "syntax" / f"{mode}.json", textmate(f"{label} {mode.capitalize()}", p, mode == "dark"))
             themes.append({"id": f"{slug}-{mode}", "label": f"{label} {mode.capitalize()}", "uiTheme": mode, "path": f"themes/{mode}.json"})
-        dump(folder / "plugin.json", {
+        pluginkit.dump_json(folder / "plugin.json", {
             "id": plugin_id, "name": f"{label} (Editor-Theme)", "version": "1.0.0", "apiVersion": 2, "publisher": "codeforge",
             "description": f"{label} als Farbschema mit TextMate-Editor-Theme, Dunkel- und Hell-Variante (Palette nachempfunden).",
             "permissions": [], "contributes": {"colorThemes": themes},
         })
-        target = out / f"{plugin_id}.zip"
-        with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-            for f in sorted(folder.rglob("*")):
-                if f.is_file():
-                    z.write(f, f.relative_to(folder).as_posix())
-        print(f"{target.name}  sha256={hashlib.sha256(target.read_bytes()).hexdigest()}")
+        pluginkit.pack(folder, out / f"{plugin_id}.zip", "textmate-plugins/generate.py")
 
 
 if __name__ == "__main__":

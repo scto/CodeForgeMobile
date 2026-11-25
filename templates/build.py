@@ -7,11 +7,11 @@ Prüft vorher, dass alle JSON-Dateien gültig sind und alle in plugin.json refer
 und gibt je ZIP die SHA-256 aus (für den Store-Katalog). Das Code-Plugin baut Gradle:
   ./gradlew :templates:code-plugin:packagePlugin
 """
-import hashlib, json, sys, zipfile
+import json, sys
 from pathlib import Path
 import os as _os
 sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "scripts"))
-from build_info import build_info  # noqa: E402
+import pluginkit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "build"
@@ -50,18 +50,7 @@ def build(folder, out=None, prefix=""):
         (out / name).mkdir(parents=True, exist_ok=True)
         target = out / name / f"{name}.zip"
         (out / name / "plugin.json").write_bytes((folder / "plugin.json").read_bytes())
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(folder.rglob("*")):
-            if f.is_file() and "__pycache__" not in f.parts and f.suffix not in (".pyc", ".pyo"):
-                z.write(f, f.relative_to(folder).as_posix())
-        if not (folder / "build-info.json").is_file():
-            z.writestr("build-info.json", build_info(folder, "templates/build.py"))
-    digest = hashlib.sha256(target.read_bytes()).hexdigest()
-    try:
-        shown = target.relative_to(ROOT.parent)
-    except ValueError:
-        shown = target
-    print(f"{shown}  sha256={digest}")
+    pluginkit.pack(folder, target, "templates/build.py")
 
 
 if __name__ == "__main__":
