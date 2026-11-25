@@ -1,5 +1,5 @@
 // Modul: :feature:settings
-package com.codeforge.feature.settings.extensions
+package com.codeforge.feature.settings.lsp
 
 import android.text.format.Formatter
 import androidx.compose.foundation.layout.Arrangement
@@ -54,17 +54,17 @@ import com.codeforge.feature.settings.tools.UserToolsViewModel
 
 /** Route der Sprachserver-Verwaltung. */
 @Composable
-fun ExtensionsRoute(
+fun LspServersRoute(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     embedded: Boolean = false,
     onOpenStore: (() -> Unit)? = null,
-    viewModel: ExtensionsViewModel = hiltViewModel(),
+    viewModel: LspServersViewModel = hiltViewModel(),
     userToolsViewModel: UserToolsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val userTools by userToolsViewModel.uiState.collectAsState()
-    ExtensionsScreen(
+    LspServersScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         onBack = onBack,
@@ -81,9 +81,9 @@ fun ExtensionsRoute(
  * eigene externe Server und der Weg in den Store.
  */
 @Composable
-fun ExtensionsScreen(
-    uiState: ExtensionsUiState,
-    onEvent: (ExtensionsUiEvent) -> Unit,
+fun LspServersScreen(
+    uiState: LspServersUiState,
+    onEvent: (LspServersUiEvent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     embedded: Boolean = false,
@@ -116,7 +116,7 @@ fun ExtensionsScreen(
     LaunchedEffect(uiState.snackbarMessage) {
         uiState.snackbarMessage?.let { message ->
             snackbarHostState.showSnackbar(message.resolve())
-            onEvent(ExtensionsUiEvent.DismissSnackbar)
+            onEvent(LspServersUiEvent.DismissSnackbar)
         }
     }
 
@@ -148,26 +148,26 @@ fun ExtensionsScreen(
 
 @Composable
 private fun ServerDialogs(
-    uiState: ExtensionsUiState,
+    uiState: LspServersUiState,
     settingsFor: String?,
     jvmFor: String?,
     onSettingsFor: (String?) -> Unit,
     onJvmFor: (String?) -> Unit,
-    onEvent: (ExtensionsUiEvent) -> Unit
+    onEvent: (LspServersUiEvent) -> Unit
 ) {
     uiState.servers.firstOrNull { it.key == settingsFor }?.let { item ->
         LspFeatureSheet(
             item = item,
             settings = uiState.settingsOf(item.key),
-            onFeatureChange = { feature, enabled -> onEvent(ExtensionsUiEvent.SetFeature(item.key, feature, enabled)) },
-            onAlongsideChange = { onEvent(ExtensionsUiEvent.SetAlongside(item.key, it)) },
+            onFeatureChange = { feature, enabled -> onEvent(LspServersUiEvent.SetFeature(item.key, feature, enabled)) },
+            onAlongsideChange = { onEvent(LspServersUiEvent.SetAlongside(item.key, it)) },
             onOpenJvm = {
                 onSettingsFor(null)
                 onJvmFor(item.key)
             },
             onInfo = {
                 onSettingsFor(null)
-                onEvent(ExtensionsUiEvent.OpenInfo(item.key))
+                onEvent(LspServersUiEvent.OpenInfo(item.key))
             },
             onDismiss = { onSettingsFor(null) }
         )
@@ -179,23 +179,23 @@ private fun ServerDialogs(
             initial = uiState.settingsOf(item.key).jvm ?: LspServerDefaults.jvmFor(item.key) ?: JvmOptions(),
             onSave = {
                 onJvmFor(null)
-                onEvent(ExtensionsUiEvent.SaveJvm(item.key, it))
+                onEvent(LspServersUiEvent.SaveJvm(item.key, it))
             },
             onReset = {
                 onJvmFor(null)
-                onEvent(ExtensionsUiEvent.SaveJvm(item.key, null))
+                onEvent(LspServersUiEvent.SaveJvm(item.key, null))
             },
             onDismiss = { onJvmFor(null) }
         )
     }
     uiState.infoModel?.let { model ->
-        LspInfoDialog(model = model, runtime = uiState.infoRuntime, onDismiss = { onEvent(ExtensionsUiEvent.CloseInfo) })
+        LspInfoDialog(model = model, runtime = uiState.infoRuntime, onDismiss = { onEvent(LspServersUiEvent.CloseInfo) })
     }
 }
 
 private fun LazyListScope.serverRows(
-    uiState: ExtensionsUiState,
-    onEvent: (ExtensionsUiEvent) -> Unit,
+    uiState: LspServersUiState,
+    onEvent: (LspServersUiEvent) -> Unit,
     onOpenSettings: (String) -> Unit
 ) {
     if (uiState.servers.isEmpty()) {
@@ -226,8 +226,8 @@ private fun LazyListScope.serverRows(
                     shape = groupShape(index, uiState.servers.size),
                     installing = uiState.installing[item.pluginId],
                     onOpenSettings = { onOpenSettings(item.key) },
-                    onEnabledChange = { onEvent(ExtensionsUiEvent.SetServerEnabled(item.key, it)) },
-                    onInstall = { onEvent(ExtensionsUiEvent.InstallRequirements(item.pluginId)) }
+                    onEnabledChange = { onEvent(LspServersUiEvent.SetServerEnabled(item.key, it)) },
+                    onInstall = { onEvent(LspServersUiEvent.InstallRequirements(item.pluginId)) }
                 )
             }
         }
@@ -253,7 +253,7 @@ private fun LazyListScope.userServers(userTools: UserToolsUiState, onUserToolsEv
 }
 
 @Composable
-private fun LegacyCard(bytes: Long, onEvent: (ExtensionsUiEvent) -> Unit) {
+private fun LegacyCard(bytes: Long, onEvent: (LspServersUiEvent) -> Unit) {
     val size = Formatter.formatShortFileSize(LocalContext.current, bytes)
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -264,7 +264,7 @@ private fun LegacyCard(bytes: Long, onEvent: (ExtensionsUiEvent) -> Unit) {
             Spacer(Modifier.height(4.dp))
             Text(stringRes(R.string.lsp_legacy_text, size), style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(8.dp))
-            OutlinedButton(onClick = { onEvent(ExtensionsUiEvent.DeleteLegacy) }) { Text(stringRes(R.string.lsp_legacy_delete)) }
+            OutlinedButton(onClick = { onEvent(LspServersUiEvent.DeleteLegacy) }) { Text(stringRes(R.string.lsp_legacy_delete)) }
         }
     }
 }

@@ -2,8 +2,8 @@
 package com.codeforge.feature.settings.store
 
 import android.content.Context
-import com.codeforge.feature.settings.extensions.DefaultHttpTextFetcher
-import com.codeforge.feature.settings.extensions.HttpTextFetcher
+import com.codeforge.feature.settings.lsp.DefaultHttpTextFetcher
+import com.codeforge.feature.settings.lsp.HttpTextFetcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -1,5 +1,5 @@
 // Modul: :feature:settings
-package com.codeforge.feature.settings.extensions
+package com.codeforge.feature.settings.lsp
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable

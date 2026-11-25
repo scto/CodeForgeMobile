@@ -1,5 +1,5 @@
 // Modul: :feature:settings
-package com.codeforge.feature.settings.extensions
+package com.codeforge.feature.settings.lsp
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

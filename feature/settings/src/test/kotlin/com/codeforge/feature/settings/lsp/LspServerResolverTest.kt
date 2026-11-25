@@ -1,5 +1,5 @@
 // Modul: :feature:settings
-package com.codeforge.feature.settings.extensions
+package com.codeforge.feature.settings.lsp
 
 import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ContributionRepository

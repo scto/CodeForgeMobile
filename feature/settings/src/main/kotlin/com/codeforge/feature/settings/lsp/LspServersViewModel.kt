@@ -1,5 +1,5 @@
 // Modul: :feature:settings
-package com.codeforge.feature.settings.extensions
+package com.codeforge.feature.settings.lsp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,7 +31,7 @@ import javax.inject.Inject
 
 /** ViewModel der Sprachserver-Verwaltung: Server aus Plugins, Einstellungen je Server, Voraussetzungen, Info. */
 @HiltViewModel
-class ExtensionsViewModel @Inject constructor(
+class LspServersViewModel @Inject constructor(
     private val contributionRepository: ContributionRepository,
     private val pluginRepository: PluginRepository,
     private val toolRunner: PluginToolRunner,
@@ -41,9 +41,9 @@ class ExtensionsViewModel @Inject constructor(
     private val runtimeStats: LspRuntimeStatsProvider? = null
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ExtensionsUiState())
+    private val _uiState = MutableStateFlow(LspServersUiState())
     /** UI-Zustand. */
-    val uiState: StateFlow<ExtensionsUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<LspServersUiState> = _uiState.asStateFlow()
 
     private var infoJob: Job? = null
 
@@ -63,38 +63,38 @@ class ExtensionsViewModel @Inject constructor(
     }
 
     /** Verarbeitet eine Aktion des Nutzers. */
-    fun onEvent(event: ExtensionsUiEvent) {
+    fun onEvent(event: LspServersUiEvent) {
         when (event) {
-            is ExtensionsUiEvent.SetServerEnabled -> {
+            is LspServersUiEvent.SetServerEnabled -> {
                 updateSettings(event.key) { it.copy(enabled = event.enabled) }
             }
-            is ExtensionsUiEvent.SetAlongside -> {
+            is LspServersUiEvent.SetAlongside -> {
                 updateSettings(event.key) { it.copy(alongside = event.alongside) }
             }
-            is ExtensionsUiEvent.SetFeature -> {
+            is LspServersUiEvent.SetFeature -> {
                 updateSettings(event.key) {
                     val features = if (event.enabled) it.disabledFeatures - event.feature else it.disabledFeatures + event.feature
                     it.copy(disabledFeatures = features)
                 }
             }
-            is ExtensionsUiEvent.SaveJvm -> {
+            is LspServersUiEvent.SaveJvm -> {
                 updateSettings(event.key) { it.copy(jvm = event.options) }
                 _uiState.update { it.copy(snackbarMessage = UiText.of(R.string.jvm_saved)) }
             }
-            is ExtensionsUiEvent.InstallRequirements -> {
+            is LspServersUiEvent.InstallRequirements -> {
                 val name = _uiState.value.servers.firstOrNull { it.pluginId == event.pluginId }?.pluginName ?: event.pluginId
                 installer.install(event.pluginId, name)
             }
-            is ExtensionsUiEvent.OpenInfo -> {
+            is LspServersUiEvent.OpenInfo -> {
                 openInfo(event.key)
             }
-            ExtensionsUiEvent.CloseInfo -> {
+            LspServersUiEvent.CloseInfo -> {
                 closeInfo()
             }
-            ExtensionsUiEvent.DeleteLegacy -> {
+            LspServersUiEvent.DeleteLegacy -> {
                 deleteLegacy()
             }
-            ExtensionsUiEvent.DismissSnackbar -> {
+            LspServersUiEvent.DismissSnackbar -> {
                 _uiState.update { it.copy(snackbarMessage = null) }
             }
         }

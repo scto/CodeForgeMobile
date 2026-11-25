@@ -1,4 +1,4 @@
-package com.codeforge.feature.settings.extensions
+package com.codeforge.feature.settings.lsp
 
 import com.codeforge.core.domain.model.LspServerDefaults
 import com.codeforge.core.domain.model.LspServerSettings

@@ -38,7 +38,7 @@ import com.codeforge.feature.settings.AboutSettingsRoute
 import com.codeforge.feature.settings.AiSettingsRoute
 import com.codeforge.feature.settings.DebugSettingsRoute
 import com.codeforge.feature.settings.EditorSettingsRoute
-import com.codeforge.feature.settings.extensions.ExtensionsRoute
+import com.codeforge.feature.settings.lsp.LspServersRoute
 import com.codeforge.feature.settings.appearance.AppearanceRoute
 import com.codeforge.feature.settings.store.StoreRoute
 import com.codeforge.feature.settings.GitSettingsRoute
@@ -315,7 +315,7 @@ fun CodeForgeNavHost(
         }
         composable(Routes.SETTINGS_LSP) {
             // Liste der installierten Sprachserver (Editor → Sprachserver verwalten); Neues kommt aus dem Store.
-            ExtensionsRoute(
+            LspServersRoute(
                 onBack = { navigateBackOrStart() },
                 onOpenStore = { navController.navigate(Routes.SETTINGS_STORE) }
             )

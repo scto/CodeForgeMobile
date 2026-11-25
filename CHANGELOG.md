@@ -35,6 +35,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Hell/Dunkel-Modus, wenn das Paket beide Varianten hat. / Store color schemes derive a full scheme and follow
   light/dark mode.
 
+### Intern / Internal
+- Paket `feature.settings.extensions` → `feature.settings.lsp`, Klassen `Extensions*` → `LspServers*` (enthält nur noch
+  die Sprachserver-Verwaltung). / Package renamed to match its content.
+
 ### Entfernt / Removed
 - Die 15 eingebauten Farb-Presets und die eigene Palette in der App; die Presets gibt es weiter im Store, eine frühere
   Auswahl wird beim Installieren des Pakets übernommen. / Built-in presets and custom palette (presets remain in the store).

@@ -2,7 +2,7 @@
 package com.codeforge.app.di
 
 import com.codeforge.core.domain.repository.LspServerResolver
-import com.codeforge.feature.settings.extensions.LspServerResolverImpl
+import com.codeforge.feature.settings.lsp.LspServerResolverImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

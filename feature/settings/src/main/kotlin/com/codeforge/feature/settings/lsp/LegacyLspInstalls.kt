@@ -1,5 +1,5 @@
 // Modul: :feature:settings
-package com.codeforge.feature.settings.extensions
+package com.codeforge.feature.settings.lsp
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
