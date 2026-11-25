@@ -1,0 +1,39 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "me",
+  "description": "Beispiel für ein Werkzeug im PT-Menü des Dateibaums: zählt Dateien je Endung im Projekt.",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "count-files",
+        "label": "Dateien je Endung zählen",
+        "description": "Optional: Unterordner, leer = ganzes Projekt",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 30,
+        "prompt": {
+          "label": "Unterordner",
+          "hint": "app/src",
+          "default": ""
+        }
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

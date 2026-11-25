@@ -13,7 +13,7 @@ import java.nio.charset.CodingErrorAction
 /**
  * Erzeugt ein Projekt aus einer Plugin-Vorlage (`contributes.projectTemplates`): Ebenen `common/`, Sprache
  * (`kotlin/`|`java/`) und DSL (`kts/`|`groovy/`) werden nacheinander kopiert, Platzhalter in Pfaden und Textdateien
- * ersetzt. Fehlende Gradle-Wrapper und Version Catalog kommen aus den Assets der App.
+ * ersetzt, die Endung `.tpl` entfernt. Fehlende Gradle-Wrapper und Version Catalog kommen aus den Assets der App.
  *
  * Es wird nichts aus der Vorlage ausgeführt. Blockierend (Dateisystem) — der Aufrufer läuft auf einem IO-Dispatcher.
  */
@@ -27,7 +27,8 @@ class PluginTemplateGenerator(private val assets: AssetSource) {
         val root = projectDir.canonicalFile
         for (layer in layers) {
             layer.walkTopDown().filter { it.isFile }.forEach { src ->
-                val rel = substitute(src.relativeTo(layer).invariantSeparatorsPath, values)
+                // `.tpl` kennzeichnet Dateien, die erst im erzeugten Projekt ihre Endung bekommen (z. B. `run.sh.tpl`).
+                val rel = substitute(src.relativeTo(layer).invariantSeparatorsPath, values).removeSuffix(TPL_SUFFIX)
                 val target = File(root, rel).canonicalFile
                 require(target.path.startsWith(root.path + File.separator)) { "Pfad außerhalb des Projekts: $rel" }
                 copy(src, target, values)
@@ -65,8 +66,9 @@ class PluginTemplateGenerator(private val assets: AssetSource) {
         private const val MAX_TEXT_BYTES = 1 shl 20
         private const val MODULE_SCAN_DEPTH = 4
         private const val GRADLEW = "gradlew"
+        private const val TPL_SUFFIX = ".tpl"
         private val BUILD_FILES = setOf("build.gradle", "build.gradle.kts")
-        private val PLACEHOLDER = Regex("""\{\{(projectName|packageName|packagePath|packageJni|minSdk)\}\}""")
+        private val PLACEHOLDER = Regex("""\{\{(\{?)(projectName|packageName|packagePath|packageJni|minSdk)\}\}(\}?)""")
 
         /** Ebenen in Kopierreihenfolge: `common`, Sprache, DSL, Kombination (z. B. `kotlin-kts`). */
         fun layersFor(request: ProjectRequest): List<String> {
@@ -88,9 +90,15 @@ class PluginTemplateGenerator(private val assets: AssetSource) {
             "minSdk" to request.minSdk.toString()
         )
 
-        /** Ersetzt bekannte `{{…}}`-Platzhalter; unbekannte bleiben stehen. */
+        /**
+         * Ersetzt bekannte `{{…}}`-Platzhalter; unbekannte bleiben stehen. Dreifach geklammert (`{{{packageName}}}`)
+         * bleibt der Platzhalter als `{{packageName}}` erhalten – für Vorlagen, die selbst Vorlagen erzeugen.
+         */
         fun substitute(text: String, values: Map<String, String>): String =
-            PLACEHOLDER.replace(text) { m -> values[m.groupValues[1]] ?: m.value }
+            PLACEHOLDER.replace(text) { m ->
+                val (open, name, close) = m.destructured
+                if (open.isNotEmpty() && close.isNotEmpty()) "{{$name}}" else open + (values[name] ?: "{{$name}}") + close
+            }
 
         // Text = gültiges UTF-8 ohne NUL-Byte; alles andere wird unverändert kopiert.
         private fun decodeUtf8(bytes: ByteArray): String? {

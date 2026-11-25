@@ -12,6 +12,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- Projektvorlagen für Plugin-Autoren (13, auch im Store): je Plugin-Art ein eigenständiges Projekt – Farbschema,
+  Icon-Theme, Sprachpaket, Grammatik, Snippets, Sprachserver, Formatierer, Werkzeug, Bundle, Projektvorlage,
+  Agent-Werkzeug, Code (Sandbox) und Code (voll). Plugin-ID ist das Package, `./gradlew packagePlugin` prüft und packt
+  das ZIP; Code-Vorlagen bringen das Plugin-SDK als `compileOnly`-JAR mit (d8 über `ANDROID_HOME`). Einreichen über das
+  neue Issue-Formular „Plugin einreichen“ im Store-Repo. Neue Autoren-Vorlage `templates/tool`. / Project templates for
+  plugin authors (one per plugin kind), build with `./gradlew packagePlugin`, submit via the store's issue form.
+- Vorlagen-Engine: `{{{name}}}` lässt einen Platzhalter stehen, Endung `.tpl` wird beim Erzeugen entfernt. /
+  Template engine: escaped placeholders and `.tpl` suffix.
 - Tree-sitter-Highlighting aktiv (Einstellung „Tree-sitter verwenden“) für Kotlin, Java, JSON, XML, C, C++, Bash,
   CMake, TOML, YAML: Farben kommen aus dem aktiven Editor-Theme (auch Theme-Plugins), zusätzliche Abfrage-Prädikate
   `#eq?`, `#any-of?`, `#lua-match?`; LSP-Vervollständigung bleibt erhalten, bei Ladefehlern gilt TextMate. /

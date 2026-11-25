@@ -1,0 +1,15 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "me",
+  "description": "Beispiel für ein Bundle, das mehrere Plugins zusammenfasst.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.example.template.color-theme",
+      "com.example.template.icon-theme"
+    ]
+  }
+}

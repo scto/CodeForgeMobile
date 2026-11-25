@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-formatter.template",
+  "name": "Plugin · Formatierer (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: Externer Code-Formatierer (stdin → stdout). Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-formatter",
+        "label": "Plugin · Formatierer",
+        "description": "Externer Code-Formatierer (stdin → stdout)",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Formatter",
+            "description": "External code formatter (stdin → stdout)"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

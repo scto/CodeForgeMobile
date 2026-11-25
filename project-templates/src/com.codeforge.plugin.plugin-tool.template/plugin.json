@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-tool.template",
+  "name": "Plugin · Werkzeug (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: Befehl im PT-Menü des Dateibaums (Skript, Eingabe, Zeitlimit). Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-tool",
+        "label": "Plugin · Werkzeug",
+        "description": "Befehl im PT-Menü des Dateibaums (Skript, Eingabe, Zeitlimit)",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Tool",
+            "description": "Command in the file tree's PT menu (script, input, timeout)"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

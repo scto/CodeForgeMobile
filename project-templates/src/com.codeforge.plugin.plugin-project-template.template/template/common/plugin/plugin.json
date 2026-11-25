@@ -1,0 +1,26 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "me",
+  "description": "Minimale Projektvorlage: Kotlin-Konsolenprogramm (Kotlin-DSL).",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "hello",
+        "label": "Hallo-Welt (Kotlin)",
+        "description": "Kleinstes Kotlin-Projekt mit Gradle",
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false
+      }
+    ]
+  }
+}

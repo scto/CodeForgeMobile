@@ -1,0 +1,20 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "me",
+  "description": "Editor-Aktionen: Auswahl umkehren, Wörter zählen. Läuft in der Sandbox.",
+  "entryPointClass": "{{packageName}}.MyPlugin",
+  "sandbox": true,
+  "permissions": [
+    "editor"
+  ],
+  "categories": [
+    "tools/text"
+  ],
+  "tags": [
+    "text",
+    "sandbox"
+  ]
+}

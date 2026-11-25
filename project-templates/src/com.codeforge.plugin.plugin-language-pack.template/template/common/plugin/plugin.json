@@ -1,0 +1,18 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "me",
+  "description": "Beispiel für Übersetzungen einzelner UI-Texte.",
+  "permissions": [],
+  "contributes": {
+    "languagePacks": [
+      {
+        "locale": "fr",
+        "label": "Français (Beispiel)",
+        "path": "l10n/fr.json"
+      }
+    ]
+  }
+}

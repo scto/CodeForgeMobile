@@ -42,6 +42,8 @@ class TemplatesValidTest {
             assertEquals(n, null, DeclarativeOnly.violation(files, manifest(n)))
         }
         assertTrue(manifest("code-plugin").entryPointClass != null)
+        val toolFiles = File(dir, "tool").walkTopDown().filter { it.isFile }.map { it.relativeTo(File(dir, "tool")).path }.toList()
+        assertEquals(null, DeclarativeOnly.violation(toolFiles, manifest("tool"), allowTools = true))
     }
 
     @Test

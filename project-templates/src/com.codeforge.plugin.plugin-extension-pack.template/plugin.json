@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-extension-pack.template",
+  "name": "Plugin · Bundle (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: Paket, das mehrere Plugins gemeinsam installiert. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-extension-pack",
+        "label": "Plugin · Bundle",
+        "description": "Paket, das mehrere Plugins gemeinsam installiert",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Bundle",
+            "description": "Pack that installs several plugins together"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

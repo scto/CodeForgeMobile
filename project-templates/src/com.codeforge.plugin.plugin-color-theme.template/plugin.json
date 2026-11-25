@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-color-theme.template",
+  "name": "Plugin · Farbschema (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: App-Farbschema (Material-3-Rollen) mit TextMate-Editor-Theme. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-color-theme",
+        "label": "Plugin · Farbschema",
+        "description": "App-Farbschema (Material-3-Rollen) mit TextMate-Editor-Theme",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Color scheme",
+            "description": "App color scheme (Material 3 roles) with TextMate editor theme"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "me",
+  "description": "Beispiel für Syntaxfarben einer eigenen Sprache (TextMate).",
+  "permissions": [],
+  "contributes": {
+    "grammars": [
+      {
+        "languageId": "mylang",
+        "scopeName": "source.mylang",
+        "path": "grammars/mylang.tmLanguage.json",
+        "extensions": [
+          "myl"
+        ]
+      }
+    ]
+  }
+}

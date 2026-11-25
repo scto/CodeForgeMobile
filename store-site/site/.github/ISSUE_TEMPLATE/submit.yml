@@ -1,0 +1,54 @@
+name: Plugin einreichen / Submit a plugin
+description: Ein eigenes Plugin für den CodeForge Store einreichen – submit your own plugin to the CodeForge Store
+title: "Einreichung: "
+labels: ["submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Vorlagen für alle Plugin-Arten gibt es in der App: Neues Projekt → „Plugin · …“. Bauen mit `./gradlew packagePlugin`,
+        das ZIP liegt danach in `build/plugin/`. Der Store nimmt deklarative Plugins, Werkzeuge mit Skripten und
+        Sandbox-Code-Plugins an; Agent-Werkzeuge und volle Code-Plugins nur per Sideload.
+        Templates for every plugin kind are in the app (New project → "Plugin · …"). Build with `./gradlew packagePlugin`.
+  - type: input
+    id: plugin
+    attributes:
+      label: Plugin-ID
+      description: Wie in plugin.json (`id`), weltweit eindeutig, z. B. de.beispiel.mein-theme.
+      placeholder: com.example.my-plugin
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Wie in plugin.json; für Updates höher als die veröffentlichte.
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: zip
+    attributes:
+      label: Plugin-ZIP
+      description: ZIP aus build/plugin/ hierher ziehen (Anhang) – drag the ZIP here.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Beschreibung / Description
+      description: Was das Plugin tut, Screenshots willkommen; bei Werkzeugen und Code, welche Berechtigungen wozu nötig sind.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Quellcode / Source (optional)
+      placeholder: https://github.com/…
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Bestätigung / Confirmation
+      options:
+        - label: Ich darf alle enthaltenen Dateien veröffentlichen (eigene Arbeit oder passende Lizenz). / I may publish all included files.
+          required: true

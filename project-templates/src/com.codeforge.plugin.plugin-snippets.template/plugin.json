@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-snippets.template",
+  "name": "Plugin · Snippets (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: Code-Bausteine mit Kürzel und Platzhaltern. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-snippets",
+        "label": "Plugin · Snippets",
+        "description": "Code-Bausteine mit Kürzel und Platzhaltern",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Snippets",
+            "description": "Code snippets with prefix and placeholders"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

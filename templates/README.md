@@ -1,6 +1,7 @@
 # Plugin-Vorlagen
 
-Je Ordner eine lauffähige Minimalvorlage. Ausführliche Anleitung: `docs/extension-authoring.md`, Referenz: `docs/extensions.md`.
+Je Ordner eine lauffähige Minimalvorlage. Dieselben Vorlagen gibt es als eigenständige Projekte im Projekt-Assistenten
+(„Plugin · …“, `project-templates/src/com.codeforge.plugin.plugin-*.template`, erzeugt mit `project-templates/make_plugin_templates.py`). Ausführliche Anleitung: `docs/extension-authoring.md`, Referenz: `docs/extensions.md`.
 
 | Ordner | Art | Kurzbeschreibung |
 |---|---|---|
@@ -11,6 +12,7 @@ Je Ordner eine lauffähige Minimalvorlage. Ausführliche Anleitung: `docs/extens
 | `snippets` | deklarativ | Code-Bausteine |
 | `lsp-server` | deklarativ | Language-Server-Anbindung |
 | `formatter` | deklarativ | Externer Formatierer (stdin → stdout) |
+| `tool` | deklarativ (Store: Kategorie Code-Tools) | Werkzeug im PT-Menü des Dateibaums (`tools`, Python-Skript) |
 | `extension-pack` | deklarativ | Bundle aus mehreren Plugins |
 | `project-template` | deklarativ | Projektvorlage für den Projekt-Assistenten (`projectTemplates`) |
 | `agent-tool` | deklarativ (nur Sideload) | Werkzeuge für den KI-Agenten (`agentTools`) |

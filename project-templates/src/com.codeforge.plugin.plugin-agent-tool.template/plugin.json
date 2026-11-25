@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-agent-tool.template",
+  "name": "Plugin · Agent-Werkzeug (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: Werkzeuge für den KI-Agenten (nur Sideload). Anpassen, mit ./gradlew packagePlugin bauen, installieren und als ZIP weitergeben.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-agent-tool",
+        "label": "Plugin · Agent-Werkzeug",
+        "description": "Werkzeuge für den KI-Agenten (nur Sideload)",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Agent tool",
+            "description": "Tools for the AI agent (sideload only)"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

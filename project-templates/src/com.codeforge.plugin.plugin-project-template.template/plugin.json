@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-project-template.template",
+  "name": "Plugin · Projektvorlage (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: Eigene Vorlage für den Projekt-Assistenten. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-project-template",
+        "label": "Plugin · Projektvorlage",
+        "description": "Eigene Vorlage für den Projekt-Assistenten",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Project template",
+            "description": "Your own template for the project wizard"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

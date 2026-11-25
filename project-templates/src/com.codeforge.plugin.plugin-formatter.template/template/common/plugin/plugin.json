@@ -1,0 +1,27 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "me",
+  "description": "Beispiel für einen externen Code-Formatierer (stdin → stdout).",
+  "permissions": [],
+  "contributes": {
+    "formatters": [
+      {
+        "id": "shfmt",
+        "label": "shfmt",
+        "extensions": [
+          "sh",
+          "bash"
+        ],
+        "command": [
+          "shfmt",
+          "-filename",
+          "${file}"
+        ],
+        "timeoutSeconds": 15
+      }
+    ]
+  }
+}

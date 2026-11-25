@@ -58,7 +58,8 @@ class PluginTemplateGeneratorTest {
     fun everyCombinationIsComplete() {
         val projects = generateAll()
         // 5 Compose-Vorlagen (je Kotlin, KTS) + jvm-cli (2 × 2) + mitgeliefert: 8 × (2 Sprachen × 2 DSL) + Compose (Kotlin × 2 DSL)
-        assertEquals(9 + 34, projects.size)
+        // + 13 Plugin-Autoren-Vorlagen (je Kotlin, KTS)
+        assertEquals(9 + 34 + 13, projects.size)
         projects.forEach { p ->
             assertTrue(p.name, File(p, "gradlew").canExecute())
             assertTrue(p.name, File(p, "gradle/wrapper/gradle-wrapper.properties").isFile)
@@ -66,10 +67,13 @@ class PluginTemplateGeneratorTest {
             assertTrue(p.name, File(p, "settings.gradle.kts").isFile || File(p, "settings.gradle").isFile)
             val leftovers = p.walkTopDown()
                 .filter { it.isFile && it.extension !in BINARY_EXT }
+                // Die Vorlage „Plugin · Projektvorlage“ erzeugt selbst eine Vorlage – deren Platzhalter bleiben stehen.
+                .filterNot { it.invariantSeparatorsPath.contains("/plugin/template/") }
+                .filterNot { p.name.startsWith("plugin-project-template") && it.name == "README.md" }
                 .filter { "{{" in it.path || "{{" in it.readText() }
                 .toList()
             assertTrue("${p.name}: $leftovers", leftovers.isEmpty())
-            if (p.walkTopDown().any { it.extension in SOURCE_EXT }) {
+            if (p.walkTopDown().any { it.extension in SOURCE_EXT && !it.invariantSeparatorsPath.contains("/plugin/template/") }) {
                 assertTrue(p.name, p.walkTopDown().any { it.path.contains("com/example/demo") })
             }
         }
@@ -85,6 +89,33 @@ class PluginTemplateGeneratorTest {
         generator.generate(request(ProjectLanguage.KOTLIN, true, "X"), tpl, out)
         assertEquals("kotlin com.example.demo", File(out, "a.txt").readText())
         assertEquals("26 {{unknown}}", File(out, "b.txt").readText())
+    }
+
+    @Test
+    fun escapesAndTplSuffix() {
+        val tpl = tmp.newFolder("esc")
+        File(tpl, "common/{{{packagePath}}}/A.kt").apply { parentFile.mkdirs() }.writeText("{{{packageName}}} {{packageName}}")
+        File(tpl, "common/run.sh.tpl").writeText("echo {{projectName}}")
+        val out = tmp.newFolder("escout")
+        generator.generate(request(ProjectLanguage.KOTLIN, true, "X"), tpl, out)
+        assertEquals("{{packageName}} com.example.demo", File(out, "{{packagePath}}/A.kt").readText())
+        assertEquals("echo X", File(out, "run.sh").readText())
+    }
+
+    @Test
+    fun pluginAuthorTemplatesPack() {
+        val src = File(repoRoot, "project-templates/src")
+        val authors = src.listFiles().orEmpty().filter { it.name.startsWith("com.codeforge.plugin.plugin-") }
+        assertEquals(13, authors.size)
+        authors.forEach { dir ->
+            val out = tmp.newFolder(dir.name)
+            generator.generate(request(ProjectLanguage.KOTLIN, true, "MyPlugin").copy(packageName = "com.example.myplugin"), File(dir, "template"), out)
+            val manifest = listOf("plugin/plugin.json", "plugin.json").map { File(out, it) }.first { it.isFile }
+            val m = PluginManifestParser.parse(manifest.readText()).getOrThrow()
+            assertEquals(dir.name, "com.example.myplugin", m.id)
+            assertEquals(dir.name, "MyPlugin", m.name)
+            assertTrue(dir.name, out.walkTopDown().none { it.name.endsWith(".tpl") })
+        }
     }
 
     @Test

@@ -1,0 +1,14 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 4,
+  "publisher": "me",
+  "description": "Befehl „Zeilen zählen“, Menüeintrag im Dateibaum und Ereignis beim Speichern.",
+  "permissions": [
+    "commands",
+    "menus",
+    "file-events"
+  ],
+  "entryPointClass": "{{packageName}}.MyPlugin"
+}

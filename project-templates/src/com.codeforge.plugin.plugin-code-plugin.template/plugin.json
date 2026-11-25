@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-code-plugin.template",
+  "name": "Plugin · Code (voll) (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: Kotlin-Plugin mit Befehl, Menü und Ereignissen (nur Sideload). Anpassen, mit ./gradlew packagePlugin bauen, installieren und als ZIP weitergeben.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-code-plugin",
+        "label": "Plugin · Code (voll)",
+        "description": "Kotlin-Plugin mit Befehl, Menü und Ereignissen (nur Sideload)",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Code (full)",
+            "description": "Kotlin plugin with command, menu and events (sideload only)"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

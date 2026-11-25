@@ -1,0 +1,18 @@
+{
+  "file": "file.png",
+  "folder": "folder.png",
+  "folderOpen": "folder-open.png",
+  "fileExtensions": {
+    "kt": "kotlin.png",
+    "tar.gz": "archive.png"
+  },
+  "fileNames": {
+    "build.gradle.kts": "gradle.png"
+  },
+  "folderNames": {
+    "src": "folder-src.png"
+  },
+  "folderNamesOpen": {
+    "src": "folder-src.png"
+  }
+}
