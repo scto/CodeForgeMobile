@@ -16,6 +16,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   geladen und in der Plugin-Liste mit Hinweis gezeigt; `shell`/`lsp` müssen immer im Manifest stehen. Deklarative
   Plugins sind nicht betroffen. / Plugin API 1 for code plugins removed (announced in 3.3).
 
+## [3.3.0] - 2026-11-25
+
 ### Hinzugefügt / Added
 - Store: Einreichungen werden automatisch geprüft (Workflow `submission.yml`, `check_submission.py`: Archiv, Manifest,
   Store-Regeln, Version bei Updates) und mit Bericht samt SHA-256 kommentiert. / Automatic checks for store submissions.
