@@ -83,14 +83,10 @@ interface PluginUiRepository {
 }
 
 /**
- * Berechtigungsregeln für Code-Plugins. Neue Berechtigungen (`commands`, `menus`, `file-events`, `git-events`)
- * müssen immer im Manifest stehen. Die älteren Zugriffe (`shell`, `lsp`) bleiben für v1-Plugins (ohne
- * `apiVersion`) erlaubt, damit bestehende Plugins weiterlaufen; ab `apiVersion` 2 sind auch sie deklarationspflichtig.
+ * Berechtigungsregeln für Code-Plugins: Jede Berechtigung muss im Manifest stehen. Die frühere Ausnahme für API 1
+ * (`shell`, `lsp` ohne Angabe) ist seit 3.4.0 entfernt, solche Plugins werden gar nicht mehr geladen.
  */
 object PluginPermissionPolicy {
-    private val LEGACY_OPEN = setOf(PluginPermissions.SHELL, PluginPermissions.LSP)
-
-    /** Ob [permission] für ein Plugin der [apiVersion] mit den Berechtigungen [granted] erlaubt ist. */
-    fun isAllowed(apiVersion: Int, granted: Set<String>, permission: String): Boolean =
-        permission in granted || (apiVersion < 2 && permission in LEGACY_OPEN)
+    /** Ob [permission] bei den Berechtigungen [granted] erlaubt ist. */
+    fun isAllowed(granted: Set<String>, permission: String): Boolean = permission in granted
 }

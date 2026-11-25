@@ -13,18 +13,18 @@ object PluginApiVersion {
     const val CURRENT: Int = 4
 
     /**
-     * Code-Plugins unter dieser Version sind abgekündigt: API 1 erlaubt `shell` und `lsp` ohne Berechtigung im Manifest.
-     * Sie laufen noch, zeigen aber eine Warnung; ab CodeForge [API1_REMOVED_IN] werden sie abgelehnt.
+     * Kleinste API-Version für Code-Plugins. API 1 (`shell` und `lsp` ohne Berechtigung im Manifest) wurde in 3.3
+     * abgekündigt und ist seit [API1_REMOVED_IN] entfernt: Installation wird abgelehnt, installierte werden nicht geladen.
      * Deklarative Plugins betrifft das nicht (für sie macht die Version keinen Unterschied).
      */
-    const val DEPRECATED_BELOW: Int = 2
+    const val MIN_CODE_API: Int = 2
 
-    /** App-Version, ab der Code-Plugins mit API 1 nicht mehr geladen werden. */
+    /** App-Version, seit der Code-Plugins mit API 1 nicht mehr geladen werden. */
     const val API1_REMOVED_IN: String = "3.4.0"
 
-    /** Ob ein Plugin die abgekündigte API 1 für Code nutzt. */
-    fun isDeprecated(apiVersion: Int, entryPointClass: String?): Boolean =
-        !entryPointClass.isNullOrBlank() && apiVersion < DEPRECATED_BELOW
+    /** Ob ein Code-Plugin eine nicht mehr unterstützte API-Version (1) hat. */
+    fun isUnsupported(apiVersion: Int, entryPointClass: String?): Boolean =
+        !entryPointClass.isNullOrBlank() && apiVersion < MIN_CODE_API
 }
 
 /** Berechtigungen, die ein Code-Plugin im Manifest anfordern muss (rein deklarative Plugins brauchen keine). */

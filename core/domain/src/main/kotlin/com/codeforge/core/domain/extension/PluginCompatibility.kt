@@ -20,6 +20,9 @@ sealed interface PluginIssue {
 
     /** Das Plugin steckt in einem Abhängigkeitszyklus (`dependsOn` im Kreis). */
     data object DependencyCycle : PluginIssue
+
+    /** Code-Plugin mit nicht mehr unterstützter API-Version ([apiVersion], siehe [PluginApiVersion.MIN_CODE_API]). */
+    data class UnsupportedApi(val apiVersion: Int) : PluginIssue
 }
 
 /** Prüft `minHostVersion` und `dependsOn` eines Plugins; rein, ohne Android-Abhängigkeit. */

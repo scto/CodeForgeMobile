@@ -141,14 +141,6 @@ private fun PluginRow(
                 )
             }
 
-            if (com.codeforge.core.domain.extension.PluginApiVersion.isDeprecated(plugin.apiVersion, plugin.entryPointClass)) {
-                Text(
-                    stringRes(R.string.plugins_api1_deprecated, com.codeforge.core.domain.extension.PluginApiVersion.API1_REMOVED_IN),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
             issues.forEach { issue ->
                 Text(
                     when (issue) {
@@ -162,6 +154,8 @@ private fun PluginRow(
                             stringRes(R.string.plugins_issue_dependency_unavailable, issue.pluginId)
                         com.codeforge.core.domain.extension.PluginIssue.DependencyCycle ->
                             stringRes(R.string.plugins_issue_dependency_cycle)
+                        is com.codeforge.core.domain.extension.PluginIssue.UnsupportedApi ->
+                            stringRes(R.string.plugins_api1_unsupported, com.codeforge.core.domain.extension.PluginApiVersion.API1_REMOVED_IN)
                     },
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.error,

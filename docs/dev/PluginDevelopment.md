@@ -74,7 +74,7 @@ mein-plugin.zip
 | `id` | ja | eindeutig, `[A-Za-z0-9][A-Za-z0-9._-]*`, kein `..`; wird zum Verzeichnisnamen. Konvention: umgekehrte Domain, z. B. `com.example.nord` |
 | `name` | ja | Anzeigename |
 | `version` | ja | Freitext, üblich `MAJOR.MINOR.PATCH` |
-| `apiVersion` | nein | `1` (Standard) bis `4`; deklarative Plugins genügt `2`, Code-Plugins mit Projekt-/Build-Dienst, Vorschauen oder Aktivierungsereignissen brauchen `4`. Eine neuere als die der App wird abgelehnt. **Code-Plugins mit API 1 sind abgekündigt** (dort sind `shell`/`lsp` ohne Berechtigung erlaubt): Sie laufen noch mit Warnung, ab CodeForge 3.4.0 werden sie abgelehnt – mindestens `2` angeben |
+| `apiVersion` | nein | `1` (Standard) bis `4`; deklarative Plugins genügt `2`, Code-Plugins mit Projekt-/Build-Dienst, Vorschauen oder Aktivierungsereignissen brauchen `4`. Eine neuere als die der App wird abgelehnt. **Code-Plugins brauchen mindestens `2`:** API 1 (dort waren `shell`/`lsp` ohne Berechtigung erlaubt) ist seit CodeForge 3.4.0 entfernt – die Installation wird abgelehnt, bereits installierte werden nicht geladen und in der Plugin-Liste gekennzeichnet |
 | `publisher`, `description` | nein | Anzeige im Plugins-Bildschirm und im Store |
 | `permissions` | nein | siehe [2.4](#24-berechtigungen); Unbekanntes lehnt die Installation ab |
 | `minHostVersion` | nein | Mindestversion der App, z. B. `3.2.0` |

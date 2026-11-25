@@ -162,7 +162,7 @@ class PluginHooks @Inject constructor(
         }
         beforePublish?.let { hook -> runCatching { hook(event) } }
         val targets = registry.contributions(LISTENER_POINT)
-            .filter { PluginPermissionPolicy.isAllowed(it.value.apiVersion, it.value.granted, event.permission) }
+            .filter { PluginPermissionPolicy.isAllowed(it.value.granted, event.permission) }
         if (targets.isEmpty()) return
         val sdkEvent = event.toSdk()
         for (t in targets) {

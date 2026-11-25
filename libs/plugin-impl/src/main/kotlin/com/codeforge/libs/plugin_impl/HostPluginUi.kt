@@ -54,7 +54,7 @@ internal class HostPluginUi(
         if (options.isEmpty()) null else PluginPromptRegistry.ask(pluginId, title, "", options)
 
     override fun notify(title: String, text: String, tag: String) {
-        if (!PluginPermissionPolicy.isAllowed(apiVersion, granted, PluginPermissions.NOTIFICATIONS)) {
+        if (!PluginPermissionPolicy.isAllowed(granted, PluginPermissions.NOTIFICATIONS)) {
             throw PluginPermissionException(pluginId, PluginPermissions.NOTIFICATIONS)
         }
         notifier?.show(pluginId, pluginName, tag.take(MAX_TITLE), title.take(MAX_TITLE), text.take(MAX_TEXT))
