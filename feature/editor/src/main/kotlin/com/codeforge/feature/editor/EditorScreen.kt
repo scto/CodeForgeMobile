@@ -480,6 +480,8 @@ fun EditorRoute(
                                 }
                             )
                             uiState.signatureHelp?.let { SignatureHelpBar(help = it) }
+                            val commentStyle = remember(active.path) { LineEdits.commentStyleFor(active.path) }
+                            val textActions = editorTextActions(hasComment = commentStyle != null)
                             SoraCodeEditor(
                                 modifier = Modifier.weight(1f).fillMaxWidth(),
                                 path = active.path,
@@ -498,6 +500,19 @@ fun EditorRoute(
                                 onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
                                 onTestTargetClick = { viewModel.onEvent(EditorUiEvent.RunTestTarget(it)) },
                                 pluginTests = uiState.activePluginTests,
+                                textActions = textActions,
+                                onTextAction = { id ->
+                                    when (id) {
+                                        TEXT_ACTION_COMMENT -> commentStyle?.let { style ->
+                                            controller?.runLineCommand { t, a, b -> LineEdits.toggleComment(t, a, b, style) }
+                                        }
+                                        TEXT_ACTION_QUICK_FIX -> triggerQuickFix()
+                                        TEXT_ACTION_FORMAT -> formatCode()
+                                        TEXT_ACTION_RENAME -> triggerRename()
+                                        TEXT_ACTION_DEFINITION -> triggerDefinition()
+                                        TEXT_ACTION_MORE -> openPalette()
+                                    }
+                                },
                                 onContentChanged = { text -> viewModel.onEvent(EditorUiEvent.TextChanged(text)) },
                                 onControllerReady = { controller = it }
                             )
@@ -1077,6 +1092,35 @@ private fun EditorToolbar(
         TooltipIconButton(onClick = onShare, label = stringRes(R.string.editor_teilen)) {
             Icon(Icons.Filled.Share, contentDescription = stringRes(R.string.editor_teilen))
         }
+    }
+}
+
+private const val TEXT_ACTION_COMMENT = "comment"
+private const val TEXT_ACTION_QUICK_FIX = "quick-fix"
+private const val TEXT_ACTION_FORMAT = "format"
+private const val TEXT_ACTION_RENAME = "rename"
+private const val TEXT_ACTION_DEFINITION = "definition"
+private const val TEXT_ACTION_MORE = "more"
+
+// Zusätzliche Schaltflächen im Kontextmenü des Editors (Long-Click/Auswahl).
+@Composable
+private fun editorTextActions(hasComment: Boolean): List<EditorTextAction> {
+    val comment = stringRes(R.string.editor_kommentar_umschalten)
+    val quickFix = stringRes(R.string.lsp_quick_fix)
+    val format = stringRes(R.string.editor_ta_format)
+    val rename = stringRes(R.string.lsp_rename)
+    val definition = stringRes(R.string.lsp_definition)
+    val more = stringRes(R.string.editor_ta_more)
+    return remember(hasComment, comment, quickFix, format, rename, definition, more) {
+        listOfNotNull(
+            EditorTextAction(TEXT_ACTION_COMMENT, comment, com.codeforge.feature.editor.R.drawable.cf_ta_comment, needsEditable = true)
+                .takeIf { hasComment },
+            EditorTextAction(TEXT_ACTION_QUICK_FIX, quickFix, com.codeforge.feature.editor.R.drawable.cf_ta_quick_fix, needsEditable = true),
+            EditorTextAction(TEXT_ACTION_FORMAT, format, com.codeforge.feature.editor.R.drawable.cf_ta_format, needsEditable = true),
+            EditorTextAction(TEXT_ACTION_RENAME, rename, com.codeforge.feature.editor.R.drawable.cf_ta_rename, needsEditable = true),
+            EditorTextAction(TEXT_ACTION_DEFINITION, definition, com.codeforge.feature.editor.R.drawable.cf_ta_definition),
+            EditorTextAction(TEXT_ACTION_MORE, more, com.codeforge.feature.editor.R.drawable.cf_ta_more),
+        )
     }
 }
 

@@ -125,6 +125,8 @@ fun SoraCodeEditor(
     onUpdateChipClick: (DependencyUpdate) -> Unit = {},
     onTestTargetClick: (TestTarget) -> Unit = {},
     pluginTests: List<TestTarget> = emptyList(),
+    textActions: List<EditorTextAction> = emptyList(),
+    onTextAction: (String) -> Unit = {},
     onContentChanged: (String) -> Unit,
     onControllerReady: (EditorController) -> Unit = {}
 ) {
@@ -171,6 +173,8 @@ fun SoraCodeEditor(
         )
     }
     val controller = remember(path) { EditorController() }
+    val currentTextActions by androidx.compose.runtime.rememberUpdatedState(textActions)
+    val currentOnTextAction by androidx.compose.runtime.rememberUpdatedState(onTextAction)
     val diagnosticsContainer = remember(path) { DiagnosticsContainer() }
 
     // Overlay (Farbkästchen + Update-Chips + Test-Starter): Editor-Referenz und „Tick“ für Scroll/Text-Änderungen
@@ -224,6 +228,11 @@ fun SoraCodeEditor(
 
                 // --- Auto-Completion-Popup aktiv halten (Snippets kommen aus LspAwareLanguage) ---
                 replaceComponent(EditorAutoCompletion::class.java, ImeAwareAutoCompletion(this))
+                // --- Kontextmenü (Long-Click/Auswahl) mit zusätzlichen Editor-Aktionen ---
+                replaceComponent(
+                    io.github.rosemoe.sora.widget.component.EditorTextActionWindow::class.java,
+                    CfTextActionWindow(this, { currentTextActions }, { id -> currentOnTextAction(id) }),
+                )
                 getComponent(EditorAutoCompletion::class.java).isEnabled = true
 
                 // --- Diagnose-UI & Tooltips ---

@@ -70,6 +70,7 @@ internal object Routes {
     const val SETTINGS_GIT = "settings_git"
     const val SETTINGS_COMPOSE_PREVIEW = "settings_compose_preview"
     const val SETTINGS_DEBUG = "settings_debug"
+    const val SETTINGS_SYSTEM_INFO = "settings_system_info"
     const val SETTINGS_AI = "settings_ai"
     const val SETTINGS_HELP = "settings_help"
     const val SETTINGS_STORE = "settings_store"
@@ -289,8 +290,12 @@ fun CodeForgeNavHost(
         }
         composable(Routes.SETTINGS_DEBUG) {
             DebugSettingsRoute(
-                onBack = { navigateBackOrStart() }
+                onBack = { navigateBackOrStart() },
+                onOpenSystemInfo = { navController.navigate(Routes.SETTINGS_SYSTEM_INFO) }
             )
+        }
+        composable(Routes.SETTINGS_SYSTEM_INFO) {
+            com.codeforge.feature.settings.diagnostics.SystemInfoRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_TERMINAL) {
             TerminalSettingsRoute(

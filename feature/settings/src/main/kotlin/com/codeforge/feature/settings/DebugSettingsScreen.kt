@@ -39,10 +39,17 @@ import com.codeforge.core.ui.SettingsTopBar
 fun DebugSettingsRoute(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
+    onOpenSystemInfo: () -> Unit = {},
     viewModel: DebugSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    DebugSettingsScreen(modifier = modifier, uiState = uiState, onBack = onBack, onEvent = viewModel::onEvent)
+    DebugSettingsScreen(
+        modifier = modifier,
+        uiState = uiState,
+        onBack = onBack,
+        onOpenSystemInfo = onOpenSystemInfo,
+        onEvent = viewModel::onEvent
+    )
 }
 
 /** Bildschirm der Debug-Einstellungen. */
@@ -52,7 +59,8 @@ internal fun DebugSettingsScreen(
     uiState: DebugSettingsUiState,
     onEvent: (DebugSettingsUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onOpenSystemInfo: () -> Unit = {}
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val message = uiState.lastMessage?.let { msg ->
@@ -82,6 +90,17 @@ internal fun DebugSettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Card(onClick = onOpenSystemInfo, modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(stringRes(R.string.sysinfo_open), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        stringRes(R.string.sysinfo_open_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
             Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),

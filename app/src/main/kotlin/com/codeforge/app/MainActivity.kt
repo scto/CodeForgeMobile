@@ -79,17 +79,26 @@ class MainActivity : ComponentActivity() {
             }
 
             CodeForgeTheme(themeState = settings.theme, extensionTheme = extensionTheme, extensionThemes = extensionThemes, iconTheme = iconTheme, grammars = activeContributions.grammars) {
-                androidx.compose.foundation.layout.Box {
-                    CodeForgeNavHost(
-                        startOnboarding = !settings.onboardingCompleted,
-                        useCompactTerminal = settings.terminal.useCompactTerminal
-                    )
-                    // Laufende Indexierung und Gradle-Läufe, sichtbar auf jedem Bildschirm.
-                    IdeProgressFlashbar(modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopCenter))
-                    // Rückfragen von Plugins (Bestätigung/Auswahl).
-                    PluginPromptHost()
+                // Editor-Vorschau für die Einstellungen (Umsetzung aus :feature:editor, Module bleiben getrennt).
+                androidx.compose.runtime.CompositionLocalProvider(com.codeforge.core.designsystem.LocalEditorPreview provides EditorPreviewImpl) {
+                    androidx.compose.foundation.layout.Box {
+                        CodeForgeNavHost(
+                            startOnboarding = !settings.onboardingCompleted,
+                            useCompactTerminal = settings.terminal.useCompactTerminal
+                        )
+                        // Laufende Indexierung und Gradle-Läufe, sichtbar auf jedem Bildschirm.
+                        IdeProgressFlashbar(modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopCenter))
+                        // Rückfragen von Plugins (Bestätigung/Auswahl).
+                        PluginPromptHost()
+                    }
                 }
             }
         }
     }
 }
+
+// Stabile Referenz: ein neues Lambda je Neuzusammensetzung würde den ganzen Baum neu aufbauen.
+private val EditorPreviewImpl: @androidx.compose.runtime.Composable (
+    com.codeforge.core.designsystem.EditorPreviewSpec,
+    androidx.compose.ui.Modifier,
+) -> Unit = { spec, modifier -> com.codeforge.feature.editor.EditorPreview(spec, modifier) }

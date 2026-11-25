@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -161,6 +162,9 @@ private fun EditorSettingsScreen(
                 availableThemes = uiState.availableThemes,
                 onThemeSelected = { onEvent(EditorSettingsUiEvent.TextmateThemeChanged(it)) }
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            EditorPreviewCard(uiState)
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -725,3 +729,40 @@ private fun EditorToggleRow(
     }
     Spacer(modifier = Modifier.height(12.dp))
 }
+
+// Live-Vorschau: Theme, Schrift, Größe, Zeilenabstand, Zeilennummern, Umbruch und Ligaturen wie im Editor.
+@Composable
+private fun EditorPreviewCard(uiState: EditorSettingsUiState) {
+    val preview = com.codeforge.core.designsystem.LocalEditorPreview.current ?: return
+    val spec = androidx.compose.runtime.remember(
+        uiState.textmateTheme, uiState.fontSize, uiState.fontFamily, uiState.showLineNumbers, uiState.wordWrap,
+        uiState.lineSpacingPercent, uiState.fontLigatures, uiState.showNonPrintableChars, uiState.tabSize, uiState.useTreeSitter,
+    ) {
+        com.codeforge.core.designsystem.EditorPreviewSpec(
+            theme = uiState.textmateTheme,
+            fontSizeSp = uiState.fontSize,
+            fontFamily = uiState.fontFamily,
+            showLineNumbers = uiState.showLineNumbers,
+            wordWrap = uiState.wordWrap,
+            lineSpacingPercent = uiState.lineSpacingPercent,
+            fontLigatures = uiState.fontLigatures,
+            showNonPrintableChars = uiState.showNonPrintableChars,
+            tabSize = uiState.tabSize,
+            useTreeSitter = uiState.useTreeSitter,
+        )
+    }
+    androidx.compose.material3.Card(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            stringRes(R.string.settings_editor_preview),
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.padding(start = 12.dp, top = 10.dp, end = 12.dp, bottom = 6.dp),
+        )
+        preview(
+            spec,
+            Modifier.fillMaxWidth().height(PREVIEW_HEIGHT_DP.dp).padding(start = 6.dp, end = 6.dp, bottom = 6.dp)
+                .clip(MaterialTheme.shapes.small),
+        )
+    }
+}
+
+private const val PREVIEW_HEIGHT_DP = 220

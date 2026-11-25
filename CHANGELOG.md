@@ -11,6 +11,16 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt / Added
+- Editor: Das Kontextmenü bei Long-Click/Auswahl hat neben Alles auswählen/Kopieren/Einfügen/Ausschneiden jetzt
+  Kommentar umschalten, Quick-Fix, Formatieren, Umbenennen, Gehe zu Definition und „Weitere Aktionen“ (Befehlspalette
+  inkl. Plugin-Befehle); die Leiste scrollt seitlich. / Editor context menu with extra actions.
+- Editor-Einstellungen: Live-Vorschau unter der Theme-Auswahl – echter Editor mit Beispielcode, folgt Theme, Schrift,
+  Schriftgröße, Zeilenabstand, Zeilennummern, Umbruch, Ligaturen und unsichtbaren Zeichen. / Live editor preview.
+- Einstellungen → Debug → System-Diagnose: Gerät, Anzeige & Rendering (Bildwiederholrate, OpenGL ES, Vulkan, HDR,
+  Farbraum), Laufzeit & Arbeitsspeicher, Speicherplatz, App- und Bibliotheksversionen; „Als Text kopieren“ für
+  Fehlerberichte. / System diagnostics screen.
+
 ## [3.3.0] - 2026-11-25
 
 ### Hinzugefügt / Added
