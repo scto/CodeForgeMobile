@@ -27,6 +27,16 @@ class ProjectTemplatePluginsTest {
     }
 
     @Test
+    fun l10nIsParsed() {
+        val t = parse("""[{"id":"a","label":"Leer","path":"t","l10n":{"en":{"label":"Empty"}}}]""").getOrThrow()
+            .contributes
+            .projectTemplates
+            .single()
+        assertEquals("Empty", t.l10n.getValue("en").label)
+        assertTrue(parse("""[{"id":"a","label":"A","path":"t","l10n":{"EN!":{"label":"x"}}}]""").isFailure)
+    }
+
+    @Test
     fun invalidTemplatesAreRejected() {
         assertTrue(parse("""[{"id":"a","label":"A","path":"../x"}]""").isFailure)
         assertTrue(parse("""[{"id":"a","label":"A","path":"t","languages":["rust"]}]""").isFailure)
@@ -38,7 +48,7 @@ class ProjectTemplatePluginsTest {
     @Test
     fun shippedTemplatePluginsAreValid() {
         val plugins = src.listFiles().orEmpty().filter { File(it, "plugin.json").isFile }
-        assertEquals(6, plugins.size)
+        assertEquals(15, plugins.size) // 6 aus dem Store + 9 mitgelieferte (android-*)
         plugins.forEach { dir ->
             val m = PluginManifestParser.parse(File(dir, "plugin.json").readText()).getOrThrow()
             assertEquals(dir.name, m.id)

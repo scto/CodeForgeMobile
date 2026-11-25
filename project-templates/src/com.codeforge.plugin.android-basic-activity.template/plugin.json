@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.android-basic-activity.template",
+  "name": "Basic Activity (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Eingebaute Projektvorlage: Toolbar, FAB und Inhaltsbereich.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "android-basic-activity",
+        "label": "Basic Activity",
+        "description": "Toolbar, FAB und Inhaltsbereich",
+        "l10n": {
+          "en": { "label": "Basic Activity", "description": "Toolbar, FAB and content area" }
+        },
+        "path": "template",
+        "languages": ["kotlin", "java"],
+        "gradleDsl": ["kts", "groovy"],
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

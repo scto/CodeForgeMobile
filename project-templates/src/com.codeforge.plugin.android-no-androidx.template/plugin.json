@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.android-no-androidx.template",
+  "name": "Ohne AndroidX (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Eingebaute Projektvorlage: Klassische Activity ohne AndroidX.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "android-no-androidx",
+        "label": "Ohne AndroidX",
+        "description": "Klassische Activity ohne AndroidX",
+        "l10n": {
+          "en": { "label": "No AndroidX", "description": "Classic activity without AndroidX" }
+        },
+        "path": "template",
+        "languages": ["kotlin", "java"],
+        "gradleDsl": ["kts", "groovy"],
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

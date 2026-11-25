@@ -15,6 +15,8 @@ enum class WizardStep { SELECT_TEMPLATE, CONFIGURE }
 data class ProjectWizardUiState(
     val step: WizardStep = WizardStep.SELECT_TEMPLATE,
     val templates: List<ProjectTemplateDescriptor> = emptyList(),
+    /** true, sobald die Vorlagenliste geladen ist (leer = keine Vorlagen-Plugins installiert). */
+    val templatesLoaded: Boolean = false,
     val selected: ProjectTemplateDescriptor? = null,
     val projectName: String = "",
     val packageName: String = "",

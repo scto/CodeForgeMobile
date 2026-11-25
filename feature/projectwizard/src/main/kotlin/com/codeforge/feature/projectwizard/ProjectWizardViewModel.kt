@@ -52,6 +52,7 @@ class ProjectWizardViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     templates = templates,
+                    templatesLoaded = true,
                     targetDir = wizard.lastSaveLocation.ifBlank { templateEngine.defaultProjectsDirectory() },
                     language = runCatching { ProjectLanguage.valueOf(wizard.language) }.getOrDefault(ProjectLanguage.KOTLIN),
                     minSdk = wizard.minSdk.takeIf { v -> v in ProjectRequest.MIN_SDK_OPTIONS } ?: ProjectRequest.DEFAULT_MIN_SDK,
@@ -106,7 +107,7 @@ class ProjectWizardViewModel @Inject constructor(
             !template.supportsGroovy -> true
             else -> useKotlinDsl
         }
-        val floor = template.plugin?.minSdk ?: 0
+        val floor = template.plugin.minSdk ?: 0
         val sdk = if (minSdk >= floor) minSdk else ProjectRequest.MIN_SDK_OPTIONS.firstOrNull { it >= floor } ?: minSdk
         return copy(language = lang, useKotlinDsl = kts, minSdk = sdk)
     }

@@ -1,24 +1,10 @@
 // Modul: :core:domain
 package com.codeforge.core.domain.model
 
-/** Art der Projektvorlage (Android-Projekte mit Gradle, Views oder Compose). */
-enum class ProjectTemplateKind {
-    NO_ACTIVITY,
-    EMPTY_ACTIVITY,
-    CPP_ACTIVITY,
-    BASIC_ACTIVITY,
-    NAV_DRAWER_ACTIVITY,
-    BOTTOM_NAV_ACTIVITY,
-    TABBED_ACTIVITY,
-    NO_ANDROIDX_ACTIVITY,
-    COMPOSE_ACTIVITY,
-    /** Vorlage aus einem Plugin (`contributes.projectTemplates`), siehe [PluginTemplateRef]. */
-    PLUGIN
-}
-
 /**
- * Herkunft einer Plugin-Vorlage: [templateDir] ist der absolute Vorlagenordner, [iconFile] das optionale Vorschaubild.
- * Texte kommen aus dem Plugin (nicht übersetzt).
+ * Herkunft einer Vorlage – jede Projektvorlage stammt aus einem Plugin (`contributes.projectTemplates`), auch die
+ * mitgelieferten. [templateDir] ist der absolute Vorlagenordner, [iconFile] das optionale Vorschaubild.
+ * [labels]/[descriptions] enthalten Übersetzungen je Sprachcode (z. B. `en`); fehlt eine, gelten [label]/[description].
  */
 data class PluginTemplateRef(
     val pluginId: String,
@@ -29,25 +15,30 @@ data class PluginTemplateRef(
     /** Android-Projekt (Mindest-SDK wählbar) oder z. B. reines JVM-Projekt. */
     val android: Boolean = true,
     /** Kleinstes erlaubtes Mindest-SDK oder `null`. */
-    val minSdk: Int? = null
+    val minSdk: Int? = null,
+    /** Mit der App ausgeliefert (vorinstalliert). */
+    val builtin: Boolean = false,
+    val labels: Map<String, String> = emptyMap(),
+    val descriptions: Map<String, String> = emptyMap()
 )
+
+/** Anzeigename für [language] (ISO-639-1), sonst [PluginTemplateRef.label]. */
+fun PluginTemplateRef.labelFor(language: String): String = labels[language] ?: label
+
+/** Beschreibung für [language] (ISO-639-1), sonst [PluginTemplateRef.description]. */
+fun PluginTemplateRef.descriptionFor(language: String): String = descriptions[language] ?: description
 
 /** Programmiersprache eines neuen Projekts. */
 enum class ProjectLanguage { KOTLIN, JAVA }
 
-/**
- * Beschreibt eine Vorlage. Anzeigename, Beschreibung und Icon liegen als Ressourcen in
- * :feature:projectwizard (Zuordnung über [id]) — die Domain bleibt frei von Android-Ressourcen.
- */
+/** Beschreibt eine wählbare Vorlage (ID `<pluginId>/<vorlagenId>`) samt erlaubter Sprachen und Gradle-DSL. */
 data class ProjectTemplateDescriptor(
     val id: String,
-    val kind: ProjectTemplateKind,
+    val plugin: PluginTemplateRef,
     val supportsJava: Boolean = true,
     val supportsKotlin: Boolean = true,
     val supportsKts: Boolean = true,
-    val supportsGroovy: Boolean = true,
-    /** Gesetzt bei [ProjectTemplateKind.PLUGIN]. */
-    val plugin: PluginTemplateRef? = null
+    val supportsGroovy: Boolean = true
 )
 
 /** Alle Eingaben des Wizards für die Projekterzeugung. */

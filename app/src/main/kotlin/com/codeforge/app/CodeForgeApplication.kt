@@ -29,6 +29,8 @@ class CodeForgeApplication : Application() {
     @Inject lateinit var logManager: CfmLogManager
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var releaseMemory: dagger.Lazy<com.codeforge.core.domain.runtime.ReleaseMemoryUseCase>
+    @Suppress("LateinitUsage") // Feldinjektion: Application hat keinen Konstruktor für Hilt.
+    @Inject lateinit var builtinTemplates: dagger.Lazy<com.codeforge.libs.template_engine.BuiltinTemplateInstaller>
 
     /** Zeitpunkt der letzten automatischen Speicherfreigabe (gegen Dauerfeuer bei anhaltendem Druck). */
     @Volatile private var lastTrimMillis = 0L
@@ -55,6 +57,8 @@ class CodeForgeApplication : Application() {
         TermuxApplication.initTermuxApplication(this)
         com.codeforge.app.keepalive.IdeKeepAliveController.start(this)
         com.codeforge.feature.composepreview.PreviewActivityHolder.register(this)
+        // Mitgelieferte Projektvorlagen (Plugins) ausrollen; der Wizard wartet bei Bedarf darauf.
+        appScope.launch { builtinTemplates.get().ensureInstalled() }
     }
 
     /**

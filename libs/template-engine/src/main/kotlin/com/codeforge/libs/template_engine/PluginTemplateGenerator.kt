@@ -66,7 +66,7 @@ class PluginTemplateGenerator(private val assets: AssetSource) {
         private const val MODULE_SCAN_DEPTH = 4
         private const val GRADLEW = "gradlew"
         private val BUILD_FILES = setOf("build.gradle", "build.gradle.kts")
-        private val PLACEHOLDER = Regex("""\{\{(projectName|packageName|packagePath|minSdk)\}\}""")
+        private val PLACEHOLDER = Regex("""\{\{(projectName|packageName|packagePath|packageJni|minSdk)\}\}""")
 
         /** Ebenen in Kopierreihenfolge: `common`, Sprache, DSL, Kombination (z. B. `kotlin-kts`). */
         fun layersFor(request: ProjectRequest): List<String> {
@@ -83,6 +83,8 @@ class PluginTemplateGenerator(private val assets: AssetSource) {
             "projectName" to request.projectName,
             "packageName" to request.packageName,
             "packagePath" to request.packageName.replace('.', '/'),
+            // JNI-Symbolname (`Java_<packageJni>_Klasse_methode`): `_` → `_1`, `.` → `_`.
+            "packageJni" to request.packageName.replace("_", "_1").replace('.', '_'),
             "minSdk" to request.minSdk.toString()
         )
 

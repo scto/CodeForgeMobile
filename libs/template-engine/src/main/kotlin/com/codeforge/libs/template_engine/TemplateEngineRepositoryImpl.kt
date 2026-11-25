@@ -7,7 +7,6 @@ import com.codeforge.core.domain.extension.Resolved
 import com.codeforge.core.domain.model.ProjectHandle
 import com.codeforge.core.domain.model.ProjectRequest
 import com.codeforge.core.domain.model.ProjectTemplateDescriptor
-import com.codeforge.core.domain.model.ProjectTemplateKind
 import com.codeforge.core.domain.model.PluginTemplateRef
 import com.codeforge.core.domain.repository.GitRepository
 import com.codeforge.core.domain.repository.ProjectsDirectoryProvider
@@ -32,14 +31,18 @@ class TemplateEngineRepositoryImpl @Inject constructor(
     private val git: GitRepository,
     private val projectsDirectoryProvider: ProjectsDirectoryProvider,
     private val contributions: ContributionRepository,
+    private val builtins: BuiltinTemplateInstaller,
 ) : TemplateEngineRepository {
 
-    private val generator by lazy { ProjectGenerator(AndroidAssetSource(context.assets)) }
-    private val pluginGenerator by lazy { PluginTemplateGenerator(AndroidAssetSource(context.assets)) }
+    private val generator by lazy { PluginTemplateGenerator(AndroidAssetSource(context.assets)) }
 
-    /** Eingebaute Vorlagen, danach die der aktivierten Plugins. */
-    override suspend fun listTemplates(): List<ProjectTemplateDescriptor> =
-        DESCRIPTORS + contributions.contributions.value.projectTemplates.map { it.toDescriptor() }
+    /** Vorlagen aller aktivierten Plugins; mitgelieferte zuerst (werden bei Bedarf vorher ausgerollt). */
+    override suspend fun listTemplates(): List<ProjectTemplateDescriptor> {
+        builtins.ensureInstalled()
+        return contributions.contributions.value.projectTemplates
+            .sortedBy { BuiltinTemplates.order(it.pluginId) }
+            .map { it.toDescriptor() }
+    }
 
     override fun defaultProjectsDirectory(): String =
         projectsDirectoryProvider.getProjectsRoot().absolutePath
@@ -51,12 +54,7 @@ class TemplateEngineRepositoryImpl @Inject constructor(
                 require(!projectDir.exists()) { Res.string(R.string.template_verzeichnis_existiert_bereits, projectDir.path) }
                 check(projectDir.mkdirs()) { Res.string(R.string.template_verzeichnis_nicht_anlegbar, projectDir.path) }
                 val handle = try {
-                    val plugin = request.template.plugin
-                    if (plugin != null) {
-                        pluginGenerator.generate(request, File(plugin.templateDir), projectDir)
-                    } else {
-                        generator.generate(request, projectDir)
-                    }
+                    generator.generate(request, File(request.template.plugin.templateDir), projectDir)
                 } catch (t: Throwable) {
                     projectDir.deleteRecursively()
                     throw t
@@ -74,7 +72,6 @@ class TemplateEngineRepositoryImpl @Inject constructor(
         val t = item
         return ProjectTemplateDescriptor(
             id = "$pluginId/${t.id}",
-            kind = ProjectTemplateKind.PLUGIN,
             supportsJava = ProjectTemplateContribution.LANGUAGE_JAVA in t.languages,
             supportsKotlin = ProjectTemplateContribution.LANGUAGE_KOTLIN in t.languages,
             supportsKts = ProjectTemplateContribution.DSL_KTS in t.gradleDsl,
@@ -86,7 +83,10 @@ class TemplateEngineRepositoryImpl @Inject constructor(
                 templateDir = File(pluginDir, t.path).path,
                 iconFile = t.icon?.let { File(pluginDir, it).path },
                 android = t.android,
-                minSdk = t.minSdk
+                minSdk = t.minSdk,
+                builtin = BuiltinTemplates.isBuiltin(pluginId),
+                labels = t.l10n.mapValues { it.value.label }.filterValues { it.isNotBlank() },
+                descriptions = t.l10n.mapValues { it.value.description }.filterValues { it.isNotBlank() }
             )
         )
     }
@@ -94,18 +94,5 @@ class TemplateEngineRepositoryImpl @Inject constructor(
     private companion object {
         /** Nachricht des ersten Commits. */
         const val INITIAL_COMMIT_MESSAGE = "Initial commit"
-
-        /** Alle verfügbaren Vorlagen. */
-        val DESCRIPTORS = listOf(
-            ProjectTemplateDescriptor("no_activity", ProjectTemplateKind.NO_ACTIVITY),
-            ProjectTemplateDescriptor("empty_activity", ProjectTemplateKind.EMPTY_ACTIVITY),
-            ProjectTemplateDescriptor("cpp_activity", ProjectTemplateKind.CPP_ACTIVITY),
-            ProjectTemplateDescriptor("basic_activity", ProjectTemplateKind.BASIC_ACTIVITY),
-            ProjectTemplateDescriptor("nav_drawer_activity", ProjectTemplateKind.NAV_DRAWER_ACTIVITY),
-            ProjectTemplateDescriptor("bottom_nav_activity", ProjectTemplateKind.BOTTOM_NAV_ACTIVITY),
-            ProjectTemplateDescriptor("tabbed_activity", ProjectTemplateKind.TABBED_ACTIVITY),
-            ProjectTemplateDescriptor("no_androidx_activity", ProjectTemplateKind.NO_ANDROIDX_ACTIVITY),
-            ProjectTemplateDescriptor("compose_activity", ProjectTemplateKind.COMPOSE_ACTIVITY, supportsJava = false),
-        )
     }
 }

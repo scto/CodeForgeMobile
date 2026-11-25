@@ -7,8 +7,8 @@ import org.junit.Test
 
 class ProjectInputValidatorTest {
 
-    private val empty = ProjectTemplateDescriptor("empty_activity", ProjectTemplateKind.EMPTY_ACTIVITY)
-    private val compose = ProjectTemplateDescriptor("compose_activity", ProjectTemplateKind.COMPOSE_ACTIVITY, supportsJava = false)
+    private val empty = ProjectTemplateDescriptor("empty_activity", PluginTemplateRef("p", "empty_activity", "", ""))
+    private val compose = ProjectTemplateDescriptor("compose_activity", PluginTemplateRef("p", "compose_activity", "", ""), supportsJava = false)
 
     private fun req(
         t: ProjectTemplateDescriptor = empty,

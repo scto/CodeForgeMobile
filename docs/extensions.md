@@ -169,10 +169,11 @@ Alle Sprachserver kommen aus Plugins (die App hat keinen eingebauten Katalog meh
   "path": "template", "languages": ["kotlin"], "gradleDsl": ["kts"], "android": true, "minSdk": 24, "icon": "icon.png" }
 ```
 
-* Erscheinen im Projekt-Assistenten nach den eingebauten Vorlagen (Kennzeichnung „Vorlage aus Plugin“). Sprache, Gradle-DSL und Mindest-SDK sind auf die Angaben beschränkt; `android: false` blendet das Mindest-SDK aus.
+* Erscheinen im Projekt-Assistenten nach den mitgelieferten Vorlagen (Kennzeichnung „Vorlage aus Plugin“). Auch die mitgelieferten Android-Vorlagen sind solche Plugins (`com.codeforge.plugin.android-*.template`, beim Start vorinstalliert, deinstallierbar, über den Store wiederherstellbar). Sprache, Gradle-DSL und Mindest-SDK sind auf die Angaben beschränkt; `android: false` blendet das Mindest-SDK aus.
+* `l10n` (optional) übersetzt Anzeigename und Beschreibung je Sprachcode: `"l10n": { "en": { "label": "Empty Activity", "description": "…" } }`; ohne Eintrag für die Oberflächensprache gelten `label`/`description`.
 * `path` ist ein Ordner mit Ebenen, die nacheinander kopiert werden (spätere überschreiben): `common/`, `kotlin/`|`java/`, `kts/`|`groovy/`, Kombination wie `kotlin-kts/`.
-* Platzhalter in Pfaden und Textdateien: `{{projectName}}`, `{{packageName}}`, `{{packagePath}}`, `{{minSdk}}`; unbekannte bleiben stehen. Binärdateien (kein gültiges UTF-8 oder mit NUL-Byte, > 1 MiB) werden unverändert kopiert. Pfade, die aus dem Projekt herausführen, brechen die Erzeugung ab.
-* Fehlen `gradlew` oder `gradle/libs.versions.toml`, kommen Wrapper bzw. Version Catalog der App dazu. Danach wie bei eingebauten Vorlagen optional `git init` mit erstem Commit.
+* Platzhalter in Pfaden und Textdateien: `{{projectName}}`, `{{packageName}}`, `{{packagePath}}`, `{{packageJni}}` (Package als JNI-Symbolteil, z. B. `com_example_app`), `{{minSdk}}`; unbekannte bleiben stehen. Binärdateien (kein gültiges UTF-8 oder mit NUL-Byte, > 1 MiB) werden unverändert kopiert. Pfade, die aus dem Projekt herausführen, brechen die Erzeugung ab.
+* Fehlen `gradlew` oder `gradle/libs.versions.toml`, kommen Wrapper bzw. Version Catalog der App dazu. Danach optional `git init` mit erstem Commit.
 * Aus der Vorlage wird nichts ausgeführt; Store-tauglich (deklarativ). Vorlage für Autoren: `templates/project-template`, Beispiele: `project-templates/src`.
 
 ## Formatierer (`formatters`)

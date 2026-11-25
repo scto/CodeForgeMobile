@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.android-navigation-drawer.template",
+  "name": "Navigation Drawer (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Eingebaute Projektvorlage: Seitenmenü mit Fragmenten und Navigation.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "android-navigation-drawer",
+        "label": "Navigation Drawer",
+        "description": "Seitenmenü mit Fragmenten und Navigation",
+        "l10n": {
+          "en": { "label": "Navigation Drawer", "description": "Side menu with fragments and navigation" }
+        },
+        "path": "template",
+        "languages": ["kotlin", "java"],
+        "gradleDsl": ["kts", "groovy"],
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

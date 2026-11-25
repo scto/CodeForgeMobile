@@ -839,24 +839,6 @@
     <string name="pw_err_target_blank">Speicherort darf nicht leer sein</string>
     <string name="pw_err_compose_kotlin">Compose unterstützt nur Kotlin</string>
 
-    <string name="pw_tpl_no_activity">Keine Activity</string>
-    <string name="pw_tpl_no_activity_desc">Nur Gradle-Grundgerüst ohne Quellcode</string>
-    <string name="pw_tpl_empty">Leere Activity</string>
-    <string name="pw_tpl_empty_desc">Eine Activity mit einfachem Layout</string>
-    <string name="pw_tpl_cpp">Native C++</string>
-    <string name="pw_tpl_cpp_desc">Activity mit JNI-Anbindung an C++</string>
-    <string name="pw_tpl_basic">Basic Activity</string>
-    <string name="pw_tpl_basic_desc">Toolbar, FAB und Inhaltsbereich</string>
-    <string name="pw_tpl_drawer">Navigation Drawer</string>
-    <string name="pw_tpl_drawer_desc">Seitenmenü mit Fragmenten und Navigation</string>
-    <string name="pw_tpl_bottom_nav">Bottom Navigation</string>
-    <string name="pw_tpl_bottom_nav_desc">Untere Navigationsleiste mit drei Zielen</string>
-    <string name="pw_tpl_tabbed">Tabs</string>
-    <string name="pw_tpl_tabbed_desc">Tabs mit ViewPager und Fragmenten</string>
-    <string name="pw_tpl_no_androidx">Ohne AndroidX</string>
-    <string name="pw_tpl_no_androidx_desc">Klassische Support-freie Activity ohne AndroidX</string>
-    <string name="pw_tpl_compose">Jetpack Compose</string>
-    <string name="pw_tpl_compose_desc">Leere Compose-Activity mit Material 3</string>
 
     <!-- Nachgezogene Einzeltexte -->
     <string name="git_op_stage">Vormerken…</string>
@@ -2522,6 +2504,7 @@
     <string name="lsp_from_plugin">Plugin: %1$s</string>
     <string name="lsp_none_installed">Noch kein Sprachserver installiert. Sprachserver kommen als Plugins aus dem Store (Kategorie „Sprachserver“).</string>
     <string name="flashbar_install">Installiere %1$s</string>
+    <string name="pw_no_templates">Keine Projektvorlagen installiert. Vorlagen unter Einstellungen → Store → Projektvorlagen installieren.</string>
     <string name="pw_tpl_plugin">Vorlage aus Plugin</string>
     <string name="settings_j2k_enabled">Java → Kotlin (J2K)</string>
     <string name="settings_j2k_enabled_desc">Beim Öffnen eines Projekts mit Java-Dateien die Umwandlung nach Kotlin anbieten. Aus: kein Scan und kein Dialog.</string>

@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.android-tabs.template",
+  "name": "Tabs (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Eingebaute Projektvorlage: Tabs mit ViewPager und Fragmenten.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "android-tabs",
+        "label": "Tabs",
+        "description": "Tabs mit ViewPager und Fragmenten",
+        "l10n": {
+          "en": { "label": "Tabs", "description": "Tabs with ViewPager and fragments" }
+        },
+        "path": "template",
+        "languages": ["kotlin", "java"],
+        "gradleDsl": ["kts", "groovy"],
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

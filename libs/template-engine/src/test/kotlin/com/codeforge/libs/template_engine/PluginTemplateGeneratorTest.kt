@@ -4,7 +4,7 @@ import com.codeforge.core.domain.extension.PluginManifestParser
 import com.codeforge.core.domain.model.ProjectLanguage
 import com.codeforge.core.domain.model.ProjectRequest
 import com.codeforge.core.domain.model.ProjectTemplateDescriptor
-import com.codeforge.core.domain.model.ProjectTemplateKind
+import com.codeforge.core.domain.model.PluginTemplateRef
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -27,7 +27,7 @@ class PluginTemplateGeneratorTest {
     private val keepDir = System.getenv("CF_TEMPLATE_OUT")?.let(::File)
 
     private fun request(lang: ProjectLanguage, kts: Boolean, name: String) = ProjectRequest(
-        template = ProjectTemplateDescriptor("t", ProjectTemplateKind.PLUGIN),
+        template = ProjectTemplateDescriptor("t", PluginTemplateRef("p", "t", "", "")),
         projectName = name,
         packageName = "com.example.demo",
         targetDir = tmp.root.path,
@@ -57,18 +57,21 @@ class PluginTemplateGeneratorTest {
     @Test
     fun everyCombinationIsComplete() {
         val projects = generateAll()
-        assertEquals(9, projects.size) // 5 Compose-Vorlagen (je Kotlin, KTS) + jvm-cli (2 Sprachen x 2 DSL)
+        // 5 Compose-Vorlagen (je Kotlin, KTS) + jvm-cli (2 × 2) + mitgeliefert: 8 × (2 Sprachen × 2 DSL) + Compose (Kotlin × 2 DSL)
+        assertEquals(9 + 34, projects.size)
         projects.forEach { p ->
             assertTrue(p.name, File(p, "gradlew").canExecute())
             assertTrue(p.name, File(p, "gradle/wrapper/gradle-wrapper.properties").isFile)
             assertTrue(p.name, File(p, "gradle/libs.versions.toml").isFile)
             assertTrue(p.name, File(p, "settings.gradle.kts").isFile || File(p, "settings.gradle").isFile)
             val leftovers = p.walkTopDown()
-                .filter { it.isFile && it.name != "gradle-wrapper.jar" }
+                .filter { it.isFile && it.extension !in BINARY_EXT }
                 .filter { "{{" in it.path || "{{" in it.readText() }
                 .toList()
             assertTrue("${p.name}: $leftovers", leftovers.isEmpty())
-            assertTrue(p.name, p.walkTopDown().any { it.path.contains("com/example/demo") })
+            if (p.walkTopDown().any { it.extension in SOURCE_EXT }) {
+                assertTrue(p.name, p.walkTopDown().any { it.path.contains("com/example/demo") })
+            }
         }
     }
 
@@ -99,5 +102,42 @@ class PluginTemplateGeneratorTest {
         val tpl = tmp.newFolder("empty")
         val result = runCatching { generator.generate(request(ProjectLanguage.KOTLIN, true, "X"), tpl, tmp.newFolder("o")) }
         assertFalse(result.isSuccess)
+    }
+
+    @Test
+    fun builtinsMatchBundledList() {
+        val src = File(repoRoot, "project-templates/src")
+        val bundled = src.listFiles().orEmpty().map { it.name }.filter { it.startsWith("com.codeforge.plugin.android-") }.sorted()
+        assertEquals(BuiltinTemplates.IDS.sorted(), bundled)
+        for (id in BuiltinTemplates.IDS) {
+            val m = PluginManifestParser.parse(File(src, "$id/plugin.json").readText()).getOrThrow()
+            val t = m.contributes.projectTemplates.single()
+            assertTrue(id, t.l10n["en"]?.label?.isNotBlank() == true)
+            assertTrue(id, File(src, "$id/${t.icon}").isFile)
+        }
+    }
+
+    @Test
+    fun nativeTemplateUsesJniSymbol() {
+        val src = File(repoRoot, "project-templates/src/com.codeforge.plugin.android-native-cpp.template/template")
+        val out = tmp.newFolder("cpp")
+        generator.generate(request(ProjectLanguage.KOTLIN, true, "X").copy(packageName = "com.my_app.demo"), src, out)
+        val cpp = out.walkTopDown().first { it.extension == "cpp" }.readText()
+        assertTrue(cpp, cpp.contains("Java_com_my_1app_demo_MainActivity_sayHello"))
+    }
+
+    @Test
+    fun seedingRespectsUninstall() {
+        assertTrue(BuiltinTemplateInstaller.needsInstall(null, null, "1.0.0"))
+        assertFalse(BuiltinTemplateInstaller.needsInstall(null, "1.0.0", "1.0.0"))
+        assertFalse(BuiltinTemplateInstaller.needsInstall("1.0.0", null, "1.0.0"))
+        assertFalse(BuiltinTemplateInstaller.needsInstall("1.0.0", null, "1.1.0"))
+        assertTrue(BuiltinTemplateInstaller.needsInstall("1.0.0", "1.0.0", "1.1.0"))
+        assertFalse(BuiltinTemplateInstaller.needsInstall("1.0.0", "2.0.0", "1.1.0"))
+    }
+
+    private companion object {
+        val SOURCE_EXT = setOf("kt", "java")
+        val BINARY_EXT = setOf("jar", "png", "webp")
     }
 }

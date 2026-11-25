@@ -18,6 +18,8 @@ object PluginManifestParser {
 
     private const val VALUE = "value"
 
+    private val LANGUAGE_CODE = Regex("[a-z]{2,3}(-[A-Z]{2})?")
+
     private val ID_REGEX = Regex("[A-Za-z0-9][A-Za-z0-9._-]*")
     private val ENV_KEY = Regex("[A-Z_][A-Z0-9_]{0,63}")
     private val SHA256 = Regex("[0-9a-f]{64}")
@@ -298,9 +300,17 @@ object PluginManifestParser {
             gradleDsl = dsl.distinct(),
             android = (obj["android"] as? JsonPrimitive)?.booleanOrNull ?: true,
             minSdk = minSdk,
-            icon = if (obj.string("icon").isNullOrBlank()) null else obj.relPath("icon")
+            icon = if (obj.string("icon").isNullOrBlank()) null else obj.relPath("icon"),
+            l10n = parseTemplateL10n(obj["l10n"] as? JsonObject)
         )
     }
+
+    private fun parseTemplateL10n(obj: JsonObject?): Map<String, ProjectTemplateContribution.TemplateText> =
+        obj?.entries.orEmpty().mapNotNull { (lang, value) ->
+            val text = value as? JsonObject ?: return@mapNotNull null
+            require(LANGUAGE_CODE.matches(lang)) { "projectTemplates: ungültiger Sprachcode '$lang' in 'l10n'" }
+            lang to ProjectTemplateContribution.TemplateText(text.string("label").orEmpty(), text.string("description").orEmpty())
+        }.toMap()
 
     private fun parseRequirement(obj: JsonObject): RequirementContribution {
         val manager = RequirementManager.of(obj.req("manager"))

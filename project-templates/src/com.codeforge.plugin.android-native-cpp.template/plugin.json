@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.android-native-cpp.template",
+  "name": "Native C++ (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Eingebaute Projektvorlage: Activity mit JNI-Anbindung an C++.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "android-native-cpp",
+        "label": "Native C++",
+        "description": "Activity mit JNI-Anbindung an C++",
+        "l10n": {
+          "en": { "label": "Native C++", "description": "Activity with JNI binding to C++" }
+        },
+        "path": "template",
+        "languages": ["kotlin", "java"],
+        "gradleDsl": ["kts", "groovy"],
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

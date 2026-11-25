@@ -839,24 +839,6 @@
     <string name="pw_err_target_blank">Location must not be empty</string>
     <string name="pw_err_compose_kotlin">Compose supports Kotlin only</string>
 
-    <string name="pw_tpl_no_activity">No Activity</string>
-    <string name="pw_tpl_no_activity_desc">Gradle skeleton only, no source code</string>
-    <string name="pw_tpl_empty">Empty Activity</string>
-    <string name="pw_tpl_empty_desc">A single activity with a simple layout</string>
-    <string name="pw_tpl_cpp">Native C++</string>
-    <string name="pw_tpl_cpp_desc">Activity with JNI binding to C++</string>
-    <string name="pw_tpl_basic">Basic Activity</string>
-    <string name="pw_tpl_basic_desc">Toolbar, FAB and content area</string>
-    <string name="pw_tpl_drawer">Navigation Drawer</string>
-    <string name="pw_tpl_drawer_desc">Side menu with fragments and navigation</string>
-    <string name="pw_tpl_bottom_nav">Bottom Navigation</string>
-    <string name="pw_tpl_bottom_nav_desc">Bottom navigation bar with three destinations</string>
-    <string name="pw_tpl_tabbed">Tabs</string>
-    <string name="pw_tpl_tabbed_desc">Tabs with ViewPager and fragments</string>
-    <string name="pw_tpl_no_androidx">No AndroidX</string>
-    <string name="pw_tpl_no_androidx_desc">Classic activity without AndroidX</string>
-    <string name="pw_tpl_compose">Jetpack Compose</string>
-    <string name="pw_tpl_compose_desc">Empty Compose activity with Material 3</string>
 
     <!-- Nachgezogene Einzeltexte -->
     <string name="git_op_stage">Stage…</string>
@@ -2522,6 +2504,7 @@
     <string name="lsp_from_plugin">Plugin: %1$s</string>
     <string name="lsp_none_installed">No language server installed yet. Language servers come as plugins from the Store (category “Language servers”).</string>
     <string name="flashbar_install">Installing %1$s</string>
+    <string name="pw_no_templates">No project templates installed. Install templates under Settings → Store → Project templates.</string>
     <string name="pw_tpl_plugin">Template from plugin</string>
     <string name="settings_j2k_enabled">Java → Kotlin (J2K)</string>
     <string name="settings_j2k_enabled_desc">Offer the conversion to Kotlin when opening a project with Java files. Off: no scan and no dialog.</string>

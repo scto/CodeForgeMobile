@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.android-bottom-navigation.template",
+  "name": "Bottom Navigation (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Eingebaute Projektvorlage: Untere Navigationsleiste mit drei Zielen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "android-bottom-navigation",
+        "label": "Bottom Navigation",
+        "description": "Untere Navigationsleiste mit drei Zielen",
+        "l10n": {
+          "en": { "label": "Bottom Navigation", "description": "Bottom navigation bar with three destinations" }
+        },
+        "path": "template",
+        "languages": ["kotlin", "java"],
+        "gradleDsl": ["kts", "groovy"],
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

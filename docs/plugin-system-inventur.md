@@ -40,7 +40,7 @@ zusammengeführt (Abschnitt 2.2). An zwei Stellen erzeugt das aber Doppelungen (
 | Eingebaute TextMate-Grammatiken (39) | `feature/editor/assets/textmate/` | Plugin-Grammatik hat Vorrang (`extensionScope ?: bundledScope`), außer kt/kts/java/xml/json | korrekt integriert |
 | Editor-Themes `dark_plus`/`light_plus` | `feature/editor/assets/textmate/themes/` | Fallback, Plugin-Theme überschreibt bei „auto“ | korrekt integriert |
 | Formatierer | `CodeFormatterRepositoryImpl` | Reihenfolge Plugin → LSP → ktlint/google-java-format | korrekt integriert |
-| Projektvorlagen | `ProjectGenerator` (10 eingebaute Arten) + `PluginTemplateGenerator` | `TemplateEngineRepositoryImpl` listet beides | zwei Generatoren, aber eine Liste (siehe 4.3) |
+| Projektvorlagen | nur noch `PluginTemplateGenerator`; 9 mitgelieferte Vorlagen sind vorinstallierte Plugins | `TemplateEngineRepositoryImpl` listet die Plugin-Vorlagen | ✅ ein Generator (siehe 4.3) |
 | Agent-Werkzeuge | `AgentToolRegistry` ← Plugins (`PluginAgentTools`) und MCP (`libs/mcp`) | MCP ist ein eigenes Protokoll für externe Server | bewusst getrennt, kein Plugin-Ersatz |
 
 ## 3. Leichen (aus dem früheren Erweiterungs-Manager und alten Plugin-Modellen)
@@ -76,7 +76,7 @@ haben je ein eigenes `generate.py`. Dazu kommen `templates/build.py` und `store-
 Vorschlag: gemeinsames Modul `scripts/pluginkit.py` (ZIP, Manifest, Prüfsummen, build-info), die Generatoren liefern
 nur noch die Inhalte.
 
-### 4.3 Projektvorlagen in zwei Formen
+### 4.3 Projektvorlagen in zwei Formen — **erledigt (2026-11-25)**
 
 10 eingebaute Arten sind in Kotlin hart verdrahtet (`ProjectGenerator`, Assets `templates/{navDrawer,bottomNav,tabbed}`),
 6 weitere sind deklarative Plugins (`project-templates/src/*.template`). Beide erscheinen im Assistenten, werden aber
@@ -84,6 +84,13 @@ unterschiedlich gepflegt.
 
 Vorschlag (langfristig): die eingebauten Arten ebenfalls als `.template`-Plugins ausliefern (vorinstalliert) und
 `ProjectGenerator` auf die Plugin-Engine reduzieren.
+
+**Umsetzung:** Die 9 Arten liegen als `project-templates/src/com.codeforge.plugin.android-*.template/` vor (automatisch
+aus dem alten Generator umgewandelt; für alle Sprach-/DSL-Kombinationen dateigenau gegen ihn verglichen). Die App packt
+sie beim Build als ZIP in die Assets (`packBuiltinTemplates`), `BuiltinTemplateInstaller` installiert sie beim Start;
+deinstallierte bleiben entfernt, neuere mitgelieferte Versionen aktualisieren installierte. `ProjectGenerator`,
+`templates/*.kt`, `ProjectTemplateKind` und die Vorlagen-Assets sind entfernt. Neu: Platzhalter `{{packageJni}}` und
+übersetzbare Texte (`l10n`) in `projectTemplates`.
 
 ## 5. Nebenbefund außerhalb des Plugin-Systems — **erledigt (2026-11-24): Tree-sitter fertiggestellt**
 
@@ -114,7 +121,7 @@ damaligen Stand.
 ## 7. Empfohlene Reihenfolge vor dem Commit
 
 **Stand 2026-11-24:** Schritte 1–5 erledigt (✅ in Abschnitt 3; L7: gemeinsames `gradle/code-plugin.gradle.kts`,
-Vorlage und Leitfaden-Beispiel auf API 4). Tree-sitter (§ 5) fertiggestellt (Farben aus dem Editor-Theme, zusätzliche Prädikate). Erledigt seit 2026-11-25: L6, L8, 4.2. Offen: 4.3.
+Vorlage und Leitfaden-Beispiel auf API 4). Tree-sitter (§ 5) fertiggestellt (Farben aus dem Editor-Theme, zusätzliche Prädikate). Erledigt seit 2026-11-25: L6, L8, 4.2, 4.3. Offen: nichts.
 
 
 1. **L1** – `PluginsRoute`/privaten `PluginsScreen` löschen; `:feature:plugins` kompilieren und testen.

@@ -79,11 +79,20 @@ fun ProjectWizardScreen(
     ) { padding ->
         val content = Modifier.fillMaxSize().padding(padding)
         when (state.step) {
-            WizardStep.SELECT_TEMPLATE -> TemplateGrid(
-                templates = state.templates,
-                onSelect = { onEvent(ProjectWizardUiEvent.TemplateSelected(it)) },
-                modifier = content,
-            )
+            WizardStep.SELECT_TEMPLATE -> if (state.templatesLoaded && state.templates.isEmpty()) {
+                Text(
+                    stringRes(CoreR.string.pw_no_templates),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = content.padding(24.dp),
+                )
+            } else {
+                TemplateGrid(
+                    templates = state.templates,
+                    onSelect = { onEvent(ProjectWizardUiEvent.TemplateSelected(it)) },
+                    modifier = content,
+                )
+            }
             WizardStep.CONFIGURE -> ConfigForm(state = state, onEvent = onEvent, modifier = content)
         }
     }
@@ -125,7 +134,7 @@ private fun TemplateGrid(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    if (template.plugin != null) {
+                    if (!template.plugin.builtin) {
                         Text(
                             stringRes(CoreR.string.pw_tpl_plugin),
                             style = MaterialTheme.typography.labelSmall,
@@ -251,11 +260,11 @@ private fun BuildOptions(
         onSelect = { onEvent(ProjectWizardUiEvent.LanguageChanged(it)) },
         enabled = enabled,
     )
-    if (template.plugin?.android != false) {
+    if (template.plugin.android) {
         Dropdown(
             label = CoreR.string.pw_field_min_sdk,
             selectedText = "API ${state.minSdk}",
-            options = ProjectRequest.MIN_SDK_OPTIONS.filter { it >= (template.plugin?.minSdk ?: 0) },
+            options = ProjectRequest.MIN_SDK_OPTIONS.filter { it >= (template.plugin.minSdk ?: 0) },
             optionText = { "API $it" },
             onSelect = { onEvent(ProjectWizardUiEvent.MinSdkChanged(it)) },
             enabled = enabled,

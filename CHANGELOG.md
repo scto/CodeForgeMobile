@@ -27,6 +27,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Code-Erzeugung, Projekt-Übernahme, Plugin-Export). / Google's color utilities and a theme kit module.
 
 ### Geändert / Changed
+- Projektvorlagen: Die 9 mitgelieferten Android-Vorlagen (Keine/Leere Activity, Native C++, Basic, Navigation Drawer,
+  Bottom Navigation, Tabs, Ohne AndroidX, Jetpack Compose) sind jetzt normale Vorlagen-Plugins
+  (`com.codeforge.plugin.android-*.template`), werden beim Start vorinstalliert und lassen sich wie Store-Vorlagen
+  deaktivieren oder deinstallieren; erzeugt wird nur noch über die Plugin-Engine (Ergebnis dateigleich zu vorher).
+  `projectTemplates` kennt neu `l10n` (übersetzte Texte) und den Platzhalter `{{packageJni}}`. / The 9 built-in
+  project templates are now preinstalled template plugins; one generator engine, localized labels and `{{packageJni}}`.
 - Plugin-API 1 für Code-Plugins abgekündigt (erlaubt `shell`/`lsp` ohne Berechtigung): Warnung in der Plugin-Liste und
   nach der Installation, ab CodeForge 3.4.0 abgelehnt. / Plugin API 1 for code plugins is deprecated (rejected from 3.4.0).
 - Eigene CodeForge-Farbgebung (Indigo `#6366F1` aus dem Icon, Cyan `#06B6D4` als Akzent) statt Material-Standard-Lila.

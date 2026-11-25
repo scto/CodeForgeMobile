@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.android-empty-activity.template",
+  "name": "Leere Activity (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Eingebaute Projektvorlage: Eine Activity mit einfachem Layout.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "android-empty-activity",
+        "label": "Leere Activity",
+        "description": "Eine Activity mit einfachem Layout",
+        "l10n": {
+          "en": { "label": "Empty Activity", "description": "A single activity with a simple layout" }
+        },
+        "path": "template",
+        "languages": ["kotlin", "java"],
+        "gradleDsl": ["kts", "groovy"],
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

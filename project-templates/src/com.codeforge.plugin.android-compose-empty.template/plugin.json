@@ -1,0 +1,25 @@
+{
+  "id": "com.codeforge.plugin.android-compose-empty.template",
+  "name": "Jetpack Compose (Projektvorlage)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Eingebaute Projektvorlage: Leere Compose-Activity mit Material 3.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "android-compose-empty",
+        "label": "Jetpack Compose",
+        "description": "Leere Compose-Activity mit Material 3",
+        "l10n": {
+          "en": { "label": "Jetpack Compose", "description": "Empty Compose activity with Material 3" }
+        },
+        "path": "template",
+        "languages": ["kotlin"],
+        "gradleDsl": ["kts", "groovy"],
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

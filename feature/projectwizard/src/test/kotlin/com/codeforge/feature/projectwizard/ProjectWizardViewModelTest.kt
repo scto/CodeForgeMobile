@@ -11,7 +11,7 @@ import com.codeforge.core.domain.model.ProjectHandle
 import com.codeforge.core.domain.model.ProjectLanguage
 import com.codeforge.core.domain.model.ProjectRequest
 import com.codeforge.core.domain.model.ProjectTemplateDescriptor
-import com.codeforge.core.domain.model.ProjectTemplateKind
+import com.codeforge.core.domain.model.PluginTemplateRef
 import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.domain.repository.GitSettingsRepository
 import com.codeforge.core.domain.repository.RecentProjectsRepository
@@ -51,8 +51,8 @@ class ProjectWizardViewModelTest {
         var generateThrowException: Throwable? = null
 
         override suspend fun listTemplates(): List<ProjectTemplateDescriptor> = listOf(
-            ProjectTemplateDescriptor("empty_activity", ProjectTemplateKind.EMPTY_ACTIVITY, supportsJava = true),
-            ProjectTemplateDescriptor("compose_activity", ProjectTemplateKind.COMPOSE_ACTIVITY, supportsJava = false),
+            ProjectTemplateDescriptor("empty_activity", PluginTemplateRef("p", "empty_activity", "", ""), supportsJava = true),
+            ProjectTemplateDescriptor("compose_activity", PluginTemplateRef("p", "compose_activity", "", ""), supportsJava = false),
         )
 
         override fun defaultProjectsDirectory(): String = "/data/projects"

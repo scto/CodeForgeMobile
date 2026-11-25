@@ -141,7 +141,7 @@ data class Contributes(
  * Projektvorlage: [path] ist ein Ordner im Plugin mit den Ebenen `common/` (immer), `kotlin/` bzw. `java/`
  * (gewählte Sprache), `kts/` bzw. `groovy/` (Gradle-DSL) und der Kombination (z. B. `kotlin-kts/`); spätere Ebenen
  * überschreiben gleichnamige Dateien.
- * In Pfaden und Textdateien werden `{{projectName}}`, `{{packageName}}`, `{{packagePath}}` und `{{minSdk}}` ersetzt.
+ * In Pfaden und Textdateien werden `{{projectName}}`, `{{packageName}}`, `{{packagePath}}`, `{{packageJni}}` (JNI-Symbolname) und `{{minSdk}}` ersetzt.
  * Fehlen Gradle-Wrapper oder `gradle/libs.versions.toml`, ergänzt die App ihre eigenen.
  */
 data class ProjectTemplateContribution(
@@ -158,8 +158,13 @@ data class ProjectTemplateContribution(
     /** Kleinstes erlaubtes Mindest-SDK. */
     val minSdk: Int? = null,
     /** Vorschaubild (PNG/WebP) relativ zum Plugin. */
-    val icon: String? = null
+    val icon: String? = null,
+    /** Übersetzungen (`l10n`): Sprachcode (z. B. `en`) → Anzeigename/Beschreibung. */
+    val l10n: Map<String, TemplateText> = emptyMap()
 ) {
+    /** Übersetzter Text einer Vorlage; leere Felder fallen auf `label`/`description` zurück. */
+    data class TemplateText(val label: String = "", val description: String = "")
+
     /** Erlaubte Werte. */
     companion object {
         const val LANGUAGE_KOTLIN = "kotlin"
