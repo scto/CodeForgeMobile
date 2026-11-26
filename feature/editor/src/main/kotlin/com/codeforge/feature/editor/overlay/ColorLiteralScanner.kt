@@ -4,8 +4,8 @@
  */
 package com.codeforge.feature.editor.overlay
 
-/** Farbliteral in [line] (0-basiert); [argb] im Android-Format 0xAARRGGBB. */
-data class ColorMatch(val line: Int, val argb: Int)
+/** Farbliteral in [line] ab [column] (0-basiert); [argb] im Android-Format 0xAARRGGBB. */
+data class ColorMatch(val line: Int, val argb: Int, val column: Int = 0)
 
 /**
  * Findet Farbwerte im Text: `#RGB`, `#ARGB`, `#RRGGBB`, `#AARRGGBB` (Android/XML/JSON/sora-
@@ -43,12 +43,12 @@ object ColorLiteralScanner {
 
         for (m in hashRegex.findAll(text)) {
             val argb = parseHash(m.groupValues[1], alphaLast) ?: continue
-            found += m.range.first to ColorMatch(lineOf(lineStarts, m.range.first), argb)
+            found += m.range.first to match(lineStarts, m.range.first, argb)
             if (found.size >= MAX_MATCHES) break
         }
         if (found.size < MAX_MATCHES) for (m in kotlinHexRegex.findAll(text)) {
             val argb = m.groupValues[1].toLong(16).toInt()
-            found += m.range.first to ColorMatch(lineOf(lineStarts, m.range.first), argb)
+            found += m.range.first to match(lineStarts, m.range.first, argb)
             if (found.size >= MAX_MATCHES) break
         }
         return found.sortedBy { it.first }.map { it.second }
@@ -71,6 +71,11 @@ object ColorLiteralScanner {
     private fun toArgb(eightDigits: String, alphaLast: Boolean): Int {
         val v = eightDigits.toLong(16)
         return if (alphaLast) (((v and 0xFF) shl 24) or (v ushr 8)).toInt() else v.toInt()
+    }
+
+    private fun match(starts: IntArray, offset: Int, argb: Int): ColorMatch {
+        val line = lineOf(starts, offset)
+        return ColorMatch(line, argb, offset - starts[line])
     }
 
     private fun lineStarts(text: String): IntArray {

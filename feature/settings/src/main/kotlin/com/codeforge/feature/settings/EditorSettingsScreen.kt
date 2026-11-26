@@ -122,6 +122,7 @@ private fun ResetLabel(title: String, onReset: () -> Unit) {
 private fun FontGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
     var fontSize by remember(uiState.fontSize) { mutableFloatStateOf(uiState.fontSize.toFloat()) }
     var spacing by remember(uiState.lineSpacingPercent) { mutableFloatStateOf(uiState.lineSpacingPercent.toFloat()) }
+    var letters by remember(uiState.letterSpacingPercent) { mutableFloatStateOf(uiState.letterSpacingPercent.toFloat()) }
     ResetLabel(stringRes(R.string.settings_editor_section_display)) {
         onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.DISPLAY))
     }
@@ -156,6 +157,23 @@ private fun FontGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUi
             valueRange = 80f..200f,
             steps = 11,
             valueLabel = "${spacing.toInt()} %"
+        )
+        SettingsSliderRow(
+            title = stringRes(R.string.settings_letter_spacing),
+            value = letters,
+            onValueChange = { letters = it },
+            onValueChangeFinished = { onEvent(EditorSettingsUiEvent.LetterSpacingChanged(letters.toInt())) },
+            valueRange = 0f..MAX_LETTER_SPACING,
+            steps = MAX_LETTER_SPACING.toInt() - 1,
+            valueLabel = String.format(java.util.Locale.ROOT, "%.2f em", letters / PERCENT)
+        )
+        SettingsChipsRow(
+            title = stringRes(R.string.settings_ruler),
+            summary = stringRes(R.string.settings_ruler_desc),
+            options = RULER_OPTIONS,
+            selected = uiState.rulerColumn,
+            label = { if (it == 0) stringRes(R.string.settings_ruler_off) else "$it" },
+            onSelect = { onEvent(EditorSettingsUiEvent.RulerColumnChanged(it)) }
         )
         SettingsDivider()
         EditorPreviewBox(uiState, EditorPreviewSpec.SAMPLE_KOTLIN, Modifier.padding(12.dp))
@@ -214,6 +232,15 @@ private fun DisplayGroup(uiState: EditorSettingsUiState, onEvent: (EditorSetting
                 SwitchSpec(stringRes(R.string.settings_line_number_selects), stringRes(R.string.settings_line_number_selects_desc), uiState.lineNumberSelectsLine) {
                     onEvent(EditorSettingsUiEvent.LineNumberSelectsLineToggled)
                 },
+                SwitchSpec(stringRes(R.string.settings_inlay_hints), stringRes(R.string.settings_inlay_hints_desc), uiState.inlayHints) {
+                    onEvent(EditorSettingsUiEvent.InlayHintsToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_fast_scroll_tip), stringRes(R.string.settings_fast_scroll_tip_desc), uiState.fastScrollLineTip) {
+                    onEvent(EditorSettingsUiEvent.FastScrollTipToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_fold_marks), stringRes(R.string.settings_fold_marks_desc), uiState.foldMarksAsLines) {
+                    onEvent(EditorSettingsUiEvent.FoldMarksToggled)
+                },
                 SwitchSpec(stringRes(R.string.settings_minimap), stringRes(R.string.settings_minimap_desc), uiState.minimapEnabled) {
                     onEvent(EditorSettingsUiEvent.MinimapToggled)
                 },
@@ -255,6 +282,11 @@ private fun DisplayGroup(uiState: EditorSettingsUiState, onEvent: (EditorSetting
 }
 
 private val STICKY_LINE_OPTIONS = listOf(1, 2, 3, 5, 8)
+private val RULER_OPTIONS = listOf(0, 80, 100, 120)
+private const val MAX_LETTER_SPACING = 20f
+private const val PERCENT = 100f
+private val MOUSE_MODES = listOf(R.string.settings_mouse_auto, R.string.settings_mouse_always, R.string.settings_mouse_never)
+private val HANDLE_STYLES = listOf(R.string.settings_handle_drop, R.string.settings_handle_side_drop)
 private val DIAGNOSTIC_STYLES = listOf(
     R.string.settings_diagnostic_wavy,
     R.string.settings_diagnostic_line,
@@ -319,6 +351,9 @@ private fun InputGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsU
                 SwitchSpec(stringRes(R.string.settings_symbol_bar_enabled), stringRes(R.string.settings_symbol_bar_enabled_desc), uiState.symbolBarEnabled) {
                     onEvent(EditorSettingsUiEvent.SymbolBarToggled)
                 },
+                SwitchSpec(stringRes(R.string.settings_format_on_paste), stringRes(R.string.settings_format_on_paste_desc), uiState.formatOnPaste) {
+                    onEvent(EditorSettingsUiEvent.FormatOnPasteToggled)
+                },
                 SwitchSpec(stringRes(R.string.settings_delete_empty_line_fast), stringRes(R.string.settings_delete_empty_line_fast_desc), uiState.deleteEmptyLineFast) {
                     onEvent(EditorSettingsUiEvent.DeleteEmptyLineFastToggled)
                 },
@@ -348,6 +383,22 @@ private fun InputGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsU
 private fun GesturesGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
     SettingsSectionLabel(stringRes(R.string.settings_section_gestures))
     SettingsGroup {
+        SettingsChipsRow(
+            title = stringRes(R.string.settings_mouse_mode),
+            summary = stringRes(R.string.settings_mouse_mode_desc),
+            options = MOUSE_MODES.indices.toList(),
+            selected = uiState.mouseMode,
+            label = { stringRes(MOUSE_MODES[it]) },
+            onSelect = { onEvent(EditorSettingsUiEvent.MouseModeChanged(it)) }
+        )
+        SettingsChipsRow(
+            title = stringRes(R.string.settings_handle_style),
+            options = HANDLE_STYLES.indices.toList(),
+            selected = uiState.selectionHandleStyle,
+            label = { stringRes(HANDLE_STYLES[it]) },
+            onSelect = { onEvent(EditorSettingsUiEvent.SelectionHandleStyleChanged(it)) }
+        )
+        SettingsDivider()
         SwitchList(
             listOf(
                 SwitchSpec(stringRes(R.string.settings_pinch_to_zoom), stringRes(R.string.settings_pinch_to_zoom_desc), uiState.pinchToZoomEnabled) {

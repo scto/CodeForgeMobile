@@ -2,11 +2,9 @@
  * Modul: :feature:editor
  * @author Thomas Schmid
  *
- * Compose-Overlay über dem sora-[CodeEditor]: Farbkästchen (Farbliterale) und Update-Chips
- * („4.0.1 -> 4.0.3“) rechts neben der jeweiligen Zeile.
- *
- * Warum kein sora-InlayHint: die Klassen (`InlayHint`, `TextInlayHint`) existieren zwar, werden aber bis
- * einschließlich 0.23.6 (Stand: neueste Maven-Version) vom Editor nicht gerendert. Die Positionen kommen aus
+ * Compose-Overlay über dem sora-[CodeEditor]: Update-Chips („4.0.1 -> 4.0.3“) und Test-Starter
+ * rechts neben der jeweiligen Zeile. Farbmarken und LSP-Inlay-Hints zeichnet sora 0.24 selbst
+ * (siehe `SoraInlayHints.kt`); die Chips bleiben hier, weil sie antippbar sind. Die Positionen kommen aus
  * der verifizierten Public-API:
  *  - `getCharOffsetX(line, column)`: x auf der View (inkl. Zeilennummern-Gutter, abzgl. Scroll-X)
  *  - `getCharOffsetY(line, column)`: UNTERKANTE der Zeile/Visual-Row auf der View (abzgl. Scroll-Y)

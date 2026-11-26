@@ -81,6 +81,8 @@ Settings are grouped into sections:
 - **System:** **Storage** (usage by category, clear caches, delete projects), **Privacy & Data** (no telemetry; crash reports, logs, system info, back up all projects as a zip), projects folder, terminal, logs.
 - **Info:** Help, About (version, build, links), Basti.
 
+**Editor extras:** inlay hints show parameter names and types from the language server inside the code. With a mouse or touchpad (mouse mode), right-click opens a menu with copy/paste and the IDE actions. “Re-indent on paste” adapts pasted multi-line code to the target line's indentation. A ruler at 80/100/120 columns reminds you to wrap.
+
 **Keymap:** tap a shortcut and press the new keys; `Esc` cancels, `Backspace` removes the binding. Without a hardware keyboard, compose the chord with the Ctrl/Alt/Shift/Meta chips and a key name (e.g. `P`, `F6`, `Enter`, `/`). Chords that only type text are rejected. Optionally, pressing `Shift` twice opens the command palette.
 
 **Symbols & Macros:** pinned entries appear in this order in the bar above the soft keyboard. Macros insert any text; `$0` places the cursor. Language-specific symbols (e.g. `#` in Python) can be appended automatically.

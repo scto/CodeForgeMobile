@@ -34,6 +34,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Tastenbelegung (vorher ohne Wirkung). / Bracket-pair and shortcut settings now do what they say.
 
 ### Hinzugefügt / Added
+- **Inlay-Hinweise:** Parameternamen und abgeleitete Typen vom Sprachserver (`textDocument/inlayHint`) direkt im
+  Code; Farbmarken vor Farbliteralen zeichnet jetzt sora selbst (statt Compose-Overlay). Abschaltbar.
+  / LSP inlay hints and native color swatches.
+- **Maus & Kontextmenü:** Mausmodus (automatisch/immer/nie), Rechtsklick-Menü mit den IDE-Aktionen (Quick-Fix,
+  Formatieren, Umbenennen, Definition, Kommentar …), Stil der Auswahlgriffe. / Mouse mode and IDE context menu.
+- Editor: Zeilennummer beim schnellen Scrollen, Faltmarken als Linien, Zeichenabstand, Lineal (80/100/120 Spalten),
+  **Beim Einfügen einrücken** (mehrzeiliger Code wird an die Zielzeile angepasst, relative Einrückung bleibt).
+  / Fast-scroll line tip, fold marks, letter spacing, ruler, re-indent on paste.
 - **Tastenbelegung** (Einstellungen → Tastenbelegung): 37 Editor-Aktionen in Gruppen (Bearbeiten, Code, Navigation,
   Tabs, Faltung), Suche, Zähler „Geändert“, Konfliktwarnung, Zurücksetzen. Kürzel antippen und neue Tasten drücken
   (Esc bricht ab, Backspace entfernt); ohne Hardware-Tastatur per Modifikator-Chips und Tastenname. „Zweimal Umschalt“

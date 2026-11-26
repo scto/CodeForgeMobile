@@ -3020,4 +3020,24 @@
     <string name="settings_cursor_anim_move">Move</string>
     <string name="settings_cursor_anim_fade">Fade</string>
     <string name="settings_cursor_anim_scale">Scale</string>
+    <string name="settings_letter_spacing">Letter spacing</string>
+    <string name="settings_ruler">Ruler</string>
+    <string name="settings_ruler_desc">Vertical line after this column as a reminder to wrap</string>
+    <string name="settings_ruler_off">Off</string>
+    <string name="settings_inlay_hints">Inlay hints</string>
+    <string name="settings_inlay_hints_desc">Parameter names and inferred types from the language server, shown in the code</string>
+    <string name="settings_fast_scroll_tip">Line number while fast scrolling</string>
+    <string name="settings_fast_scroll_tip_desc">Shows the current line next to the scrollbar while dragging it</string>
+    <string name="settings_fold_marks">Fold marks as lines</string>
+    <string name="settings_fold_marks_desc">Marks with a line along the block instead of arrows</string>
+    <string name="settings_format_on_paste">Re-indent on paste</string>
+    <string name="settings_format_on_paste_desc">Adjusts the indentation of pasted multi-line code to the target line</string>
+    <string name="settings_mouse_mode">Mouse mode</string>
+    <string name="settings_mouse_mode_desc">Mouse or touchpad: pointer instead of selection handles, right-click context menu with IDE actions</string>
+    <string name="settings_mouse_auto">Automatic</string>
+    <string name="settings_mouse_always">Always</string>
+    <string name="settings_mouse_never">Never</string>
+    <string name="settings_handle_style">Selection handles</string>
+    <string name="settings_handle_drop">Drop</string>
+    <string name="settings_handle_side_drop">Side drop</string>
 </resources>

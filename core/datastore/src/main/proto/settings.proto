@@ -138,6 +138,18 @@ message EditorConfig {
   bool line_number_click_selects_line = 51;
   // 0 = Wellenlinie, 1 = Linie, 2 = Doppellinie, 3 = keine
   int32 diagnostic_style = 52;
+  bool inlay_hints_disabled = 53;
+  // 0 = automatisch, 1 = immer, 2 = nie
+  int32 mouse_mode = 54;
+  bool fast_scroll_tip_hidden = 55;
+  bool fold_marks_as_lines = 56;
+  // Zeichenabstand in Hundertstel em
+  int32 letter_spacing_percent = 57;
+  // Lineal nach Spalte (0 = aus)
+  int32 ruler_column = 58;
+  bool format_on_paste = 59;
+  // 0 = Tropfen, 1 = seitlicher Tropfen
+  int32 selection_handle_style = 60;
 }
 
 

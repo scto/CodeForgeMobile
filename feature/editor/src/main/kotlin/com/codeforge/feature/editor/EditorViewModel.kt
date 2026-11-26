@@ -228,6 +228,7 @@ class EditorViewModel @Inject constructor(
         observeDirectoryChanges()
         observeUpdateAnnotations()
         observePluginTests()
+        observeInlayHints()
         observeServerCapabilities()
         setupApplyEditHandler()
         observeBreakpoints()
@@ -567,6 +568,14 @@ class EditorViewModel @Inject constructor(
                             ?: EditorDisplaySettings.DEFAULT_STICKY_LINES,
                         lineNumberSelectsLine = settings.editor.lineNumberClickSelectsLine,
                         diagnosticStyle = settings.editor.diagnosticStyle,
+                        inlayHints = !settings.editor.inlayHintsDisabled,
+                        mouseMode = settings.editor.mouseMode,
+                        selectionHandleStyle = settings.editor.selectionHandleStyle,
+                        fastScrollLineTip = !settings.editor.fastScrollTipHidden,
+                        foldMarksAsLines = settings.editor.foldMarksAsLines,
+                        letterSpacingPercent = settings.editor.letterSpacingPercent,
+                        rulerColumn = settings.editor.rulerColumn,
+                        formatOnPaste = settings.editor.formatOnPaste,
                         readOnlyDefault = settings.editor.readOnlyDefault,
                         txtWordWrap = settings.editor.txtWordWrap,
                         colorPreviewsEnabled = !settings.editor.colorPreviewsDisabled,
@@ -1405,6 +1414,25 @@ class EditorViewModel @Inject constructor(
             }
     }
 
+    // Fragt nach Änderungen (entprellt) die Inlay-Hints der aktiven Datei beim Sprachserver ab.
+    @OptIn(FlowPreview::class)
+    private fun observeInlayHints() = viewModelScope.launch {
+        _uiState.map { s -> s.activeFile?.let { Triple(it.path, it.content, s.displaySettings.inlayHints) } }
+            .distinctUntilChanged()
+            .debounce(INLAY_HINT_DEBOUNCE_MS)
+            .collectLatest { active ->
+                val hints = if (active == null || !active.third) {
+                    emptyList()
+                } else {
+                    val text = active.second
+                    val lastLine = text.count { it == '\n' }
+                    val range = LspRange(LspPosition(0, 0), LspPosition(lastLine, text.length - text.lastIndexOf('\n') - 1))
+                    lspClient.requestInlayHints(active.first, range).getOrDefault(emptyList())
+                }
+                _uiState.update { it.copy(inlayHints = hints, inlayHintsPath = active?.first) }
+            }
+    }
+
     private fun withResults(path: String?, tests: List<TestTarget>): List<TestTarget> = tests.map { t ->
         t.copy(passed = pluginTestResults["$path|${t.filterTarget}"] ?: pluginTestResults["$path|${t.label}"])
     }
@@ -2022,6 +2050,7 @@ class EditorViewModel @Inject constructor(
         private const val MAX_ACTION_MESSAGE = 500
         private const val MAX_RUN_LINES = 2_000
         private const val TEST_DISCOVERY_DEBOUNCE_MS = 400L
+        private const val INLAY_HINT_DEBOUNCE_MS = 600L
         private const val MAX_RUN_LINE = 2_000
         private const val CANCELLED_EXIT = 130
 

@@ -3020,4 +3020,24 @@
     <string name="settings_cursor_anim_move">Gleiten</string>
     <string name="settings_cursor_anim_fade">Überblenden</string>
     <string name="settings_cursor_anim_scale">Skalieren</string>
+    <string name="settings_letter_spacing">Zeichenabstand</string>
+    <string name="settings_ruler">Lineal</string>
+    <string name="settings_ruler_desc">Senkrechte Linie nach dieser Spalte als Hinweis zum Umbrechen</string>
+    <string name="settings_ruler_off">Aus</string>
+    <string name="settings_inlay_hints">Inlay-Hinweise</string>
+    <string name="settings_inlay_hints_desc">Parameternamen und abgeleitete Typen vom Sprachserver, direkt im Code</string>
+    <string name="settings_fast_scroll_tip">Zeilennummer beim schnellen Scrollen</string>
+    <string name="settings_fast_scroll_tip_desc">Zeigt beim Ziehen der Bildlaufleiste die aktuelle Zeile daneben</string>
+    <string name="settings_fold_marks">Faltmarken als Linien</string>
+    <string name="settings_fold_marks_desc">Marken mit Linie entlang des Blocks statt Pfeilen</string>
+    <string name="settings_format_on_paste">Beim Einfügen einrücken</string>
+    <string name="settings_format_on_paste_desc">Passt die Einrückung eingefügten mehrzeiligen Codes an die Zielzeile an</string>
+    <string name="settings_mouse_mode">Mausmodus</string>
+    <string name="settings_mouse_mode_desc">Maus oder Touchpad: Zeiger statt Auswahlgriffen, Rechtsklick-Menü mit IDE-Aktionen</string>
+    <string name="settings_mouse_auto">Automatisch</string>
+    <string name="settings_mouse_always">Immer</string>
+    <string name="settings_mouse_never">Nie</string>
+    <string name="settings_handle_style">Auswahlgriffe</string>
+    <string name="settings_handle_drop">Tropfen</string>
+    <string name="settings_handle_side_drop">Seitlich</string>
 </resources>

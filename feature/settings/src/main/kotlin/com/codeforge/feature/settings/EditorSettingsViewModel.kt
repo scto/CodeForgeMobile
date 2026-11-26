@@ -80,6 +80,14 @@ class EditorSettingsViewModel internal constructor(
                 stickyScrollMaxLines = settings.editor.stickyScrollMaxLines.takeIf { it > 0 } ?: DEFAULT_STICKY_LINES,
                 lineNumberSelectsLine = settings.editor.lineNumberClickSelectsLine,
                 diagnosticStyle = settings.editor.diagnosticStyle,
+                inlayHints = !settings.editor.inlayHintsDisabled,
+                mouseMode = settings.editor.mouseMode,
+                selectionHandleStyle = settings.editor.selectionHandleStyle,
+                fastScrollLineTip = !settings.editor.fastScrollTipHidden,
+                foldMarksAsLines = settings.editor.foldMarksAsLines,
+                letterSpacingPercent = settings.editor.letterSpacingPercent,
+                rulerColumn = settings.editor.rulerColumn,
+                formatOnPaste = settings.editor.formatOnPaste,
                 fileHeaderEnabled = settings.fileHeader.enabled,
                 fileHeaderAuthor = settings.fileHeader.author,
                 availableThemes = availableThemes,
@@ -263,6 +271,30 @@ class EditorSettingsViewModel internal constructor(
                 is EditorSettingsUiEvent.DiagnosticStyleChanged -> settingsRepository.updateEditor {
                     it.toBuilder().setDiagnosticStyle(event.style).build()
                 }
+                EditorSettingsUiEvent.InlayHintsToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setInlayHintsDisabled(!it.inlayHintsDisabled).build()
+                }
+                EditorSettingsUiEvent.FastScrollTipToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setFastScrollTipHidden(!it.fastScrollTipHidden).build()
+                }
+                EditorSettingsUiEvent.FoldMarksToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setFoldMarksAsLines(!it.foldMarksAsLines).build()
+                }
+                EditorSettingsUiEvent.FormatOnPasteToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setFormatOnPaste(!it.formatOnPaste).build()
+                }
+                is EditorSettingsUiEvent.MouseModeChanged -> settingsRepository.updateEditor {
+                    it.toBuilder().setMouseMode(event.mode).build()
+                }
+                is EditorSettingsUiEvent.SelectionHandleStyleChanged -> settingsRepository.updateEditor {
+                    it.toBuilder().setSelectionHandleStyle(event.style).build()
+                }
+                is EditorSettingsUiEvent.LetterSpacingChanged -> settingsRepository.updateEditor {
+                    it.toBuilder().setLetterSpacingPercent(event.percent).build()
+                }
+                is EditorSettingsUiEvent.RulerColumnChanged -> settingsRepository.updateEditor {
+                    it.toBuilder().setRulerColumn(event.column).build()
+                }
 
                 EditorSettingsUiEvent.SymbolBarToggled ->
                     settingsRepository.updateEditor { it.toBuilder().setSymbolBarHidden(!it.symbolBarHidden).build() }
@@ -309,6 +341,11 @@ class EditorSettingsViewModel internal constructor(
                                     .setStickyScrollMaxLines(0)
                                     .setLineNumberClickSelectsLine(false)
                                     .setDiagnosticStyle(0)
+                                    .setInlayHintsDisabled(false)
+                                    .setFastScrollTipHidden(false)
+                                    .setFoldMarksAsLines(false)
+                                    .setLetterSpacingPercent(0)
+                                    .setRulerColumn(0)
                                     .build()
                             }
                         }
@@ -322,6 +359,9 @@ class EditorSettingsViewModel internal constructor(
                                     .setSymbolPairAutocompleteEnabled(true)
                                     .setDesktopShortcutsEnabled(true)
                                     .setSymbolBarHidden(false)
+                                    .setFormatOnPaste(false)
+                                    .setMouseMode(0)
+                                    .setSelectionHandleStyle(0)
                                     .setDisableSoftKeyboardWithHardwareKeyboard(false)
                                     .setKeyboardSuggestions(false)
                                     .build()

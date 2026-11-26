@@ -81,6 +81,8 @@ Die Einstellungen sind in Abschnitte gegliedert:
 - **System:** **Speicher** (Verbrauch nach Kategorien, Caches leeren, Projekte löschen), **Daten & Datenschutz** (keine Telemetrie; Absturzberichte, Protokolle, Systeminfo, Sicherung aller Projekte als ZIP), Projektordner, Terminal, Protokolle.
 - **Info:** Hilfe, Info (Version, Build, Links), Basti.
 
+**Editor-Extras:** Inlay-Hinweise zeigen Parameternamen und Typen vom Sprachserver direkt im Code. Mit Maus oder Touchpad (Mausmodus) öffnet ein Rechtsklick ein Menü mit Kopieren/Einfügen und den IDE-Aktionen. „Beim Einfügen einrücken“ passt mehrzeilig eingefügten Code an die Einrückung der Zielzeile an. Ein Lineal bei 80/100/120 Spalten erinnert ans Umbrechen.
+
 **Tastenbelegung:** Ein Kürzel antippen und die neuen Tasten drücken; `Esc` bricht ab, `Backspace` entfernt die Belegung. Ohne Hardware-Tastatur lässt sich der Akkord über die Chips Ctrl/Alt/Shift/Meta und den Tastennamen (z. B. `P`, `F6`, `Enter`, `/`) zusammenstellen. Kombinationen, die nur Text tippen, werden abgelehnt. Optional öffnet zweimal `Umschalt` die Befehlspalette.
 
 **Symbole & Makros:** Angeheftete Einträge erscheinen in dieser Reihenfolge in der Leiste über der Bildschirmtastatur. Makros fügen beliebigen Text ein; `$0` setzt den Cursor an diese Stelle. Sprachspezifische Symbole (z. B. `#` in Python) können automatisch angehängt werden.

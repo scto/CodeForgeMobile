@@ -178,6 +178,7 @@
     <ID>LongMethod:EditorViewModel.kt:EditorViewModel$fun onEvent</ID>
     <ID>LongMethod:EditorViewModel.kt:EditorViewModel$private fun assembleContext: com.codeforge.core.domain.ai.AiPreparedContext</ID>
     <ID>LongMethod:EditorViewModel.kt:EditorViewModel$private fun executeAiPrompt</ID>
+    <ID>LongMethod:EditorViewModel.kt:EditorViewModel$private fun observeSettings</ID>
     <ID>LongMethod:LspAwareLanguage.kt:LspAwareLanguage$override fun requireAutoComplete</ID>
     <ID>LongMethod:SoraCodeEditor.kt:fun applyDisplaySettings</ID>
     <ID>LongMethod:TestTargetScanner.kt:TestTargetScanner$internal fun sanitizeCode: List&lt;String></ID>
@@ -190,6 +191,7 @@
     <ID>ReturnCount:EditorController.kt:internal fun mapCursorOffset: Int</ID>
     <ID>ReturnCount:EditorScreen.kt:@Suppress("CyclomaticComplexMethod") fun runKeymapAction: Boolean</ID>
     <ID>ReturnCount:ImageFilePreview.kt:fun isImageFilePath: Boolean</ID>
+    <ID>ReturnCount:PasteReindent.kt:PasteReindentFormatter$override fun formatRegion</ID>
     <ID>ReturnCount:TestTargetScanner.kt:TestTargetScanner$private fun extractFunctionName: String?</ID>
     <ID>StringLiteralDuplication:EditorViewModel.kt:EditorViewModel$"file://"</ID>
     <ID>StringLiteralDuplication:EditorViewModel.kt:EditorViewModel.Companion$"cmake"</ID>
@@ -217,6 +219,8 @@
     <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"a\nours1\nours2\nz\n"</ID>
     <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"a\ntheirs\nz\n"</ID>
     <ID>StringShouldBeRawString:MergeConflictsTest.kt:MergeConflictsTest$"x\nmid\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; A\n1\n=======\n2\n>>>>>>> B"</ID>
+    <ID>StringShouldBeRawString:PasteReindentTest.kt:PasteReindentTest$"listOf(\n 1,\n 2\n )"</ID>
+    <ID>StringShouldBeRawString:PasteReindentTest.kt:PasteReindentTest$"listOf(\n\t1,\n\t2\n)"</ID>
     <ID>StringShouldBeRawString:TextMateManifestTest.kt:TextMateManifestTest$"\"grammar\"\\s*:\\s*\"([^\"]+)\""</ID>
     <ID>StringShouldBeRawString:TextMateManifestTest.kt:TextMateManifestTest$"\"languageConfiguration\"\\s*:\\s*\"([^\"]+)\""</ID>
     <ID>StringShouldBeRawString:TextMateManifestTest.kt:TextMateManifestTest$"\"scopeName\"\\s*:\\s*\"([^\"]+)\""</ID>

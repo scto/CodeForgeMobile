@@ -116,7 +116,23 @@ data class EditorDisplaySettings(
     /** Tipp auf die Zeilennummer markiert die ganze Zeile. */
     val lineNumberSelectsLine: Boolean = false,
     /** 0 = Wellenlinie, 1 = Linie, 2 = Doppellinie, 3 = keine. */
-    val diagnosticStyle: Int = 0
+    val diagnosticStyle: Int = 0,
+    /** Typ- und Parameterhinweise des Sprachservers im Text. */
+    val inlayHints: Boolean = true,
+    /** Maus/Touchpad-Modus: 0 = automatisch, 1 = immer, 2 = nie. */
+    val mouseMode: Int = 0,
+    /** Auswahlgriffe: 0 = Tropfen, 1 = seitlicher Tropfen. */
+    val selectionHandleStyle: Int = 0,
+    /** Zeilennummer neben der Bildlaufleiste beim schnellen Scrollen. */
+    val fastScrollLineTip: Boolean = true,
+    /** Faltmarken als Linien statt Pfeilen. */
+    val foldMarksAsLines: Boolean = false,
+    /** Zeichenabstand in Hundertstel em (0 = normal). */
+    val letterSpacingPercent: Int = 0,
+    /** Senkrechtes Lineal nach dieser Spalte (0 = aus). */
+    val rulerColumn: Int = 0,
+    /** Eingefügten Text automatisch formatieren. */
+    val formatOnPaste: Boolean = false
 ) {
     companion object {
         const val DEFAULT_STICKY_LINES = 3
@@ -132,6 +148,7 @@ fun SoraCodeEditor(
     language: EditorLanguageType,
     settings: EditorDisplaySettings,
     diagnostics: List<LspDiagnostic> = emptyList(),
+    inlayHints: List<com.codeforge.core.domain.model.LspInlayHint> = emptyList(),
     completionProvider: LspCompletionProvider? = null,
     updateAnnotations: List<FileUpdateAnnotation> = emptyList(),
     breakpointsEnabled: Boolean = false,
@@ -206,9 +223,12 @@ fun SoraCodeEditor(
     }
     val scannedTests = remember(path, content) { TestTargetScanner.scan(path, content) }
     val testTargets = remember(scannedTests, pluginTests) { scannedTests + pluginTests }
-    val lineOverlays = remember(colorMatches, updateAnnotations, testTargets) {
-        buildLineOverlays(colorMatches, updateAnnotations.map { it.line to it.update }, testTargets)
+    // Farbmarken zeichnet sora selbst (ColorInlayHint); das Overlay trägt nur noch Chips.
+    val lineOverlays = remember(updateAnnotations, testTargets) {
+        buildLineOverlays(emptyList(), updateAnnotations.map { it.line to it.update }, testTargets)
     }
+    val inlaySource = remember(path) { SoraInlayHintSource() }
+    val currentTabSize by androidx.compose.runtime.rememberUpdatedState(settings.tabSize)
 
     DisposableEffect(Unit) {
         TextMateAssetLoader.ensureInitialized(context)
@@ -338,6 +358,11 @@ fun SoraCodeEditor(
 
                 overlayEditor = this
 
+                inlaySource.attach(this)
+                setFormatterProvider(PasteReindentFormatter.provider { currentTabSize })
+                subscribeEvent<io.github.rosemoe.sora.event.CreateContextMenuEvent> { event, _ ->
+                    addIdeContextMenu(event.menu, currentTextActions, currentOnTextAction)
+                }
                 controller.attach(this)
                 onControllerReady(controller)
             }
@@ -352,6 +377,7 @@ fun SoraCodeEditor(
                 editor.invalidateDiagnostics()
                 appliedDiagnostics.set(diagnostics)
             }
+            inlaySource.update(editor, if (settings.inlayHints) inlayHints else emptyList(), colorMatches)
         }
     )
 
@@ -573,4 +599,54 @@ private fun applySoraDisplay(editor: CodeEditor, settings: EditorDisplaySettings
             else -> io.github.rosemoe.sora.widget.style.DiagnosticIndicatorStyle.WAVY_LINE
         }
     )
+    applySoraInput(editor, settings)
+}
+
+private const val MOUSE_ALWAYS = 1
+private const val MOUSE_NEVER = 2
+private const val HANDLE_SIDE_DROP = 1
+private const val PERCENT = 100f
+
+// Maus, Auswahlgriffe, Bildlauf-Tipp, Faltmarken, Zeichenabstand, Lineal und Formatieren beim Einfügen.
+private fun applySoraInput(editor: CodeEditor, settings: EditorDisplaySettings) {
+    val props = editor.props
+    props.mouseMode = when (settings.mouseMode) {
+        MOUSE_ALWAYS -> io.github.rosemoe.sora.widget.DirectAccessProps.MOUSE_MODE_ALWAYS
+        MOUSE_NEVER -> io.github.rosemoe.sora.widget.DirectAccessProps.MOUSE_MODE_NEVER
+        else -> io.github.rosemoe.sora.widget.DirectAccessProps.MOUSE_MODE_AUTO
+    }
+    val handleClass = if (settings.selectionHandleStyle == HANDLE_SIDE_DROP) {
+        io.github.rosemoe.sora.widget.style.builtin.HandleStyleSideDrop::class.java
+    } else {
+        io.github.rosemoe.sora.widget.style.builtin.HandleStyleDrop::class.java
+    }
+    if (editor.handleStyle.javaClass != handleClass) {
+        editor.setSelectionHandleStyle(handleClass.getConstructor(android.content.Context::class.java).newInstance(editor.context))
+    }
+    editor.setDisplayLnPanel(settings.fastScrollLineTip)
+    props.foldIndicatorStyle = if (settings.foldMarksAsLines) {
+        io.github.rosemoe.sora.widget.DirectAccessProps.FOLD_STYLE_MARK
+    } else {
+        io.github.rosemoe.sora.widget.DirectAccessProps.FOLD_STYLE_ICON
+    }
+    val spacing = settings.letterSpacingPercent / PERCENT
+    if (editor.textLetterSpacing != spacing) editor.textLetterSpacing = spacing
+    if (props.hardwrapColumn != settings.rulerColumn) {
+        props.hardwrapColumn = settings.rulerColumn
+        editor.invalidate()
+    }
+    props.formatPastedText = settings.formatOnPaste
+}
+
+private const val CONTEXT_MENU_ORDER = 100
+
+// Ergänzt das Kontextmenü von sora (Rechtsklick/Mausmodus) um die IDE-Aktionen der Textaktionsleiste.
+private fun addIdeContextMenu(menu: android.view.Menu, actions: List<EditorTextAction>, onAction: (String) -> Unit) {
+    actions.forEachIndexed { index, action ->
+        menu.add(android.view.Menu.NONE, android.view.Menu.NONE, CONTEXT_MENU_ORDER + index, action.label)
+            .setOnMenuItemClickListener {
+                onAction(action.id)
+                true
+            }
+    }
 }

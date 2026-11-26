@@ -592,6 +592,7 @@ fun EditorRoute(
                                 language = EditorLanguageType.fromPath(active.path),
                                 settings = uiState.displaySettings,
                                 diagnostics = uiState.activeDiagnostics,
+                                inlayHints = uiState.activeInlayHints,
                                 completionProvider = viewModel.completionProvider,
                                 updateAnnotations = uiState.activeUpdateAnnotations,
                                 breakpointsEnabled = debuggerEnabled,

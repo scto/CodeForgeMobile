@@ -98,6 +98,9 @@ data class EditorUiState(
     /** Tests aus Plugin-Quellen für die Datei [pluginTestsPath]. */
     val pluginTests: List<com.codeforge.feature.editor.overlay.TestTarget> = emptyList(),
     val pluginTestsPath: String? = null,
+    /** Inlay-Hints des Sprachservers für [inlayHintsPath]. */
+    val inlayHints: List<com.codeforge.core.domain.model.LspInlayHint> = emptyList(),
+    val inlayHintsPath: String? = null,
     /** Geöffnete Befehlspalette, sonst `null`. */
     val commandPalette: com.codeforge.feature.editor.palette.CommandPaletteState? = null,
     val renameDialog: RenameDialogState? = null,
@@ -181,6 +184,10 @@ data class EditorUiState(
     /** Update-Hinweise der aktiven Datei. */
     val activeUpdateAnnotations: List<FileUpdateAnnotation>
         get() = if (updateAnnotationsPath != null && updateAnnotationsPath == activeFile?.path) updateAnnotations else emptyList()
+
+    /** Inlay-Hints der aktiven Datei. */
+    val activeInlayHints: List<com.codeforge.core.domain.model.LspInlayHint>
+        get() = if (inlayHintsPath != null && inlayHintsPath == activeFile?.path) inlayHints else emptyList()
 
     /** Aktive Datei oder `null`. */
     val activeFile: OpenFile? get() = openFiles.getOrNull(activeFileIndex)

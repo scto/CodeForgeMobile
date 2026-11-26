@@ -79,6 +79,16 @@ data class EditorSettingsUiState(
     val lineNumberSelectsLine: Boolean = false,
     /** 0 = Wellenlinie, 1 = Linie, 2 = Doppellinie, 3 = keine. */
     val diagnosticStyle: Int = 0,
+    val inlayHints: Boolean = true,
+    /** 0 = automatisch, 1 = immer, 2 = nie. */
+    val mouseMode: Int = 0,
+    /** 0 = Tropfen, 1 = seitlicher Tropfen. */
+    val selectionHandleStyle: Int = 0,
+    val fastScrollLineTip: Boolean = true,
+    val foldMarksAsLines: Boolean = false,
+    val letterSpacingPercent: Int = 0,
+    val rulerColumn: Int = 0,
+    val formatOnPaste: Boolean = false,
     val fileHeaderEnabled: Boolean = false,
     val fileHeaderAuthor: String = "",
     val availableThemes: List<TextMateThemeItem> = TextMateThemeCatalog.BUNDLED_THEMES,
@@ -187,6 +197,22 @@ sealed interface EditorSettingsUiEvent {
     data class StickyScrollMaxLinesChanged(val lines: Int) : EditorSettingsUiEvent
     /** Stil der Fehler-Unterstreichung (0 Welle, 1 Linie, 2 Doppellinie, 3 keine). */
     data class DiagnosticStyleChanged(val style: Int) : EditorSettingsUiEvent
+    /** Inlay-Hints umgeschaltet. */
+    data object InlayHintsToggled : EditorSettingsUiEvent
+    /** Zeilennummer beim schnellen Scrollen umgeschaltet. */
+    data object FastScrollTipToggled : EditorSettingsUiEvent
+    /** Faltmarken als Linien umgeschaltet. */
+    data object FoldMarksToggled : EditorSettingsUiEvent
+    /** Formatieren beim Einfügen umgeschaltet. */
+    data object FormatOnPasteToggled : EditorSettingsUiEvent
+    /** Mausmodus gewählt. */
+    data class MouseModeChanged(val mode: Int) : EditorSettingsUiEvent
+    /** Stil der Auswahlgriffe gewählt. */
+    data class SelectionHandleStyleChanged(val style: Int) : EditorSettingsUiEvent
+    /** Zeichenabstand in Hundertstel em. */
+    data class LetterSpacingChanged(val percent: Int) : EditorSettingsUiEvent
+    /** Lineal-Spalte (0 = aus). */
+    data class RulerColumnChanged(val column: Int) : EditorSettingsUiEvent
     /** Einen Bereich auf Standardwerte zurücksetzen. */
     data class ResetSection(val section: EditorSettingsSection) : EditorSettingsUiEvent
 }
