@@ -84,7 +84,7 @@ class StoreViewModel @Inject constructor(
     /** Verarbeitet eine Aktion des Nutzers. */
     fun onEvent(event: StoreUiEvent) {
         when (event) {
-            StoreUiEvent.Reload -> load()
+            StoreUiEvent.Reload -> load(force = true)
             is StoreUiEvent.SelectCategory -> _uiState.update { it.copy(selectedCategoryId = event.id) }
             is StoreUiEvent.Install -> install(event.item)
             is StoreUiEvent.InstallServer -> installServer(event.item)
@@ -146,25 +146,52 @@ class StoreViewModel @Inject constructor(
         }
     }
 
-    private fun load() {
-        _uiState.update { it.copy(isLoading = true, errorMessage = null, unsupportedSchema = false) }
+    // Wie der CodeAssist-Store: sofort die letzte bekannte Fassung zeigen (Datei oder eingebauter Katalog),
+    // parallel Statistik laden und im Hintergrund bedingt nach einer neueren Fassung fragen.
+    private fun load(force: Boolean = false) {
+        if (force) repository.invalidate()
+        _uiState.update { it.copy(isLoading = it.catalog == null, refreshing = true, errorMessage = null, unsupportedSchema = false) }
         viewModelScope.launch {
             val lang = Locale.getDefault().language
-            _uiState.update { state ->
-                when (val result = repository.load(lang)) {
-                    is StoreLoadResult.Online -> state.copy(isLoading = false, catalog = result.catalog, cachedAt = null)
-                    is StoreLoadResult.Cached -> state.copy(isLoading = false, catalog = result.catalog, cachedAt = result.cachedAt)
-                    is StoreLoadResult.Failed -> state.copy(
-                        isLoading = false, errorMessage = result.message, unsupportedSchema = result.unsupportedSchema,
-                    )
-                }
-            }
+            if (_uiState.value.catalog == null) showCachedCatalog(lang)
+            val statsJob = _uiState.value.catalog?.let { shown -> launch { loadStats(shown.statsUrl) } }
+            applyLoadResult(repository.load(lang, force))
             refreshServerStates()
-            _uiState.value.catalog?.let { catalog ->
-                val stats = repository.loadStats(catalog.statsUrl)
-                _uiState.update { it.copy(stats = stats) }
-            }
+            val catalog = _uiState.value.catalog ?: return@launch
+            if (statsJob == null) loadStats(catalog.statsUrl) else statsJob.join()
         }
+    }
+
+    private suspend fun showCachedCatalog(lang: String) {
+        repository.cached(lang)?.let { cached ->
+            _uiState.update { it.copy(isLoading = false, catalog = cached.catalog) }
+            refreshServerStates()
+        }
+        val stats = repository.cachedStats()
+        if (stats.items.isNotEmpty()) _uiState.update { it.copy(stats = stats) }
+    }
+
+    private fun applyLoadResult(result: StoreLoadResult) = _uiState.update { state ->
+        when (result) {
+            is StoreLoadResult.Online -> state.copy(isLoading = false, refreshing = false, catalog = result.catalog, cachedAt = null)
+            is StoreLoadResult.Cached -> state.copy(
+                isLoading = false,
+                refreshing = false,
+                catalog = result.catalog,
+                cachedAt = result.cachedAt.takeUnless { result.bundled },
+            )
+            is StoreLoadResult.Failed -> state.copy(
+                isLoading = false,
+                refreshing = false,
+                errorMessage = result.message,
+                unsupportedSchema = result.unsupportedSchema,
+            )
+        }
+    }
+
+    private suspend fun loadStats(url: String) {
+        val stats = repository.loadStats(url)
+        _uiState.update { it.copy(stats = stats) }
     }
 
     private companion object {

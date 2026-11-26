@@ -11,6 +11,8 @@ data class StoreUiState(
     val selectedCategoryId: String? = null,
     /** Zeitpunkt der zwischengespeicherten Fassung, falls offline. */
     val cachedAt: String? = null,
+    /** Im Hintergrund wird gerade nach einer neueren Fassung gefragt (Katalog wird schon angezeigt). */
+    val refreshing: Boolean = false,
     val errorMessage: String? = null,
     val unsupportedSchema: Boolean = false,
     /** Bereits installierte Plugin-IDs (Item-ID = Plugin-ID). */

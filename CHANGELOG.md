@@ -11,6 +11,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert / Changed
+- **Store öffnet sofort** (nach dem Vorbild des CodeAssist-Stores): Die letzte geladene Fassung – beim ersten Start
+  der mit der App ausgelieferte Katalog – erscheint ohne Wartezeit; im Hintergrund wird bedingt nachgeladen
+  (`If-None-Match`/ETag, unverändert nur HTTP 304), ein geladener Katalog wird 5 Minuten im Speicher
+  wiederverwendet, Statistik lädt parallel. Ungültige Antworten ersetzen nie die letzte gute Fassung.
+  / Store shows instantly: cached or bundled catalog first, conditional refresh in the background.
+
 ### Behoben / Fixed
 - Absturz beim Öffnen des Editors in 3.5.1 („Can't instantiate abstract class“): Cursor-Animator und Auswahlgriffe
   wurden per Reflection erzeugt, was R8 im Release-Build nicht sieht. / Editor crash on open in 3.5.1 release builds.

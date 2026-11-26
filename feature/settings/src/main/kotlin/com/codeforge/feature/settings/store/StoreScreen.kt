@@ -108,6 +108,9 @@ fun StoreScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             val catalog = uiState.catalog
+            if (catalog != null && uiState.refreshing) {
+                androidx.compose.material3.LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
             when {
                 catalog == null && uiState.isLoading -> Row(
                     modifier = Modifier.fillMaxWidth().padding(24.dp),

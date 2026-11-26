@@ -39,6 +39,7 @@
     <ID>CognitiveComplexMethod:FormattersScreen.kt:@Composable fun FormattersScreen</ID>
     <ID>CognitiveComplexMethod:GitSettingsScreen.kt:@Composable private fun CredentialDialog</ID>
     <ID>CognitiveComplexMethod:HttpTextFetcher.kt:DefaultHttpTextFetcher$override suspend fun fetch: Result&lt;String></ID>
+    <ID>CognitiveComplexMethod:HttpTextFetcher.kt:DefaultHttpTextFetcher$override suspend fun fetchIfChanged: Result&lt;ConditionalText></ID>
     <ID>CognitiveComplexMethod:KeymapScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun KeyCaptureDialog</ID>
     <ID>CognitiveComplexMethod:PackageManagerScreen.kt:@Composable private fun PackageCard</ID>
     <ID>CognitiveComplexMethod:SnippetSettingsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun SnippetSettingsScreen</ID>
@@ -46,6 +47,7 @@
     <ID>CognitiveComplexMethod:StoreInstaller.kt:StoreInstaller$private suspend fun installRecursive: StoreInstallResult</ID>
     <ID>CognitiveComplexMethod:StoreScreen.kt:@Composable private fun StoreContent</ID>
     <ID>CognitiveComplexMethod:StoreScreen.kt:@Composable private fun StoreItemCard</ID>
+    <ID>CognitiveComplexMethod:StoreScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun StoreScreen</ID>
     <ID>CognitiveComplexMethod:StoreScreen.kt:@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable private fun StoreDetailSheet</ID>
     <ID>CognitiveComplexMethod:TerminalSettingsContract.kt:ExtraKeysConfig$fun isValid: Boolean</ID>
     <ID>CognitiveComplexMethod:TerminalSettingsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable private fun TerminalSettingsScreen</ID>
