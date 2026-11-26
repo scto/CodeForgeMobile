@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.5.1] - 2026-11-26
+
 ### Geändert / Changed
 - **Einstellungen neu gegliedert** (nach dem Vorbild von CodeAssist): Abschnitte „Darstellung & Editor“ (Darstellung,
   Editor, Farbschema, Code-Stil, Tastenbelegung, Symbole & Makros, Snippets) und „Build & Ausführen“ (Build & Run,
