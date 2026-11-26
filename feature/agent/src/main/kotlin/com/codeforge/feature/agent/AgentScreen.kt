@@ -72,6 +72,8 @@ fun AgentRoute(
     viewModel: AgentViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    LaunchedEffect(viewModel) { viewModel.openUrl.collect { url -> runCatching { uriHandler.openUri(url) } } }
     LaunchedEffect(rootPath) { viewModel.onEvent(AgentUiEvent.Initialize(rootPath)) }
     LaunchedEffect(attachment) {
         if (attachment != null) {
@@ -129,6 +131,15 @@ fun AgentScreen(
                 }
             }
         }
+        state.pacingSeconds?.let { sec ->
+            Text(
+                stringRes(R.string.agent_pacing, sec),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
+            )
+        }
+        state.pendingQuestion?.let { QuestionCard(it, onEvent) }
         state.pendingApproval?.let { ApprovalCard(it, onEvent) }
         InputRow(state, onEvent)
     }
@@ -304,6 +315,39 @@ private fun ApprovalCard(approval: PendingApproval, onEvent: (AgentUiEvent) -> U
 }
 
 @Composable
+private fun QuestionCard(question: PendingQuestion, onEvent: (AgentUiEvent) -> Unit) {
+    var own by rememberSaveable(question) { mutableStateOf("") }
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+    ) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(question.question, style = MaterialTheme.typography.bodyMedium)
+            question.options.forEach { option ->
+                androidx.compose.material3.OutlinedButton(onClick = { onEvent(AgentUiEvent.AnswerQuestion(option)) }, modifier = Modifier.fillMaxWidth()) {
+                    Text(option)
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = own,
+                    onValueChange = { own = it },
+                    placeholder = { Text(stringRes(R.string.agent_question_own)) },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = { onEvent(AgentUiEvent.AnswerQuestion(own)) }, enabled = own.isNotBlank()) {
+                    Icon(Icons.Filled.Send, contentDescription = stringRes(R.string.agent_send))
+                }
+            }
+            TextButton(onClick = { onEvent(AgentUiEvent.AnswerQuestion(null)) }, modifier = Modifier.align(Alignment.End)) {
+                Text(stringRes(R.string.agent_question_skip))
+            }
+        }
+    }
+}
+
+@Composable
 private fun InputRow(state: AgentUiState, onEvent: (AgentUiEvent) -> Unit) {
     if (state.attachments.isNotEmpty()) {
         Row(
@@ -368,6 +412,7 @@ private fun ConnectionsDialog(state: AgentUiState, onEvent: (AgentUiEvent) -> Un
                     Text(stringRes(R.string.agent_connections_empty), style = MaterialTheme.typography.bodySmall)
                 }
                 state.mcpServers.forEach { server -> McpServerRow(server, onEvent) }
+                McpHostCard(state.mcpHost, onEvent)
                 Text(stringRes(R.string.agent_connections_add), style = MaterialTheme.typography.labelLarge)
                 OutlinedTextField(target, { target = it }, label = { Text(stringRes(R.string.agent_connections_target)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(name, { name = it }, label = { Text(stringRes(R.string.agent_connections_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
@@ -397,6 +442,7 @@ private fun McpServerRow(server: McpServerUi, onEvent: (AgentUiEvent) -> Unit) {
                 McpStatus.CONNECTING -> stringRes(R.string.agent_mcp_connecting)
                 McpStatus.DISABLED -> stringRes(R.string.agent_mcp_disabled)
                 McpStatus.NEEDS_TRUST -> stringRes(R.string.agent_mcp_needs_trust)
+                McpStatus.NEEDS_AUTH -> stringRes(R.string.agent_mcp_needs_auth)
                 McpStatus.FAILED -> stringRes(R.string.agent_mcp_failed, server.message.orEmpty())
             }
             Text(
@@ -411,6 +457,12 @@ private fun McpServerRow(server: McpServerUi, onEvent: (AgentUiEvent) -> Unit) {
                 if (server.status == McpStatus.FAILED) {
                     TextButton(onClick = { onEvent(AgentUiEvent.ReconnectMcpServer(server.name)) }) { Text(stringRes(R.string.agent_mcp_reconnect)) }
                 }
+                if (server.needsAuth) {
+                    TextButton(onClick = { onEvent(AgentUiEvent.SignInMcpServer(server.name)) }) { Text(stringRes(R.string.agent_mcp_sign_in)) }
+                }
+                if (server.signedIn) {
+                    TextButton(onClick = { onEvent(AgentUiEvent.SignOutMcpServer(server.name)) }) { Text(stringRes(R.string.agent_mcp_sign_out)) }
+                }
                 if (!server.fromProject) {
                     TextButton(onClick = { onEvent(AgentUiEvent.ToggleMcpServer(server.name)) }) {
                         Text(stringRes(if (server.status == McpStatus.DISABLED) R.string.agent_mcp_enable else R.string.agent_mcp_disable))
@@ -420,4 +472,37 @@ private fun McpServerRow(server: McpServerUi, onEvent: (AgentUiEvent) -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun McpHostCard(host: McpHostUi, onEvent: (AgentUiEvent) -> Unit) {
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringRes(R.string.agent_host_title), style = MaterialTheme.typography.labelLarge)
+                    Text(stringRes(R.string.agent_host_desc), style = MaterialTheme.typography.bodySmall)
+                }
+                androidx.compose.material3.Switch(checked = host.enabled, onCheckedChange = { onEvent(AgentUiEvent.ToggleMcpHost(it)) })
+            }
+            host.error?.let { Text(stringRes(R.string.agent_host_error, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+            if (host.running) {
+                val config = McpHostConfig.json(host.url, host.token)
+                Text(host.url, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+                Text(stringRes(R.string.agent_host_approval_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                TextButton(onClick = { clipboard.setText(androidx.compose.ui.text.AnnotatedString(config)) }) {
+                    Text(stringRes(R.string.agent_host_copy_config))
+                }
+            }
+        }
+    }
+}
+
+/** Konfiguration für externe Agenten (Format der `.mcp.json` von Claude Code/Cursor). */
+internal object McpHostConfig {
+    /** JSON-Schnipsel mit [url] und [token]. */
+    fun json(url: String, token: String): String =
+        "{\n  \"mcpServers\": {\n    \"codeforge\": {\n      \"type\": \"http\",\n      \"url\": \"$url\",\n" +
+            "      \"headers\": { \"Authorization\": \"Bearer $token\" }\n    }\n  }\n}"
 }

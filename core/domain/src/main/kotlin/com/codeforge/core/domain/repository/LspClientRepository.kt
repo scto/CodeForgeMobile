@@ -94,6 +94,9 @@ interface LspClientRepository {
      */
     fun getRunningSessionIds(): List<String> = emptyList()
 
+    /** `true`, wenn [path] bei einem Server geöffnet ist (z. B. im Editor). */
+    fun isDocumentOpen(path: String): Boolean = false
+
     /**
      * Handler für eingehende `workspace/applyEdit`-Anfragen vom Server.
      * Liefert true, wenn der WorkspaceEdit erfolgreich angewendet wurde.

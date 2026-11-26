@@ -78,6 +78,10 @@ fun AiSettingsRoute(
     viewModel: AiSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    LaunchedEffect(viewModel) {
+        viewModel.openUrl.collect { url -> runCatching { uriHandler.openUri(url) } }
+    }
     AiSettingsScreen(modifier = modifier, uiState = uiState, onBack = onBack, onEvent = viewModel::onEvent)
 }
 
@@ -119,6 +123,7 @@ internal fun AiSettingsScreen(
             ProviderSection(uiState, onEvent)
             ModelSection(active, onEvent)
             KeysSection(uiState.providers, onEvent)
+            AgentLimitsSection(active, onEvent)
             EndpointsSection(uiState.providers, onEvent)
             PrivacySection(uiState, onEvent)
             Text(
@@ -267,7 +272,62 @@ private fun KeysSection(providers: List<AiProviderState>, onEvent: (AiSettingsUi
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+            if (provider == AiProviderType.OPENROUTER) OpenRouterAccountRow(state, onEvent)
         }
+    }
+}
+
+@Composable
+private fun OpenRouterAccountRow(state: AiProviderState, onEvent: (AiSettingsUiEvent) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        androidx.compose.material3.OutlinedButton(onClick = { onEvent(AiSettingsUiEvent.SignInOpenRouter) }, enabled = !state.signingIn) {
+            Busy(state.signingIn)
+            Text(stringRes(R.string.aiset_openrouter_sign_in))
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        if (state.hasKey) {
+            androidx.compose.material3.TextButton(onClick = { onEvent(AiSettingsUiEvent.RefreshOpenRouterUsage) }) {
+                Text(stringRes(R.string.aiset_openrouter_usage_refresh))
+            }
+        }
+    }
+    state.usage?.let { u ->
+        val lines = listOfNotNull(
+            u.freeRequestsLimit?.let { stringRes(R.string.aiset_openrouter_free, u.freeRequestsUsed ?: 0, it) },
+            u.budgetLimitUsd?.let { stringRes(R.string.aiset_openrouter_budget, "%.2f".format(u.budgetUsedUsd ?: 0.0), "%.2f".format(it)) },
+            u.spentTodayUsd?.let { stringRes(R.string.aiset_openrouter_today, "%.2f".format(it)) },
+            stringRes(R.string.aiset_openrouter_free_tier).takeIf { u.isFreeTier == true },
+        )
+        Text(lines.joinToString("\n"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    if (state.usageState is AiCheckState.Failure) CheckResult(state.usageState, success = { it })
+}
+
+@Composable
+private fun AgentLimitsSection(state: AiProviderState, onEvent: (AiSettingsUiEvent) -> Unit) {
+    SectionTitle(stringRes(R.string.aiset_section_agent_limits, state.provider.displayName))
+    Block {
+        OutlinedTextField(
+            value = state.backupKeys,
+            onValueChange = { onEvent(AiSettingsUiEvent.BackupKeysChanged(state.provider, it)) },
+            label = { Text(stringRes(R.string.aiset_backup_keys)) },
+            supportingText = { Text(stringRes(R.string.aiset_backup_keys_desc, state.backupKeyCount)) },
+            visualTransformation = if (state.keyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+            minLines = 2,
+            maxLines = 5,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = state.requestsPerMinute,
+            onValueChange = { onEvent(AiSettingsUiEvent.RequestsPerMinuteChanged(state.provider, it)) },
+            label = { Text(stringRes(R.string.aiset_rpm)) },
+            supportingText = { Text(stringRes(R.string.aiset_rpm_desc)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

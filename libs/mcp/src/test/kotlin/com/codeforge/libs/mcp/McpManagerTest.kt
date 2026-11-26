@@ -37,7 +37,7 @@ class McpManagerTest {
 
     @Test
     fun `verbindet Server, benennt Werkzeuge um und liefert Hinweise`() = runBlocking {
-        val m = McpManager(scope, factory)
+        val m = McpManager(scope, factory = factory)
         m.setEntries(listOf(entry(http("docs")), entry(http("off", disabled = true))))
         m.await { l -> l.first { it.entry.config.name == "docs" }.status == McpStatus.READY }
         assertEquals(McpStatus.DISABLED, m.servers.value.first { it.entry.config.name == "off" }.status)
@@ -53,7 +53,7 @@ class McpManagerTest {
 
     @Test
     fun `Projekt-Server ohne Freigabe verbinden nicht, mit Freigabe schon, Projekt gewinnt bei gleichem Namen`() = runBlocking {
-        val m = McpManager(scope, factory)
+        val m = McpManager(scope, factory = factory)
         m.setEntries(listOf(entry(http("a", "https://app/a")), entry(http("a", "https://proj/a"), McpSource.PROJECT, trusted = false)))
         assertEquals(1, m.servers.value.size)
         assertEquals(McpStatus.NEEDS_TRUST, m.servers.value.single().status)
@@ -66,7 +66,7 @@ class McpManagerTest {
 
     @Test
     fun `Fehler werden je Server gemeldet, unveraenderte Server bleiben verbunden, Entfernte verschwinden`() = runBlocking {
-        val m = McpManager(scope, factory)
+        val m = McpManager(scope, factory = factory)
         m.setEntries(listOf(entry(http("ok")), entry(http("bad", "boom"))))
         m.await { l -> l.all { it.status == McpStatus.READY || it.status == McpStatus.FAILED } }
         assertEquals(McpStatus.FAILED, m.servers.value.first { it.entry.config.name == "bad" }.status)
@@ -82,7 +82,7 @@ class McpManagerTest {
     @Test
     fun `Namenskonflikte bekommen ein Suffix`() = runBlocking {
         servers["dup"] = FakeMcpServer(tools = listOf(FakeMcpServer.tool("a.b"), FakeMcpServer.tool("a_b")))
-        val m = McpManager(scope, factory)
+        val m = McpManager(scope, factory = factory)
         m.setEntries(listOf(entry(http("dup"))))
         m.await { it.single().status == McpStatus.READY }
         assertEquals(2, m.tools.value.map { it.name }.toSet().size)

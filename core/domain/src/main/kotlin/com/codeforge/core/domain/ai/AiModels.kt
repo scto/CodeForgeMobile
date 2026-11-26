@@ -162,8 +162,15 @@ data class AiChatOptions(
     val baseUrl: String? = null,
     val apiKey: String = "",
     val temperature: Float? = null,
-    val maxTokens: Int? = null
-)
+    val maxTokens: Int? = null,
+    /** Ersatzschlüssel desselben Anbieters; übernehmen, wenn der Hauptschlüssel ein Limit erreicht oder abgelehnt wird. */
+    val backupKeys: List<String> = emptyList(),
+    /** Anfragen pro Minute, die der Agent höchstens sendet (0 = ohne Limit bzw. aus 429 gelernt). */
+    val requestsPerMinute: Int = 0
+) {
+    /** Hauptschlüssel und Ersatzschlüssel in Reihenfolge, bereinigt. */
+    val allKeys: List<String> get() = (listOf(apiKey) + backupKeys).map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+}
 
 /** Datenschutzrichtlinie für den Kontext: immer nachfragen, nur Auswahl oder ganze Datei. */
 enum class AiPrivacyPolicy {

@@ -3,6 +3,7 @@ package com.codeforge.libs.ai_client
 
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.Res
+import com.codeforge.libs.agent.LlmFailureKind
 import com.codeforge.libs.agent.LlmStreamEvent
 import java.io.BufferedReader
 import java.io.IOException
@@ -62,6 +63,7 @@ internal object AgentSseTransport {
                 }
                 if (code !in 200..299) {
                     val err = runCatching { connection.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty() }.getOrDefault("")
+                    val retryAfter = connection.getHeaderField("Retry-After")?.trim()?.toLongOrNull()?.times(1000)
                     emit(
                         LlmStreamEvent.Failed(
                             when (code) {
@@ -69,6 +71,8 @@ internal object AgentSseTransport {
                                 429 -> Res.string(R.string.ai_error_quota_exceeded)
                                 else -> Res.string(R.string.ai_error_generic, "HTTP $code: ${err.take(500)}")
                             },
+                            kind = failureKind(code, err),
+                            retryAfterMs = retryAfter,
                         ),
                     )
                     return@flow
@@ -112,4 +116,16 @@ internal object AgentSseTransport {
             }
         }
     }.flowOn(Dispatchers.IO)
+}
+
+/** Ordnet einen HTTP-Fehler für den Schlüsselwechsel ein. */
+internal fun failureKind(code: Int, body: String): LlmFailureKind {
+    val text = body.lowercase()
+    val quota = listOf("quota", "billing", "insufficient", "credit", "exceeded your", "per day", "daily").any { it in text }
+    return when {
+        code == 401 || code == 403 -> if (quota) LlmFailureKind.QUOTA else LlmFailureKind.AUTH
+        code == 402 -> LlmFailureKind.QUOTA
+        code == 429 -> if (quota && ("per day" in text || "daily" in text || "billing" in text || "credit" in text)) LlmFailureKind.QUOTA else LlmFailureKind.RATE_LIMIT
+        else -> LlmFailureKind.OTHER
+    }
 }

@@ -6,15 +6,35 @@
     <ID>BracesOnIfStatements:CheckpointWorkspace.kt:CheckpointWorkspace$else</ID>
     <ID>BracesOnIfStatements:CheckpointWorkspace.kt:CheckpointWorkspace$if</ID>
     <ID>BracesOnIfStatements:HistoryCompactor.kt:HistoryCompactor$if</ID>
+    <ID>BracesOnIfStatements:InteractionTools.kt:FileAgentMemory$if</ID>
+    <ID>BracesOnIfStatements:KeyFailover.kt:KeyFailoverClient$else</ID>
+    <ID>BracesOnIfStatements:NewAgentToolsTest.kt:NewAgentToolsTest$else</ID>
     <ID>BracesOnIfStatements:TextDiff.kt:TextDiff$if</ID>
+    <ID>CascadingCallWrapping:CodeIntelTools.kt:CodeIntelTools$trim()</ID>
+    <ID>CascadingCallWrapping:InteractionTools.kt:InteractionTools.AskUser$distinct()</ID>
+    <ID>CascadingCallWrapping:ProjectTools.kt:GradleProjectInfo.Companion$distinct()</ID>
+    <ID>CascadingCallWrapping:ProjectTools.kt:GradleProjectInfo.Companion$map { m -> m.groupValues[1].ifEmpty { m.groupValues[2].ifEmpty { m.groupValues[3].takeIf { it.isNotEmpty() }?.let { "kotlin(\"$it\")" } ?: m.groupValues[4] } } }</ID>
     <ID>CascadingCallWrapping:RunGradleTool.kt:GradleTaskSupport$append(": ")</ID>
+    <ID>CascadingCallWrapping:WebTools.kt:DependencyAdder$listOf("build.gradle.kts", "build.gradle").map { if (dir.isEmpty()) it else "$dir/$it" } .firstOrNull { ws.readFile(it) != null } ?: throw ToolArgumentException("Keine Build-Datei für Modul $module")</ID>
+    <ID>CascadingCallWrapping:WebTools.kt:HtmlText$replace("&amp;apos;", "'")</ID>
     <ID>ClassOrdering:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$private val sample = listOf( AgentMessage(AgentRole.USER, listOf(ContentPart.Text("lies a.kt\nmit \"Anführungszeichen\""))), AgentMessage(AgentRole.ASSISTANT, listOf(ContentPart.Text("ok"), ContentPart.ToolUse("t1", "read_file", buildJsonObject { put("path", "a.kt") }))), AgentMessage(AgentRole.USER, listOf(ContentPart.ToolResultPart("t1", "inhalt", isError = true))), )</ID>
+    <ID>ClassOrdering:CodeIntelTools.kt:CodeIntelTools$private val positionProps = arrayOf( "path" to stringProp("File path relative to the project root"), "line" to intProp("1-based line of the symbol"), "symbol" to stringProp("The symbol text on that line (used to find the column)"), "column" to intProp("1-based column; optional when symbol is given"), )</ID>
     <ID>ClassOrdering:ProjectContext.kt:ProjectContext$/** `true`, wenn weder Regeln noch Skills vorhanden sind. */ val isEmpty: Boolean get() = instructions.isBlank() &amp;&amp; skills.isEmpty()</ID>
+    <ID>ClassOrdering:WebTools.kt:DependencyAdder$private const val CATALOG = "gradle/libs.versions.toml"</ID>
     <ID>CognitiveComplexMethod:AgentLoop.kt:AgentLoop$fun run: Flow&lt;AgentEvent></ID>
     <ID>CognitiveComplexMethod:FileAgentWorkspace.kt:FileAgentWorkspace$override suspend fun searchText: List&lt;SearchHit></ID>
     <ID>CognitiveComplexMethod:HistoryCompactor.kt:HistoryCompactor$fun compact: List&lt;AgentMessage></ID>
+    <ID>CognitiveComplexMethod:KeyFailover.kt:KeyFailoverClient$override fun stream: Flow&lt;LlmStreamEvent></ID>
+    <ID>CognitiveComplexMethod:LoopbackRedirect.kt:LoopbackRedirect$suspend fun await: Map&lt;String, String></ID>
+    <ID>CognitiveComplexMethod:ProjectTools.kt:GradleProjectInfo$fun render: String</ID>
+    <ID>CognitiveComplexMethod:ProjectTools.kt:GradleProjectInfo.Companion$private suspend fun walk</ID>
     <ID>CognitiveComplexMethod:TextDiff.kt:TextDiff$fun unified: String</ID>
+    <ID>CognitiveComplexMethod:WebTools.kt:DependencyAdder$suspend fun plan: List&lt;Triple&lt;String, String, String>></ID>
+    <ID>ComplexCondition:ProjectTools.kt:ProjectTools.ListTasks$m.hasKotlin || m.isAndroidApp || m.isAndroidLibrary || m.isKotlinJvm</ID>
+    <ID>ComplexCondition:ProjectTools.kt:ProjectTools.MovePath$newName.isEmpty() || newName.contains('/') || newName == "." || newName == ".."</ID>
     <ID>CyclomaticComplexMethod:TextDiff.kt:TextDiff$fun unified: String</ID>
+    <ID>CyclomaticComplexMethod:WebTools.kt:DependencyAdder$suspend fun plan: List&lt;Triple&lt;String, String, String>></ID>
+    <ID>DataClassContainsFunctions:ProjectTools.kt:GradleProjectInfo$fun render: String</ID>
     <ID>FunctionNameMaxLength:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$@Test fun `Speichern, Laden getrennt je Projekt, Loeschen`</ID>
     <ID>FunctionNameMaxLength:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$@Test fun `alte Werkzeugergebnisse werden beim Speichern gekuerzt`</ID>
     <ID>FunctionNameMaxLength:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$@Test fun `kaputte oder fremde Dateien ergeben leeren Verlauf`</ID>
@@ -47,6 +67,9 @@
     <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `Suche findet Treffer ohne Gross-Kleinschreibung, ueberspringt Build und Binaerdateien`</ID>
     <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `schreiben legt Ordner an, lesen und loeschen funktionieren`</ID>
     <ID>FunctionNameMaxLength:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$@Test fun `zu grosse Dateien werden nicht gelesen, Diagnosen bekommen normalisierte Pfade`</ID>
+    <ID>FunctionNameMaxLength:NewAgentToolsTest.kt:NewAgentToolsTest$@Test fun addDependencyWithoutCatalogGroovy</ID>
+    <ID>FunctionNameMaxLength:NewAgentToolsTest.kt:NewAgentToolsTest$@Test fun keyFailoverDoesNotRotateOnOtherErrors</ID>
+    <ID>FunctionNameMaxLength:NewAgentToolsTest.kt:NewAgentToolsTest$@Test fun movePathKeepsContentAndRejectsBinary</ID>
     <ID>FunctionNameMaxLength:ProjectContextTest.kt:ProjectContextTest$@Test fun `Regeln kommen aus AGENTS_md vor CLAUDE_md und werden gekuerzt`</ID>
     <ID>FunctionNameMaxLength:ProjectContextTest.kt:ProjectContextTest$@Test fun `Skills mit Frontmatter, Fallback und Duplikaten`</ID>
     <ID>FunctionNameMaxLength:ProjectContextTest.kt:ProjectContextTest$@Test fun `use_skill liefert den Text oder listet die Namen`</ID>
@@ -62,11 +85,17 @@
     <ID>FunctionNameMaxLength:TextDiffTest.kt:TextDiffTest$@Test fun `neue Datei besteht nur aus Plus-Zeilen, geloeschte nur aus Minus-Zeilen`</ID>
     <ID>LoopWithTooManyJumpStatements:FileAgentWorkspace.kt:FileAgentWorkspace$for</ID>
     <ID>LoopWithTooManyJumpStatements:HistoryCompactor.kt:HistoryCompactor$for</ID>
+    <ID>LoopWithTooManyJumpStatements:KeyFailover.kt:KeyFailoverClient$while</ID>
     <ID>OutdatedDocumentation:RunGradleTool.kt:BuildOutcome</ID>
     <ID>ReturnCount:BuiltinTools.kt:BuiltinTools.EditFile$override suspend fun execute: ToolResult</ID>
     <ID>ReturnCount:BuiltinTools.kt:BuiltinTools.EditFile$override suspend fun preview: String?</ID>
     <ID>ReturnCount:BuiltinTools.kt:BuiltinTools.ListDir$override suspend fun execute: ToolResult</ID>
     <ID>ReturnCount:BuiltinTools.kt:BuiltinTools.ReadFile$override suspend fun execute: ToolResult</ID>
+    <ID>ReturnCount:CodeIntelTools.kt:CodeIntelTools.ApplyQuickFix$override suspend fun execute: ToolResult</ID>
+    <ID>ReturnCount:CodeIntelTools.kt:CodeIntelTools.FormatFile$override suspend fun execute: ToolResult</ID>
+    <ID>ReturnCount:KeyFailover.kt:RequestPacer$@Synchronized fun delayMs: Long</ID>
+    <ID>ReturnCount:WebTools.kt:WebTools.SearchDependency$override suspend fun execute: ToolResult</ID>
+    <ID>ReturnCount:WebTools.kt:WebTools.WebFetch$override suspend fun execute: ToolResult</ID>
     <ID>StringLiteralDuplication:AgentTool.kt:"description"</ID>
     <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.CreateFile$"content"</ID>
     <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.EditFile$"new_string"</ID>
@@ -76,18 +105,54 @@
     <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.SearchText$"query"</ID>
     <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.TodoWrite$"status"</ID>
     <ID>StringLiteralDuplication:BuiltinTools.kt:BuiltinTools.TodoWrite$"todos"</ID>
+    <ID>StringLiteralDuplication:CodeIntelTools.kt:CodeIntelTools$"Datei nicht gefunden: $path"</ID>
+    <ID>StringLiteralDuplication:CodeIntelTools.kt:CodeIntelTools$"File path relative to the project root"</ID>
+    <ID>StringLiteralDuplication:CodeIntelTools.kt:CodeIntelTools.ApplyQuickFix$"number"</ID>
+    <ID>StringLiteralDuplication:CodeIntelTools.kt:CodeIntelTools.RenameSymbol$"new_name"</ID>
+    <ID>StringLiteralDuplication:InteractionTools.kt:InteractionTools.AskUser$"options"</ID>
+    <ID>StringLiteralDuplication:InteractionTools.kt:InteractionTools.AskUser$"question"</ID>
+    <ID>StringLiteralDuplication:InteractionTools.kt:InteractionTools.ScreenshotPreview$"function"</ID>
+    <ID>StringLiteralDuplication:InteractionTools.kt:InteractionTools.WriteMemory$"content"</ID>
+    <ID>StringLiteralDuplication:ProjectTools.kt:ProjectTools.MovePath$"new_name"</ID>
+    <ID>StringLiteralDuplication:WebTools.kt:WebTools.AddDependency$"coordinate"</ID>
+    <ID>StringLiteralDuplication:WebTools.kt:WebTools.AddDependency$"module"</ID>
+    <ID>StringLiteralDuplication:WebTools.kt:WebTools.HttpRequest$"method"</ID>
+    <ID>StringLiteralDuplication:WebTools.kt:WebTools.SearchDependency$"query"</ID>
     <ID>StringShouldBeRawString:AgentHistoryStoreTest.kt:AgentHistoryStoreTest$"lies a.kt\nmit \"Anführungszeichen\""</ID>
     <ID>StringShouldBeRawString:BuiltinToolsTest.kt:BuiltinToolsTest$"src/Main.kt" to "fun main() {\n println(\"a\")\n println(\"a\")\n}\n"</ID>
     <ID>StringShouldBeRawString:BuiltinToolsTest.kt:BuiltinToolsTest$"src/Main.kt:2: println(\"a\")\nsrc/Main.kt:3: println(\"a\")"</ID>
+    <ID>StringShouldBeRawString:CodeIntelTools.kt:SymbolDeclarations$"@\\+id/$n\\b|name=\"$n\""</ID>
+    <ID>StringShouldBeRawString:CodeIntelTools.kt:SymbolDeclarations$"\\b(class|interface|enum|record|@interface)\\s+$n\\b|" + "\\b(public|private|protected|static|void|final|abstract|synchronized|native|default)\\b[^;=()]*\\s$n\\s*\\("</ID>
+    <ID>StringShouldBeRawString:CodeIntelTools.kt:SymbolDeclarations$"\\b(class|interface|object|typealias|fun|val|var|enum\\s+class|annotation\\s+class|data\\s+class|sealed\\s+(class|interface)|value\\s+class)\\s+" + "(&lt;[^>]*>\\s*)?([A-Za-z0-9_.]+\\.)?$n\\b"</ID>
     <ID>StringShouldBeRawString:FileAgentWorkspaceTest.kt:FileAgentWorkspaceTest$"fun main() {\n println(\"Hallo\")\n}"</ID>
+    <ID>StringShouldBeRawString:LoopbackRedirect.kt:LoopbackRedirect$"HTTP/1.1 $status\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: ${bytes.size}\r\nConnection: close\r\n\r\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"a/Repo.kt" to "package a\n\nclass Repo\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"androidx-room-runtime = { group = \"androidx.room\", name = \"room-runtime\", version.ref = \"androidx-room-runtime\" }\n\n[plugins]"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"app/build.gradle.kts" to "plugins {\n alias(libs.plugins.android.application)\n}\nandroid {\n namespace = \"com.x\"\n compileSdk = 36\n defaultConfig { minSdk = 26 }\n}\ntasks.register(\"hello\") {}\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"app/build.gradle.kts" to "plugins {\n}\n\ndependencies {\n implementation(libs.androidx.core)\n}\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"apply plugin: 'java'\n\ndependencies {\n testImplementation 'junit:junit:4.13.2'\n}\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"core/data/build.gradle.kts" to "plugins {\n id(\"com.android.library\")\n}\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"fun a() {\n foo()\n}\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"fun b() {\n bar()\n}\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"gradle/libs.versions.toml" to "[versions]\nagp = \"9.0.1\"\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"gradle/libs.versions.toml" to "[versions]\ncore = \"1.0\"\n\n[libraries]\nandroidx-core = { group = \"androidx.core\", name = \"core-ktx\", version.ref = \"core\" }\n\n[plugins]\n"</ID>
+    <ID>StringShouldBeRawString:NewAgentToolsTest.kt:NewAgentToolsTest$"settings.gradle.kts" to "rootProject.name = \"Demo\"\ninclude(\":app\", \":core:data\")\n"</ID>
     <ID>StringShouldBeRawString:ProjectContext.kt:ProjectContext$"\n\n&lt;available-skills>\nCall use_skill with the name when a skill fits the task.\n"</ID>
     <ID>StringShouldBeRawString:ProjectContext.kt:ProjectContext$"\n\n&lt;project-instructions>\n"</ID>
     <ID>StringShouldBeRawString:ProjectContextTest.kt:ProjectContextTest$"---\nname: Release\ndescription: \"Release bauen\"\n---\n# Schritte\n1. tag"</ID>
     <ID>StringShouldBeRawString:ProjectContextTest.kt:ProjectContextTest$"---\nname: a\ndescription: d\n---\nBODY"</ID>
     <ID>StringShouldBeRawString:ProjectContextTest.kt:ProjectContextTest$"---\nname: release\ndescription: doppelt\n---\nx"</ID>
     <ID>StringShouldBeRawString:TextDiffTest.kt:TextDiffTest$"@@ -3,5 +3,5 @@\n z3\n z4\n-z5\n+NEU\n z6\n z7"</ID>
+    <ID>StringShouldBeRawString:WebTools.kt:DependencyAdder$"$alias = { group = \"$group\", name = \"$artifact\", version.ref = \"$versionKey\" }"</ID>
+    <ID>StringShouldBeRawString:WebTools.kt:DependencyAdder$"^([\\w.-]+):([\\w.-]+):([\\w.+-]+)$"</ID>
+    <ID>StringShouldBeRawString:WebTools.kt:DependencyAdder$build.trimEnd() + "\n\ndependencies {\n $line\n}\n"</ID>
+    <ID>StringShouldBeRawString:WebTools.kt:DependencyAdder$toml.trimEnd() + "\n\n[$name]\n$entry\n"</ID>
+    <ID>StringShouldBeRawString:WebTools.kt:MavenXml$"&lt;([\\w.-]+)\\s+versions=\"([^\"]+)\"\\s*/>"</ID>
+    <ID>StringShouldBeRawString:WebTools.kt:WebTools.HttpRequest$"HTTP ${r.status}\nContent-Type: ${r.contentType ?: "-"}\n\n$body"</ID>
     <ID>SwallowedException:CheckpointWorkspace.kt:CheckpointWorkspace$e: Exception</ID>
+    <ID>ThrowsCount:CodeIntelTools.kt:CodeIntelTools$internal suspend fun position: CodePosition</ID>
     <ID>ThrowsCount:RunGradleTool.kt:GradleTaskSupport$fun validate: String</ID>
+    <ID>ThrowsCount:WebTools.kt:DependencyAdder$suspend fun plan: List&lt;Triple&lt;String, String, String>></ID>
     <ID>TooGenericExceptionCaught:AgentLoop.kt:AgentLoop$e: Exception</ID>
     <ID>TooGenericExceptionCaught:CheckpointWorkspace.kt:CheckpointWorkspace$e: Exception</ID>
     <ID>UnnecessaryParentheses:TextDiff.kt:TextDiff$(when (it.op) { Op.KEEP -> " "; Op.DEL -> "-"; Op.ADD -> "+" })</ID>

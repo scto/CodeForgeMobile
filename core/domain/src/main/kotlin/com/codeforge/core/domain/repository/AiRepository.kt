@@ -20,6 +20,9 @@ interface AiRepository {
     /** Speichert Modell/Basis-URL/Schlüssel eines Anbieters, ohne den aktiven Anbieter zu wechseln (leerer Schlüssel = löschen). */
     suspend fun saveProviderOptions(options: AiChatOptions)
 
+    /** Speichert Ersatzschlüssel und das Anfragelimit pro Minute des Agenten für [provider]. */
+    suspend fun saveAgentLimits(provider: AiProviderType, backupKeys: List<String>, requestsPerMinute: Int) {}
+
     /** Datenschutzeinstellungen: welche Inhalte an den Anbieter gesendet werden dürfen. */
     fun getPrivacyPolicy(): Flow<AiPrivacyPolicy>
     /** Speichert die Datenschutzeinstellungen. */

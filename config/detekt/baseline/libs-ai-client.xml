@@ -14,6 +14,7 @@
     <ID>CascadingCallWrapping:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$root["usage"]?.jsonObject?.get("output_tokens")?.jsonPrimitive?.intOrNull ?.let { outputTokens = it; listOf(LlmStreamEvent.Usage(inputTokens, outputTokens)) } ?: emptyList()</ID>
     <ID>ClassOrdering:GeminiModelCheckTest.kt:GeminiModelCheckTest$private val available = listOf("gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-preview-tts", "embedding-001")</ID>
     <ID>CognitiveComplexMethod:AgentSseTransport.kt:AgentSseTransport$fun stream: Flow&lt;LlmStreamEvent></ID>
+    <ID>CognitiveComplexMethod:AnthropicAgentWire.kt:AnthropicAgentWire$private fun message: JsonObject?</ID>
     <ID>CognitiveComplexMethod:AnthropicClient.kt:AnthropicClient$fun stream: Flow&lt;AiEvent></ID>
     <ID>CognitiveComplexMethod:GeminiAgentWire.kt:GeminiAgentWire$private fun content: JsonObject?</ID>
     <ID>CognitiveComplexMethod:GeminiClient.kt:GeminiClient$fun stream: Flow&lt;AiEvent></ID>
@@ -23,6 +24,7 @@
     <ID>CollapsibleIfStatements:AnthropicClient.kt:AnthropicClient$if (responseCode == 429 || responseCode in 500..599) { if (attempts &lt; maxAttempts) { connection.disconnect() delay(delayMs) delayMs *= 2 continue } }</ID>
     <ID>CollapsibleIfStatements:GeminiClient.kt:GeminiClient$if (responseCode == 429 || responseCode in 500..599) { if (attempts &lt; maxAttempts) { connection.disconnect() delay(delayMs) delayMs *= 2 continue } }</ID>
     <ID>CollapsibleIfStatements:OpenAiClient.kt:OpenAiClient$if (responseCode == 429 || responseCode in 500..599) { if (attempts &lt; maxAttempts) { connection.disconnect() delay(delayMs) delayMs *= 2 continue } }</ID>
+    <ID>ComplexCondition:AgentSseTransport.kt:quota &amp;&amp; ("per day" in text || "daily" in text || "billing" in text || "credit" in text)</ID>
     <ID>CyclomaticComplexMethod:AgentSseTransport.kt:AgentSseTransport$fun stream: Flow&lt;LlmStreamEvent></ID>
     <ID>CyclomaticComplexMethod:AnthropicAgentWire.kt:AnthropicAgentWire.StreamAssembler$override fun accept: List&lt;LlmStreamEvent></ID>
     <ID>CyclomaticComplexMethod:AnthropicClient.kt:AnthropicClient$fun stream: Flow&lt;AiEvent></ID>
@@ -50,6 +52,7 @@
     <ID>LongMethod:AgentSseTransport.kt:AgentSseTransport$fun stream: Flow&lt;LlmStreamEvent></ID>
     <ID>LongMethod:AnthropicClient.kt:AnthropicClient$fun stream: Flow&lt;AiEvent></ID>
     <ID>LongMethod:GeminiClient.kt:GeminiClient$fun stream: Flow&lt;AiEvent></ID>
+    <ID>LongMethod:OpenAiAgentWire.kt:OpenAiAgentWire$private fun messages: List&lt;JsonObject></ID>
     <ID>LongMethod:OpenAiClient.kt:OpenAiClient$fun stream: Flow&lt;AiEvent></ID>
     <ID>LoopWithTooManyJumpStatements:AgentSseTransport.kt:AgentSseTransport$while</ID>
     <ID>LoopWithTooManyJumpStatements:AiStreamFixturesTest.kt:AiStreamFixturesTest$for</ID>
@@ -63,6 +66,7 @@
     <ID>ReturnCount:GeminiClient.kt:GeminiClient$suspend fun testConnection: Result&lt;String></ID>
     <ID>ReturnCount:OpenAiAgentWire.kt:OpenAiAgentWire.StreamAssembler$override fun accept: List&lt;LlmStreamEvent></ID>
     <ID>ReturnCount:SseEventParser.kt:SseEventParser$fun parseLine: RawSseEvent?</ID>
+    <ID>StringLiteralDuplication:AnthropicAgentWire.kt:AnthropicAgentWire$"content"</ID>
     <ID>StringLiteralDuplication:AnthropicAgentWire.kt:AnthropicAgentWire$"tool_use"</ID>
     <ID>StringLiteralDuplication:GeminiAgentWire.kt:GeminiAgentWire$"parts"</ID>
     <ID>StringLiteralDuplication:GeminiClient.kt:GeminiClient$"parts"</ID>

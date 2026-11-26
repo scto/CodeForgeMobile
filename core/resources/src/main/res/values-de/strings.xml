@@ -2791,4 +2791,27 @@
     <string name="plugins_api1_unsupported">Nutzt die Plugin-API 1, die seit CodeForge %1$s nicht mehr unterstützt wird – wird nicht geladen. Bitte beim Autor ein Update auf API 4 anfragen oder entfernen.</string>
     <string name="plugins_api1_rejected">%1$s nutzt die Plugin-API 1, die seit CodeForge %2$s nicht mehr unterstützt wird. Bitte eine aktuelle Version (API 2–4) installieren.</string>
     <string name="settings_pin_line_numbers_wrap_hint">Wirkt nur ohne Zeilenumbruch: Zeilennummern bleiben beim seitlichen Scrollen stehen. Zeilenumbruch ist gerade an.</string>
+    <string name="aiset_openrouter_sign_in">Mit OpenRouter anmelden</string>
+    <string name="aiset_openrouter_usage_refresh">Verbrauch abfragen</string>
+    <string name="aiset_openrouter_free">Gratis-Anfragen heute: %1$d von %2$d</string>
+    <string name="aiset_openrouter_budget">Budget: %1$s von %2$s USD</string>
+    <string name="aiset_openrouter_today">Heute ausgegeben: %1$s USD</string>
+    <string name="aiset_openrouter_free_tier">Gratis-Konto: nur Modelle mit „:free“</string>
+    <string name="aiset_section_agent_limits">Agent: Ersatzschlüssel und Limit (%1$s)</string>
+    <string name="aiset_backup_keys">Ersatzschlüssel (einer pro Zeile)</string>
+    <string name="aiset_backup_keys_desc">%1$d eingetragen. Übernehmen, wenn der Hauptschlüssel ein Limit erreicht oder abgelehnt wird.</string>
+    <string name="aiset_rpm">Anfragen pro Minute</string>
+    <string name="aiset_rpm_desc">Der Agent wartet vor einer Anfrage, statt ins Minutenlimit zu laufen. Leer = ohne Limit (aus Fehlern gelernt).</string>
+    <string name="agent_pacing">Warte %1$d s – Anfragelimit des Anbieters</string>
+    <string name="agent_question_own">Eigene Antwort</string>
+    <string name="agent_question_skip">Überspringen</string>
+    <string name="agent_mcp_needs_auth">Anmeldung nötig</string>
+    <string name="agent_mcp_sign_in">Anmelden</string>
+    <string name="agent_mcp_sign_out">Abmelden</string>
+    <string name="agent_mcp_sign_in_failed">Anmeldung bei %1$s fehlgeschlagen: %2$s</string>
+    <string name="agent_host_title">CodeForge als MCP-Server</string>
+    <string name="agent_host_desc">Externe Agenten (z. B. in Termux) nutzen die Werkzeuge des Agenten: Dateien, Sprachserver, Gradle.</string>
+    <string name="agent_host_error">Server konnte nicht starten: %1$s</string>
+    <string name="agent_host_approval_hint">Nur auf diesem Gerät erreichbar, mit Token. Änderungen gibst du hier im Agenten-Panel frei.</string>
+    <string name="agent_host_copy_config">Konfiguration kopieren</string>
 </resources>

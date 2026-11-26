@@ -71,6 +71,24 @@ data class McpServerUi(
     val toolCount: Int,
     val message: String?,
     val fromProject: Boolean,
+    /** Anmeldung über den Browser möglich bzw. nötig. */
+    val needsAuth: Boolean = false,
+    /** Eine Anmeldung ist gespeichert. */
+    val signedIn: Boolean = false,
+)
+
+/** Offene Rückfrage des Agenten (`ask_user`). */
+@Immutable
+data class PendingQuestion(val question: String, val options: List<String>)
+
+/** Eigener MCP-Server für externe Agenten; [url] und [token] für deren Konfiguration. */
+@Immutable
+data class McpHostUi(
+    val enabled: Boolean = false,
+    val running: Boolean = false,
+    val url: String = "",
+    val token: String = "",
+    val error: String? = null,
 )
 
 /** UI-Zustand des Agenten-Panels. */
@@ -88,6 +106,12 @@ data class AgentUiState(
     val attachments: List<AgentAttachment> = emptyList(),
     /** Kurzbeschreibung gefundener, noch nicht freigegebener Projektregeln/Skills; `null` = nichts offen. */
     val untrustedContext: String? = null,
+    /** Offene Rückfrage des Agenten. */
+    val pendingQuestion: PendingQuestion? = null,
+    /** Eigener MCP-Server. */
+    val mcpHost: McpHostUi = McpHostUi(),
+    /** Hinweis, wenn der Agent wegen des Anfragelimits wartet (Sekunden); `null` = wartet nicht. */
+    val pacingSeconds: Int? = null,
 )
 
 /** Aktionen des Nutzers. */
@@ -145,4 +169,16 @@ sealed interface AgentUiEvent {
 
     /** Gefundene Projektregeln/Skills freigeben. */
     data object TrustContext : AgentUiEvent
+
+    /** Rückfrage beantworten; `null` = verwerfen. */
+    data class AnswerQuestion(val answer: String?) : AgentUiEvent
+
+    /** Eigenen MCP-Server ein-/ausschalten. */
+    data class ToggleMcpHost(val enabled: Boolean) : AgentUiEvent
+
+    /** Beim MCP-Server [name] über den Browser anmelden. */
+    data class SignInMcpServer(val name: String) : AgentUiEvent
+
+    /** Gespeicherte Anmeldung beim MCP-Server [name] entfernen. */
+    data class SignOutMcpServer(val name: String) : AgentUiEvent
 }

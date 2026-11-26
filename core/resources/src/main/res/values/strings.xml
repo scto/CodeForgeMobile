@@ -2791,4 +2791,27 @@
     <string name="plugins_api1_unsupported">Uses plugin API 1, which is no longer supported since CodeForge %1$s – not loaded. Please ask the author for an update to API 4 or remove it.</string>
     <string name="plugins_api1_rejected">%1$s uses plugin API 1, which is no longer supported since CodeForge %2$s. Please install a current version (API 2–4).</string>
     <string name="settings_pin_line_numbers_wrap_hint">Only works without word wrap: line numbers stay put while scrolling sideways. Word wrap is currently on.</string>
+    <string name="aiset_openrouter_sign_in">Sign in with OpenRouter</string>
+    <string name="aiset_openrouter_usage_refresh">Check usage</string>
+    <string name="aiset_openrouter_free">Free requests today: %1$d of %2$d</string>
+    <string name="aiset_openrouter_budget">Budget: %1$s of %2$s USD</string>
+    <string name="aiset_openrouter_today">Spent today: %1$s USD</string>
+    <string name="aiset_openrouter_free_tier">Free account: only “:free” models</string>
+    <string name="aiset_section_agent_limits">Agent: backup keys and limit (%1$s)</string>
+    <string name="aiset_backup_keys">Backup keys (one per line)</string>
+    <string name="aiset_backup_keys_desc">%1$d entered. Used when the main key hits a limit or is rejected.</string>
+    <string name="aiset_rpm">Requests per minute</string>
+    <string name="aiset_rpm_desc">The agent waits before a request instead of hitting the per-minute limit. Empty = no limit (learned from errors).</string>
+    <string name="agent_pacing">Waiting %1$d s – provider rate limit</string>
+    <string name="agent_question_own">Your own answer</string>
+    <string name="agent_question_skip">Skip</string>
+    <string name="agent_mcp_needs_auth">Sign-in required</string>
+    <string name="agent_mcp_sign_in">Sign in</string>
+    <string name="agent_mcp_sign_out">Sign out</string>
+    <string name="agent_mcp_sign_in_failed">Sign-in to %1$s failed: %2$s</string>
+    <string name="agent_host_title">CodeForge as MCP server</string>
+    <string name="agent_host_desc">External agents (e.g. in Termux) use the agent\'s tools: files, language server, Gradle.</string>
+    <string name="agent_host_error">Server could not start: %1$s</string>
+    <string name="agent_host_approval_hint">Reachable on this device only, with a token. You approve changes here in the agent panel.</string>
+    <string name="agent_host_copy_config">Copy configuration</string>
 </resources>

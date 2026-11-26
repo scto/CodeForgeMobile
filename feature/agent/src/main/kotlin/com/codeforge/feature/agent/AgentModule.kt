@@ -60,6 +60,9 @@ object AgentModule {
     /** Ein Manager für die ganze App; stdio-Server laufen in der Termux-Umgebung. */
     @Provides
     @Singleton
-    fun provideMcpManager(): McpManager =
-        McpManager(CoroutineScope(SupervisorJob() + Dispatchers.Default), DefaultMcpTransportFactory(TermuxMcpLauncher))
+    fun provideMcpManager(@ApplicationContext context: Context): McpManager = McpManager(
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        tokens = FileMcpTokenStore(File(File(context.filesDir, "agent"), "mcp-tokens.json")),
+        factory = DefaultMcpTransportFactory(TermuxMcpLauncher),
+    )
 }

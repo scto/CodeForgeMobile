@@ -73,6 +73,27 @@ internal object OpenAiAgentWire {
                             put("content", if (r.isError) "Error: ${r.content}" else r.content)
                         }
                     }
+                    // Chat Completions erlaubt keine Bilder in role=tool: als eigene Nutzer-Nachricht nachreichen.
+                    val images = m.parts.filterIsInstance<ContentPart.ToolResultPart>().flatMap { it.images }
+                    if (images.isNotEmpty()) {
+                        out += buildJsonObject {
+                            put("role", "user")
+                            put(
+                                "content",
+                                buildJsonArray {
+                                    add(buildJsonObject { put("type", "text"); put("text", "Bild(er) aus dem letzten Werkzeugergebnis:") })
+                                    images.forEach { img ->
+                                        add(
+                                            buildJsonObject {
+                                                put("type", "image_url")
+                                                put("image_url", buildJsonObject { put("url", "data:${img.mediaType};base64,${img.base64}") })
+                                            },
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
                     if (text.isNotBlank()) out += buildJsonObject { put("role", "user"); put("content", text) }
                 }
                 AgentRole.ASSISTANT -> {

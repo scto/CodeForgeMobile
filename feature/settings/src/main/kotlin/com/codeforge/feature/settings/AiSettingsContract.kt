@@ -32,8 +32,21 @@ data class AiProviderState(
     val test: AiCheckState = AiCheckState.Idle,
     val modelsFetch: AiCheckState = AiCheckState.Idle,
     /** Vorschläge (statische Liste, nach Abruf ergänzt um die Live-Liste des Anbieters). */
-    val models: List<String> = provider.suggestedModels
+    val models: List<String> = provider.suggestedModels,
+    /** Ersatzschlüssel, einer pro Zeile. */
+    val backupKeys: String = "",
+    /** Anfragen pro Minute für den Agenten (leer = ohne Limit). */
+    val requestsPerMinute: String = "",
+    /** Nur OpenRouter: Anmeldung läuft. */
+    val signingIn: Boolean = false,
+    /** Nur OpenRouter: Verbrauch des Schlüssels. */
+    val usage: com.codeforge.libs.ai_client.OpenRouterUsage? = null,
+    /** Nur OpenRouter: Stand der Verbrauchsabfrage bzw. Anmeldung. */
+    val usageState: AiCheckState = AiCheckState.Idle
 ) {
+    /** Anzahl der eingetragenen Ersatzschlüssel. */
+    val backupKeyCount: Int get() = backupKeys.lines().count { it.isNotBlank() }
+
     /** Ob ein API-Schlüssel eingetragen ist. */
     val hasKey: Boolean get() = apiKey.isNotBlank()
     /** Ob die Basis-URL vom Standard des Anbieters abweicht. */
@@ -86,6 +99,14 @@ sealed interface AiSettingsUiEvent {
     data class PolicyChanged(val policy: AiPrivacyPolicy) : AiSettingsUiEvent
     /** Das Tageslimit wurde geändert. */
     data class DailyLimitChanged(val limit: Int) : AiSettingsUiEvent
+    /** Die Ersatzschlüssel wurden geändert (einer pro Zeile). */
+    data class BackupKeysChanged(val provider: AiProviderType, val value: String) : AiSettingsUiEvent
+    /** Das Anfragelimit pro Minute wurde geändert. */
+    data class RequestsPerMinuteChanged(val provider: AiProviderType, val value: String) : AiSettingsUiEvent
+    /** „Mit OpenRouter anmelden“. */
+    data object SignInOpenRouter : AiSettingsUiEvent
+    /** OpenRouter-Verbrauch neu abfragen. */
+    data object RefreshOpenRouterUsage : AiSettingsUiEvent
     /** Der Hinweis wurde angezeigt. */
     data object MessageShown : AiSettingsUiEvent
 }

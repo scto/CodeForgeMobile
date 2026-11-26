@@ -27,6 +27,18 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   kein seitliches Scrollen). / Pin line numbers explains that it needs word wrap off.
 
 ### Hinzugefügt / Added
+- **KI-Agent: IDE-Werkzeuge** (nach dem Vorbild von CodeAssist): Sprachserver (`find_symbol`, `go_to_definition`,
+  `find_references`, `rename_symbol`, `list_quick_fixes`/`apply_quick_fix`, `organize_imports`, `format_file`), Projekt
+  (`project_overview`, `project_diagnostics`, `list_tasks`, `move_path`, `rename_path`), Abhängigkeiten
+  (`search_dependency`, `add_dependency` mit Version Catalog), `web_fetch`/`http_request`, `ask_user` mit Antwortknöpfen,
+  Projektgedächtnis (`read_memory`/`write_memory`), Bilder (`view_image`, `screenshot_preview` rendert eine Compose-Vorschau).
+  / Agent IDE tools.
+- **KI-Agent: Ersatzschlüssel und Anfragelimit** je Anbieter (Einstellungen → KI): Schlüsselwechsel bei 429,
+  erschöpftem Kontingent oder abgelehntem Schlüssel; Takten der Anfragen pro Minute (konfiguriert oder aus 429
+  gelernt). „Mit OpenRouter anmelden“ (OAuth PKCE) und Verbrauchsanzeige. / Backup keys, pacing, OpenRouter sign-in.
+- **MCP:** Anmeldung bei MCP-Servern über den Browser (OAuth 2.1 nach MCP-Spezifikation, Tokens werden erneuert);
+  CodeForge selbst als MCP-Server auf `127.0.0.1:8765` mit Token, gleiche Freigaben wie im Agenten.
+  / MCP OAuth sign-in and CodeForge as MCP server.
 - **PT-Werkzeug „AGP-9-Migration“** (`com.codeforge.plugin.agp9-migrate.tool`): stellt Projekte auf Android Gradle
   Plugin 9.0 um – AGP/Gradle 9.1/Kotlin 2.2.10, eingebautes Kotlin (kotlin-android entfernen, `kotlinOptions` →
   `kotlin.compilerOptions`), kapt → `com.android.legacy-kapt`, entfernte `gradle.properties`-Schalter, `dexOptions`,

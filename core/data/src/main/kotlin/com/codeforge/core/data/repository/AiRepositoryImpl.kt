@@ -79,10 +79,11 @@ class AiRepositoryImpl internal constructor(
             null
         }
         if (key.isNullOrBlank()) return
+        val backups = readBackupKeys(provider)
         lock.withLock {
             // Nur ergänzen, wenn der Benutzer inzwischen nichts anderes gespeichert hat.
             _optionsFlow.update { current ->
-                if (current.provider == provider && current.apiKey.isBlank()) current.copy(apiKey = key) else current
+                if (current.provider == provider && current.apiKey.isBlank()) current.copy(apiKey = key, backupKeys = backups) else current
             }
         }
     }
@@ -98,9 +99,28 @@ class AiRepositoryImpl internal constructor(
         lock.withLock {
             store.put(KEY_PROVIDER, options.provider.id)
             persistProvider(options)
-            _optionsFlow.value = options
+            _optionsFlow.value = withAgentLimits(options)
         }
     }
+
+    override suspend fun saveAgentLimits(provider: AiProviderType, backupKeys: List<String>, requestsPerMinute: Int) {
+        lock.withLock {
+            val backups = backupKeys.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+            if (backups.isNotEmpty()) {
+                secretStorage.storeSecret(SECRET_KEY_PREFIX + provider.id + BACKUP_SUFFIX, backups.joinToString("\n"))
+            } else {
+                secretStorage.removeSecret(SECRET_KEY_PREFIX + provider.id + BACKUP_SUFFIX)
+            }
+            store.put(KEY_RPM_PREFIX + provider.id, requestsPerMinute.coerceAtLeast(0).toString())
+            if (_optionsFlow.value.provider == provider) _optionsFlow.value = withAgentLimits(_optionsFlow.value)
+        }
+    }
+
+    /** Ergänzt Ersatzschlüssel und Anfragelimit aus dem Speicher (sie werden nur über [saveAgentLimits] geändert). */
+    private suspend fun withAgentLimits(options: AiChatOptions): AiChatOptions = options.copy(
+        backupKeys = readBackupKeys(options.provider),
+        requestsPerMinute = store.get(KEY_RPM_PREFIX + options.provider.id)?.toIntOrNull() ?: 0
+    )
 
     override suspend fun getProviderOptions(provider: AiProviderType): AiChatOptions = lock.withLock {
         AiChatOptions(
@@ -111,14 +131,23 @@ class AiRepositoryImpl internal constructor(
                 secretStorage.getSecret(SECRET_KEY_PREFIX + provider.id).orEmpty()
             } catch (_: Exception) {
                 ""
-            }
+            },
+            backupKeys = readBackupKeys(provider),
+            requestsPerMinute = store.get(KEY_RPM_PREFIX + provider.id)?.toIntOrNull() ?: 0
         )
+    }
+
+    private suspend fun readBackupKeys(provider: AiProviderType): List<String> = try {
+        secretStorage.getSecret(SECRET_KEY_PREFIX + provider.id + BACKUP_SUFFIX).orEmpty()
+            .lines().map { it.trim() }.filter { it.isNotEmpty() }
+    } catch (_: Exception) {
+        emptyList()
     }
 
     override suspend fun saveProviderOptions(options: AiChatOptions) {
         lock.withLock {
             persistProvider(options)
-            if (_optionsFlow.value.provider == options.provider) _optionsFlow.value = options
+            if (_optionsFlow.value.provider == options.provider) _optionsFlow.value = withAgentLimits(options)
         }
     }
 
@@ -130,6 +159,7 @@ class AiRepositoryImpl internal constructor(
         } else {
             secretStorage.removeSecret(SECRET_KEY_PREFIX + options.provider.id)
         }
+
     }
 
     override fun getPrivacyPolicy(): Flow<AiPrivacyPolicy> = _privacyFlow.asStateFlow()
@@ -283,7 +313,8 @@ class AiRepositoryImpl internal constructor(
             provider = provider,
             model = model,
             baseUrl = baseUrl,
-            apiKey = ""
+            apiKey = "",
+            requestsPerMinute = store.get(KEY_RPM_PREFIX + provider.id)?.toIntOrNull() ?: 0
         )
     }
 
@@ -300,5 +331,7 @@ class AiRepositoryImpl internal constructor(
         private const val KEY_REQUEST_DATE = "ai_request_date"
         private const val KEY_REQUEST_COUNT = "ai_request_count"
         private const val SECRET_KEY_PREFIX = "ai_key_"
+        private const val BACKUP_SUFFIX = "_backup"
+        private const val KEY_RPM_PREFIX = "ai_rpm_"
     }
 }

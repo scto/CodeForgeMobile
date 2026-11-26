@@ -27,8 +27,11 @@ enum class ToolKind {
     EXECUTE,
 }
 
-/** Ergebnis eines Werkzeugaufrufs. [isError] wird dem Modell als Fehler gemeldet, damit es reagieren kann. */
-data class ToolResult(val content: String, val isError: Boolean = false) {
+/**
+ * Ergebnis eines Werkzeugaufrufs. [isError] wird dem Modell als Fehler gemeldet, damit es reagieren kann;
+ * [images] gehen als Bild an Modelle, die Bilder verstehen.
+ */
+data class ToolResult(val content: String, val isError: Boolean = false, val images: List<ImageData> = emptyList()) {
     companion object {
         /** Fehlerergebnis mit [message]. */
         fun error(message: String) = ToolResult(message, isError = true)

@@ -19,6 +19,7 @@
     <ID>CognitiveComplexMethod:StdioTransport.kt:StdioTransport$override suspend fun start</ID>
     <ID>CyclomaticComplexMethod:McpSchemas.kt:McpSchemas$private fun node: JsonElement</ID>
     <ID>DocumentationOverPrivateFunction:HttpTransports.kt:private fun readSse</ID>
+    <ID>DocumentationOverPrivateFunction:McpToolServer.kt:LoopbackMcpHttpServer$private fun rejection: Response?</ID>
     <ID>EmptyCatchBlock:McpTransportsTest.kt:McpTransportsTest${ }</ID>
     <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `Aufruf flacht Text, Ressourcen und Fehlerkennzeichen ab`</ID>
     <ID>FunctionNameMaxLength:McpClientTest.kt:McpClientTest$@Test fun `Handshake liefert Serverdaten, initialized wird gesendet`</ID>
@@ -49,13 +50,23 @@
     <ID>ReturnCount:FakeMcpServer.kt:FakeMcpServer$fun reply: List&lt;JsonObject></ID>
     <ID>ReturnCount:McpSchemas.kt:McpSchemas$private fun node: JsonElement</ID>
     <ID>ReturnCount:McpServerConfig.kt:McpServerConfig.Companion$fun parseEntry: McpServerConfig?</ID>
+    <ID>ReturnCount:McpToolServer.kt:LoopbackMcpHttpServer$private suspend fun dispatch: Response</ID>
+    <ID>ReturnCount:McpToolServer.kt:McpToolHandler$@Suppress("TooGenericExceptionCaught") // Jeder Fehler wird als JSON-RPC-Fehler an den Client gemeldet. suspend fun handle: JsonObject?</ID>
     <ID>StringLiteralDuplication:HttpTransports.kt:StreamableHttpTransport$"Mcp-Session-Id"</ID>
     <ID>StringLiteralDuplication:HttpTransports.kt:StreamableHttpTransport$"WWW-Authenticate"</ID>
     <ID>StringLiteralDuplication:McpClient.kt:McpClient$"jsonrpc"</ID>
     <ID>StringLiteralDuplication:McpClient.kt:McpClient$"method"</ID>
+    <ID>StringLiteralDuplication:McpOAuth.kt:McpOAuth$"client_id"</ID>
+    <ID>StringLiteralDuplication:McpOAuth.kt:McpOAuth$"client_secret"</ID>
+    <ID>StringLiteralDuplication:McpOAuth.kt:McpOAuth$"refresh_token"</ID>
+    <ID>StringLiteralDuplication:McpOAuth.kt:McpTokens$"resource"</ID>
     <ID>StringLiteralDuplication:McpSchemas.kt:McpSchemas$"items"</ID>
     <ID>StringLiteralDuplication:McpSchemas.kt:McpSchemas$"properties"</ID>
     <ID>StringLiteralDuplication:McpSchemas.kt:McpSchemas$"string"</ID>
+    <ID>StringLiteralDuplication:McpToolServer.kt:LoopbackMcpHttpServer$"200 OK"</ID>
+    <ID>StringLiteralDuplication:McpToolServer.kt:McpToolHandler$"mimeType"</ID>
+    <ID>StringShouldBeRawString:McpHostTest.kt:McpHostTest$"Bearer realm=\"mcp\", resource_metadata=\"https://x.dev/.well-known/oauth-protected-resource\", scope=\"a b\""</ID>
+    <ID>StringShouldBeRawString:McpToolServer.kt:LoopbackMcpHttpServer$"HTTP/1.1 ${r.status}\r\nContent-Type: application/json\r\nContent-Length: ${bytes.size}\r\nConnection: close\r\n"</ID>
     <ID>StringShouldBeRawString:McpTransportsTest.kt:McpTransportsTest$": ping\n\nevent: message\ndata: ${replies[0]}\n\n"</ID>
     <ID>StringShouldBeRawString:McpTransportsTest.kt:McpTransportsTest$"event: endpoint\ndata: /messages?s=1\n\n"</ID>
     <ID>StringShouldBeRawString:McpTransportsTest.kt:McpTransportsTest$"event: message\ndata: $m\n\n"</ID>
@@ -71,6 +82,7 @@
     <ID>UnderscoresInNumericLiterals:FakeMcpServer.kt:FakeMcpServer$32601</ID>
     <ID>UnderscoresInNumericLiterals:McpClient.kt:McpClient.Companion$32601</ID>
     <ID>UnderscoresInNumericLiterals:McpClientTest.kt:McpClientTest$32601</ID>
+    <ID>UnderscoresInNumericLiterals:McpHostTest.kt:McpHostTest$32601</ID>
     <ID>UnnecessaryParentheses:McpSchemas.kt:McpSchemas$((pick as? JsonObject).orEmpty())</ID>
     <ID>UnnecessaryParentheses:McpSchemas.kt:McpSchemas$((schema["\$defs"] ?: schema["definitions"]) as? JsonObject)</ID>
     <ID>UseIfInsteadOfWhen:McpSchemas.kt:McpSchemas$when (v) { is JsonArray -> v.firstOrNull { it is JsonPrimitive &amp;&amp; it.contentOrNull != "null" } ?: JsonPrimitive("string") else -> v }</ID>

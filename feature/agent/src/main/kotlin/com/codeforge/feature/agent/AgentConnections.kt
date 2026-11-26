@@ -82,4 +82,40 @@ class AgentConnections(private val dir: File) {
         dir.mkdirs()
         contextTrustFile.writeText(JsonArray((trustedContexts() + contextKey(root, fingerprint)).sorted().map { JsonPrimitive(it) }).toString())
     }
+
+    /** Datei des Agenten-Gedächtnisses für das Projekt [root] (im privaten App-Speicher, nicht im Projekt). */
+    fun memoryFile(root: File): File {
+        val id = runCatching { root.canonicalPath }.getOrDefault(root.path)
+        val hash = java.security.MessageDigest.getInstance("SHA-256").digest(id.toByteArray()).take(12).joinToString("") { "%02x".format(it) }
+        return File(File(dir, "memory"), "$hash.md")
+    }
+
+    private val hostFile get() = File(dir, "mcp-host.json")
+
+    /** Einstellungen des eigenen MCP-Servers: (aktiv, Token). Legt beim ersten Aufruf einen Token an. */
+    fun hostSettings(): Pair<Boolean, String> {
+        val obj = hostFile.takeIf { it.isFile }?.let { runCatching { Json.parseToJsonElement(it.readText()) as? kotlinx.serialization.json.JsonObject }.getOrNull() }
+        val token = (obj?.get("token") as? JsonPrimitive)?.contentOrNull?.takeIf { it.length >= MIN_TOKEN }
+            ?: com.codeforge.libs.agent.LoopbackRedirect.randomToken(TOKEN_BYTES)
+        val enabled = (obj?.get("enabled") as? JsonPrimitive)?.contentOrNull == "true"
+        if (obj == null || (obj["token"] as? JsonPrimitive)?.contentOrNull != token) saveHost(enabled, token)
+        return enabled to token
+    }
+
+    /** Speichert die Einstellungen des eigenen MCP-Servers. */
+    fun saveHost(enabled: Boolean, token: String) {
+        dir.mkdirs()
+        hostFile.writeText(kotlinx.serialization.json.buildJsonObject {
+            put("enabled", JsonPrimitive(enabled.toString()))
+            put("token", JsonPrimitive(token))
+        }.toString())
+    }
+
+    /** Konstanten. */
+    companion object {
+        /** Fester Port des eigenen MCP-Servers (Rückfall: frei gewählt). */
+        const val HOST_PORT = 8765
+        private const val TOKEN_BYTES = 24
+        private const val MIN_TOKEN = 16
+    }
 }

@@ -2,15 +2,18 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>AlsoCouldBeApply:AgentViewModel.kt:AgentViewModel$also</ID>
     <ID>AlsoCouldBeApply:AgentViewModelTest.kt:AgentViewModelTest$also</ID>
     <ID>BracesOnIfStatements:AgentConnections.kt:AgentConnections$if</ID>
     <ID>BracesOnWhenStatements:AgentTranscript.kt:AgentTranscript$when</ID>
     <ID>BracesOnWhenStatements:AgentViewModel.kt:AgentViewModel$when</ID>
     <ID>BracesOnWhenStatements:GradleAgentBuildRunner.kt:GradleAgentBuildRunner$when</ID>
     <ID>CascadingCallWrapping:AgentConnections.kt:AgentConnections$toSet()</ID>
+    <ID>CascadingCallWrapping:AgentIdeAdapters.kt:LspAgentCodeIntel$orEmpty()</ID>
     <ID>CascadingCallWrapping:AgentTranscript.kt:AgentTranscript$let { items += AgentChatItem.User(id++, it) }</ID>
     <ID>ClassOrdering:AgentConnections.kt:AgentConnections$/** MCP-Server aus aktiven Plugins (`contributes.mcpServers`); wie Projekt-Server unvertraut, bis der Nutzer sie freigibt. */ @Volatile var pluginServers: List&lt;McpServerConfig> = emptyList()</ID>
     <ID>ClassOrdering:AgentConnections.kt:AgentConnections$private val contextTrustFile get() = File(dir, "context-trust.json")</ID>
+    <ID>ClassOrdering:AgentConnections.kt:AgentConnections$private val hostFile get() = File(dir, "mcp-host.json")</ID>
     <ID>CognitiveComplexMethod:AgentScreen.kt:@Composable private fun ChatItem</ID>
     <ID>CognitiveComplexMethod:AgentScreen.kt:@Composable private fun McpServerRow</ID>
     <ID>CognitiveComplexMethod:AgentTranscript.kt:AgentTranscript$fun toItems: List&lt;AgentChatItem></ID>
@@ -18,10 +21,13 @@
     <ID>CognitiveComplexMethod:GradleAgentBuildRunner.kt:GradleAgentBuildRunner$override suspend fun run: BuildOutcome</ID>
     <ID>ComplexCondition:AgentViewModel.kt:AgentViewModel$saved.isEmpty() || session !== current || _state.value.items.isNotEmpty() || _state.value.running</ID>
     <ID>CyclomaticComplexMethod:AgentViewModel.kt:AgentViewModel$private suspend fun runTurn</ID>
+    <ID>DocumentationOverPrivateFunction:AgentIdeAdapters.kt:LspAgentCodeIntel$private suspend fun &lt;T> withDocument: T</ID>
     <ID>DocumentationOverPrivateFunction:AgentScreen.kt:@Composable private fun DiffView</ID>
+    <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private fun llmFor: com.codeforge.libs.agent.LlmClient</ID>
     <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private fun pluginTools: List&lt;AgentTool></ID>
     <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private fun registryFor: AgentToolRegistry?</ID>
     <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private fun restoreHistory</ID>
+    <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private fun setHost</ID>
     <ID>DocumentationOverPrivateFunction:AgentViewModel.kt:AgentViewModel$private suspend fun loadContext: ProjectContext</ID>
     <ID>DocumentationOverPrivateFunction:AgentViewModelTest.kt:AgentViewModelTest$private fun AgentViewModel.await</ID>
     <ID>FunctionNameMaxLength:AgentAttachmentTest.kt:AgentAttachmentTest$@Test fun `Prompt enthaelt Auszug mit Pfad und Zeilen`</ID>
@@ -62,10 +68,14 @@
     <ID>NestedBlockDepth:AgentTranscript.kt:AgentTranscript$fun toItems: List&lt;AgentChatItem></ID>
     <ID>OutdatedDocumentation:AgentTranscript.kt:AgentTranscript$fun toItems: List&lt;AgentChatItem></ID>
     <ID>OutdatedDocumentation:GradleAgentBuildRunner.kt:GradleAgentBuildRunner : AgentBuildRunner</ID>
+    <ID>ReturnCount:AgentIdeAdapters.kt:LspAgentCodeIntel$override suspend fun format: String?</ID>
     <ID>ReturnCount:GradleAgentBuildRunner.kt:GradleAgentBuildRunner$override suspend fun run: BuildOutcome</ID>
+    <ID>StringLiteralDuplication:AgentConnections.kt:AgentConnections$"token"</ID>
     <ID>StringLiteralDuplication:PluginAgentTools.kt:PluginAgentTool$"input"</ID>
     <ID>StringShouldBeRawString:AgentAttachmentTest.kt:AgentAttachmentTest$"[Auszug: /p/Foo.kt, Zeile 3-4]\n```\na\nb\n```"</ID>
+    <ID>StringShouldBeRawString:AgentScreen.kt:McpHostConfig$"{\n \"mcpServers\": {\n \"codeforge\": {\n \"type\": \"http\",\n \"url\": \"$url\",\n" + " \"headers\": { \"Authorization\": \"Bearer $token\" }\n }\n }\n}"</ID>
     <ID>StringShouldBeRawString:AgentViewModel.kt:AgentViewModel$"\n\n&lt;mcp-server-notes>\n$notes\n&lt;/mcp-server-notes>"</ID>
+    <ID>StringShouldBeRawString:AgentViewModel.kt:AgentViewModel$"\n\n&lt;project-memory>\n$memoryNotes\n&lt;/project-memory>"</ID>
     <ID>SwallowedException:GradleAgentBuildRunner.kt:GradleAgentBuildRunner$e: TimeoutCancellationException</ID>
     <ID>TooGenericExceptionCaught:AgentViewModel.kt:AgentViewModel$e: Exception</ID>
     <ID>UseIfInsteadOfWhen:AgentViewModel.kt:AgentViewModel$when { // Lokale OpenAI-kompatible Server (eigene Basis-URL) laufen auch ohne Schlüssel. options.apiKey.isBlank() &amp;&amp; !(options.provider == AiProviderType.OPENAI &amp;&amp; !options.baseUrl.isNullOrBlank()) -> Res.string(R.string.agent_error_no_key) else -> dailyLimitProblem() }</ID>

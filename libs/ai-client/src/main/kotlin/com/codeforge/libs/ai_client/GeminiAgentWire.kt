@@ -69,6 +69,9 @@ internal object GeminiAgentWire {
     }
 
     private fun content(role: AgentRole, parts: List<ContentPart>, nameById: Map<String, String>): JsonObject? {
+        val images = parts.filterIsInstance<ContentPart.ToolResultPart>().flatMap { it.images }.map { img ->
+            buildJsonObject { put("inlineData", buildJsonObject { put("mimeType", img.mediaType); put("data", img.base64) }) }
+        }
         val out = parts.mapNotNull { p ->
             when (p) {
                 is ContentPart.Text -> if (p.text.isBlank()) null else buildJsonObject { put("text", p.text) }
@@ -90,7 +93,7 @@ internal object GeminiAgentWire {
         if (out.isEmpty()) return null
         return buildJsonObject {
             put("role", if (role == AgentRole.ASSISTANT) "model" else "user")
-            put("parts", JsonArray(out))
+            put("parts", JsonArray(out + images))
         }
     }
 

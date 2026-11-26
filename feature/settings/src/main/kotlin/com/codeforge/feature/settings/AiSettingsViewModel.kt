@@ -4,6 +4,8 @@
  */
 package com.codeforge.feature.settings
 
+import com.codeforge.libs.ai_client.OpenRouterAccount
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codeforge.core.domain.ai.AiChatOptions
@@ -35,6 +37,10 @@ class AiSettingsViewModel @Inject constructor(
     /** UI-Zustand. */
     val uiState: StateFlow<AiSettingsUiState> = _uiState.asStateFlow()
 
+    private val _openUrl = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 1)
+    /** URLs, die die Oberfläche im Browser öffnen soll (Anmeldung). */
+    val openUrl: kotlinx.coroutines.flow.SharedFlow<String> = _openUrl
+
     init {
         viewModelScope.launch {
             val providers = AiProviderType.entries.map { type ->
@@ -45,7 +51,9 @@ class AiSettingsViewModel @Inject constructor(
                     model = o.model,
                     baseUrl = o.baseUrl ?: type.defaultBaseUrl,
                     // Gespeichertes, nicht vorgeschlagenes Modell bleibt auswählbar.
-                    models = (listOf(o.model) + type.suggestedModels).distinct()
+                    models = (listOf(o.model) + type.suggestedModels).distinct(),
+                    backupKeys = o.backupKeys.joinToString("\n"),
+                    requestsPerMinute = o.requestsPerMinute.takeIf { it > 0 }?.toString().orEmpty()
                 )
             }
             _uiState.update {
@@ -94,7 +102,45 @@ class AiSettingsViewModel @Inject constructor(
                 repository.saveDailyLimit(limit)
                 _uiState.update { it.copy(dailyLimit = limit) }
             }
+            is AiSettingsUiEvent.BackupKeysChanged -> edit(event.provider) { it.copy(backupKeys = event.value) }
+            is AiSettingsUiEvent.RequestsPerMinuteChanged -> edit(event.provider) {
+                it.copy(requestsPerMinute = event.value.filter(Char::isDigit).take(4))
+            }
+            AiSettingsUiEvent.SignInOpenRouter -> signInOpenRouter()
+            AiSettingsUiEvent.RefreshOpenRouterUsage -> refreshOpenRouterUsage()
             AiSettingsUiEvent.MessageShown -> _uiState.update { it.copy(message = null) }
+        }
+    }
+
+    private fun signInOpenRouter() {
+        val provider = AiProviderType.OPENROUTER
+        if (current(provider).signingIn) return
+        update(provider) { it.copy(signingIn = true, usageState = AiCheckState.Running) }
+        viewModelScope.launch {
+            val result = runCatching { OpenRouterAccount.signIn { url -> _openUrl.tryEmit(url) } }
+            result.onSuccess { key ->
+                update(provider) { it.copy(apiKey = key, signingIn = false, usageState = AiCheckState.Idle, dirty = true) }
+                save(provider, silent = false)
+                refreshOpenRouterUsage()
+            }.onFailure { e ->
+                update(provider) { it.copy(signingIn = false, usageState = AiCheckState.Failure(e.message ?: e.javaClass.simpleName)) }
+            }
+        }
+    }
+
+    private fun refreshOpenRouterUsage() {
+        val provider = AiProviderType.OPENROUTER
+        val key = current(provider).apiKey.trim()
+        if (key.isEmpty()) return
+        update(provider) { it.copy(usageState = AiCheckState.Running) }
+        viewModelScope.launch {
+            val result = runCatching { OpenRouterAccount.usage(key) }
+            update(provider) { st ->
+                result.fold(
+                    onSuccess = { u -> st.copy(usage = u, usageState = AiCheckState.Idle) },
+                    onFailure = { e -> st.copy(usageState = AiCheckState.Failure(e.message ?: e.javaClass.simpleName)) }
+                )
+            }
         }
     }
 
@@ -129,6 +175,9 @@ class AiSettingsViewModel @Inject constructor(
     private suspend fun save(provider: AiProviderType, silent: Boolean) {
         autosaveJobs.remove(provider)?.takeIf { it != kotlinx.coroutines.currentCoroutineContext()[Job] }?.cancel()
         repository.saveProviderOptions(options(provider))
+        current(provider).let { st ->
+            repository.saveAgentLimits(provider, st.backupKeys.lines(), st.requestsPerMinute.toIntOrNull() ?: 0)
+        }
         update(provider) { it.copy(dirty = false) }
         if (!silent) _uiState.update { it.copy(message = AiSettingsMessage.Saved(provider)) }
     }

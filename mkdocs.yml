@@ -53,6 +53,7 @@ nav:
   - Dokumentation:
       - Anwenderhandbuch: user/Anwenderhandbuch.md
       - User Guide: user/UserGuide.md
+      - KI-Agent: user/Agent.md
       - Entwicklerhandbuch: dev/DeveloperGuide.md
       - Plugins entwickeln: dev/PluginDevelopment.md
       - Plugin-Liste: dev/PluginCatalog.md

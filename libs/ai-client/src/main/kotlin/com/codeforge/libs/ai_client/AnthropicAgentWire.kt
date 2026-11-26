@@ -61,7 +61,24 @@ internal object AnthropicAgentWire {
                 is ContentPart.ToolResultPart -> buildJsonObject {
                     put("type", "tool_result")
                     put("tool_use_id", part.toolUseId)
-                    put("content", part.content)
+                    if (part.images.isEmpty()) {
+                        put("content", part.content)
+                    } else {
+                        put(
+                            "content",
+                            buildJsonArray {
+                                add(buildJsonObject { put("type", "text"); put("text", part.content) })
+                                part.images.forEach { img ->
+                                    add(
+                                        buildJsonObject {
+                                            put("type", "image")
+                                            put("source", buildJsonObject { put("type", "base64"); put("media_type", img.mediaType); put("data", img.base64) })
+                                        },
+                                    )
+                                }
+                            },
+                        )
+                    }
                     if (part.isError) put("is_error", true)
                 }
             }

@@ -209,6 +209,8 @@ class LspClientRepositoryImpl(
         stopAll()
     }
 
+    override fun isDocumentOpen(path: String): Boolean = documentToSession.containsKey(path)
+
     override suspend fun didOpen(path: String, languageId: String, content: String) {
         val targets = sessionsForOpen(path, languageId)
         if (targets.isEmpty()) return

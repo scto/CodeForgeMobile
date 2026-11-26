@@ -25,7 +25,7 @@ enum class McpSource { APP, PROJECT }
 data class McpServerEntry(val config: McpServerConfig, val source: McpSource, val trusted: Boolean)
 
 /** Verbindungszustand eines Servers. */
-enum class McpStatus { DISABLED, NEEDS_TRUST, CONNECTING, READY, FAILED }
+enum class McpStatus { DISABLED, NEEDS_TRUST, NEEDS_AUTH, CONNECTING, READY, FAILED }
 
 /** Zustand eines Servers für die Oberfläche. */
 data class McpServerState(
@@ -34,6 +34,10 @@ data class McpServerState(
     val toolCount: Int = 0,
     val message: String? = null,
     val instructions: String? = null,
+    /** Herausforderung des Servers bei [McpStatus.NEEDS_AUTH] (für die Anmeldung). */
+    val wwwAuthenticate: String? = null,
+    /** `true`, wenn für den Server eine Anmeldung gespeichert ist. */
+    val signedIn: Boolean = false,
 )
 
 /** Baut den Transport eines Servers. */
@@ -65,6 +69,8 @@ class DefaultMcpTransportFactory(private val launcher: McpProcessLauncher?) : Mc
  */
 class McpManager(
     private val scope: CoroutineScope,
+    /** Gespeicherte OAuth-Anmeldungen; `null` = keine Anmeldung über den Browser. */
+    private val tokens: McpTokenStore? = null,
     private val factory: McpTransportFactory,
 ) {
     private class Live(val entry: McpServerEntry, val job: Job) {
@@ -146,21 +152,70 @@ class McpManager(
 
     private fun startConnection(entry: McpServerEntry) {
         val name = entry.config.name
-        val job = scope.launch {
+        // Erst eintragen, dann starten: connect() setzt live[name].client und darf den Eintrag nie verpassen.
+        val job = scope.launch(start = kotlinx.coroutines.CoroutineStart.LAZY) {
             try {
                 connect(entry)
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: McpAuthRequiredException) {
+                update(name) { authState(entry, e) }
             } catch (e: Throwable) {
                 update(name) { McpServerState(entry, McpStatus.FAILED, message = describe(e)) }
             }
         }
         live[name] = Live(entry, job)
+        job.start()
+    }
+
+    private fun authState(entry: McpServerEntry, e: McpAuthRequiredException): McpServerState {
+        val oauth = tokens != null && entry.config.url != null
+        return McpServerState(
+            entry,
+            if (oauth) McpStatus.NEEDS_AUTH else McpStatus.FAILED,
+            message = if (oauth) "Anmeldung nötig" else describe(e),
+            wwwAuthenticate = e.wwwAuthenticate,
+        )
+    }
+
+    // Schlüssel der Anmeldung eines Servers: Name und URL.
+    private fun tokenKey(config: McpServerConfig) = config.name + "|" + config.url.orEmpty()
+
+    // Ergänzt den Authorization-Header aus der gespeicherten Anmeldung (erneuert sie, wenn abgelaufen).
+    private suspend fun withAuth(config: McpServerConfig): McpServerConfig {
+        val store = tokens ?: return config
+        if (config.url == null || config.headers.keys.any { it.equals("Authorization", ignoreCase = true) }) return config
+        var t = store.get(tokenKey(config)) ?: return config
+        if (t.expired()) {
+            t = runCatching { McpOAuth.refresh(t) }.getOrElse { store.put(tokenKey(config), null); return config }
+            store.put(tokenKey(config), t)
+        }
+        return config.copy(headers = config.headers + ("Authorization" to "Bearer ${t.accessToken}"))
+    }
+
+    /**
+     * Meldet beim Server [name] über den Browser an ([openBrowser] öffnet die URL) und verbindet danach neu.
+     * Wirft bei Fehlern [McpOAuth.OAuthException] bzw. eine `IOException`.
+     */
+    suspend fun signIn(name: String, openBrowser: (String) -> Unit) {
+        val store = tokens ?: throw IOException("Anmeldung nicht verfügbar")
+        val state = _servers.value.firstOrNull { it.entry.config.name == name } ?: throw IOException("Unbekannter Server: $name")
+        val url = state.entry.config.url ?: throw IOException("Nur HTTP-Server unterstützen eine Anmeldung")
+        val t = McpOAuth.signIn(url, state.wwwAuthenticate, openBrowser)
+        store.put(tokenKey(state.entry.config), t)
+        reconnect(name)
+    }
+
+    /** Entfernt die gespeicherte Anmeldung von [name] und verbindet neu. */
+    suspend fun signOut(name: String) {
+        val state = _servers.value.firstOrNull { it.entry.config.name == name } ?: return
+        tokens?.put(tokenKey(state.entry.config), null)
+        reconnect(name)
     }
 
     private suspend fun connect(entry: McpServerEntry) {
         val name = entry.config.name
-        val transport = factory.create(entry.config)
+        val transport = factory.create(withAuth(entry.config))
         val client = McpClient(transport)
         try {
             client.connect()
@@ -172,7 +227,8 @@ class McpManager(
                 rebuildTools()
             }
             toolCache[name] = buildTools(entry.config, infos)
-            update(name) { McpServerState(entry, McpStatus.READY, infos.size, instructions = client.instructions) }
+            val signedIn = tokens?.get(tokenKey(entry.config)) != null
+            update(name) { McpServerState(entry, McpStatus.READY, infos.size, instructions = client.instructions, signedIn = signedIn) }
             rebuildTools()
         } catch (e: Throwable) {
             client.close()
@@ -208,7 +264,7 @@ class McpManager(
         } catch (e: McpSessionExpiredException) {
             // Der Server hat die Anfrage vor der Ausführung abgewiesen: neu verbinden und genau einmal wiederholen.
             val entry = live[server]?.entry ?: throw e
-            val fresh = McpClient(factory.create(entry.config))
+            val fresh = McpClient(factory.create(withAuth(entry.config)))
             fresh.connect()
             live[server]?.client?.close()
             live[server]?.client = fresh
@@ -226,7 +282,7 @@ class McpManager(
     }
 
     private fun describe(e: Throwable): String = when (e) {
-        is McpAuthRequiredException -> "Anmeldung nötig (401). Token unter „Header“ eintragen."
+        is McpAuthRequiredException -> "Anmeldung nötig (401). Anmelden oder Token unter „Header“ eintragen."
         is McpTimeoutException -> e.message.orEmpty()
         else -> e.message ?: e.toString()
     }

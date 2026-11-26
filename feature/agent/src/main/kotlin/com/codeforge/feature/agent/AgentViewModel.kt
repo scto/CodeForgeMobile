@@ -58,7 +58,7 @@ import kotlinx.coroutines.withContext
 @HiltViewModel
 class AgentViewModel @Inject constructor(
     private val aiRepository: AiRepository,
-    lspClient: LspClientRepository,
+    private val lspClient: LspClientRepository,
     private val fileSync: FileSyncBridge,
     private val gradle: GradleBuildRepository,
     private val historyStore: AgentHistoryStore,
@@ -66,6 +66,8 @@ class AgentViewModel @Inject constructor(
     private val connections: AgentConnections,
     private val contributionRepository: ContributionRepository? = null,
     private val pluginToolRunner: PluginToolRunner? = null,
+    private val previewRenderer: com.codeforge.core.domain.repository.ComposePreviewRenderer? = null,
+    private val codeFormatter: com.codeforge.core.domain.repository.CodeFormatterRepository? = null,
     private val llmFactory: AgentLlmFactory,
 ) : ViewModel() {
 
@@ -91,13 +93,42 @@ class AgentViewModel @Inject constructor(
         },
     )
 
+    private var question: CompletableDeferred<String?>? = null
+    private val questioner = com.codeforge.libs.agent.AgentQuestioner { q ->
+        val answer = CompletableDeferred<String?>()
+        question = answer
+        _state.update { it.copy(pendingQuestion = PendingQuestion(q.question, q.options)) }
+        try {
+            answer.await()
+        } finally {
+            question = null
+            _state.update { it.copy(pendingQuestion = null) }
+        }
+    }
+
+    private val _openUrl = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 1)
+
+    /** URLs, die die Oberfläche im Browser öffnen soll (Anmeldung bei MCP-Servern). */
+    val openUrl: kotlinx.coroutines.flow.SharedFlow<String> = _openUrl
+
+    // Schlüssel-Pools und Takter bleiben über Züge hinweg erhalten (gesperrte Schlüssel, gelernte Limits).
+    private val keyPools = HashMap<String, com.codeforge.libs.agent.ApiKeyPool>()
+    private val pacers = HashMap<String, com.codeforge.libs.agent.RequestPacer>()
+    private var host: com.codeforge.libs.mcp.LoopbackMcpHttpServer? = null
+
     private var session: Session? = null
     private var history: List<AgentMessage> = emptyList()
     private var job: Job? = null
     private var nextId = 1L
 
     /** Alles, was an einem Chat hängt: Checkpoints, Werkzeuge, Aufgabenliste. */
-    private class Session(val root: File, val checkpoint: CheckpointWorkspace, val builtins: List<AgentTool>, val todos: TodoStore)
+    private class Session(
+        val root: File,
+        val checkpoint: CheckpointWorkspace,
+        val builtins: List<AgentTool>,
+        val todos: TodoStore,
+        val memory: com.codeforge.libs.agent.AgentMemory,
+    )
 
     init {
         contributionRepository?.let { repo ->
@@ -109,6 +140,10 @@ class AgentViewModel @Inject constructor(
             }
         }
         viewModelScope.launch { lspClient.diagnostics.collect { (path, list) -> diagnostics.update(path, list) } }
+        viewModelScope.launch(Dispatchers.IO) {
+            val (enabled, _) = connections.hostSettings()
+            if (enabled) setHost(true)
+        }
         viewModelScope.launch {
             mcp.servers.collect { list ->
                 _state.update { st ->
@@ -121,6 +156,8 @@ class AgentViewModel @Inject constructor(
                                 toolCount = it.toolCount,
                                 message = it.message,
                                 fromProject = it.entry.source == McpSource.PROJECT,
+                                needsAuth = it.status == com.codeforge.libs.mcp.McpStatus.NEEDS_AUTH,
+                                signedIn = it.signedIn,
                             )
                         },
                     )
@@ -141,6 +178,10 @@ class AgentViewModel @Inject constructor(
                 st.copy(attachments = st.attachments.filterIndexed { i, _ -> i != event.index })
             }
             AgentUiEvent.TrustContext -> trustContext()
+            is AgentUiEvent.AnswerQuestion -> question?.complete(event.answer?.trim()?.ifEmpty { null })
+            is AgentUiEvent.ToggleMcpHost -> viewModelScope.launch(Dispatchers.IO) { setHost(event.enabled) }
+            is AgentUiEvent.SignInMcpServer -> signInMcp(event.name)
+            is AgentUiEvent.SignOutMcpServer -> viewModelScope.launch(Dispatchers.IO) { mcp.signOut(event.name) }
             AgentUiEvent.Send -> send()
             AgentUiEvent.Stop -> job?.cancel()
             is AgentUiEvent.ModeChanged -> {
@@ -226,10 +267,14 @@ class AgentViewModel @Inject constructor(
     private fun startChat(rootPath: String, restore: Boolean) {
         job?.cancel()
         approval?.complete(false)
+        question?.complete(null)
         history = emptyList()
         nextId = 1L
         session = if (rootPath.isEmpty()) null else newSession(File(rootPath))
-        _state.value = AgentUiState(rootPath = rootPath, mode = policy.mode, mcpServers = _state.value.mcpServers, showConnections = _state.value.showConnections)
+        _state.value = AgentUiState(
+            rootPath = rootPath, mode = policy.mode, mcpServers = _state.value.mcpServers,
+            showConnections = _state.value.showConnections, mcpHost = _state.value.mcpHost,
+        )
         if (restore && rootPath.isNotEmpty()) restoreHistory(rootPath)
         syncMcp(rootPath)
         if (rootPath.isNotEmpty()) viewModelScope.launch { loadContext(File(rootPath)) }
@@ -274,7 +319,80 @@ class AgentViewModel @Inject constructor(
         val files = FileAgentWorkspace(root) { path -> diagnostics.query(root, path) }
         val checkpoint = CheckpointWorkspace(SyncingAgentWorkspace(files, root, fileSync))
         val todos = TodoStore()
-        return Session(root, checkpoint, BuiltinTools.create(checkpoint, todos, GradleAgentBuildRunner(gradle, root)), todos)
+        val memory = com.codeforge.libs.agent.FileAgentMemory(connections.memoryFile(root))
+        val tools = BuiltinTools.create(checkpoint, todos, GradleAgentBuildRunner(gradle, root)) +
+            com.codeforge.libs.agent.CodeIntelTools.create(checkpoint, LspAgentCodeIntel(lspClient, root, codeFormatter)) +
+            com.codeforge.libs.agent.ProjectTools.create(checkpoint) +
+            com.codeforge.libs.agent.WebTools.create(checkpoint) +
+            com.codeforge.libs.agent.InteractionTools.create(
+                questioner = questioner,
+                memory = memory,
+                images = com.codeforge.libs.agent.FileImageReader(root),
+                preview = previewRenderer?.let { ComposeAgentPreview(it, root) },
+            )
+        return Session(root, checkpoint, tools, todos, memory)
+    }
+
+    /** Sprachmodell mit Schlüsselwechsel und Takt für [options]. */
+    private fun llmFor(options: com.codeforge.core.domain.ai.AiChatOptions): com.codeforge.libs.agent.LlmClient {
+        val keys = options.allKeys
+        val id = options.provider.id + "|" + options.model + "|" + keys.hashCode()
+        val pool = keyPools.getOrPut(id) { com.codeforge.libs.agent.ApiKeyPool(keys) }
+        val pacer = pacers.getOrPut(id + "|" + options.requestsPerMinute) { com.codeforge.libs.agent.RequestPacer(options.requestsPerMinute) }
+        val failover = com.codeforge.libs.agent.KeyFailoverClient(pool) { key -> llmFactory.create(options.copy(apiKey = key)) }
+        return com.codeforge.libs.agent.PacedLlmClient(failover, pacer) { ms ->
+            val seconds = ((ms + 999) / 1000).toInt()
+            _state.update { it.copy(pacingSeconds = seconds) }
+            viewModelScope.launch {
+                kotlinx.coroutines.delay(ms)
+                _state.update { st -> if (st.pacingSeconds == seconds) st.copy(pacingSeconds = null) else st }
+            }
+        }
+    }
+
+    /** Startet bzw. beendet den eigenen MCP-Server für externe Agenten. */
+    private fun setHost(enabled: Boolean) {
+        val (_, token) = connections.hostSettings()
+        connections.saveHost(enabled, token)
+        host?.stop()
+        host = null
+        if (!enabled) {
+            _state.update { it.copy(mcpHost = McpHostUi(enabled = false, token = token)) }
+            return
+        }
+        val handler = com.codeforge.libs.mcp.McpToolHandler(
+            tools = { session?.let { s -> AgentToolRegistry(s.builtins + pluginTools(s.root)) } },
+            policy = policy,
+            resources = {
+                val s = session ?: return@McpToolHandler emptyList()
+                listOf(
+                    com.codeforge.libs.mcp.McpResource("codeforge://project/overview", "Projektüberblick", "Module, Plugins, SDK-Werte, Versionen") {
+                        com.codeforge.libs.agent.GradleProjectInfo.read(s.checkpoint).render()
+                    },
+                    com.codeforge.libs.mcp.McpResource("codeforge://project/memory", "Agenten-Gedächtnis", "Notizen des Agenten zu diesem Projekt") {
+                        s.memory.read()
+                    },
+                )
+            },
+        )
+        val server = runCatching { com.codeforge.libs.mcp.LoopbackMcpHttpServer(handler, token, AgentConnections.HOST_PORT).also { it.start(viewModelScope) } }
+            .recoverCatching { com.codeforge.libs.mcp.LoopbackMcpHttpServer(handler, token, 0).also { it.start(viewModelScope) } }
+        server.onSuccess { srv ->
+            host = srv
+            _state.update { it.copy(mcpHost = McpHostUi(enabled = true, running = true, url = srv.url, token = token)) }
+        }.onFailure { e ->
+            _state.update { it.copy(mcpHost = McpHostUi(enabled = true, running = false, token = token, error = e.message ?: e.toString())) }
+        }
+    }
+
+    private fun signInMcp(name: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { mcp.signIn(name) { url -> _openUrl.tryEmit(url) } }.onFailure { e ->
+                withContext(Dispatchers.Main) {
+                    addItem { AgentChatItem.Notice(it, Res.string(R.string.agent_mcp_sign_in_failed, name, e.message ?: e.toString()), isError = true) }
+                }
+            }
+        }
     }
 
     private fun send() {
@@ -312,12 +430,14 @@ class AgentViewModel @Inject constructor(
             val context = loadContext(current.root)
             val registry = AgentToolRegistry(current.builtins + mcp.tools.value + pluginTools(current.root) + context.tools())
             val notes = mcp.serverNotes()
+            val memoryNotes = runCatching { current.memory.read() }.getOrDefault("").take(MEMORY_PROMPT_MAX)
             val loop = AgentLoop(
-                llm = llmFactory.create(options),
+                llm = llmFor(options),
                 tools = registry,
                 policy = policy,
                 systemPrompt = AgentSystemPrompt.default(current.root.name) +
                     (if (notes.isBlank()) "" else "\n\n<mcp-server-notes>\n$notes\n</mcp-server-notes>") +
+                    (if (memoryNotes.isBlank()) "" else "\n\n<project-memory>\n$memoryNotes\n</project-memory>") +
                     context.promptSection(),
             )
             var streamingId: Long? = null
@@ -378,7 +498,7 @@ class AgentViewModel @Inject constructor(
         } finally {
             withContext(NonCancellable) {
                 if (turnId != null) publishChanges(current, turnId)
-                _state.update { it.copy(running = false, pendingApproval = null) }
+                _state.update { it.copy(running = false, pendingApproval = null, pendingQuestion = null, pacingSeconds = null) }
             }
         }
     }
@@ -427,12 +547,15 @@ class AgentViewModel @Inject constructor(
 
     override fun onCleared() {
         approval?.complete(false)
+        question?.complete(null)
+        host?.stop()
         super.onCleared()
     }
 
     private companion object {
         const val DETAIL_MAX = 600
         const val MAX_ATTACHMENTS = 5
+        const val MEMORY_PROMPT_MAX = 4_000
         private const val TAG = "CodeForgeAgent"
     }
 }

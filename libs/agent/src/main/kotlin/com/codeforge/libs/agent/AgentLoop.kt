@@ -81,7 +81,7 @@ class AgentLoop(
             val calls = mutableListOf<ContentPart.ToolUse>()
             var stop = StopReason.END_TURN
             var failure: String? = null
-            val request = LlmRequest(systemPrompt, compactor.compact(messages.toList()), tools.specs(), maxTokens)
+            val request = LlmRequest(systemPrompt, onlyLatestImages(compactor.compact(messages.toList())), tools.specs(), maxTokens)
 
             llm.stream(request).collect { event ->
                 when (event) {
@@ -111,7 +111,7 @@ class AgentLoop(
                 emit(AgentEvent.ToolCallStarted(call.id, call.name, call.arguments))
                 val (result, denied) = execute(call)
                 emit(AgentEvent.ToolCallFinished(call.id, call.name, result, denied))
-                results += ContentPart.ToolResultPart(call.id, result.content, result.isError)
+                results += ContentPart.ToolResultPart(call.id, result.content, result.isError, result.images)
             }
             messages += AgentMessage(AgentRole.USER, results)
         }
@@ -132,6 +132,23 @@ class AgentLoop(
                 ToolResult.error("${tool.name} fehlgeschlagen: ${e.message ?: e::class.simpleName}") to false
             }
         }
+    }
+}
+
+/** Bilder nur in der letzten Nachricht mitschicken – ältere kosten bei jedem Schritt erneut viele Tokens. */
+internal fun onlyLatestImages(messages: List<AgentMessage>): List<AgentMessage> = messages.mapIndexed { i, m ->
+    if (i == messages.lastIndex || m.parts.all { it !is ContentPart.ToolResultPart || it.images.isEmpty() }) {
+        m
+    } else {
+        m.copy(
+            parts = m.parts.map { p ->
+                if (p is ContentPart.ToolResultPart && p.images.isNotEmpty()) {
+                    p.copy(images = emptyList(), content = p.content + "\n[Bild nicht erneut mitgeschickt]")
+                } else {
+                    p
+                }
+            },
+        )
     }
 }
 

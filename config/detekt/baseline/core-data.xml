@@ -11,6 +11,7 @@
     <ID>BracesOnIfStatements:ProjectSettingsRepositoryImpl.kt:ProjectSettingsRepositoryImpl$if</ID>
     <ID>BracesOnWhenStatements:GitRepositoryImpl.kt:GitRepositoryImpl$when</ID>
     <ID>BracesOnWhenStatements:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$when</ID>
+    <ID>CascadingCallWrapping:AiRepositoryImpl.kt:AiRepositoryImpl$map { it.trim() }</ID>
     <ID>CascadingCallWrapping:GitRepositoryImpl.kt:GitRepositoryImpl$call()</ID>
     <ID>CascadingCallWrapping:GitRepositoryImpl.kt:GitRepositoryImpl$setSign(false)</ID>
     <ID>CascadingCallWrapping:PluginToolRunnerImpl.kt:PluginToolRunnerImpl$absolutePath</ID>
@@ -39,6 +40,7 @@
     <ID>ComplexCondition:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$prev != null &amp;&amp; prev.isCrash &amp;&amp; r.entry.tag.equals("AndroidRuntime", ignoreCase = true) &amp;&amp; prev.pid == r.entry.pid</ID>
     <ID>CyclomaticComplexMethod:GitRepositoryImpl.kt:GitRepositoryImpl$override suspend fun applyHunks: Result&lt;Unit></ID>
     <ID>CyclomaticComplexMethod:LogcatRepositoryImpl.kt:LogcatRepositoryImpl$override fun startStream: Flow&lt;LogEntry></ID>
+    <ID>DocumentationOverPrivateFunction:AiRepositoryImpl.kt:AiRepositoryImpl$private suspend fun withAgentLimits: AiChatOptions</ID>
     <ID>DocumentationOverPrivateFunction:CodeFormatterRepositoryImpl.kt:CodeFormatterRepositoryImpl$private suspend fun tryPluginFormat: Result&lt;FormattedCode>?</ID>
     <ID>DocumentationOverPrivateFunction:GitRepositoryImpl.kt:GitRepositoryImpl$private fun collectRefs: Pair&lt;Map&lt;ObjectId, MutableList&lt;String>>, Set&lt;ObjectId>></ID>
     <ID>DocumentationOverPrivateFunction:GitRepositoryImpl.kt:GitRepositoryImpl$private fun friendly: Throwable</ID>

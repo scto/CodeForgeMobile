@@ -45,7 +45,7 @@ class HistoryCompactor(
         return messages.map { m ->
             if (m.parts.none { it is ContentPart.ToolResultPart && it.toolUseId in elided }) m
             else m.copy(parts = m.parts.map { p ->
-                if (p is ContentPart.ToolResultPart && p.toolUseId in elided) p.copy(content = placeholder(p)) else p
+                if (p is ContentPart.ToolResultPart && p.toolUseId in elided) p.copy(content = placeholder(p), images = emptyList()) else p
             })
         }
     }
