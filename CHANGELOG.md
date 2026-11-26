@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.5.2] - 2026-11-26
+
 ### Geändert / Changed
 - **Store öffnet sofort** (nach dem Vorbild des CodeAssist-Stores): Die letzte geladene Fassung – beim ersten Start
   der mit der App ausgelieferte Katalog – erscheint ohne Wartezeit; im Hintergrund wird bedingt nachgeladen
