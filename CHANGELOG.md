@@ -11,6 +11,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben / Fixed
+- Absturz beim Öffnen des Editors in 3.5.1 („Can't instantiate abstract class“): Cursor-Animator und Auswahlgriffe
+  wurden per Reflection erzeugt, was R8 im Release-Build nicht sieht. / Editor crash on open in 3.5.1 release builds.
+
 ## [3.5.1] - 2026-11-26
 
 ### Geändert / Changed
