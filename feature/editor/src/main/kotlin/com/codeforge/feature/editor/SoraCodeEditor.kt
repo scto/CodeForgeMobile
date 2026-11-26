@@ -581,8 +581,14 @@ private fun applySoraDisplay(editor: CodeEditor, settings: EditorDisplaySettings
         ANIMATION_SCALE -> io.github.rosemoe.sora.widget.style.builtin.ScaleCursorAnimator::class.java
         else -> io.github.rosemoe.sora.widget.style.builtin.MoveCursorAnimator::class.java
     }
+    // Direkte Konstruktoraufrufe statt Reflection: R8 macht nur per Reflection erzeugte Klassen abstrakt
+    // (Absturz „Can't instantiate abstract class“ in Release-Builds).
     if (editor.cursorAnimator.javaClass != animatorClass) {
-        editor.cursorAnimator = animatorClass.getConstructor(CodeEditor::class.java).newInstance(editor)
+        editor.cursorAnimator = when (settings.cursorAnimationStyle) {
+            ANIMATION_FADE -> io.github.rosemoe.sora.widget.style.builtin.FadeCursorAnimator(editor)
+            ANIMATION_SCALE -> io.github.rosemoe.sora.widget.style.builtin.ScaleCursorAnimator(editor)
+            else -> io.github.rosemoe.sora.widget.style.builtin.MoveCursorAnimator(editor)
+        }
     }
     editor.isVerticalScrollBarEnabled = settings.scrollbars
     editor.isHorizontalScrollBarEnabled = settings.scrollbars
@@ -621,7 +627,13 @@ private fun applySoraInput(editor: CodeEditor, settings: EditorDisplaySettings) 
         io.github.rosemoe.sora.widget.style.builtin.HandleStyleDrop::class.java
     }
     if (editor.handleStyle.javaClass != handleClass) {
-        editor.setSelectionHandleStyle(handleClass.getConstructor(android.content.Context::class.java).newInstance(editor.context))
+        editor.setSelectionHandleStyle(
+            if (settings.selectionHandleStyle == HANDLE_SIDE_DROP) {
+                io.github.rosemoe.sora.widget.style.builtin.HandleStyleSideDrop(editor.context)
+            } else {
+                io.github.rosemoe.sora.widget.style.builtin.HandleStyleDrop(editor.context)
+            }
+        )
     }
     editor.setDisplayLnPanel(settings.fastScrollLineTip)
     props.foldIndicatorStyle = if (settings.foldMarksAsLines) {
