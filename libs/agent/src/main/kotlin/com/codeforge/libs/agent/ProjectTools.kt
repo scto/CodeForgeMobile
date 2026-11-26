@@ -251,7 +251,7 @@ data class GradleProjectInfo(
 
         /** Plugin-IDs bzw. Aliase aus dem `plugins { }`-Block und `apply plugin:`. */
         fun plugins(build: String): List<String> {
-            val block = Regex("""(?s)plugins\s*\{(.*?)\n\s*}""").find(build)?.groupValues?.get(1).orEmpty()
+            val block = Regex("""(?s)plugins\s*\{(.*?)\n\s*\}""").find(build)?.groupValues?.get(1).orEmpty()
             val ids = Regex("""id\s*\(?\s*["']([^"']+)["']|alias\s*\(\s*libs\.plugins\.([\w.]+)\s*\)|kotlin\s*\(\s*"([\w.]+)"\s*\)|^\s*`([\w-]+)`""", RegexOption.MULTILINE)
                 .findAll(block).map { m ->
                     m.groupValues[1].ifEmpty { m.groupValues[2].ifEmpty { m.groupValues[3].takeIf { it.isNotEmpty() }?.let { "kotlin(\"$it\")" } ?: m.groupValues[4] } }
