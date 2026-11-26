@@ -4,6 +4,8 @@
  */
 package com.codeforge.feature.settings
 
+import com.codeforge.core.resources.R
+import com.codeforge.core.resources.Res
 import com.codeforge.libs.ai_client.OpenRouterAccount
 
 import androidx.lifecycle.ViewModel
@@ -40,6 +42,9 @@ class AiSettingsViewModel @Inject constructor(
     private val _openUrl = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 1)
     /** URLs, die die Oberfläche im Browser öffnen soll (Anmeldung). */
     val openUrl: kotlinx.coroutines.flow.SharedFlow<String> = _openUrl
+
+    private var openRouterJob: kotlinx.coroutines.Job? = null
+    private var openRouterDeliver: ((String) -> Boolean)? = null
 
     init {
         viewModelScope.launch {
@@ -108,16 +113,35 @@ class AiSettingsViewModel @Inject constructor(
             }
             AiSettingsUiEvent.SignInOpenRouter -> signInOpenRouter()
             AiSettingsUiEvent.RefreshOpenRouterUsage -> refreshOpenRouterUsage()
+            is AiSettingsUiEvent.PasteOpenRouterCallback -> pasteOpenRouterCallback(event.url)
+            AiSettingsUiEvent.CancelOpenRouterSignIn -> cancelOpenRouterSignIn()
             AiSettingsUiEvent.MessageShown -> _uiState.update { it.copy(message = null) }
         }
+    }
+
+    private fun pasteOpenRouterCallback(url: String) {
+        if (openRouterDeliver?.invoke(url) == true) return
+        update(AiProviderType.OPENROUTER) {
+            it.copy(usageState = AiCheckState.Failure(Res.string(R.string.aiset_openrouter_paste_invalid)))
+        }
+    }
+
+    private fun cancelOpenRouterSignIn() {
+        openRouterJob?.cancel()
+        openRouterDeliver = null
+        update(AiProviderType.OPENROUTER) { it.copy(signingIn = false, usageState = AiCheckState.Idle) }
     }
 
     private fun signInOpenRouter() {
         val provider = AiProviderType.OPENROUTER
         if (current(provider).signingIn) return
         update(provider) { it.copy(signingIn = true, usageState = AiCheckState.Running) }
-        viewModelScope.launch {
-            val result = runCatching { OpenRouterAccount.signIn { url -> _openUrl.tryEmit(url) } }
+        openRouterJob = viewModelScope.launch {
+            val result = runCatching {
+                OpenRouterAccount.signIn(openBrowser = { url -> _openUrl.tryEmit(url) }, onWaiting = { openRouterDeliver = it })
+            }
+            openRouterDeliver = null
+            if (result.exceptionOrNull() is kotlinx.coroutines.CancellationException) return@launch
             result.onSuccess { key ->
                 update(provider) { it.copy(apiKey = key, signingIn = false, usageState = AiCheckState.Idle, dirty = true) }
                 save(provider, silent = false)

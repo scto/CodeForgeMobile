@@ -3040,4 +3040,7 @@
     <string name="settings_handle_style">Auswahlgriffe</string>
     <string name="settings_handle_drop">Tropfen</string>
     <string name="settings_handle_side_drop">Seitlich</string>
+    <string name="aiset_openrouter_paste_hint">Der Browser zeigt eine „localhost“-Adresse und es passiert nichts? Android hat die App im Hintergrund pausiert. Kopiere die ganze Adresse aus der Adresszeile des Browsers und füge sie hier ein – oder trag deinen API-Schlüssel einfach oben ins Feld ein.</string>
+    <string name="aiset_openrouter_paste_apply">Anmeldung abschließen</string>
+    <string name="aiset_openrouter_paste_invalid">Das ist nicht die Rückleitungsadresse dieser Anmeldung (…/callback?code=…).</string>
 </resources>

@@ -11,6 +11,23 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert / Changed
+- **SDK-Manager öffnet sofort:** zuletzt geladene Paketliste wird sofort gezeigt und im Hintergrund aktualisiert,
+  5 Minuten im Speicher wiederverwendet (nach Installation/Deinstallation neu); das Skript speichert auch das
+  entfernte Manifest 6 Stunden zwischen, „Aktualisieren“ umgeht alle Zwischenspeicher (`CFSDK_REFRESH=1`).
+  / SDK manager shows the last list instantly and refreshes in the background.
+- **PT-Werkzeug „AGP-9-Migration“ nach Googles Skill `agp-9-upgrade` ergänzt:** hebt KSP (2.3.6) und Hilt (2.59.2)
+  an, stellt `kapt(…)` für KSP-fähige Prozessoren auf `ksp(…)` um (sonst `legacy-kapt`), ergänzt
+  `buildFeatures.buildConfig`, entfernt Übergangsschalter in `gradle.properties` und meldet Paparazzi < 2.0.0-alpha05.
+  / AGP 9 migration tool now follows Google's agp-9-upgrade skill (KSP/Hilt bumps, kapt → KSP, BuildConfig, flags).
+
+### Behoben / Fixed
+- **„Mit OpenRouter anmelden“ blieb auf einer `localhost`-Adresse hängen:** Der Rückleitungs-Empfänger wurde von
+  leeren Vorab-Verbindungen des Browsers (Preconnect) blockiert; jetzt wird jede Verbindung parallel mit Zeitlimit
+  bedient. Erreicht die Rückleitung die App nicht (Android pausiert Apps im Hintergrund), lässt sich die Adresse aus
+  der Adresszeile einfügen; die Anmeldung kann abgebrochen werden. Gilt auch für die MCP-Anmeldung.
+  / OpenRouter sign-in no longer hangs on the localhost callback; paste fallback added.
+
 ## [3.5.2] - 2026-11-26
 
 ### Geändert / Changed

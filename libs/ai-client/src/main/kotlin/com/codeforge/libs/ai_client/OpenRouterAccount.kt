@@ -41,9 +41,15 @@ object OpenRouterAccount {
         return Attempt(url, verifier, state)
     }
 
-    /** Ganze Anmeldung: Browser über [openBrowser] öffnen, Rückleitung abwarten, Schlüssel holen. */
-    suspend fun signIn(openBrowser: (String) -> Unit): String = LoopbackRedirect().use { redirect ->
+    /**
+     * Ganze Anmeldung: Browser über [openBrowser] öffnen, Rückleitung abwarten, Schlüssel holen.
+     * [onWaiting] erhält eine Funktion, mit der sich die Rückleitungsadresse aus dem Browser nachreichen lässt,
+     * falls sie die App nicht erreicht (liefert `false` bei unpassender Adresse).
+     */
+    suspend fun signIn(openBrowser: (String) -> Unit, onWaiting: ((deliver: (String) -> Boolean) -> Unit)? = null): String =
+        LoopbackRedirect().use { redirect ->
         val attempt = start(redirect.redirectUri)
+        onWaiting?.invoke(redirect::deliver)
         openBrowser(attempt.url)
         val params = redirect.await()
         params["error"]?.let { throw IOException("OpenRouter: $it") }

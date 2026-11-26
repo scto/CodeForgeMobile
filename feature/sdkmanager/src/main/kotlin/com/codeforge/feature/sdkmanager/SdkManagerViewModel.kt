@@ -38,7 +38,11 @@ class SdkManagerViewModel @Inject constructor(
     val effect: SharedFlow<SdkManagerEffect> = _effect.asSharedFlow()
 
     init {
-        refresh()
+        // Wie der Store: sofort die zuletzt geladene Liste zeigen, dann im Hintergrund aktualisieren.
+        viewModelScope.launch {
+            sdkRepository.cachedPackages()?.let(::applyItems)
+            refresh()
+        }
     }
 
     /** Verarbeitet eine Aktion des Nutzers. */
@@ -57,13 +61,13 @@ class SdkManagerViewModel @Inject constructor(
                 _uiState.update { it.copy(pendingUninstallId = null) }
                 uninstall(id)
             }
-            SdkManagerEvent.RefreshRemoteList -> refresh()
+            SdkManagerEvent.RefreshRemoteList -> refresh(force = true)
         }
     }
 
-    private fun refresh() = viewModelScope.launch {
+    private fun refresh(force: Boolean = false) = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
-        sdkRepository.listAvailablePackages()
+        sdkRepository.listAvailablePackages(refresh = force)
             .onSuccess { items -> applyItems(items) }
             .onFailure { _effect.emit(SdkManagerEffect.ShowSnackbar(it.message ?: Res.string(R.string.sdkmanager_paketliste_konnte_nicht_geladen_werden))) }
         _uiState.update { it.copy(isLoading = false) }

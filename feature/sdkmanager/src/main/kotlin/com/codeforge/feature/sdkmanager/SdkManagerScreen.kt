@@ -175,6 +175,9 @@ private fun SdkManagerScreen(
                 }
             }
             SettingsSectionLabel(stringRes(tab.labelRes))
+            if (uiState.isLoading && items.isNotEmpty()) {
+                androidx.compose.material3.LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+            }
             when {
                 uiState.isLoading && items.isEmpty() ->
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }

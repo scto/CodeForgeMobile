@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Stellt ein Android-Projekt auf Android Gradle Plugin 9.0 um: AGP-, Gradle- (9.1) und Kotlin-Version (2.2.10), eingebautes Kotlin (Plugin kotlin-android entfernen, kotlinOptions -> kotlin.compilerOptions), kapt -> legacy-kapt, entfernte gradle.properties-Schalter und DSL (dexOptions, CommonExtension<…>); meldet alte Variant-API und andere Handarbeit. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
+  "description": "Stellt ein Android-Projekt auf Android Gradle Plugin 9.0 um: AGP-, Gradle- (9.1) und Kotlin-Version (2.2.10), eingebautes Kotlin (Plugin kotlin-android entfernen, kotlinOptions -> kotlin.compilerOptions), KSP (2.3.6) und Hilt (2.59.2), kapt -> KSP für KSP-fähige Prozessoren (sonst legacy-kapt), buildFeatures.buildConfig, entfernte bzw. Übergangs-Schalter in gradle.properties und DSL (dexOptions, CommonExtension<…>); meldet alte Variant-API, buildConfigField, Paparazzi und andere Handarbeit. Schritte nach Googles Skill agp-9-upgrade. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
   "permissions": [
     "shell"
   ],

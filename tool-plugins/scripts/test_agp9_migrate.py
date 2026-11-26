@@ -168,12 +168,107 @@ class KtsCatalogTest(unittest.TestCase):
         notes = "\n".join(mig.notes)
         self.assertIn("Variant-API", notes)
         self.assertIn("android.newDsl=false", notes)
-        self.assertIn("KSP", notes)
+        self.assertIn('ksp = "2.3.6"', toml)
+        self.assertIn("android.newDsl=false", props)  # alte Variant-API vorhanden -> Schalter bleibt
 
     def test_second_run_is_noop(self):
         run(self.root, "apply")
         again = run(self.root, "apply")
         self.assertEqual([], again.changes)
+
+
+SKILL_CATALOG = """[versions]
+agp = "8.9.0"
+kotlin = "2.2.10"
+hilt = "2.52"
+room = "2.6.1"
+paparazzi = "1.3.5"
+
+[libraries]
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+"""
+
+LIB_KTS = """plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.kapt)
+}
+
+android {
+    namespace = "com.example.data"
+    defaultConfig {
+        buildConfigField("String", "API", "\\"https://example.com\\"")
+    }
+}
+
+dependencies {
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    kapt(libs.room.compiler)
+}
+"""
+
+SKILL_PROPS = """android.builtInKotlin=false
+android.uniquePackageNames=false
+android.enableAppCompileTimeRClass=false
+android.newDsl=false
+"""
+
+
+class SkillStepsTest(unittest.TestCase):
+    """Schritte aus Googles Skill agp-9-upgrade."""
+
+    def setUp(self):
+        self.root = project({
+            "gradle/libs.versions.toml": SKILL_CATALOG,
+            "data/build.gradle.kts": LIB_KTS,
+            "gradle.properties": SKILL_PROPS,
+        })
+        self.mig = run(self.root, "apply")
+
+    def read(self, name):
+        return (Path(self.root) / name).read_text(encoding="utf-8")
+
+    def test_versions(self):
+        toml = self.read("gradle/libs.versions.toml")
+        self.assertIn('hilt = "2.59.2"', toml)
+        self.assertIn("Paparazzi 1.3.5", "\n".join(self.mig.notes))
+
+    def test_kapt_to_ksp(self):
+        lib = self.read("data/build.gradle.kts")
+        self.assertIn("ksp(libs.hilt.compiler)", lib)
+        self.assertIn("ksp(libs.room.compiler)", lib)
+        self.assertNotIn("kapt", lib)
+        self.assertIn('id("com.google.devtools.ksp")', lib)
+
+    def test_build_config(self):
+        lib = self.read("data/build.gradle.kts")
+        self.assertIn("buildFeatures {\n        buildConfig = true\n    }", lib)
+        self.assertIn("addCustomBuildConfigFields", "\n".join(self.mig.notes))
+
+    def test_transition_props_removed(self):
+        self.assertEqual("", self.read("gradle.properties").strip())
+
+    def test_second_run_is_noop(self):
+        self.assertEqual([], run(self.root, "apply").changes)
+
+    def test_remaining_kapt_keeps_legacy_kapt(self):
+        root = project({
+            "gradle/libs.versions.toml": SKILL_CATALOG,
+            "data/build.gradle.kts": LIB_KTS.replace("kapt(libs.room.compiler)", 'kapt("com.example:legacy-processor:1.0")'),
+        })
+        run(root, "apply")
+        lib = (Path(root) / "data/build.gradle.kts").read_text(encoding="utf-8")
+        self.assertIn("ksp(libs.hilt.compiler)", lib)
+        self.assertIn('kapt("com.example:legacy-processor:1.0")', lib)
+        toml = (Path(root) / "gradle/libs.versions.toml").read_text(encoding="utf-8")
+        self.assertIn('kotlin-kapt = { id = "com.android.legacy-kapt", version.ref = "agp" }', toml)
 
 
 class GroovyTest(unittest.TestCase):

@@ -10,15 +10,25 @@ Umgestellt (apply):
   * eingebautes Kotlin: Plugin org.jetbrains.kotlin.android / kotlin-android entfernen (Module, Wurzel, Catalog)
   * android { kotlinOptions { … } } -> kotlin { compilerOptions { … } } (jvmTarget, freeCompilerArgs,
     languageVersion, apiVersion, allWarningsAsErrors, suppressWarnings)
-  * kapt -> com.android.legacy-kapt (KSP empfohlen)
+  * KSP >= 2.3.6 und Hilt >= 2.59.2 (Mindestversionen für AGP 9)
+  * kapt(…) -> ksp(…) für Prozessoren mit KSP-Unterstützung (bekannte Liste bzw. Prüfung des JARs im
+    Gradle-Cache auf META-INF/services/…SymbolProcessorProvider); bleibt kein kapt(…) übrig, ersetzt KSP das
+    kapt-Plugin, sonst kapt -> com.android.legacy-kapt
+  * buildConfigField ohne buildFeatures { buildConfig = true } -> Schalter ergänzen
   * CommonExtension<*, …> -> CommonExtension, dexOptions-Blöcke entfernen
-  * gradle.properties: in AGP 9 entfernte/erzwungene Schalter entfernen, resValues beibehalten, wenn genutzt
+  * gradle.properties: in AGP 9 entfernte/erzwungene Schalter entfernen, resValues beibehalten, wenn genutzt;
+    Übergangsschalter android.builtInKotlin, android.uniquePackageNames, android.enableAppCompileTimeRClass
+    entfernen, android.newDsl nur, wenn keine alte Variant-API mehr vorkommt
 Nur gemeldet: alte Variant-API (applicationVariants, variantFilter …), BaseExtension, kotlin.sourceSets,
-KMP + Android-Plugin im selben Modul, android.newDsl=false / android.builtInKotlin=false.
+KMP + Android-Plugin im selben Modul, android.newDsl=false, buildConfigField -> addCustomBuildConfigFields,
+Paparazzi < 2.0.0-alpha05.
+Abgleich: Googles Skill agp-9-upgrade (https://github.com/android/skills, build-system/agp, Apache-2.0).
 """
+import glob
 import os
 import re
 import sys
+import zipfile
 
 from common import args, walk, read, write, rel
 
@@ -26,6 +36,20 @@ DEFAULT_AGP = "9.0.1"
 MIN_GRADLE = (9, 1, 0)
 MIN_KOTLIN = (2, 2, 10)
 MIN_BUILD_TOOLS = (36, 0, 0)
+MIN_KSP = "2.3.6"
+MIN_HILT = "2.59.2"
+KSP_ID = "com.google.devtools.ksp"
+HILT_ID = "com.google.dagger.hilt.android"
+KSP_SERVICE = "META-INF/services/com.google.devtools.ksp.processing.SymbolProcessorProvider"
+# Annotation-Prozessoren mit KSP-Unterstützung (group:name); andere werden im Gradle-Cache geprüft.
+KSP_CAPABLE = {
+    "androidx.room:room-compiler", "com.google.dagger:hilt-compiler", "com.google.dagger:hilt-android-compiler",
+    "com.google.dagger:dagger-compiler", "com.google.dagger:dagger-android-processor", "androidx.hilt:hilt-compiler",
+    "com.squareup.moshi:moshi-kotlin-codegen", "com.github.bumptech.glide:ksp", "io.insert-koin:koin-ksp-compiler",
+    "io.github.raamcosta.compose-destinations:ksp", "me.tatarka.inject:kotlin-inject-compiler-ksp",
+}
+# Übergangsschalter, die nach der Migration entfallen (Skill agp-9-upgrade).
+TRANSITION_PROPS = ("android.builtInKotlin", "android.uniquePackageNames", "android.enableAppCompileTimeRClass")
 
 KOTLIN_ANDROID_IDS = ("org.jetbrains.kotlin.android", "kotlin-android")
 KAPT_IDS = ("org.jetbrains.kotlin.kapt", "kotlin-kapt")
@@ -72,6 +96,10 @@ class Migration:
     def __init__(self, root, apply, agp):
         self.root, self.apply, self.agp = root, apply, agp
         self.changes, self.notes = [], []
+        self.libraries = {}      # normalisierter Catalog-Alias -> group:name
+        self.ksp_alias = None    # normalisierter Plugin-Alias von KSP
+        self.kapt_alias = None   # normalisierter Plugin-Alias von kapt
+        self.legacy_api = False  # alte Variant-API gefunden -> android.newDsl bleibt
 
     # ---------------- Hilfen ----------------
     def change(self, path, what):
@@ -112,20 +140,34 @@ class Migration:
         if kt_key and kt_key in versions and vtuple(versions[kt_key]) < MIN_KOTLIN:
             new = set_version(new, kt_key, vstr(MIN_KOTLIN))
             self.change(path, f"Kotlin {versions[kt_key]} -> {vstr(MIN_KOTLIN)} (eingebautes Kotlin braucht KGP >= 2.2.10)")
-            ksp = next((r for p, (a, r) in refs.items() if p == "com.google.devtools.ksp" and r), None)
-            if ksp and ksp in versions and versions[ksp].count("-") == 1 and vtuple(versions[ksp]) < MIN_KOTLIN:
-                self.note(path, f"KSP {versions[ksp]} passt nicht zu Kotlin {vstr(MIN_KOTLIN)} – auf eine dazu passende KSP-Version anheben")
+        # KSP und Hilt: Mindestversionen für AGP 9
+        bumps = [(r, "KSP", MIN_KSP) for p, (a, r) in refs.items() if p == KSP_ID and r]
+        bumps += [(r, "Hilt", MIN_HILT) for p, (a, r) in refs.items() if p == HILT_ID and r]
+        bumps += [(r, "Hilt", MIN_HILT) for r in re.findall(
+            r'module\s*=\s*"com\.google\.dagger:hilt-[\w-]+"\s*,\s*version\.ref\s*=\s*"([^"]+)"', text)]
+        for key, label, minimum in dict.fromkeys(bumps):
+            if key in versions and vtuple(versions[key]) < vtuple(minimum):
+                new = set_version(new, key, minimum)
+                self.change(path, f"{label} {versions[key]} -> {minimum} (Mindestversion für AGP 9)")
+        libs = section(text, "libraries")
+        for alias, module in re.findall(r'(?m)^\s*([\w.-]+)\s*=\s*\{[^}\n]*module\s*=\s*"([^":]+:[^":]+)"', libs):
+            self.libraries[norm(alias)] = module
+        for alias, g, n in re.findall(r'(?m)^\s*([\w.-]+)\s*=\s*\{[^}\n]*group\s*=\s*"([^"]+)"\s*,\s*name\s*=\s*"([^"]+)"', libs):
+            self.libraries[norm(alias)] = f"{g}:{n}"
+        if KSP_ID in refs:
+            self.ksp_alias = norm(refs[KSP_ID][0])
         # Kotlin-Android-Plugin-Eintrag; kapt -> legacy-kapt
         aliases = set()
         for pid in KOTLIN_ANDROID_IDS:
             if pid in refs:
                 aliases.add(refs[pid][0])
         kapt_alias = next((refs[p][0] for p in KAPT_IDS if p in refs), None)
+        self.kapt_alias = norm(kapt_alias) if kapt_alias else None
         if kapt_alias and agp_key:
             pat = re.compile(rf'(?m)^([ \t]*{re.escape(kapt_alias)}\s*=\s*)\{{[^}}\n]*\}}')
             if pat.search(new):
                 new = pat.sub(lambda m: f'{m.group(1)}{{ id = "{LEGACY_KAPT}", version.ref = "{agp_key}" }}', new, count=1)
-                self.change(path, f"kapt-Plugin ({kapt_alias}) -> {LEGACY_KAPT} (KSP wird empfohlen)")
+                self.change(path, f"kapt-Plugin ({kapt_alias}) -> {LEGACY_KAPT} (für Prozessoren ohne KSP-Unterstützung)")
         if new != text:
             self.save(path, text, new)
         self.catalog_path, self.catalog_text = path, new
@@ -166,7 +208,8 @@ class Migration:
                 new = new2
         if removed_aliases:
             self.change(path, "Plugin Kotlin Android entfernt (AGP 9 kompiliert Kotlin selbst)")
-        # 2. kapt
+        # 2. kapt: KSP-fähige Prozessoren auf ksp(…), sonst legacy-kapt
+        new = self.kapt_to_ksp(path, new, kts)
         for pid in KAPT_IDS:
             new2 = re.sub(rf'(?m)(^[ \t]*id\s*\(?\s*["\']){re.escape(pid)}(["\']\s*\)?)', rf'\g<1>{LEGACY_KAPT}\g<2>', new)
             new2 = re.sub(rf'(?m)(^[ \t]*apply\s*plugin\s*:\s*["\']){re.escape(pid)}(["\'])', rf'\g<1>{LEGACY_KAPT}\g<2>', new2)
@@ -192,7 +235,9 @@ class Migration:
         if new2 != new:
             self.change(path, "CommonExtension<*, …> -> CommonExtension")
             new = new2
-        # 7. buildToolsVersion
+        # 7. BuildConfig-Felder brauchen den Schalter
+        new = self.build_config(path, new)
+        # 8. buildToolsVersion
         m = re.search(r'buildToolsVersion\s*=?\s*\(?\s*["\']([\d.]+)["\']', new)
         if m and vtuple(m.group(1)) < MIN_BUILD_TOOLS:
             new = new[:m.start(1)] + vstr(MIN_BUILD_TOOLS) + new[m.end(1):]
@@ -200,6 +245,100 @@ class Migration:
         # Bericht
         self.report_legacy(path, new)
         self.save(path, text, new)
+        return new
+
+    def coordinate(self, ref):
+        """group:name einer kapt-Abhängigkeit (Catalog-Alias oder String-Koordinate)."""
+        if ref.startswith("libs."):
+            return self.libraries.get(norm(ref[5:]))
+        parts = ref.strip("\"'").split(":")
+        return ":".join(parts[:2]) if len(parts) >= 2 else None
+
+    @staticmethod
+    def ksp_capable(coord):
+        if not coord:
+            return False
+        if coord in KSP_CAPABLE:
+            return True
+        group, _, name = coord.partition(":")
+        base = os.path.join(os.path.expanduser("~"), ".gradle", "caches", "modules-2", "files-2.1", group, name)
+        for jar in sorted(glob.glob(os.path.join(base, "*", "*", "*.jar")), reverse=True):
+            try:
+                with zipfile.ZipFile(jar) as z:
+                    if KSP_SERVICE in z.namelist():
+                        return True
+            except (OSError, zipfile.BadZipFile):
+                continue
+        return False
+
+    def kapt_to_ksp(self, path, text, kts):
+        dep = re.compile(r'(?m)^([ \t]*)kapt(\s*\(\s*|\s+)(libs\.[\w.-]+|"[^"\n]+"|\'[^\'\n]+\')')
+        new, converted = text, []
+        for m in list(dep.finditer(text))[::-1]:
+            coord = self.coordinate(m.group(3))
+            if self.ksp_capable(coord):
+                at = m.start() + len(m.group(1))
+                new = new[:at] + "ksp" + new[at + 4:]
+                converted.append(coord)
+        if not converted:
+            return text
+        for coord in reversed(converted):
+            self.change(path, f"kapt -> ksp ({coord})")
+        if re.search(r'(?m)^[ \t]*kapt\w*(\s*\(|\s+["\'l])', new):
+            return new  # weitere kapt-Prozessoren: legacy-kapt bleibt
+        flat = norm_aliases(new)
+        has_ksp = KSP_ID in new or bool(self.ksp_alias and f"libs.plugins.{self.ksp_alias}" in flat)
+        if has_ksp:
+            plugin_line = ""
+        elif self.ksp_alias:
+            plugin_line = f"alias(libs.plugins.{self.ksp_alias})"
+        elif kts:
+            plugin_line = f'id("{KSP_ID}")'
+        else:
+            plugin_line = f"id '{KSP_ID}'"
+        ids = "|".join(re.escape(p) for p in KAPT_IDS)
+        pats = [rf'(?m)^([ \t]*)id\s*\(?\s*["\'](?:{ids})["\']\s*\)?[^\n]*\n',
+                r'(?m)^([ \t]*)kotlin\s*\(\s*"kapt"\s*\)[^\n]*\n']
+        if self.kapt_alias:
+            pats.append(rf'(?m)^([ \t]*)alias\s*\(\s*libs\.plugins\.{alias_pattern(self.kapt_alias)}\s*\)[^\n]*\n')
+        groovy_apply = rf'(?m)^([ \t]*)apply\s*plugin\s*:\s*["\'](?:{ids})["\'][^\n]*\n'
+        m = re.search(groovy_apply, new)
+        if m:
+            repl = "" if has_ksp else f"{m.group(1)}apply plugin: '{KSP_ID}'\n"
+            new = new[:m.start()] + repl + new[m.end():]
+            self.change(path, "kapt-Plugin -> KSP (keine kapt-Abhängigkeiten mehr)")
+            return new
+        for pat in pats:
+            m = re.search(pat, new)
+            if m:
+                repl = f"{m.group(1)}{plugin_line}\n" if plugin_line else ""
+                new = new[:m.start()] + repl + new[m.end():]
+                self.change(path, "kapt-Plugin -> KSP (keine kapt-Abhängigkeiten mehr)")
+                if not self.ksp_alias and not has_ksp:
+                    self.note(path, f"KSP-Plugin ohne Version eingetragen – im Wurzel-Build "
+                                    f"id(\"{KSP_ID}\") version \"{MIN_KSP}\" apply false ergänzen")
+                return new
+        if not has_ksp:
+            self.note(path, f"kapt-Abhängigkeiten auf ksp umgestellt – KSP-Plugin ({KSP_ID}, >= {MIN_KSP}) im Modul anwenden")
+        return new
+
+    def build_config(self, path, text):
+        if not re.search(r'\bbuildConfigField\b', text):
+            return text
+        new = text
+        if not re.search(r'\bbuildConfig\s*=?\s*true\b', text):
+            block = find_block(text, "buildFeatures")
+            target = block or find_block(text, "android")
+            if target:
+                brace = text.index("{", target[0]) + 1
+                indent = re.match(r"[ \t]*", text[text.rfind("\n", 0, target[0]) + 1:]).group(0)
+                eq = " = " if path.endswith(".kts") else " "
+                inner = f"\n{indent}    buildConfig{eq}true" if block else \
+                    f"\n{indent}    buildFeatures {{\n{indent}        buildConfig{eq}true\n{indent}    }}"
+                new = text[:brace] + inner + text[brace:]
+                self.change(path, "buildFeatures { buildConfig = true } ergänzt (Modul nutzt buildConfigField)")
+        self.note(path, "buildConfigField – auf androidComponents.onVariants { it.buildConfigFields?.put(…) } umstellen "
+                        "(Rezept addCustomBuildConfigFields in android/gradle-recipes; String-Werte mit Anführungszeichen)")
         return new
 
     def inline_versions(self, path, text):
@@ -210,8 +349,12 @@ class Migration:
             (r'(id\s*\(?\s*["\']org\.jetbrains\.kotlin\.[\w.-]+["\']\s*\)?\s*version\s*\(?\s*["\'])([^"\']+)', "Kotlin", MIN_KOTLIN),
             (r'(kotlin\s*\(\s*"[\w.-]+"\s*\)\s*version\s*")([^"]+)', "Kotlin", MIN_KOTLIN),
             (r'(["\']org\.jetbrains\.kotlin:kotlin-gradle-plugin:)([^"\'$]+)', "Kotlin", MIN_KOTLIN),
+            (r'(id\s*\(?\s*["\']com\.google\.devtools\.ksp["\']\s*\)?\s*version\s*\(?\s*["\'])([^"\']+)', "KSP", MIN_KSP),
+            (r'(["\']com\.google\.devtools\.ksp:symbol-processing-gradle-plugin:)([^"\'$]+)', "KSP", MIN_KSP),
+            (r'(id\s*\(?\s*["\']com\.google\.dagger\.hilt\.android["\']\s*\)?\s*version\s*\(?\s*["\'])([^"\']+)', "Hilt", MIN_HILT),
+            (r'(["\']com\.google\.dagger:hilt-[\w-]+:)([^"\'$]+)', "Hilt", MIN_HILT),
         ):
-            target = self.agp if minimum is None else vstr(minimum)
+            target = self.agp if minimum is None else (minimum if isinstance(minimum, str) else vstr(minimum))
             for m in list(re.finditer(pat, new))[::-1]:
                 old = m.group(2)
                 if vtuple(old) < vtuple(target):
@@ -253,6 +396,10 @@ class Migration:
         for pat, msg in LEGACY_API:
             if re.search(pat, text):
                 self.note(path, msg)
+                self.legacy_api = True
+        for v in re.findall(r'(?:app\.cash\.paparazzi["\']\s*\)?\s*version\s*\(?\s*["\']|app\.cash\.paparazzi:paparazzi-gradle-plugin:)([\w.-]+)', text):
+            if paparazzi_too_old(v):
+                self.note(path, f"Paparazzi {v} läuft nicht mit AGP 9 – auf 2.0.0-alpha05 oder neuer anheben")
         if re.search(r'\bkotlin\s*\{[^}]*\bsourceSets\b', text, re.S):
             self.note(path, "kotlin.sourceSets – Quellordner über android.sourceSets.<name>.kotlin.directories angeben")
         if re.search(r'kotlin\.multiplatform|kotlin\("multiplatform"\)', text) and re.search(r'com\.android\.(application|library)|android\.(application|library)', text):
@@ -270,6 +417,15 @@ class Migration:
             if pat.search(new):
                 new = pat.sub("", new)
                 self.change(path, f"{key} entfernt ({why})")
+        for key in TRANSITION_PROPS:
+            pat = re.compile(rf'(?m)^[ \t]*{re.escape(key)}\s*=.*\n?')
+            if pat.search(new):
+                new = pat.sub("", new)
+                self.change(path, f"{key} entfernt (Übergangsschalter, nach der Migration überflüssig)")
+        dsl = re.compile(r'(?m)^[ \t]*android\.newDsl\s*=.*\n?')
+        if dsl.search(new) and not self.legacy_api:
+            new = dsl.sub("", new)
+            self.change(path, "android.newDsl entfernt (keine alte Variant-API mehr gefunden)")
         for key, why in OPT_OUTS.items():
             if re.search(rf'(?m)^[ \t]*{re.escape(key)}\s*=\s*false', new):
                 self.note(path, f"{key}=false – {why}")
@@ -316,6 +472,10 @@ class Migration:
                 self.note(p, "Konventions-Plugin wendet org.jetbrains.kotlin.android an – entfernen")
             contents.append(new)
         uses_res_values = any(re.search(r'\bresValue\s*\(', c) for c in contents)
+        if getattr(self, "catalog_text", None):
+            pv = re.search(r'(?m)^\s*paparazzi\s*=\s*"([^"]+)"', section(self.catalog_text, "versions"))
+            if pv and paparazzi_too_old(pv.group(1)):
+                self.note(self.catalog_path, f"Paparazzi {pv.group(1)} läuft nicht mit AGP 9 – auf 2.0.0-alpha05 oder neuer anheben")
         still = set()
         for c in contents:
             still.update(a.replace("-", ".").replace("_", ".") for a in re.findall(r'libs\.plugins\.([\w.]+)', c))
@@ -324,6 +484,27 @@ class Migration:
         self.wrapper()
         if not files:
             self.notes.append("Keine build.gradle(.kts) gefunden – ist das ein Gradle-Projekt?")
+
+
+def norm(alias):
+    return alias.replace("-", ".").replace("_", ".")
+
+
+def norm_aliases(text):
+    return re.sub(r"libs\.[\w.-]+", lambda m: norm(m.group(0)), text)
+
+
+def alias_pattern(alias):
+    return r"[.\-_]".join(re.escape(p) for p in alias.split("."))
+
+
+def paparazzi_too_old(v):
+    """AGP 9 braucht Paparazzi 2.0.0-alpha05 oder neuer."""
+    base = vtuple(v.split("-")[0])
+    if base != (2, 0, 0):
+        return base < (2, 0, 0)
+    m = re.search(r"alpha(\d+)", v)
+    return bool(m) and int(m.group(1)) < 5
 
 
 def section(toml, name):
@@ -420,7 +601,8 @@ def main():
     elif not mig.apply and mig.changes:
         print("\nMit 'apply' umstellen (vorher committen). Danach einen Gradle-Sync bzw. Build starten.")
     else:
-        print(f"\nDanach: Gradle-Build starten. Voraussetzungen: JDK 17, Gradle {vstr(MIN_GRADLE)}, Build-Tools {vstr(MIN_BUILD_TOOLS)}.")
+        print(f"\nDanach prüfen (ohne clean): Gradle-Sync, ./gradlew help, ./gradlew build --dry-run. "
+              f"Voraussetzungen: JDK 17, Gradle {vstr(MIN_GRADLE)}, Build-Tools {vstr(MIN_BUILD_TOOLS)}.")
     return 0
 
 

@@ -107,6 +107,10 @@ sealed interface AiSettingsUiEvent {
     data object SignInOpenRouter : AiSettingsUiEvent
     /** OpenRouter-Verbrauch neu abfragen. */
     data object RefreshOpenRouterUsage : AiSettingsUiEvent
+    /** Rückleitungsadresse aus dem Browser nachreichen (wenn sie die App nicht erreicht hat). */
+    data class PasteOpenRouterCallback(val url: String) : AiSettingsUiEvent
+    /** Laufende OpenRouter-Anmeldung abbrechen. */
+    data object CancelOpenRouterSignIn : AiSettingsUiEvent
     /** Der Hinweis wurde angezeigt. */
     data object MessageShown : AiSettingsUiEvent
 }

@@ -3040,4 +3040,7 @@
     <string name="settings_handle_style">Selection handles</string>
     <string name="settings_handle_drop">Drop</string>
     <string name="settings_handle_side_drop">Side drop</string>
+    <string name="aiset_openrouter_paste_hint">Browser shows a “localhost” address and nothing happens? Android paused the app in the background. Copy the full address from the browser\'s address bar and paste it here – or simply type your API key into the field above.</string>
+    <string name="aiset_openrouter_paste_apply">Complete sign-in</string>
+    <string name="aiset_openrouter_paste_invalid">That is not the sign-in address of this attempt (…/callback?code=…).</string>
 </resources>

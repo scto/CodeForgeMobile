@@ -16,9 +16,12 @@ Plugins (`com.codeforge.plugin.<name>.formatter|lsp|tool`, Publisher `codeforge`
   * `agp9-migrate` – Umstellung auf Android Gradle Plugin 9.0: AGP-Version (Catalog, `plugins`, `buildscript`),
     Gradle-Wrapper ≥ 9.1.0, Kotlin ≥ 2.2.10, `buildToolsVersion` ≥ 36.0.0, eingebautes Kotlin (Plugin
     `org.jetbrains.kotlin.android`/`kotlin-android` entfernen, `android.kotlinOptions` → `kotlin.compilerOptions`),
-    kapt → `com.android.legacy-kapt`, `dexOptions` entfernen, `CommonExtension<…>` → `CommonExtension`, in AGP 9
+    KSP ≥ 2.3.6, Hilt ≥ 2.59.2, `kapt(…)` → `ksp(…)` für KSP-fähige Prozessoren (bekannte Liste bzw. JAR im
+    Gradle-Cache), übrige kapt → `com.android.legacy-kapt`, `buildFeatures.buildConfig = true` bei
+    `buildConfigField`, Übergangsschalter (`builtInKotlin`, `uniquePackageNames`, `enableAppCompileTimeRClass`,
+    `newDsl` ohne alte Variant-API) entfernen, `dexOptions` entfernen, `CommonExtension<…>` → `CommonExtension`, in AGP 9
     entfernte `gradle.properties`-Schalter, `resvalues=true` wenn `resValue()` genutzt wird. Meldet alte Variant-API,
-    `BaseExtension`, `kotlin.sourceSets`, KMP + Android im selben Modul, KSP-Version und Opt-outs. Eingabe
+    `BaseExtension`, `kotlin.sourceSets`, KMP + Android im selben Modul, `addCustomBuildConfigFields`, Paparazzi < 2.0.0-alpha05 und Opt-outs (Abgleich mit Googles Skill `agp-9-upgrade`, github.com/android/skills). Eingabe
     `check|apply [version]` (Standard 9.0.1); Tests: `python3 -m unittest tool-plugins/scripts/test_agp9_migrate.py`.
   * `catalog-migrate` – hartcodierte Abhängigkeiten → `gradle/libs.versions.toml`; Modus `check`/`apply`.
   * `unused-resources` – unbenutzte Ressourcen finden, Dateien auf Wunsch löschen.

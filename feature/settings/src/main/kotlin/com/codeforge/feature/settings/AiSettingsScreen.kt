@@ -286,6 +286,7 @@ private fun OpenRouterAccountRow(state: AiProviderState, onEvent: (AiSettingsUiE
             }
         }
     }
+    if (state.signingIn) OpenRouterPasteFallback(onEvent)
     state.usage?.let { u ->
         val lines = listOfNotNull(
             u.freeRequestsLimit?.let { stringRes(R.string.aiset_openrouter_free, u.freeRequestsUsed ?: 0, it) },
@@ -296,6 +297,36 @@ private fun OpenRouterAccountRow(state: AiProviderState, onEvent: (AiSettingsUiE
         Text(lines.joinToString("\n"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     if (state.usageState is AiCheckState.Failure) CheckResult(state.usageState, success = { it })
+}
+
+// Rückfall, wenn die Rückleitung die App nicht erreicht (Android friert Apps im Hintergrund ein): Adresse aus der
+// Adresszeile des Browsers kopieren und hier einfügen.
+@Composable
+private fun OpenRouterPasteFallback(onEvent: (AiSettingsUiEvent) -> Unit) {
+    var pasted by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf("") }
+    Text(
+        stringRes(R.string.aiset_openrouter_paste_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    OutlinedTextField(
+        value = pasted,
+        onValueChange = { pasted = it },
+        placeholder = { Text("http://localhost:…/callback?code=…", fontFamily = FontFamily.Monospace) },
+        singleLine = true,
+        textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+        modifier = Modifier.fillMaxWidth()
+    )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        androidx.compose.material3.FilledTonalButton(
+            onClick = { onEvent(AiSettingsUiEvent.PasteOpenRouterCallback(pasted)) },
+            enabled = pasted.contains("code=")
+        ) { Text(stringRes(R.string.aiset_openrouter_paste_apply)) }
+        Spacer(modifier = Modifier.width(8.dp))
+        androidx.compose.material3.TextButton(onClick = { onEvent(AiSettingsUiEvent.CancelOpenRouterSignIn) }) {
+            Text(stringRes(R.string.common_abbrechen))
+        }
+    }
 }
 
 @Composable

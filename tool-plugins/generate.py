@@ -170,7 +170,7 @@ TOOLS = [
     ("readme", "README-Generator", "Erzeugt eine README.md aus dem Projekt (Name, Module, Technik, SDK-Werte, Build-Befehle, Lizenz) auf Deutsch oder Englisch. Eine vorhandene README.md bleibt unangetastet (dann entsteht README.generated.md).",
      "generate", "README.md erstellen", "Sprache wählen; Inhalt aus den Gradle-Dateien abgeleitet", "readme.py",
      README_PROMPT, None, [PY], 30),
-    ("agp9-migrate", "AGP-9-Migration", "Stellt ein Android-Projekt auf Android Gradle Plugin 9.0 um: AGP-, Gradle- (9.1) und Kotlin-Version (2.2.10), eingebautes Kotlin (Plugin kotlin-android entfernen, kotlinOptions -> kotlin.compilerOptions), kapt -> legacy-kapt, entfernte gradle.properties-Schalter und DSL (dexOptions, CommonExtension<…>); meldet alte Variant-API und andere Handarbeit.",
+    ("agp9-migrate", "AGP-9-Migration", "Stellt ein Android-Projekt auf Android Gradle Plugin 9.0 um: AGP-, Gradle- (9.1) und Kotlin-Version (2.2.10), eingebautes Kotlin (Plugin kotlin-android entfernen, kotlinOptions -> kotlin.compilerOptions), KSP (2.3.6) und Hilt (2.59.2), kapt -> KSP für KSP-fähige Prozessoren (sonst legacy-kapt), buildFeatures.buildConfig, entfernte bzw. Übergangs-Schalter in gradle.properties und DSL (dexOptions, CommonExtension<…>); meldet alte Variant-API, buildConfigField, Paparazzi und andere Handarbeit. Schritte nach Googles Skill agp-9-upgrade.",
      "migrate", "Auf AGP 9 migrieren", "Prüfen (Bericht) oder Anwenden; optional Zielversion, z. B. 9.0.1", "agp9_migrate.py",
      dict(MODE_PROMPT, textLabel="AGP-Version (leer = 9.0.1)", textHint="9.0.1"),
      "Vor dem Umstellen (apply) bitte committen. Mit check gibt es nur einen Bericht.", [PY], 120),

@@ -560,7 +560,7 @@ gh_find_asset() {
 # Releases eines Repos als JSON (bis zu 3 Seiten à 100), 6 Stunden zwischengespeichert (schont das API-Limit von 60/Stunde)
 gh_releases_json() {
   local repo=$1 f="$TMP/.cfsdk-gh-${1//\//_}.json" json="[]" part page
-  if [ -s "$f" ] && [ -n "$(find "$f" -mmin -360 2>/dev/null)" ]; then cat "$f"; return 0; fi
+  if [ -z "${CFSDK_REFRESH:-}" ] && [ -s "$f" ] && [ -n "$(find "$f" -mmin -360 2>/dev/null)" ]; then cat "$f"; return 0; fi
   for page in 1 2 3; do
     part=$(gh_api "https://api.github.com/repos/$repo/releases?per_page=100&page=$page" 2>/dev/null) || { json=""; break; }
     printf '%s' "$part" | jq -e 'type == "array"' >/dev/null 2>&1 || { json=""; break; }
@@ -646,10 +646,18 @@ build_manifest() {
   m="$m"$'\n'"$dyn"
   case "$MANIFEST_URL" in
     *@*) ;; # nicht ersetzter Platzhalter
-    *) remote=$(curl -fsSL --max-time 20 "$MANIFEST_URL" 2>/dev/null | tr -d '\r' | grep -v '^[[:space:]]*#' | grep '|' || true) ;;
+    *) remote=$(manifest_remote) ;;
   esac
   [ -n "$remote" ] && m="$m"$'\n'"$remote"
   printf '%s\n' "$m"
+}
+
+# Entferntes Manifest, 6 Stunden zwischengespeichert (CFSDK_REFRESH=1 erzwingt neu); ohne Netz die letzte Fassung.
+manifest_remote() {
+  local f="$TMP/.cfsdk-manifest.txt" body
+  if [ -z "${CFSDK_REFRESH:-}" ] && [ -s "$f" ] && [ -n "$(find "$f" -mmin -360 2>/dev/null)" ]; then cat "$f"; return 0; fi
+  body=$(curl -fsSL --max-time 20 "$MANIFEST_URL" 2>/dev/null | tr -d '\r' | grep -v '^[[:space:]]*#' | grep '|' || true)
+  if [ -n "$body" ]; then printf '%s\n' "$body" > "$f"; printf '%s\n' "$body"; elif [ -s "$f" ]; then cat "$f"; fi
 }
 
 # gh_fetch_extract <zielordner>: lädt GH_URL, prüft ggf. die Prüfsumme, entpackt nach <zielordner>; setzt GH_ROOT

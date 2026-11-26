@@ -23,6 +23,15 @@ import kotlinx.coroutines.flow.Flow
 interface SdkRepository {
     /** Listet die verfügbaren SDK-Pakete. */
     suspend fun listAvailablePackages(): Result<List<ToolItem>>
+
+    /**
+     * Wie [listAvailablePackages]; ohne [refresh] darf eine kurz zuvor geladene Liste wiederverwendet werden,
+     * mit [refresh] werden auch die Zwischenspeicher der Quellen (Release-Listen, Manifest) umgangen.
+     */
+    suspend fun listAvailablePackages(refresh: Boolean): Result<List<ToolItem>> = listAvailablePackages()
+
+    /** Zuletzt geladene Liste ohne Netz und ohne Skriptstart (für die sofortige Anzeige); `null` = keine. */
+    suspend fun cachedPackages(): List<ToolItem>? = null
     /**
      * Installiert ein SDK-Paket und streamt den Fortschritt.
      *
