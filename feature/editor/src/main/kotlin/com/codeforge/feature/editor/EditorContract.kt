@@ -109,6 +109,8 @@ data class EditorUiState(
     val outlineFilter: String = "",
     val isLoadingOutline: Boolean = false,
     val isReferencesSheetVisible: Boolean = false,
+    /** Aktionsblatt eines Tests aus der Randspalte, sonst `null`. */
+    val testActions: com.codeforge.feature.editor.overlay.TestActionsState? = null,
     val referencesList: List<LspLocation> = emptyList(),
     val referencesSymbol: String = "",
     /** Git-Gutter: Änderungen gegenüber HEAD je Dateipfad (nur gespeicherter Stand). */
@@ -352,8 +354,14 @@ sealed interface EditorUiEvent {
     data object DismissSignatureHelp : EditorUiEvent
     /** Fundstelle öffnen. */
     data class SelectLocation(val location: LspLocation) : EditorUiEvent
-    /** Test ausführen. */
+    /** Test-Symbol in der Randspalte angetippt: Unit-Tests laufen sofort, Screenshot-Tests öffnen das Aktionsblatt. */
     data class RunTestTarget(val target: com.codeforge.feature.editor.overlay.TestTarget) : EditorUiEvent
+    /** Aktion im Test-Aktionsblatt gewählt. */
+    data class TestActionChosen(val action: com.codeforge.feature.editor.overlay.TestGutterAction) : EditorUiEvent
+    /** Test-Aktionsblatt schließen. */
+    data object DismissTestActions : EditorUiEvent
+    /** Ergebnisbild eines Screenshot-Tests öffnen. */
+    data class OpenTestResultImage(val path: String) : EditorUiEvent
     /** LSP-Sitzungen anzeigen/verbergen. */
     data object ToggleLspSessionsDialog : EditorUiEvent
     /** LSP-Sitzung neu starten. */
@@ -451,6 +459,8 @@ sealed interface EditorUiEffect {
     ) : EditorUiEffect
     /** Zu einer Route navigieren. */
     data class NavigateTo(val route: String) : EditorUiEffect
+    /** Datei mit einer anderen App öffnen (z. B. HTML-Bericht im Browser). */
+    data class OpenExternal(val path: String, val mimeType: String) : EditorUiEffect
     /** Ergebnis einer Editor-Aktion übernehmen: neuer Text (`null` = unverändert), danach Auswahl/Cursor. */
     data class ApplyEditorText(val newText: String?, val selectionStart: Int?, val selectionEnd: Int?) : EditorUiEffect
 }

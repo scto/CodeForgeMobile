@@ -3043,4 +3043,17 @@
     <string name="aiset_openrouter_paste_hint">Browser shows a “localhost” address and nothing happens? Android paused the app in the background. Copy the full address from the browser\'s address bar and paste it here – or simply type your API key into the field above.</string>
     <string name="aiset_openrouter_paste_apply">Complete sign-in</string>
     <string name="aiset_openrouter_paste_invalid">That is not the sign-in address of this attempt (…/callback?code=…).</string>
+    <string name="test_gutter_run">Run test</string>
+    <string name="test_gutter_validate">Check screenshots against references</string>
+    <string name="test_gutter_update_references">Add or update reference images</string>
+    <string name="test_gutter_show_results">Show results (reference, actual, diff)</string>
+    <string name="test_gutter_open_report">Open HTML report</string>
+    <string name="test_gutter_no_results">No result images yet – check or record the screenshots first.</string>
+    <string name="test_gutter_no_report">No report yet – run the check first.</string>
+    <string name="test_gutter_module_scope">This tool cannot filter single tests: the action runs for the whole module.</string>
+    <string name="test_gutter_tool_compose_plugin">Compose screenshot plugin (no longer maintained)</string>
+    <string name="test_gutter_tool_test_suite">AGP test suite</string>
+    <string name="test_gutter_tool_unit">Unit test</string>
+    <string name="test_gutter_no_module">No Gradle module found for this file.</string>
+    <string name="test_gutter_report_open_failed">Cannot open the report with another app: %1$s</string>
 </resources>

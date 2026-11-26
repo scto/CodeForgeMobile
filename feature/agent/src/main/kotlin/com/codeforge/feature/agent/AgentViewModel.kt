@@ -68,6 +68,7 @@ class AgentViewModel @Inject constructor(
     private val pluginToolRunner: PluginToolRunner? = null,
     private val previewRenderer: com.codeforge.core.domain.repository.ComposePreviewRenderer? = null,
     private val codeFormatter: com.codeforge.core.domain.repository.CodeFormatterRepository? = null,
+    private val builtInSkills: BuiltInAgentSkills? = null,
     private val llmFactory: AgentLlmFactory,
 ) : ViewModel() {
 
@@ -286,7 +287,8 @@ class AgentViewModel @Inject constructor(
         val trusted = ctx.isEmpty || connections.isContextTrusted(root, ctx.fingerprint())
         val pending = if (trusted) null else ctx.summary()
         if (_state.value.rootPath == root.path && _state.value.untrustedContext != pending) _state.update { it.copy(untrustedContext = pending) }
-        if (trusted) ctx else ProjectContext.EMPTY
+        // Mitgelieferte Skills der App brauchen keine Freigabe; Projekt-Skills gleichen Namens haben Vorrang.
+        (if (trusted) ctx else ProjectContext.EMPTY).withBuiltInSkills(builtInSkills?.skills().orEmpty())
     }
 
     private fun trustContext() {

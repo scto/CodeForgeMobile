@@ -261,4 +261,6 @@ sealed interface BuildUiEffect {
     data class SaveText(val text: String, val fileName: String) : BuildUiEffect
     /** APK-Analyse öffnen. */
     data class OpenApkAnalyzer(val apkPath: String) : BuildUiEffect
+    /** Build-Panel einblenden (z. B. nach einem Testlauf aus dem Editor). */
+    data object ShowPanel : BuildUiEffect
 }

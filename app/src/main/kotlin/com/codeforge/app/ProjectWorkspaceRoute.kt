@@ -199,6 +199,7 @@ fun ProjectWorkspaceRoute(
                 is BuildUiEffect.LaunchIntent -> {
                     context.startActivity(effect.intent)
                 }
+                BuildUiEffect.ShowPanel -> showBuildSheet = true
                 is BuildUiEffect.OpenApkAnalyzer -> {
                     showBuildSheet = false
                     onNavigate(Routes.apkAnalyzer(effect.apkPath))

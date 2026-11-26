@@ -223,9 +223,14 @@ fun SoraCodeEditor(
     }
     val scannedTests = remember(path, content) { TestTargetScanner.scan(path, content) }
     val testTargets = remember(scannedTests, pluginTests) { scannedTests + pluginTests }
-    // Farbmarken zeichnet sora selbst (ColorInlayHint); das Overlay trägt nur noch Chips.
-    val lineOverlays = remember(updateAnnotations, testTargets) {
-        buildLineOverlays(emptyList(), updateAnnotations.map { it.line to it.update }, testTargets)
+    val currentOnTestTargetClick by androidx.compose.runtime.rememberUpdatedState(onTestTargetClick)
+    // Test-Symbole in der Randspalte (sora-Symbolspalte), Tipp öffnet die Test-Aktionen.
+    val gutterIcons = remember(path) {
+        com.codeforge.feature.editor.overlay.TestGutterIcons(context) { currentOnTestTargetClick(it) }
+    }
+    // Farbmarken zeichnet sora selbst (ColorInlayHint), Tests stehen in der Randspalte; das Overlay trägt Update-Chips.
+    val lineOverlays = remember(updateAnnotations) {
+        buildLineOverlays(emptyList(), updateAnnotations.map { it.line to it.update })
     }
     val inlaySource = remember(path) { SoraInlayHintSource() }
     val currentTabSize by androidx.compose.runtime.rememberUpdatedState(settings.tabSize)
@@ -359,6 +364,7 @@ fun SoraCodeEditor(
                 overlayEditor = this
 
                 inlaySource.attach(this)
+                gutterIcons.attach(this)
                 setFormatterProvider(PasteReindentFormatter.provider { currentTabSize })
                 subscribeEvent<io.github.rosemoe.sora.event.CreateContextMenuEvent> { event, _ ->
                     addIdeContextMenu(event.menu, currentTextActions, currentOnTextAction)
@@ -378,6 +384,7 @@ fun SoraCodeEditor(
                 appliedDiagnostics.set(diagnostics)
             }
             inlaySource.update(editor, if (settings.inlayHints) inlayHints else emptyList(), colorMatches)
+            gutterIcons.update(editor, testTargets)
         }
     )
 
@@ -386,8 +393,7 @@ fun SoraCodeEditor(
         editor = overlayEditor,
         tick = overlayTick,
         overlays = lineOverlays,
-        onUpdateChipClick = onUpdateChipClick,
-        onTestTargetClick = onTestTargetClick
+        onUpdateChipClick = onUpdateChipClick
     )
 
     com.codeforge.feature.editor.overlay.ConflictOverlayLayer(
@@ -419,7 +425,10 @@ fun SoraCodeEditor(
         tick = overlayTick,
         breakpointsEnabled = breakpointsEnabled,
         onToggleBreakpoint = onToggleBreakpoint,
-        onEditBreakpoint = onEditBreakpoint
+        onEditBreakpoint = onEditBreakpoint,
+        onSideIconTap = { line ->
+            testTargets.firstOrNull { it.line == line }?.let { currentOnTestTargetClick(it); true } ?: false
+        }
     )
     }
 

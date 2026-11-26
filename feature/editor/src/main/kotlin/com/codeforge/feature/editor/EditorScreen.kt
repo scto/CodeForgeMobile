@@ -389,6 +389,14 @@ fun EditorRoute(
                     controller?.applyTextChange(effect.formattedText)
                 }
                 is EditorUiEffect.NavigateTo -> onNavigate(effect.route)
+                is EditorUiEffect.OpenExternal -> {
+                    val opened = runCatching {
+                        context.startActivity(EditorFileProvider.buildOpenWithIntent(context, effect.path, effect.mimeType))
+                    }.isSuccess
+                    if (!opened) {
+                        snackbarHostState.showSnackbar(Res.string(R.string.test_gutter_report_open_failed, effect.path))
+                    }
+                }
                 is EditorUiEffect.ApplyEditorText -> {
                     effect.newText?.let { controller?.applyTextChange(it) }
                     if (effect.selectionStart != null && effect.selectionEnd != null) {
@@ -729,6 +737,15 @@ fun EditorRoute(
 
     uiState.hoverText?.let { text ->
         HoverSheet(text = text, palette = controller?.hoverPalette(), onDismiss = { viewModel.onEvent(EditorUiEvent.DismissHover) })
+    }
+
+    uiState.testActions?.let { actions ->
+        com.codeforge.feature.editor.overlay.TestActionsSheet(
+            state = actions,
+            onAction = { viewModel.onEvent(EditorUiEvent.TestActionChosen(it)) },
+            onOpenImage = { viewModel.onEvent(EditorUiEvent.OpenTestResultImage(it)) },
+            onDismiss = { viewModel.onEvent(EditorUiEvent.DismissTestActions) }
+        )
     }
 
     if (uiState.isReferencesSheetVisible) {

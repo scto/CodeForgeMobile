@@ -83,6 +83,14 @@ class TestRunnerRepositoryImpl @Inject constructor(
             }
     }
 
+    override fun runCommand(projectRoot: File, command: String): Flow<BuildEvent> =
+        gradleBuildRepository.runTask(command)
+            .onStart { _isRunning.value = true }
+            .onCompletion {
+                _isRunning.value = false
+                loadLastResults(projectRoot)
+            }
+
     override fun rerunFailedTests(
         projectRoot: File,
         variant: String

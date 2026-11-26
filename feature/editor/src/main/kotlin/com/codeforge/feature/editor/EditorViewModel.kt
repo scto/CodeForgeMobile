@@ -39,6 +39,10 @@ import com.codeforge.feature.editor.palette.buildPaletteItems
 import com.codeforge.feature.editor.palette.codeActionKindRank
 import com.codeforge.feature.editor.plugin.BuiltInEditorActions
 import com.codeforge.feature.editor.plugin.PluginEditorBridge
+import com.codeforge.feature.editor.overlay.TestActionsState
+import com.codeforge.feature.editor.overlay.TestCommands
+import com.codeforge.feature.editor.overlay.TestGutterAction
+import com.codeforge.feature.editor.overlay.TestModuleResolver
 import com.codeforge.feature.editor.overlay.TestTarget
 import com.codeforge.feature.editor.plugin.discoverTests
 import com.codeforge.feature.editor.plugin.runTests
@@ -832,11 +836,13 @@ class EditorViewModel @Inject constructor(
             }
             is EditorUiEvent.RunTestTarget -> {
                 val ref = event.target.pluginRef
-                if (ref != null) {
-                    runPluginTests(ref, listOf(event.target))
-                } else {
-                    viewModelScope.launch { testRunRequestBridge?.requestRunTest(testFilter = event.target.filterTarget) }
-                }
+                if (ref != null) runPluginTests(ref, listOf(event.target)) else openTestActions(event.target)
+            }
+            is EditorUiEvent.TestActionChosen -> onTestAction(event.action)
+            EditorUiEvent.DismissTestActions -> _uiState.update { it.copy(testActions = null) }
+            is EditorUiEvent.OpenTestResultImage -> {
+                _uiState.update { it.copy(testActions = null) }
+                viewModelScope.launch { openFileRequestBridge.requestOpen(event.path) }
             }
             EditorUiEvent.RunPluginFileTests -> {
                 _uiState.update { it.copy(commandPalette = null) }
@@ -1435,6 +1441,49 @@ class EditorViewModel @Inject constructor(
 
     private fun withResults(path: String?, tests: List<TestTarget>): List<TestTarget> = tests.map { t ->
         t.copy(passed = pluginTestResults["$path|${t.filterTarget}"] ?: pluginTestResults["$path|${t.label}"])
+    }
+
+    // Modul und Screenshot-Werkzeug ermitteln; Unit-Tests laufen sofort, Screenshot-Tests zeigen das Aktionsblatt.
+    private fun openTestActions(target: TestTarget) = viewModelScope.launch {
+        val path = _uiState.value.activeFile?.path ?: return@launch
+        val root = projectRoot.value?.let(::File)
+        val module = withContext(Dispatchers.IO) { root?.let { TestModuleResolver.resolve(it, path) } }
+        val actions = TestCommands.actionsFor(target, module)
+        if (actions == listOf(TestGutterAction.RUN)) {
+            testRunRequestBridge?.requestRunTest(moduleGradlePath = module?.gradlePath, testFilter = target.filterTarget)
+        } else {
+            _uiState.update { it.copy(testActions = TestActionsState(target, module, actions)) }
+        }
+    }
+
+    private fun onTestAction(action: TestGutterAction) {
+        val state = _uiState.value.testActions ?: return
+        val module = state.module
+        if (module == null) {
+            viewModelScope.launch { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.test_gutter_no_module))) }
+            return
+        }
+        when (action) {
+            TestGutterAction.SHOW_RESULTS -> viewModelScope.launch {
+                val images = withContext(Dispatchers.IO) { TestCommands.resultImages(module, state.target).map { it.absolutePath } }
+                _uiState.update { s -> s.copy(testActions = s.testActions?.copy(images = images)) }
+            }
+            TestGutterAction.OPEN_REPORT -> viewModelScope.launch {
+                val report = withContext(Dispatchers.IO) { TestCommands.report(module) }
+                _effect.emit(
+                    if (report != null) {
+                        EditorUiEffect.OpenExternal(report.absolutePath, "text/html")
+                    } else {
+                        EditorUiEffect.ShowSnackbar(Res.string(R.string.test_gutter_no_report))
+                    }
+                )
+            }
+            else -> {
+                val command = TestCommands.command(action, state.target, module) ?: return
+                _uiState.update { it.copy(testActions = null) }
+                viewModelScope.launch { testRunRequestBridge?.requestRunTest(gradleCommand = command) }
+            }
+        }
     }
 
     private fun runPluginTests(ref: String, targets: List<TestTarget>) {

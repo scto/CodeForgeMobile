@@ -11,6 +11,18 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Neu / Added
+- **Test-Symbole in der Randspalte des Editors (wie in Android Studio):** neben Testklassen, `@Test`- und
+  `@PreviewTest`-Funktionen steht ein Symbol in der Symbolspalte; Unit-Tests laufen per Tipp im richtigen Modul,
+  Screenshot-Tests (Roborazzi, Compose-Screenshot-Plugin, AGP-Test-Suites) öffnen ein Blatt: mit Referenzbildern
+  vergleichen, Referenzbilder aktualisieren, Ergebnisbilder (Referenz/Tatsächlich/Unterschied) ansehen, HTML-Bericht
+  öffnen. Das Build-Panel öffnet sich beim Start. Ersetzt die Test-Chips am Zeilenende.
+  / Gutter test icons with run, screenshot validate/update and result viewing.
+- **KI-Agent: Googles Skill `agp-9-upgrade` mitgeliefert** (Apache-2.0, unverändert, mit Lizenz und Herkunft);
+  braucht keine Freigabe, ein Projekt-Skill gleichen Namens hat Vorrang. `use_skill` lädt jetzt auch
+  Referenzdateien aus Unterordnern (`file`), mehrzeilige `description` im Frontmatter wird vollständig gelesen.
+  / Agent ships Google's agp-9-upgrade skill; use_skill can load reference files.
+
 ### Geändert / Changed
 - **SDK-Manager öffnet sofort:** zuletzt geladene Paketliste wird sofort gezeigt und im Hintergrund aktualisiert,
   5 Minuten im Speicher wiederverwendet (nach Installation/Deinstallation neu); das Skript speichert auch das

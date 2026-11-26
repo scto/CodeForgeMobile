@@ -53,6 +53,44 @@ class ProjectContextTest {
     }
 
     @Test
+    fun `mitgelieferte Skills`() = runBlocking {
+        val builtIn = File(root, "builtin/agp-9-upgrade").apply { mkdirs() }
+        File(builtIn, "SKILL.md").writeText(
+            """
+                |---
+                |name: agp-9-upgrade
+                |description: Upgrades a project
+                |  to AGP 9.
+                |metadata:
+                |  author: Google LLC
+                |---
+                |STEPS
+            """.trimMargin()
+        )
+        File(builtIn, "references/ksp.md").apply { parentFile.mkdirs() }.writeText("KSP")
+        File(root, "secret.txt").writeText("nope")
+        val skills = ProjectContext.loadSkills(File(root, "builtin"))
+        assertEquals("Upgrades a project to AGP 9.", skills.single().description)
+
+        val own = """
+            |---
+            |name: agp-9-upgrade
+            |description: eigene
+            |---
+            |OWN
+        """.trimMargin()
+        skill(".codeforge/skills/agp-9-upgrade", own)
+        val merged = ProjectContext.load(root).withBuiltInSkills(skills)
+        assertEquals("eigene", merged.skills.single().description)
+
+        val tool = ProjectContext.EMPTY.withBuiltInSkills(skills).tools().single()
+        val listing = tool.execute(buildJsonObject { put("name", "agp-9-upgrade") })
+        assertTrue(listing.content.contains("references/ksp.md"))
+        assertEquals("KSP", tool.execute(buildJsonObject { put("name", "agp-9-upgrade"); put("file", "references/ksp.md") }).content)
+        assertTrue(tool.execute(buildJsonObject { put("name", "agp-9-upgrade"); put("file", "../../secret.txt") }).isError)
+    }
+
+    @Test
     fun `leerer Kontext ergibt nichts`() {
         val ctx = ProjectContext.load(root)
         assertEquals("", ctx.promptSection())

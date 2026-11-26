@@ -30,9 +30,16 @@ Der Test-Läufer ermöglicht das Ausführen von Unit-Tests (alle Tests, einzelne
   - Erkennung von `@Test`-annotierten Methoden in Kotlin- und Java-Dateien.
   - Erkennung von Testklassen (`class ...Test`, `class ...Tests`, `class ...Spec`).
   - Maskierung von Kommentaren (`// ...`, `/* ... */`) und String-Literalen, um Fehlalarme (False Positives) auszuschließen.
-- **`EditorOverlay` & `SoraCodeEditor`**:
-  - Anzeige von `TestRunChip`-Gutter-Overlays neben Testklassen und `@Test`-Methoden.
-  - Auslösen von `TestRunRequest` über `TestRunRequestBridge`.
+  - Erkennung von Screenshot-Tests: `@PreviewTest` (Compose Preview Screenshot Testing) und Roborazzi
+    (`captureRoboImage` in der Datei).
+- **`TestGutterIcons` & `SoraCodeEditor`**:
+  - Test-Symbole in der sora-Symbolspalte der Randspalte (▶, bestanden/fehlgeschlagen, Bild für Screenshot-Tests).
+  - Tipp: Unit-Tests laufen sofort (mit Modul aus dem Dateipfad), Screenshot-Tests öffnen ein Aktionsblatt
+    (vergleichen, Referenzbilder aktualisieren, Ergebnisbilder, HTML-Bericht).
+  - Auslösen von `TestRunRequest` über `TestRunRequestBridge` (optional mit fertigem `gradleCommand`); das Build-Panel
+    öffnet sich.
+- **`TestModulesTest`**: Modul- und Werkzeugerkennung (Roborazzi, `com.android.compose.screenshot`, AGP-Test-Suites),
+  Gradle-Aufrufe und Ergebnisbilder.
 
 ### Repository & UI-Logik (`:feature:build`)
 - **`TestRunnerRepositoryImplTest`**:

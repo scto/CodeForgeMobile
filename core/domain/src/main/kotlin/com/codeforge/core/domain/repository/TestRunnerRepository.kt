@@ -36,4 +36,7 @@ interface TestRunnerRepository {
         projectRoot: File,
         variant: String = "Debug"
     ): Flow<BuildEvent>
+
+    /** Führt einen fertigen Gradle-Testaufruf aus (z. B. Screenshot-Tests) und liest danach die Ergebnisse. */
+    fun runCommand(projectRoot: File, command: String): Flow<BuildEvent>
 }

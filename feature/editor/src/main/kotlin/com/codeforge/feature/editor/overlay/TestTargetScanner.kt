@@ -13,7 +13,9 @@ data class TestTarget(
     /** Quelle `pluginId/providerId`, wenn der Test von einem Plugin stammt; sonst Gradle-Test. */
     val pluginRef: String? = null,
     /** Ergebnis des letzten Laufs (`null` = noch nicht gelaufen). */
-    val passed: Boolean? = null
+    val passed: Boolean? = null,
+    /** Screenshot-Test (`@PreviewTest` oder Roborazzi `captureRoboImage`). */
+    val screenshot: Boolean = false
 )
 
 /** Findet Tests im Quelltext. */
@@ -27,6 +29,7 @@ object TestTargetScanner {
         "RepeatedTest",
         "TestFactory"
     )
+    private const val PREVIEW_TEST = "PreviewTest"
 
     /** Tests der Datei. */
     fun scan(path: String, content: String): List<TestTarget> {
@@ -42,20 +45,25 @@ object TestTargetScanner {
         var currentClassName = ""
         var currentClassLine = -1
         var pendingTestAnnotation = false
-        var testAnnotationLine = -1
+        var pendingScreenshot = false
+        // Roborazzi: jeder Test einer Datei mit captureRoboImage nimmt Screenshots auf.
+        val roborazzi = content.contains("captureRoboImage")
 
         for ((lineIdx, line) in cleanedLines.withIndex()) {
             val trimmed = line.trim()
             if (trimmed.isEmpty()) continue
 
-            // Check for annotations
-            val annotationNames = extractAnnotations(trimmed)
-            for (anno in annotationNames) {
-                val simpleAnno = anno.substringAfterLast('.')
-                if (simpleAnno in TEST_ANNOTATION_NAMES || anno in TEST_ANNOTATION_NAMES) {
+            // Annotationen: Test bzw. Screenshot-Test
+            when (testKind(extractAnnotations(trimmed))) {
+                AnnotationKind.TEST -> {
                     pendingTestAnnotation = true
-                    testAnnotationLine = lineIdx
+                    pendingScreenshot = pendingScreenshot || roborazzi
                 }
+                AnnotationKind.PREVIEW_TEST -> {
+                    pendingTestAnnotation = true
+                    pendingScreenshot = true
+                }
+                AnnotationKind.NONE -> {}
             }
 
             // Check for class declaration
@@ -67,20 +75,12 @@ object TestTargetScanner {
 
             // Check for function/method declaration
             val funMatch = extractFunctionName(trimmed, ext)
-            if (funMatch != null) {
-                if (pendingTestAnnotation) {
-                    val fullClass = if (packageName.isNotEmpty()) "$packageName.$currentClassName" else currentClassName
-                    val filterTarget = if (fullClass.isNotEmpty()) "$fullClass.$funMatch" else funMatch
-                    targets.add(
-                        TestTarget(
-                            line = lineIdx,
-                            label = funMatch,
-                            filterTarget = filterTarget,
-                            isClass = false
-                        )
-                    )
-                    pendingTestAnnotation = false
-                }
+            if (funMatch != null && pendingTestAnnotation) {
+                val fullClass = if (packageName.isNotEmpty()) "$packageName.$currentClassName" else currentClassName
+                val filterTarget = if (fullClass.isNotEmpty()) "$fullClass.$funMatch" else funMatch
+                targets += TestTarget(lineIdx, funMatch, filterTarget, isClass = false, screenshot = pendingScreenshot)
+                pendingTestAnnotation = false
+                pendingScreenshot = false
             }
         }
 
@@ -93,12 +93,28 @@ object TestTargetScanner {
                     line = currentClassLine,
                     label = currentClassName,
                     filterTarget = fullClass,
-                    isClass = true
+                    isClass = true,
+                    screenshot = targets.any { it.screenshot }
                 )
             )
         }
 
         return targets.sortedBy { it.line }
+    }
+
+    private enum class AnnotationKind { NONE, TEST, PREVIEW_TEST }
+
+    // Stärkste Test-Annotation der Zeile: @PreviewTest vor @Test.
+    private fun testKind(annotations: List<String>): AnnotationKind {
+        var kind = AnnotationKind.NONE
+        for (anno in annotations) {
+            val simple = anno.substringAfterLast('.')
+            when {
+                simple == PREVIEW_TEST -> return AnnotationKind.PREVIEW_TEST
+                simple in TEST_ANNOTATION_NAMES || anno in TEST_ANNOTATION_NAMES -> kind = AnnotationKind.TEST
+            }
+        }
+        return kind
     }
 
     private fun extractPackage(lines: List<String>): String {

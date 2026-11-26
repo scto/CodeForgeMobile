@@ -137,7 +137,8 @@ class BuildViewModel internal constructor(
             scope.launch {
                 bridge.runRequests.collect { req ->
                     _uiState.update { it.copy(activeTab = BuildTab.TESTS) }
-                    runTests(req.moduleGradlePath, req.testFilter)
+                    _effects.send(BuildUiEffect.ShowPanel)
+                    runTests(req.moduleGradlePath, req.testFilter, req.gradleCommand)
                 }
             }
         }
@@ -626,7 +627,7 @@ class BuildViewModel internal constructor(
     }
 
     /** Führt Tests aus. */
-    fun runTests(moduleGradlePath: String? = null, testFilter: String? = null) {
+    fun runTests(moduleGradlePath: String? = null, testFilter: String? = null, gradleCommand: String? = null) {
         val root = currentProjectRoot ?: return
         val runner = testRunnerRepository ?: return
         if (_uiState.value.isBuilding || _uiState.value.isTesting) {
@@ -659,7 +660,7 @@ class BuildViewModel internal constructor(
 
         activeBuildJob = scope.launch {
             try {
-                runner.runTests(root, moduleGradlePath, "Debug", testFilter).collect { event ->
+                testEvents(runner, root, moduleGradlePath, testFilter, gradleCommand).collect { event ->
                     when (event) {
                         is BuildEvent.Output -> {
                             synchronized(lineBufferLock) {
@@ -700,6 +701,19 @@ class BuildViewModel internal constructor(
                 _uiState.update { it.copy(isTesting = false) }
             }
         }
+    }
+
+    // Fertiger Gradle-Aufruf (Screenshot-Tests aus dem Editor) oder normaler Testlauf.
+    private fun testEvents(
+        runner: TestRunnerRepository,
+        root: File,
+        moduleGradlePath: String?,
+        testFilter: String?,
+        gradleCommand: String?
+    ) = if (gradleCommand.isNullOrBlank()) {
+        runner.runTests(root, moduleGradlePath, "Debug", testFilter)
+    } else {
+        runner.runCommand(root, gradleCommand)
     }
 
     /** Wiederholt fehlgeschlagene Tests. */

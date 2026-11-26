@@ -838,6 +838,18 @@ class BuildViewModelTest {
         assertEquals(BuildTab.TESTS, viewModel.uiState.value.activeTab)
     }
 
+    @Test
+    fun gradleCommandRequestRuns() = runBlocking {
+        fakeTestRunner.runTaskFlow = flowOf(BuildEvent.BuildFinished(success = true))
+        kotlinx.coroutines.withTimeoutOrNull(5_000) {
+            while (fakeTestRunner.commands.isEmpty()) {
+                fakeTestRunBridge.requestRunTest(gradleCommand = ":app:validateDebugScreenshotTest")
+                delay(100)
+            }
+        }
+        assertEquals(":app:validateDebugScreenshotTest", fakeTestRunner.commands.firstOrNull())
+    }
+
     private class FakeTestRunnerRepository : TestRunnerRepository {
         val _lastRunResult = MutableStateFlow<TestRunResult?>(null)
         override val lastRunResult: StateFlow<TestRunResult?> = _lastRunResult.asStateFlow()
@@ -846,6 +858,7 @@ class BuildViewModelTest {
         override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
         var runTaskFlow: Flow<BuildEvent> = flowOf(BuildEvent.BuildFinished(true))
+        val commands = mutableListOf<String>()
 
         override suspend fun loadLastResults(projectRoot: File): TestRunResult? {
             return _lastRunResult.value
@@ -866,14 +879,19 @@ class BuildViewModelTest {
         ): Flow<BuildEvent> {
             return runTaskFlow
         }
+
+        override fun runCommand(projectRoot: File, command: String): Flow<BuildEvent> {
+            commands += command
+            return runTaskFlow
+        }
     }
 
     private class FakeTestRunRequestBridge : TestRunRequestBridge {
         val _runRequests = MutableSharedFlow<TestRunRequest>(extraBufferCapacity = 4)
         override val runRequests: SharedFlow<TestRunRequest> = _runRequests.asSharedFlow()
 
-        override suspend fun requestRunTest(moduleGradlePath: String?, testFilter: String?) {
-            _runRequests.emit(TestRunRequest(moduleGradlePath, testFilter))
+        override suspend fun requestRunTest(moduleGradlePath: String?, testFilter: String?, gradleCommand: String?) {
+            _runRequests.emit(TestRunRequest(moduleGradlePath, testFilter, gradleCommand))
         }
     }
 }

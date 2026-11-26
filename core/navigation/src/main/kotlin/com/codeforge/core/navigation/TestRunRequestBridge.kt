@@ -12,7 +12,9 @@ import javax.inject.Singleton
  */
 data class TestRunRequest(
     val moduleGradlePath: String? = null,
-    val testFilter: String? = null
+    val testFilter: String? = null,
+    /** Fertiger Gradle-Aufruf (z. B. Screenshot-Tests); ersetzt Modul und Filter. */
+    val gradleCommand: String? = null
 )
 
 /** Wünsche, Tests zu starten. */
@@ -20,7 +22,7 @@ interface TestRunRequestBridge {
     /** Anforderungen zum Testlauf. */
     val runRequests: SharedFlow<TestRunRequest>
     /** Fordert einen Testlauf an (Modul und Filter optional). */
-    suspend fun requestRunTest(moduleGradlePath: String? = null, testFilter: String? = null)
+    suspend fun requestRunTest(moduleGradlePath: String? = null, testFilter: String? = null, gradleCommand: String? = null)
 }
 
 /** Standardimplementierung. */
@@ -29,7 +31,7 @@ class TestRunRequestBridgeImpl @Inject constructor() : TestRunRequestBridge {
     private val _runRequests = MutableSharedFlow<TestRunRequest>(extraBufferCapacity = 4)
     override val runRequests: SharedFlow<TestRunRequest> = _runRequests.asSharedFlow()
 
-    override suspend fun requestRunTest(moduleGradlePath: String?, testFilter: String?) {
-        _runRequests.emit(TestRunRequest(moduleGradlePath, testFilter))
+    override suspend fun requestRunTest(moduleGradlePath: String?, testFilter: String?, gradleCommand: String?) {
+        _runRequests.emit(TestRunRequest(moduleGradlePath, testFilter, gradleCommand))
     }
 }

@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,13 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
-import androidx.compose.ui.unit.sp
-import com.codeforge.core.resources.R
-import com.codeforge.core.resources.stringRes
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlin.math.roundToInt
@@ -60,21 +52,18 @@ import kotlin.math.roundToInt
 sealed interface OverlayItem {
     @Immutable data class Swatch(val argb: Int) : OverlayItem
     @Immutable data class UpdateChip(val update: DependencyUpdate) : OverlayItem
-    @Immutable data class TestRunChip(val target: TestTarget) : OverlayItem
 }
 
 /** Overlay-Elemente einer Zeile. */
 @Immutable
 data class LineOverlay(val line: Int, val items: List<OverlayItem>)
 
-/** Gruppiert Farben, Test-Starter und Update-Hinweise je Zeile. */
+/** Gruppiert Farben und Update-Hinweise je Zeile (Tests stehen als Symbol in der Randspalte). */
 fun buildLineOverlays(
     colors: List<ColorMatch>,
-    updates: List<Pair<Int, DependencyUpdate>>,
-    testTargets: List<TestTarget> = emptyList()
+    updates: List<Pair<Int, DependencyUpdate>>
 ): List<LineOverlay> {
     val byLine = sortedMapOf<Int, MutableList<OverlayItem>>()
-    testTargets.forEach { t -> byLine.getOrPut(t.line) { ArrayList() } += OverlayItem.TestRunChip(t) }
     updates.forEach { (line, u) -> byLine.getOrPut(line) { ArrayList() } += OverlayItem.UpdateChip(u) }
     colors.forEach { c -> byLine.getOrPut(c.line) { ArrayList() } += OverlayItem.Swatch(c.argb) }
     return byLine.map { (line, items) -> LineOverlay(line, items) }
@@ -106,8 +95,7 @@ internal fun EditorOverlayLayer(
     /** Zusätzlicher Anstoß (Scroll/Textänderung); die Positionen werden zusätzlich pro Frame abgeglichen. */
     tick: Int,
     overlays: List<LineOverlay>,
-    onUpdateChipClick: (DependencyUpdate) -> Unit,
-    onTestTargetClick: (TestTarget) -> Unit = {}
+    onUpdateChipClick: (DependencyUpdate) -> Unit
 ) {
     if (editor == null || overlays.isEmpty()) return
     val geometry = remember(editor) { EditorOverlayGeometry(editor) }
@@ -170,48 +158,12 @@ internal fun EditorOverlayLayer(
             ) {
                 for (item in overlay.items) {
                     when (item) {
-                        is OverlayItem.TestRunChip -> TestRunChipView(item.target, onTestTargetClick)
                         is OverlayItem.UpdateChip -> UpdateChipView(item.update, onUpdateChipClick)
                         is OverlayItem.Swatch -> ColorSwatch(item.argb, swatchSizeDp)
                     }
                 }
             }
         }
-    }
-}
-
-private val TestPassedColor = Color(0x664CAF50)
-
-@Composable
-private fun TestRunChipView(target: TestTarget, onClick: (TestTarget) -> Unit) {
-    Row(
-        modifier = Modifier
-            .padding(end = 6.dp)
-            .background(
-                when (target.passed) {
-                    true -> TestPassedColor
-                    false -> MaterialTheme.colorScheme.errorContainer
-                    null -> MaterialTheme.colorScheme.primaryContainer
-                },
-                RoundedCornerShape(8.dp)
-            )
-            .clickable { onClick(target) }
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.PlayArrow,
-            contentDescription = stringRes(R.string.test_runner_ausfuehren_tooltip),
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(12.dp)
-        )
-        Spacer(modifier = Modifier.width(3.dp))
-        Text(
-            text = if (target.isClass) stringRes(R.string.test_runner_tab_titel) else target.label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            maxLines = 1
-        )
     }
 }
 

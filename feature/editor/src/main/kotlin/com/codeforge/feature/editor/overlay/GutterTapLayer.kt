@@ -44,13 +44,16 @@ fun GutterTapLayer(
     breakpointsEnabled: Boolean,
     onToggleBreakpoint: (Int) -> Unit,
     onEditBreakpoint: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Tipp auf ein Symbol der Symbolspalte (0-basierte Zeile); `true`, wenn behandelt. */
+    onSideIconTap: (Int) -> Boolean = { false }
 ) {
     if (editor == null) return
     if (!breakpointsEnabled && !editor.isCodeFoldingEnabled) return
     val density = LocalDensity.current
     val toggle by rememberUpdatedState(onToggleBreakpoint)
     val edit by rememberUpdatedState(onEditBreakpoint)
+    val sideIcon by rememberUpdatedState(onSideIconTap)
     @Suppress("UNUSED_VARIABLE") val unused = tick
     val gutterPx = visibleGutterWidth(editor)
     if (gutterPx <= 0f) return
@@ -64,14 +67,8 @@ fun GutterTapLayer(
                 detectTapGestures(
                     onTap = { offset ->
                         val line = lineAt(editor, offset.x, offset.y) ?: return@detectTapGestures
-                        val fm = editor.foldingManager
-                        val foldable = editor.isCodeFoldingEnabled &&
-                            (fm.collapsedRegionFor(line) != null || fm.regionAt(line) != null)
-                        when (GutterTapResolver.resolve(offset.x, gutterPx, foldable, breakpointsEnabled)) {
-                            GutterAction.FOLD -> fm.toggle(line)
-                            GutterAction.BREAKPOINT -> toggle(line + 1)
-                            GutterAction.CURSOR -> runCatching { editor.setSelection(line, 0) }
-                        }
+                        if (inSideIconColumn(editor, offset.x) && sideIcon(line)) return@detectTapGestures
+                        handleGutterTap(editor, line, offset.x, gutterPx, breakpointsEnabled, toggle)
                     },
                     onLongPress = { offset ->
                         if (breakpointsEnabled) lineAt(editor, offset.x, offset.y)?.let { edit(it + 1) }
@@ -83,12 +80,40 @@ fun GutterTapLayer(
 
 private const val MIN_HIT_DP = 24
 
+// Faltung, Haltepunkt oder Cursor je nach Trefferstelle (siehe GutterTapResolver).
+private fun handleGutterTap(
+    editor: CodeEditor,
+    line: Int,
+    x: Float,
+    gutterPx: Float,
+    breakpointsEnabled: Boolean,
+    toggle: (Int) -> Unit
+) {
+    val fm = editor.foldingManager
+    val foldable = editor.isCodeFoldingEnabled && (fm.collapsedRegionFor(line) != null || fm.regionAt(line) != null)
+    when (GutterTapResolver.resolve(x, gutterPx, foldable, breakpointsEnabled)) {
+        GutterAction.FOLD -> fm.toggle(line)
+        GutterAction.BREAKPOINT -> toggle(line + 1)
+        GutterAction.CURSOR -> runCatching { editor.setSelection(line, 0) }
+    }
+}
+
 // Sichtbare Breite der Randspalte: angeheftet bleibt sie stehen, sonst wandert sie beim seitlichen Scrollen mit.
 private fun visibleGutterWidth(editor: CodeEditor): Float {
     if (!editor.isLineNumberEnabled && !editor.isCodeFoldingEnabled) return 0f
     val width = editor.measureTextRegionOffset()
     val pinned = editor.isLineNumberPinned && !editor.isWordwrap
     return if (pinned) width else (width - editor.offsetX).coerceAtLeast(0f)
+}
+
+// Liegt x (View-Koordinaten) in der Symbolspalte von sora (zwischen Zeilennummern und Faltmarken)?
+internal fun inSideIconColumn(editor: CodeEditor, x: Float): Boolean {
+    val width = editor.measureSideIconWidth()
+    if (width <= 0f || !editor.isLineNumberEnabled) return false
+    val pinned = editor.isLineNumberPinned && !editor.isWordwrap
+    val left = (if (pinned) 0f else -editor.offsetX.toFloat()) +
+        editor.measureBreakpointIndicatorWidth() + editor.measureLineNumber()
+    return x >= left && x <= left + width
 }
 
 // Zeile (0-basiert) unter der Bildschirmposition; berücksichtigt eingeklappte Bereiche und Zeilenumbruch.
