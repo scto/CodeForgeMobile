@@ -1,0 +1,19 @@
+{
+  "id": "com.codeforge.plugin.nord.terminal",
+  "name": "Nord (Terminal)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Terminal-Farbschema „Nord“ (dunkel). Auswahl unter Einstellungen → Terminal → Farbschema.",
+  "permissions": [],
+  "contributes": {
+    "terminalThemes": [
+      {
+        "id": "nord",
+        "label": "Nord",
+        "uiTheme": "dark",
+        "path": "colors.properties"
+      }
+    ]
+  }
+}

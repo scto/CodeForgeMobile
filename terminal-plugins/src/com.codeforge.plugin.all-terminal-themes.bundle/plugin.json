@@ -1,0 +1,23 @@
+{
+  "id": "com.codeforge.plugin.all-terminal-themes.bundle",
+  "name": "Alle Terminal-Farbschemata (Bundle)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Installiert alle 10 Terminal-Farbschemata des Stores.",
+  "permissions": [],
+  "contributes": {
+    "extensionPack": [
+      "com.codeforge.plugin.dracula.terminal",
+      "com.codeforge.plugin.nord.terminal",
+      "com.codeforge.plugin.solarized-dark.terminal",
+      "com.codeforge.plugin.solarized-light.terminal",
+      "com.codeforge.plugin.gruvbox-dark.terminal",
+      "com.codeforge.plugin.one-dark.terminal",
+      "com.codeforge.plugin.monokai.terminal",
+      "com.codeforge.plugin.tokyo-night.terminal",
+      "com.codeforge.plugin.catppuccin-mocha.terminal",
+      "com.codeforge.plugin.github-light.terminal"
+    ]
+  }
+}

@@ -1,0 +1,3 @@
+- `targetSdk = 28` ist nötig, damit Termux-Binaries ausführbar sind – **kein Play-Store-Release möglich**; Verteilung über GitHub/F-Droid/Sideload.
+- Das Android-SDK 37 (`android-sdk-37.0.0`) steht nur für aarch64 zur Verfügung.
+- Gerätetests (Bootstrap, W^X, Layouts, LSP, Code-Faltung, Terminal-Farbschemata) sind noch offen.

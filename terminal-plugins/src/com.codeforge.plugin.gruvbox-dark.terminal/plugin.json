@@ -1,0 +1,19 @@
+{
+  "id": "com.codeforge.plugin.gruvbox-dark.terminal",
+  "name": "Gruvbox Dark (Terminal)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Terminal-Farbschema „Gruvbox Dark“ (dunkel). Auswahl unter Einstellungen → Terminal → Farbschema.",
+  "permissions": [],
+  "contributes": {
+    "terminalThemes": [
+      {
+        "id": "gruvbox-dark",
+        "label": "Gruvbox Dark",
+        "uiTheme": "dark",
+        "path": "colors.properties"
+      }
+    ]
+  }
+}

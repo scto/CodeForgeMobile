@@ -50,6 +50,7 @@ class EditorSettingsViewModel internal constructor(
                 symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled,
                 minimapEnabled = settings.editor.minimapEnabled,
                 rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,
+                codeFoldingEnabled = !settings.editor.codeFoldingDisabled,
                 pinchToZoomEnabled = settings.editor.pinchToZoomEnabled,
                 desktopShortcutsEnabled = settings.editor.desktopShortcutsEnabled,
                 formatOnSaveKotlin = settings.editor.formatOnSaveKotlin,
@@ -170,6 +171,9 @@ class EditorSettingsViewModel internal constructor(
                 EditorSettingsUiEvent.MinimapToggled ->
                     settingsRepository.updateEditor { it.toBuilder().setMinimapEnabled(!it.minimapEnabled).build() }
 
+                EditorSettingsUiEvent.CodeFoldingToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setCodeFoldingDisabled(!it.codeFoldingDisabled).build() }
+
                 EditorSettingsUiEvent.RainbowBracketsToggled ->
                     settingsRepository.updateEditor {
                         it.toBuilder().setRainbowBracketsEnabled(!it.rainbowBracketsEnabled).build()
@@ -260,6 +264,7 @@ class EditorSettingsViewModel internal constructor(
                                     .setReadOnlyDefault(false)
                                     .setTxtWordWrap(false)
                                     .setColorPreviewsDisabled(false)
+                                    .setCodeFoldingDisabled(false)
                                     .build()
                             }
                         }

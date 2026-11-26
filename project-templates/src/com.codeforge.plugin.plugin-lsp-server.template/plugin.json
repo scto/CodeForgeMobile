@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.plugin-lsp-server.template",
   "name": "Plugin · Sprachserver (Projektvorlage)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Projektvorlage für Plugin-Autoren: Anbindung eines Language Servers (LSP) inklusive Installation. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",

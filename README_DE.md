@@ -49,6 +49,8 @@ Die Entwicklungsumgebung (Shell, JDK, Android SDK, NDK) läuft in einem **Termux
 | *Theme-Builder (Projekt-Werkzeug)* | *Theme-Builder (Projekt-Werkzeug)* |
 | <img src="docs/screenshots/appearance-light.png" width="260" alt="Erscheinungsbild (Hell)"> | <img src="docs/screenshots/appearance-dark.png" width="260" alt="Erscheinungsbild (Dunkel)"> |
 | *Einstellungen → Erscheinungsbild* | *Einstellungen → Erscheinungsbild* |
+| <img src="docs/screenshots/editor-folding-dark.png" width="260" alt="Editor mit Faltmarken"> | |
+| *Editor: Code-Faltung (Faltmarken in der Randspalte)* | |
 
 > Erzeugt mit Compose-Screenshot-Tests (Roborazzi + Robolectric, Beispieldaten): `./gradlew :app:recordRoborazziDebug`. Schriften und Systemleisten können vom echten Gerät abweichen.
 

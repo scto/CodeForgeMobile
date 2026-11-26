@@ -1,0 +1,19 @@
+{
+  "id": "com.codeforge.plugin.tokyo-night.terminal",
+  "name": "Tokyo Night (Terminal)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Terminal-Farbschema „Tokyo Night“ (dunkel). Auswahl unter Einstellungen → Terminal → Farbschema.",
+  "permissions": [],
+  "contributes": {
+    "terminalThemes": [
+      {
+        "id": "tokyo-night",
+        "label": "Tokyo Night",
+        "uiTheme": "dark",
+        "path": "colors.properties"
+      }
+    ]
+  }
+}

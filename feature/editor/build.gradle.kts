@@ -37,11 +37,11 @@ dependencies {
     // Sora-Editor: vollständiger Funktionsumfang (Incremental Highlight, Auto-Completion,
     // Code-Block-Indicators, Undo-Stack, Search/Replace, Word-Wrap, Diagnostics, Magnifier,
     // Bracket-Matching, Sticky Scroll) — TextMate- UND TreeSitter-Sprachunterstützung.
-    implementation("io.github.Rosemoe.sora-editor:editor:0.23.4")
-    implementation("io.github.Rosemoe.sora-editor:language-textmate:0.23.4")
+    implementation(libs.sora.editor)
+    implementation(libs.sora.language.textmate)
     // TreeSitter-Sprachunterstützung — benötigt native Parser-Bibliotheken je Sprache.
     // Siehe TREESITTER.md (analog zur proot-Problematik in :libs:terminal-engine).
-    implementation("io.github.Rosemoe.sora-editor:language-treesitter:0.23.4")
+    implementation(libs.sora.language.treesitter)
     implementation(libs.treesitter.core)
     implementation(libs.treesitter.kotlin)
     implementation(libs.treesitter.java)

@@ -13,7 +13,8 @@ enum class BuiltinPaletteAction {
     QUICK_FIX, REFACTOR, RENAME, EXTRACT_STRING, ORGANIZE_IMPORTS_SERVER, ORGANIZE_IMPORTS_LOCAL, FIX_ALL,
     DEFINITION, TYPE_DEFINITION, IMPLEMENTATION, REFERENCES, OUTLINE, GO_TO_LINE,
     HOVER, SIGNATURE_HELP, FORMAT,
-    SEARCH, SAVE, LSP_SESSIONS, AI_ASSISTANT
+    SEARCH, SAVE, LSP_SESSIONS, AI_ASSISTANT,
+    FOLD_TOGGLE, FOLD_ALL, UNFOLD_ALL
 }
 
 /** Was ein Eintrag auslöst. */
@@ -117,7 +118,10 @@ object CommandPaletteCatalog {
         BuiltinPaletteAction.SEARCH to { hasFile },
         BuiltinPaletteAction.SAVE to { hasFile },
         BuiltinPaletteAction.LSP_SESSIONS to { serverRunning },
-        BuiltinPaletteAction.AI_ASSISTANT to { true }
+        BuiltinPaletteAction.AI_ASSISTANT to { true },
+        BuiltinPaletteAction.FOLD_TOGGLE to { hasFile },
+        BuiltinPaletteAction.FOLD_ALL to { hasFile },
+        BuiltinPaletteAction.UNFOLD_ALL to { hasFile }
     )
 
     /** Eingebaute Aktionen, die in [context] verfügbar sind. */
@@ -136,7 +140,8 @@ object CommandPaletteCatalog {
         BuiltinPaletteAction.FIX_ALL, BuiltinPaletteAction.HOVER, BuiltinPaletteAction.SIGNATURE_HELP,
         BuiltinPaletteAction.FORMAT -> PaletteCategory.CODE
         BuiltinPaletteAction.SEARCH, BuiltinPaletteAction.SAVE, BuiltinPaletteAction.LSP_SESSIONS,
-        BuiltinPaletteAction.AI_ASSISTANT -> PaletteCategory.EDITOR
+        BuiltinPaletteAction.AI_ASSISTANT, BuiltinPaletteAction.FOLD_TOGGLE, BuiltinPaletteAction.FOLD_ALL,
+        BuiltinPaletteAction.UNFOLD_ALL -> PaletteCategory.EDITOR
     }
 
     /** Server-Befehle als Einträge; reine Infrastruktur-Befehle (Edits anwenden u. ä.) werden ausgeblendet. */

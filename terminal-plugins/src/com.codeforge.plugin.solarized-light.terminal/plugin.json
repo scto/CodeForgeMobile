@@ -1,0 +1,19 @@
+{
+  "id": "com.codeforge.plugin.solarized-light.terminal",
+  "name": "Solarized Light (Terminal)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Terminal-Farbschema „Solarized Light“ (hell). Auswahl unter Einstellungen → Terminal → Farbschema.",
+  "permissions": [],
+  "contributes": {
+    "terminalThemes": [
+      {
+        "id": "solarized-light",
+        "label": "Solarized Light",
+        "uiTheme": "light",
+        "path": "colors.properties"
+      }
+    ]
+  }
+}

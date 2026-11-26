@@ -9,6 +9,7 @@ TITLES = {
     "themes": ("Themes", "Themes"),
     "themes/dark": ("Dunkel", "Dark"),
     "themes/light": ("Hell", "Light"),
+    "themes/terminal": ("Terminal", "Terminal"),
     "icons": ("Icon-Pakete", "Icon packs"),
     "languages": ("Sprachen", "Languages"),
     "languages/jvm": ("JVM", "JVM"),
@@ -121,6 +122,9 @@ def derive(manifest, category):
         for t in c.get("colorThemes", []):
             cats.append("themes/dark" if t.get("uiTheme") == "dark" else "themes/light")
             tags.append(t.get("uiTheme", "dark"))
+        if c.get("terminalThemes"):
+            cats.append("themes/terminal")
+            tags += ["terminal"] + [t.get("uiTheme", "dark") for t in c["terminalThemes"]]
         tags.append("theme")
     elif category == "icons":
         cats.append("icons"); tags += ["icons", "file-icons"]

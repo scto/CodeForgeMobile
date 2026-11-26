@@ -43,6 +43,8 @@ data class EditorSettingsUiState(
     val symbolPairAutocompleteEnabled: Boolean = true,
     val minimapEnabled: Boolean = true,
     val rainbowBracketsEnabled: Boolean = true,
+    /** Code-Faltung (Faltmarken in der Randspalte). */
+    val codeFoldingEnabled: Boolean = true,
     val pinchToZoomEnabled: Boolean = true,
     val desktopShortcutsEnabled: Boolean = true,
     val formatOnSaveKotlin: Boolean = false,
@@ -109,6 +111,8 @@ sealed interface EditorSettingsUiEvent {
     data object BackspaceDeletesTabToggled : EditorSettingsUiEvent
     /** Automatisches Schließen von Klammern und Anführungszeichen umgeschaltet. */
     data object SymbolPairAutocompleteToggled : EditorSettingsUiEvent
+    /** Code-Faltung umgeschaltet. */
+    data object CodeFoldingToggled : EditorSettingsUiEvent
     /** Minimap umgeschaltet. */
     data object MinimapToggled : EditorSettingsUiEvent
     /** Projektindexierung umgeschaltet. */

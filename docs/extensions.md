@@ -81,6 +81,20 @@ Datei (`path`); alle Werte sind Bilddateien (PNG, WebP oder JPEG — **kein SVG*
 * Gilt in: Dateibaum, Editor-Tabs, Suchergebnissen, Git-Änderungen.
 * Auswahl: Einstellungen → Erscheinungsbild → „Icon-Pakete“ (`ThemeConfig.icon_theme_id`, leer = Standard).
 
+## Terminal-Farbschemata (`terminalThemes`)
+
+```json
+{ "id": "nord", "label": "Nord", "uiTheme": "dark", "path": "colors.properties" }
+```
+
+* `path` zeigt auf eine Datei im Format von Termux `colors.properties`: `foreground`, `background`, `cursor` und
+  `color0`…`color15` als `#RRGGBB`; fehlende Farben ergänzt die App mit den Termux-Standardfarben.
+* Auswahl unter Einstellungen → Terminal → Farbschema (mit Vorschau). Die App schreibt das gewählte Schema nach
+  `~/.termux/colors.properties` (erste Zeile `# codeforge-terminal-theme: <id>`) und lädt das Terminal neu; eine
+  eigene, von Hand geschriebene Datei wird vorher nach `~/.termux/backup/` gesichert.
+* Eingebaut sind nur „Termux-Standard“ und „CodeForge“; weitere im Store (Themes → Terminal,
+  `terminal-plugins/`), Autorenvorlage `templates/terminal-theme`.
+
 ## Sprachpakete (`languagePacks`)
 
 Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Text" } }`
@@ -302,6 +316,7 @@ Die öffentliche Binär-API des SDK ist in `libs/plugin-api/api/plugin-api.api` 
 |---|---|
 | `colorThemes` | umgesetzt (Phase 2) |
 | `iconThemes` | umgesetzt (Phase 3): Dateibaum, Tabs, Suche, Git |
+| `terminalThemes` | umgesetzt: Einstellungen → Terminal → Farbschema, Store-Kategorie Themes → Terminal; nicht auf Gerät getestet |
 | `languagePacks` | umgesetzt (Phase 4), nicht abgedeckt: Plurals/`Context.getString` |
 | `grammars` | umgesetzt (Phase 5), nur Dateien ohne eingebaute Grammatik |
 | `snippets` | umgesetzt (Phase 5), schreibgeschützt |

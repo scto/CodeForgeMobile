@@ -1,0 +1,19 @@
+{
+  "id": "com.codeforge.plugin.catppuccin-mocha.terminal",
+  "name": "Catppuccin Mocha (Terminal)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Terminal-Farbschema „Catppuccin Mocha“ (dunkel). Auswahl unter Einstellungen → Terminal → Farbschema.",
+  "permissions": [],
+  "contributes": {
+    "terminalThemes": [
+      {
+        "id": "catppuccin-mocha",
+        "label": "Catppuccin Mocha",
+        "uiTheme": "dark",
+        "path": "colors.properties"
+      }
+    ]
+  }
+}

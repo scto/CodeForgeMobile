@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import com.codeforge.feature.welcome.WelcomeUiState
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
+import androidx.compose.foundation.layout.fillMaxSize
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
 import org.junit.Test
@@ -114,6 +115,13 @@ class ScreenshotTest {
         onOpenStore = {},
         onOpenThemeBuilder = {},
     )
+
+    @Test fun editorFoldingDark() = shot("editor-folding", true) {
+        com.codeforge.feature.editor.EditorPreview(
+            com.codeforge.core.designsystem.EditorPreviewSpec(theme = "dark_plus"),
+            androidx.compose.ui.Modifier.fillMaxSize(),
+        )
+    }
 
     @Test fun aboutBastiLight() = shot("about-basti", false) { AboutBastiScreen() }
 

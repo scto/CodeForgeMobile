@@ -29,7 +29,7 @@ SUBMIT = "https://github.com/scto/codeforge-store/issues/new?template=submit.yml
 # Dateien, die die Store-Prüfung als Code ablehnt, liegen mit `.tpl` in der Vorlage; der Assistent entfernt die Endung.
 CODE_SUFFIXES = (".dex", ".jar", ".so", ".apk", ".class", ".aar", ".sh")
 PLACEHOLDERS = ("projectName", "packageName", "packagePath", "packageJni", "minSdk")
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 # slug, Quelle (templates/<ordner>), Art, Label DE/EN, Beschreibung DE/EN, Farbe, Kürzel, Store-fähig, Hinweise DE
 SPECS = [
@@ -43,6 +43,11 @@ SPECS = [
      (245, 158, 11), "◆", True,
      "`plugin/icons/icon-theme.json` bildet Endungen, Dateinamen und Ordner auf PNG-Dateien ab (empfohlen 48×48 px). "
      "Fehlende Bilder fallen auf das Standard-Icon zurück."),
+    ("terminal-theme", "terminal-theme", "declarative", "Plugin · Terminal-Farbschema", "Plugin · Terminal color scheme",
+     "Farben des Terminals (Termux colors.properties)", "Terminal colors (Termux colors.properties)",
+     (15, 23, 42), "$_", True,
+     "`plugin/colors.properties`: `foreground`, `background`, `cursor`, `color0`…`color15` als `#RRGGBB`. "
+     "`uiTheme` (`dark`/`light`) ordnet das Schema in der Auswahl ein (Einstellungen → Terminal → Farbschema)."),
     ("language-pack", "language-pack", "declarative", "Plugin · Sprachpaket", "Plugin · Language pack",
      "Übersetzung der App-Oberfläche", "Translation of the app UI",
      (16, 185, 129), "文", True,
@@ -194,7 +199,7 @@ val validatePlugin by tasks.registering {
         }
         val contributes = manifest["contributes"] as? Map<*, *> ?: emptyMap<Any, Any>()
         fun items(key: String) = (contributes[key] as? List<*>).orEmpty().filterIsInstance<Map<*, *>>()
-        val files = listOf("colorThemes", "iconThemes", "languagePacks", "grammars", "snippets")
+        val files = listOf("colorThemes", "iconThemes", "terminalThemes", "languagePacks", "grammars", "snippets")
             .flatMap { k -> items(k).mapNotNull { it["path"] as? String } } +
             items("projectTemplates").mapNotNull { it["icon"] as? String } +
             listOf("tools", "agentTools", "formatters").flatMap { k -> items(k) }

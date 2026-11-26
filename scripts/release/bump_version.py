@@ -203,7 +203,7 @@ def previous_notes(root: Path, version: str, lang: str) -> tuple[str, Path] | No
     return (max(cands)[1].read_text(encoding="utf-8"), max(cands)[1]) if cands else None
 
 
-def carry_over(prev: str | None, lang: str) -> tuple[str, str, str]:
+def carry_over(prev: str | None, lang: str, root: Path | None = None) -> tuple[str, str, str]:
     """Übernimmt Intro, Warnhinweis und den Block ab 'Installation' aus den vorherigen Notes."""
     de_intro = "Android-Entwicklungsumgebung auf dem Handy: Editor, Terminal, Git, Gradle-Build, Language Server, Layout-Designer und Asset Studio – alles in einer App."
     en_intro = "Android development environment on your phone: editor, terminal, Git, Gradle build, language servers, layout designer and Asset Studio – all in one app."
@@ -223,12 +223,27 @@ def carry_over(prev: str | None, lang: str) -> tuple[str, str, str]:
         f = re.search(r"^---\s*$", prev, re.M)
         if t and f and t.start() < f.start():
             tail = prev[t.start(): f.start()].rstrip() + "\n"
-    return intro, warn, tail
+    return intro, warn, current_limitations(tail, lang, root) if root else tail
+
+
+def current_limitations(tail: str, lang: str, root: Path) -> str:
+    """Ersetzt den Abschnitt „Bekannte Einschränkungen“ durch docs/release-notes/limitations[.en].md (falls vorhanden),
+    damit behobene Einschränkungen nicht aus den vorherigen Notes weitergetragen werden."""
+    src = root / NOTES_DIR / ("limitations.en.md" if lang == "en" else "limitations.md")
+    if not src.is_file():
+        return tail
+    heading = "## Known limitations" if lang == "en" else "## Bekannte Einschränkungen"
+    section = heading + "\n\n" + src.read_text(encoding="utf-8").strip() + "\n\n"
+    m = re.search(r"^" + re.escape(heading) + r".*?(?=^## |\Z)", tail, re.S | re.M)
+    if m:
+        return tail[: m.start()] + section + tail[m.end():]
+    lic = re.search(r"^## (Lizenz|License)", tail, re.M)
+    return tail[: lic.start()] + section + tail[lic.start():] if lic else tail + "\n" + section
 
 
 def build_notes(root: Path, version: str, prev_version: str, body: str, lang: str, public: bool = False) -> str:
     prev = previous_notes(root, version, lang)
-    intro, warn, tail = carry_over(prev[0] if prev else None, lang)
+    intro, warn, tail = carry_over(prev[0] if prev else None, lang, root)
     warn = "" if public else warn + "\n\n"
     entries = parse_entries(body)
     groups = render_groups(entries, lang)

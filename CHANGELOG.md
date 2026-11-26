@@ -11,7 +11,25 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben / Fixed
+
+- Absturz `IndexOutOfBoundsException` in `ColorMap.getColor` nach einem Theme-Wechsel (z. B. über die Theme-Vorschau): veraltete TextMate-Farb-IDs fallen auf die Textfarbe zurück, der Editor analysiert nach dem Wechsel neu. / Crash in `ColorMap.getColor` after switching the editor theme fixed.
+
+### Geändert / Changed
+- sora-editor 0.23.4 → 0.24.7 (Fork), android-tree-sitter 4.3.1 → 4.3.2; Diagnosen laufen über die Provider-API.
+  Plugin-Autorenvorlagen 1.1.0 (prüfen auch `terminalThemes`). / sora-editor fork 0.24.7, tree-sitter 4.3.2.
+
 ### Hinzugefügt / Added
+- **Code-Faltung:** sora-editor kommt jetzt aus dem Fork `scto/codeforgemobile-sora-editor` (0.24.7, als
+  `third_party/sora-editor` mit Patch und Build-Skript eingebunden). Faltmarken in der Randspalte, Ellipse für
+  eingeklappte Bereiche; gefaltet werden die Code-Blöcke der Sprache sowie – je Dateityp – Klammerblöcke,
+  Blockkommentare, Kommentarfolgen, Imports, XML-Elemente und mehrzeilige Tags, Einrückungsblöcke (Python, YAML) und
+  Markdown-Abschnitte. Befehlspalette: „Faltung umschalten“, „Alles einklappen“, „Alles ausklappen“; abschaltbar in den
+  Editor-Einstellungen. / Code folding via the sora-editor fork.
+- **Terminal-Farbschemata:** Einstellungen → Terminal → Farbschema mit Vorschau (Prompt, Git-Ausgabe, 16 Farben);
+  eingebaut „Termux-Standard“ und „CodeForge“, zehn weitere im Store (Dracula, Nord, Solarized Dark/Light, Gruvbox,
+  One Dark, Monokai, Tokyo Night, Catppuccin Mocha, GitHub Light) plus Bundle. Neue Plugin-Beitragsart
+  `terminalThemes`, Autorenvorlage „Plugin · Terminal-Farbschema“. / Terminal color schemes with store plugins.
 - Editor: Das Kontextmenü bei Long-Click/Auswahl hat neben Alles auswählen/Kopieren/Einfügen/Ausschneiden jetzt
   Kommentar umschalten, Quick-Fix, Formatieren, Umbenennen, Gehe zu Definition und „Weitere Aktionen“ (Befehlspalette
   inkl. Plugin-Befehle); die Leiste scrollt seitlich. / Editor context menu with extra actions.

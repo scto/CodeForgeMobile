@@ -115,6 +115,8 @@ message EditorConfig {
   bool hard_tabs = 36;
   bool delete_empty_line_fast_disabled = 37;
   bool backspace_deletes_tab_disabled = 38;
+  // Code-Faltung (sora-editor-Fork): standardmäßig an.
+  bool code_folding_disabled = 39;
 }
 
 

@@ -124,6 +124,14 @@ object PluginManifestParser {
             iconThemes = obj.objects("iconThemes").map {
                 IconThemeContribution(it.req("id"), it.req("label"), it.relPath("path"))
             },
+            terminalThemes = obj.objects("terminalThemes").map {
+                TerminalThemeContribution(
+                    id = it.req("id"),
+                    label = it.req("label"),
+                    isDark = it.string("uiTheme") != "light",
+                    path = it.relPath("path")
+                )
+            },
             languagePacks = obj.objects("languagePacks").map {
                 LanguagePackContribution(it.req("locale"), it.req("label"), it.relPath("path"))
             },

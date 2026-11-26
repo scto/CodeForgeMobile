@@ -1,0 +1,33 @@
+{
+  "id": "com.codeforge.plugin.plugin-terminal-theme.template",
+  "name": "Plugin · Terminal-Farbschema (Projektvorlage)",
+  "version": "1.1.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Projektvorlage für Plugin-Autoren: Farben des Terminals (Termux colors.properties). Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",
+  "permissions": [],
+  "contributes": {
+    "projectTemplates": [
+      {
+        "id": "plugin-terminal-theme",
+        "label": "Plugin · Terminal-Farbschema",
+        "description": "Farben des Terminals (Termux colors.properties)",
+        "l10n": {
+          "en": {
+            "label": "Plugin · Terminal color scheme",
+            "description": "Terminal colors (Termux colors.properties)"
+          }
+        },
+        "path": "template",
+        "languages": [
+          "kotlin"
+        ],
+        "gradleDsl": [
+          "kts"
+        ],
+        "android": false,
+        "icon": "icon.png"
+      }
+    ]
+  }
+}

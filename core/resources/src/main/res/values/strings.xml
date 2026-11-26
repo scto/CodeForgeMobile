@@ -229,6 +229,9 @@
     <string name="editor_hinweis_datei_oeffnen">Select a file in the file tree on the left to edit it.</string>
     <string name="editor_gespeichert">Saved</string>
     <string name="editor_grammar_registrierung_fehlgeschlagen_a">Grammar registration failed — assets under textmate/ probably missing (see ASSETS.md). Falling back to plain text highlighting.</string>
+    <string name="editor_fold_toggle">Toggle fold (cursor line)</string>
+    <string name="editor_fold_all">Fold all</string>
+    <string name="editor_unfold_all">Unfold all</string>
     <string name="editor_ta_format">Format</string>
     <string name="editor_ta_more">More actions</string>
     <string name="editor_kommentar_umschalten">Toggle comment</string>
@@ -1052,6 +1055,8 @@
     <string name="settings_project_indexing_desc">When a project opens, scan it in the background (Java→Kotlin and XML→Compose suggestions). Turn off for large projects or to save battery; manual actions still work.</string>
     <string name="settings_minimap">Show Minimap</string>
     <string name="settings_minimap_desc">Display miniature code overview on the right edge.</string>
+    <string name="settings_code_folding">Code folding</string>
+    <string name="settings_code_folding_desc">Collapse and expand blocks (brackets, indentation, XML elements, comments, imports) with the markers in the gutter.</string>
     <string name="settings_rainbow_brackets">Rainbow Brackets</string>
     <string name="settings_rainbow_brackets_desc">Colorize matching bracket pairs.</string>
     <string name="settings_pinch_to_zoom">Pinch to Zoom</string>
@@ -1928,6 +1933,14 @@
     <string name="settings_terminal_font_jetbrains">JetBrains Mono</string>
     <string name="settings_terminal_kill_on_exit">End all sessions on close</string>
     <string name="settings_terminal_kill_on_exit_desc">Stops the terminal service and all running sessions when the terminal is closed.</string>
+    <string name="settings_terminal_theme">Color scheme</string>
+    <string name="settings_terminal_theme_desc">Terminal colors (Termux colors.properties). More schemes in the store under Themes → Terminal.</string>
+    <string name="settings_terminal_theme_default">Termux default</string>
+    <string name="settings_terminal_theme_codeforge">CodeForge</string>
+    <string name="settings_terminal_theme_custom">Custom colors.properties</string>
+    <string name="settings_terminal_theme_backup">Custom colors.properties backed up: %1$s</string>
+    <string name="settings_terminal_theme_failed">Color scheme not applied: %1$s</string>
+    <string name="settings_terminal_theme_store">More in the store</string>
     <string name="settings_terminal_integration">Permissions &amp; integration</string>
     <string name="settings_terminal_integration_commands">Run commands</string>
     <string name="settings_terminal_integration_commands_desc">The terminal is built into CodeForge: language servers, builds and tools start directly in its own process. The Termux \"run command\" permission (RUN_COMMAND) that editors using a separate Termux app need is not required here.</string>

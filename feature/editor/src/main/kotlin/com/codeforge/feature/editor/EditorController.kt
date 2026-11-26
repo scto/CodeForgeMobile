@@ -256,6 +256,20 @@ class EditorController {
     /** Schaltet den Zeilenumbruch um. */
     fun toggleWordWrap() = withEditor { it.isWordwrap = !it.isWordwrap }
 
+    /** Faltbereich an der Cursorzeile (oder den sie umschließenden) ein- bzw. ausklappen. */
+    fun toggleFoldAtCursor() = withEditor { editor ->
+        val line = editor.cursor.leftLine
+        val manager = editor.foldingManager
+        val region = manager.regionFor(line) ?: return@withEditor
+        if (manager.isCollapsed(region)) manager.unfold(region) else manager.fold(region)
+    }
+
+    /** Alle Faltbereiche einklappen. */
+    fun foldAll() = withEditor { it.foldingManager.foldAll() }
+
+    /** Alle Faltbereiche ausklappen. */
+    fun unfoldAll() = withEditor { it.foldingManager.expandAll() }
+
     /** Textgröße in sp — Persistenz erfolgt separat über EditorConfig (:feature:settings). */
     fun setTextSizeSp(sizeSp: Float) = withEditor { it.setTextSize(sizeSp.coerceIn(6f, 48f)) }
     /** Aktuelle Schriftgröße in sp. */

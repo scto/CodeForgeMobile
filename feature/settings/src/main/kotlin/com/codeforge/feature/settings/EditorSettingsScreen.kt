@@ -302,6 +302,12 @@ private fun EditorSettingsScreen(
                 onToggle = { onEvent(EditorSettingsUiEvent.MinimapToggled) }
             )
             EditorToggleRow(
+                title = Res.string(R.string.settings_code_folding),
+                description = Res.string(R.string.settings_code_folding_desc),
+                checked = uiState.codeFoldingEnabled,
+                onToggle = { onEvent(EditorSettingsUiEvent.CodeFoldingToggled) }
+            )
+            EditorToggleRow(
                 title = Res.string(R.string.settings_rainbow_brackets),
                 description = Res.string(R.string.settings_rainbow_brackets_desc),
                 checked = uiState.rainbowBracketsEnabled,

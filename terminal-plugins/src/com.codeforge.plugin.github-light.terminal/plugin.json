@@ -1,0 +1,19 @@
+{
+  "id": "com.codeforge.plugin.github-light.terminal",
+  "name": "GitHub Light (Terminal)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Terminal-Farbschema „GitHub Light“ (hell). Auswahl unter Einstellungen → Terminal → Farbschema.",
+  "permissions": [],
+  "contributes": {
+    "terminalThemes": [
+      {
+        "id": "github-light",
+        "label": "GitHub Light",
+        "uiTheme": "light",
+        "path": "colors.properties"
+      }
+    ]
+  }
+}

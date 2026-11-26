@@ -109,6 +109,8 @@ data class PluginManifest(
 data class Contributes(
     val colorThemes: List<ColorThemeContribution> = emptyList(),
     val iconThemes: List<IconThemeContribution> = emptyList(),
+    /** Farbschemata des Terminals (Termux-`colors.properties`). */
+    val terminalThemes: List<TerminalThemeContribution> = emptyList(),
     val languagePacks: List<LanguagePackContribution> = emptyList(),
     val grammars: List<GrammarContribution> = emptyList(),
     val snippets: List<SnippetContribution> = emptyList(),
@@ -131,7 +133,7 @@ data class Contributes(
 ) {
     /** Ob das Plugin keinerlei Contributions enthält. */
     val isEmpty: Boolean
-        get() = colorThemes.isEmpty() && iconThemes.isEmpty() && languagePacks.isEmpty() &&
+        get() = colorThemes.isEmpty() && iconThemes.isEmpty() && terminalThemes.isEmpty() && languagePacks.isEmpty() &&
             grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty() &&
             formatters.isEmpty() && tools.isEmpty() && requires.isEmpty() &&
             agentTools.isEmpty() && mcpServers.isEmpty() && projectTemplates.isEmpty()
@@ -176,6 +178,17 @@ data class ProjectTemplateContribution(
 
 /** Farbschema: [path] zeigt auf eine JSON-Datei (siehe docs/extensions.md) relativ zum Plugin-Verzeichnis. */
 data class ColorThemeContribution(
+    val id: String,
+    val label: String,
+    val isDark: Boolean,
+    val path: String
+)
+
+/**
+ * Terminal-Farbschema: [path] zeigt auf eine Datei im Format von Termux `colors.properties`
+ * (`foreground`, `background`, `cursor`, `color0`…`color15` als `#RRGGBB`), siehe [TerminalColorsFile].
+ */
+data class TerminalThemeContribution(
     val id: String,
     val label: String,
     val isDark: Boolean,
@@ -411,6 +424,7 @@ fun RequirementContribution.appliesTo(cpuArch: String): Boolean = arch == null |
 fun Contributes.kinds(): List<String> = listOf(
     "colorThemes" to colorThemes.isNotEmpty(),
     "iconThemes" to iconThemes.isNotEmpty(),
+    "terminalThemes" to terminalThemes.isNotEmpty(),
     "languagePacks" to languagePacks.isNotEmpty(),
     "grammars" to grammars.isNotEmpty(),
     "snippets" to snippets.isNotEmpty(),

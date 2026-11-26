@@ -1,0 +1,19 @@
+{
+  "id": "com.codeforge.plugin.solarized-dark.terminal",
+  "name": "Solarized Dark (Terminal)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Terminal-Farbschema „Solarized Dark“ (dunkel). Auswahl unter Einstellungen → Terminal → Farbschema.",
+  "permissions": [],
+  "contributes": {
+    "terminalThemes": [
+      {
+        "id": "solarized-dark",
+        "label": "Solarized Dark",
+        "uiTheme": "dark",
+        "path": "colors.properties"
+      }
+    ]
+  }
+}

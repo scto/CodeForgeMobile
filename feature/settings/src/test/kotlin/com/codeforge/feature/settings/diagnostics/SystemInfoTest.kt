@@ -13,8 +13,7 @@ class SystemInfoTest {
         val catalog = File(root, "gradle/libs.versions.toml").readText()
         assertTrue(catalog.contains("treesitter = \"${LibraryVersions.TREE_SITTER}\""))
         assertTrue(catalog.contains("composeBom = \"${LibraryVersions.COMPOSE_BOM}\""))
-        val editor = File(root, "feature/editor/build.gradle.kts").readText()
-        assertTrue(editor.contains("sora-editor:editor:${LibraryVersions.SORA_EDITOR}\""))
+        assertTrue(catalog.contains("sora = \"${LibraryVersions.SORA_EDITOR}\""))
     }
 
     @Test

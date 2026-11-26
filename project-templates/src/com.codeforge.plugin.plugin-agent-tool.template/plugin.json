@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.plugin-agent-tool.template",
   "name": "Plugin · Agent-Werkzeug (Projektvorlage)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Projektvorlage für Plugin-Autoren: Werkzeuge für den KI-Agenten (nur Sideload). Anpassen, mit ./gradlew packagePlugin bauen, installieren und als ZIP weitergeben.",

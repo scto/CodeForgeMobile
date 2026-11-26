@@ -22,7 +22,7 @@ ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 VERSION_RE = re.compile(r"^\d+(\.\d+){0,3}([-+][0-9A-Za-z.-]+)?$")
 CODE_SUFFIXES = (".dex", ".jar", ".so", ".apk", ".class", ".aar", ".sh")
 ATTACHMENT_RE = re.compile(r"https://github\.com/(?:user-attachments/files|[^/\s]+/[^/\s]+/files)/[^\s)\"']+\.zip")
-TEXT_PATH_KINDS = ("colorThemes", "iconThemes", "languagePacks", "grammars", "snippets")
+TEXT_PATH_KINDS = ("colorThemes", "iconThemes", "terminalThemes", "languagePacks", "grammars", "snippets")
 
 
 def field(body, label):

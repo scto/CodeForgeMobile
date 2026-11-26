@@ -14,6 +14,7 @@ Je Ordner eine lauffähige Minimalvorlage. Dieselben Vorlagen gibt es als eigens
 | `formatter` | deklarativ | Externer Formatierer (stdin → stdout) |
 | `tool` | deklarativ (Store: Kategorie Code-Tools) | Werkzeug im PT-Menü des Dateibaums (`tools`, Python-Skript) |
 | `extension-pack` | deklarativ | Bundle aus mehreren Plugins |
+| `terminal-theme` | deklarativ | Farbschema des Terminals (`terminalThemes`) |
 | `project-template` | deklarativ | Projektvorlage für den Projekt-Assistenten (`projectTemplates`) |
 | `agent-tool` | deklarativ (nur Sideload) | Werkzeuge für den KI-Agenten (`agentTools`) |
 | `code-plugin` | Code (Gradle) | Befehle, Menüs, Ereignisse |

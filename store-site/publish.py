@@ -26,7 +26,7 @@ STORE_REPO = "scto/codeforge-store"
 BASE = "https://scto.github.io/codeforge-store"
 RELEASE = f"https://github.com/{STORE_REPO}/releases/download/packages"
 HOME = "https://github.com/scto/CodeForgeMobile"
-GENERATORS = ["theme-plugins", "textmate-plugins", "tool-plugins", "icon-plugins", "content-plugins", "project-templates"]
+GENERATORS = ["theme-plugins", "terminal-plugins", "textmate-plugins", "tool-plugins", "icon-plugins", "content-plugins", "project-templates"]
 CATEGORY_ORDER = ["theme", "icons", "language", "grammar", "snippets", "lsp", "template", "formatter", "bundle", "tool", "plugin"]
 
 
@@ -44,7 +44,7 @@ def category(manifest):
         return "template"
     if "formatters" in c:
         return "formatter"
-    if "colorThemes" in c:
+    if "colorThemes" in c or "terminalThemes" in c:
         return "theme"
     if "iconThemes" in c:
         return "icons"

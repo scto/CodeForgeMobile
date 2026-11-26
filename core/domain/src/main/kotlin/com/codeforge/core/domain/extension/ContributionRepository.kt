@@ -17,6 +17,7 @@ data class Resolved<T>(
 data class ActiveContributions(
     val colorThemes: List<Resolved<ColorThemeContribution>> = emptyList(),
     val iconThemes: List<Resolved<IconThemeContribution>> = emptyList(),
+    val terminalThemes: List<Resolved<TerminalThemeContribution>> = emptyList(),
     val languagePacks: List<Resolved<LanguagePackContribution>> = emptyList(),
     val grammars: List<Resolved<GrammarContribution>> = emptyList(),
     val snippets: List<Resolved<SnippetContribution>> = emptyList(),
@@ -42,6 +43,7 @@ data class ActiveContributions(
             return ActiveContributions(
                 colorThemes = collect({ it.colorThemes }, { it.id }),
                 iconThemes = collect({ it.iconThemes }, { it.id }),
+                terminalThemes = collect({ it.terminalThemes }, { it.id }),
                 languagePacks = collect({ it.languagePacks }, { it.locale }),
                 grammars = collect({ it.grammars }, { it.scopeName }),
                 snippets = collect({ it.snippets }, { it.languageId + "|" + it.path }),

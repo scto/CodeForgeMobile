@@ -25,6 +25,9 @@ fun BuiltinPaletteAction.titleRes(): Int = when (this) {
     BuiltinPaletteAction.SAVE -> R.string.common_speichern
     BuiltinPaletteAction.LSP_SESSIONS -> R.string.editor_lsp_sessions_title
     BuiltinPaletteAction.AI_ASSISTANT -> R.string.ai_assistant_title
+    BuiltinPaletteAction.FOLD_TOGGLE -> R.string.editor_fold_toggle
+    BuiltinPaletteAction.FOLD_ALL -> R.string.editor_fold_all
+    BuiltinPaletteAction.UNFOLD_ALL -> R.string.editor_unfold_all
 }
 
 /** Tastenkürzel (Hardware-Tastatur) einer eingebauten Aktion, falls vorhanden. */

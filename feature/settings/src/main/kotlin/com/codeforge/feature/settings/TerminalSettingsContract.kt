@@ -36,6 +36,14 @@ data class TerminalSettingsUiState(
     val allowExternalApps: Boolean = false,
     /** Rückmeldung „Einstellungen neu geladen“ anzeigen. */
     val settingsReloaded: Boolean = false,
+    /** Wählbare Terminal-Farbschemata (eingebaut + Plugins). */
+    val terminalThemes: List<TerminalThemeOption> = emptyList(),
+    /** Aktives Schema ([TerminalThemes.CUSTOM_ID] bei eigener `colors.properties`). */
+    val terminalThemeId: String = TerminalThemes.DEFAULT_ID,
+    /** Farben einer eigenen `colors.properties` (für die Vorschau), sonst `null`. */
+    val customTerminalPalette: com.codeforge.core.domain.extension.TerminalPalette? = null,
+    /** Rückmeldung zum Farbschema (z. B. Sicherung einer eigenen Datei) oder `null`. */
+    val terminalThemeMessage: String? = null,
     /** Pfad von termux.properties (Anzeige). */
     val propertiesPath: String = "",
     /** Inhalt im Editor, solange er offen ist; sonst null. */
@@ -87,6 +95,10 @@ sealed interface TerminalSettingsUiEvent {
     data object ReloadSettings : TerminalSettingsUiEvent
     /** Die Rückmeldung zum Neuladen wurde angezeigt. */
     data object ReloadShown : TerminalSettingsUiEvent
+    /** Terminal-Farbschema gewählt. */
+    data class TerminalThemeSelected(val id: String) : TerminalSettingsUiEvent
+    /** Rückmeldung zum Farbschema wurde angezeigt. */
+    data object TerminalThemeMessageShown : TerminalSettingsUiEvent
     /** termux.properties im Editor öffnen. */
     data object PropertiesEditRequested : TerminalSettingsUiEvent
     /** Editor ohne Speichern schließen. */

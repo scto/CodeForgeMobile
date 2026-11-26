@@ -1,0 +1,103 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "io.github.rosemoe",
+    "module": "language-treesitter",
+    "version": "0.24.7-cfm.1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.8.2"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseVariantReleaseApiPublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "com.itsaky.androidide.treesitter",
+          "module": "android-tree-sitter",
+          "version": {
+            "requires": "4.3.2"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "language-treesitter-0.24.7-cfm.1.aar",
+          "url": "language-treesitter-0.24.7-cfm.1.aar",
+          "size": 85539,
+          "sha512": "ca5000ea410792339652b634d672f9a3ed99fa823743275ff14b1fd9447ea799849430f0859b715634c4bdccb81ef16a5b05c6ce397c04b1deba08060a6a5bde",
+          "sha256": "c4f1eed543e56c019bdf79f57402ba3732cdac60643f40426d91a067b5a33368",
+          "sha1": "a04ab450874b44be1b6113efb7e5916ad393b1c6",
+          "md5": "778bc9e47b8a2eba98994fb80321fb3e"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseRuntimePublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.21"
+          }
+        },
+        {
+          "group": "com.itsaky.androidide.treesitter",
+          "module": "android-tree-sitter",
+          "version": {
+            "requires": "4.3.2"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "language-treesitter-0.24.7-cfm.1.aar",
+          "url": "language-treesitter-0.24.7-cfm.1.aar",
+          "size": 85539,
+          "sha512": "ca5000ea410792339652b634d672f9a3ed99fa823743275ff14b1fd9447ea799849430f0859b715634c4bdccb81ef16a5b05c6ce397c04b1deba08060a6a5bde",
+          "sha256": "c4f1eed543e56c019bdf79f57402ba3732cdac60643f40426d91a067b5a33368",
+          "sha1": "a04ab450874b44be1b6113efb7e5916ad393b1c6",
+          "md5": "778bc9e47b8a2eba98994fb80321fb3e"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseSourcePublication",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "language-treesitter-0.24.7-cfm.1-sources.jar",
+          "url": "language-treesitter-0.24.7-cfm.1-sources.jar",
+          "size": 37001,
+          "sha512": "7b102900f4be3a99339e853b4a9c91cdbc8a906bb655c21615d44b35c9722329f9f64668272a545dafbc6b0a08ca7a0a1471e7ad5bd4a87db0853897c2e6b43b",
+          "sha256": "933a4340c2208343e7b09b20ee6baf1e338c533990a969c217e09699363e4e98",
+          "sha1": "019457acdeaccb9ac19c9582ed582525df4e768b",
+          "md5": "38dd3af89820864701aa2dd074d822c4"
+        }
+      ]
+    }
+  ]
+}

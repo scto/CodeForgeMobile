@@ -43,7 +43,6 @@ import com.codeforge.feature.editor.lsp.LspDiagnosticsBridge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.luminance
 import com.codeforge.feature.editor.textmate.TextMateAssetLoader
-import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
 import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import com.codeforge.core.domain.model.Breakpoint
 import com.codeforge.core.domain.model.LspDiagnostic
@@ -90,6 +89,8 @@ data class EditorDisplaySettings(
     /** Wortgrenzen für Doppeltipp/langes Drücken per ICU (`android.icu.text.BreakIterator`) statt Zeichenklassen. */
     val icuWordSelection: Boolean = true,
     val symbolPairAutocompleteEnabled: Boolean = true,
+    /** Code-Faltung (Faltmarken in der Randspalte). */
+    val codeFoldingEnabled: Boolean = true,
     val minimapEnabled: Boolean = true,
     val rainbowBracketsEnabled: Boolean = true,
     val pinchToZoomEnabled: Boolean = true,
@@ -176,6 +177,8 @@ fun SoraCodeEditor(
     val currentTextActions by androidx.compose.runtime.rememberUpdatedState(textActions)
     val currentOnTextAction by androidx.compose.runtime.rememberUpdatedState(onTextAction)
     val diagnosticsContainer = remember(path) { DiagnosticsContainer() }
+    // Zuletzt übernommene Diagnosen (Identität), damit nicht bei jeder Neuzusammensetzung neu gezeichnet wird.
+    val appliedDiagnostics = remember(path) { java.util.concurrent.atomic.AtomicReference<List<LspDiagnostic>?>(null) }
 
     // Overlay (Farbkästchen + Update-Chips + Test-Starter): Editor-Referenz und „Tick“ für Scroll/Text-Änderungen
     var overlayEditor by remember { mutableStateOf<CodeEditor?>(null) }
@@ -241,7 +244,11 @@ fun SoraCodeEditor(
                     tooltipWindow.isEnabled = true
                 }
 
-                this.diagnostics = diagnosticsContainer
+                // sora-editor 0.24: Diagnosen kommen über Provider; unser Container wird bei jeder Aktualisierung übernommen.
+                registerDiagnosticProvider { merged -> merged.addDiagnostics(diagnosticsContainer.regions) }
+
+                // --- Code-Faltung: zusätzliche Bereiche je Dateityp (Code-Blöcke der Sprache kommen vom Fork selbst) ---
+                com.codeforge.feature.editor.folding.CodeFolding.providersFor(path).forEach(::registerFoldingProvider)
 
                 subscribeEvent<ContentChangeEvent> { event, _ ->
                     onContentChanged(event.editor.text.toString())
@@ -320,7 +327,11 @@ fun SoraCodeEditor(
                 editor.setText(content)
             }
             applyDisplaySettings(editor, themedSettings)
-            LspDiagnosticsBridge.apply(diagnosticsContainer, editor.text, diagnostics)
+            if (appliedDiagnostics.get() !== diagnostics) {
+                LspDiagnosticsBridge.apply(diagnosticsContainer, editor.text, diagnostics)
+                editor.invalidateDiagnostics()
+                appliedDiagnostics.set(diagnostics)
+            }
         }
     )
 
@@ -415,6 +426,7 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
 
     // Symbolpaare automatisch schließen
     editor.props.symbolPairAutoCompletion = settings.symbolPairAutocompleteEnabled
+    editor.isCodeFoldingEnabled = settings.codeFoldingEnabled
 
     // Rainbow Brackets / Klammerpaar-Hervorhebung
     // Zusammengehörige Klammern werden immer deutlich hervorgehoben (Hintergrund + Unterstreichung, fett)
@@ -478,12 +490,17 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
 private val appliedThemes = java.util.WeakHashMap<CodeEditor, String>()
 
 private fun applyTextMateTheme(editor: CodeEditor, themeName: String) {
-    if (themeName.isBlank() || appliedThemes[editor] == themeName) return
+    if (themeName.isBlank()) return
+    // Die ThemeRegistry ist global: ein anderer Editor (z. B. die Vorschau) kann das Theme umgestellt haben.
+    val registryTheme = runCatching { ThemeRegistry.getInstance().currentThemeModel?.name }.getOrNull()
+    if (appliedThemes[editor] == themeName && registryTheme == themeName) return
     TextMateAssetLoader.ensureInitialized(editor.context)
     TextMateAssetLoader.setActiveTheme(themeName)
     runCatching {
-        editor.colorScheme = TextMateColorScheme.create(ThemeRegistry.getInstance()).also(::emphasizeBracketPair)
+        editor.colorScheme = SafeTextMateColorScheme.create().also(::emphasizeBracketPair)
         appliedThemes[editor] = themeName
+        // Spans mit Farb-IDs des neuen Themes neu aufbauen.
+        editor.rerunAnalysis()
     }.onFailure { android.util.Log.w("SoraCodeEditor", "TextMate-ColorScheme nicht anwendbar: $themeName", it) }
 }
 

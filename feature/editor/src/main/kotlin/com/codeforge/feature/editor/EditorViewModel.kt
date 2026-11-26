@@ -530,6 +530,7 @@ class EditorViewModel @Inject constructor(
                         deleteEmptyLineFast = !settings.editor.deleteEmptyLineFastDisabled,
                         backspaceDeletesTab = !settings.editor.backspaceDeletesTabDisabled,
                         symbolPairAutocompleteEnabled = settings.editor.symbolPairAutocompleteEnabled,
+                        codeFoldingEnabled = !settings.editor.codeFoldingDisabled,
                         minimapEnabled = settings.editor.minimapEnabled,
                         rainbowBracketsEnabled = settings.editor.rainbowBracketsEnabled,
                         pinchToZoomEnabled = settings.editor.pinchToZoomEnabled,

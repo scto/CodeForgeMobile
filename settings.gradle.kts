@@ -11,6 +11,11 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // sora-editor aus dem Fork mit Code-Folding (third_party/sora-editor/README.md)
+        maven {
+            url = uri(rootDir.resolve("third_party/sora-editor/maven"))
+            content { includeGroup("io.github.rosemoe") }
+        }
         google()
         mavenCentral()
         maven { url = uri("https://repo.gradle.org/gradle/libs-releases") }

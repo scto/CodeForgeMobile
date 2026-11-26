@@ -229,6 +229,9 @@
     <string name="editor_hinweis_datei_oeffnen">Wähle eine Datei im Dateibaum links aus, um sie zu bearbeiten.</string>
     <string name="editor_gespeichert">Gespeichert</string>
     <string name="editor_grammar_registrierung_fehlgeschlagen_a">Grammar-Registrierung fehlgeschlagen — Assets unter textmate/ fehlen vermutlich (siehe ASSETS.md). Fällt auf Plain-Text-Highlighting zurück.</string>
+    <string name="editor_fold_toggle">Faltung umschalten (Cursorzeile)</string>
+    <string name="editor_fold_all">Alles einklappen</string>
+    <string name="editor_unfold_all">Alles ausklappen</string>
     <string name="editor_ta_format">Formatieren</string>
     <string name="editor_ta_more">Weitere Aktionen</string>
     <string name="editor_kommentar_umschalten">Kommentar umschalten</string>
@@ -1052,6 +1055,8 @@
     <string name="settings_project_indexing_desc">Beim Öffnen eines Projekts im Hintergrund scannen (Vorschläge für Java→Kotlin und XML→Compose). Bei großen Projekten oder zum Akkusparen ausschalten; manuelle Aktionen funktionieren weiterhin.</string>
     <string name="settings_minimap">Minimap anzeigen</string>
     <string name="settings_minimap_desc">Miniatur-Codeübersicht am rechten Bildschirmrand einblenden.</string>
+    <string name="settings_code_folding">Code-Faltung</string>
+    <string name="settings_code_folding_desc">Blöcke (Klammern, Einrückung, XML-Elemente, Kommentare, Imports) über die Marken in der Randspalte ein- und ausklappen.</string>
     <string name="settings_rainbow_brackets">Regenbogen-Klammern (Rainbow Brackets)</string>
     <string name="settings_rainbow_brackets_desc">Zusammengehörende Klammerpaare farblich hervorheben.</string>
     <string name="settings_pinch_to_zoom">Pinch-to-Zoom</string>
@@ -1928,6 +1933,14 @@
     <string name="settings_terminal_font_jetbrains">JetBrains Mono</string>
     <string name="settings_terminal_kill_on_exit">Alle Sitzungen beim Schließen beenden</string>
     <string name="settings_terminal_kill_on_exit_desc">Beendet den Terminal-Dienst und alle laufenden Sitzungen, sobald das Terminal geschlossen wird.</string>
+    <string name="settings_terminal_theme">Farbschema</string>
+    <string name="settings_terminal_theme_desc">Farben des Terminals (Termux colors.properties). Weitere Schemata im Store unter Themes → Terminal.</string>
+    <string name="settings_terminal_theme_default">Termux-Standard</string>
+    <string name="settings_terminal_theme_codeforge">CodeForge</string>
+    <string name="settings_terminal_theme_custom">Eigene colors.properties</string>
+    <string name="settings_terminal_theme_backup">Eigene colors.properties gesichert: %1$s</string>
+    <string name="settings_terminal_theme_failed">Farbschema nicht gesetzt: %1$s</string>
+    <string name="settings_terminal_theme_store">Mehr im Store</string>
     <string name="settings_terminal_integration">Berechtigungen &amp; Integration</string>
     <string name="settings_terminal_integration_commands">Befehle ausführen</string>
     <string name="settings_terminal_integration_commands_desc">Das Terminal ist in CodeForge eingebaut: Sprachserver, Builds und Werkzeuge starten direkt im eigenen Prozess. Die Termux-Berechtigung „Befehle ausführen“ (RUN_COMMAND), die Editoren mit separater Termux-App brauchen, ist hier nicht nötig.</string>

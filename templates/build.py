@@ -19,7 +19,7 @@ OUT = ROOT / "build"
 
 def referenced_paths(manifest):
     c = manifest.get("contributes", {})
-    for kind in ("colorThemes", "iconThemes", "languagePacks", "grammars", "snippets"):
+    for kind in ("colorThemes", "iconThemes", "terminalThemes", "languagePacks", "grammars", "snippets"):
         for item in c.get(kind, []):
             yield item["path"]
     for tool in c.get("agentTools", []):  # Skripte unter ${pluginDir}

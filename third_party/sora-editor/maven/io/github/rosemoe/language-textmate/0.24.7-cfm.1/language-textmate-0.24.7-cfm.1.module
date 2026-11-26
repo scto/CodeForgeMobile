@@ -1,0 +1,122 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "io.github.rosemoe",
+    "module": "language-textmate",
+    "version": "0.24.7-cfm.1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.8.2"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseVariantReleaseApiPublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "language-textmate-0.24.7-cfm.1.aar",
+          "url": "language-textmate-0.24.7-cfm.1.aar",
+          "size": 269058,
+          "sha512": "2dcc5fbcfb1064165482b9e4d1b7ab3ff3bb3ad0b42a06b4c5f856d5907c76356471077bbd1ad947651cefbba056c3de477b097bf488233053ea9cedf867cb9f",
+          "sha256": "4a12ea6e157d3ed9f68f6d49c907533bb596613d319496b0bd72d780ba21521c",
+          "sha1": "5702e1279ebea9d95301e76e31b5f4c5635e20ef",
+          "md5": "ee38846dafd25c2412474c3bd2924785"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseRuntimePublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.1.21"
+          }
+        },
+        {
+          "group": "com.google.code.gson",
+          "module": "gson",
+          "version": {
+            "requires": "2.14.0"
+          }
+        },
+        {
+          "group": "org.jruby.jcodings",
+          "module": "jcodings",
+          "version": {
+            "requires": "1.0.64"
+          }
+        },
+        {
+          "group": "org.jruby.joni",
+          "module": "joni",
+          "version": {
+            "requires": "2.2.7"
+          }
+        },
+        {
+          "group": "org.snakeyaml",
+          "module": "snakeyaml-engine",
+          "version": {
+            "requires": "3.2"
+          }
+        },
+        {
+          "group": "org.eclipse.jdt",
+          "module": "org.eclipse.jdt.annotation",
+          "version": {
+            "requires": "2.4.100"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "language-textmate-0.24.7-cfm.1.aar",
+          "url": "language-textmate-0.24.7-cfm.1.aar",
+          "size": 269058,
+          "sha512": "2dcc5fbcfb1064165482b9e4d1b7ab3ff3bb3ad0b42a06b4c5f856d5907c76356471077bbd1ad947651cefbba056c3de477b097bf488233053ea9cedf867cb9f",
+          "sha256": "4a12ea6e157d3ed9f68f6d49c907533bb596613d319496b0bd72d780ba21521c",
+          "sha1": "5702e1279ebea9d95301e76e31b5f4c5635e20ef",
+          "md5": "ee38846dafd25c2412474c3bd2924785"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseSourcePublication",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "language-textmate-0.24.7-cfm.1-sources.jar",
+          "url": "language-textmate-0.24.7-cfm.1-sources.jar",
+          "size": 203780,
+          "sha512": "e693ed9078c8f743d619fbdcc7bc05c606932d6fc97c013b92e1d08f5c274d2334ec638812775954680514f7ccb2165cd38c6ec8197bf6b1296507e62a2227fc",
+          "sha256": "b3264762a3727d1611bf8e9d0327fe551b987c52f0c977b884f368c158971386",
+          "sha1": "9773aab52e30d93bbb29646d93c0fd9a99c91318",
+          "md5": "33120a0d957b44b1c9d41014cdf14780"
+        }
+      ]
+    }
+  ]
+}

@@ -137,7 +137,7 @@ Technisch sind es zwei Schalter, inhaltlich eine Checkliste.
    Release-APK (R8!) auf einem echten Gerät starten – R8 kann Reflection-Pfade (Sora-Editor, Tree-sitter, Plugins)
    entfernen, die der Debug-Build noch hat.
 4. **Version/Notes:** gewünschte Versionsnummer festlegen (z. B. `3.1.0`), `bump_version.py … --public`, englische
-   Notes übersetzen, CHANGELOG prüfen; „Bekannte Einschränkungen“ ehrlich halten (Code Folding, targetSdk 28,
+   Notes übersetzen, CHANGELOG prüfen; „Bekannte Einschränkungen“ ehrlich halten (Quelle: `docs/release-notes/limitations[.en].md`; targetSdk 28,
    SDK 37 nur aarch64).
 5. **Dokumentation:** `README`/`README_DE` (Download-Link auf den neuesten Release, Badge), `docs/index.md`
    (Hinweis „Release-APK noch nicht auf Geräten geprüft“ entfernen), `docs/apk/APK-Dokumentation.md`.

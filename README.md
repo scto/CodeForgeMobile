@@ -49,6 +49,8 @@ The development environment (shell, JDK, Android SDK, NDK) runs inside a **Termu
 | *Theme builder (project tool)* | *Theme builder (project tool)* |
 | <img src="docs/screenshots/appearance-light.png" width="260" alt="Appearance settings (Light)"> | <img src="docs/screenshots/appearance-dark.png" width="260" alt="Appearance settings (Dark)"> |
 | *Settings → Appearance* | *Settings → Appearance* |
+| <img src="docs/screenshots/editor-folding-dark.png" width="260" alt="Editor with fold markers"> | |
+| *Editor: code folding (fold markers in the gutter)* | |
 
 > Generated with Compose screenshot tests (Roborazzi + Robolectric, sample data): `./gradlew :app:recordRoborazziDebug`. Fonts and system bars may differ from a real device.
 

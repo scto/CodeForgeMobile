@@ -11,6 +11,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -20,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TerminalSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
+    contributions: com.codeforge.core.domain.extension.ContributionRepository,
 ) : ViewModel() {
 
     private val density: Float get() = context.resources.displayMetrics.density
@@ -52,19 +56,43 @@ class TerminalSettingsViewModel @Inject constructor(
     // Overlay erlaubt, Akku-Optimierung aus, allow-external-apps, „neu geladen“-Hinweis.
     private val integrationState = MutableStateFlow(readIntegration(reloaded = false))
 
+    private val colorsStore = TerminalColorsStore(com.codeforge.shared.termux.TermuxConstants.TERMUX_COLOR_PROPERTIES_FILE)
+
+    // Aktive Kennung, eigene Palette, Rückmeldung.
+    private val terminalThemeState = MutableStateFlow(Triple(colorsStore.currentId(), colorsStore.currentPalette(), null as String?))
+
+    // Eingebaute + Plugin-Schemata (Dateien der Plugins werden auf einem IO-Thread gelesen).
+    private val terminalThemeOptions: kotlinx.coroutines.flow.Flow<List<TerminalThemeOption>> = contributions.contributions
+        .map { active -> active.terminalThemes }
+        .distinctUntilChanged()
+        .map { resolved ->
+            val builtins = TerminalThemes.builtins(
+                context.getString(com.codeforge.core.resources.R.string.settings_terminal_theme_default),
+                context.getString(com.codeforge.core.resources.R.string.settings_terminal_theme_codeforge),
+            )
+            builtins + kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                resolved.mapNotNull { r ->
+                    val f = java.io.File(r.pluginDir, r.item.path)
+                    val palette = runCatching { com.codeforge.core.domain.extension.TerminalColorsFile.parse(f.readText()) }.getOrNull()
+                    palette?.let { TerminalThemeOption("${r.pluginId}/${r.item.id}", r.item.label, r.item.isDark, it, r.pluginId) }
+                }
+            }
+        }
+
     // Editor-Entwurf von termux.properties (null = geschlossen) und letzte Rückmeldung.
     private val propsState = MutableStateFlow(null as String? to (null as String?))
 
     /** UI-Zustand. */
-    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState, backupState, combine(propsState, integrationState) { p, i -> p to i }) { e, k, c, b, p -> listOf(e, k, c, b, p) }) { settings, termux, fontSp, font, extra ->
+    val uiState: StateFlow<TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState, backupState, combine(propsState, integrationState, terminalThemeState, terminalThemeOptions) { p, i, t, o -> Extra(p, i, t, o) }) { e, k, c, b, p -> listOf(e, k, c, b, p) }) { settings, termux, fontSp, font, extra ->
             @Suppress("UNCHECKED_CAST")
             val extraKeys = extra[0] as String?
             val killOnExit = extra[1] as Boolean
             val clipboard = extra[2] as Boolean
             val backup = extra[3] as Pair<Boolean, String?>
             @Suppress("UNCHECKED_CAST")
-            val propsAndIntegration = extra[4] as Pair<Pair<String?, String?>, TermuxIntegration>
-            val (props, integration) = propsAndIntegration
+            val more = extra[4] as Extra
+            val props = more.props
+            val integration = more.integration
             TerminalSettingsUiState(
                 fontSize = fontSp ?: settings.terminal.fontSize.takeIf { it > 0 } ?: 14,
                 useCompactTerminal = settings.terminal.useCompactTerminal,
@@ -82,6 +110,10 @@ class TerminalSettingsViewModel @Inject constructor(
                 batteryUnrestricted = integration.batteryUnrestricted,
                 allowExternalApps = integration.allowExternalApps,
                 settingsReloaded = integration.reloaded,
+                terminalThemes = more.themes,
+                terminalThemeId = more.theme.first,
+                customTerminalPalette = more.theme.second,
+                terminalThemeMessage = more.theme.third,
                 propertiesPath = properties.path,
                 propertiesDraft = props.first,
                 propertiesMessage = props.second,
@@ -177,6 +209,9 @@ class TerminalSettingsViewModel @Inject constructor(
                 }
                 TerminalSettingsUiEvent.FontMessageShown ->
                     fontState.value = fontState.value.first to null
+                is TerminalSettingsUiEvent.TerminalThemeSelected -> applyTerminalTheme(event.id)
+                TerminalSettingsUiEvent.TerminalThemeMessageShown ->
+                    terminalThemeState.value = terminalThemeState.value.copy(third = null)
                 TerminalSettingsUiEvent.PermissionsRefresh, TerminalSettingsUiEvent.ReloadSettings,
                 TerminalSettingsUiEvent.ReloadShown, TerminalSettingsUiEvent.PropertiesEditRequested,
                 TerminalSettingsUiEvent.PropertiesEditCancelled, is TerminalSettingsUiEvent.PropertiesSaved,
@@ -218,6 +253,29 @@ class TerminalSettingsViewModel @Inject constructor(
             else -> Unit
         }
     }
+
+    private suspend fun applyTerminalTheme(id: String) {
+        val option = terminalThemeOptions.first().firstOrNull { it.id == id } ?: return
+        val result = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { colorsStore.apply(option) }
+        val message = result.fold(
+            onSuccess = { backup ->
+                backup?.let { context.getString(com.codeforge.core.resources.R.string.settings_terminal_theme_backup, it.path) }
+            },
+            onFailure = { e ->
+                context.getString(com.codeforge.core.resources.R.string.settings_terminal_theme_failed, e.message ?: e.javaClass.simpleName)
+            },
+        )
+        terminalThemeState.value = Triple(colorsStore.currentId(), colorsStore.currentPalette(), message)
+        notifyTermuxStylingReload()
+    }
+
+    /** Weitere Teile des UI-Zustands (termux.properties, Systemrechte, Farbschema). */
+    private data class Extra(
+        val props: Pair<String?, String?>,
+        val integration: TermuxIntegration,
+        val theme: Triple<String, com.codeforge.core.domain.extension.TerminalPalette?, String?>,
+        val themes: List<TerminalThemeOption>,
+    )
 
     private suspend fun saveProperties(text: String) {
         val result = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { properties.replaceAll(text) }

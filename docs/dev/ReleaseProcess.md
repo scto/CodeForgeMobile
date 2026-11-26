@@ -36,7 +36,7 @@ Python-Standardbibliothek.
 |---|---|
 | `app/build.gradle.kts` | `versionName`, `versionCode` |
 | `CHANGELOG.md` | `[Unreleased]` → `[X.Y.Z] - Datum`, neuer leerer `[Unreleased]` |
-| `docs/release-notes/X.Y.Z[.en].md` | neu (Installation, Einschränkungen und Lizenz aus den vorherigen Notes übernommen) |
+| `docs/release-notes/X.Y.Z[.en].md` | neu (Installation und Lizenz aus den vorherigen Notes, „Bekannte Einschränkungen“ aus `docs/release-notes/limitations[.en].md`) |
 | `mkdocs.yml` | Navigation |
 | `README.md`, `README_DE.md`, `STATUS.md`, `docs/apk/…`, `docs/index.md`, `docs/overview.md` | Versionsangaben |
 

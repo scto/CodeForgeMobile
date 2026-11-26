@@ -58,8 +58,8 @@ class PluginTemplateGeneratorTest {
     fun everyCombinationIsComplete() {
         val projects = generateAll()
         // 5 Compose-Vorlagen (je Kotlin, KTS) + jvm-cli (2 × 2) + mitgeliefert: 8 × (2 Sprachen × 2 DSL) + Compose (Kotlin × 2 DSL)
-        // + 13 Plugin-Autoren-Vorlagen (je Kotlin, KTS)
-        assertEquals(9 + 34 + 13, projects.size)
+        // + 14 Plugin-Autoren-Vorlagen (je Kotlin, KTS)
+        assertEquals(9 + 34 + 14, projects.size)
         projects.forEach { p ->
             assertTrue(p.name, File(p, "gradlew").canExecute())
             assertTrue(p.name, File(p, "gradle/wrapper/gradle-wrapper.properties").isFile)
@@ -106,7 +106,7 @@ class PluginTemplateGeneratorTest {
     fun pluginAuthorTemplatesPack() {
         val src = File(repoRoot, "project-templates/src")
         val authors = src.listFiles().orEmpty().filter { it.name.startsWith("com.codeforge.plugin.plugin-") }
-        assertEquals(13, authors.size)
+        assertEquals(14, authors.size)
         authors.forEach { dir ->
             val out = tmp.newFolder(dir.name)
             generator.generate(request(ProjectLanguage.KOTLIN, true, "MyPlugin").copy(packageName = "com.example.myplugin"), File(dir, "template"), out)

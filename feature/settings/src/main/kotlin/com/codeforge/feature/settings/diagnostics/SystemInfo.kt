@@ -21,10 +21,10 @@ enum class InfoSectionKind { DEVICE, DISPLAY, RUNTIME, STORAGE, APP }
 
 /** Versionen der eingebundenen Bibliotheken (geprüft von `LibraryVersionsTest` gegen Version Catalog und Build-Dateien). */
 object LibraryVersions {
-    /** sora-editor (`:feature:editor`). */
-    const val SORA_EDITOR = "0.23.4"
+    /** sora-editor-Fork mit Code-Folding (Version Catalog `sora`). */
+    const val SORA_EDITOR = "0.24.7-cfm.1"
     /** android-tree-sitter (Version Catalog `treesitter`). */
-    const val TREE_SITTER = "4.3.1"
+    const val TREE_SITTER = "4.3.2"
     /** Compose BOM (Version Catalog `composeBom`). */
     const val COMPOSE_BOM = "2025.09.00"
 }

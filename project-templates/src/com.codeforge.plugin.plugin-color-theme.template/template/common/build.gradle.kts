@@ -18,7 +18,7 @@ val validatePlugin by tasks.registering {
         }
         val contributes = manifest["contributes"] as? Map<*, *> ?: emptyMap<Any, Any>()
         fun items(key: String) = (contributes[key] as? List<*>).orEmpty().filterIsInstance<Map<*, *>>()
-        val files = listOf("colorThemes", "iconThemes", "languagePacks", "grammars", "snippets")
+        val files = listOf("colorThemes", "iconThemes", "terminalThemes", "languagePacks", "grammars", "snippets")
             .flatMap { k -> items(k).mapNotNull { it["path"] as? String } } +
             items("projectTemplates").mapNotNull { it["icon"] as? String } +
             listOf("tools", "agentTools", "formatters").flatMap { k -> items(k) }

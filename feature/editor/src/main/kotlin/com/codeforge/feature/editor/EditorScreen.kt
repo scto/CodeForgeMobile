@@ -253,6 +253,9 @@ fun EditorRoute(
             BuiltinPaletteAction.SAVE -> viewModel.onEvent(EditorUiEvent.Save)
             BuiltinPaletteAction.LSP_SESSIONS -> viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog)
             BuiltinPaletteAction.AI_ASSISTANT -> viewModel.onEvent(EditorUiEvent.ToggleAiAssistant(true))
+            BuiltinPaletteAction.FOLD_TOGGLE -> controller?.toggleFoldAtCursor()
+            BuiltinPaletteAction.FOLD_ALL -> controller?.foldAll()
+            BuiltinPaletteAction.UNFOLD_ALL -> controller?.unfoldAll()
         }
     }
 

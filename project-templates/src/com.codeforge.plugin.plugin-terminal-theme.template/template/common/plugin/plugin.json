@@ -1,0 +1,19 @@
+{
+  "id": "{{packageName}}",
+  "name": "{{projectName}}",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "me",
+  "description": "Beispiel für ein Terminal-Farbschema (Termux colors.properties).",
+  "permissions": [],
+  "contributes": {
+    "terminalThemes": [
+      {
+        "id": "midnight-terminal",
+        "label": "Midnight",
+        "uiTheme": "dark",
+        "path": "colors.properties"
+      }
+    ]
+  }
+}
