@@ -2740,8 +2740,6 @@
     <string name="appearance_more_in_store">Mehr im Store</string>
     <string name="appearance_create_own">Eigenes erstellen</string>
     <string name="appearance_variant_both">Hell &amp; dunkel</string>
-    <string name="plugins_api1_deprecated">Nutzt die abgekündigte Plugin-API 1. Ab CodeForge %1$s wird es nicht mehr geladen; bitte beim Autor ein Update auf API 4 anfragen.</string>
-    <string name="plugins_installed_api1_deprecated">%1$s installiert. Hinweis: Es nutzt die abgekündigte Plugin-API 1 und wird ab CodeForge %2$s nicht mehr geladen.</string>
     <string name="sysinfo_title">System-Diagnose</string>
     <string name="sysinfo_refresh">Neu laden</string>
     <string name="sysinfo_copy">Als Text kopieren</string>
@@ -2790,4 +2788,6 @@
     <string name="sysinfo_target_sdk">Target-SDK</string>
     <string name="sysinfo_yes">Ja</string>
     <string name="sysinfo_no">Nein</string>
+    <string name="plugins_api1_unsupported">Nutzt die Plugin-API 1, die seit CodeForge %1$s nicht mehr unterstützt wird – wird nicht geladen. Bitte beim Autor ein Update auf API 4 anfragen oder entfernen.</string>
+    <string name="plugins_api1_rejected">%1$s nutzt die Plugin-API 1, die seit CodeForge %2$s nicht mehr unterstützt wird. Bitte eine aktuelle Version (API 2–4) installieren.</string>
 </resources>

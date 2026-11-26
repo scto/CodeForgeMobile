@@ -10,6 +10,7 @@ import com.codeforge.core.domain.extension.ActiveContributions
 import com.codeforge.core.domain.extension.ContributionRepository
 import com.codeforge.core.domain.extension.DeclarativeOnly
 import com.codeforge.core.domain.extension.HostEvent
+import com.codeforge.core.domain.extension.PluginApiVersion
 import com.codeforge.core.domain.extension.PluginCompatibility
 import com.codeforge.core.domain.extension.PluginIssue
 import com.codeforge.core.domain.extension.PluginLoadOrder
@@ -135,10 +136,16 @@ class PluginRepositoryImpl @Inject constructor(
     /** Probleme eines installierten Plugins gegen die App-Version und den Bestand (auch über Abhängigkeitsketten). */
     private fun issuesOf(plugin: InstalledPlugin): List<PluginIssue> = allIssues()[plugin.id].orEmpty()
 
-    private fun allIssues(): Map<String, List<PluginIssue>> = PluginCompatibility.checkAll(
-        _installedPlugins.value.associate { it.id to PluginNode(it.isEnabled, it.minHostVersion, it.dependsOn) },
-        hostVersion.ifBlank { Int.MAX_VALUE.toString() }
-    )
+    private fun allIssues(): Map<String, List<PluginIssue>> {
+        val compatibility = PluginCompatibility.checkAll(
+            _installedPlugins.value.associate { it.id to PluginNode(it.isEnabled, it.minHostVersion, it.dependsOn) },
+            hostVersion.ifBlank { Int.MAX_VALUE.toString() }
+        )
+        // Code-Plugins mit API 1 (seit 3.4.0 entfernt) bleiben installiert, werden aber nicht geladen.
+        val unsupported = _installedPlugins.value.filter { PluginApiVersion.isUnsupported(it.apiVersion, it.entryPointClass) }
+            .associate { it.id to listOf<PluginIssue>(PluginIssue.UnsupportedApi(it.apiVersion)) }
+        return (compatibility.keys + unsupported.keys).associateWith { compatibility[it].orEmpty() + unsupported[it].orEmpty() }
+    }
 
     private fun loadNow(plugin: InstalledPlugin) {
         issuesOf(plugin).firstOrNull()?.let { error(it.describe()) }
@@ -226,6 +233,9 @@ class PluginRepositoryImpl @Inject constructor(
             // Validiert u. a. die ID (wird zum Verzeichnisnamen), API-Version, Berechtigungen und Contribution-Pfade.
             val manifest = PluginManifestParser.parse(manifestFile.readText()).getOrThrow()
             val id = manifest.id
+            if (PluginApiVersion.isUnsupported(manifest.apiVersion, manifest.entryPointClass)) {
+                error(Res.string(R.string.plugins_api1_rejected, manifest.name, PluginApiVersion.API1_REMOVED_IN))
+            }
             if (declarativeOnly) {
                 val files = tempDir.walkTopDown().filter { it.isFile }
                     .map { it.relativeTo(tempDir).invariantSeparatorsPath }.toList()
@@ -344,6 +354,7 @@ class PluginRepositoryImpl @Inject constructor(
         is PluginIssue.DependencyDisabled -> "Benötigtes Plugin ist deaktiviert: $pluginId"
         is PluginIssue.DependencyUnavailable -> "Benötigtes Plugin kann nicht geladen werden: $pluginId"
         PluginIssue.DependencyCycle -> "Abhängigkeitszyklus in dependsOn"
+        is PluginIssue.UnsupportedApi -> "Plugin-API $apiVersion wird seit CodeForge ${PluginApiVersion.API1_REMOVED_IN} nicht mehr unterstützt"
     }
 
     private fun countZipEntries(file: File): Int {

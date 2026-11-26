@@ -250,7 +250,7 @@ internal class PluginRuntime(
 
         override fun <T : Any> register(point: ExtensionPoint<T>, value: T): Disposable {
             point.permission?.let { permission ->
-                if (!PluginPermissionPolicy.isAllowed(plugin.apiVersion, plugin.permissions, permission)) {
+                if (!PluginPermissionPolicy.isAllowed(plugin.permissions, permission)) {
                     throw PluginPermissionException(plugin.id, permission)
                 }
             }
@@ -336,7 +336,7 @@ internal class PluginRuntime(
     ) : PluginHostServices {
 
         private fun require(permission: String) {
-            if (!PluginPermissionPolicy.isAllowed(apiVersion, granted, permission)) {
+            if (!PluginPermissionPolicy.isAllowed(granted, permission)) {
                 throw PluginPermissionException(pluginId, permission)
             }
         }
@@ -373,7 +373,7 @@ internal class PluginRuntime(
 
         override fun addEventListener(listener: PluginEventListener) {
             // Mindestens eine der Ereignis-Berechtigungen ist nötig; je Ereignis wird beim Zustellen erneut geprüft.
-            if (EVENT_PERMISSIONS.none { PluginPermissionPolicy.isAllowed(apiVersion, granted, it) }) {
+            if (EVENT_PERMISSIONS.none { PluginPermissionPolicy.isAllowed(granted, it) }) {
                 throw PluginPermissionException(pluginId, PluginPermissions.FILE_EVENTS)
             }
             hooks.addListener(pluginId, apiVersion, granted, listener)

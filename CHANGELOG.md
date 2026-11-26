@@ -38,6 +38,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Einstellungen → Debug → System-Diagnose: Gerät, Anzeige & Rendering (Bildwiederholrate, OpenGL ES, Vulkan, HDR,
   Farbraum), Laufzeit & Arbeitsspeicher, Speicherplatz, App- und Bibliotheksversionen; „Als Text kopieren“ für
   Fehlerberichte. / System diagnostics screen.
+### Entfernt / Removed
+- **Plugin-API 1 für Code-Plugins** (angekündigt in 3.3): Installation wird abgelehnt, installierte werden nicht mehr
+  geladen und in der Plugin-Liste mit Hinweis gezeigt; `shell`/`lsp` müssen immer im Manifest stehen. Deklarative
+  Plugins sind nicht betroffen. / Plugin API 1 for code plugins removed (announced in 3.3).
 
 ## [3.3.0] - 2026-11-25
 

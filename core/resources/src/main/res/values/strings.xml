@@ -2740,8 +2740,6 @@
     <string name="appearance_more_in_store">More in the store</string>
     <string name="appearance_create_own">Create your own</string>
     <string name="appearance_variant_both">Light &amp; dark</string>
-    <string name="plugins_api1_deprecated">Uses the deprecated plugin API 1. It will no longer load from CodeForge %1$s on; please ask the author for an update to API 4.</string>
-    <string name="plugins_installed_api1_deprecated">%1$s installed. Note: it uses the deprecated plugin API 1 and will no longer load from CodeForge %2$s on.</string>
     <string name="sysinfo_title">System diagnostics</string>
     <string name="sysinfo_refresh">Refresh</string>
     <string name="sysinfo_copy">Copy as text</string>
@@ -2790,4 +2788,6 @@
     <string name="sysinfo_target_sdk">Target SDK</string>
     <string name="sysinfo_yes">Yes</string>
     <string name="sysinfo_no">No</string>
+    <string name="plugins_api1_unsupported">Uses plugin API 1, which is no longer supported since CodeForge %1$s – not loaded. Please ask the author for an update to API 4 or remove it.</string>
+    <string name="plugins_api1_rejected">%1$s uses plugin API 1, which is no longer supported since CodeForge %2$s. Please install a current version (API 2–4).</string>
 </resources>
