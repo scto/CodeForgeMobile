@@ -111,6 +111,14 @@ data class EditorUiState(
     /** Git-Gutter: Änderungen gegenüber HEAD je Dateipfad (nur gespeicherter Stand). */
     val gitChangesByPath: Map<String, List<com.codeforge.core.domain.model.GitLineChange>> = emptyMap(),
     val gitGutterEnabled: Boolean = true,
+    /** Überschriebene Tastenbelegungen (Aktions-ID -> Akkord), siehe [com.codeforge.core.domain.editor.Keymap]. */
+    val keymapOverrides: Map<String, String> = emptyMap(),
+    /** Zweimal Umschalt öffnet die Befehlspalette. */
+    val doubleShiftPalette: Boolean = false,
+    /** Konfigurierte Symbolleiste über der Tastatur. */
+    val symbolBarEntries: List<com.codeforge.core.domain.editor.SymbolBarEntry> = com.codeforge.core.domain.editor.SymbolBarConfig.DEFAULT,
+    val symbolBarEnabled: Boolean = true,
+    val symbolBarLanguageExtras: Boolean = true,
     val conflictDetectionEnabled: Boolean = true,
     /** Hover-Dokumentation des Symbols unter dem Cursor (null = Sheet geschlossen). */
     val hoverText: String? = null,

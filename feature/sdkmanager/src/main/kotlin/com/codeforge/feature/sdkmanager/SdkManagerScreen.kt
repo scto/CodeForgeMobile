@@ -44,7 +44,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -67,7 +66,8 @@ import com.codeforge.core.domain.model.ToolItem
 import com.codeforge.core.domain.model.ToolType
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
+import com.codeforge.core.ui.SettingsSectionLabel
 import kotlinx.coroutines.flow.collectLatest
 
 /** Route des SDK-Managers. */
@@ -131,19 +131,15 @@ private fun SdkManagerScreen(
         )
     }
 
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.sdkmanager_title),
+        onBack = onBack,
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            SettingsTopBar(
-                title = "",
-                onBack = onBack,
-                actions = {
-                    IconButton(onClick = { onEvent(SdkManagerEvent.RefreshRemoteList) }) {
-                        Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))
-                    }
-                }
-            )
+        actions = {
+            IconButton(onClick = { onEvent(SdkManagerEvent.RefreshRemoteList) }) {
+                Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))
+            }
         },
         bottomBar = {
             if (selected != null) {
@@ -157,14 +153,12 @@ private fun SdkManagerScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(stringRes(R.string.sdkmanager_title), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-                Text(
-                    stringRes(R.string.sdkmanager_subtitle),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Text(
+                stringRes(R.string.sdkmanager_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
             LazyRow(
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -180,12 +174,7 @@ private fun SdkManagerScreen(
                     )
                 }
             }
-            Text(
-                stringRes(tab.labelRes),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = 32.dp, top = 20.dp, bottom = 8.dp)
-            )
+            SettingsSectionLabel(stringRes(tab.labelRes))
             when {
                 uiState.isLoading && items.isEmpty() ->
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -199,7 +188,7 @@ private fun SdkManagerScreen(
 
                 else -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, bottom = 16.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     itemsIndexed(items, key = { _, item -> item.id }) { index, item ->

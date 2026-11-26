@@ -79,6 +79,10 @@ internal object Routes {
     const val SETTINGS_BUILD_RUN = "settings_build_run"
     const val SETTINGS_ABOUT = "settings_about"
     const val SETTINGS_BASTI = "settings_basti"
+    const val SETTINGS_COLOR_SCHEME = "settings_color_scheme"
+    const val SETTINGS_CODE_STYLE = "settings_code_style"
+    const val SETTINGS_KEYMAP = "settings_keymap"
+    const val SETTINGS_SYMBOLS = "settings_symbols"
     const val TERMINAL = "terminal"
     const val TERMINAL_PATTERN = "terminal?initialCommand={initialCommand}"
     const val PROJECT_WORKSPACE_PATTERN = "workspace/{rootPath}"
@@ -227,8 +231,31 @@ fun CodeForgeNavHost(
                 onNavigateToPackages = { navController.navigate(Routes.SETTINGS_PACKAGES) },
                 onNavigateToProjectsRoot = { navController.navigate(Routes.SETTINGS_PROJECTS_ROOT) },
                 onNavigateToBuildRun = { navController.navigate(Routes.SETTINGS_BUILD_RUN) },
-                onNavigateToComposePreview = { navController.navigate(Routes.SETTINGS_COMPOSE_PREVIEW) }
+                onNavigateToComposePreview = { navController.navigate(Routes.SETTINGS_COMPOSE_PREVIEW) },
+                onNavigateToColorScheme = { navController.navigate(Routes.SETTINGS_COLOR_SCHEME) },
+                onNavigateToCodeStyle = { navController.navigate(Routes.SETTINGS_CODE_STYLE) },
+                onNavigateToKeymap = { navController.navigate(Routes.SETTINGS_KEYMAP) },
+                onNavigateToSymbols = { navController.navigate(Routes.SETTINGS_SYMBOLS) },
+                onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) }
             )
+        }
+        composable(Routes.SETTINGS_COLOR_SCHEME) {
+            com.codeforge.feature.settings.editor.ColorSchemeSettingsRoute(
+                onBack = { navigateBackOrStart() },
+                onOpenStore = { navController.navigate(Routes.SETTINGS_STORE) }
+            )
+        }
+        composable(Routes.SETTINGS_CODE_STYLE) {
+            com.codeforge.feature.settings.editor.CodeStyleSettingsRoute(
+                onBack = { navigateBackOrStart() },
+                onNavigateToFormatters = { navController.navigate(Routes.SETTINGS_FORMATTERS) }
+            )
+        }
+        composable(Routes.SETTINGS_KEYMAP) {
+            com.codeforge.feature.settings.editor.KeymapSettingsRoute(onBack = { navigateBackOrStart() })
+        }
+        composable(Routes.SETTINGS_SYMBOLS) {
+            com.codeforge.feature.settings.editor.SymbolBarSettingsRoute(onBack = { navigateBackOrStart() })
         }
         composable(Routes.SETTINGS_THEME) {
             AppearanceRoute(
@@ -246,9 +273,7 @@ fun CodeForgeNavHost(
         composable(Routes.SETTINGS_EDITOR) {
             EditorSettingsRoute(
                 onBack = { navigateBackOrStart() },
-                onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) },
-                onNavigateToLsp = { navController.navigate(Routes.SETTINGS_LSP) },
-                onNavigateToFormatters = { navController.navigate(Routes.SETTINGS_FORMATTERS) }
+                onNavigateToLsp = { navController.navigate(Routes.SETTINGS_LSP) }
             )
         }
         composable(Routes.SETTINGS_SNIPPETS) {

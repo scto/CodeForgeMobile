@@ -11,6 +11,28 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert / Changed
+- **Einstellungen neu gegliedert** (nach dem Vorbild von CodeAssist): Abschnitte „Darstellung & Editor“ (Darstellung,
+  Editor, Farbschema, Code-Stil, Tastenbelegung, Symbole & Makros, Snippets) und „Build & Ausführen“ (Build & Run,
+  SDK-Manager, Keystore-Manager); übrige Seiten unter „Weitere“. Großer, einklappender Titel, abgerundete Gruppen,
+  Chip-, Schalter- und Schiebereglerzeilen als gemeinsame Bausteine (`:core:ui` `SettingsComponents`).
+  / Settings regrouped into “Appearance & Editor” and “Build & Run” with a shared CodeAssist-style look.
+- Editor-Einstellungen aufgeteilt: **Farbschema** (Themes als Chips, Vorschau mit Kotlin/XML/Markdown) und
+  **Code-Stil** (Formatieren beim Speichern je Sprache, Einrückung, eigene Formatierer) sind eigene Seiten.
+  / Editor settings split into Color Scheme and Code Style pages.
+- Darstellung, Build & Run, SDK-Manager und Keystore-Manager im neuen Stil. / Restyled pages.
+
+### Hinzugefügt / Added
+- **Tastenbelegung** (Einstellungen → Tastenbelegung): 37 Editor-Aktionen in Gruppen (Bearbeiten, Code, Navigation,
+  Tabs, Faltung), Suche, Zähler „Geändert“, Konfliktwarnung, Zurücksetzen. Kürzel antippen und neue Tasten drücken
+  (Esc bricht ab, Backspace entfernt); ohne Hardware-Tastatur per Modifikator-Chips und Tastenname. „Zweimal Umschalt“
+  öffnet die Befehlspalette. Der Editor nutzt die Belegung statt fest eingebauter Kürzel.
+  / Configurable keymap with key capture; the editor uses it.
+- **Symbole & Makros** (Einstellungen → Symbole & Makros): Einträge der Symbolleiste anheften, sortieren, eigene
+  Symbole und Makros (`$0` = Cursorposition) hinzufügen; Aktionen Tab, Zeilenkommentar, Zeile hoch/runter/duplizieren/
+  löschen, Ein-/Ausrücken, Rückgängig/Wiederholen, Cursor links/rechts. Sprachspezifische Symbole werden optional
+  angehängt; die Leiste lässt sich ausblenden. / Configurable symbol bar with macros.
+
 ## [3.5.0] - 2026-11-26
 
 ### Geändert / Changed

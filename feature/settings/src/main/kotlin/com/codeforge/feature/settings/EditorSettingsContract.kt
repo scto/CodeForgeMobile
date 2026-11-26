@@ -67,6 +67,8 @@ data class EditorSettingsUiState(
     val colorPreviewsEnabled: Boolean = true,
     val disableSoftKeyboardWithHardwareKeyboard: Boolean = false,
     val keyboardSuggestions: Boolean = false,
+    /** Symbolleiste über der Bildschirmtastatur. */
+    val symbolBarEnabled: Boolean = true,
     val fileHeaderEnabled: Boolean = false,
     val fileHeaderAuthor: String = "",
     val availableThemes: List<TextMateThemeItem> = TextMateThemeCatalog.BUNDLED_THEMES,
@@ -157,6 +159,8 @@ sealed interface EditorSettingsUiEvent {
     data object FileHeaderEnabledToggled : EditorSettingsUiEvent
     /** Der Autor im Datei-Kopf wurde geändert. */
     data class FileHeaderAuthorChanged(val author: String) : EditorSettingsUiEvent
+    /** Symbolleiste über der Tastatur umgeschaltet. */
+    data object SymbolBarToggled : EditorSettingsUiEvent
     /** Einen Bereich auf Standardwerte zurücksetzen. */
     data class ResetSection(val section: EditorSettingsSection) : EditorSettingsUiEvent
 }

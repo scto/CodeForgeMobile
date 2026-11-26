@@ -73,7 +73,17 @@ Unter Einstellungen → KI hinterlegst du API-Schlüssel für Anthropic, OpenAI 
 
 ## 9. Einstellungen und Info
 
-Design (hell/dunkel, dynamische Farben), Editor, Git, KI, Plugins und **Info** (Version, Build, Links). Die App ist adaptiv (Smartphone, Tablet, Foldable) und nutzt die gesamte Bildschirmfläche.
+Die Einstellungen sind in Abschnitte gegliedert:
+
+- **Darstellung & Editor:** Darstellung (hell/dunkel, dynamische Farben, Farbschema der App), Editor (Schrift, Anzeige, Eingabe, Gesten, Sprachserver), Farbschema (Editor-Theme mit Vorschau), Code-Stil (Formatieren beim Speichern je Sprache, Einrückung), **Tastenbelegung** und **Symbole & Makros**, Snippets.
+- **Build & Ausführen:** Build & Run (Gradle-Optionen, Speicher, Caches), SDK-Manager, Keystore-Manager.
+- **Weitere:** Terminal, Git, KI, Store, Hilfe und **Info** (Version, Build, Links).
+
+**Tastenbelegung:** Ein Kürzel antippen und die neuen Tasten drücken; `Esc` bricht ab, `Backspace` entfernt die Belegung. Ohne Hardware-Tastatur lässt sich der Akkord über die Chips Ctrl/Alt/Shift/Meta und den Tastennamen (z. B. `P`, `F6`, `Enter`, `/`) zusammenstellen. Kombinationen, die nur Text tippen, werden abgelehnt. Optional öffnet zweimal `Umschalt` die Befehlspalette.
+
+**Symbole & Makros:** Angeheftete Einträge erscheinen in dieser Reihenfolge in der Leiste über der Bildschirmtastatur. Makros fügen beliebigen Text ein; `$0` setzt den Cursor an diese Stelle. Sprachspezifische Symbole (z. B. `#` in Python) können automatisch angehängt werden.
+
+Die App ist adaptiv (Smartphone, Tablet, Foldable) und nutzt die gesamte Bildschirmfläche.
 
 ## 10. Fehlerbehebung
 

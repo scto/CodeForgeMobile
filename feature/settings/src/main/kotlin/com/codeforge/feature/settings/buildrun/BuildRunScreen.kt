@@ -35,7 +35,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -52,14 +51,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.GradleRunSettings
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsLinkRow
+import com.codeforge.core.ui.SettingsScaffold
+import com.codeforge.core.ui.SettingsSectionLabel
+import androidx.compose.material.icons.filled.Memory
 import com.codeforge.feature.settings.common.JvmOptionsSheet
 import kotlinx.coroutines.flow.collectLatest
 
@@ -120,13 +121,14 @@ fun BuildRunScreen(
         )
     }
 
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.buildrun_title),
+        onBack = onBack,
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = { SettingsTopBar(title = stringRes(R.string.buildrun_title), onBack = onBack) },
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SectionTitle(R.string.buildrun_section_options)
@@ -204,14 +206,13 @@ fun BuildRunScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringRes(R.string.sdkmanager_uebernehmen)) }
             }
-            Block {
-                Text(stringRes(R.string.buildrun_daemon_jvm), style = MaterialTheme.typography.titleSmall)
-                Text(
-                    settings.daemonJvm?.toArgs()?.joinToString(" ")?.ifEmpty { null } ?: stringRes(R.string.buildrun_daemon_jvm_project),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.fillMaxWidth()) {
+                SettingsLinkRow(
+                    title = stringRes(R.string.buildrun_daemon_jvm),
+                    summary = settings.daemonJvm?.toArgs()?.joinToString(" ")?.ifEmpty { null } ?: stringRes(R.string.buildrun_daemon_jvm_project),
+                    icon = Icons.Filled.Memory,
+                    onClick = { jvmSheet = true },
                 )
-                OutlinedButton(onClick = { jvmSheet = true }, modifier = Modifier.fillMaxWidth()) { Text(stringRes(R.string.buildrun_setup)) }
             }
             Block {
                 Text(stringRes(R.string.buildrun_idle), style = MaterialTheme.typography.titleSmall)
@@ -289,12 +290,7 @@ private fun ActionButton(action: BuildRunAction, state: BuildRunState, enabled: 
 
 @Composable
 private fun SectionTitle(@StringRes title: Int) {
-    Text(
-        stringRes(title),
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = 20.dp, top = 12.dp, bottom = 2.dp),
-    )
+    SettingsSectionLabel(stringRes(title), modifier = Modifier.padding(horizontal = 0.dp))
 }
 
 @Composable

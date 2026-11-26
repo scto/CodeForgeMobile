@@ -64,11 +64,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -99,7 +97,9 @@ import com.codeforge.core.domain.model.ProjectSigningAssignment
 import com.codeforge.core.domain.model.RecentProject
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsGroup
+import com.codeforge.core.ui.SettingsScaffold
+import androidx.compose.material3.PrimaryTabRow
 import java.io.File
 
 /** Route des Signing-Bildschirms. */
@@ -137,19 +137,15 @@ fun SigningScreen(
         }
     }
 
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.settings_keystore_manager_title),
+        onBack = onNavigateBack,
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            SettingsTopBar(
-                title = stringRes(R.string.signing_title),
-                onBack = onNavigateBack,
-                actions = {
-                    IconButton(onClick = { onIntent(SigningUiIntent.RefreshKeystores) }) {
-                        Icon(Icons.Default.Refresh, contentDescription = null)
-                    }
-                }
-            )
+        actions = {
+            IconButton(onClick = { onIntent(SigningUiIntent.RefreshKeystores) }) {
+                Icon(Icons.Default.Refresh, contentDescription = stringRes(R.string.common_aktualisieren))
+            }
         }
     ) { padding ->
         Column(
@@ -238,7 +234,7 @@ fun SigningScreen(
             }
 
             // Tabs
-            TabRow(selectedTabIndex = state.activeTab.ordinal) {
+            PrimaryTabRow(selectedTabIndex = state.activeTab.ordinal) {
                 Tab(
                     selected = state.activeTab == SigningTab.KEYSTORES,
                     onClick = { onIntent(SigningUiIntent.SelectTab(SigningTab.KEYSTORES)) },
@@ -328,27 +324,31 @@ private fun KeystoresTabContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(
-                onClick = { onIntent(SigningUiIntent.OpenCreateDialog) },
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(6.dp))
-                Text(stringRes(R.string.signing_new_keystore))
-            }
-            OutlinedButton(
-                onClick = { onIntent(SigningUiIntent.OpenImportDialog) },
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.Default.FileOpen, contentDescription = null)
-                Spacer(Modifier.width(6.dp))
-                Text(stringRes(R.string.signing_import_keystore))
+        SettingsGroup(Modifier.padding(vertical = 12.dp)) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    stringRes(R.string.signing_keystores_intro),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = { onIntent(SigningUiIntent.OpenCreateDialog) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringRes(R.string.signing_new_keystore))
+                    }
+                    OutlinedButton(
+                        onClick = { onIntent(SigningUiIntent.OpenImportDialog) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.FileOpen, contentDescription = null)
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringRes(R.string.signing_import_keystore))
+                    }
+                }
             }
         }
 

@@ -48,6 +48,7 @@
     <ID>CognitiveComplexMethod:EditorScreen.kt:@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class) @Composable fun EditorRoute</ID>
     <ID>CognitiveComplexMethod:EditorSearchBar.kt:@Composable fun EditorSearchBar</ID>
     <ID>CognitiveComplexMethod:EditorSymbolBar.kt:@Composable fun EditorSymbolBar</ID>
+    <ID>CognitiveComplexMethod:EditorSymbolBar.kt:@Composable private fun SymbolKey</ID>
     <ID>CognitiveComplexMethod:EditorViewModel.kt:EditorViewModel$fun onEvent</ID>
     <ID>CognitiveComplexMethod:EditorViewModel.kt:EditorViewModel$private fun acceptAiProposedChange</ID>
     <ID>CognitiveComplexMethod:EditorViewModel.kt:EditorViewModel$private fun assembleContext: com.codeforge.core.domain.ai.AiPreparedContext</ID>
@@ -63,6 +64,7 @@
     <ID>CognitiveComplexMethod:TestTargetScanner.kt:TestTargetScanner$internal fun sanitizeCode: List&lt;String></ID>
     <ID>CognitiveComplexMethod:TreeSitterGrammarTest.kt:TreeSitterGrammarTest$@Test fun kotlinLocalsQueryExistsAndValidStructure</ID>
     <ID>CollapsibleIfStatements:TestTargetScanner.kt:TestTargetScanner$if (funMatch != null) { if (pendingTestAnnotation) { val fullClass = if (packageName.isNotEmpty()) "$packageName.$currentClassName" else currentClassName val filterTarget = if (fullClass.isNotEmpty()) "$fullClass.$funMatch" else funMatch targets.add( TestTarget( line = lineIdx, label = funMatch, filterTarget = filterTarget, isClass = false ) ) pendingTestAnnotation = false } }</ID>
+    <ID>ComplexCondition:EditorScreen.kt:isShift &amp;&amp; uiState.doubleShiftPalette &amp;&amp; event.nativeKeyEvent.repeatCount == 0 &amp;&amp; !event.isCtrlPressed &amp;&amp; !event.isAltPressed &amp;&amp; !event.isMetaPressed</ID>
     <ID>ComplexCondition:EditorViewModel.kt:EditorViewModel$!forceOverwrite &amp;&amp; currentContent != null &amp;&amp; change.originalContent.isNotBlank() &amp;&amp; currentContent != change.originalContent</ID>
     <ID>ComplexCondition:LspAwareLanguage.kt:start > 0 &amp;&amp; (line[start - 1].isLetterOrDigit() || line[start - 1] == '_' || line[start - 1] == '$')</ID>
     <ID>ComplexCondition:TestTargetScanner.kt:TestTargetScanner$i &lt; line.length &amp;&amp; (line[i].isLetterOrDigit() || line[i] == '_' || line[i] == '.')</ID>
@@ -186,6 +188,7 @@
     <ID>MatchingDeclarationName:SoraCodeEditor.kt:EditorDisplaySettings</ID>
     <ID>ReturnCount:ConflictOverlay.kt:fun band</ID>
     <ID>ReturnCount:EditorController.kt:internal fun mapCursorOffset: Int</ID>
+    <ID>ReturnCount:EditorScreen.kt:@Suppress("CyclomaticComplexMethod") fun runKeymapAction: Boolean</ID>
     <ID>ReturnCount:ImageFilePreview.kt:fun isImageFilePath: Boolean</ID>
     <ID>ReturnCount:TestTargetScanner.kt:TestTargetScanner$private fun extractFunctionName: String?</ID>
     <ID>StringLiteralDuplication:EditorViewModel.kt:EditorViewModel$"file://"</ID>

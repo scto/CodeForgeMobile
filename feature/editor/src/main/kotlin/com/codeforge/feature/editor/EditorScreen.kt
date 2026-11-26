@@ -101,10 +101,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -133,6 +133,13 @@ import com.codeforge.feature.editor.ui.ConflictBar
 import com.codeforge.feature.editor.ui.DocumentOutlineSheet
 import com.codeforge.feature.editor.ui.EditBreakpointDialog
 import com.codeforge.feature.editor.ui.EditorSymbolBar
+import com.codeforge.core.domain.editor.KeyChord
+import com.codeforge.core.domain.editor.Keymap
+import com.codeforge.core.domain.editor.KeymapAction
+import com.codeforge.core.domain.editor.SymbolBarAction
+import com.codeforge.core.ui.keyName
+import android.os.SystemClock
+import androidx.compose.runtime.mutableLongStateOf
 import com.codeforge.feature.editor.ui.HoverSheet
 import com.codeforge.feature.editor.ui.ImageFilePreview
 import com.codeforge.feature.editor.ui.QuickFixSheet
@@ -260,6 +267,85 @@ fun EditorRoute(
         }
     }
 
+    val keymap = remember(uiState.keymapOverrides) { Keymap(uiState.keymapOverrides) }
+    var lastShiftAt by remember { mutableLongStateOf(0L) }
+
+    fun runLineEdit(command: (String, Int, Int) -> com.codeforge.libs.code_tools.edit.TextEdit?) {
+        controller?.runLineCommand(command)
+    }
+
+    fun indentUnit(): String = " ".repeat(uiState.displaySettings.tabSize.coerceIn(1, 8))
+
+    fun toggleComment() {
+        val style = activePath?.let(LineEdits::commentStyleFor) ?: return
+        runLineEdit { t, a, b -> LineEdits.toggleComment(t, a, b, style) }
+    }
+
+    fun runSymbolAction(action: SymbolBarAction) {
+        when (action) {
+            SymbolBarAction.TAB -> {
+                controller?.insertText("\t")
+                viewModel.onEvent(EditorUiEvent.InsertText("\t"))
+            }
+            SymbolBarAction.LINE_COMMENT -> toggleComment()
+            SymbolBarAction.MOVE_LINE_UP -> runLineEdit { t, a, b -> LineEdits.moveLines(t, a, b, up = true) }
+            SymbolBarAction.MOVE_LINE_DOWN -> runLineEdit { t, a, b -> LineEdits.moveLines(t, a, b, up = false) }
+            SymbolBarAction.DUPLICATE_LINE -> runLineEdit { t, a, b -> LineEdits.duplicateLines(t, a, b) }
+            SymbolBarAction.DELETE_LINE -> runLineEdit { t, a, b -> LineEdits.deleteLines(t, a, b) }
+            SymbolBarAction.INDENT -> { val unit = indentUnit(); runLineEdit { t, a, b -> LineEdits.indent(t, a, b, unit) } }
+            SymbolBarAction.DEDENT -> { val unit = indentUnit(); runLineEdit { t, a, b -> LineEdits.dedent(t, a, b, unit) } }
+            SymbolBarAction.UNDO -> controller?.undo()
+            SymbolBarAction.REDO -> controller?.redo()
+            SymbolBarAction.CURSOR_LEFT -> controller?.moveCursor(-1)
+            SymbolBarAction.CURSOR_RIGHT -> controller?.moveCursor(1)
+        }
+    }
+
+    fun selectTabRelative(delta: Int) {
+        val count = uiState.openFiles.size
+        if (count > 1) viewModel.onEvent(EditorUiEvent.SelectTab(Math.floorMod(uiState.activeFileIndex + delta, count)))
+    }
+
+    @Suppress("CyclomaticComplexMethod")
+    fun runKeymapAction(action: KeymapAction): Boolean {
+        action.tabIndex?.let { index ->
+            if (index < uiState.openFiles.size) viewModel.onEvent(EditorUiEvent.SelectTab(index))
+            return true
+        }
+        when (action) {
+            KeymapAction.UNDO -> controller?.undo()
+            KeymapAction.REDO -> controller?.redo()
+            KeymapAction.SAVE -> viewModel.onEvent(EditorUiEvent.Save)
+            KeymapAction.TOGGLE_COMMENT -> toggleComment()
+            KeymapAction.DUPLICATE_LINE -> runSymbolAction(SymbolBarAction.DUPLICATE_LINE)
+            KeymapAction.DELETE_LINE -> runSymbolAction(SymbolBarAction.DELETE_LINE)
+            KeymapAction.MOVE_LINE_UP -> runSymbolAction(SymbolBarAction.MOVE_LINE_UP)
+            KeymapAction.MOVE_LINE_DOWN -> runSymbolAction(SymbolBarAction.MOVE_LINE_DOWN)
+            KeymapAction.FORMAT -> formatCode()
+            KeymapAction.QUICK_FIX -> triggerQuickFix()
+            KeymapAction.REFACTOR -> triggerRefactor()
+            KeymapAction.RENAME -> triggerRename()
+            KeymapAction.DEFINITION -> triggerDefinition()
+            KeymapAction.REFERENCES -> triggerReferences()
+            KeymapAction.HOVER -> runBuiltin(BuiltinPaletteAction.HOVER)
+            KeymapAction.SIGNATURE_HELP -> runBuiltin(BuiltinPaletteAction.SIGNATURE_HELP)
+            KeymapAction.ORGANIZE_IMPORTS -> runBuiltin(BuiltinPaletteAction.ORGANIZE_IMPORTS_SERVER)
+            KeymapAction.COMMAND_PALETTE -> openPalette()
+            KeymapAction.FIND -> viewModel.onEvent(EditorUiEvent.ToggleSearchBar)
+            KeymapAction.GO_TO_LINE -> showGoToLine = true
+            KeymapAction.OUTLINE -> viewModel.onEvent(EditorUiEvent.ToggleOutline)
+            KeymapAction.NEXT_TAB -> selectTabRelative(1)
+            KeymapAction.PREVIOUS_TAB -> selectTabRelative(-1)
+            KeymapAction.CLOSE_TAB -> if (uiState.openFiles.isNotEmpty()) viewModel.onEvent(EditorUiEvent.CloseTab(uiState.activeFileIndex))
+            KeymapAction.CLOSE_OTHER_TABS -> if (uiState.openFiles.isNotEmpty()) viewModel.onEvent(EditorUiEvent.CloseOtherTabs(uiState.activeFileIndex))
+            KeymapAction.FOLD_TOGGLE -> controller?.toggleFoldAtCursor()
+            KeymapAction.FOLD_ALL -> controller?.foldAll()
+            KeymapAction.UNFOLD_ALL -> controller?.unfoldAll()
+            else -> return false
+        }
+        return true
+    }
+
     fun runPaletteItem(item: PaletteItem) {
         viewModel.onEvent(EditorUiEvent.DismissCommandPalette)
         when (val action = item.action) {
@@ -317,15 +403,24 @@ fun EditorRoute(
         modifier = modifier
             .fillMaxSize()
             .onPreviewKeyEvent { event ->
-                // Alt+Enter Quick-Fix, Strg+Umschalt+P Befehlspalette, Strg+Umschalt+R Refactoring, Umschalt+F6 Umbenennen
+                // Tastenbelegung aus Einstellungen › Keymap; „zweimal Umschalt“ öffnet die Befehlspalette.
                 if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                when {
-                    event.isAltPressed && event.key == Key.Enter -> { triggerQuickFix(); true }
-                    event.isCtrlPressed && event.isShiftPressed && event.key == Key.P -> { openPalette(); true }
-                    event.isCtrlPressed && event.isShiftPressed && event.key == Key.R -> { triggerRefactor(); true }
-                    event.isShiftPressed && event.key == Key.F6 -> { triggerRename(); true }
-                    else -> false
+                val name = event.key.keyName()
+                if (name in KeyChord.MODIFIER_KEYS) {
+                    val isShift = name == "SHIFT_LEFT" || name == "SHIFT_RIGHT"
+                    if (isShift && uiState.doubleShiftPalette && event.nativeKeyEvent.repeatCount == 0 &&
+                        !event.isCtrlPressed && !event.isAltPressed && !event.isMetaPressed
+                    ) {
+                        val now = SystemClock.uptimeMillis()
+                        if (now - lastShiftAt < DOUBLE_SHIFT_WINDOW_MS) { lastShiftAt = 0L; openPalette() } else lastShiftAt = now
+                    }
+                    return@onPreviewKeyEvent false
                 }
+                lastShiftAt = 0L
+                val chord = KeyChord(name, event.isCtrlPressed, event.isShiftPressed, event.isAltPressed, event.isMetaPressed)
+                if (chord.producesText) return@onPreviewKeyEvent false
+                val action = keymap.actionFor(chord) ?: return@onPreviewKeyEvent false
+                runKeymapAction(action)
             },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
@@ -526,13 +621,16 @@ fun EditorRoute(
                                 onControllerReady = { controller = it }
                             )
 
-                            if (WindowInsets.isImeVisible) {
+                            if (WindowInsets.isImeVisible && uiState.symbolBarEnabled) {
                                 EditorSymbolBar(
+                                    entries = uiState.symbolBarEntries,
                                     filePath = active.path,
-                                    onInsertText = { text ->
-                                        controller?.insertText(text)
+                                    languageExtras = uiState.symbolBarLanguageExtras,
+                                    onInsertText = { text, offset ->
+                                        controller?.insertText(text, offset)
                                         viewModel.onEvent(EditorUiEvent.InsertText(text))
-                                    }
+                                    },
+                                    onAction = ::runSymbolAction
                                 )
                             }
                         }
@@ -1104,6 +1202,7 @@ private fun EditorToolbar(
     }
 }
 
+private const val DOUBLE_SHIFT_WINDOW_MS = 400L
 private const val TEXT_ACTION_COMMENT = "comment"
 private const val TEXT_ACTION_QUICK_FIX = "quick-fix"
 private const val TEXT_ACTION_FORMAT = "format"

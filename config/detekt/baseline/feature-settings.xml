@@ -34,10 +34,12 @@
     <ID>ClassOrdering:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$/** UI-Zustand. */ val uiState: StateFlow&lt;TerminalSettingsUiState> = combine(settingsRepository.appSettings, termuxState, termuxFontSp, fontState, combine(extraKeysState, killOnExitState, clipboardState, backupState) { e, k, c, b -> listOf(e, k, c, b) }) { settings, termux, fontSp, font, extra -> @Suppress("UNCHECKED_CAST") val extraKeys = extra[0] as String? val killOnExit = extra[1] as Boolean val clipboard = extra[2] as Boolean val backup = extra[3] as Pair&lt;Boolean, String?> TerminalSettingsUiState( fontSize = fontSp ?: settings.terminal.fontSize.takeIf { it > 0 } ?: 14, useCompactTerminal = settings.terminal.useCompactTerminal, scrollbackRows = termux.first, cursorStyle = termux.second, customFontInstalled = font.first, killSessionsOnExit = killOnExit, clipboardShortcuts = clipboard, backupBusy = backup.first, backupMessage = backup.second, extraKeys = extraKeys ?: ExtraKeysConfig.DEFAULT, extraKeysCustom = extraKeys != null, fontMessageRes = font.second, isLoading = false ) } .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TerminalSettingsUiState())</ID>
     <ID>ClassOrdering:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$private fun readExtraKeys: String?</ID>
     <ID>ClassOrdering:TerminalSettingsViewModel.kt:TerminalSettingsViewModel$private fun readTermuxFontSp: Int?</ID>
+    <ID>CognitiveComplexMethod:AppearanceScreen.kt:@Composable fun AppearanceContent</ID>
     <ID>CognitiveComplexMethod:BuildRunScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable fun BuildRunScreen</ID>
     <ID>CognitiveComplexMethod:FormattersScreen.kt:@Composable fun FormattersScreen</ID>
     <ID>CognitiveComplexMethod:GitSettingsScreen.kt:@Composable private fun CredentialDialog</ID>
     <ID>CognitiveComplexMethod:HttpTextFetcher.kt:DefaultHttpTextFetcher$override suspend fun fetch: Result&lt;String></ID>
+    <ID>CognitiveComplexMethod:KeymapScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun KeyCaptureDialog</ID>
     <ID>CognitiveComplexMethod:PackageManagerScreen.kt:@Composable private fun PackageCard</ID>
     <ID>CognitiveComplexMethod:SnippetSettingsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun SnippetSettingsScreen</ID>
     <ID>CognitiveComplexMethod:StoreInstaller.kt:StoreInstaller$private suspend fun installRecursive: StoreInstallResult</ID>
@@ -46,6 +48,7 @@
     <ID>CognitiveComplexMethod:StoreScreen.kt:@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable private fun StoreDetailSheet</ID>
     <ID>CognitiveComplexMethod:TerminalSettingsContract.kt:ExtraKeysConfig$fun isValid: Boolean</ID>
     <ID>CognitiveComplexMethod:TerminalSettingsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable private fun TerminalSettingsScreen</ID>
+    <ID>CyclomaticComplexMethod:KeymapScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun KeyCaptureDialog</ID>
     <ID>CyclomaticComplexMethod:StoreCatalogParser.kt:StoreCatalogParser$fun parse: Result&lt;StoreCatalog></ID>
     <ID>CyclomaticComplexMethod:StoreInstaller.kt:StoreInstaller$private suspend fun installRecursive: StoreInstallResult</ID>
     <ID>CyclomaticComplexMethod:StoreScreen.kt:@Composable private fun StoreContent</ID>

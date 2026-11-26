@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
  * @param showNonPrintableChars Leerzeichen, Tabs und Zeilenenden zeigen.
  * @param tabSize Tab-Breite.
  * @param useTreeSitter Tree-sitter statt TextMate für die Farben.
+ * @param sample Beispieltext der Vorschau.
  */
 @Immutable
 data class EditorPreviewSpec(
@@ -32,7 +33,15 @@ data class EditorPreviewSpec(
     val showNonPrintableChars: Boolean = false,
     val tabSize: Int = 4,
     val useTreeSitter: Boolean = true,
-)
+    /** Beispieltext: [SAMPLE_KOTLIN], [SAMPLE_XML] oder [SAMPLE_MARKDOWN]. */
+    val sample: String = SAMPLE_KOTLIN,
+) {
+    companion object {
+        const val SAMPLE_KOTLIN = "kotlin"
+        const val SAMPLE_XML = "xml"
+        const val SAMPLE_MARKDOWN = "markdown"
+    }
+}
 
 /**
  * Zeichnet eine Editor-Vorschau. Die App stellt die Umsetzung aus `:feature:editor` bereit, damit Einstellungen

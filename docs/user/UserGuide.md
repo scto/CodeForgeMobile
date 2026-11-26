@@ -73,7 +73,17 @@ Under Settings → AI you store API keys for Anthropic, OpenAI and Gemini, test 
 
 ## 9. Settings and About
 
-Theme (light/dark, dynamic colour), editor, Git, AI, plugins and **About** (version, build, links). The app is adaptive (phone, tablet, foldable) and edge-to-edge.
+Settings are grouped into sections:
+
+- **Appearance & Editor:** Appearance (light/dark, dynamic colour, app colour scheme), Editor (font, display, input, gestures, language servers), Color Scheme (editor theme with preview), Code Style (reformat on save per language, indentation), **Keymap** and **Symbols & Macros**, Snippets.
+- **Build & Run:** Build & Run (Gradle options, memory, caches), SDK Manager, Keystore Manager.
+- **More:** Terminal, Git, AI, Store, Help and **About** (version, build, links).
+
+**Keymap:** tap a shortcut and press the new keys; `Esc` cancels, `Backspace` removes the binding. Without a hardware keyboard, compose the chord with the Ctrl/Alt/Shift/Meta chips and a key name (e.g. `P`, `F6`, `Enter`, `/`). Chords that only type text are rejected. Optionally, pressing `Shift` twice opens the command palette.
+
+**Symbols & Macros:** pinned entries appear in this order in the bar above the soft keyboard. Macros insert any text; `$0` places the cursor. Language-specific symbols (e.g. `#` in Python) can be appended automatically.
+
+The app is adaptive (phone, tablet, foldable) and edge-to-edge.
 
 ## 10. Troubleshooting
 

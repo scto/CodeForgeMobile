@@ -1,67 +1,63 @@
 /**
  * Modul: :feature:settings
  * @author Thomas Schmid
+ *
+ * Editor-Einstellungen im Stil von CodeAssist: Schrift oben, darunter gruppierte Schalter für Anzeige,
+ * Eingabe, Gesten, Sprachfunktionen, Indexierung und Datei-Kopf. Farbschema und Code-Stil haben eigene Seiten.
  */
 package com.codeforge.feature.settings
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.common.FileHeaderContext
 import com.codeforge.core.common.FileHeaderRenderer
+import com.codeforge.core.designsystem.EditorPreviewSpec
+import com.codeforge.core.designsystem.LocalEditorPreview
 import com.codeforge.core.resources.R
-import com.codeforge.core.resources.Res
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsChipsRow
+import com.codeforge.core.ui.SettingsDivider
+import com.codeforge.core.ui.SettingsGroup
+import com.codeforge.core.ui.SettingsHint
+import com.codeforge.core.ui.SettingsLinkRow
+import com.codeforge.core.ui.SettingsScaffold
+import com.codeforge.core.ui.SettingsSectionLabel
+import com.codeforge.core.ui.SettingsSliderRow
+import com.codeforge.core.ui.SettingsSwitchRow
 
 /** Route der Editor-Einstellungen. */
 @Composable
 fun EditorSettingsRoute(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
-    onNavigateToSnippets: () -> Unit = {},
     onNavigateToLsp: () -> Unit = {},
-    onNavigateToFormatters: () -> Unit = {},
     viewModel: EditorSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -69,685 +65,345 @@ fun EditorSettingsRoute(
         modifier = modifier,
         uiState = uiState,
         onBack = onBack,
-        onNavigateToSnippets = onNavigateToSnippets,
         onNavigateToLsp = onNavigateToLsp,
-        onNavigateToFormatters = onNavigateToFormatters,
         onEvent = viewModel::onEvent
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Schriftarten des Editors (Asset-Pfad, leer = System). */
+internal enum class EditorFontChoice(val assetPath: String) {
+    SYSTEM(""),
+    JETBRAINS_MONO("fonts/jetbrainsmono_regular.ttf");
+
+    companion object {
+        fun fromPath(path: String): EditorFontChoice =
+            if (path.contains("jetbrains", ignoreCase = true)) JETBRAINS_MONO else SYSTEM
+    }
+}
+
 @Composable
 private fun EditorSettingsScreen(
-    modifier: Modifier = Modifier,
     uiState: EditorSettingsUiState,
+    onEvent: (EditorSettingsUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
-    onNavigateToSnippets: () -> Unit = {},
-    onNavigateToLsp: () -> Unit = {},
-    onNavigateToFormatters: () -> Unit = {},
-    onEvent: (EditorSettingsUiEvent) -> Unit
+    onNavigateToLsp: () -> Unit = {}
 ) {
-    Scaffold(
-        modifier = modifier,
-        topBar = { SettingsTopBar(title = stringRes(R.string.common_editor), onBack = onBack) }
-    ) { padding ->
+    SettingsScaffold(title = stringRes(R.string.common_editor), onBack = onBack, modifier = modifier) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(bottom = 24.dp)
         ) {
-            // --- SNIPPETS ---
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onNavigateToSnippets
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringRes(R.string.settings_editor_snippets), style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            stringRes(R.string.settings_editor_snippets_desc),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = stringRes(R.string.settings_editor_snippets)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // --- SPRACHSERVER ---
-            Text(
-                stringRes(R.string.settings_editor_lsp_section),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
-            )
-            Card(modifier = Modifier.fillMaxWidth(), onClick = onNavigateToLsp) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringRes(R.string.settings_editor_lsp_manage), style = MaterialTheme.typography.titleMedium)
-                        Text(stringRes(R.string.settings_editor_lsp_manage_desc), style = MaterialTheme.typography.bodySmall)
-                    }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = stringRes(R.string.settings_editor_lsp_manage)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // --- DARSTELLUNG (APPEARANCE) ---
-            SectionHeader(
-                title = stringRes(R.string.settings_editor_section_display),
-                onReset = { onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.DISPLAY)) }
-            )
-
-            // TextMate Theme Dropdown
-            ThemeDropdown(
-                selectedThemeId = uiState.textmateTheme,
-                availableThemes = uiState.availableThemes,
-                onThemeSelected = { onEvent(EditorSettingsUiEvent.TextmateThemeChanged(it)) }
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            EditorPreviewCard(uiState)
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Font Family Dropdown
-            FontFamilyDropdown(
-                selectedFontFamily = uiState.fontFamily,
-                onFontFamilySelected = { onEvent(EditorSettingsUiEvent.FontFamilyChanged(it)) }
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Schriftgröße Slider mit Vorschau
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(stringRes(R.string.settings_editor_font_size_slider), style = MaterialTheme.typography.titleSmall)
-                        Text("${uiState.fontSize} sp", style = MaterialTheme.typography.labelLarge)
-                    }
-                    Slider(
-                        value = uiState.fontSize.toFloat(),
-                        onValueChange = { onEvent(EditorSettingsUiEvent.FontSizeChanged(it.toInt())) },
-                        valueRange = 8f..32f,
-                        steps = 23
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                MaterialTheme.colorScheme.surfaceVariant,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .padding(12.dp)
-                    ) {
-                        Text(
-                            text = stringRes(R.string.settings_editor_font_size_preview_sample),
-                            fontSize = uiState.fontSize.sp,
-                            fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            EditorToggleRow(
-                title = Res.string(R.string.settings_font_ligatures),
-                description = Res.string(R.string.settings_font_ligatures_desc),
-                checked = uiState.fontLigatures,
-                onToggle = { onEvent(EditorSettingsUiEvent.FontLigaturesToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_zeilenumbruch_word_wrap),
-                description = Res.string(R.string.settings_word_wrap_desc),
-                checked = uiState.wordWrap,
-                onToggle = { onEvent(EditorSettingsUiEvent.WordWrapToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_txt_word_wrap),
-                description = Res.string(R.string.settings_txt_word_wrap_desc),
-                checked = uiState.txtWordWrap,
-                onToggle = { onEvent(EditorSettingsUiEvent.TxtWordWrapToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_line_numbers),
-                description = Res.string(R.string.settings_line_numbers_desc),
-                checked = uiState.showLineNumbers,
-                onToggle = { onEvent(EditorSettingsUiEvent.LineNumbersToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_pin_line_numbers),
-                // Anheften wirkt nur beim seitlichen Scrollen – mit Zeilenumbruch gibt es keins.
-                description = Res.string(
-                    if (uiState.wordWrap) R.string.settings_pin_line_numbers_wrap_hint else R.string.settings_pin_line_numbers_desc
-                ),
-                checked = uiState.pinLineNumbers,
-                onToggle = { onEvent(EditorSettingsUiEvent.PinLineNumbersToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_cursor_animation),
-                description = Res.string(R.string.settings_cursor_animation_desc),
-                checked = uiState.cursorAnimationEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.CursorAnimationToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_color_previews),
-                description = Res.string(R.string.settings_color_previews_desc),
-                checked = uiState.colorPreviewsEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.ColorPreviewsToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_read_only_default),
-                description = Res.string(R.string.settings_read_only_default_desc),
-                checked = uiState.readOnlyDefault,
-                onToggle = { onEvent(EditorSettingsUiEvent.ReadOnlyDefaultToggled) }
-            )
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(stringRes(R.string.settings_line_spacing), style = MaterialTheme.typography.titleSmall)
-                        Text("${uiState.lineSpacingPercent} %", style = MaterialTheme.typography.labelLarge)
-                    }
-                    Text(stringRes(R.string.settings_line_spacing_desc), style = MaterialTheme.typography.bodySmall)
-                    Slider(
-                        value = uiState.lineSpacingPercent.toFloat(),
-                        onValueChange = { onEvent(EditorSettingsUiEvent.LineSpacingChanged(it.toInt())) },
-                        valueRange = 80f..200f,
-                        steps = 11
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            EditorToggleRow(
-                title = Res.string(R.string.settings_nicht_druckbare_zeichen_anzeigen),
-                description = Res.string(R.string.settings_leerzeichen_tabs_und_zeilenumbrueche_a),
-                checked = uiState.showNonPrintableChars,
-                onToggle = { onEvent(EditorSettingsUiEvent.NonPrintableCharsToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_sticky_scroll),
-                description = Res.string(R.string.settings_zeigt_den_umschliessenden_code_block),
-                checked = uiState.stickyScrollEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.StickyScrollToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_minimap),
-                description = Res.string(R.string.settings_minimap_desc),
-                checked = uiState.minimapEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.MinimapToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_code_folding),
-                description = Res.string(R.string.settings_code_folding_desc),
-                checked = uiState.codeFoldingEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.CodeFoldingToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_rainbow_brackets),
-                description = Res.string(R.string.settings_rainbow_brackets_desc),
-                checked = uiState.rainbowBracketsEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.RainbowBracketsToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_text_lupe_magnifier),
-                description = Res.string(R.string.settings_vergroesserungsglas_bei_cursor_platzie),
-                checked = uiState.magnifierEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.MagnifierToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_icu_word_selection),
-                description = Res.string(R.string.settings_icu_word_selection_desc),
-                checked = uiState.icuWordSelection,
-                onToggle = { onEvent(EditorSettingsUiEvent.IcuWordSelectionToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_pinch_to_zoom),
-                description = Res.string(R.string.settings_pinch_to_zoom_desc),
-                checked = uiState.pinchToZoomEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.PinchToZoomToggled) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // --- EINGABE (INPUT) ---
-            SectionHeader(
-                title = stringRes(R.string.settings_editor_section_input),
-                onReset = { onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.INPUT)) }
-            )
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(stringRes(R.string.settings_tab_groesse), style = MaterialTheme.typography.titleSmall)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = { onEvent(EditorSettingsUiEvent.TabSizeChanged((uiState.tabSize - 1).coerceAtLeast(1))) }) {
-                            Text("–")
-                        }
-                        Text("${uiState.tabSize}", modifier = Modifier.padding(horizontal = 8.dp))
-                        IconButton(onClick = { onEvent(EditorSettingsUiEvent.TabSizeChanged((uiState.tabSize + 1).coerceAtMost(8))) }) {
-                            Text("+")
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            EditorToggleRow(
-                title = Res.string(R.string.settings_soft_tabs),
-                description = Res.string(R.string.settings_soft_tabs_desc),
-                checked = uiState.softTabs,
-                onToggle = { onEvent(EditorSettingsUiEvent.SoftTabsToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_delete_empty_line_fast),
-                description = Res.string(R.string.settings_delete_empty_line_fast_desc),
-                checked = uiState.deleteEmptyLineFast,
-                onToggle = { onEvent(EditorSettingsUiEvent.DeleteEmptyLineFastToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_backspace_deletes_tab),
-                description = Res.string(R.string.settings_backspace_deletes_tab_desc),
-                checked = uiState.backspaceDeletesTab,
-                onToggle = { onEvent(EditorSettingsUiEvent.BackspaceDeletesTabToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_klammern_anfuehrungszeichen_automatisc),
-                checked = uiState.symbolPairAutocompleteEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.SymbolPairAutocompleteToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_keyboard_suggestions),
-                description = Res.string(R.string.settings_keyboard_suggestions_desc),
-                checked = uiState.keyboardSuggestions,
-                onToggle = { onEvent(EditorSettingsUiEvent.KeyboardSuggestionsToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_disable_soft_keyboard),
-                description = Res.string(R.string.settings_disable_soft_keyboard_desc),
-                checked = uiState.disableSoftKeyboardWithHardwareKeyboard,
-                onToggle = { onEvent(EditorSettingsUiEvent.DisableSoftKeyboardToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_desktop_shortcuts),
-                description = Res.string(R.string.settings_desktop_shortcuts_desc),
-                checked = uiState.desktopShortcutsEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.DesktopShortcutsToggled) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // --- SPRACHFUNKTIONEN (LANGUAGE) ---
-            SectionHeader(
-                title = stringRes(R.string.settings_editor_section_language),
-                onReset = { onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.LANGUAGE)) }
-            )
-
-            EditorToggleRow(
-                title = Res.string(R.string.settings_tree_sitter_verwenden),
-                description = Res.string(R.string.settings_praeziseres_syntax_highlighting_statt),
-                checked = uiState.useTreeSitter,
-                onToggle = { onEvent(EditorSettingsUiEvent.TreeSitterToggled) }
-            )
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(stringRes(R.string.settings_lsp_section_title), style = MaterialTheme.typography.titleSmall)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(stringRes(R.string.settings_lsp_max_sessions_label), style = MaterialTheme.typography.bodyMedium)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { onEvent(EditorSettingsUiEvent.LspMaxConcurrentSessionsChanged((uiState.lspMaxConcurrentSessions - 1).coerceAtLeast(1))) }) {
-                                Text("–")
-                            }
-                            Text("${uiState.lspMaxConcurrentSessions}", modifier = Modifier.padding(horizontal = 8.dp))
-                            IconButton(onClick = { onEvent(EditorSettingsUiEvent.LspMaxConcurrentSessionsChanged((uiState.lspMaxConcurrentSessions + 1).coerceAtMost(10))) }) {
-                                Text("+")
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(stringRes(R.string.settings_lsp_idle_timeout_label), style = MaterialTheme.typography.bodyMedium)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { onEvent(EditorSettingsUiEvent.LspIdleTimeoutMinutesChanged((uiState.lspIdleTimeoutMinutes - 1).coerceAtLeast(1))) }) {
-                                Text("–")
-                            }
-                            Text("${uiState.lspIdleTimeoutMinutes}m", modifier = Modifier.padding(horizontal = 8.dp))
-                            IconButton(onClick = { onEvent(EditorSettingsUiEvent.LspIdleTimeoutMinutesChanged((uiState.lspIdleTimeoutMinutes + 5).coerceAtMost(120))) }) {
-                                Text("+")
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // --- PROJEKT-INDEXIERUNG ---
-            SectionHeader(
-                title = stringRes(R.string.settings_editor_section_indexing),
-                onReset = { onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.INDEXING)) }
-            )
-
-            EditorToggleRow(
-                title = Res.string(R.string.settings_project_indexing),
-                description = Res.string(R.string.settings_project_indexing_desc),
-                checked = uiState.projectIndexingEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.ProjectIndexingToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_j2k_enabled),
-                description = Res.string(R.string.settings_j2k_enabled_desc),
-                checked = uiState.j2kEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.J2kToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_x2c_enabled),
-                description = Res.string(R.string.settings_x2c_enabled_desc),
-                checked = uiState.x2cEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.X2cToggled) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // --- FORMAT BEIM SPEICHERN ---
-            Card(modifier = Modifier.fillMaxWidth(), onClick = onNavigateToFormatters) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(stringRes(R.string.user_formatters_title), style = MaterialTheme.typography.titleMedium)
-                        Text(stringRes(R.string.user_formatters_desc), style = MaterialTheme.typography.bodySmall)
-                    }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = stringRes(R.string.user_formatters_title)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            SectionHeader(
-                title = stringRes(R.string.settings_editor_section_format),
-                onReset = { onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.FORMAT_ON_SAVE)) }
-            )
-
-            EditorToggleRow(
-                title = Res.string(R.string.settings_format_on_save_kotlin),
-                description = Res.string(R.string.settings_format_on_save_kotlin_desc),
-                checked = uiState.formatOnSaveKotlin,
-                onToggle = { onEvent(EditorSettingsUiEvent.FormatOnSaveKotlinToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_format_on_save_java),
-                description = Res.string(R.string.settings_format_on_save_java_desc),
-                checked = uiState.formatOnSaveJava,
-                onToggle = { onEvent(EditorSettingsUiEvent.FormatOnSaveJavaToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_format_on_save_xml),
-                description = Res.string(R.string.settings_format_on_save_xml_desc),
-                checked = uiState.formatOnSaveXml,
-                onToggle = { onEvent(EditorSettingsUiEvent.FormatOnSaveXmlToggled) }
-            )
-            EditorToggleRow(
-                title = Res.string(R.string.settings_format_on_save_json),
-                description = Res.string(R.string.settings_format_on_save_json_desc),
-                checked = uiState.formatOnSaveJson,
-                onToggle = { onEvent(EditorSettingsUiEvent.FormatOnSaveJsonToggled) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // --- DATEIKOPF (FILE HEADER) ---
-            SectionHeader(title = stringRes(R.string.settings_editor_section_file_header))
-
-            EditorToggleRow(
-                title = Res.string(R.string.settings_editor_file_header_enabled),
-                checked = uiState.fileHeaderEnabled,
-                onToggle = { onEvent(EditorSettingsUiEvent.FileHeaderEnabledToggled) }
-            )
-
-            if (uiState.fileHeaderEnabled) {
-                OutlinedTextField(
-                    value = uiState.fileHeaderAuthor,
-                    onValueChange = { onEvent(EditorSettingsUiEvent.FileHeaderAuthorChanged(it)) },
-                    label = { Text(stringRes(R.string.settings_editor_file_header_author)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val sampleHeader = FileHeaderRenderer.render(
-                    extension = "kt",
-                    context = FileHeaderContext(
-                        filename = "Sample.kt",
-                        moduleName = ":feature:sample",
-                        author = uiState.fileHeaderAuthor.ifBlank { "Author" },
-                        year = "2026"
-                    )
-                ).orEmpty()
-
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            stringRes(R.string.settings_editor_file_header_preview),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = sampleHeader,
-                            fontFamily = FontFamily.Monospace,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            }
+            FontGroup(uiState, onEvent)
+            DisplayGroup(uiState, onEvent)
+            InputGroup(uiState, onEvent)
+            GesturesGroup(uiState, onEvent)
+            LanguageGroup(uiState, onEvent, onNavigateToLsp)
+            IndexingGroup(uiState, onEvent)
+            FileHeaderGroup(uiState, onEvent)
         }
     }
 }
 
 @Composable
-private fun SectionHeader(
-    title: String,
-    onReset: (() -> Unit)? = null
-) {
+private fun ResetLabel(title: String, onReset: () -> Unit) {
+    SettingsSectionLabel(title) {
+        TextButton(onClick = onReset) {
+            Text(stringRes(R.string.settings_editor_reset_section), style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
+private fun FontGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
+    var fontSize by remember(uiState.fontSize) { mutableFloatStateOf(uiState.fontSize.toFloat()) }
+    var spacing by remember(uiState.lineSpacingPercent) { mutableFloatStateOf(uiState.lineSpacingPercent.toFloat()) }
+    ResetLabel(stringRes(R.string.settings_editor_section_display)) {
+        onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.DISPLAY))
+    }
+    SettingsGroup {
+        SettingsSliderRow(
+            title = stringRes(R.string.settings_editor_font_size_slider),
+            value = fontSize,
+            onValueChange = { fontSize = it },
+            onValueChangeFinished = { onEvent(EditorSettingsUiEvent.FontSizeChanged(fontSize.toInt())) },
+            valueRange = 8f..32f,
+            steps = 23,
+            valueLabel = "${fontSize.toInt()} sp"
+        )
+        SettingsChipsRow(
+            title = stringRes(R.string.settings_editor_font_family),
+            options = EditorFontChoice.entries,
+            selected = EditorFontChoice.fromPath(uiState.fontFamily),
+            label = {
+                when (it) {
+                    EditorFontChoice.SYSTEM -> stringRes(R.string.settings_editor_font_system)
+                    EditorFontChoice.JETBRAINS_MONO -> stringRes(R.string.settings_editor_font_jetbrains)
+                }
+            },
+            onSelect = { onEvent(EditorSettingsUiEvent.FontFamilyChanged(it.assetPath)) }
+        )
+        SettingsSliderRow(
+            title = stringRes(R.string.settings_line_spacing),
+            summary = stringRes(R.string.settings_line_spacing_desc),
+            value = spacing,
+            onValueChange = { spacing = it },
+            onValueChangeFinished = { onEvent(EditorSettingsUiEvent.LineSpacingChanged(spacing.toInt())) },
+            valueRange = 80f..200f,
+            steps = 11,
+            valueLabel = "${spacing.toInt()} %"
+        )
+        SettingsDivider()
+        EditorPreviewBox(uiState, EditorPreviewSpec.SAMPLE_KOTLIN, Modifier.padding(12.dp))
+    }
+}
+
+@Composable
+private fun SwitchList(rows: List<SwitchSpec>) {
+    rows.forEachIndexed { index, row ->
+        if (index > 0) SettingsDivider()
+        SettingsSwitchRow(title = row.title, summary = row.summary, checked = row.checked, onCheckedChange = { row.onToggle() })
+    }
+}
+
+private data class SwitchSpec(val title: String, val summary: String?, val checked: Boolean, val onToggle: () -> Unit)
+
+@Composable
+private fun DisplayGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
+    Spacer(Modifier.height(12.dp))
+    SettingsGroup {
+        SwitchList(
+            listOf(
+                SwitchSpec(stringRes(R.string.settings_font_ligatures), stringRes(R.string.settings_font_ligatures_desc), uiState.fontLigatures) {
+                    onEvent(EditorSettingsUiEvent.FontLigaturesToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_code_folding), stringRes(R.string.settings_code_folding_desc), uiState.codeFoldingEnabled) {
+                    onEvent(EditorSettingsUiEvent.CodeFoldingToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_zeilenumbruch_word_wrap), stringRes(R.string.settings_word_wrap_desc), uiState.wordWrap) {
+                    onEvent(EditorSettingsUiEvent.WordWrapToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_txt_word_wrap), stringRes(R.string.settings_txt_word_wrap_desc), uiState.txtWordWrap) {
+                    onEvent(EditorSettingsUiEvent.TxtWordWrapToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_line_numbers), stringRes(R.string.settings_line_numbers_desc), uiState.showLineNumbers) {
+                    onEvent(EditorSettingsUiEvent.LineNumbersToggled)
+                },
+                // Anheften wirkt nur beim seitlichen Scrollen – mit Zeilenumbruch gibt es keins.
+                SwitchSpec(
+                    stringRes(R.string.settings_pin_line_numbers),
+                    stringRes(if (uiState.wordWrap) R.string.settings_pin_line_numbers_wrap_hint else R.string.settings_pin_line_numbers_desc),
+                    uiState.pinLineNumbers
+                ) { onEvent(EditorSettingsUiEvent.PinLineNumbersToggled) },
+                SwitchSpec(stringRes(R.string.settings_sticky_scroll), stringRes(R.string.settings_zeigt_den_umschliessenden_code_block), uiState.stickyScrollEnabled) {
+                    onEvent(EditorSettingsUiEvent.StickyScrollToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_minimap), stringRes(R.string.settings_minimap_desc), uiState.minimapEnabled) {
+                    onEvent(EditorSettingsUiEvent.MinimapToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_rainbow_brackets), stringRes(R.string.settings_rainbow_brackets_desc), uiState.rainbowBracketsEnabled) {
+                    onEvent(EditorSettingsUiEvent.RainbowBracketsToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_color_previews), stringRes(R.string.settings_color_previews_desc), uiState.colorPreviewsEnabled) {
+                    onEvent(EditorSettingsUiEvent.ColorPreviewsToggled)
+                },
+                SwitchSpec(
+                    stringRes(R.string.settings_nicht_druckbare_zeichen_anzeigen),
+                    stringRes(R.string.settings_leerzeichen_tabs_und_zeilenumbrueche_a),
+                    uiState.showNonPrintableChars
+                ) { onEvent(EditorSettingsUiEvent.NonPrintableCharsToggled) },
+                SwitchSpec(stringRes(R.string.settings_cursor_animation), stringRes(R.string.settings_cursor_animation_desc), uiState.cursorAnimationEnabled) {
+                    onEvent(EditorSettingsUiEvent.CursorAnimationToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_read_only_default), stringRes(R.string.settings_read_only_default_desc), uiState.readOnlyDefault) {
+                    onEvent(EditorSettingsUiEvent.ReadOnlyDefaultToggled)
+                }
+            )
+        )
+    }
+}
+
+@Composable
+private fun Stepper(label: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        if (onReset != null) {
-            TextButton(onClick = onReset) {
-                Text(stringRes(R.string.settings_editor_reset_section), style = MaterialTheme.typography.labelSmall)
-            }
-        }
+        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        IconButton(onClick = onMinus) { Text("–") }
+        Text(value, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        IconButton(onClick = onPlus) { Text("+") }
     }
-    Spacer(modifier = Modifier.height(4.dp))
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ThemeDropdown(
-    selectedThemeId: String,
-    availableThemes: List<com.codeforge.core.designsystem.theme.TextMateThemeItem>,
-    onThemeSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val autoLabel = stringRes(R.string.settings_editor_theme_auto)
-    val currentLabel = if (selectedThemeId.isBlank() || selectedThemeId == "auto") {
-        autoLabel
-    } else {
-        availableThemes.find { it.id.equals(selectedThemeId, ignoreCase = true) }?.displayName ?: autoLabel
+private fun InputGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
+    ResetLabel(stringRes(R.string.settings_editor_section_input)) {
+        onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.INPUT))
     }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-        OutlinedTextField(
-            value = currentLabel,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringRes(R.string.settings_textmate_theme)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable)
+    SettingsGroup {
+        SwitchList(
+            listOf(
+                SwitchSpec(stringRes(R.string.settings_symbol_bar_enabled), stringRes(R.string.settings_symbol_bar_enabled_desc), uiState.symbolBarEnabled) {
+                    onEvent(EditorSettingsUiEvent.SymbolBarToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_delete_empty_line_fast), stringRes(R.string.settings_delete_empty_line_fast_desc), uiState.deleteEmptyLineFast) {
+                    onEvent(EditorSettingsUiEvent.DeleteEmptyLineFastToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_backspace_deletes_tab), stringRes(R.string.settings_backspace_deletes_tab_desc), uiState.backspaceDeletesTab) {
+                    onEvent(EditorSettingsUiEvent.BackspaceDeletesTabToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_klammern_anfuehrungszeichen_automatisc), null, uiState.symbolPairAutocompleteEnabled) {
+                    onEvent(EditorSettingsUiEvent.SymbolPairAutocompleteToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_keyboard_suggestions), stringRes(R.string.settings_keyboard_suggestions_desc), uiState.keyboardSuggestions) {
+                    onEvent(EditorSettingsUiEvent.KeyboardSuggestionsToggled)
+                },
+                SwitchSpec(
+                    stringRes(R.string.settings_disable_soft_keyboard),
+                    stringRes(R.string.settings_disable_soft_keyboard_desc),
+                    uiState.disableSoftKeyboardWithHardwareKeyboard
+                ) { onEvent(EditorSettingsUiEvent.DisableSoftKeyboardToggled) },
+                SwitchSpec(stringRes(R.string.settings_desktop_shortcuts), stringRes(R.string.settings_desktop_shortcuts_desc), uiState.desktopShortcutsEnabled) {
+                    onEvent(EditorSettingsUiEvent.DesktopShortcutsToggled)
+                }
+            )
         )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text(autoLabel) },
-                onClick = {
-                    onThemeSelected("auto")
-                    expanded = false
-                }
-            )
-            availableThemes.forEachIndexed { index, theme ->
-                // Trennlinie vor den Themes aus installierten Plugins (Store).
-                if (theme.filePath != null && availableThemes.getOrNull(index - 1)?.filePath == null) {
-                    androidx.compose.material3.HorizontalDivider()
-                }
-                DropdownMenuItem(
-                    text = { Text(theme.displayName) },
-                    onClick = {
-                        onThemeSelected(theme.id)
-                        expanded = false
-                    }
-                )
-            }
-        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FontFamilyDropdown(
-    selectedFontFamily: String,
-    onFontFamilySelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val systemLabel = stringRes(R.string.settings_editor_font_system)
-    val jetbrainsLabel = stringRes(R.string.settings_editor_font_jetbrains)
-
-    val currentLabel = if (selectedFontFamily.contains("jetbrains", ignoreCase = true)) {
-        jetbrainsLabel
-    } else {
-        systemLabel
-    }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-        OutlinedTextField(
-            value = currentLabel,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringRes(R.string.settings_editor_font_family)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable)
+private fun GesturesGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
+    SettingsSectionLabel(stringRes(R.string.settings_section_gestures))
+    SettingsGroup {
+        SwitchList(
+            listOf(
+                SwitchSpec(stringRes(R.string.settings_pinch_to_zoom), stringRes(R.string.settings_pinch_to_zoom_desc), uiState.pinchToZoomEnabled) {
+                    onEvent(EditorSettingsUiEvent.PinchToZoomToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_text_lupe_magnifier), stringRes(R.string.settings_vergroesserungsglas_bei_cursor_platzie), uiState.magnifierEnabled) {
+                    onEvent(EditorSettingsUiEvent.MagnifierToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_icu_word_selection), stringRes(R.string.settings_icu_word_selection_desc), uiState.icuWordSelection) {
+                    onEvent(EditorSettingsUiEvent.IcuWordSelectionToggled)
+                }
+            )
         )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text(systemLabel) },
-                onClick = {
-                    onFontFamilySelected("")
-                    expanded = false
+    }
+}
+
+@Composable
+private fun LanguageGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit, onNavigateToLsp: () -> Unit) {
+    ResetLabel(stringRes(R.string.settings_editor_section_language)) {
+        onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.LANGUAGE))
+    }
+    SettingsGroup {
+        SettingsSwitchRow(
+            title = stringRes(R.string.settings_tree_sitter_verwenden),
+            summary = stringRes(R.string.settings_praeziseres_syntax_highlighting_statt),
+            checked = uiState.useTreeSitter,
+            onCheckedChange = { onEvent(EditorSettingsUiEvent.TreeSitterToggled) }
+        )
+        SettingsDivider()
+        SettingsLinkRow(
+            title = stringRes(R.string.settings_editor_lsp_manage),
+            summary = stringRes(R.string.settings_editor_lsp_manage_desc),
+            icon = Icons.Filled.Dns,
+            onClick = onNavigateToLsp
+        )
+        SettingsDivider()
+        Stepper(
+            label = stringRes(R.string.settings_lsp_max_sessions_label),
+            value = "${uiState.lspMaxConcurrentSessions}",
+            onMinus = { onEvent(EditorSettingsUiEvent.LspMaxConcurrentSessionsChanged((uiState.lspMaxConcurrentSessions - 1).coerceAtLeast(1))) },
+            onPlus = { onEvent(EditorSettingsUiEvent.LspMaxConcurrentSessionsChanged((uiState.lspMaxConcurrentSessions + 1).coerceAtMost(10))) }
+        )
+        Stepper(
+            label = stringRes(R.string.settings_lsp_idle_timeout_label),
+            value = "${uiState.lspIdleTimeoutMinutes}m",
+            onMinus = { onEvent(EditorSettingsUiEvent.LspIdleTimeoutMinutesChanged((uiState.lspIdleTimeoutMinutes - 1).coerceAtLeast(1))) },
+            onPlus = { onEvent(EditorSettingsUiEvent.LspIdleTimeoutMinutesChanged((uiState.lspIdleTimeoutMinutes + 5).coerceAtMost(120))) }
+        )
+    }
+}
+
+@Composable
+private fun IndexingGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
+    ResetLabel(stringRes(R.string.settings_editor_section_indexing)) {
+        onEvent(EditorSettingsUiEvent.ResetSection(EditorSettingsSection.INDEXING))
+    }
+    SettingsGroup {
+        SwitchList(
+            listOf(
+                SwitchSpec(stringRes(R.string.settings_project_indexing), stringRes(R.string.settings_project_indexing_desc), uiState.projectIndexingEnabled) {
+                    onEvent(EditorSettingsUiEvent.ProjectIndexingToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_j2k_enabled), stringRes(R.string.settings_j2k_enabled_desc), uiState.j2kEnabled) {
+                    onEvent(EditorSettingsUiEvent.J2kToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_x2c_enabled), stringRes(R.string.settings_x2c_enabled_desc), uiState.x2cEnabled) {
+                    onEvent(EditorSettingsUiEvent.X2cToggled)
                 }
             )
-            DropdownMenuItem(
-                text = { Text(jetbrainsLabel) },
-                onClick = {
-                    onFontFamilySelected("fonts/jetbrainsmono_regular.ttf")
-                    expanded = false
-                }
-            )
+        )
+    }
+}
+
+@Composable
+private fun FileHeaderGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
+    SettingsSectionLabel(stringRes(R.string.settings_editor_section_file_header))
+    SettingsGroup {
+        SettingsSwitchRow(
+            title = stringRes(R.string.settings_editor_file_header_enabled),
+            checked = uiState.fileHeaderEnabled,
+            onCheckedChange = { onEvent(EditorSettingsUiEvent.FileHeaderEnabledToggled) }
+        )
+        if (uiState.fileHeaderEnabled) {
+            FileHeaderEditor(uiState, onEvent)
         }
     }
 }
 
 @Composable
-private fun EditorToggleRow(
-    modifier: Modifier = Modifier,
-    title: String,
-    description: String? = null,
-    checked: Boolean,
-    onToggle: () -> Unit
-) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleSmall)
-                if (description != null) {
-                    Text(description, style = MaterialTheme.typography.bodySmall)
-                }
-            }
-            Switch(checked = checked, onCheckedChange = { onToggle() })
-        }
-    }
-    Spacer(modifier = Modifier.height(12.dp))
+private fun ColumnScope.FileHeaderEditor(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
+    OutlinedTextField(
+        value = uiState.fileHeaderAuthor,
+        onValueChange = { onEvent(EditorSettingsUiEvent.FileHeaderAuthorChanged(it)) },
+        label = { Text(stringRes(R.string.settings_editor_file_header_author)) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+    )
+    val sampleHeader = FileHeaderRenderer.render(
+        extension = "kt",
+        context = FileHeaderContext(
+            filename = "Sample.kt",
+            moduleName = ":feature:sample",
+            author = uiState.fileHeaderAuthor.ifBlank { "Author" },
+            year = "2026"
+        )
+    ).orEmpty()
+    SettingsHint(stringRes(R.string.settings_editor_file_header_preview))
+    Text(
+        text = sampleHeader,
+        fontFamily = FontFamily.Monospace,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+    )
 }
 
-// Live-Vorschau: Theme, Schrift, Größe, Zeilenabstand, Zeilennummern, Umbruch und Ligaturen wie im Editor.
+/** Live-Vorschau: Theme, Schrift, Größe, Zeilenabstand, Zeilennummern, Umbruch und Ligaturen wie im Editor. */
 @Composable
-private fun EditorPreviewCard(uiState: EditorSettingsUiState) {
-    val preview = com.codeforge.core.designsystem.LocalEditorPreview.current ?: return
-    val spec = androidx.compose.runtime.remember(
+internal fun EditorPreviewBox(uiState: EditorSettingsUiState, sample: String, modifier: Modifier = Modifier) {
+    val preview = LocalEditorPreview.current ?: return
+    val spec = remember(
         uiState.textmateTheme, uiState.fontSize, uiState.fontFamily, uiState.showLineNumbers, uiState.wordWrap,
-        uiState.lineSpacingPercent, uiState.fontLigatures, uiState.showNonPrintableChars, uiState.tabSize, uiState.useTreeSitter,
+        uiState.lineSpacingPercent, uiState.fontLigatures, uiState.showNonPrintableChars, uiState.tabSize,
+        uiState.useTreeSitter, sample,
     ) {
-        com.codeforge.core.designsystem.EditorPreviewSpec(
+        EditorPreviewSpec(
             theme = uiState.textmateTheme,
             fontSizeSp = uiState.fontSize,
             fontFamily = uiState.fontFamily,
@@ -758,20 +414,10 @@ private fun EditorPreviewCard(uiState: EditorSettingsUiState) {
             showNonPrintableChars = uiState.showNonPrintableChars,
             tabSize = uiState.tabSize,
             useTreeSitter = uiState.useTreeSitter,
+            sample = sample,
         )
     }
-    androidx.compose.material3.Card(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            stringRes(R.string.settings_editor_preview),
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(start = 12.dp, top = 10.dp, end = 12.dp, bottom = 6.dp),
-        )
-        preview(
-            spec,
-            Modifier.fillMaxWidth().height(PREVIEW_HEIGHT_DP.dp).padding(start = 6.dp, end = 6.dp, bottom = 6.dp)
-                .clip(MaterialTheme.shapes.small),
-        )
-    }
+    preview(spec, modifier.fillMaxWidth().height(PREVIEW_HEIGHT_DP.dp).clip(MaterialTheme.shapes.medium))
 }
 
 private const val PREVIEW_HEIGHT_DP = 220

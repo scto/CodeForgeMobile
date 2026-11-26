@@ -60,6 +60,7 @@ import com.codeforge.feature.editor.plugin.PreviewAsPanel
 import com.codeforge.libs.plugin_ui_api.PluginUiExtensionPoints
 import com.codeforge.libs.lsp_client.LspWorkspaceEditApplier
 import com.codeforge.libs.lsp_client.WorkspaceEditException
+import com.codeforge.core.domain.editor.SymbolBarConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import kotlinx.coroutines.Dispatchers
@@ -527,6 +528,11 @@ class EditorViewModel @Inject constructor(
                 it.copy(
                     gitGutterEnabled = !settings.git.gutterMarkersDisabled,
                     conflictDetectionEnabled = !settings.git.conflictDetectionDisabled,
+                    keymapOverrides = settings.editor.keymapOverridesMap,
+                    doubleShiftPalette = settings.editor.doubleShiftPalette,
+                    symbolBarEntries = SymbolBarConfig.decode(settings.editor.symbolBarJson),
+                    symbolBarEnabled = !settings.editor.symbolBarHidden,
+                    symbolBarLanguageExtras = !settings.editor.symbolBarLanguageExtrasDisabled,
                     displaySettings = EditorDisplaySettings(
                         tabSize = settings.editor.tabSize.takeIf { v -> v > 0 } ?: 4,
                         useTreeSitter = settings.editor.useTreeSitter,

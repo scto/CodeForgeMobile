@@ -27,6 +27,36 @@ private val PREVIEW_CODE = """
     |}
 """.trimMargin()
 
+private val PREVIEW_XML = """
+    |<?xml version="1.0" encoding="utf-8"?>
+    |<!-- Vorschau des Editor-Themes -->
+    |<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    |    android:layout_width="match_parent"
+    |    android:layout_height="wrap_content"
+    |    android:orientation="vertical">
+    |
+    |    <TextView
+    |        android:id="@+id/title"
+    |        android:text="@string/app_name"
+    |        android:textSize="18sp" />
+    |</LinearLayout>
+""".trimMargin()
+
+private val PREVIEW_MARKDOWN = """
+    |# Vorschau
+    |
+    |Ein **fetter** und ein *kursiver* Text mit `Code`.
+    |
+    |- Punkt eins
+    |- [Link](https://example.com)
+    |
+    |```kotlin
+    |fun main() = println("Hallo")
+    |```
+    |
+    |> Zitat
+""".trimMargin()
+
 /**
  * Nur lesbarer Editor mit Beispielcode, der Theme, Schrift, Schriftgröße, Zeilenabstand, Zeilennummern,
  * Zeilenumbruch, Ligaturen und unsichtbare Zeichen wie im echten Editor zeigt.
@@ -53,14 +83,21 @@ fun EditorPreview(spec: EditorPreviewSpec, modifier: Modifier = Modifier) {
             colorPreviewsEnabled = false,
         )
     }
+    val (path, code) = when (spec.sample) {
+        EditorPreviewSpec.SAMPLE_XML -> PREVIEW_PATH_XML to PREVIEW_XML
+        EditorPreviewSpec.SAMPLE_MARKDOWN -> PREVIEW_PATH_MD to PREVIEW_MARKDOWN
+        else -> PREVIEW_PATH to PREVIEW_CODE
+    }
     SoraCodeEditor(
         modifier = modifier,
-        path = PREVIEW_PATH,
-        content = PREVIEW_CODE,
-        language = EditorLanguageType.fromPath(PREVIEW_PATH),
+        path = path,
+        content = code,
+        language = EditorLanguageType.fromPath(path),
         settings = settings,
         onContentChanged = {},
     )
 }
 
 private const val PREVIEW_PATH = "/preview/Preview.kt"
+private const val PREVIEW_PATH_XML = "/preview/preview.xml"
+private const val PREVIEW_PATH_MD = "/preview/README.md"

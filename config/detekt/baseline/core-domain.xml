@@ -312,6 +312,8 @@
     <ID>ReturnCount:GradleRunSettings.kt:GradleRunSettings$fun addCustomFlag: GradleRunSettings</ID>
     <ID>ReturnCount:IconThemeFile.kt:IconThemeFile$fun forFile: String?</ID>
     <ID>ReturnCount:IconThemeFile.kt:IconThemeFile$fun forFolder: String?</ID>
+    <ID>ReturnCount:Keymap.kt:KeyChord.Companion$fun keyFromText: String?</ID>
+    <ID>ReturnCount:Keymap.kt:KeyChord.Companion$fun parse: KeyChord?</ID>
     <ID>ReturnCount:LogcatModels.kt:LogcatFilter$fun matches: Boolean</ID>
     <ID>ReturnCount:LogcatParser.kt:LogcatParser$fun parseLine: ParseLineResult</ID>
     <ID>ReturnCount:ProjectStackFrameResolver.kt:ProjectStackFrameResolver$fun resolve: File?</ID>
@@ -335,6 +337,15 @@
     <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleRunSettings$"--rerun-tasks"</ID>
     <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleStacktrace.FULL$"--full-stacktrace"</ID>
     <ID>StringLiteralDuplication:GradleRunSettings.kt:GradleStacktrace.SHORT$"--stacktrace"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"DPAD_DOWN"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"DPAD_LEFT"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"DPAD_RIGHT"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"DPAD_UP"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"ENTER"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"EQUALS"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"MINUS"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"PERIOD"</ID>
+    <ID>StringLiteralDuplication:Keymap.kt:KeyChord.Companion$"SLASH"</ID>
     <ID>StringLiteralDuplication:PluginManifestParser.kt:PluginManifestParser$"command"</ID>
     <ID>StringLiteralDuplication:PluginManifestParser.kt:PluginManifestParser$"description"</ID>
     <ID>StringLiteralDuplication:PluginManifestParser.kt:PluginManifestParser$"label"</ID>

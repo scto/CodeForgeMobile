@@ -71,6 +71,7 @@ class EditorSettingsViewModel internal constructor(
                 colorPreviewsEnabled = !settings.editor.colorPreviewsDisabled,
                 disableSoftKeyboardWithHardwareKeyboard = settings.editor.disableSoftKeyboardWithHardwareKeyboard,
                 keyboardSuggestions = settings.editor.keyboardSuggestions,
+                symbolBarEnabled = !settings.editor.symbolBarHidden,
                 fileHeaderEnabled = settings.fileHeader.enabled,
                 fileHeaderAuthor = settings.fileHeader.author,
                 availableThemes = availableThemes,
@@ -230,6 +231,9 @@ class EditorSettingsViewModel internal constructor(
                         it.toBuilder().setFormatOnSaveJson(!it.formatOnSaveJson).build()
                     }
 
+                EditorSettingsUiEvent.SymbolBarToggled ->
+                    settingsRepository.updateEditor { it.toBuilder().setSymbolBarHidden(!it.symbolBarHidden).build() }
+
                 EditorSettingsUiEvent.FileHeaderEnabledToggled ->
                     settingsRepository.updateFileHeader {
                         it.toBuilder().setEnabled(!it.enabled).build()
@@ -245,7 +249,6 @@ class EditorSettingsViewModel internal constructor(
                         EditorSettingsSection.DISPLAY -> {
                             settingsRepository.updateEditor {
                                 it.toBuilder()
-                                    .setTextmateTheme("auto")
                                     .setFontSize(14)
                                     .setFontFamily("")
                                     .setWordWrap(false)
@@ -277,6 +280,7 @@ class EditorSettingsViewModel internal constructor(
                                     .setBackspaceDeletesTabDisabled(false)
                                     .setSymbolPairAutocompleteEnabled(true)
                                     .setDesktopShortcutsEnabled(true)
+                                    .setSymbolBarHidden(false)
                                     .setDisableSoftKeyboardWithHardwareKeyboard(false)
                                     .setKeyboardSuggestions(false)
                                     .build()

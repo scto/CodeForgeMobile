@@ -117,6 +117,15 @@ message EditorConfig {
   bool backspace_deletes_tab_disabled = 38;
   // Code-Faltung (sora-editor-Fork): standardmäßig an.
   bool code_folding_disabled = 39;
+  // Tastenbelegung: Aktions-ID -> Akkord ("Ctrl+Shift+P"); leerer Wert = Belegung entfernt.
+  map<string, string> keymap_overrides = 40;
+  // Zweimal Umschalt öffnet die Befehlspalette (Search Everywhere).
+  bool double_shift_palette = 41;
+  // Symbolleiste über der Tastatur als JSON (leer = Standardliste).
+  string symbol_bar_json = 42;
+  bool symbol_bar_hidden = 43;
+  // Sprachspezifische Symbole anhängen; invertiert gespeichert (Standard = an).
+  bool symbol_bar_language_extras_disabled = 44;
 }
 
 

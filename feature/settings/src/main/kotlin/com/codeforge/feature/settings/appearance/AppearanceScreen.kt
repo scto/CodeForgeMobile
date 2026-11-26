@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -32,11 +31,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,7 +48,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.datastore.proto.ThemeMode
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsDivider
+import com.codeforge.core.ui.SettingsGroup
+import com.codeforge.core.ui.SettingsScaffold
+import com.codeforge.core.ui.SettingsSectionLabel
+import com.codeforge.core.ui.SettingsSwitchRow
 
 /**
  * Einstellungen → Erscheinungsbild: Hell/Dunkel/System, dynamische Farben, Farbschema (CodeForge-Standard oder aus
@@ -79,72 +80,94 @@ fun AppearanceContent(
     onOpenThemeBuilder: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(modifier = modifier, topBar = { SettingsTopBar(title = stringRes(R.string.appearance_title), onBack = onBack) }) { padding ->
+    SettingsScaffold(title = stringRes(R.string.appearance_title), onBack = onBack, modifier = modifier) { padding ->
         if (state.loading) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            return@Scaffold
+            return@SettingsScaffold
         }
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(bottom = 24.dp),
         ) {
-            item { ModeSelector(state.mode) { onEvent(AppearanceUiEvent.ModeSelected(it)) } }
-            item { DynamicColorRow(state.dynamicSupported, state.useDynamicColor) { onEvent(AppearanceUiEvent.DynamicToggled) } }
             item {
-                Column(Modifier.alpha(if (state.useDynamicColor && state.dynamicSupported) DISABLED_ALPHA else 1f)) {
-                    Text(stringRes(R.string.themebuilder_farbschema), style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(state.schemes, key = { it.id }) { option ->
-                            SchemeCard(option, selected = option.id == state.selectedSchemeId) {
-                                onEvent(AppearanceUiEvent.SchemeSelected(option.key))
+                SettingsSectionLabel(stringRes(R.string.appearance_section_theme))
+                SettingsGroup {
+                    Box(Modifier.padding(16.dp)) { ModeSelector(state.mode) { onEvent(AppearanceUiEvent.ModeSelected(it)) } }
+                    SettingsDivider()
+                    SettingsSwitchRow(
+                        title = stringRes(R.string.themebuilder_dynamische_farben),
+                        summary = stringRes(dynamicSummaryRes(state.dynamicSupported)),
+                        checked = state.useDynamicColor && state.dynamicSupported,
+                        enabled = state.dynamicSupported,
+                        onCheckedChange = { onEvent(AppearanceUiEvent.DynamicToggled) },
+                    )
+                }
+            }
+            item {
+                SettingsSectionLabel(stringRes(R.string.themebuilder_farbschema))
+                SettingsGroup(Modifier.alpha(if (state.useDynamicColor && state.dynamicSupported) DISABLED_ALPHA else 1f)) {
+                    Column(Modifier.padding(16.dp)) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            items(state.schemes, key = { it.id }) { option ->
+                                SchemeCard(option, selected = option.id == state.selectedSchemeId) {
+                                    onEvent(AppearanceUiEvent.SchemeSelected(option.key))
+                                }
                             }
                         }
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        stringRes(R.string.appearance_scheme_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Button(onClick = onOpenStore, modifier = Modifier.weight(1f)) {
-                            Icon(Icons.Filled.Storefront, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text(stringRes(R.string.appearance_more_in_store), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                        OutlinedButton(onClick = onOpenThemeBuilder, modifier = Modifier.weight(1f)) {
-                            Icon(Icons.Filled.Palette, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text(stringRes(R.string.appearance_create_own), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            stringRes(R.string.appearance_scheme_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Button(onClick = onOpenStore, modifier = Modifier.weight(1f)) {
+                                Icon(Icons.Filled.Storefront, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(stringRes(R.string.appearance_more_in_store), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                            OutlinedButton(onClick = onOpenThemeBuilder, modifier = Modifier.weight(1f)) {
+                                Icon(Icons.Filled.Palette, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(stringRes(R.string.appearance_create_own), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
                         }
                     }
                 }
             }
             if (state.iconThemes.isNotEmpty()) {
                 item {
-                    ChipSection(
-                        title = stringRes(R.string.themebuilder_icon_pakete),
-                        options = state.iconThemes.map { it.key to it.label },
-                        selected = state.iconThemeId,
-                        onSelect = { onEvent(AppearanceUiEvent.IconThemeSelected(it)) },
-                    )
+                    SettingsSectionLabel(stringRes(R.string.themebuilder_icon_pakete))
+                    SettingsGroup {
+                        ChipSection(
+                            options = state.iconThemes.map { it.key to it.label },
+                            selected = state.iconThemeId,
+                            onSelect = { onEvent(AppearanceUiEvent.IconThemeSelected(it)) },
+                        )
+                    }
                 }
             }
             if (state.languagePacks.isNotEmpty()) {
                 item {
-                    ChipSection(
-                        title = stringRes(R.string.themebuilder_sprachpakete),
-                        options = state.languagePacks.map { it.key to it.label },
-                        selected = state.languagePackId,
-                        onSelect = { onEvent(AppearanceUiEvent.LanguagePackSelected(it)) },
-                    )
+                    SettingsSectionLabel(stringRes(R.string.themebuilder_sprachpakete))
+                    SettingsGroup {
+                        ChipSection(
+                            options = state.languagePacks.map { it.key to it.label },
+                            selected = state.languagePackId,
+                            onSelect = { onEvent(AppearanceUiEvent.LanguagePackSelected(it)) },
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+private fun dynamicSummaryRes(supported: Boolean): Int = if (supported) {
+    R.string.themebuilder_verwendet_die_systemfarben_deines_wall
+} else {
+    R.string.themebuilder_nicht_verfuegbar_auf_diesem_geraet
 }
 
 private const val DISABLED_ALPHA = 0.45f
@@ -163,24 +186,6 @@ private fun ModeSelector(selected: ThemeMode, onSelect: (ThemeMode) -> Unit) {
                 onClick = { onSelect(mode) },
                 shape = SegmentedButtonDefaults.itemShape(i, options.size),
             ) { Text(stringRes(label)) }
-        }
-    }
-}
-
-@Composable
-private fun DynamicColorRow(supported: Boolean, checked: Boolean, onToggle: () -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(stringRes(R.string.themebuilder_dynamische_farben), style = MaterialTheme.typography.titleSmall)
-                Text(
-                    stringRes(
-                        if (supported) R.string.themebuilder_verwendet_die_systemfarben_deines_wall else R.string.themebuilder_nicht_verfuegbar_auf_diesem_geraet,
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            Switch(checked = checked && supported, onCheckedChange = { onToggle() }, enabled = supported)
         }
     }
 }
@@ -220,10 +225,8 @@ private fun SchemeCard(option: SchemeOption, selected: Boolean, onClick: () -> U
 }
 
 @Composable
-private fun ChipSection(title: String, options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
-    Column {
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(8.dp))
+private fun ChipSection(options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item(key = "") {
                 FilterChip(selected = selected.isBlank(), onClick = { onSelect("") }, label = { Text(stringRes(R.string.themebuilder_icon_standard)) })

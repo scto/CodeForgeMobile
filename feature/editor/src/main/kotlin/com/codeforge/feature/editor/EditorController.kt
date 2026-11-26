@@ -78,7 +78,10 @@ class EditorController {
     fun paste() = withEditor { it.pasteText() }
 
     /** Fügt [text] an der aktuellen Cursor-Position ein (bzw. ersetzt die aktive Auswahl). */
-    fun insertText(text: String) = withEditor { editor ->
+    fun insertText(text: String) = insertText(text, text.length)
+
+    /** Wie [insertText], setzt den Cursor danach [cursorOffset] Zeichen hinter den Einfügebeginn. */
+    fun insertText(text: String, cursorOffset: Int) = withEditor { editor ->
         val cursor = editor.cursor
         val s = cursor.left
         val e = cursor.right
@@ -88,8 +91,14 @@ class EditorController {
         } finally {
             editor.text.endBatchEdit()
         }
-        val newPos = s + text.length
+        val newPos = s + cursorOffset.coerceIn(0, text.length)
         selectRange(newPos, newPos)
+    }
+
+    /** Bewegt den Cursor um [delta] Zeichen (hebt eine Auswahl auf). */
+    fun moveCursor(delta: Int) = withEditor { editor ->
+        val pos = (if (delta < 0) editor.cursor.left else editor.cursor.right) + delta
+        selectRange(pos, pos)
     }
 
     // --- Navigation ---
