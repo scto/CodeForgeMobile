@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.plugin-code-sandbox.template",
   "name": "Plugin · Code (Sandbox) (Projektvorlage)",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Projektvorlage für Plugin-Autoren: Kotlin-Plugin mit Editor-Aktion, läuft isoliert – Store-fähig. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",

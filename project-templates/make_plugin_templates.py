@@ -29,7 +29,7 @@ SUBMIT = "https://github.com/scto/codeforge-store/issues/new?template=submit.yml
 # Dateien, die die Store-Prüfung als Code ablehnt, liegen mit `.tpl` in der Vorlage; der Assistent entfernt die Endung.
 CODE_SUFFIXES = (".dex", ".jar", ".so", ".apk", ".class", ".aar", ".sh")
 PLACEHOLDERS = ("projectName", "packageName", "packagePath", "packageJni", "minSdk")
-VERSION = "1.1.0"
+VERSION = "1.1.1"  # 1.1.1: Plugin-SDK mit contributes.features
 
 # slug, Quelle (templates/<ordner>), Art, Label DE/EN, Beschreibung DE/EN, Farbe, Kürzel, Store-fähig, Hinweise DE
 SPECS = [

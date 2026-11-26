@@ -15,7 +15,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Debugger als Plugin:** Haltepunkte, Haltepunkt-Übersicht und Debug-Leiste sind standardmäßig ausgeblendet und
   erscheinen erst mit dem Plugin „Debugger“ (`com.codeforge.plugin.debugger.feature`, Store → Code-Tools → Debugger).
   Deaktivieren oder Deinstallieren blendet sie wieder aus; gespeicherte Haltepunkte bleiben erhalten. Neue
-  Beitragsart `contributes.features` (nur offizielle Plugins). / Debugger moved behind a plugin, off by default.
+  Beitragsart `contributes.features` (nur offizielle Plugins); Plugin-Autorenvorlagen 1.1.1 mit aktuellem SDK.
+  / Debugger moved behind a plugin, off by default.
 
 ### Behoben / Fixed
 - Code-Faltung: Tippen auf die Faltmarken ging an die Haltepunkt-Fläche verloren. Jetzt faltet ein Tipp irgendwo auf

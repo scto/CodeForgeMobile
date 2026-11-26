@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.plugin-grammar.template",
   "name": "Plugin · Grammatik (Projektvorlage)",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Projektvorlage für Plugin-Autoren: TextMate-Grammatik: Syntaxfarben für einen eigenen Dateityp. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",
