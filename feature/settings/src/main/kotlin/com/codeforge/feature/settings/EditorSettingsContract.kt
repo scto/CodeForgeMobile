@@ -69,6 +69,16 @@ data class EditorSettingsUiState(
     val keyboardSuggestions: Boolean = false,
     /** Symbolleiste über der Bildschirmtastatur. */
     val symbolBarEnabled: Boolean = true,
+    val highlightCurrentLine: Boolean = true,
+    val indentGuides: Boolean = true,
+    val cursorBlink: Boolean = true,
+    /** 0 = Bewegen, 1 = Überblenden, 2 = Skalieren. */
+    val cursorAnimationStyle: Int = 0,
+    val scrollbars: Boolean = true,
+    val stickyScrollMaxLines: Int = 3,
+    val lineNumberSelectsLine: Boolean = false,
+    /** 0 = Wellenlinie, 1 = Linie, 2 = Doppellinie, 3 = keine. */
+    val diagnosticStyle: Int = 0,
     val fileHeaderEnabled: Boolean = false,
     val fileHeaderAuthor: String = "",
     val availableThemes: List<TextMateThemeItem> = TextMateThemeCatalog.BUNDLED_THEMES,
@@ -161,6 +171,22 @@ sealed interface EditorSettingsUiEvent {
     data class FileHeaderAuthorChanged(val author: String) : EditorSettingsUiEvent
     /** Symbolleiste über der Tastatur umgeschaltet. */
     data object SymbolBarToggled : EditorSettingsUiEvent
+    /** Hervorhebung der aktuellen Zeile umgeschaltet. */
+    data object CurrentLineHighlightToggled : EditorSettingsUiEvent
+    /** Einrückungslinien umgeschaltet. */
+    data object IndentGuidesToggled : EditorSettingsUiEvent
+    /** Blinkender Cursor umgeschaltet. */
+    data object CursorBlinkToggled : EditorSettingsUiEvent
+    /** Bildlaufleisten umgeschaltet. */
+    data object ScrollbarsToggled : EditorSettingsUiEvent
+    /** Tipp auf Zeilennummer markiert Zeile umgeschaltet. */
+    data object LineNumberSelectsLineToggled : EditorSettingsUiEvent
+    /** Cursor-Animation gewählt (0 Gleiten, 1 Überblenden, 2 Skalieren). */
+    data class CursorAnimationStyleChanged(val style: Int) : EditorSettingsUiEvent
+    /** Höchstzahl der Zeilen im Sticky Scroll. */
+    data class StickyScrollMaxLinesChanged(val lines: Int) : EditorSettingsUiEvent
+    /** Stil der Fehler-Unterstreichung (0 Welle, 1 Linie, 2 Doppellinie, 3 keine). */
+    data class DiagnosticStyleChanged(val style: Int) : EditorSettingsUiEvent
     /** Einen Bereich auf Standardwerte zurücksetzen. */
     data class ResetSection(val section: EditorSettingsSection) : EditorSettingsUiEvent
 }

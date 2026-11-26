@@ -16,7 +16,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
@@ -32,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
 
 /** Route der Debug-Einstellungen. */
 @Composable
@@ -77,10 +76,11 @@ internal fun DebugSettingsScreen(
         }
     }
 
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.debug_settings_title),
+        onBack = onBack,
         modifier = modifier,
-        topBar = { SettingsTopBar(title = stringRes(R.string.debug_settings_title), onBack = onBack) },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier

@@ -21,6 +21,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   **Code-Stil** (Formatieren beim Speichern je Sprache, Einrückung, eigene Formatierer) sind eigene Seiten.
   / Editor settings split into Color Scheme and Code Style pages.
 - Darstellung, Build & Run, SDK-Manager und Keystore-Manager im neuen Stil. / Restyled pages.
+- Einstellungen „Erweiterungen“ (Plugins, Pakete, Versionskontrolle, KI, Mit Claude verwenden), „System“ (Speicher,
+  Daten & Datenschutz, Projektordner, Terminal, Protokolle) und „Info“; Versionskontrolle, KI, Terminal, Pakete,
+  Protokolle, Projektordner, Compose-Vorschau, Hilfe und Info im neuen Stil. / “Extensions”, “System” and “Info” sections.
+
+### Behoben / Fixed
+- Editor: **Sticky Scroll, Minimap und Pinch-Zoom** wirkten nicht – sie wurden über Komponenten/Methoden angesprochen,
+  die es in sora-editor 0.24 nicht gibt. Jetzt über `props.stickyScroll`, `props.showMinimap` und `setScalable`.
+  / Sticky scroll, minimap and pinch-to-zoom had no effect.
+- „Regenbogen-Klammern“ gibt es in sora-editor nicht; die Einstellung heißt jetzt „Klammerpaare hervorheben“ und
+  schaltet die Hervorhebung des Klammerpaars am Cursor. „Desktop-Tastaturkürzel“ schaltet jetzt die Kürzel der
+  Tastenbelegung (vorher ohne Wirkung). / Bracket-pair and shortcut settings now do what they say.
 
 ### Hinzugefügt / Added
 - **Tastenbelegung** (Einstellungen → Tastenbelegung): 37 Editor-Aktionen in Gruppen (Bearbeiten, Code, Navigation,
@@ -32,6 +43,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Symbole und Makros (`$0` = Cursorposition) hinzufügen; Aktionen Tab, Zeilenkommentar, Zeile hoch/runter/duplizieren/
   löschen, Ein-/Ausrücken, Rückgängig/Wiederholen, Cursor links/rechts. Sprachspezifische Symbole werden optional
   angehängt; die Leiste lässt sich ausblenden. / Configurable symbol bar with macros.
+- **Speicher** (Einstellungen → System): Gesamtverbrauch mit Balken, Kategorien (Abhängigkeiten, Build-Ausgaben,
+  Vorschauen, App-Cache, Projektdateien, Linux-Umgebung, Sonstiges) mit „Leeren“, Projekte mit „Löschen“. Folgt keinen
+  symbolischen Links. / Storage page.
+- **Daten & Datenschutz:** Absturzberichte löschen, Caches leeren, Protokolle, Systeminfo, alle Projekte als ZIP
+  sichern (ohne Build-Ausgaben). / Privacy & Data page with project backup.
+- **Mit Claude verwenden:** lokalen MCP-Server des Agenten schalten, Token erneuern, Befehle für `adb forward`,
+  Claude Code und Claude Desktop zum Kopieren. / Use with Claude page.
+- Editor (sora-editor): aktuelle Zeile hervorheben, Einrückungslinien mit Hervorhebung des aktuellen Blocks,
+  Bildlaufleisten, Zeilennummer-Tipp markiert Zeile, Zeilen im Sticky Scroll, Stil der Fehler-Unterstreichung,
+  blinkender Cursor und Cursor-Animation (Gleiten/Überblenden/Skalieren); die Suche hinterlegt jetzt alle Treffer im
+  Editor. / More sora-editor options; search highlights all matches.
 
 ## [3.5.0] - 2026-11-26
 

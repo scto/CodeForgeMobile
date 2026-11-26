@@ -103,8 +103,25 @@ data class EditorDisplaySettings(
     val txtWordWrap: Boolean = false,
     val colorPreviewsEnabled: Boolean = true,
     val disableSoftKeyboardWithHardwareKeyboard: Boolean = false,
-    val keyboardSuggestions: Boolean = false
-)
+    val keyboardSuggestions: Boolean = false,
+    /** Aktuelle Zeile hinterlegen. */
+    val highlightCurrentLine: Boolean = true,
+    /** Einrückungslinien (Block-Linien) und Hervorhebung des aktuellen Blocks. */
+    val indentGuides: Boolean = true,
+    val cursorBlink: Boolean = true,
+    /** 0 = Bewegen, 1 = Überblenden, 2 = Skalieren. */
+    val cursorAnimationStyle: Int = 0,
+    val scrollbars: Boolean = true,
+    val stickyScrollMaxLines: Int = DEFAULT_STICKY_LINES,
+    /** Tipp auf die Zeilennummer markiert die ganze Zeile. */
+    val lineNumberSelectsLine: Boolean = false,
+    /** 0 = Wellenlinie, 1 = Linie, 2 = Doppellinie, 3 = keine. */
+    val diagnosticStyle: Int = 0
+) {
+    companion object {
+        const val DEFAULT_STICKY_LINES = 3
+    }
+}
 
 /** Compose-Hülle um den Sora-Editor (Syntax, LSP, Overlays). */
 @Composable
@@ -442,59 +459,23 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
     editor.props.foldIconSizeFactor = FOLD_ICON_SIZE_FACTOR
     editor.props.foldIndicatorPadding = FOLD_INDICATOR_PADDING
 
-    // Rainbow Brackets / Klammerpaar-Hervorhebung
-    // Zusammengehörige Klammern werden immer deutlich hervorgehoben (Hintergrund + Unterstreichung, fett)
-    editor.isHighlightBracketPair = true
+    // Klammerpaare: sora hebt das zusammengehörige Paar am Cursor hervor (Hintergrund, Unterstreichung, fett).
+    // Regenbogenklammern kennt sora nicht – die Einstellung schaltet die Paar-Hervorhebung.
+    editor.isHighlightBracketPair = settings.rainbowBracketsEnabled
+    editor.props.highlightMatchingDelimiters = settings.rainbowBracketsEnabled
     editor.props.boldMatchingDelimiters = true
-    runCatching {
-        val bracketClass = Class.forName("io.github.rosemoe.sora.widget.component.BracketPairs")
-        val component = editor.getComponent(bracketClass.asSubclass(
-            io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
-        ))
-        component.isEnabled = settings.rainbowBracketsEnabled
-    }
 
-    // Pinch-to-zoom
+    applySoraDisplay(editor, settings)
+
+    // Pinch-to-zoom (sora: setScalable + Grenzen der Textgröße)
     val density = editor.context.resources.displayMetrics.scaledDensity
-    if (settings.pinchToZoomEnabled) {
-        editor.setScaleTextSizes(8f * density, 40f * density)
-        runCatching {
-            val method = editor.javaClass.getMethod("setScaleTextEnabled", Boolean::class.javaPrimitiveType)
-            method.invoke(editor, true)
-        }
-    } else {
-        val currentPx = settings.fontSizeSp * density
-        editor.setScaleTextSizes(currentPx, currentPx)
-        runCatching {
-            val method = editor.javaClass.getMethod("setScaleTextEnabled", Boolean::class.javaPrimitiveType)
-            method.invoke(editor, false)
-        }
-    }
+    editor.isScalable = settings.pinchToZoomEnabled
+    if (settings.pinchToZoomEnabled) editor.setScaleTextSizes(MIN_ZOOM_SP * density, MAX_ZOOM_SP * density)
 
-    // Desktop shortcuts / PC Navigation
-    runCatching {
-        val field = editor.props.javaClass.getDeclaredField("navigationMode")
-        field.isAccessible = true
-        field.setInt(editor.props, if (settings.desktopShortcutsEnabled) 1 else 0)
-    }
-
-    // Sticky Scroll
-    runCatching {
-        val stickyScrollClass = Class.forName("io.github.rosemoe.sora.widget.component.EditorStickyScroll")
-        val component = editor.getComponent(stickyScrollClass.asSubclass(
-            io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
-        ))
-        component.isEnabled = settings.stickyScrollEnabled
-    }
-
-    // Minimap
-    runCatching {
-        val minimapClass = Class.forName("io.github.rosemoe.sora.widget.component.EditorMinimap")
-        val comp = editor.getComponent(minimapClass.asSubclass(
-            io.github.rosemoe.sora.widget.component.EditorBuiltinComponent::class.java
-        ))
-        comp?.isEnabled = settings.minimapEnabled
-    }
+    // Sticky Scroll und Minimap sind in sora 0.24 Eigenschaften (props), keine Komponenten.
+    editor.props.stickyScroll = settings.stickyScrollEnabled
+    editor.props.stickyScrollMaxLines = settings.stickyScrollMaxLines.coerceIn(1, MAX_STICKY_LINES)
+    editor.props.showMinimap = settings.minimapEnabled
 
     // TextMate Theme: Registry setzen UND als ColorScheme auf den Editor anwenden
     // (ohne das bleibt der Editor beim hellen Standard-EditorColorScheme).
@@ -552,3 +533,44 @@ internal fun resolveEditorTheme(stored: String, isDarkUi: Boolean, extensionThem
         if (extensionThemeId != null) extensionThemeId
         else if (isDarkUi) TextMateAssetLoader.DEFAULT_DARK_THEME else TextMateAssetLoader.DEFAULT_LIGHT_THEME
     } else stored
+
+private const val MIN_ZOOM_SP = 8f
+private const val MAX_ZOOM_SP = 40f
+private const val MAX_STICKY_LINES = 8
+private const val CURSOR_BLINK_MS = 500
+private const val DIAGNOSTIC_LINE = 1
+private const val DIAGNOSTIC_DOUBLE = 2
+private const val DIAGNOSTIC_NONE = 3
+private const val ANIMATION_FADE = 1
+private const val ANIMATION_SCALE = 2
+
+// Weitere Darstellungsoptionen von sora-editor: Zeile, Einrückungslinien, Cursor, Bildlaufleisten, Diagnosen.
+private fun applySoraDisplay(editor: CodeEditor, settings: EditorDisplaySettings) {
+    editor.isHighlightCurrentLine = settings.highlightCurrentLine
+    editor.isBlockLineEnabled = settings.indentGuides
+    editor.isHighlightCurrentBlock = settings.indentGuides
+    editor.setCursorBlinkPeriod(if (settings.cursorBlink) CURSOR_BLINK_MS else 0)
+    val animatorClass = when (settings.cursorAnimationStyle) {
+        ANIMATION_FADE -> io.github.rosemoe.sora.widget.style.builtin.FadeCursorAnimator::class.java
+        ANIMATION_SCALE -> io.github.rosemoe.sora.widget.style.builtin.ScaleCursorAnimator::class.java
+        else -> io.github.rosemoe.sora.widget.style.builtin.MoveCursorAnimator::class.java
+    }
+    if (editor.cursorAnimator.javaClass != animatorClass) {
+        editor.cursorAnimator = animatorClass.getConstructor(CodeEditor::class.java).newInstance(editor)
+    }
+    editor.isVerticalScrollBarEnabled = settings.scrollbars
+    editor.isHorizontalScrollBarEnabled = settings.scrollbars
+    editor.props.actionWhenLineNumberClicked = if (settings.lineNumberSelectsLine) {
+        io.github.rosemoe.sora.widget.DirectAccessProps.LN_ACTION_SELECT_LINE
+    } else {
+        io.github.rosemoe.sora.widget.DirectAccessProps.LN_ACTION_PLACE_SELECTION_HOME
+    }
+    editor.setDiagnosticIndicatorStyle(
+        when (settings.diagnosticStyle) {
+            DIAGNOSTIC_LINE -> io.github.rosemoe.sora.widget.style.DiagnosticIndicatorStyle.LINE
+            DIAGNOSTIC_DOUBLE -> io.github.rosemoe.sora.widget.style.DiagnosticIndicatorStyle.DOUBLE_LINE
+            DIAGNOSTIC_NONE -> io.github.rosemoe.sora.widget.style.DiagnosticIndicatorStyle.NONE
+            else -> io.github.rosemoe.sora.widget.style.DiagnosticIndicatorStyle.WAVY_LINE
+        }
+    )
+}

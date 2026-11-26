@@ -16,7 +16,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -31,7 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
 import kotlinx.coroutines.flow.collectLatest
 
 /** Route „Projektverzeichnis“. */
@@ -62,10 +61,11 @@ fun ProjectsRootScreen(
     onEvent: (ProjectsRootEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.projroot_title),
+        onBack = onBack,
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = { SettingsTopBar(title = stringRes(R.string.projroot_title), onBack = onBack) },
     ) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),

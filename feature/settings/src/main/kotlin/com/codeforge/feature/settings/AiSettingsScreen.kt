@@ -40,7 +40,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -68,7 +67,7 @@ import com.codeforge.core.domain.ai.AiPrivacyPolicy
 import com.codeforge.core.domain.ai.AiProviderType
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
 
 /** Route der KI-Einstellungen. */
 @Composable
@@ -111,13 +110,14 @@ internal fun AiSettingsScreen(
     }
     val active = uiState.providers.first { it.provider == uiState.activeProvider }
 
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.aiset_title),
+        onBack = onBack,
         modifier = modifier,
-        topBar = { SettingsTopBar(title = stringRes(R.string.aiset_title), onBack = onBack) },
-        snackbarHost = { SnackbarHost(snackbar) }
+        snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ProviderSection(uiState, onEvent)
@@ -138,12 +138,7 @@ internal fun AiSettingsScreen(
 
 @Composable
 private fun SectionTitle(text: String) {
-    Text(
-        text.uppercase(),
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(start = 12.dp, top = 16.dp, bottom = 4.dp)
-    )
+    com.codeforge.core.ui.SettingsSectionLabel(text, modifier = Modifier.padding(horizontal = 0.dp))
 }
 
 @Composable

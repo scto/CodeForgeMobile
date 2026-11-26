@@ -30,7 +30,10 @@ import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.SdCard
 import androidx.compose.material.icons.automirrored.filled.ShortText
 import androidx.compose.material.icons.filled.Source
-import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.IosShare
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -79,7 +82,10 @@ fun SettingsHubRoute(
     onNavigateToCodeStyle: () -> Unit = {},
     onNavigateToKeymap: () -> Unit = {},
     onNavigateToSymbols: () -> Unit = {},
-    onNavigateToSnippets: () -> Unit = {}
+    onNavigateToSnippets: () -> Unit = {},
+    onNavigateToUseWithClaude: () -> Unit = {},
+    onNavigateToStorage: () -> Unit = {},
+    onNavigateToDataPrivacy: () -> Unit = {}
 ) {
     val sections = listOf(
         SettingsSection(
@@ -99,20 +105,33 @@ fun SettingsHubRoute(
             listOf(
                 SettingsEntry(R.string.settings_hub_build_run, Icons.Filled.PlayArrow, onNavigateToBuildRun, R.string.settings_hub_build_run_summary),
                 SettingsEntry(R.string.sdkmanager_title, Icons.Filled.SdCard, onNavigateToSdkManager, R.string.settings_hub_sdk_summary),
-                SettingsEntry(R.string.settings_keystore_manager_title, Icons.Filled.Key, onNavigateToSigning, R.string.settings_hub_keystore_summary)
+                SettingsEntry(R.string.settings_keystore_manager_title, Icons.Filled.Key, onNavigateToSigning, R.string.settings_hub_keystore_summary),
+                SettingsEntry(R.string.settings_compose_preview_title, Icons.Filled.Preview, onNavigateToComposePreview, R.string.settings_hub_compose_preview_summary)
             )
         ),
         SettingsSection(
-            R.string.settings_section_more,
+            R.string.settings_section_extensions,
             listOf(
-                SettingsEntry(R.string.settings_hub_terminal, Icons.Filled.Terminal, onNavigateToTerminal),
-                SettingsEntry(R.string.settings_hub_git, Icons.Filled.Source, onNavigateToGit),
-                SettingsEntry(R.string.settings_compose_preview_title, Icons.Filled.Preview, onNavigateToComposePreview),
-                SettingsEntry(R.string.settings_hub_projects_root, Icons.Filled.Folder, onNavigateToProjectsRoot),
-                SettingsEntry(R.string.settings_hub_packages, Icons.Filled.Inventory2, onNavigateToPackages),
-                SettingsEntry(R.string.settings_hub_ai, Icons.Filled.AutoAwesome, onNavigateToAi),
-                SettingsEntry(R.string.settings_hub_debug, Icons.Filled.BugReport, onNavigateToDebug),
-                SettingsEntry(R.string.settings_hub_store, Icons.Filled.Storefront, onNavigateToStore),
+                SettingsEntry(R.string.settings_hub_plugins, Icons.Filled.Extension, onNavigateToStore, R.string.settings_hub_plugins_summary),
+                SettingsEntry(R.string.settings_hub_packages, Icons.Filled.Inventory2, onNavigateToPackages, R.string.settings_hub_packages_summary),
+                SettingsEntry(R.string.settings_hub_version_control, Icons.Filled.Source, onNavigateToGit, R.string.settings_hub_version_control_summary),
+                SettingsEntry(R.string.settings_hub_ai, Icons.Filled.AutoAwesome, onNavigateToAi, R.string.settings_hub_ai_summary),
+                SettingsEntry(R.string.use_with_claude_title, Icons.Filled.IosShare, onNavigateToUseWithClaude, R.string.settings_hub_use_with_claude_summary)
+            )
+        ),
+        SettingsSection(
+            R.string.settings_section_system,
+            listOf(
+                SettingsEntry(R.string.storage_title, Icons.Filled.Layers, onNavigateToStorage, R.string.settings_hub_storage_summary),
+                SettingsEntry(R.string.data_privacy_title, Icons.Filled.Shield, onNavigateToDataPrivacy, R.string.settings_hub_data_privacy_summary),
+                SettingsEntry(R.string.settings_hub_projects_root, Icons.Filled.Folder, onNavigateToProjectsRoot, R.string.settings_hub_projects_root_summary),
+                SettingsEntry(R.string.settings_hub_terminal, Icons.Filled.Terminal, onNavigateToTerminal, R.string.settings_hub_terminal_summary),
+                SettingsEntry(R.string.settings_hub_debug, Icons.Filled.BugReport, onNavigateToDebug, R.string.settings_hub_debug_summary)
+            )
+        ),
+        SettingsSection(
+            R.string.settings_section_info,
+            listOf(
                 SettingsEntry(R.string.settings_hub_help, Icons.AutoMirrored.Filled.HelpOutline, onNavigateToHelp),
                 SettingsEntry(R.string.settings_hub_about, Icons.Filled.Info, onNavigateToAbout),
                 SettingsEntry(R.string.settings_hub_basti, Icons.Filled.Pets, onNavigateToBasti)

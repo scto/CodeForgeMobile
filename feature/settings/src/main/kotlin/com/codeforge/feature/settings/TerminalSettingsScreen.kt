@@ -19,7 +19,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
 
 /** Route der Terminal-Einstellungen. */
 @Composable
@@ -53,9 +52,10 @@ private fun TerminalSettingsScreen(
     onEvent: (TerminalSettingsUiEvent) -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.settings_terminal),
+        onBack = onBack,
         modifier = modifier,
-        topBar = { SettingsTopBar(title = stringRes(R.string.settings_terminal), onBack = onBack) }
     ) { padding ->
         Column(
             modifier = Modifier

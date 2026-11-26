@@ -418,7 +418,7 @@ fun EditorRoute(
                 }
                 lastShiftAt = 0L
                 val chord = KeyChord(name, event.isCtrlPressed, event.isShiftPressed, event.isAltPressed, event.isMetaPressed)
-                if (chord.producesText) return@onPreviewKeyEvent false
+                if (chord.producesText || !uiState.displaySettings.desktopShortcutsEnabled) return@onPreviewKeyEvent false
                 val action = keymap.actionFor(chord) ?: return@onPreviewKeyEvent false
                 runKeymapAction(action)
             },

@@ -77,7 +77,9 @@ Die Einstellungen sind in Abschnitte gegliedert:
 
 - **Darstellung & Editor:** Darstellung (hell/dunkel, dynamische Farben, Farbschema der App), Editor (Schrift, Anzeige, Eingabe, Gesten, Sprachserver), Farbschema (Editor-Theme mit Vorschau), Code-Stil (Formatieren beim Speichern je Sprache, Einrückung), **Tastenbelegung** und **Symbole & Makros**, Snippets.
 - **Build & Ausführen:** Build & Run (Gradle-Optionen, Speicher, Caches), SDK-Manager, Keystore-Manager.
-- **Weitere:** Terminal, Git, KI, Store, Hilfe und **Info** (Version, Build, Links).
+- **Erweiterungen:** Plugins (Store), Pakete, Versionskontrolle, KI und **Mit Claude verwenden** (lokaler MCP-Server mit Token für Claude Code/Claude Desktop per `adb forward`).
+- **System:** **Speicher** (Verbrauch nach Kategorien, Caches leeren, Projekte löschen), **Daten & Datenschutz** (keine Telemetrie; Absturzberichte, Protokolle, Systeminfo, Sicherung aller Projekte als ZIP), Projektordner, Terminal, Protokolle.
+- **Info:** Hilfe, Info (Version, Build, Links), Basti.
 
 **Tastenbelegung:** Ein Kürzel antippen und die neuen Tasten drücken; `Esc` bricht ab, `Backspace` entfernt die Belegung. Ohne Hardware-Tastatur lässt sich der Akkord über die Chips Ctrl/Alt/Shift/Meta und den Tastennamen (z. B. `P`, `F6`, `Enter`, `/`) zusammenstellen. Kombinationen, die nur Text tippen, werden abgelehnt. Optional öffnet zweimal `Umschalt` die Befehlspalette.
 

@@ -95,6 +95,29 @@ class EditorController {
         selectRange(newPos, newPos)
     }
 
+    /**
+     * Hebt alle Treffer der Suche im Editor hervor (sora-[io.github.rosemoe.sora.widget.EditorSearcher]);
+     * leere Suche oder ungültiger Regex entfernt die Hervorhebung.
+     */
+    fun highlightMatches(query: String, caseSensitive: Boolean, regex: Boolean, wholeWord: Boolean) = withEditor { editor ->
+        val searcher = editor.searcher
+        if (query.isEmpty()) {
+            searcher.stopSearch()
+            return@withEditor
+        }
+        val type = when {
+            regex -> io.github.rosemoe.sora.widget.EditorSearcher.SearchOptions.TYPE_REGULAR_EXPRESSION
+            wholeWord -> io.github.rosemoe.sora.widget.EditorSearcher.SearchOptions.TYPE_WHOLE_WORD
+            else -> io.github.rosemoe.sora.widget.EditorSearcher.SearchOptions.TYPE_NORMAL
+        }
+        val pattern = if (regex && wholeWord) "\\b(?:$query)\\b" else query
+        runCatching { searcher.search(pattern, io.github.rosemoe.sora.widget.EditorSearcher.SearchOptions(type, !caseSensitive)) }
+            .onFailure { searcher.stopSearch() }
+    }
+
+    /** Entfernt die Hervorhebung der Suchtreffer. */
+    fun clearMatchHighlights() = withEditor { it.searcher.stopSearch() }
+
     /** Bewegt den Cursor um [delta] Zeichen (hebt eine Auswahl auf). */
     fun moveCursor(delta: Int) = withEditor { editor ->
         val pos = (if (delta < 0) editor.cursor.left else editor.cursor.right) + delta

@@ -42,6 +42,7 @@
     <ID>CognitiveComplexMethod:KeymapScreen.kt:@OptIn(ExperimentalLayoutApi::class) @Composable private fun KeyCaptureDialog</ID>
     <ID>CognitiveComplexMethod:PackageManagerScreen.kt:@Composable private fun PackageCard</ID>
     <ID>CognitiveComplexMethod:SnippetSettingsScreen.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun SnippetSettingsScreen</ID>
+    <ID>CognitiveComplexMethod:StorageScreen.kt:@Composable private fun StorageScreen</ID>
     <ID>CognitiveComplexMethod:StoreInstaller.kt:StoreInstaller$private suspend fun installRecursive: StoreInstallResult</ID>
     <ID>CognitiveComplexMethod:StoreScreen.kt:@Composable private fun StoreContent</ID>
     <ID>CognitiveComplexMethod:StoreScreen.kt:@Composable private fun StoreItemCard</ID>

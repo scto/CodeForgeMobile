@@ -76,7 +76,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,7 +86,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
 
 /** Eine Schaltfläche: Symbol, Name (wie im Tooltip) und Beschreibung. */
 @Immutable
@@ -228,9 +227,10 @@ fun HelpScreen(
     sections: List<HelpSection>,
     onBack: () -> Unit = {},
 ) {
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.help_title),
+        onBack = onBack,
         modifier = modifier,
-        topBar = { SettingsTopBar(title = stringRes(R.string.help_title), onBack = onBack) },
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),

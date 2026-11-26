@@ -99,6 +99,7 @@ private fun EditorSettingsScreen(
         ) {
             FontGroup(uiState, onEvent)
             DisplayGroup(uiState, onEvent)
+            CursorGroup(uiState, onEvent)
             InputGroup(uiState, onEvent)
             GesturesGroup(uiState, onEvent)
             LanguageGroup(uiState, onEvent, onNavigateToLsp)
@@ -201,6 +202,18 @@ private fun DisplayGroup(uiState: EditorSettingsUiState, onEvent: (EditorSetting
                 SwitchSpec(stringRes(R.string.settings_sticky_scroll), stringRes(R.string.settings_zeigt_den_umschliessenden_code_block), uiState.stickyScrollEnabled) {
                     onEvent(EditorSettingsUiEvent.StickyScrollToggled)
                 },
+                SwitchSpec(stringRes(R.string.settings_current_line), stringRes(R.string.settings_current_line_desc), uiState.highlightCurrentLine) {
+                    onEvent(EditorSettingsUiEvent.CurrentLineHighlightToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_indent_guides), stringRes(R.string.settings_indent_guides_desc), uiState.indentGuides) {
+                    onEvent(EditorSettingsUiEvent.IndentGuidesToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_scrollbars), stringRes(R.string.settings_scrollbars_desc), uiState.scrollbars) {
+                    onEvent(EditorSettingsUiEvent.ScrollbarsToggled)
+                },
+                SwitchSpec(stringRes(R.string.settings_line_number_selects), stringRes(R.string.settings_line_number_selects_desc), uiState.lineNumberSelectsLine) {
+                    onEvent(EditorSettingsUiEvent.LineNumberSelectsLineToggled)
+                },
                 SwitchSpec(stringRes(R.string.settings_minimap), stringRes(R.string.settings_minimap_desc), uiState.minimapEnabled) {
                     onEvent(EditorSettingsUiEvent.MinimapToggled)
                 },
@@ -215,14 +228,70 @@ private fun DisplayGroup(uiState: EditorSettingsUiState, onEvent: (EditorSetting
                     stringRes(R.string.settings_leerzeichen_tabs_und_zeilenumbrueche_a),
                     uiState.showNonPrintableChars
                 ) { onEvent(EditorSettingsUiEvent.NonPrintableCharsToggled) },
-                SwitchSpec(stringRes(R.string.settings_cursor_animation), stringRes(R.string.settings_cursor_animation_desc), uiState.cursorAnimationEnabled) {
-                    onEvent(EditorSettingsUiEvent.CursorAnimationToggled)
-                },
                 SwitchSpec(stringRes(R.string.settings_read_only_default), stringRes(R.string.settings_read_only_default_desc), uiState.readOnlyDefault) {
                     onEvent(EditorSettingsUiEvent.ReadOnlyDefaultToggled)
                 }
             )
         )
+        if (uiState.stickyScrollEnabled) {
+            SettingsDivider()
+            SettingsChipsRow(
+                title = stringRes(R.string.settings_sticky_lines),
+                options = STICKY_LINE_OPTIONS,
+                selected = uiState.stickyScrollMaxLines,
+                label = { "$it" },
+                onSelect = { onEvent(EditorSettingsUiEvent.StickyScrollMaxLinesChanged(it)) }
+            )
+        }
+        SettingsDivider()
+        SettingsChipsRow(
+            title = stringRes(R.string.settings_diagnostic_style),
+            options = DIAGNOSTIC_STYLES.indices.toList(),
+            selected = uiState.diagnosticStyle,
+            label = { stringRes(DIAGNOSTIC_STYLES[it]) },
+            onSelect = { onEvent(EditorSettingsUiEvent.DiagnosticStyleChanged(it)) }
+        )
+    }
+}
+
+private val STICKY_LINE_OPTIONS = listOf(1, 2, 3, 5, 8)
+private val DIAGNOSTIC_STYLES = listOf(
+    R.string.settings_diagnostic_wavy,
+    R.string.settings_diagnostic_line,
+    R.string.settings_diagnostic_double,
+    R.string.settings_diagnostic_none
+)
+private val CURSOR_ANIMATIONS = listOf(
+    R.string.settings_cursor_anim_move,
+    R.string.settings_cursor_anim_fade,
+    R.string.settings_cursor_anim_scale
+)
+
+@Composable
+private fun CursorGroup(uiState: EditorSettingsUiState, onEvent: (EditorSettingsUiEvent) -> Unit) {
+    SettingsSectionLabel(stringRes(R.string.settings_section_cursor))
+    SettingsGroup {
+        SettingsSwitchRow(
+            title = stringRes(R.string.settings_cursor_blink),
+            checked = uiState.cursorBlink,
+            onCheckedChange = { onEvent(EditorSettingsUiEvent.CursorBlinkToggled) }
+        )
+        SettingsDivider()
+        SettingsSwitchRow(
+            title = stringRes(R.string.settings_cursor_animation),
+            summary = stringRes(R.string.settings_cursor_animation_desc),
+            checked = uiState.cursorAnimationEnabled,
+            onCheckedChange = { onEvent(EditorSettingsUiEvent.CursorAnimationToggled) }
+        )
+        if (uiState.cursorAnimationEnabled) {
+            SettingsChipsRow(
+                title = stringRes(R.string.settings_cursor_anim_style),
+                options = CURSOR_ANIMATIONS.indices.toList(),
+                selected = uiState.cursorAnimationStyle,
+                label = { stringRes(CURSOR_ANIMATIONS[it]) },
+                onSelect = { onEvent(EditorSettingsUiEvent.CursorAnimationStyleChanged(it)) }
+            )
+        }
     }
 }
 

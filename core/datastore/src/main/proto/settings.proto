@@ -126,6 +126,18 @@ message EditorConfig {
   bool symbol_bar_hidden = 43;
   // Sprachspezifische Symbole anhängen; invertiert gespeichert (Standard = an).
   bool symbol_bar_language_extras_disabled = 44;
+  // sora-editor: Darstellung (invertiert gespeichert, Standard = an)
+  bool current_line_highlight_disabled = 45;
+  bool indent_guides_disabled = 46;
+  bool cursor_blink_disabled = 47;
+  // 0 = Bewegen, 1 = Überblenden, 2 = Skalieren
+  int32 cursor_animation_style = 48;
+  bool scrollbars_hidden = 49;
+  // 0 = Standard (3)
+  int32 sticky_scroll_max_lines = 50;
+  bool line_number_click_selects_line = 51;
+  // 0 = Wellenlinie, 1 = Linie, 2 = Doppellinie, 3 = keine
+  int32 diagnostic_style = 52;
 }
 
 

@@ -83,6 +83,9 @@ internal object Routes {
     const val SETTINGS_CODE_STYLE = "settings_code_style"
     const val SETTINGS_KEYMAP = "settings_keymap"
     const val SETTINGS_SYMBOLS = "settings_symbols"
+    const val SETTINGS_USE_WITH_CLAUDE = "settings_use_with_claude"
+    const val SETTINGS_STORAGE = "settings_storage"
+    const val SETTINGS_DATA_PRIVACY = "settings_data_privacy"
     const val TERMINAL = "terminal"
     const val TERMINAL_PATTERN = "terminal?initialCommand={initialCommand}"
     const val PROJECT_WORKSPACE_PATTERN = "workspace/{rootPath}"
@@ -236,7 +239,24 @@ fun CodeForgeNavHost(
                 onNavigateToCodeStyle = { navController.navigate(Routes.SETTINGS_CODE_STYLE) },
                 onNavigateToKeymap = { navController.navigate(Routes.SETTINGS_KEYMAP) },
                 onNavigateToSymbols = { navController.navigate(Routes.SETTINGS_SYMBOLS) },
-                onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) }
+                onNavigateToSnippets = { navController.navigate(Routes.SETTINGS_SNIPPETS) },
+                onNavigateToUseWithClaude = { navController.navigate(Routes.SETTINGS_USE_WITH_CLAUDE) },
+                onNavigateToStorage = { navController.navigate(Routes.SETTINGS_STORAGE) },
+                onNavigateToDataPrivacy = { navController.navigate(Routes.SETTINGS_DATA_PRIVACY) }
+            )
+        }
+        composable(Routes.SETTINGS_USE_WITH_CLAUDE) {
+            com.codeforge.feature.agent.UseWithClaudeRoute(onBack = { navigateBackOrStart() })
+        }
+        composable(Routes.SETTINGS_STORAGE) {
+            com.codeforge.feature.settings.storage.StorageRoute(onBack = { navigateBackOrStart() })
+        }
+        composable(Routes.SETTINGS_DATA_PRIVACY) {
+            com.codeforge.feature.settings.storage.DataPrivacyRoute(
+                onBack = { navigateBackOrStart() },
+                onOpenLogs = { navController.navigate(Routes.SETTINGS_DEBUG) },
+                onOpenSystemInfo = { navController.navigate(Routes.SETTINGS_SYSTEM_INFO) },
+                onOpenStorage = { navController.navigate(Routes.SETTINGS_STORAGE) }
             )
         }
         composable(Routes.SETTINGS_COLOR_SCHEME) {

@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +28,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.activity.compose.BackHandler
@@ -48,7 +46,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
+import com.codeforge.core.ui.SettingsDivider
+import com.codeforge.core.ui.SettingsGroup
+import com.codeforge.core.ui.SettingsHint
+import com.codeforge.core.ui.SettingsSectionLabel
+import com.codeforge.core.ui.SettingsSwitchRow
 
 /** Route der Git-Einstellungen. */
 @Composable
@@ -88,83 +91,43 @@ private fun GitSettingsScreen(
         onEvent(GitSettingsUiEvent.DialogDismiss)
     }
 
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.common_git),
+        onBack = onBack,
         modifier = modifier,
-        topBar = { SettingsTopBar(title = stringRes(R.string.common_git), onBack = onBack) },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 24.dp),
         ) {
+            SettingsSectionLabel(stringRes(R.string.settings_identitaet))
             IdentityCard(state, onEvent)
-            Card(Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringRes(R.string.settings_git_file_colors), style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            stringRes(R.string.settings_git_file_colors_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    androidx.compose.material3.Switch(
-                        checked = state.fileNameColorsEnabled,
-                        onCheckedChange = { onEvent(GitSettingsUiEvent.FileNameColorsToggled) },
-                    )
-                }
+            SettingsSectionLabel(stringRes(R.string.settings_git_section_editor))
+            SettingsGroup {
+                SettingsSwitchRow(
+                    title = stringRes(R.string.settings_git_file_colors),
+                    summary = stringRes(R.string.settings_git_file_colors_desc),
+                    checked = state.fileNameColorsEnabled,
+                    onCheckedChange = { onEvent(GitSettingsUiEvent.FileNameColorsToggled) },
+                )
+                SettingsDivider()
+                SettingsSwitchRow(
+                    title = stringRes(R.string.settings_git_gutter_markers),
+                    summary = stringRes(R.string.settings_git_gutter_markers_desc),
+                    checked = state.gutterMarkersEnabled,
+                    onCheckedChange = { onEvent(GitSettingsUiEvent.GutterMarkersToggled) },
+                )
+                SettingsDivider()
+                SettingsSwitchRow(
+                    title = stringRes(R.string.settings_git_conflict_detection),
+                    summary = stringRes(R.string.settings_git_conflict_detection_desc),
+                    checked = state.conflictDetectionEnabled,
+                    onCheckedChange = { onEvent(GitSettingsUiEvent.ConflictDetectionToggled) },
+                )
             }
-            Card(Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringRes(R.string.settings_git_gutter_markers), style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            stringRes(R.string.settings_git_gutter_markers_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    androidx.compose.material3.Switch(
-                        checked = state.gutterMarkersEnabled,
-                        onCheckedChange = { onEvent(GitSettingsUiEvent.GutterMarkersToggled) },
-                    )
-                }
-            }
-            Card(Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringRes(R.string.settings_git_conflict_detection), style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            stringRes(R.string.settings_git_conflict_detection_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    androidx.compose.material3.Switch(
-                        checked = state.conflictDetectionEnabled,
-                        onCheckedChange = { onEvent(GitSettingsUiEvent.ConflictDetectionToggled) },
-                    )
-                }
-            }
+            SettingsSectionLabel(stringRes(R.string.settings_zugangsdaten_https))
             CredentialsCard(state, onEvent)
-            Text(
-                stringRes(R.string.settings_tokens_werden_verschluesselt_im_androi),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp),
-            )
+            SettingsHint(stringRes(R.string.settings_tokens_werden_verschluesselt_im_androi), Modifier.padding(horizontal = 4.dp))
         }
     }
 
@@ -182,9 +145,8 @@ private fun GitSettingsScreen(
 
 @Composable
 private fun IdentityCard(state: GitSettingsUiState, onEvent: (GitSettingsUiEvent) -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
+    SettingsGroup {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringRes(R.string.settings_identitaet), style = MaterialTheme.typography.titleMedium)
             Text(stringRes(R.string.settings_wird_als_autor_in_jedem), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             OutlinedTextField(
                 value = state.name,
@@ -214,9 +176,8 @@ private fun IdentityCard(state: GitSettingsUiState, onEvent: (GitSettingsUiEvent
 
 @Composable
 private fun CredentialsCard(state: GitSettingsUiState, onEvent: (GitSettingsUiEvent) -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringRes(R.string.settings_zugangsdaten_https), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+    SettingsGroup {
+        Column(Modifier.padding(vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 stringRes(R.string.settings_personal_access_token_pro_host),
                 style = MaterialTheme.typography.bodySmall,

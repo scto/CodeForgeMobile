@@ -77,7 +77,9 @@ Settings are grouped into sections:
 
 - **Appearance & Editor:** Appearance (light/dark, dynamic colour, app colour scheme), Editor (font, display, input, gestures, language servers), Color Scheme (editor theme with preview), Code Style (reformat on save per language, indentation), **Keymap** and **Symbols & Macros**, Snippets.
 - **Build & Run:** Build & Run (Gradle options, memory, caches), SDK Manager, Keystore Manager.
-- **More:** Terminal, Git, AI, Store, Help and **About** (version, build, links).
+- **Extensions:** Plugins (store), packages, version control, AI and **Use with Claude** (local MCP server with a token for Claude Code/Claude Desktop via `adb forward`).
+- **System:** **Storage** (usage by category, clear caches, delete projects), **Privacy & Data** (no telemetry; crash reports, logs, system info, back up all projects as a zip), projects folder, terminal, logs.
+- **Info:** Help, About (version, build, links), Basti.
 
 **Keymap:** tap a shortcut and press the new keys; `Esc` cancels, `Backspace` removes the binding. Without a hardware keyboard, compose the chord with the Ctrl/Alt/Shift/Meta chips and a key name (e.g. `P`, `F6`, `Enter`, `/`). Chords that only type text are rejected. Optionally, pressing `Shift` twice opens the command palette.
 

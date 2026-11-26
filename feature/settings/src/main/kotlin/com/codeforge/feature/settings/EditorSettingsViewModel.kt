@@ -72,6 +72,14 @@ class EditorSettingsViewModel internal constructor(
                 disableSoftKeyboardWithHardwareKeyboard = settings.editor.disableSoftKeyboardWithHardwareKeyboard,
                 keyboardSuggestions = settings.editor.keyboardSuggestions,
                 symbolBarEnabled = !settings.editor.symbolBarHidden,
+                highlightCurrentLine = !settings.editor.currentLineHighlightDisabled,
+                indentGuides = !settings.editor.indentGuidesDisabled,
+                cursorBlink = !settings.editor.cursorBlinkDisabled,
+                cursorAnimationStyle = settings.editor.cursorAnimationStyle,
+                scrollbars = !settings.editor.scrollbarsHidden,
+                stickyScrollMaxLines = settings.editor.stickyScrollMaxLines.takeIf { it > 0 } ?: DEFAULT_STICKY_LINES,
+                lineNumberSelectsLine = settings.editor.lineNumberClickSelectsLine,
+                diagnosticStyle = settings.editor.diagnosticStyle,
                 fileHeaderEnabled = settings.fileHeader.enabled,
                 fileHeaderAuthor = settings.fileHeader.author,
                 availableThemes = availableThemes,
@@ -231,6 +239,31 @@ class EditorSettingsViewModel internal constructor(
                         it.toBuilder().setFormatOnSaveJson(!it.formatOnSaveJson).build()
                     }
 
+                EditorSettingsUiEvent.CurrentLineHighlightToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setCurrentLineHighlightDisabled(!it.currentLineHighlightDisabled).build()
+                }
+                EditorSettingsUiEvent.IndentGuidesToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setIndentGuidesDisabled(!it.indentGuidesDisabled).build()
+                }
+                EditorSettingsUiEvent.CursorBlinkToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setCursorBlinkDisabled(!it.cursorBlinkDisabled).build()
+                }
+                EditorSettingsUiEvent.ScrollbarsToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setScrollbarsHidden(!it.scrollbarsHidden).build()
+                }
+                EditorSettingsUiEvent.LineNumberSelectsLineToggled -> settingsRepository.updateEditor {
+                    it.toBuilder().setLineNumberClickSelectsLine(!it.lineNumberClickSelectsLine).build()
+                }
+                is EditorSettingsUiEvent.CursorAnimationStyleChanged -> settingsRepository.updateEditor {
+                    it.toBuilder().setCursorAnimationStyle(event.style).build()
+                }
+                is EditorSettingsUiEvent.StickyScrollMaxLinesChanged -> settingsRepository.updateEditor {
+                    it.toBuilder().setStickyScrollMaxLines(event.lines).build()
+                }
+                is EditorSettingsUiEvent.DiagnosticStyleChanged -> settingsRepository.updateEditor {
+                    it.toBuilder().setDiagnosticStyle(event.style).build()
+                }
+
                 EditorSettingsUiEvent.SymbolBarToggled ->
                     settingsRepository.updateEditor { it.toBuilder().setSymbolBarHidden(!it.symbolBarHidden).build() }
 
@@ -268,6 +301,14 @@ class EditorSettingsViewModel internal constructor(
                                     .setTxtWordWrap(false)
                                     .setColorPreviewsDisabled(false)
                                     .setCodeFoldingDisabled(false)
+                                    .setCurrentLineHighlightDisabled(false)
+                                    .setIndentGuidesDisabled(false)
+                                    .setCursorBlinkDisabled(false)
+                                    .setCursorAnimationStyle(0)
+                                    .setScrollbarsHidden(false)
+                                    .setStickyScrollMaxLines(0)
+                                    .setLineNumberClickSelectsLine(false)
+                                    .setDiagnosticStyle(0)
                                     .build()
                             }
                         }
@@ -316,3 +357,5 @@ class EditorSettingsViewModel internal constructor(
         }
     }
 }
+
+private const val DEFAULT_STICKY_LINES = 3

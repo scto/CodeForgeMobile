@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -73,6 +74,12 @@ fun EditorSearchBar(
     val fresh = computed?.first == options
     val matches = computed?.second?.getOrNull().orEmpty()
     val error = if (fresh) computed?.second?.exceptionOrNull()?.message else null
+
+    // Alle Treffer im Editor hinterlegen (sora-Suche); beim Schließen der Leiste wieder entfernen.
+    DisposableEffect(controller, options) {
+        controller?.highlightMatches(options.query, options.caseSensitive, options.regex, options.wholeWord)
+        onDispose { controller?.clearMatchHighlights() }
+    }
 
     var current by remember { mutableIntStateOf(-1) }
     var selectOnNextUpdate by remember { mutableStateOf(false) }

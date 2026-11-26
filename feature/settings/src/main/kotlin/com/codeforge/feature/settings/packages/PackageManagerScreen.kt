@@ -30,7 +30,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -48,7 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.AptPackage
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
 import kotlinx.coroutines.flow.collectLatest
 
 /** Route „Paketmanager“: Pakete des CodeForge-APT-Repos (inkl. große Pakete) installieren, aktualisieren, entfernen. */
@@ -90,22 +89,18 @@ fun PackageManagerScreen(
         )
     }
 
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.pkgmgr_title),
+        onBack = onBack,
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            SettingsTopBar(
-                title = stringRes(R.string.pkgmgr_title),
-                onBack = onBack,
-                actions = {
-                    IconButton(enabled = !busy, onClick = { onEvent(PackageManagerEvent.UpgradeAll) }) {
-                        Icon(Icons.Filled.SystemUpdate, contentDescription = stringRes(R.string.pkgmgr_update_all))
-                    }
-                    IconButton(enabled = !busy, onClick = { onEvent(PackageManagerEvent.RefreshIndex) }) {
-                        Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.pkgmgr_refresh_index))
-                    }
-                },
-            )
+        actions = {
+            IconButton(enabled = !busy, onClick = { onEvent(PackageManagerEvent.UpgradeAll) }) {
+                Icon(Icons.Filled.SystemUpdate, contentDescription = stringRes(R.string.pkgmgr_update_all))
+            }
+            IconButton(enabled = !busy, onClick = { onEvent(PackageManagerEvent.RefreshIndex) }) {
+                Icon(Icons.Filled.Refresh, contentDescription = stringRes(R.string.pkgmgr_refresh_index))
+            }
         },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {

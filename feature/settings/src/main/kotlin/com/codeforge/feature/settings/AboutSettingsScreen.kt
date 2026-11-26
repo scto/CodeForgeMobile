@@ -37,7 +37,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -62,7 +61,7 @@ import com.codeforge.core.designsystem.BastiSprite
 import com.codeforge.core.designsystem.R as DesignSystemR
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
-import com.codeforge.core.ui.SettingsTopBar
+import com.codeforge.core.ui.SettingsScaffold
 
 /** Angaben zur App: Versionsname, Build-Nummer und ob es ein Debug-Build ist. */
 @Immutable
@@ -115,9 +114,10 @@ fun AboutSettingsScreen(
     val open: (String) -> Unit = { url -> runCatching { uriHandler.openUri(url) } }
     var creditsExpanded by remember { mutableStateOf(false) }
 
-    Scaffold(
+    SettingsScaffold(
+        title = stringRes(R.string.about_title),
+        onBack = onBack,
         modifier = modifier,
-        topBar = { SettingsTopBar(title = stringRes(R.string.about_title), onBack = onBack) },
     ) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
