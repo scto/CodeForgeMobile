@@ -62,6 +62,8 @@ nav:
       - Release-Signatur: dev/Signing.md
       - Modulgraph: dev/module-graph.md
       - APK: apk/APK-Dokumentation.md
+      - Release Notes 3.5.0: release-notes/3.5.0.md
+      - Release Notes 3.5.0 (EN): release-notes/3.5.0.en.md
       - Release Notes 3.4.0: release-notes/3.4.0.md
       - Release Notes 3.4.0 (EN): release-notes/3.4.0.en.md
       - Release Notes 3.3.0: release-notes/3.3.0.md

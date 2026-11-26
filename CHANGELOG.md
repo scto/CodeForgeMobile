@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-11-26
+
 ### Geändert / Changed
 - **Debugger als Plugin:** Haltepunkte, Haltepunkt-Übersicht und Debug-Leiste sind standardmäßig ausgeblendet und
   erscheinen erst mit dem Plugin „Debugger“ (`com.codeforge.plugin.debugger.feature`, Store → Code-Tools → Debugger).
