@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-11-26
+
 ### Behoben / Fixed
 
 - Absturz `IndexOutOfBoundsException` in `ColorMap.getColor` nach einem Theme-Wechsel (z. B. über die Theme-Vorschau): veraltete TextMate-Farb-IDs fallen auf die Textfarbe zurück, der Editor analysiert nach dem Wechsel neu. / Crash in `ColorMap.getColor` after switching the editor theme fixed.
