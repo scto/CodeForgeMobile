@@ -28,8 +28,11 @@ data class ActiveContributions(
     val agentTools: List<Resolved<AgentToolContribution>> = emptyList(),
     val mcpServers: List<Resolved<McpServerContribution>> = emptyList(),
     val projectTemplates: List<Resolved<ProjectTemplateContribution>> = emptyList(),
-    val settings: List<Resolved<PluginSettingsContribution>> = emptyList()
+    val settings: List<Resolved<PluginSettingsContribution>> = emptyList(),
+    /** Freigeschaltete App-Funktionen ([AppFeature]). */
+    val features: List<Resolved<String>> = emptyList()
 ) {
+
     companion object {
         /** Leere Gesamtsicht ohne Contributions. */
         val EMPTY = ActiveContributions()
@@ -56,11 +59,15 @@ data class ActiveContributions(
                 mcpServers = entries.flatMap { (m, dir) -> m.contributes.mcpServers.map { Resolved(m.id, dir, it) } },
                 // Vorlagen-IDs sind nur je Plugin eindeutig.
                 projectTemplates = entries.flatMap { (m, dir) -> m.contributes.projectTemplates.map { Resolved(m.id, dir, it) } },
-                settings = entries.mapNotNull { (m, dir) -> m.contributes.settings?.let { Resolved(m.id, dir, it) } }
+                settings = entries.mapNotNull { (m, dir) -> m.contributes.settings?.let { Resolved(m.id, dir, it) } },
+                features = collect({ it.features }, { it })
             )
         }
     }
 }
+
+/** Ob ein aktiviertes Plugin die App-Funktion [id] ([AppFeature]) freischaltet. */
+fun ActiveContributions.hasFeature(id: String): Boolean = features.any { it.item == id }
 
 /**
  * Grammatik für [path] anhand der Dateiendung (`contributes.grammars[].extensions`, ohne Punkt, case-insensitiv)

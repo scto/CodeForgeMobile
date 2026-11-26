@@ -129,14 +129,28 @@ data class Contributes(
     /** Projektvorlagen für den Projekt-Assistenten (Dateibäume mit Platzhaltern, kein Code wird ausgeführt). */
     val projectTemplates: List<ProjectTemplateContribution> = emptyList(),
     /** Einstellungsseite des Plugins (Plugins-Bildschirm → „Einstellungen“). */
-    val settings: PluginSettingsContribution? = null
+    val settings: PluginSettingsContribution? = null,
+    /** Eingebaute App-Funktionen, die dieses Plugin freischaltet (siehe [AppFeature], z. B. `debugger`). */
+    val features: List<String> = emptyList()
 ) {
     /** Ob das Plugin keinerlei Contributions enthält. */
     val isEmpty: Boolean
         get() = colorThemes.isEmpty() && iconThemes.isEmpty() && terminalThemes.isEmpty() && languagePacks.isEmpty() &&
             grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty() &&
             formatters.isEmpty() && tools.isEmpty() && requires.isEmpty() &&
-            agentTools.isEmpty() && mcpServers.isEmpty() && projectTemplates.isEmpty()
+            agentTools.isEmpty() && mcpServers.isEmpty() && projectTemplates.isEmpty() && features.isEmpty()
+}
+
+/**
+ * Eingebaute App-Funktionen, die erst mit einem Plugin (`contributes.features`) sichtbar werden.
+ * Der Code liegt in der App; das Plugin schaltet die Oberfläche frei und kann jederzeit deaktiviert werden.
+ */
+object AppFeature {
+    /** Debugger: Haltepunkte im Editor, Debug-Leiste (JVM/Android/DAP), Variablen, Aufrufstapel, Auswertung. */
+    const val DEBUGGER = "debugger"
+
+    /** Alle bekannten Kennungen; unbekannte Einträge in Manifesten werden ignoriert. */
+    val ALL: Set<String> = setOf(DEBUGGER)
 }
 
 /**
@@ -436,6 +450,7 @@ fun Contributes.kinds(): List<String> = listOf(
     "agentTools" to agentTools.isNotEmpty(),
     "mcpServers" to mcpServers.isNotEmpty(),
     "projectTemplates" to projectTemplates.isNotEmpty(),
-    "settings" to (settings != null)
+    "settings" to (settings != null),
+    "features" to features.isNotEmpty()
 ).filter { it.second }.map { it.first }
 

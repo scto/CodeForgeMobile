@@ -117,6 +117,7 @@ fun SoraCodeEditor(
     diagnostics: List<LspDiagnostic> = emptyList(),
     completionProvider: LspCompletionProvider? = null,
     updateAnnotations: List<FileUpdateAnnotation> = emptyList(),
+    breakpointsEnabled: Boolean = false,
     breakpoints: List<Breakpoint> = emptyList(),
     gitChanges: List<com.codeforge.core.domain.model.GitLineChange> = emptyList(),
     conflicts: List<com.codeforge.feature.editor.overlay.ConflictBlock> = emptyList(),
@@ -231,6 +232,8 @@ fun SoraCodeEditor(
 
                 // --- Auto-Completion-Popup aktiv halten (Snippets kommen aus LspAwareLanguage) ---
                 replaceComponent(EditorAutoCompletion::class.java, ImeAwareAutoCompletion(this))
+                // System-Lupe statt der PixelCopy-Lupe von sora (die in Compose unsichtbar blieb).
+                replaceComponent(Magnifier::class.java, SystemMagnifier(this))
                 // --- Kontextmenü (Long-Click/Auswahl) mit zusätzlichen Editor-Aktionen ---
                 replaceComponent(
                     io.github.rosemoe.sora.widget.component.EditorTextActionWindow::class.java,
@@ -358,12 +361,20 @@ fun SoraCodeEditor(
         changes = gitChanges
     )
 
-    BreakpointOverlayLayer(
-        modifier = Modifier.fillMaxSize(),
+    if (breakpointsEnabled) {
+        BreakpointOverlayLayer(
+            modifier = Modifier.fillMaxSize(),
+            editor = overlayEditor,
+            tick = overlayTick,
+            breakpoints = breakpoints,
+            pausedLine = pausedLine
+        )
+    }
+
+    com.codeforge.feature.editor.overlay.GutterTapLayer(
         editor = overlayEditor,
         tick = overlayTick,
-        breakpoints = breakpoints,
-        pausedLine = pausedLine,
+        breakpointsEnabled = breakpointsEnabled,
         onToggleBreakpoint = onToggleBreakpoint,
         onEditBreakpoint = onEditBreakpoint
     )
@@ -427,6 +438,9 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
     // Symbolpaare automatisch schließen
     editor.props.symbolPairAutoCompletion = settings.symbolPairAutocompleteEnabled
     editor.isCodeFoldingEnabled = settings.codeFoldingEnabled
+    // Größere Faltmarken (Standard 0.77/0.25 der Zeilenhöhe) – auf dem Handy besser zu sehen und zu treffen.
+    editor.props.foldIconSizeFactor = FOLD_ICON_SIZE_FACTOR
+    editor.props.foldIndicatorPadding = FOLD_INDICATOR_PADDING
 
     // Rainbow Brackets / Klammerpaar-Hervorhebung
     // Zusammengehörige Klammern werden immer deutlich hervorgehoben (Hintergrund + Unterstreichung, fett)
@@ -488,6 +502,9 @@ fun applyDisplaySettings(editor: CodeEditor, settings: EditorDisplaySettings) {
 }
 
 private val appliedThemes = java.util.WeakHashMap<CodeEditor, String>()
+
+private const val FOLD_ICON_SIZE_FACTOR = 0.95f
+private const val FOLD_INDICATOR_PADDING = 0.35f
 
 private fun applyTextMateTheme(editor: CodeEditor, themeName: String) {
     if (themeName.isBlank()) return

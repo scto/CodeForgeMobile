@@ -1876,7 +1876,7 @@
     <string name="settings_line_numbers">Show line numbers</string>
     <string name="settings_line_numbers_desc">Show line numbers in the gutter.</string>
     <string name="settings_pin_line_numbers">Pin line numbers</string>
-    <string name="settings_pin_line_numbers_desc">Whether the editor should pin the line number panel when scrolled horizontally.</string>
+    <string name="settings_pin_line_numbers_desc">Keep line numbers at the edge while scrolling sideways (only without word wrap).</string>
     <string name="settings_cursor_animation">Cursor animation</string>
     <string name="settings_cursor_animation_desc">Smooth cursor movement animation.</string>
     <string name="settings_color_previews">Color previews</string>
@@ -2000,7 +2000,7 @@
     <string name="help_d_menu">Opens the navigation with the file tree and project areas.</string>
     <string name="help_d_x2c">Finds XML layouts in the project and converts them to Jetpack Compose.</string>
     <string name="help_d_x2cres">Shows the result of the last layout conversion.</string>
-    <string name="help_d_debugbar">Opens the debug toolbar.</string>
+    <string name="help_d_debugbar">Opens the debug toolbar (needs the “Debugger” plugin from the store).</string>
     <string name="help_d_build">Opens the build sheet to build the project.</string>
     <string name="help_s_edit">Editor: edit</string>
     <string name="help_d_undo">Undoes the last change.</string>
@@ -2032,7 +2032,7 @@
     <string name="help_s_ai">Editor: AI and breakpoints</string>
     <string name="help_d_assistant">Opens the AI assistant for questions about your code.</string>
     <string name="help_d_aiquick">Quick AI actions such as explain or improve.</string>
-    <string name="help_d_breakpoints">Shows breakpoints; red when the file has some.</string>
+    <string name="help_d_breakpoints">Shows breakpoints; red when the file has some (needs the “Debugger” plugin).</string>
     <string name="help_s_debug">Debug toolbar</string>
     <string name="help_d_attach">Attaches the debugger to an Android app.</string>
     <string name="help_d_target">Configures the debug target.</string>
@@ -2790,4 +2790,5 @@
     <string name="sysinfo_no">No</string>
     <string name="plugins_api1_unsupported">Uses plugin API 1, which is no longer supported since CodeForge %1$s – not loaded. Please ask the author for an update to API 4 or remove it.</string>
     <string name="plugins_api1_rejected">%1$s uses plugin API 1, which is no longer supported since CodeForge %2$s. Please install a current version (API 2–4).</string>
+    <string name="settings_pin_line_numbers_wrap_hint">Only works without word wrap: line numbers stay put while scrolling sideways. Word wrap is currently on.</string>
 </resources>

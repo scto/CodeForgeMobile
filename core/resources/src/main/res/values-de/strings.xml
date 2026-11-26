@@ -1876,7 +1876,7 @@
     <string name="settings_line_numbers">Zeilennummern anzeigen</string>
     <string name="settings_line_numbers_desc">Zeilennummern am linken Rand anzeigen.</string>
     <string name="settings_pin_line_numbers">Zeilennummern anheften</string>
-    <string name="settings_pin_line_numbers_desc">Zeilennummern beim horizontalen Scrollen fest am Rand halten.</string>
+    <string name="settings_pin_line_numbers_desc">Zeilennummern beim seitlichen Scrollen fest am Rand halten (nur ohne Zeilenumbruch).</string>
     <string name="settings_cursor_animation">Cursor-Animation</string>
     <string name="settings_cursor_animation_desc">Flüssige Cursor-Animation aktivieren.</string>
     <string name="settings_color_previews">Farbvorschauen</string>
@@ -2000,7 +2000,7 @@
     <string name="help_d_menu">Öffnet die Navigation mit Dateibaum und Projektbereichen.</string>
     <string name="help_d_x2c">Sucht XML-Layouts im Projekt und wandelt sie in Jetpack Compose um.</string>
     <string name="help_d_x2cres">Zeigt das Ergebnis der letzten Layout-Konvertierung.</string>
-    <string name="help_d_debugbar">Öffnet die Debug-Leiste.</string>
+    <string name="help_d_debugbar">Öffnet die Debug-Leiste (nur mit Plugin „Debugger“ aus dem Store).</string>
     <string name="help_d_build">Öffnet das Build-Fenster zum Bauen des Projekts.</string>
     <string name="help_s_edit">Editor: Bearbeiten</string>
     <string name="help_d_undo">Macht die letzte Änderung rückgängig.</string>
@@ -2032,7 +2032,7 @@
     <string name="help_s_ai">Editor: KI und Haltepunkte</string>
     <string name="help_d_assistant">Öffnet den KI-Assistenten für Fragen zum Code.</string>
     <string name="help_d_aiquick">Schnellaktionen der KI, etwa erklären oder verbessern.</string>
-    <string name="help_d_breakpoints">Zeigt die Haltepunkte; rot, wenn die Datei welche hat.</string>
+    <string name="help_d_breakpoints">Zeigt die Haltepunkte; rot, wenn die Datei welche hat (nur mit Plugin „Debugger“).</string>
     <string name="help_s_debug">Debug-Leiste</string>
     <string name="help_d_attach">Verbindet den Debugger mit einer Android-App.</string>
     <string name="help_d_target">Stellt das Debug-Ziel ein.</string>
@@ -2790,4 +2790,5 @@
     <string name="sysinfo_no">Nein</string>
     <string name="plugins_api1_unsupported">Nutzt die Plugin-API 1, die seit CodeForge %1$s nicht mehr unterstützt wird – wird nicht geladen. Bitte beim Autor ein Update auf API 4 anfragen oder entfernen.</string>
     <string name="plugins_api1_rejected">%1$s nutzt die Plugin-API 1, die seit CodeForge %2$s nicht mehr unterstützt wird. Bitte eine aktuelle Version (API 2–4) installieren.</string>
+    <string name="settings_pin_line_numbers_wrap_hint">Wirkt nur ohne Zeilenumbruch: Zeilennummern bleiben beim seitlichen Scrollen stehen. Zeilenumbruch ist gerade an.</string>
 </resources>

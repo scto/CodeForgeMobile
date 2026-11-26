@@ -170,6 +170,10 @@ TOOLS = [
     ("readme", "README-Generator", "Erzeugt eine README.md aus dem Projekt (Name, Module, Technik, SDK-Werte, Build-Befehle, Lizenz) auf Deutsch oder Englisch. Eine vorhandene README.md bleibt unangetastet (dann entsteht README.generated.md).",
      "generate", "README.md erstellen", "Sprache wählen; Inhalt aus den Gradle-Dateien abgeleitet", "readme.py",
      README_PROMPT, None, [PY], 30),
+    ("agp9-migrate", "AGP-9-Migration", "Stellt ein Android-Projekt auf Android Gradle Plugin 9.0 um: AGP-, Gradle- (9.1) und Kotlin-Version (2.2.10), eingebautes Kotlin (Plugin kotlin-android entfernen, kotlinOptions -> kotlin.compilerOptions), kapt -> legacy-kapt, entfernte gradle.properties-Schalter und DSL (dexOptions, CommonExtension<…>); meldet alte Variant-API und andere Handarbeit.",
+     "migrate", "Auf AGP 9 migrieren", "Prüfen (Bericht) oder Anwenden; optional Zielversion, z. B. 9.0.1", "agp9_migrate.py",
+     dict(MODE_PROMPT, textLabel="AGP-Version (leer = 9.0.1)", textHint="9.0.1"),
+     "Vor dem Umstellen (apply) bitte committen. Mit check gibt es nur einen Bericht.", [PY], 120),
     ("project-clean", "Projekt bereinigen", "Löscht Build-Artefakte (build/, .gradle/, .kotlin/, .cxx/, captures/, *.iml) und zeigt die freigegebene Größe.",
      "clean", "Build-Artefakte löschen", "Bericht oder Löschen (Prüfen/Anwenden)", "project_clean.py",
      MODE_PROMPT, None, [PY], 120),
@@ -177,6 +181,14 @@ TOOLS = [
 
 
 dump = pluginkit.dump_json
+
+FEATURE_PLUGINS = [
+    ("com.codeforge.plugin.debugger.feature", "Debugger",
+     "Schaltet den eingebauten Debugger frei: Haltepunkte in der Randspalte (mit Bedingung und Log-Meldung), "
+     "Haltepunkt-Übersicht, Debug-Leiste mit JVM-, Android- (ADB/JDWP) und DAP-Sitzungen, Variablen, Aufrufstapel und "
+     "Ausdrucksauswertung. Ohne dieses Plugin sind alle Debugger-Elemente ausgeblendet; deaktivieren blendet sie wieder aus.",
+     ["debugger"]),
+]
 
 
 # Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
@@ -235,6 +247,11 @@ def main(out):
         dump(folder / "plugin.json", m)
         (folder / "tool.py").write_text((ROOT / "scripts" / script).read_text(encoding="utf-8"), encoding="utf-8")
         (folder / "common.py").write_text((ROOT / "scripts" / "common.py").read_text(encoding="utf-8"), encoding="utf-8")
+        pack(out, pid, folder)
+    # App-Funktionen, die erst ein Plugin freischaltet (contributes.features) – Code liegt in der App.
+    for pid, name, desc, features in FEATURE_PLUGINS:
+        folder = ROOT / "src" / pid
+        dump(folder / "plugin.json", manifest(pid, name, desc, {"features": features}))
         pack(out, pid, folder)
     pluginkit.write_zip(out / "codeforge-tool-plugins-alle.zip",
                         [(f"{pid}.zip", (out / f"{pid}.zip").read_bytes(), 0o644) for pid in tool_ids])

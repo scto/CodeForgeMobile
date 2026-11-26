@@ -95,6 +95,17 @@ Datei (`path`); alle Werte sind Bilddateien (PNG, WebP oder JPEG — **kein SVG*
 * Eingebaut sind nur „Termux-Standard“ und „CodeForge“; weitere im Store (Themes → Terminal,
   `terminal-plugins/`), Autorenvorlage `templates/terminal-theme`.
 
+## App-Funktionen freischalten (`features`)
+
+```json
+{ "contributes": { "features": ["debugger"] } }
+```
+
+* Schaltet eingebaute Funktionen frei, deren Code in der App liegt, die aber erst mit Plugin sichtbar sind.
+  Bekannt: `debugger` (Haltepunkte, Haltepunkt-Übersicht, Debug-Leiste); unbekannte Werte werden ignoriert.
+* Nur offizielle Plugins: `check_submission.py` lehnt Einreichungen mit `features` ab. Plugin:
+  `com.codeforge.plugin.debugger.feature` (`tool-plugins/generate.py`, Store-Kategorie Code-Tools → Debugger).
+
 ## Sprachpakete (`languagePacks`)
 
 Datei (`path`): `{ "strings": { "<Name der String-Ressource>": "Übersetzter Text" } }`
@@ -317,6 +328,7 @@ Die öffentliche Binär-API des SDK ist in `libs/plugin-api/api/plugin-api.api` 
 | `colorThemes` | umgesetzt (Phase 2) |
 | `iconThemes` | umgesetzt (Phase 3): Dateibaum, Tabs, Suche, Git |
 | `terminalThemes` | umgesetzt: Einstellungen → Terminal → Farbschema, Store-Kategorie Themes → Terminal; nicht auf Gerät getestet |
+| `features` | umgesetzt: `debugger`; nicht auf Gerät getestet |
 | `languagePacks` | umgesetzt (Phase 4), nicht abgedeckt: Plurals/`Context.getString` |
 | `grammars` | umgesetzt (Phase 5), nur Dateien ohne eingebaute Grammatik |
 | `snippets` | umgesetzt (Phase 5), schreibgeschützt |

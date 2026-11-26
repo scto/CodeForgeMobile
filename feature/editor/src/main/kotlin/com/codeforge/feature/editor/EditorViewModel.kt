@@ -45,6 +45,7 @@ import com.codeforge.feature.editor.plugin.runTests
 import com.codeforge.feature.editor.palette.PaletteItem
 import com.codeforge.feature.editor.palette.PaletteAction
 import com.codeforge.feature.editor.palette.PaletteCategory
+import com.codeforge.core.domain.extension.hasFeature
 import kotlinx.coroutines.flow.collectLatest
 import com.codeforge.feature.editor.plugin.definitions
 import com.codeforge.feature.editor.plugin.references
@@ -117,7 +118,8 @@ class EditorViewModel @Inject constructor(
     private val pluginEvents: com.codeforge.core.domain.extension.PluginEventSink = com.codeforge.core.domain.extension.NoOpPluginEventSink,
     private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null,
     private val extensionRegistry: com.codeforge.core.domain.extension.registry.ExtensionRegistry? = null,
-    private val pluginLogs: com.codeforge.core.domain.extension.PluginLogRepository? = null
+    private val pluginLogs: com.codeforge.core.domain.extension.PluginLogRepository? = null,
+    private val contributionRepository: com.codeforge.core.domain.extension.ContributionRepository? = null
 ) : ViewModel() {
 
     // Editor-Aktionen aus dem Register (eingebaute und von Plugins); `null` ohne Plugin-System (Tests).
@@ -136,6 +138,17 @@ class EditorViewModel @Inject constructor(
         .map { ConverterToggles(j2k = !it.editor.j2KDisabled, x2c = !it.editor.x2CDisabled) }
         .distinctUntilChanged()
         .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(CONVERTER_STOP_TIMEOUT_MS), ConverterToggles())
+
+    /** Debugger (Haltepunkte, Debug-Leiste) nur mit installiertem und aktiviertem Debugger-Plugin. */
+    val debuggerEnabled: StateFlow<Boolean> = contributionRepository?.contributions
+        ?.map { it.hasFeature(com.codeforge.core.domain.extension.AppFeature.DEBUGGER) }
+        ?.distinctUntilChanged()
+        ?.stateIn(
+            viewModelScope,
+            kotlinx.coroutines.flow.SharingStarted.Eagerly,
+            contributionRepository.contributions.value.hasFeature(com.codeforge.core.domain.extension.AppFeature.DEBUGGER)
+        )
+        ?: MutableStateFlow(false)
 
     private val _effect = MutableSharedFlow<EditorUiEffect>()
     /** Einmalige Effekte. */

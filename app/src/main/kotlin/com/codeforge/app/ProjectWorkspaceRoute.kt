@@ -107,6 +107,8 @@ fun ProjectWorkspaceRoute(
     val j2kState by j2kViewModel.uiState.collectAsState()
     val x2cState by x2cViewModel.uiState.collectAsState()
     val converters by editorViewModel.converters.collectAsState()
+    // Debugger nur mit installiertem und aktiviertem Debugger-Plugin (contributes.features: debugger).
+    val debuggerEnabled by editorViewModel.debuggerEnabled.collectAsState()
     // X2C abgeschaltet → keine Menüeinträge im Dateibaum und in der Layout-Liste.
     val convertLayout: ((String?) -> Unit)? = if (converters.x2c) {
         { layoutPath ->
@@ -252,11 +254,13 @@ fun ProjectWorkspaceRoute(
                                 )
                             }
                         }
-                        TooltipIconButton(onClick = { showDebugSheet = true }, label = stringRes(R.string.debug_title)) {
-                            Icon(
-                                imageVector = Icons.Default.BugReport,
-                                contentDescription = stringRes(R.string.debug_title)
-                            )
+                        if (debuggerEnabled) {
+                            TooltipIconButton(onClick = { showDebugSheet = true }, label = stringRes(R.string.debug_title)) {
+                                Icon(
+                                    imageVector = Icons.Default.BugReport,
+                                    contentDescription = stringRes(R.string.debug_title)
+                                )
+                            }
                         }
                         TooltipIconButton(onClick = { showBuildSheet = true }, label = stringRes(R.string.build_bauen)) {
                             if (buildState.isBuilding) {
@@ -346,7 +350,7 @@ fun ProjectWorkspaceRoute(
         )
     }
 
-    if (showDebugSheet) {
+    if (showDebugSheet && debuggerEnabled) {
         DebugBottomSheet(
             projectRoot = rootPath,
             onDismissRequest = { showDebugSheet = false },

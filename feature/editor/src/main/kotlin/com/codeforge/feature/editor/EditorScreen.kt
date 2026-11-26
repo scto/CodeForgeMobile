@@ -160,6 +160,7 @@ fun EditorRoute(
     viewModel: EditorViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val debuggerEnabled by viewModel.debuggerEnabled.collectAsState()
     val pluginCommands by viewModel.pluginCommands.collectAsState()
     val pluginMenuEntries by viewModel.pluginMenuEntries.collectAsState()
     val pluginToolbarItems = remember(pluginCommands, pluginMenuEntries) {
@@ -435,7 +436,11 @@ fun EditorRoute(
                 onSignatureHelp = { cursorPos().let { (l, c) -> viewModel.onEvent(EditorUiEvent.RequestSignatureHelp(l, c)) } },
                 onToggleLspSessions = { viewModel.onEvent(EditorUiEvent.ToggleLspSessionsDialog) },
                 hasBreakpoints = uiState.activeBreakpoints.isNotEmpty(),
-                onBreakpoints = { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(true)) },
+                onBreakpoints = if (debuggerEnabled) {
+                    { viewModel.onEvent(EditorUiEvent.ShowBreakpointsOverview(true)) }
+                } else {
+                    null
+                },
                 onOpenAiAssistant = { viewModel.onEvent(EditorUiEvent.ToggleAiAssistant(true)) },
                 onOpenAiQuickActions = { viewModel.onEvent(EditorUiEvent.ToggleAiQuickActions(true)) },
                 pluginItems = pluginToolbarItems,
@@ -494,7 +499,8 @@ fun EditorRoute(
                                 diagnostics = uiState.activeDiagnostics,
                                 completionProvider = viewModel.completionProvider,
                                 updateAnnotations = uiState.activeUpdateAnnotations,
-                                breakpoints = uiState.activeBreakpoints,
+                                breakpointsEnabled = debuggerEnabled,
+                                breakpoints = if (debuggerEnabled) uiState.activeBreakpoints else emptyList(),
                                 gitChanges = uiState.activeGitChanges,
                                 conflicts = conflicts,
                                 pausedLine = uiState.activePausedLine,
@@ -644,7 +650,7 @@ fun EditorRoute(
         )
     }
 
-    if (uiState.editingBreakpoint != null) {
+    if (debuggerEnabled && uiState.editingBreakpoint != null) {
         EditBreakpointDialog(
             breakpoint = uiState.editingBreakpoint!!,
             onSave = { viewModel.onEvent(EditorUiEvent.SaveBreakpoint(it)) },
@@ -653,7 +659,7 @@ fun EditorRoute(
         )
     }
 
-    if (uiState.isBreakpointsOverviewVisible) {
+    if (debuggerEnabled && uiState.isBreakpointsOverviewVisible) {
         BreakpointsOverviewSheet(
             breakpointsByPath = uiState.breakpointsByPath,
             onBreakpointClick = { path, line ->
@@ -862,7 +868,7 @@ private fun EditorToolbar(
     onSignatureHelp: () -> Unit,
     onToggleLspSessions: () -> Unit,
     hasBreakpoints: Boolean,
-    onBreakpoints: () -> Unit,
+    onBreakpoints: (() -> Unit)?,
     onOpenAiAssistant: () -> Unit,
     onOpenAiQuickActions: () -> Unit,
     pluginItems: List<PluginToolbarItem> = emptyList(),
@@ -899,8 +905,8 @@ private fun EditorToolbar(
             onClick = onToggleLspSessions
         )
 
-        // Breakpoints-Übersicht
-        if (!isImage) {
+        // Breakpoints-Übersicht (nur mit Debugger-Plugin)
+        if (!isImage && onBreakpoints != null) {
             TooltipIconButton(onClick = onBreakpoints, label = stringRes(R.string.debug_tab_breakpoints)) {
                 Icon(
                     imageVector = Icons.Default.Adjust,

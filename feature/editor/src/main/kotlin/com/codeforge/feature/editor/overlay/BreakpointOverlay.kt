@@ -1,11 +1,8 @@
 package com.codeforge.feature.editor.overlay
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -15,21 +12,18 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.domain.model.Breakpoint
 import io.github.rosemoe.sora.widget.CodeEditor
 
-/** Zeichnet Haltepunkte und die pausierte Zeile über dem Editor. */
+/** Zeichnet Haltepunkte und die pausierte Zeile über dem Editor; Tipps behandelt [GutterTapLayer]. */
 @Composable
 fun BreakpointOverlayLayer(
     editor: CodeEditor?,
     tick: Int,
     breakpoints: List<Breakpoint>,
     pausedLine: Int?,
-    onToggleBreakpoint: (Int) -> Unit,
-    onEditBreakpoint: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (editor == null) return
@@ -119,37 +113,5 @@ fun BreakpointOverlayLayer(
         }
     }
 
-    // Nur der schmale Gutter fängt Taps ab. Ein vollflächiger pointerInput würde alle Touch-Events
-    // (Scrollen, Cursor setzen, Tippen) vom darunterliegenden CodeEditor abfangen.
-    @Suppress("UNUSED_VARIABLE") val gutterTick = tick
-    val gutterPx = runCatching { editor.getCharOffsetX(0, 0) }.getOrDefault(0f)
-    val hitWidth = with(density) { (gutterPx + 16.dp.toPx()).coerceAtLeast(24.dp.toPx()).toDp() }
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(hitWidth)
-            .pointerInput(editor, breakpoints) {
-                detectTapGestures(
-                    onTap = { offset ->
-                        findLineAtY(editor, offset.y)?.let { onToggleBreakpoint(it + 1) }
-                    },
-                    onLongPress = { offset ->
-                        findLineAtY(editor, offset.y)?.let { onEditBreakpoint(it + 1) }
-                    }
-                )
-            }
-    )
     }
-}
-
-private fun findLineAtY(editor: CodeEditor, y: Float): Int? {
-    val count = editor.lineCount
-    for (i in 0 until count) {
-        val bottom = runCatching { editor.getCharOffsetY(i, 0) }.getOrNull() ?: continue
-        val top = bottom - editor.rowHeight
-        if (y in top..bottom) {
-            return i
-        }
-    }
-    return null
 }

@@ -1,0 +1,51 @@
+{
+  "id": "com.codeforge.plugin.agp9-migrate.tool",
+  "name": "AGP-9-Migration (Tool)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Stellt ein Android-Projekt auf Android Gradle Plugin 9.0 um: AGP-, Gradle- (9.1) und Kotlin-Version (2.2.10), eingebautes Kotlin (Plugin kotlin-android entfernen, kotlinOptions -> kotlin.compilerOptions), kapt -> legacy-kapt, entfernte gradle.properties-Schalter und DSL (dexOptions, CommonExtension<…>); meldet alte Variant-API und andere Handarbeit. Erscheint im PT-Menü des Dateibaums. Führt Skripte aus (Berechtigung shell).",
+  "permissions": [
+    "shell"
+  ],
+  "contributes": {
+    "tools": [
+      {
+        "id": "migrate",
+        "label": "Auf AGP 9 migrieren",
+        "description": "Prüfen (Bericht) oder Anwenden; optional Zielversion, z. B. 9.0.1",
+        "command": [
+          "python3",
+          "${pluginDir}/tool.py",
+          "${projectDir}",
+          "${input}"
+        ],
+        "timeoutSeconds": 120,
+        "prompt": {
+          "label": "Modus",
+          "default": "check",
+          "options": [
+            {
+              "value": "check",
+              "label": "Prüfen – nur Bericht, nichts ändern"
+            },
+            {
+              "value": "apply",
+              "label": "Anwenden – Änderungen durchführen"
+            }
+          ],
+          "textLabel": "AGP-Version (leer = 9.0.1)",
+          "textHint": "9.0.1"
+        },
+        "confirm": "Vor dem Umstellen (apply) bitte committen. Mit check gibt es nur einen Bericht."
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "python",
+        "check": "python3"
+      }
+    ]
+  }
+}

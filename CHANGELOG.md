@@ -11,6 +11,28 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert / Changed
+- **Debugger als Plugin:** Haltepunkte, Haltepunkt-Übersicht und Debug-Leiste sind standardmäßig ausgeblendet und
+  erscheinen erst mit dem Plugin „Debugger“ (`com.codeforge.plugin.debugger.feature`, Store → Code-Tools → Debugger).
+  Deaktivieren oder Deinstallieren blendet sie wieder aus; gespeicherte Haltepunkte bleiben erhalten. Neue
+  Beitragsart `contributes.features` (nur offizielle Plugins). / Debugger moved behind a plugin, off by default.
+
+### Behoben / Fixed
+- Code-Faltung: Tippen auf die Faltmarken ging an die Haltepunkt-Fläche verloren. Jetzt faltet ein Tipp irgendwo auf
+  die Randspalte einer faltbaren Zeile; mit Debugger-Plugin gehört die linke Hälfte den Haltepunkten, die rechte der
+  Faltung. Faltmarken sind größer. / Fold markers did not react to taps.
+- Lupe: nutzt jetzt die System-Lupe von Android (API 28+) statt der PixelCopy-Lupe von sora-editor, die in der
+  Compose-Oberfläche nicht erschien. / Magnifier now uses the Android system magnifier.
+- Zeilennummern anheften: Die Einstellung erklärt jetzt, dass sie nur ohne Zeilenumbruch wirkt (mit Umbruch gibt es
+  kein seitliches Scrollen). / Pin line numbers explains that it needs word wrap off.
+
+### Hinzugefügt / Added
+- **PT-Werkzeug „AGP-9-Migration“** (`com.codeforge.plugin.agp9-migrate.tool`): stellt Projekte auf Android Gradle
+  Plugin 9.0 um – AGP/Gradle 9.1/Kotlin 2.2.10, eingebautes Kotlin (kotlin-android entfernen, `kotlinOptions` →
+  `kotlin.compilerOptions`), kapt → `com.android.legacy-kapt`, entfernte `gradle.properties`-Schalter, `dexOptions`,
+  `CommonExtension<…>`; meldet alte Variant-API und weitere Handarbeit. Modus Prüfen/Anwenden, Zielversion wählbar.
+  / AGP 9 migration tool.
+
 ## [3.4.0] - 2026-11-26
 
 ### Behoben / Fixed

@@ -1,0 +1,14 @@
+{
+  "id": "com.codeforge.plugin.debugger.feature",
+  "name": "Debugger",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Schaltet den eingebauten Debugger frei: Haltepunkte in der Randspalte (mit Bedingung und Log-Meldung), Haltepunkt-Übersicht, Debug-Leiste mit JVM-, Android- (ADB/JDWP) und DAP-Sitzungen, Variablen, Aufrufstapel und Ausdrucksauswertung. Ohne dieses Plugin sind alle Debugger-Elemente ausgeblendet; deaktivieren blendet sie wieder aus.",
+  "permissions": [],
+  "contributes": {
+    "features": [
+      "debugger"
+    ]
+  }
+}

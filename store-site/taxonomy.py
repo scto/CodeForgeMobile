@@ -54,6 +54,7 @@ TITLES = {
     "tools/database": ("Datenbanken", "Databases"),
     "tools/http": ("HTTP/APIs", "HTTP/APIs"),
     "tools/text": ("Text", "Text"),
+    "tools/debug": ("Debugger", "Debugger"),
     "previews": ("Vorschauen", "Previews"),
     "previews/markdown": ("Markdown", "Markdown"),
     "previews/data": ("Daten", "Data"),
@@ -165,9 +166,11 @@ def derive(manifest, category):
     elif category == "tool":
         cats.append("tools")
         name = pid.split(".")[3] if pid.count(".") >= 4 else pid
-        if name in ("vscode-import",):
+        if "features" in c and "debugger" in c["features"]:
+            cats.append("tools/debug"); tags += ["debugger", "breakpoints", "jvm", "android"]
+        elif name in ("vscode-import",):
             cats.append("tools/import"); tags += ["vscode", "import"]
-        elif name in ("androidx-migrate", "catalog-migrate", "unused-resources", "format-all"):
+        elif name in ("androidx-migrate", "catalog-migrate", "agp9-migrate", "unused-resources", "format-all"):
             cats.append("tools/refactoring"); tags += ["android", "gradle"] if name != "format-all" else ["format"]
         else:
             cats.append("tools/project")

@@ -163,6 +163,7 @@ object PluginManifestParser {
                 )
             },
             extensionPack = obj.stringList("extensionPack"),
+            features = obj.stringList("features").filter { it in AppFeature.ALL }.distinct(),
             formatters = obj.objects("formatters").map {
                 val command = it.stringList("command")
                 require(command.isNotEmpty()) { "formatters: 'command' darf nicht leer sein" }

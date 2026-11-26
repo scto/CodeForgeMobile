@@ -36,7 +36,7 @@ def category(manifest):
         return "plugin"
     if pid.endswith(".bundle"):
         return "bundle"
-    if "tools" in c:
+    if "tools" in c or "features" in c:
         return "tool"
     if "lspServers" in c:
         return "lsp"

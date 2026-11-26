@@ -95,6 +95,8 @@ def check_archive(data, form_id="", form_version="", catalog=None):
         errors.append("Agent-Werkzeuge und MCP-Server sind nur per Sideload erlaubt")
     if not contributes and not m.get("entryPointClass"):
         errors.append("Keine Beiträge (`contributes`) und kein Code")
+    if contributes.get("features"):
+        errors.append("`features` schaltet eingebaute App-Funktionen frei und ist offiziellen CodeForge-Plugins vorbehalten")
     if contributes.get("tools"):
         notes.append("Enthält Werkzeuge (`tools`, Berechtigung `shell`) – Skripte bei der Durchsicht lesen")
     for kind in TEXT_PATH_KINDS:

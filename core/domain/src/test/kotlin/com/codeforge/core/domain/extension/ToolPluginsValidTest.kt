@@ -17,11 +17,11 @@ class ToolPluginsValidTest {
 
     @Test
     fun `alle Tool-Plugins sind gueltig, deklarativ und haben Publisher codeforge`() {
-        assertEquals(41, manifests.size) // 33 + 8 Sprachpakete
+        assertEquals(43, manifests.size) // 35 + 8 Sprachpakete
         manifests.forEach { (dirName, m) ->
             assertEquals(dirName, m.id)
             assertEquals("codeforge", m.publisher)
-            assertTrue(Regex("com\\.codeforge\\.plugin\\.[a-z0-9-]+\\.(formatter|lsp|bundle|tool)").matches(m.id))
+            assertTrue(Regex("""com\.codeforge\.plugin\.[a-z0-9-]+\.(formatter|lsp|bundle|tool|feature)""").matches(m.id))
             val files = File(src, dirName).walkTopDown().filter { it.isFile }.map { it.relativeTo(File(src, dirName)).path }.toList()
             if (m.id.endsWith(".tool")) {
                 // Werkzeuge führen Programme aus → im Store nicht erlaubt, nur Sideload
@@ -50,7 +50,7 @@ class ToolPluginsValidTest {
     @Test
     fun `Werkzeug-Plugins haben shell-Berechtigung, Skript und python als Voraussetzung`() {
         val tools = manifests.values.filter { it.id.endsWith(".tool") }
-        assertEquals(9, tools.size)
+        assertEquals(10, tools.size)
         tools.forEach { m ->
             assertTrue(m.id, PluginPermissions.SHELL in m.permissions)
             val dir = File(src, m.id)
@@ -79,6 +79,28 @@ class ToolPluginsValidTest {
         // Architektur-abhängige Downloads decken aarch64 und x86_64 ab.
         val kmp = downloads.single { m -> m.id.endsWith("kmp-lsp.lsp") }.contributes.requires
         assertEquals(setOf("aarch64", "x86_64"), kmp.mapNotNull { it.arch }.toSet())
+    }
+
+    @Test
+    fun debuggerFeaturePlugin() {
+        val m = manifests.getValue("com.codeforge.plugin.debugger.feature")
+        assertEquals(listOf(AppFeature.DEBUGGER), m.contributes.features)
+        assertTrue(m.permissions.isEmpty())
+        assertEquals(listOf("features"), m.contributes.kinds())
+        val active = ActiveContributions.of(listOf(m to "/plugins/debugger"))
+        assertTrue(active.hasFeature(AppFeature.DEBUGGER))
+        assertTrue(!ActiveContributions.EMPTY.hasFeature(AppFeature.DEBUGGER))
+    }
+
+    @Test
+    fun unknownFeaturesIgnored() {
+        val m = PluginManifestParser.parse(
+            """
+                {"id":"a.b.c","name":"x","version":"1.0.0","apiVersion":2,"publisher":"p",
+                "contributes":{"features":["debugger","root-access","debugger"]}}
+            """.trimIndent()
+        ).getOrThrow()
+        assertEquals(listOf(AppFeature.DEBUGGER), m.contributes.features)
     }
 
     @Test

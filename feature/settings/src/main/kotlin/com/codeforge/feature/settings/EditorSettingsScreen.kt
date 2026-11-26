@@ -241,7 +241,10 @@ private fun EditorSettingsScreen(
             )
             EditorToggleRow(
                 title = Res.string(R.string.settings_pin_line_numbers),
-                description = Res.string(R.string.settings_pin_line_numbers_desc),
+                // Anheften wirkt nur beim seitlichen Scrollen – mit Zeilenumbruch gibt es keins.
+                description = Res.string(
+                    if (uiState.wordWrap) R.string.settings_pin_line_numbers_wrap_hint else R.string.settings_pin_line_numbers_desc
+                ),
                 checked = uiState.pinLineNumbers,
                 onToggle = { onEvent(EditorSettingsUiEvent.PinLineNumbersToggled) }
             )
