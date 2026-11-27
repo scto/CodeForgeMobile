@@ -1,6 +1,6 @@
 # Code-Plugins (API 4 und 5)
 
-Zehn Code-Plugins nach dem Vorbild beliebter VS-Code-Extensions – zugleich Vorlagen für eigene. Acht laufen im
+Elf Code-Plugins nach dem Vorbild beliebter VS-Code-Extensions – zugleich Vorlagen für eigene. Acht laufen im
 App-Prozess (nur Sideload, im Store als Download); `text-tools` und `session-stats` laufen in der Prozess-Sandbox und
 sind direkt aus dem Store installierbar. `session-stats` und `ide-showcase` sind die Beispiele für API 5
 (`docs/plugin-api-v5.md`).
@@ -16,6 +16,7 @@ sind direkt aus dem Store installierbar. `session-stats` und `ide-showcase` sind
 | `python-tests` | `com.codeforge.plugin.python-tests.code` | pytest-Tests mit Start-Knöpfen und Ergebnissen | `run`, `shell` | `onLanguage:python` |
 | `text-tools` | `com.codeforge.plugin.text-tools.code` | 17 Textaktionen (Groß/klein, Sortieren, Base64, URL, Hash, Statistik …) – **Sandbox** | `editor` | Start |
 | `session-stats` | `com.codeforge.plugin.session-stats.code` | API 5 in der Sandbox: Sitzungsstatistik in der Statusleiste, Befehle mit Menüs (Editor, Dateibaum, Palette), Tastenkürzel, `when`, Ereignisse, Einstellungen – **Sandbox** | `editor`, `commands`, `events`, `ui` | Start |
+| `string-editor` | `com.codeforge.plugin.string-editor.code` | Visueller Editor für `strings.xml` (portiert aus StringEditor, GPL-3.0): Symbol in der Seitenleiste mit allen String-Dateien, Liste + XML, Suche, Sortieren, Übersetzungen | `ui`, `files.read`, `files.write`, `editor`, `commands`, `events` | Start |
 | `ide-showcase` | `com.codeforge.plugin.ide-showcase.code` | API 5 komplett: Projektbaum mit Git-Status (Werkzeugfenster), Übersicht (Editor, Git, Befehle, Ereignisse, App-Einstellungen, Navigation), eigene Einstellungsseite, Statusleiste, Menüs, Tastenkürzel | alle API-5-Berechtigungen | Start |
 
 ## Bauen

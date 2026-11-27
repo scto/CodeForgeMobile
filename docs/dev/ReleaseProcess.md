@@ -30,6 +30,17 @@ Python-Standardbibliothek.
    git tag vX.Y.Z && git push origin vX.Y.Z
    ```
 
+## Plugins im Release-Build prüfen
+
+Code-Plugins linken zur Laufzeit gegen Klassen der App (Kotlin-Stdlib, Coroutines, Compose, Plugin-SDK). Damit R8
+sie nicht umbenennt oder entfernt, stehen Keep-Regeln in `libs/plugin-api/consumer-rules.pro` und
+`libs/plugin-ui-api/consumer-rules.pro`. Nach Änderungen an Abhängigkeiten oder R8-Regeln prüfen:
+
+```bash
+./gradlew :app:minifyReleaseWithR8 :code-plugins:packageAll
+python3 scripts/check_plugin_linkage.py   # meldet fehlende Klassen/Mitglieder je Plugin
+```
+
 ## Was das Skript ändert
 
 | Datei | Änderung |

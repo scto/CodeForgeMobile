@@ -179,6 +179,27 @@ Eigenes SDK-Modul, damit Plugins ohne Oberfläche kein Compose brauchen. Angemel
 gemerkte `context.ide()`. Die Oberflächen verwenden das Material-3-Theme der App mit. Compose-Laufzeit und
 -Compiler müssen zur App passen.
 
+### 5.x Seitenleiste (`PluginUiPoints.SIDEBAR`, ab App 3.6.1)
+
+Ein Plugin kann ein Symbol in die Leiste der Projekt-Seitenleiste setzen – neben Dateien, Git, Layouts, Themes.
+Antippen zeigt die Ansicht des Plugins darunter (wie die Layout-Liste); für größere Arbeit öffnet sie einen eigenen
+Bildschirm.
+
+```kotlin
+context.register(PluginUiPoints.SIDEBAR, object : PluginSidebarView {
+    override val id = "strings"
+    override val title = "Strings"            // kurz, steht unter dem Symbol
+    override val icon = Icons.Filled.Translate // gefüllte Material-Symbole
+
+    @Composable
+    override fun Content(scope: PluginSidebarScope, modifier: Modifier) {
+        // scope.projectRoot, scope.close() (Seitenleiste schließen), scope.openScreen("editor")
+    }
+})
+```
+
+Beispiel: `code-plugins/string-editor`. Plugins, die das nutzen, setzen `"minHostVersion": "3.6.1"`.
+
 ## 6. Menüs, Tastenkürzel, Bedingungen (`plugin.json` → `contributes`)
 
 Neben `hostServices.registerMenuItem` (Code) gibt es die deklarative Form. Sie gilt für alle Stufen, auch für

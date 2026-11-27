@@ -115,6 +115,7 @@ include(
     ":code-plugins:text-tools",
     ":code-plugins:session-stats",
     ":code-plugins:ide-showcase",
+    ":code-plugins:string-editor",
 )
 
 // Beispiel-Plugin aus dem Plugin-Leitfaden (docs/dev/PluginDevelopment.md) liegt unter examples/guide/

@@ -50,6 +50,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -113,7 +114,16 @@ fun WorkspaceDrawer(
     val drawerWidth = if (permanent) PermanentDrawerWidth else minOf(screenWidth * 0.92f, MaxDrawerWidth)
 
     var selected by rememberSaveable { mutableStateOf(DrawerSection.FILES) }
-    LaunchedEffect(agentAttachment) { if (agentAttachment != null) selected = DrawerSection.AGENT }
+    // Gewählte Plugin-Ansicht (`pluginId/viewId`); hat Vorrang vor [selected].
+    var selectedPlugin by rememberSaveable { mutableStateOf<String?>(null) }
+    val pluginViews by androidx.hilt.navigation.compose.hiltViewModel<PluginSidebarViewModel>().views.collectAsState()
+    val activePlugin = pluginViews.firstOrNull { it.sidebarKey == selectedPlugin }
+    LaunchedEffect(agentAttachment) {
+        if (agentAttachment != null) {
+            selected = DrawerSection.AGENT
+            selectedPlugin = null
+        }
+    }
     val snackbar = remember { SnackbarHostState() }
     var message by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(message) {
@@ -138,10 +148,14 @@ fun WorkspaceDrawer(
         ) {
             Column(Modifier.fillMaxSize()) {
                 SectionRail(
-                    selected = selected,
+                    selected = selected.takeIf { activePlugin == null },
+                    pluginViews = pluginViews,
+                    selectedPlugin = activePlugin?.sidebarKey,
+                    onSelectPlugin = { selectedPlugin = it },
                     onSelect = { section ->
                         if (section.isPanel) {
                             selected = section
+                            selectedPlugin = null
                         } else {
                             onCloseDrawer()
                             onNavigate(
@@ -158,69 +172,73 @@ fun WorkspaceDrawer(
                 )
                 HorizontalDivider()
                 Box(Modifier.weight(1f).fillMaxWidth()) {
-                    when (selected) {
-                        DrawerSection.FILES -> FileTreeRoute(
-                            rootPath = rootPath,
-                            onOpenFile = { onCloseDrawer() },
-                            onOpenApkAnalyzer = { path ->
-                                onCloseDrawer()
-                                onNavigate(Routes.apkAnalyzer(path))
-                            },
-                            onScanHardcodedStrings = { path ->
-                                onCloseDrawer()
-                                onNavigate(Routes.hardcodedStrings(path, rootPath))
-                            },
-                            onConvertLayoutToCompose = onConvertLayout?.let { convert ->
-                                { path: String ->
+                    if (activePlugin != null) {
+                        PluginSidebarContent(activePlugin, rootPath, onCloseDrawer, onNavigate, Modifier.fillMaxSize())
+                    } else {
+                        when (selected) {
+                            DrawerSection.FILES -> FileTreeRoute(
+                                rootPath = rootPath,
+                                onOpenFile = { onCloseDrawer() },
+                                onOpenApkAnalyzer = { path ->
                                     onCloseDrawer()
-                                    convert(path)
-                                }
-                            }
-                        )
-                        DrawerSection.SEARCH -> SearchRoute(
-                            rootPath = rootPath,
-                            onMatchOpened = onCloseDrawer,
-                            onMessage = { message = it },
-                        )
-                        DrawerSection.AGENT -> AgentRoute(
-                            rootPath = rootPath,
-                            attachment = agentAttachment,
-                            onAttachmentConsumed = onAgentAttachmentConsumed,
-                        )
-                        DrawerSection.GIT -> GitPanel(
-                            repoPath = rootPath,
-                            onFileOpened = onCloseDrawer,
-                            onOpenSettings = {
-                                onCloseDrawer()
-                                onOpenGitSettings()
-                            },
-                        )
-                        DrawerSection.MODULES -> ModuleMakerRoute(
-                            rootPath = rootPath,
-                            onFileOpened = onCloseDrawer,
-                            onMessage = { message = it },
-                        )
-                        DrawerSection.LAYOUTS -> LayoutFilesPanel(
-                            rootPath = rootPath,
-                            onOpenDesigner = { path ->
-                                onCloseDrawer()
-                                onNavigate(Routes.layoutDesigner(path))
-                            },
-                            onConvertLayoutsToCompose = onConvertLayout?.let { convert ->
-                                {
+                                    onNavigate(Routes.apkAnalyzer(path))
+                                },
+                                onScanHardcodedStrings = { path ->
                                     onCloseDrawer()
-                                    convert(null)
+                                    onNavigate(Routes.hardcodedStrings(path, rootPath))
+                                },
+                                onConvertLayoutToCompose = onConvertLayout?.let { convert ->
+                                    { path: String ->
+                                        onCloseDrawer()
+                                        convert(path)
+                                    }
                                 }
-                            }
-                        )
-                        DrawerSection.ASSETS -> AssetStudioPanel(
-                            onAction = { action ->
-                                onCloseDrawer()
-                                onNavigate(Routes.assetStudio(rootPath, action.name))
-                            }
-                        )
-                        DrawerSection.TERMINAL, DrawerSection.SETTINGS, DrawerSection.DEPENDENCIES, DrawerSection.PROJECT_INFO,
-                        DrawerSection.THEME -> Unit
+                            )
+                            DrawerSection.SEARCH -> SearchRoute(
+                                rootPath = rootPath,
+                                onMatchOpened = onCloseDrawer,
+                                onMessage = { message = it },
+                            )
+                            DrawerSection.AGENT -> AgentRoute(
+                                rootPath = rootPath,
+                                attachment = agentAttachment,
+                                onAttachmentConsumed = onAgentAttachmentConsumed,
+                            )
+                            DrawerSection.GIT -> GitPanel(
+                                repoPath = rootPath,
+                                onFileOpened = onCloseDrawer,
+                                onOpenSettings = {
+                                    onCloseDrawer()
+                                    onOpenGitSettings()
+                                },
+                            )
+                            DrawerSection.MODULES -> ModuleMakerRoute(
+                                rootPath = rootPath,
+                                onFileOpened = onCloseDrawer,
+                                onMessage = { message = it },
+                            )
+                            DrawerSection.LAYOUTS -> LayoutFilesPanel(
+                                rootPath = rootPath,
+                                onOpenDesigner = { path ->
+                                    onCloseDrawer()
+                                    onNavigate(Routes.layoutDesigner(path))
+                                },
+                                onConvertLayoutsToCompose = onConvertLayout?.let { convert ->
+                                    {
+                                        onCloseDrawer()
+                                        convert(null)
+                                    }
+                                }
+                            )
+                            DrawerSection.ASSETS -> AssetStudioPanel(
+                                onAction = { action ->
+                                    onCloseDrawer()
+                                    onNavigate(Routes.assetStudio(rootPath, action.name))
+                                }
+                            )
+                            DrawerSection.TERMINAL, DrawerSection.SETTINGS, DrawerSection.DEPENDENCIES, DrawerSection.PROJECT_INFO,
+                            DrawerSection.THEME -> Unit
+                        }
                     }
                 }
             }
@@ -232,41 +250,30 @@ fun WorkspaceDrawer(
 /** Horizontal scrollbare Icon-Leiste; bei genug Platz passen alle Einträge, sonst wird gewischt. */
 @Composable
 private fun SectionRail(
-    selected: DrawerSection,
+    selected: DrawerSection?,
+    pluginViews: List<com.codeforge.core.domain.extension.registry.Contribution<com.codeforge.libs.plugin_ui_api.PluginSidebarView>>,
+    selectedPlugin: String?,
+    onSelectPlugin: (String) -> Unit,
     onSelect: (DrawerSection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Plugin-Symbole stehen hinter den eingebauten Bereichen (nach Themes), vor Projektinfo/Terminal/Einstellungen.
+    val split = DrawerSection.entries.indexOf(DrawerSection.PROJECT_INFO)
+    val before = DrawerSection.entries.take(split)
+    val after = DrawerSection.entries.drop(split)
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
         horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
     ) {
-        items(DrawerSection.entries, key = { it.name }) { section ->
-            val isSelected = section == selected && section.isPanel
-            Column(
-                modifier = Modifier
-                    .width(64.dp)
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.secondaryContainer else androidx.compose.ui.graphics.Color.Transparent,
-                        RoundedCornerShape(14.dp),
-                    )
-                    .clickable { onSelect(section) }
-                    .padding(vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    section.icon,
-                    contentDescription = stringRes(section.labelRes),
-                    tint = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    stringRes(section.labelRes),
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+        items(before, key = { it.name }) { section ->
+            RailButton(section.icon, stringRes(section.labelRes), section == selected && section.isPanel) { onSelect(section) }
+        }
+        items(pluginViews, key = { "plugin:" + it.sidebarKey }) { view ->
+            RailButton(view.value.icon, view.value.title, view.sidebarKey == selectedPlugin) { onSelectPlugin(view.sidebarKey) }
+        }
+        items(after, key = { it.name }) { section ->
+            RailButton(section.icon, stringRes(section.labelRes), section == selected && section.isPanel) { onSelect(section) }
         }
     }
 }

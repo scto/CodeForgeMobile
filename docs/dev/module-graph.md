@@ -2,7 +2,7 @@
 
 Automatisch erzeugt mit `python3 scripts/gen-module-graph.py` — nicht von Hand ändern.
 
-77 Module, 334 direkte Projektabhängigkeiten.
+78 Module, 337 direkte Projektabhängigkeiten.
 
 ## Schichten (aggregiert)
 
@@ -17,8 +17,8 @@ flowchart TD
     app -->|8| core
     app -->|26| feature
     app -->|15| libs
-    code-plugins -->|5| core
-    code-plugins -->|18| libs
+    code-plugins -->|6| core
+    code-plugins -->|20| libs
     core -->|5| libs
     feature -->|153| core
     feature -->|33| libs

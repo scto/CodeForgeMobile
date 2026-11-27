@@ -1,0 +1,77 @@
+{
+  "id": "com.codeforge.plugin.string-editor.code",
+  "name": "String-Editor",
+  "version": "1.0.0",
+  "apiVersion": 5,
+  "publisher": "codeforge",
+  "description": "Visueller Editor für strings.xml: alle String-Dateien des Projekts in der Seitenleiste (nach Modul und Sprache), Bearbeiten in Listenansicht oder als XML, Suchen, Sortieren, Verschieben, Kopieren als @string/R.string, nicht übersetzbar markieren und fehlende Übersetzungen ergänzen. Kommentare, Arrays und Plurals bleiben unverändert. Portiert aus StringEditor (raredeveloperofc, GPL-3.0) nach Kotlin/Compose.",
+  "entryPointClass": "com.codeforge.plugin.strings.StringEditorPlugin",
+  "permissions": [
+    "ui",
+    "files.read",
+    "files.write",
+    "editor",
+    "commands",
+    "events"
+  ],
+  "minHostVersion": "3.6.1",
+  "categories": [
+    "tools/android",
+    "languages/data/xml"
+  ],
+  "tags": [
+    "strings",
+    "resources",
+    "translation",
+    "i18n",
+    "android",
+    "xml",
+    "editor"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "id": "open",
+        "title": "Im String-Editor öffnen",
+        "category": "Strings"
+      }
+    ],
+    "menus": {
+      "fileTree/context": [
+        {
+          "command": "open",
+          "when": "resourcePath =~ '/res/values[^/]*/strings[^/]*\\.xml$'"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "open",
+          "when": "resourcePath =~ '/res/values[^/]*/strings[^/]*\\.xml$'"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "open",
+          "when": "resourcePath =~ '/res/values[^/]*/strings[^/]*\\.xml$'"
+        }
+      ]
+    },
+    "settings": {
+      "title": "String-Editor",
+      "items": [
+        {
+          "key": "sortOnSave",
+          "type": "boolean",
+          "title": "Beim Speichern alphabetisch sortieren",
+          "default": "false"
+        },
+        {
+          "key": "showDefault",
+          "type": "boolean",
+          "title": "Bei Übersetzungen den Standardtext anzeigen",
+          "default": "true"
+        }
+      ]
+    }
+  }
+}

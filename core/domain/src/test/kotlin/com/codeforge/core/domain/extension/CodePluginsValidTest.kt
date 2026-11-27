@@ -16,7 +16,7 @@ class CodePluginsValidTest {
 
     @Test
     fun `alle Manifeste sind gültig`() {
-        assertEquals(10, manifests.size)
+        assertEquals(11, manifests.size)
         manifests.forEach { (name, m) ->
             assertTrue(name, m.apiVersion in 4..5)
             assertNotNull(name, m.entryPointClass)

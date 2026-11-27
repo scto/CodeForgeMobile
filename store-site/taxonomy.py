@@ -49,6 +49,7 @@ TITLES = {
     "templates/jvm": ("JVM", "JVM"),
     "tools": ("Werkzeuge", "Tools"),
     "tools/project": ("Projekt", "Project"),
+    "tools/android": ("Android-Ressourcen", "Android resources"),
     "tools/refactoring": ("Umbau", "Refactoring"),
     "tools/import": ("Import", "Import"),
     "tools/database": ("Datenbanken", "Databases"),

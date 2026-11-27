@@ -11,6 +11,22 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Neu / Added
+- **String-Editor (Plugin):** visueller Editor für `strings.xml`, portiert aus StringEditor (raredeveloperofc,
+  GPL-3.0) nach Kotlin/Jetpack Compose. Symbol „Strings“ in der Seitenleiste des Projekts (neben Layouts und Themes)
+  mit allen String-Dateien nach Modul und Sprache; Editor mit Liste und XML, Suche, Sortieren, Verschieben, Kopieren
+  als `@string`/`R.string`, `translatable`, Sprachwechsel, fehlende Übersetzungen ergänzen. Liest und schreibt
+  verlustfrei (Kommentare, Arrays, Plurals, Formatierung bleiben). Auch über Dateibaum und Editor-Menü. / String
+  editor plugin with sidebar icon, list and XML views, translations; lossless round-trip.
+- **Plugin-API: Seitenleiste** (`PluginUiPoints.SIDEBAR`): Plugins setzen ein Symbol mit eigener Ansicht in die
+  Leiste der Projekt-Seitenleiste. / Plugins can add an icon and view to the workspace sidebar.
+
+### Behoben / Fixed
+- **Code-Plugins luden in Release-APKs nicht (seit 3.0.0):** R8 benannte die Kotlin-Standardbibliothek, Coroutines,
+  `core.domain` und die Plugin-UI-API um, gegen die Plugins zur Laufzeit linken. Diese bleiben jetzt erhalten
+  (Consumer-Regeln in `:libs:plugin-api` und `:libs:plugin-ui-api`). Debug-Builds waren nicht betroffen. / Code
+  plugins failed to load in release builds because R8 renamed the classes they link against.
+
 ## [3.6.0] - 2026-11-27
 
 ### Neu / Added
