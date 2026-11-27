@@ -11,6 +11,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben / Fixed
+- **Absturz beim Öffnen eines Projekts (3.6.0/3.6.1):** Der Editor las beim Start der Plugin-Menüs
+  (`contributes.menus`) das Projektverzeichnis, bevor es angelegt war (NullPointerException in `EditorViewModel`).
+  Regressionstest mit `Dispatchers.Main.immediate`. / Crash when opening a project.
+
 ## [3.6.1] - 2026-11-27
 
 ### Neu / Added

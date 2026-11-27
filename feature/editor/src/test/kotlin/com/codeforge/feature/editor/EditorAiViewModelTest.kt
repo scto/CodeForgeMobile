@@ -84,6 +84,7 @@ class EditorAiViewModelTest {
     private lateinit var fakeAiProvider: FakeAiProvider
     private lateinit var fakeAiRepository: FakeAiRepository
     private lateinit var viewModel: EditorViewModel
+    private lateinit var build: (com.codeforge.core.domain.extension.ContributionRepository?) -> EditorViewModel
 
     @Before
     fun setUp() {
@@ -158,7 +159,7 @@ class EditorAiViewModelTest {
             )
         }
 
-        viewModel = EditorViewModel(
+        build = { contributions -> EditorViewModel(
             openFileUseCase = openFileUseCase,
             lspClient = fakeLspClient,
             lspSessionController = fakeSessionController,
@@ -176,12 +177,39 @@ class EditorAiViewModelTest {
             fileSyncBridge = fakeFileSyncBridge,
             codeFormatterRepository = fakeCodeFormatter,
             aiRepository = fakeAiRepository,
-            aiProvider = fakeAiProvider
-        )
+            aiProvider = fakeAiProvider,
+            contributionRepository = contributions
+        ) }
+        viewModel = build(null)
 
         viewModel.onEvent(EditorUiEvent.OpenFile("/project/src/Main.kt"))
         viewModel.onEvent(EditorUiEvent.SetProjectRoot("/project"))
         testDispatcher.scheduler.advanceUntilIdle()
+    }
+
+    /**
+     * Regression (Absturz 3.6.1 beim Öffnen eines Projekts): Mit `Dispatchers.Main.immediate` laufen die im `init`
+     * gestarteten Coroutinen sofort im Konstruktor. Eigenschaften, die sie lesen, müssen davor deklariert sein.
+     */
+    @Test
+    fun initWithPluginContributions() {
+        val main = kotlinx.coroutines.test.UnconfinedTestDispatcher()
+        Dispatchers.setMain(main)
+        val contributions = object : com.codeforge.core.domain.extension.ContributionRepository {
+            override val contributions = MutableStateFlow(com.codeforge.core.domain.extension.ActiveContributions())
+        }
+        // Fehler in viewModelScope-Coroutinen gehen an den Thread-Handler, nicht an den Test – hier abfangen.
+        val errors = mutableListOf<Throwable>()
+        val thread = Thread.currentThread()
+        val previous = thread.uncaughtExceptionHandler
+        thread.uncaughtExceptionHandler = Thread.UncaughtExceptionHandler { _, e -> errors += e }
+        try {
+            val vm = build(contributions)
+            vm.viewModelScope.cancel()
+        } finally {
+            thread.uncaughtExceptionHandler = previous
+        }
+        assertTrue("Fehler im init: $errors", errors.isEmpty())
     }
 
     @After
