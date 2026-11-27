@@ -77,6 +77,8 @@ include(
     // Projekt-Indexierung + Dependency-Updater (siehe docs/indexing-and-dependency-updater.md)
     ":libs:indexing-api",
     ":libs:indexing-impl",
+    ":libs:command-palette-api",
+    ":libs:command-palette-impl",
     ":libs:dependency-updater-api",
     ":libs:dependency-updater-impl",
     ":libs:code-tools",

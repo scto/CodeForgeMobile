@@ -32,10 +32,8 @@ import com.codeforge.feature.editor.outline.SymbolOutlineExtractor
 import com.codeforge.feature.editor.textmate.TextMateAssetLoader
 import com.codeforge.libs.dependency_updater_api.DependencyUpdate
 import com.codeforge.libs.dependency_updater_api.DependencyUpdateRepository
-import com.codeforge.feature.editor.palette.CommandPaletteState
-import com.codeforge.feature.editor.palette.PaletteContext
-import com.codeforge.feature.editor.palette.PalettePluginCommand
-import com.codeforge.feature.editor.palette.buildPaletteItems
+import com.codeforge.libs.command_palette_api.PaletteContext
+import com.codeforge.libs.command_palette_api.PalettePluginCommand
 import com.codeforge.feature.editor.palette.codeActionKindRank
 import com.codeforge.feature.editor.plugin.BuiltInEditorActions
 import com.codeforge.feature.editor.plugin.PluginEditorBridge
@@ -46,9 +44,9 @@ import com.codeforge.feature.editor.overlay.TestModuleResolver
 import com.codeforge.feature.editor.overlay.TestTarget
 import com.codeforge.feature.editor.plugin.discoverTests
 import com.codeforge.feature.editor.plugin.runTests
-import com.codeforge.feature.editor.palette.PaletteItem
-import com.codeforge.feature.editor.palette.PaletteAction
-import com.codeforge.feature.editor.palette.PaletteCategory
+import com.codeforge.libs.command_palette_api.PaletteItem
+import com.codeforge.libs.command_palette_api.PaletteAction
+import com.codeforge.libs.command_palette_api.PaletteCategory
 import com.codeforge.core.domain.extension.hasFeature
 import kotlinx.coroutines.flow.collectLatest
 import com.codeforge.feature.editor.plugin.definitions
@@ -127,7 +125,10 @@ class EditorViewModel @Inject constructor(
     private val contributionRepository: com.codeforge.core.domain.extension.ContributionRepository? = null,
     private val ideEditor: com.codeforge.core.domain.extension.ide.IdeEditorBridge? = null,
     private val ideCommands: com.codeforge.core.domain.extension.ide.IdeCommandRegistry? = null,
-    private val ideStatusBar: com.codeforge.core.domain.extension.ide.IdeStatusBar? = null
+    private val ideStatusBar: com.codeforge.core.domain.extension.ide.IdeStatusBar? = null,
+    // Befehlspalette (Anbieter je Bereich, :libs:command-palette-impl); leer in Tests ohne Hilt.
+    private val commandPalette: com.codeforge.libs.command_palette_api.CommandPalette =
+        com.codeforge.libs.command_palette_api.CommandPalette.EMPTY
 ) : ViewModel() {
 
     // Plugin-API 5: Editor-Zustand, Aufträge und Befehle `cfm.editor.*`; `null` ohne Plugin-System (Tests).
@@ -823,7 +824,7 @@ class EditorViewModel @Inject constructor(
                 runEditorAction(event.ref, event.caret ?: lastCaret)
             }
             is EditorUiEvent.CommandPaletteQueryChanged -> _uiState.update { s ->
-                s.copy(commandPalette = s.commandPalette?.copy(query = event.query))
+                s.copy(commandPalette = s.commandPalette?.let { commandPalette.query(it, event.query) })
             }
             EditorUiEvent.DismissCommandPalette -> _uiState.update { it.copy(commandPalette = null) }
             is EditorUiEvent.RunServerCommand -> runServerCommand(event.command)
@@ -1462,7 +1463,7 @@ class EditorViewModel @Inject constructor(
 
     private fun fileTestsItem(state: EditorUiState): List<PaletteItem> =
         if (state.activePluginTests.isEmpty()) emptyList()
-        else listOf(PaletteItem(PaletteAction.PluginFileTests, Res.string(R.string.plugin_tests_file), PaletteCategory.PLUGIN))
+        else listOf(PaletteItem(PaletteAction.PluginFileTests, Res.string(R.string.plugin_tests_file), PaletteCategory.BUILD_RUN))
 
     // Sucht nach Änderungen (entprellt) die Tests der aktiven Datei bei den Test-Quellen der Plugins.
     @OptIn(FlowPreview::class)
@@ -1662,25 +1663,24 @@ class EditorViewModel @Inject constructor(
 
     private fun openCommandPalette(pluginCommands: List<PalettePluginCommand>) {
         val state = _uiState.value
+        val root = projectRoot.value ?: state.activeFile?.path?.let { File(it).parent }
+        // Fertige Einträge des Editors; alles Weitere leiten die Anbieter der Palette aus dem Kontext ab.
+        val contributed = editorContext(lastCaret)?.let { editorActions?.paletteItems(it) }.orEmpty() +
+            root?.let { editorActions?.runTaskItems(it, Res.string(R.string.plugin_run_prefix), Res.string(R.string.plugin_test_prefix)) }.orEmpty() +
+            editorActions?.panelItems(panels().mapValues { it.value.title }).orEmpty() +
+            fileTestsItem(state)
         val context = PaletteContext(
             filePath = state.activeFile?.path,
             isLspConnected = state.isLspConnected,
             capabilities = state.serverCapabilities,
-            pluginCommands = pluginCommands
+            projectOpen = projectRoot.value != null,
+            gitRepo = projectRoot.value?.let { File(it, ".git").exists() } == true,
+            pluginCommands = pluginCommands,
+            ideCommands = ideCommands?.commands?.value.orEmpty(),
+            hiddenCommandIds = paletteHidden(state),
+            contributed = contributed
         )
-        val root = projectRoot.value ?: state.activeFile?.path?.let { File(it).parent }
-        val registryItems = editorContext(lastCaret)?.let { editorActions?.paletteItems(it) }.orEmpty() +
-            root?.let { editorActions?.runTaskItems(it, Res.string(R.string.plugin_run_prefix), Res.string(R.string.plugin_test_prefix)) }.orEmpty() +
-            editorActions?.panelItems(panels().mapValues { it.value.title }).orEmpty() +
-            fileTestsItem(state)
-        // Befehle der API 5: `cfm.*` und von Plugins neu angemeldete (API-2-Befehle stehen schon oben).
-        val legacy = pluginCommands.mapTo(HashSet()) { "${it.pluginId}.${it.commandId}" }
-        val hidden = paletteHidden(state)
-        val ideItems = ideCommands?.commands?.value.orEmpty().filter { it.id !in legacy && it.id !in hidden }.map {
-            PaletteItem(PaletteAction.IdeCommand(it.id), it.title, PaletteCategory.IDE, detail = "${it.category} · ${it.id}")
-        }
-        val items = buildPaletteItems(context) { id -> Res.string(id) } + registryItems + ideItems
-        _uiState.update { it.copy(commandPalette = CommandPaletteState(allItems = items)) }
+        _uiState.update { it.copy(commandPalette = commandPalette.open(context)) }
     }
 
     // Befehle mit `contributes.menus.commandPalette`, deren `when` für die aktive Datei nicht gilt.

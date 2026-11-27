@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":libs:debug-client"))
     implementation(project(":libs:plugin-api"))
     implementation(project(":libs:plugin-ui-api"))
+    implementation(project(":libs:command-palette-api"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

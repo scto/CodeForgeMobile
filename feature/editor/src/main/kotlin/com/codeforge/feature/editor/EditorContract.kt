@@ -102,7 +102,7 @@ data class EditorUiState(
     val inlayHints: List<com.codeforge.core.domain.model.LspInlayHint> = emptyList(),
     val inlayHintsPath: String? = null,
     /** Geöffnete Befehlspalette, sonst `null`. */
-    val commandPalette: com.codeforge.feature.editor.palette.CommandPaletteState? = null,
+    val commandPalette: com.codeforge.libs.command_palette_api.CommandPaletteState? = null,
     val renameDialog: RenameDialogState? = null,
     val isOutlineVisible: Boolean = false,
     val outlineSymbols: List<LspDocumentSymbol> = emptyList(),
@@ -292,7 +292,7 @@ sealed interface EditorUiEvent {
 
     /** Befehlspalette öffnen; [pluginCommands] = Befehle der Code-Plugins, [caret] = Cursor/Auswahl. */
     data class OpenCommandPalette(
-        val pluginCommands: List<com.codeforge.feature.editor.palette.PalettePluginCommand> = emptyList(),
+        val pluginCommands: List<com.codeforge.libs.command_palette_api.PalettePluginCommand> = emptyList(),
         val caret: CaretSnapshot? = null
     ) : EditorUiEvent
     /** Ausführen-/Test-Aufgabe eines Plugins starten. */

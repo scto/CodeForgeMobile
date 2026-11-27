@@ -51,6 +51,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   / Agent ships Google's agp-9-upgrade skill; use_skill can load reference files.
 
 ### Geändert / Changed
+- **Befehlspalette aufgeteilt** in `:libs:command-palette-api` (Verträge) und `:libs:command-palette-impl` (ein
+  Anbieter je Bereich, Filter, Hilt). Neue Bereiche Git, Dateibaum, Build & Ausführen und Agent & KI; IDE-Befehle
+  `cfm.*` landen automatisch im passenden Bereich, Ausführen-/Testeinträge der Plugins unter Build & Ausführen. Eigene
+  Anbieter per Hilt-Multibinding (`docs/dev/CommandPalette.md`). / Command palette split into API/impl modules with
+  one provider per area (Git, file tree, build & run, agent & AI …).
 - **Gefilterte Testläufe griffen nie:** Gradle-Aufrufe wurden stur an Leerzeichen zerlegt, `--tests "Klasse"` kam
   mit Anführungszeichen bei Gradle an. Aufrufe werden jetzt wie in einer Shell zerlegt (betraf Einzeltests aus dem
   Editor und „Fehlgeschlagene wiederholen“). / Filtered test runs now work (shell-like argument splitting).

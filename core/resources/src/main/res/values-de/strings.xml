@@ -3069,4 +3069,8 @@
     <string name="plugin_ui_missing_title">Plugin</string>
     <string name="plugin_ui_missing">Diese Plugin-Ansicht ist nicht mehr verfügbar (Plugin deaktiviert oder entfernt).</string>
     <string name="settings_section_plugin_settings">Plugin-Einstellungen</string>
+    <string name="palette_cat_git">Git</string>
+    <string name="palette_cat_file_tree">Dateibaum</string>
+    <string name="palette_cat_build_run">Build &amp; Ausführen</string>
+    <string name="palette_cat_agent_ai">Agent &amp; KI</string>
 </resources>

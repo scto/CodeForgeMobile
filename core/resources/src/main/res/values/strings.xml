@@ -3069,4 +3069,8 @@
     <string name="plugin_ui_missing_title">Plugin</string>
     <string name="plugin_ui_missing">This plugin view is no longer available (plugin disabled or removed).</string>
     <string name="settings_section_plugin_settings">Plugin settings</string>
+    <string name="palette_cat_git">Git</string>
+    <string name="palette_cat_file_tree">File tree</string>
+    <string name="palette_cat_build_run">Build &amp; Run</string>
+    <string name="palette_cat_agent_ai">Agent &amp; AI</string>
 </resources>

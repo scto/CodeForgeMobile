@@ -55,6 +55,7 @@ nav:
       - User Guide: user/UserGuide.md
       - KI-Agent: user/Agent.md
       - Entwicklerhandbuch: dev/DeveloperGuide.md
+      - Befehlspalette: dev/CommandPalette.md
       - Plugins entwickeln: dev/PluginDevelopment.md
       - Plugin-Liste: dev/PluginCatalog.md
       - Plugin-Signaturen: dev/PluginSigning.md

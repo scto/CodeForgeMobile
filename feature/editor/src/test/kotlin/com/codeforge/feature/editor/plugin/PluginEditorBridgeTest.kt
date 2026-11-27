@@ -3,7 +3,7 @@ package com.codeforge.feature.editor.plugin
 import com.codeforge.core.domain.extension.PluginLogLine
 import com.codeforge.core.domain.extension.PluginLogRepository
 import com.codeforge.core.domain.extension.registry.ExtensionRegistryImpl
-import com.codeforge.feature.editor.palette.PaletteAction
+import com.codeforge.libs.command_palette_api.PaletteAction
 import com.codeforge.libs.plugin_api.EditorAction
 import com.codeforge.libs.plugin_api.EditorContext
 import com.codeforge.libs.plugin_api.EditorEffect

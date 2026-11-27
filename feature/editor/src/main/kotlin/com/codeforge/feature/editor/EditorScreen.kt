@@ -7,11 +7,11 @@ package com.codeforge.feature.editor
 import com.codeforge.feature.editor.plugin.PluginPanelSheet
 import com.codeforge.feature.editor.plugin.PluginRunSheet
 import com.codeforge.libs.plugin_ui_api.PanelHost
-import com.codeforge.feature.editor.palette.BuiltinPaletteAction
+import com.codeforge.libs.command_palette_api.BuiltinPaletteAction
 import com.codeforge.feature.editor.palette.CommandPaletteSheet
-import com.codeforge.feature.editor.palette.PaletteAction
-import com.codeforge.feature.editor.palette.PaletteItem
-import com.codeforge.feature.editor.palette.PalettePluginCommand
+import com.codeforge.libs.command_palette_api.PaletteAction
+import com.codeforge.libs.command_palette_api.PaletteItem
+import com.codeforge.libs.command_palette_api.PalettePluginCommand
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.KeyboardCommandKey
 import com.codeforge.core.designsystem.OptionalThemedFileIcon

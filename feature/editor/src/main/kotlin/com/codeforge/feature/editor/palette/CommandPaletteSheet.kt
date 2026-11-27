@@ -14,7 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CallSplit
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.AccountTree
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Edit
@@ -41,10 +45,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.codeforge.core.resources.R
+import com.codeforge.libs.command_palette_api.CommandPaletteState
+import com.codeforge.libs.command_palette_api.PaletteCategory
+import com.codeforge.libs.command_palette_api.PaletteItem
 import com.codeforge.core.resources.stringRes
 
 /**
- * Befehlspalette: Suchfeld + Liste aller in der aktuellen Lage verfügbaren Befehle (eingebaut, Sprachserver, Plugins).
+ * Befehlspalette: Suchfeld + Liste aller in der aktuellen Lage verfügbaren Befehle. Die Einträge liefern die Anbieter
+ * je Bereich aus :libs:command-palette-impl (über [com.codeforge.libs.command_palette_api.CommandPalette]).
  * Ohne Suchtext gruppiert nach Kategorie; Enter führt den ersten Treffer aus.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,7 +107,7 @@ private fun PaletteList(items: List<PaletteItem>, grouped: Boolean, onSelect: (P
             if (grouped && (index == 0 || items[index - 1].category != item.category)) {
                 item(key = "header-${item.category}") {
                     Text(
-                        text = stringRes(item.category.titleRes()),
+                        text = stringRes(item.category.titleRes),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
@@ -152,7 +160,11 @@ private fun PaletteCategory.icon(): ImageVector = when (this) {
     PaletteCategory.NAVIGATION -> Icons.AutoMirrored.Filled.OpenInNew
     PaletteCategory.CODE -> Icons.Default.Code
     PaletteCategory.EDITOR -> Icons.Default.Tune
-    PaletteCategory.SERVER -> Icons.Default.Dns
+    PaletteCategory.LSP -> Icons.Default.Dns
+    PaletteCategory.GIT -> Icons.AutoMirrored.Filled.CallSplit
+    PaletteCategory.FILE_TREE -> Icons.Default.AccountTree
+    PaletteCategory.BUILD_RUN -> Icons.Default.PlayArrow
+    PaletteCategory.AGENT_AI -> Icons.Default.AutoAwesome
     PaletteCategory.PLUGIN -> Icons.Default.Extension
     PaletteCategory.IDE -> Icons.Default.Terminal
 }

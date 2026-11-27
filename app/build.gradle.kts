@@ -115,6 +115,7 @@ dependencies {
     implementation(project(":libs:ai-client"))
     implementation(project(":libs:indexing-api"))
     implementation(project(":libs:indexing-impl"))
+    implementation(project(":libs:command-palette-impl"))
     implementation(project(":libs:dependency-updater-api"))
     implementation(project(":libs:dependency-updater-impl"))
 

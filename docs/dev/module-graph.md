@@ -2,7 +2,7 @@
 
 Automatisch erzeugt mit `python3 scripts/gen-module-graph.py` — nicht von Hand ändern.
 
-71 Module, 325 direkte Projektabhängigkeiten.
+77 Module, 334 direkte Projektabhängigkeiten.
 
 ## Schichten (aggregiert)
 
@@ -11,18 +11,18 @@ flowchart TD
     app["App (1)"]
     feature["Feature-Module (26)"]
     core["Core (9)"]
-    libs["Bibliotheken (libs) (22)"]
-    examples["Beispiel-Plugins (12)"]
+    libs["Bibliotheken (libs) (28)"]
+    examples["Beispiel-Plugins (2)"]
     templates["Templates (1)"]
     app -->|8| core
     app -->|26| feature
-    app -->|13| libs
-    core -->|4| libs
-    examples -->|10| core
-    examples -->|20| libs
-    feature -->|150| core
-    feature -->|28| libs
-    libs -->|23| core
+    app -->|15| libs
+    code-plugins -->|5| core
+    code-plugins -->|18| libs
+    core -->|5| libs
+    feature -->|153| core
+    feature -->|33| libs
+    libs -->|32| core
     templates -->|1| libs
 ```
 
@@ -32,7 +32,7 @@ flowchart TD
 
 | Modul | hängt ab von |
 |---|---|
-| `:app` | `:core:common`, `:core:data`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:feature:agent`, `:feature:assetstudio`, `:feature:build`, `:feature:composepreview`, `:feature:debug`, `:feature:dependencies`, `:feature:dependencyupdates`, `:feature:editor`, `:feature:filetree`, `:feature:git`, `:feature:hardcodedstrings`, `:feature:j2k`, `:feature:layoutdesigner`, `:feature:modulemaker`, `:feature:onboarding`, `:feature:plugins`, `:feature:projectsettings`, `:feature:projectwizard`, `:feature:sdkmanager`, `:feature:search`, `:feature:settings`, `:feature:signing`, `:feature:terminal`, `:feature:themebuilder`, `:feature:welcome`, `:feature:x2c`, `:libs:ai-client`, `:libs:dependency-updater-api`, `:libs:dependency-updater-impl`, `:libs:gradle-tooling-bridge`, `:libs:indexing-api`, `:libs:indexing-impl`, `:libs:lsp-client`, `:libs:plugin-api`, `:libs:plugin-impl`, `:libs:template-engine`, `:libs:terminal-engine`, `:libs:termux-app`, `:libs:x2c` |
+| `:app` | `:core:common`, `:core:data`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:feature:agent`, `:feature:assetstudio`, `:feature:build`, `:feature:composepreview`, `:feature:debug`, `:feature:dependencies`, `:feature:dependencyupdates`, `:feature:editor`, `:feature:filetree`, `:feature:git`, `:feature:hardcodedstrings`, `:feature:j2k`, `:feature:layoutdesigner`, `:feature:modulemaker`, `:feature:onboarding`, `:feature:plugins`, `:feature:projectsettings`, `:feature:projectwizard`, `:feature:sdkmanager`, `:feature:search`, `:feature:settings`, `:feature:signing`, `:feature:terminal`, `:feature:themebuilder`, `:feature:welcome`, `:feature:x2c`, `:libs:ai-client`, `:libs:command-palette-impl`, `:libs:dependency-updater-api`, `:libs:dependency-updater-impl`, `:libs:gradle-tooling-bridge`, `:libs:indexing-api`, `:libs:indexing-impl`, `:libs:lsp-client`, `:libs:plugin-api`, `:libs:plugin-impl`, `:libs:plugin-ui-api`, `:libs:template-engine`, `:libs:terminal-engine`, `:libs:termux-app`, `:libs:x2c` |
 
 ### Feature-Module
 
@@ -41,18 +41,18 @@ flowchart TD
 | `:feature:onboarding` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:libs:terminal-engine`, `:libs:termux-app` |
 | `:feature:welcome` | `:core:common`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui` |
 | `:feature:projectwizard` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:template-engine` |
-| `:feature:editor` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:ai-client`, `:libs:code-tools`, `:libs:debug-client`, `:libs:dependency-updater-api`, `:libs:lsp-client` |
-| `:feature:composepreview` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:libs:terminal-engine` |
+| `:feature:editor` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:ai-client`, `:libs:code-tools`, `:libs:command-palette-api`, `:libs:debug-client`, `:libs:dependency-updater-api`, `:libs:lsp-client`, `:libs:plugin-api`, `:libs:plugin-ui-api` |
+| `:feature:composepreview` | `:core:common`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:libs:terminal-engine` |
 | `:feature:filetree` | `:core:common`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui` |
 | `:feature:terminal` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:libs:terminal-engine` |
 | `:feature:sdkmanager` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui` |
 | `:feature:layoutdesigner` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui` |
 | `:feature:agent` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:agent`, `:libs:ai-client`, `:libs:mcp`, `:libs:terminal-engine` |
 | `:feature:assetstudio` | `:core:designsystem`, `:core:domain`, `:core:resources`, `:core:ui` |
-| `:feature:themebuilder` | `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui` |
+| `:feature:themebuilder` | `:core:common`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:theme-kit` |
 | `:feature:git` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui` |
 | `:feature:plugins` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:libs:plugin-api` |
-| `:feature:settings` | `:core:common`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:terminal-engine`, `:libs:termux-shared` |
+| `:feature:settings` | `:core:common`, `:core:datastore`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:feature:plugins`, `:libs:ai-client`, `:libs:terminal-engine`, `:libs:termux-shared` |
 | `:feature:dependencyupdates` | `:core:navigation`, `:core:resources`, `:libs:dependency-updater-api` |
 | `:feature:dependencies` | `:core:common`, `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:testing`, `:core:ui`, `:libs:dependency-updater-api` |
 | `:feature:search` | `:core:designsystem`, `:core:domain`, `:core:navigation`, `:core:resources`, `:core:ui`, `:libs:code-tools` |
@@ -70,7 +70,7 @@ flowchart TD
 | Modul | hängt ab von |
 |---|---|
 | `:core:resources` | – |
-| `:core:designsystem` | `:core:datastore`, `:core:domain`, `:core:resources`, `:core:testing` |
+| `:core:designsystem` | `:core:datastore`, `:core:domain`, `:core:resources`, `:core:testing`, `:libs:theme-kit` |
 | `:core:ui` | `:core:resources` |
 | `:core:common` | – |
 | `:core:data` | `:core:common`, `:core:domain`, `:core:resources`, `:core:testing`, `:libs:code-tools`, `:libs:dependency-updater-api` |
@@ -89,9 +89,13 @@ flowchart TD
 | `:libs:debug-client` | `:core:common`, `:core:domain`, `:core:resources`, `:core:testing`, `:libs:indexing-api`, `:libs:terminal-engine` |
 | `:libs:template-engine` | `:core:domain`, `:core:resources` |
 | `:libs:plugin-api` | `:core:domain`, `:libs:terminal-engine` |
-| `:libs:plugin-impl` | `:core:domain`, `:core:resources`, `:libs:plugin-api`, `:libs:terminal-engine` |
+| `:libs:plugin-ui-api` | `:core:domain` |
+| `:libs:plugin-impl` | `:core:datastore`, `:core:domain`, `:core:navigation`, `:core:resources`, `:libs:plugin-api`, `:libs:plugin-sandbox`, `:libs:terminal-engine` |
+| `:libs:plugin-sandbox` | `:core:domain`, `:libs:plugin-api` |
 | `:libs:indexing-api` | – |
-| `:libs:indexing-impl` | `:core:resources`, `:libs:indexing-api` |
+| `:libs:indexing-impl` | `:core:domain`, `:core:resources`, `:libs:indexing-api` |
+| `:libs:command-palette-api` | `:core:domain`, `:core:resources` |
+| `:libs:command-palette-impl` | `:core:domain`, `:core:resources`, `:libs:command-palette-api` |
 | `:libs:dependency-updater-api` | – |
 | `:libs:dependency-updater-impl` | `:core:resources`, `:libs:dependency-updater-api`, `:libs:indexing-api`, `:libs:indexing-impl` |
 | `:libs:code-tools` | – |
@@ -101,6 +105,8 @@ flowchart TD
 | `:libs:ai-client` | `:core:common`, `:core:domain`, `:core:resources`, `:core:testing`, `:libs:agent` |
 | `:libs:j2k` | – |
 | `:libs:x2c` | – |
+| `:libs:color-utilities` | – |
+| `:libs:theme-kit` | `:libs:color-utilities` |
 | `:libs:termux-emulator` | – |
 | `:libs:termux-view` | `:libs:termux-emulator` |
 | `:libs:termux-shared` | `:libs:termux-view` |
@@ -110,16 +116,6 @@ flowchart TD
 
 | Modul | hängt ab von |
 |---|---|
-| `:examples:lsp-plugin-common` | `:core:domain`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:kotlin-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:java-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:xml-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:cpp-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:bash-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:yaml-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:toml-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:kmp-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
-| `:examples:python-lsp-plugin` | `:core:domain`, `:examples:lsp-plugin-common`, `:libs:plugin-api`, `:libs:terminal-engine` |
 | `:examples:guide-commit-notes` | – |
 | `:examples:guide-commit-notes` | – |
 
@@ -168,6 +164,7 @@ flowchart LR
     app --> n_feature_welcome[":feature:welcome"]
     app --> n_feature_x2c[":feature:x2c"]
     app --> n_libs_ai_client[":libs:ai-client"]
+    app --> n_libs_command_palette_impl[":libs:command-palette-impl"]
     app --> n_libs_dependency_updater_api[":libs:dependency-updater-api"]
     app --> n_libs_dependency_updater_impl[":libs:dependency-updater-impl"]
     app --> n_libs_gradle_tooling_bridge[":libs:gradle-tooling-bridge"]
@@ -176,6 +173,7 @@ flowchart LR
     app --> n_libs_lsp_client[":libs:lsp-client"]
     app --> n_libs_plugin_api[":libs:plugin-api"]
     app --> n_libs_plugin_impl[":libs:plugin-impl"]
+    app --> n_libs_plugin_ui_api[":libs:plugin-ui-api"]
     app --> n_libs_template_engine[":libs:template-engine"]
     app --> n_libs_terminal_engine[":libs:terminal-engine"]
     app --> n_libs_termux_app[":libs:termux-app"]

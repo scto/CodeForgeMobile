@@ -9,9 +9,9 @@ import com.codeforge.core.domain.extension.registry.ExtensionRegistry
 import com.codeforge.core.domain.model.LspCodeAction
 import com.codeforge.core.domain.model.LspCompletionItem
 import com.codeforge.core.domain.model.LspCommand
-import com.codeforge.feature.editor.palette.PaletteAction
-import com.codeforge.feature.editor.palette.PaletteCategory
-import com.codeforge.feature.editor.palette.PaletteItem
+import com.codeforge.libs.command_palette_api.PaletteAction
+import com.codeforge.libs.command_palette_api.PaletteCategory
+import com.codeforge.libs.command_palette_api.PaletteItem
 import com.codeforge.libs.plugin_api.EditorAction
 import com.codeforge.libs.plugin_api.EditorContext
 import com.codeforge.libs.plugin_api.EditorEffect
@@ -92,7 +92,7 @@ class PluginEditorBridge(
             .filter { c -> runCatching { c.value.appliesTo(projectRoot) }.getOrDefault(false) }
             .map { c ->
                 val prefix = if (c.value.kind == RunTask.KIND_TEST) testPrefix else runPrefix
-                PaletteItem(PaletteAction.PluginRunTask("${c.pluginId}/${c.value.id}"), "$prefix ${c.value.title}", PaletteCategory.PLUGIN, c.pluginId)
+                PaletteItem(PaletteAction.PluginRunTask("${c.pluginId}/${c.value.id}"), "$prefix ${c.value.title}", PaletteCategory.BUILD_RUN, c.pluginId)
             }
 
     /** Aufgabe zu [ref] mit Herkunft. */
