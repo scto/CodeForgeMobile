@@ -246,7 +246,7 @@ FEATURE_PLUGINS = [
 
 
 # Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
-VERSIONS = {"com.codeforge.plugin.pyright.lsp": "1.0.1", "com.codeforge.plugin.jvm-pack.bundle": "1.1.0", "com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
+VERSIONS = {"com.codeforge.plugin.pyright.lsp": "1.0.1", "com.codeforge.plugin.jvm-pack.bundle": "1.1.0", "com.codeforge.plugin.all-formatters.bundle": "1.1.0", "com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
 
 
 def manifest(pid, name, desc, contributes):

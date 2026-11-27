@@ -28,10 +28,16 @@ def pack(out, pid, folder):
     return target
 
 
+# Neue Mitglieder → neue Version, damit installierte Bundles das Update sehen.
+BUNDLE_VERSIONS = {"languages": "1.1.0"}  # 1.1.0: da, sv, nb, fi, cs, hu, uk, ko
+
+
 def bundle(out, kind, title, ids):
     pid = f"com.codeforge.plugin.all-{kind}.bundle"
     folder = out / "src" / pid
-    dump(folder / "plugin.json", manifest(pid, f"{title} (Bundle)", f"{title} von CodeForge als Bundle ({len(ids)} Pakete).", {"extensionPack": ids}))
+    m = manifest(pid, f"{title} (Bundle)", f"{title} von CodeForge als Bundle ({len(ids)} Pakete).", {"extensionPack": ids})
+    m["version"] = BUNDLE_VERSIONS.get(kind, m["version"])
+    dump(folder / "plugin.json", m)
     return pack(out, pid, folder)
 
 
