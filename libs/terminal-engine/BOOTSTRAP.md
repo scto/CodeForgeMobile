@@ -56,6 +56,24 @@ entfernt. Es gibt genau eine Umgebung: den Termux-Bootstrap unter
 * Maschinenprotokoll (`--machine`): `CFSDK|ITEM|id|version|0/1|pfad`, `CFSDK|PROGRESS|%|text`,
   `CFSDK|OK|id`, `CFSDK|ERR|text` (Parser: `SdkScriptProtocol`, getestet).
 
+## Paketliste schnell laden (catalog.json)
+
+Die Liste der installierbaren SDK-Pakete stammt aus den Releases von `scto/codeforge-tools`. Statt sie über die
+GitHub-API zu holen (mehrere Seiten, mehrere MB JSON, Rate-Limit), liest `codeforge-env` die kompakte
+`catalog.json` des Mirrors von `raw.githubusercontent.com` – dasselbe Prinzip wie `store.json` im Plugin-Store:
+
+1. frischer Zwischenspeicher `$TMPDIR/.cfsdk-catalog.json` (höchstens 6 Stunden alt, „Aktualisieren“ in der App
+   setzt `CFSDK_REFRESH=1`),
+2. `catalog.json` vom CDN,
+3. älterer Zwischenspeicher,
+4. die beim Bauen der App geladene Fassung (`fetchBundledToolsCatalog` → Asset `codeforge-tools-catalog.json`,
+   von `ScriptInstaller` nach `$PREFIX/share/codeforge-env/tools-catalog.json` gelegt),
+5. erst dann die GitHub-API.
+
+Der Mirror baut `catalog.json` nach jedem Spiegel-Lauf und bei jeder Release-Änderung neu
+(`scripts/build-catalog.sh` in codeforge-tools). Die App zeigt außerdem die zuletzt geladene Liste sofort an
+(`SdkPackageCache`) und aktualisiert im Hintergrund.
+
 ## Als Termux-Paket
 
 Im `terminal-packages-codeforge`-Fork: Paket `codeforge-env` mit `build.sh`, das

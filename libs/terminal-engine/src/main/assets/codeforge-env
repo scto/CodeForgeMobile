@@ -47,11 +47,15 @@
 #       cmake-<v>                cmake;<v>                                (HomuHomu833/cmake-custom)
 #       androidide-tools-v<v>    build-tools;<v>, platform-tools;<v>      (AndroidIDEOfficial/androidide-tools, 33.x/34.x, statisch)
 #       lzhiyong-sdk-tools-<v>   build-tools;<v> (nur Binaries, Überlagerung der Google-build-tools; Lzhiyong/android-sdk-tools)
+#       msmt-platform-tools-<v>  platform-tools;<v>, build-tools;<Version aus dem Asset> – vollständige Google-Pakete mit
+#                                statischen Android-Binaries (msmt2018/android-sdk-tools, 30.0.2 …); haben Vorrang
 #     Gibt der Mirror für eine Komponente nichts her (nicht erreichbar, noch leer), gelten die Upstream-Repos
 #     HomuHomu833/* direkt (SDK_REPO/NDK_REPO/CMAKE_REPO), danach eine feste Rückfallliste.
 #     Beta-/RC-Releases (Name oder Tag mit "beta"/"rc") werden nie angeboten.
 #   - Alternativ das Termux-CMake (cmake;termux), per Symlink als $SDK_ROOT/cmake/<version> registriert.
-#   - Die Versionslisten werden bei jedem Aufruf aus den GitHub-Releases gebildet, 6 Stunden zwischengespeichert.
+#   - Die Versionslisten kommen für den Mirror aus dessen catalog.json (CDN, eine kleine Datei; CODEFORGE_TOOLS_CATALOG,
+#     leer = GitHub-API), ohne Netz aus der Fassung, die die App mitbringt ($PREFIX/share/codeforge-env/tools-catalog.json).
+#     Für die Upstream-Repos aus der GitHub-API. Beides 6 Stunden zwischengespeichert (CFSDK_REFRESH=1 lädt neu).
 #   - GitHub-API ohne Token ist auf 60 Anfragen/Stunde begrenzt: bei Fehlern GITHUB_TOKEN setzen.
 #   - Prüfsumme: GitHubs "digest" des Assets, sonst die <asset>.sha256 aus dem Mirror-Release; fehlt beides, Warnung.
 #   - Überschreibbar über sdk.conf oder Umgebung: TOOLS_REPO (leer = Mirror aus), SDK_REPO, NDK_REPO, CMAKE_REPO,
@@ -122,6 +126,10 @@ esac
 GH_VARIANT="${ASSET_VARIANT:-$GH_VARIANT_DEFAULT}"
 # Eigener Mirror (Releases android-sdk-*, android-ndk-*, cmake-*, androidide-tools-v*, lzhiyong-sdk-tools-*)
 TOOLS_REPO="${CODEFORGE_TOOLS_REPO:-${TOOLS_REPO-scto/codeforge-tools}}"
+# Release-Liste des Mirrors als kleine Datei vom CDN statt über die GitHub-API (schneller erster Start, kein
+# Rate-Limit). Leer = immer die API. Die App legt beim Installieren eine eingebaute Fassung nach BUNDLED_CATALOG.
+TOOLS_CATALOG_URL="${CODEFORGE_TOOLS_CATALOG-${TOOLS_REPO:+https://raw.githubusercontent.com/$TOOLS_REPO/main/catalog.json}}"
+BUNDLED_CATALOG="${CFSDK_BUNDLED_CATALOG:-$PREFIX/share/codeforge-env/tools-catalog.json}"
 AIDE_VARIANT="${AIDE_VARIANT:-$AIDE_VARIANT_DEFAULT}"
 # Releases v<ver> (buildtools_<ver>_<arch>.tar.xz, platformtools_<arch>.tar.xz): arm64-v8a bzw. armeabi-v7a
 case "$CF_ARCH" in arm) NU_VARIANT_DEFAULT=armeabi-v7a ;; *) NU_VARIANT_DEFAULT=arm64-v8a ;; esac
@@ -514,6 +522,11 @@ asset_re_for() { # tagprefix kind version
         ghaidept) printf '^platform-tools-%s-%s\\.tar\\.xz$' "$v" "$AIDE_VARIANT" ;;
       esac ;;
     lzhiyong-sdk-tools-) printf '^android-sdk-tools-static-%s\\.zip$' "$AIDE_VARIANT" ;;
+    msmt-platform-tools-)
+      case "$2" in
+        ghaidebt) printf '^build-tools-%s-%s\\.zip$' "$v" "$NU_VARIANT" ;;
+        ghaidept) printf '^platform-tools-%s-%s\\.tar\\.gz$' "$v" "$NU_VARIANT" ;;
+      esac ;;
     v)
       case "$2" in
         ghaidebt) printf '^buildtools_%s_%s\\.tar\\.xz$' "$v" "$NU_VARIANT" ;;
@@ -527,6 +540,7 @@ probe_re_for() { # tagprefix
   case "$1" in
     androidide-tools-v) printf -- '-%s\\.tar\\.xz$' "$AIDE_VARIANT" ;;
     lzhiyong-sdk-tools-) printf '^android-sdk-tools-static-%s\\.zip$' "$AIDE_VARIANT" ;;
+    msmt-platform-tools-) printf -- '-%s\\.(zip|tar\\.gz)$' "$NU_VARIANT" ;;
     v) printf '^(buildtools_[0-9.]+|platformtools)_%s\\.tar\\.xz$' "$NU_VARIANT" ;;
     *) printf -- '-%s\\.(tar\\.xz|tar\\.gz|zip|7z)$' "$GH_VARIANT" ;;
   esac
@@ -560,6 +574,7 @@ gh_find_asset() {
 # Releases eines Repos als JSON (bis zu 3 Seiten à 100), 6 Stunden zwischengespeichert (schont das API-Limit von 60/Stunde)
 gh_releases_json() {
   local repo=$1 f="$TMP/.cfsdk-gh-${1//\//_}.json" json="[]" part page
+  [ "$repo" = "$TOOLS_REPO" ] && tools_catalog && return 0
   if [ -z "${CFSDK_REFRESH:-}" ] && [ -s "$f" ] && [ -n "$(find "$f" -mmin -360 2>/dev/null)" ]; then cat "$f"; return 0; fi
   for page in 1 2 3; do
     part=$(gh_api "https://api.github.com/repos/$repo/releases?per_page=100&page=$page" 2>/dev/null) || { json=""; break; }
@@ -569,6 +584,42 @@ gh_releases_json() {
   done
   [ -n "$json" ] || { [ -s "$f" ] && cat "$f"; return 0; }
   printf '%s' "$json" > "$f"; printf '%s' "$json"
+}
+
+# tools_catalog: Release-Liste des Mirrors aus catalog.json (gleiches Format wie die Releases-API, nur die genutzten
+# Felder). Reihenfolge: frischer Zwischenspeicher (6 Stunden) → CDN → alter Zwischenspeicher → eingebaute Fassung
+# der App. Rückgabe 1 = nichts davon da, dann fragt gh_releases_json die API.
+tools_catalog() {
+  local f="$TMP/.cfsdk-catalog.json" new="$TMP/.cfsdk-catalog.$$"
+  [ -n "$TOOLS_CATALOG_URL" ] || return 1
+  if [ -z "${CFSDK_REFRESH:-}" ] && [ -s "$f" ] && [ -n "$(find "$f" -mmin -360 2>/dev/null)" ]; then cat "$f"; return 0; fi
+  if curl -fsSL --max-time 20 -o "$new" "$TOOLS_CATALOG_URL" 2>/dev/null \
+     && jq -e 'type == "array" and length > 0' "$new" >/dev/null 2>&1; then
+    mv -f "$new" "$f"; cat "$f"; return 0
+  fi
+  rm -f "$new"
+  if [ -s "$f" ]; then cat "$f"; return 0; fi
+  if [ -s "$BUNDLED_CATALOG" ] && jq -e 'type == "array"' "$BUNDLED_CATALOG" >/dev/null 2>&1; then cat "$BUNDLED_CATALOG"; return 0; fi
+  return 1
+}
+
+# mirror_msmt: vollständige build-/platform-tools aus msmt2018/android-sdk-tools (Tags msmt-platform-tools-<V>).
+# Die build-tools-Version steht im Asset-Namen und weicht vom Release ab (platform-tools 37.0.2 bringt
+# build-tools 37.0.0); "rel=" im Feld extra nennt das Release. Neueste Releases zuerst, doppelte IDs gewinnt das neueste.
+mirror_msmt() {
+  [ -n "$TOOLS_REPO" ] || return 0
+  command -v jq >/dev/null 2>&1 || return 0
+  gh_releases_json "$TOOLS_REPO" | jq -r --arg repo "$TOOLS_REPO" --arg v "$NU_VARIANT" --arg skip "$GH_SKIP_RE" '
+    .[]?
+    | select(.tag_name | startswith("msmt-platform-tools-"))
+    | (.tag_name | ltrimstr("msmt-platform-tools-")) as $n
+    | select($n | test("^[0-9]+(\\.[0-9]+)+$"))
+    | select($n | test($skip; "i") | not)
+    | . as $r
+    | ( ($r.assets[]? | .name | capture("^build-tools-(?<b>[0-9.]+)-" + $v + "\\.zip$") | .b
+         | "build-tools;\(.)|\(.)|ghaidebt|\($repo)|||tagprefix=msmt-platform-tools-;rel=\($n)"),
+        (select(any($r.assets[]?; .name == "platform-tools-" + $n + "-" + $v + ".tar.gz"))
+         | "platform-tools;\($n)|\($n)|ghaidept|\($repo)|||tagprefix=msmt-platform-tools-") )' 2>/dev/null
 }
 
 # gh_dynamic <repo> <idpräfix> <kind> [<idpräfix2> <kind2> …]: Manifestzeilen für jedes Release des Upstream-Repos mit passendem Asset.
@@ -630,6 +681,8 @@ build_manifest() {
   dyn=$(mirror_dynamic android-sdk- build-tools ghsdk platform-tools ghpt)
   # Vollständiges SDK-Archiv (android-sdk.tar.gz) hat Vorrang vor den Binär-Archiven gleicher Version
   d=$(mirror_fullsdk); [ -n "$d" ] && dyn="$d"$'\n'"$dyn"
+  # Ganz vorne: msmt2018 (offizielle Pakete mit Jars, Binaries statisch für Android gebaut)
+  d=$(mirror_msmt); [ -n "$d" ] && dyn="$d"$'\n'"$dyn"
   [ -n "$dyn" ] || dyn=$(gh_dynamic "$SDK_CUSTOM_REPO" build-tools ghsdk platform-tools ghpt)
   [ -n "$dyn" ] || dyn=$FALLBACK_SDK
   d=$(mirror_dynamic androidide-tools-v build-tools ghaidebt platform-tools ghaidept); [ -n "$d" ] && dyn="$dyn"$'\n'"$d"
@@ -758,6 +811,9 @@ _do_install() { # id
   case "$extra" in *strip=*) strip=${extra##*strip=}; strip=${strip%%[!0-9]*} ;; esac
   : "${strip:=0}"
   case "$extra" in *tagprefix=*) tp=${extra##*tagprefix=}; tp=${tp%%[!A-Za-z0-9._-]*} ;; esac
+  # rel=<Release>: das Asset liegt in einem Release mit anderer Version (msmt: build-tools 37.0.0 in 37.0.2)
+  local rel=""
+  case "$extra" in *rel=*) rel=${extra##*rel=}; rel=${rel%%[!A-Za-z0-9._-]*} ;; esac
 
   case "$kind" in
     pkg)
@@ -866,7 +922,7 @@ _do_install() { # id
       need_tools
       local px="$TMP/cfsdk-pt-extract" padb
       progress 6 "Suche platform-tools $ver bei GitHub …"
-      gh_find_asset "$src" "$ver" "$tp" "$(asset_re_for "$tp" "$kind" "$ver")" || exit 1
+      gh_find_asset "$src" "${rel:-$ver}" "$tp" "$(asset_re_for "$tp" "$kind" "$ver")" || exit 1
       gh_fetch_extract "$px" || { rm -rf "$px"; exit 1; }
       padb=$(find "$GH_ROOT" -type f -name adb | head -n1)
       [ -n "$padb" ] || { rm -rf "$px"; die "adb im Archiv nicht gefunden"; }
@@ -881,8 +937,8 @@ _do_install() { # id
     ghaidebt)
       need_tools
       local ax="$TMP/cfsdk-aide-extract" aapt2src bdir
-      progress 6 "Suche build-tools $ver (androidide-tools) …"
-      gh_find_asset "$src" "$ver" "$tp" "$(asset_re_for "$tp" "$kind" "$ver")" || exit 1
+      progress 6 "Suche build-tools $ver …"
+      gh_find_asset "$src" "${rel:-$ver}" "$tp" "$(asset_re_for "$tp" "$kind" "$ver")" || exit 1
       gh_fetch_extract "$ax" || { rm -rf "$ax"; exit 1; }
       aapt2src=$(find "$GH_ROOT" -type f -name aapt2 | head -n1)
       [ -n "$aapt2src" ] || { rm -rf "$ax"; die "aapt2 im Archiv nicht gefunden"; }

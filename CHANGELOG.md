@@ -11,6 +11,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Neu / Added
+- **SDK-Manager: vollständige build-tools und platform-tools 30.0.2 – 37.0.3** aus msmt2018/android-sdk-tools
+  (gespiegelt in scto/codeforge-tools, `arm64-v8a` und `armeabi-v7a`): offizielle Google-Pakete mit `d8.jar` und
+  `apksigner`, die nativen Programme statisch für Android gebaut. Sie haben im SDK-Manager Vorrang vor den bisherigen
+  Quellen (Lzhiyong-Pakete enthielten keine Jars). / Complete build-tools and platform-tools 30.0.2–37.0.3.
+
+### Geändert / Changed
+- **SDK-Manager startet schneller:** Die Paketliste kommt aus `catalog.json` des Mirrors (eine kleine Datei vom CDN)
+  statt aus mehreren Seiten der GitHub-API; ohne Netz aus einer Fassung, die die App mitbringt (wie beim
+  Plugin-Store). / SDK manager loads its package list from a compact catalog instead of the GitHub API.
+
 ## [3.6.2] - 2026-11-27
 
 ### Behoben / Fixed

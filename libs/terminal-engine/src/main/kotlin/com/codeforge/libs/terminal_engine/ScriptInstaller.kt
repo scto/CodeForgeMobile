@@ -23,12 +23,26 @@ internal class ScriptInstaller(private val context: Context) {
         val target = File(TermuxEnvironment.sdkScriptPath)
         val template = context.assets.open(ASSET_NAME).bufferedReader().use { it.readText() }
         val content = render(template, repoUrl = null)
+        installCatalog()
         if (target.isFile && target.readText() == content) return@runCatching
         target.parentFile?.mkdirs()
         target.writeText(content)
         target.setExecutable(true, false)
         target.setReadable(true, false)
         installMotd()
+    }
+
+    // Eingebaute Release-Liste des SDK-Mirrors nach $PREFIX/share/codeforge-env/ (Rückfall von codeforge-env ohne
+    // Zwischenspeicher und Netz); nur schreiben, wenn sie sich geändert hat.
+    private fun installCatalog() {
+        runCatching {
+            val body = context.assets.open(CATALOG_ASSET).use { it.readBytes() }
+            if (body.size < 2) return
+            val file = File(TermuxEnvironment.prefix, CATALOG_TARGET)
+            if (file.isFile && file.length() == body.size.toLong() && file.readBytes().contentEquals(body)) return
+            file.parentFile?.mkdirs()
+            file.writeBytes(body)
+        }
     }
 
     /**
@@ -46,6 +60,8 @@ internal class ScriptInstaller(private val context: Context) {
     companion object {
         const val ASSET_NAME = "codeforge-env"
         const val MOTD_ASSET = "codeforge-motd"
+        const val CATALOG_ASSET = "codeforge-tools-catalog.json"
+        const val CATALOG_TARGET = "share/codeforge-env/tools-catalog.json"
         private val MOTD_SCRIPTS = listOf("etc/motd.sh", "etc/termux/motd.sh")
 
         /** Schreibt `etc/motd` und ersetzt vorhandene Termux-MOTD-Skripte durch `cat` dieser Datei (idempotent). */
