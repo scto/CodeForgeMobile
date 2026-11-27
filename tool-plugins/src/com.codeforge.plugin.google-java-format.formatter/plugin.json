@@ -1,10 +1,10 @@
 {
   "id": "com.codeforge.plugin.google-java-format.formatter",
   "name": "google-java-format (Formatierer)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Formatiert Java mit google-java-format 1.36.1 (Google- oder AOSP-Stil). Einstellungsseite für alle Optionen der Kommandozeile.",
+  "description": "Formatiert Java mit google-java-format 1.37.0 (Google- oder AOSP-Stil). Einstellungsseite für alle Optionen der Kommandozeile.",
   "permissions": [],
   "contributes": {
     "formatters": [
@@ -27,7 +27,8 @@
           "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
           "-jar",
           "${deps}/google-java-format/google-java-format.jar",
-          "${setting:style=aosp?--aosp}",
+          "--style=${setting:style}",
+          "--max-line-length=${setting:maxLineLength}",
           "${setting:sortImports=false?--skip-sorting-imports}",
           "${setting:removeUnused=false?--skip-removing-unused-imports}",
           "${setting:reflowStrings=false?--skip-reflowing-long-strings}",
@@ -50,8 +51,8 @@
       {
         "manager": "download",
         "name": "google-java-format",
-        "url": "https://repo1.maven.org/maven2/com/google/googlejavaformat/google-java-format/1.36.1/google-java-format-1.36.1-all-deps.jar",
-        "sha256": "25b400f003089d23cc5320cdaf1a16cabee19b8aa3434d0ff021b3d9f42154b4",
+        "url": "https://repo1.maven.org/maven2/com/google/googlejavaformat/google-java-format/1.37.0/google-java-format-1.37.0-all-deps.jar",
+        "sha256": "834b2a0c38cb774953322a84b5ca3f2f40dd3156650b3cd44d3b744345962f7a",
         "archive": "file",
         "check": "google-java-format.jar"
       }
@@ -75,6 +76,15 @@
               "label": "AOSP (Android)"
             }
           ]
+        },
+        {
+          "key": "maxLineLength",
+          "type": "number",
+          "title": "Maximale Zeilenlänge",
+          "description": "--max-line-length (Standard 100).",
+          "default": "100",
+          "min": 40,
+          "max": 400
         },
         {
           "key": "sortImports",

@@ -124,7 +124,7 @@ REQUIRES = {
 }
 
 MAVEN = "https://repo1.maven.org/maven2"
-GJF_VERSION, KTFMT_VERSION = "1.36.1", "0.64"
+GJF_VERSION, KTFMT_VERSION = "1.37.0", "0.65"
 
 
 def _bool(key, title, desc, default=True):
@@ -144,13 +144,15 @@ GJF_EXPORTS = [f"--add-exports=jdk.compiler/com.sun.tools.javac.{p}=ALL-UNNAMED"
 JVM_FORMATTERS = [
     ("google-java-format", "google-java-format", ["java"],
      ["java", *JVM_FAST, *GJF_EXPORTS, "-jar", "${deps}/google-java-format/google-java-format.jar",
-      "${setting:style=aosp?--aosp}", "${setting:sortImports=false?--skip-sorting-imports}",
+      "--style=${setting:style}", "--max-line-length=${setting:maxLineLength}", "${setting:sortImports=false?--skip-sorting-imports}",
       "${setting:removeUnused=false?--skip-removing-unused-imports}", "${setting:reflowStrings=false?--skip-reflowing-long-strings}",
       "${setting:formatJavadoc=false?--skip-javadoc-formatting}", "${setting:reorderModifiers=false?--skip-reordering-modifiers}",
       "${setting:importsOnly?--fix-imports-only}", "--assume-filename", "${fileName}", "-"],
      [{"key": "style", "type": "choice", "title": "Stil", "default": "google",
        "description": "Google Java Style (2 Leerzeichen) oder AOSP (4 Leerzeichen, Android).",
        "options": [{"value": "google", "label": "Google Java Style"}, {"value": "aosp", "label": "AOSP (Android)"}]},
+      {"key": "maxLineLength", "type": "number", "title": "Maximale Zeilenlänge", "description": "--max-line-length (Standard 100).",
+       "default": "100", "min": 40, "max": 400},
       _bool("sortImports", "Importe sortieren", "Aus: --skip-sorting-imports"),
       _bool("removeUnused", "Unbenutzte Importe entfernen", "Aus: --skip-removing-unused-imports"),
       _bool("reflowStrings", "Lange Strings umbrechen", "Aus: --skip-reflowing-long-strings"),
@@ -159,21 +161,25 @@ JVM_FORMATTERS = [
       _bool("importsOnly", "Nur Importe korrigieren", "--fix-imports-only: sonst nichts umformatieren", False),
       _heap(256)],
      [JDK, _dl("google-java-format", f"{MAVEN}/com/google/googlejavaformat/google-java-format/{GJF_VERSION}/google-java-format-{GJF_VERSION}-all-deps.jar",
-               "25b400f003089d23cc5320cdaf1a16cabee19b8aa3434d0ff021b3d9f42154b4", "file", "google-java-format.jar")],
+               "834b2a0c38cb774953322a84b5ca3f2f40dd3156650b3cd44d3b744345962f7a", "file", "google-java-format.jar")],
      f"Formatiert Java mit google-java-format {GJF_VERSION} (Google- oder AOSP-Stil). Einstellungsseite für alle Optionen der Kommandozeile."),
     ("ktfmt", "ktfmt", ["kt", "kts"],
      ["java", *JVM_FAST, "-jar", "${deps}/ktfmt/ktfmt.jar",
       "${setting:style=kotlinlang?--kotlinlang-style}", "${setting:style=google?--google-style}", "${setting:style=meta?--meta-style}",
-      "${setting:removeUnused=false?--do-not-remove-unused-imports}", "--quiet", "--stdin-name=${fileName}", "-"],
+      "${setting:removeUnused=false?--do-not-remove-unused-imports}", "${setting:editorconfig?--enable-editorconfig}",
+      "--quiet", "--stdin-name=${file}", "-"],
      [{"key": "style", "type": "choice", "title": "Stil", "default": "kotlinlang",
        "description": "Kotlinlang: 4 Leerzeichen (offizielle Konventionen). Google/Meta: 2 Leerzeichen. Zeilenbreite jeweils 100.",
        "options": [{"value": "kotlinlang", "label": "Kotlinlang (4 Leerzeichen)"}, {"value": "google", "label": "Google (2 Leerzeichen)"},
                    {"value": "meta", "label": "Meta (2 Leerzeichen)"}]},
       _bool("removeUnused", "Unbenutzte Importe entfernen", "Aus: --do-not-remove-unused-imports"),
+      _bool("editorconfig", ".editorconfig beachten",
+            "Zeilenbreite und Einzüge aus der .editorconfig des Projekts: max_line_length, ij_kotlin_indent_size, "
+            "ij_kotlin_continuation_indent_size (ktfmt hat dafür keine eigenen Schalter)."),
       _heap(512)],
-     [JDK, _dl("ktfmt", f"{MAVEN}/com/facebook/ktfmt/{KTFMT_VERSION}/ktfmt-{KTFMT_VERSION}-with-dependencies.jar",
-               "5b3d5286fd2defcc7dc8e28c21ddf156cc6b2d8682bdcd929ce4333e7a6201f2", "file", "ktfmt.jar")],
-     f"Formatiert Kotlin mit ktfmt {KTFMT_VERSION} (Kotlinlang-, Google- oder Meta-Stil). Einstellungsseite für Stil, Importe und Speicher."),
+     [JDK, _dl("ktfmt", f"https://github.com/Kotlin/ktfmt/releases/download/v{KTFMT_VERSION}/ktfmt-{KTFMT_VERSION}-with-dependencies.jar",
+               "aba9753b6ab387926179ab7318ba8e0c33dad483ebc72f633e79522265b15214", "file", "ktfmt.jar")],
+     f"Formatiert Kotlin mit ktfmt {KTFMT_VERSION} (Kotlinlang-, Google- oder Meta-Stil). Einstellungsseite für Stil, Importe, .editorconfig (Breite/Einzüge) und Speicher."),
 ]
 JVM_FORMATTER_HOST = "3.6.3"  # repo1.maven.org, ${deps} und bedingte Platzhalter in Formatierern
 
@@ -246,7 +252,7 @@ FEATURE_PLUGINS = [
 
 
 # Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
-VERSIONS = {"com.codeforge.plugin.pyright.lsp": "1.0.1", "com.codeforge.plugin.jvm-pack.bundle": "1.1.0", "com.codeforge.plugin.all-formatters.bundle": "1.1.0", "com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
+VERSIONS = {"com.codeforge.plugin.pyright.lsp": "1.0.1", "com.codeforge.plugin.jvm-pack.bundle": "1.1.0", "com.codeforge.plugin.all-formatters.bundle": "1.1.0", "com.codeforge.plugin.ktfmt.formatter": "1.0.1", "com.codeforge.plugin.google-java-format.formatter": "1.0.1", "com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
 
 
 def manifest(pid, name, desc, contributes):

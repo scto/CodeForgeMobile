@@ -17,9 +17,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   `apksigner`, die nativen Programme statisch für Android gebaut. Sie haben im SDK-Manager Vorrang vor den bisherigen
   Quellen. Die Lzhiyong-Pakete (nur Binaries, keine Jars) werden nicht mehr angeboten. / Complete build-tools and
   platform-tools 28.0.0–37.0.3; Lzhiyong packages removed.
-- **Formatierer google-java-format 1.36.1 und ktfmt 0.64 im Store**, je mit Einstellungsseite (GJF: Google/AOSP,
+- **Formatierer google-java-format 1.37.0 und ktfmt 0.65 im Store**, je mit Einstellungsseite (GJF: Google/AOSP, maximale Zeilenlänge,
   Importe sortieren/entfernen, Strings umbrechen, Javadoc, Modifier, nur Importe, Heap; ktfmt: Kotlinlang/Google/Meta,
-  unbenutzte Importe, Heap). Die JARs kommen als SHA-256-geprüfter Download aus Maven Central; beide sind auch im
+  unbenutzte Importe, .editorconfig für Breite und Einzüge, Heap). Die JARs kommen SHA-256-geprüft aus Maven Central
+  bzw. GitHub-Releases; beide sind auch im
   Bundle „Kotlin und Java“. / google-java-format and ktfmt formatter plugins with settings pages.
 - **Plugins: bedingte Einstellungs-Platzhalter** `${setting:key?--flag}` und `${setting:key=WERT?--flag}` – das
   Argument entfällt, wenn die Bedingung nicht zutrifft; Formatierer kennen jetzt auch `${deps}`. `repo1.maven.org` ist
