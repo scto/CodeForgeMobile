@@ -48,7 +48,7 @@
 #       androidide-tools-v<v>    build-tools;<v>, platform-tools;<v>      (AndroidIDEOfficial/androidide-tools, 33.x/34.x, statisch)
 #       lzhiyong-sdk-tools-<v>   build-tools;<v> (nur Binaries, Überlagerung der Google-build-tools; Lzhiyong/android-sdk-tools)
 #       msmt-platform-tools-<v>  platform-tools;<v>, build-tools;<Version aus dem Asset> – vollständige Google-Pakete mit
-#                                statischen Android-Binaries (msmt2018/android-sdk-tools, 30.0.2 …); haben Vorrang
+#                                statischen Android-Binaries (msmt2018/android-sdk-tools, 28.0.0 …); haben Vorrang
 #     Gibt der Mirror für eine Komponente nichts her (nicht erreichbar, noch leer), gelten die Upstream-Repos
 #     HomuHomu833/* direkt (SDK_REPO/NDK_REPO/CMAKE_REPO), danach eine feste Rückfallliste.
 #     Beta-/RC-Releases (Name oder Tag mit "beta"/"rc") werden nie angeboten.
