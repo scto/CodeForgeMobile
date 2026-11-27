@@ -136,6 +136,8 @@ fun CodeForgeNavHost(
     val navController = rememberNavController()
     val context = LocalContext.current
     val startDestination = if (startOnboarding) Routes.ONBOARDING else Routes.WELCOME
+    val ideNavigation: IdeNavigationViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val pluginUi: PluginUiHostViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 
     fun launchTermuxActivity(initialCommand: String? = null) {
         val intent = Intent(context, TermuxActivity::class.java).apply {
@@ -153,6 +155,9 @@ fun CodeForgeNavHost(
             }
         }
     }
+
+    // Plugin-API 5 und Befehle `cfm.*`: Navigationswünsche ausführen (das Build-Panel öffnet der Arbeitsbereich selbst).
+    IdeNavigationEffect(ideNavigation, navController, useCompactTerminal, ::launchTermuxActivity)
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.ONBOARDING) {
@@ -216,8 +221,15 @@ fun CodeForgeNavHost(
                 }
             )
         }
+        pluginUiRoutes(pluginUi, onBack = { navigateBackOrStart() })
         composable(Routes.SETTINGS) {
+            val pluginSettings by pluginUi.settingsEntries.collectAsState()
             SettingsHubRoute(
+                pluginSettings = pluginSettings.map { com.codeforge.feature.settings.PluginSettingsLink(it.pluginId, it.title, it.summary) },
+                onOpenPluginSettings = { pluginId ->
+                    val hasPage = pluginSettings.firstOrNull { it.pluginId == pluginId }?.hasPage == true
+                    navController.navigate(if (hasPage) PluginRoutes.settings(pluginId) else Routes.SETTINGS_STORE)
+                },
                 onBack = { navigateBackOrStart() },
                 onNavigateToTheme = { navController.navigate(Routes.SETTINGS_THEME) },
                 onNavigateToEditor = { navController.navigate(Routes.SETTINGS_EDITOR) },

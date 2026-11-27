@@ -124,8 +124,17 @@ class EditorViewModel @Inject constructor(
     private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null,
     private val extensionRegistry: com.codeforge.core.domain.extension.registry.ExtensionRegistry? = null,
     private val pluginLogs: com.codeforge.core.domain.extension.PluginLogRepository? = null,
-    private val contributionRepository: com.codeforge.core.domain.extension.ContributionRepository? = null
+    private val contributionRepository: com.codeforge.core.domain.extension.ContributionRepository? = null,
+    private val ideEditor: com.codeforge.core.domain.extension.ide.IdeEditorBridge? = null,
+    private val ideCommands: com.codeforge.core.domain.extension.ide.IdeCommandRegistry? = null,
+    private val ideStatusBar: com.codeforge.core.domain.extension.ide.IdeStatusBar? = null
 ) : ViewModel() {
+
+    // Plugin-API 5: Editor-Zustand, Aufträge und Befehle `cfm.editor.*`; `null` ohne Plugin-System (Tests).
+    private val ideConnector: com.codeforge.feature.editor.plugin.EditorIdeConnector? = ideEditor?.let {
+        com.codeforge.feature.editor.plugin.EditorIdeConnector(viewModelScope, it, ideCommands, IdeEditorActions())
+    }
+    private val caretFlow = MutableStateFlow<CaretSnapshot?>(null)
 
     // Editor-Aktionen aus dem Register (eingebaute und von Plugins); `null` ohne Plugin-System (Tests).
     private val editorActions: PluginEditorBridge? = extensionRegistry?.let { registry ->
@@ -169,6 +178,27 @@ class EditorViewModel @Inject constructor(
     init {
         // Nachrichten von Plugins (showMessage) als Snackbar zeigen.
         pluginUi?.let { ui -> viewModelScope.launch { ui.messages.collect { _effect.emit(EditorUiEffect.ShowSnackbar(it)) } } }
+    }
+
+    init {
+        // Plugin-API 5: Zustand an die Brücke, Aufträge bearbeiten, Statusleiste der Plugins zeigen.
+        ideConnector?.let { connector ->
+            connector.start()
+            viewModelScope.launch {
+                kotlinx.coroutines.flow.combine(_uiState, caretFlow) { s, caret ->
+                    com.codeforge.core.domain.extension.ide.IdeEditorSnapshot(
+                        path = s.activeFile?.path,
+                        text = s.activeFile?.content.orEmpty(),
+                        caret = caret?.cursor ?: 0,
+                        selectionStart = caret?.selectionStart ?: 0,
+                        selectionEnd = caret?.selectionEnd ?: 0,
+                        dirty = s.activeFile?.isDirty == true,
+                        openFiles = s.openFiles.map { it.path }
+                    )
+                }.distinctUntilChanged().collect(connector::publish)
+            }
+        }
+        ideStatusBar?.let { bar -> viewModelScope.launch { bar.items.collect { items -> _uiState.update { it.copy(statusItems = items) } } } }
     }
 
     private var syncWorkspaceJob: Job? = null
@@ -840,6 +870,11 @@ class EditorViewModel @Inject constructor(
             }
             is EditorUiEvent.TestActionChosen -> onTestAction(event.action)
             is EditorUiEvent.ShowComposePreview -> previewBridge.requestShow(event.functionName)
+            is EditorUiEvent.CaretChanged -> {
+                lastCaret = event.caret
+                caretFlow.value = event.caret
+            }
+            is EditorUiEvent.RunIdeCommand -> runIdeCommand(event.id)
             EditorUiEvent.DismissTestActions -> _uiState.update { it.copy(testActions = null) }
             is EditorUiEvent.OpenTestResultImage -> {
                 _uiState.update { it.copy(testActions = null) }
@@ -1618,8 +1653,80 @@ class EditorViewModel @Inject constructor(
             root?.let { editorActions?.runTaskItems(it, Res.string(R.string.plugin_run_prefix), Res.string(R.string.plugin_test_prefix)) }.orEmpty() +
             editorActions?.panelItems(panels().mapValues { it.value.title }).orEmpty() +
             fileTestsItem(state)
-        val items = buildPaletteItems(context) { id -> Res.string(id) } + registryItems
+        // Befehle der API 5: `cfm.*` und von Plugins neu angemeldete (API-2-Befehle stehen schon oben).
+        val legacy = pluginCommands.mapTo(HashSet()) { "${it.pluginId}.${it.commandId}" }
+        val ideItems = ideCommands?.commands?.value.orEmpty().filter { it.id !in legacy }.map {
+            PaletteItem(PaletteAction.IdeCommand(it.id), it.title, PaletteCategory.IDE, detail = "${it.category} · ${it.id}")
+        }
+        val items = buildPaletteItems(context) { id -> Res.string(id) } + registryItems + ideItems
         _uiState.update { it.copy(commandPalette = CommandPaletteState(allItems = items)) }
+    }
+
+    private fun runIdeCommand(id: String) = viewModelScope.launch {
+        _uiState.update { it.copy(commandPalette = null) }
+        val registry = ideCommands ?: return@launch
+        val args = _uiState.value.activeFile?.path?.let { mapOf("path" to it) }.orEmpty()
+        registry.execute(id, args)
+            .onSuccess { result ->
+                result?.takeIf { it.isNotBlank() && it != "true" }?.let { _effect.emit(EditorUiEffect.ShowSnackbar(it.take(MAX_ACTION_MESSAGE))) }
+            }
+            .onFailure { _effect.emit(EditorUiEffect.ShowSnackbar(Res.string(R.string.editor_plugin_action_failed, it.message.orEmpty()))) }
+    }
+
+    /** Was Plugins über die API 5 im Editor tun dürfen (siehe [com.codeforge.feature.editor.plugin.EditorIdeConnector]). */
+    private inner class IdeEditorActions : com.codeforge.feature.editor.plugin.EditorIdeConnector.Actions {
+        override suspend fun open(path: String, line: Int, column: Int): Boolean {
+            if (!File(path).isFile) return false
+            openFileRequestBridge.requestOpenAt(path, line, column)
+            return true
+        }
+
+        override suspend fun applyEdits(path: String?, edits: List<com.codeforge.core.domain.extension.ide.IdeTextEdit>): Boolean {
+            val active = _uiState.value.activeFile
+            val target = path?.let(::normalize) ?: active?.path?.let(::normalize)
+            val file = _uiState.value.openFiles.firstOrNull { normalize(it.path) == target } ?: return false
+            val text = PluginEditorBridge.applyEdits(file.content, edits.map { com.codeforge.libs.plugin_api.TextEdit(it.start, it.end, it.newText) })
+            if (file.path == active?.path) {
+                // Aktive Datei über den Editor ändern (Rückgängig bleibt möglich).
+                _effect.emit(EditorUiEffect.ApplyEditorText(newText = text, selectionStart = null, selectionEnd = null))
+            } else {
+                _uiState.update { s -> s.copy(openFiles = s.openFiles.map { if (it.path == file.path) it.copy(content = text, isDirty = true) else it }) }
+            }
+            return true
+        }
+
+        override suspend fun select(start: Int, end: Int): Boolean {
+            val length = _uiState.value.activeFile?.content?.length ?: return false
+            _effect.emit(EditorUiEffect.ApplyEditorText(null, start.coerceIn(0, length), end.coerceIn(0, length)))
+            return true
+        }
+
+        override suspend fun save(path: String?): Boolean {
+            val targets = if (path == null) {
+                _uiState.value.openFiles.filter { it.isDirty }.map { normalize(it.path) }.toSet()
+            } else {
+                setOf(normalize(path))
+            }
+            return targets.isEmpty() || persistDirty(targets)
+        }
+
+        override suspend fun close(path: String): Boolean {
+            val index = _uiState.value.openFiles.indexOfFirst { normalize(it.path) == normalize(path) }
+            if (index < 0) return false
+            closeTab(index)
+            return true
+        }
+
+        override suspend fun format(): Boolean {
+            if (_uiState.value.activeFile == null) return false
+            formatCodeInternal(range = null, silentIfUnchanged = true)
+            return true
+        }
+    }
+
+    override fun onCleared() {
+        ideConnector?.dispose()
+        super.onCleared()
     }
 
     private fun runServerCommand(command: String) = viewModelScope.launch {

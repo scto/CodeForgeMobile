@@ -109,6 +109,8 @@ dependencies {
     implementation(project(":libs:lsp-client"))
     implementation(project(":libs:plugin-api"))
     implementation(project(":libs:plugin-impl"))
+    // API 5: Werkzeugfenster, Bildschirme und Einstellungsseiten von Plugins hosten
+    implementation(project(":libs:plugin-ui-api"))
     // Hilt-Bindings für Indexierung + Dependency-Updater (Features sehen nur die -api-Module)
     implementation(project(":libs:ai-client"))
     implementation(project(":libs:indexing-api"))

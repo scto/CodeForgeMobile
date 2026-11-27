@@ -96,6 +96,7 @@ fun ProjectWorkspaceRoute(
     val coroutineScope = rememberCoroutineScope()
 
     val bridgeViewModel: ComposablePreviewBridgeViewModel = hiltViewModel()
+    val ideNavigation: IdeNavigationViewModel = hiltViewModel()
     val activeFile by bridgeViewModel.activeFile.collectAsState()
 
     val buildViewModel: BuildViewModel = hiltViewModel()
@@ -123,6 +124,27 @@ fun ProjectWorkspaceRoute(
     // Erst nach der Indexierungs-Entscheidung (LaunchedEffect unten) für den Auto-Scan freigegeben.
     var x2cScannedForProject by remember(rootPath) { mutableStateOf(true) }
     var showBuildSheet by remember { mutableStateOf(false) }
+    var openToolWindow by remember { mutableStateOf<Pair<String, String>?>(null) }
+    // Plugin-API 5 / Befehl `cfm.navigate.build`: Build-Panel öffnen.
+    LaunchedEffect(ideNavigation) {
+        ideNavigation.requests.collect { target ->
+            when (target) {
+                com.codeforge.core.domain.extension.ide.IdeNavTarget.BuildPanel -> showBuildSheet = true
+                is com.codeforge.core.domain.extension.ide.IdeNavTarget.PluginToolWindow -> openToolWindow = target.pluginId to target.toolWindowId
+                else -> Unit
+            }
+        }
+    }
+    // API 5: Werkzeugfenster eines Plugins als Blatt.
+    openToolWindow?.let { (pluginId, id) ->
+        val pluginUi: PluginUiHostViewModel = hiltViewModel()
+        val window = pluginUi.toolWindow(pluginId, id)
+        if (window == null) {
+            openToolWindow = null
+        } else {
+            PluginToolWindowSheet(pluginId, window, onDismiss = { openToolWindow = null })
+        }
+    }
     var showDebugSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current

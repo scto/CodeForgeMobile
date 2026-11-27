@@ -6,7 +6,7 @@ import com.codeforge.core.domain.model.LspServerCapabilities
 import com.codeforge.core.domain.model.supportsCodeActionKind
 
 /** Gruppe eines Palette-Eintrags (Reihenfolge = Anzeige-Reihenfolge ohne Suchbegriff). */
-enum class PaletteCategory { REFACTOR, NAVIGATION, CODE, EDITOR, SERVER, PLUGIN }
+enum class PaletteCategory { REFACTOR, NAVIGATION, CODE, EDITOR, SERVER, PLUGIN, IDE }
 
 /** Eingebaute Aktionen; ausgeführt vom Editor-Screen (brauchen Cursor/Auswahl des Controllers). */
 enum class BuiltinPaletteAction {
@@ -39,6 +39,9 @@ sealed interface PaletteAction {
 
     /** Bereich (Oberfläche) eines Plugins; [ref] = `pluginId/panelId`. */
     data class PluginPanel(val ref: String) : PaletteAction
+
+    /** Befehl aus dem Befehlsverzeichnis der API 5 (`cfm.*` oder `<pluginId>.*`). */
+    data class IdeCommand(val id: String) : PaletteAction
 }
 
 /** Ein Eintrag der Befehlspalette (Titel bereits übersetzt). */

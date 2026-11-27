@@ -67,8 +67,43 @@ abstract class PluginApiModule {
     @Singleton
     abstract fun bindPluginLogRepository(impl: PluginLogStore): com.codeforge.core.domain.extension.PluginLogRepository
 
+    /** API 5: freigegebene App-Einstellungen. */
+    @Binds
+    @Singleton
+    abstract fun bindIdeSettingsAccess(impl: com.codeforge.libs.plugin_impl.ide.IdeSettingsAccessImpl): com.codeforge.core.domain.extension.ide.IdeSettingsAccess
+
     /** Stellt das gemeinsame Register aller Beiträge (App und Plugins) bereit. */
     companion object {
+        /** API 5: Befehlsverzeichnis der IDE. */
+        @dagger.Provides
+        @Singleton
+        fun provideIdeCommands(): com.codeforge.core.domain.extension.ide.IdeCommandRegistry =
+            com.codeforge.core.domain.extension.ide.IdeCommandRegistryImpl()
+
+        /** API 5: Ereignisbus. */
+        @dagger.Provides
+        @Singleton
+        fun provideIdeEventBus(): com.codeforge.core.domain.extension.ide.IdeEventBus =
+            com.codeforge.core.domain.extension.ide.IdeEventBusImpl()
+
+        /** API 5: Verbindung zum Editor. */
+        @dagger.Provides
+        @Singleton
+        fun provideIdeEditorBridge(): com.codeforge.core.domain.extension.ide.IdeEditorBridge =
+            com.codeforge.core.domain.extension.ide.IdeEditorBridgeImpl()
+
+        /** API 5: Navigationswünsche an die App. */
+        @dagger.Provides
+        @Singleton
+        fun provideIdeNavigator(): com.codeforge.core.domain.extension.ide.IdeNavigator =
+            com.codeforge.core.domain.extension.ide.IdeNavigatorImpl()
+
+        /** API 5: Statusleiste. */
+        @dagger.Provides
+        @Singleton
+        fun provideIdeStatusBar(): com.codeforge.core.domain.extension.ide.IdeStatusBar =
+            com.codeforge.core.domain.extension.ide.IdeStatusBarImpl()
+
         /** Ein Register je App-Prozess. */
         @dagger.Provides
         @Singleton

@@ -16,11 +16,16 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(project(":core:domain"))
+    // API 5: freigegebene App-Einstellungen (IdeSettingsAccessImpl)
+    implementation(project(":core:datastore"))
+    // API 5: Dateibaum/Editor über Dateiänderungen informieren
+    implementation(project(":core:navigation"))
     implementation(project(":libs:terminal-engine"))
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
+    testImplementation(project(":core:navigation"))
     testImplementation(libs.kotlinx.coroutines.test)
 }

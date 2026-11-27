@@ -356,6 +356,7 @@ fun EditorRoute(
             is PaletteAction.PluginRunTask -> viewModel.onEvent(EditorUiEvent.RunPluginTask(action.ref))
             PaletteAction.PluginFileTests -> viewModel.onEvent(EditorUiEvent.RunPluginFileTests)
             is PaletteAction.PluginPanel -> viewModel.onEvent(EditorUiEvent.SetPluginPanel(action.ref))
+            is PaletteAction.IdeCommand -> viewModel.onEvent(EditorUiEvent.RunIdeCommand(action.id))
         }
     }
 
@@ -614,6 +615,7 @@ fun EditorRoute(
                                 onTestTargetClick = { viewModel.onEvent(EditorUiEvent.RunTestTarget(it)) },
                                 previewTargets = uiState.previewGutter,
                                 onPreviewGutterClick = { viewModel.onEvent(EditorUiEvent.ShowComposePreview(it)) },
+                                onCaretChanged = { viewModel.onEvent(EditorUiEvent.CaretChanged(it)) },
                                 pluginTests = uiState.activePluginTests,
                                 textActions = textActions,
                                 onTextAction = { id ->
@@ -632,6 +634,12 @@ fun EditorRoute(
                                 onControllerReady = { controller = it }
                             )
 
+                            if (uiState.statusItems.isNotEmpty()) {
+                                com.codeforge.feature.editor.plugin.IdeStatusBarRow(
+                                    items = uiState.statusItems,
+                                    onClick = { id -> viewModel.onEvent(EditorUiEvent.RunIdeCommand(id)) }
+                                )
+                            }
                             if (WindowInsets.isImeVisible && uiState.symbolBarEnabled) {
                                 EditorSymbolBar(
                                     entries = uiState.symbolBarEntries,

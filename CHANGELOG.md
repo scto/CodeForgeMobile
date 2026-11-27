@@ -12,6 +12,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Neu / Added
+- **Plugin-API 5 – CodeForge Mobile aus Plugins vollständig ansteuern** (`docs/plugin-api-v5.md`):
+  `PluginContext.ide()` mit Befehlsverzeichnis (IDE-Befehle `cfm.editor.*`, `cfm.git.*`, `cfm.build.run`,
+  `cfm.terminal.run`, `cfm.settings.open` … ausführen, eigene anmelden), Ereignisbus (Datei, Editor, Git, Build,
+  Projekt, Einstellungen, Plugin-zu-Plugin), App-Einstellungen lesen/ändern, Editor (Zustand, öffnen, ändern,
+  auswählen, speichern), Projektdateien, Git, Navigation und Statusleiste – je Bereich mit eigener Berechtigung.
+  Compose-Oberflächen: Werkzeugfenster, Bildschirme, Einstellungsseiten (neuer Abschnitt „Plugin-Einstellungen“).
+  Befehle stehen auch in der Befehlspalette („Befehle“). Nur für Plugins im App-Prozess (Sideload); alles
+  Angemeldete wird beim Deaktivieren entfernt. / Plugin API 5: full IDE control (commands, event bus, settings,
+  editor, files, git, navigation, status bar, tool windows, screens, settings pages).
 - **Compose-Vorschau „Genau (Gradle)“:** zweiter Modus neben der Live-Vorschau. Rendert die `@Preview`s des Moduls
   mit dem Gradle-Plugin von compose-ai-tools (`ee.schimke.composeai.preview` 2.104.0, Apache-2.0, Robolectric) über
   ein mitgeliefertes Init-Skript – ohne Änderung am Projekt, mit echten Abhängigkeiten, Ressourcen und Theme. Der Lauf

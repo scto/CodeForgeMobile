@@ -6,11 +6,13 @@ package com.codeforge.core.domain.extension
 
 /**
  * Versionen des Manifest-/SDK-Vertrags. v1 = nur id/name/version/entryPointClass, v2 = + contributes/permissions,
- * v3 = Editor/UI/Run, v4 = Projekt-/Build-Dienst, Plugin-Dienste, Vorschauen, Aktivierungsereignisse, Katalogangaben.
+ * v3 = Editor/UI/Run, v4 = Projekt-/Build-Dienst, Plugin-Dienste, Vorschauen, Aktivierungsereignisse, Katalogangaben,
+ * v5 = IDE-Zugriff (`PluginContext.ide()`: Befehle, Ereignisbus, App-Einstellungen, Editor, Dateien, Git, Navigation,
+ * Statusleiste) und Compose-Oberflächen (`:libs:plugin-ui-api`: Werkzeugfenster, Bildschirme, Einstellungsseiten).
  */
 object PluginApiVersion {
     /** Aktuelle Version des Plugin-API-Vertrags. */
-    const val CURRENT: Int = 4
+    const val CURRENT: Int = 5
 
     /**
      * Kleinste API-Version für Code-Plugins. API 1 (`shell` und `lsp` ohne Berechtigung im Manifest) wurde in 3.3
@@ -64,11 +66,28 @@ object PluginPermissions {
      * technisch ohnehin ins Netz); der Store und die Plugin-Ansicht zeigen sie an.
      */
     const val NETWORK = "network"
+    /** Seit API 5: Befehle der IDE und anderer Plugins auflisten und ausführen. */
+    const val COMMANDS_EXECUTE = "commands.execute"
+    /** Seit API 5: Ereignisbus abonnieren und eigene Ereignisse veröffentlichen. */
+    const val EVENTS = "events"
+    /** Seit API 5: App-Einstellungen lesen. */
+    const val SETTINGS_READ = "settings.read"
+    /** Seit API 5: App-Einstellungen ändern. */
+    const val SETTINGS_WRITE = "settings.write"
+    /** Seit API 5: Projektdateien lesen. */
+    const val FILES_READ = "files.read"
+    /** Seit API 5: Projektdateien anlegen, ändern, umbenennen, löschen. */
+    const val FILES_WRITE = "files.write"
+    /** Seit API 5: Git-Status, Diff und Branches lesen. */
+    const val GIT_READ = "git.read"
+    /** Seit API 5: stagen, committen, Branch wechseln. */
+    const val GIT_WRITE = "git.write"
 
     /** Menge aller bekannten Berechtigungen. */
     val ALL: Set<String> = setOf(
         COMMANDS, MENUS, FILE_EVENTS, GIT_EVENTS, SHELL, LSP, AGENT, EDITOR, BUILD_EVENTS, PROJECT_EVENTS, UI, RUN,
-        NOTIFICATIONS, PROJECT, BUILD, NETWORK
+        NOTIFICATIONS, PROJECT, BUILD, NETWORK, COMMANDS_EXECUTE, EVENTS, SETTINGS_READ, SETTINGS_WRITE, FILES_READ,
+        FILES_WRITE, GIT_READ, GIT_WRITE
     )
 }
 

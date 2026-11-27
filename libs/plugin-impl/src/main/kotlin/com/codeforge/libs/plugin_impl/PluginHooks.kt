@@ -12,6 +12,7 @@ import com.codeforge.core.domain.extension.PluginMenuTarget
 import com.codeforge.core.domain.extension.PluginPermissionPolicy
 import com.codeforge.core.domain.extension.PluginUiRepository
 import com.codeforge.core.domain.extension.registry.Disposable
+import com.codeforge.core.domain.extension.ide.IdeTopics
 import com.codeforge.core.domain.extension.registry.ExtensionPoint
 import com.codeforge.core.domain.extension.registry.ExtensionRegistry
 import com.codeforge.libs.plugin_api.CommandArgs
@@ -40,7 +41,10 @@ import javax.inject.Singleton
  */
 @Singleton
 class PluginHooks @Inject constructor(
-    private val registry: ExtensionRegistry
+    private val registry: ExtensionRegistry,
+    /** API 5: Ereignisse auch auf den Bus, Befehle auch ins Befehlsverzeichnis. */
+    private val bus: com.codeforge.core.domain.extension.ide.IdeEventBus? = null,
+    private val ideCommands: com.codeforge.core.domain.extension.ide.IdeCommandRegistry? = null
 ) : PluginUiRepository, PluginEventSink {
 
     internal class Cmd(val id: String, val title: String, val handler: PluginCommandHandler)
@@ -87,7 +91,12 @@ class PluginHooks @Inject constructor(
                 "Zu viele Befehle (max. $MAX_COMMANDS je Plugin)"
             }
             commandHandles.remove(key)?.dispose()
-            commandHandles[key] = registry.register(COMMAND_POINT, Cmd(id, title, handler), pluginId)
+            val own = registry.register(COMMAND_POINT, Cmd(id, title, handler), pluginId)
+            // Auch im Befehlsverzeichnis der API 5 (Palette, andere Plugins): `<pluginId>.<id>`, Argument `path`.
+            val mirrored = ideCommands?.register(
+                com.codeforge.core.domain.extension.ide.IdeCommandInfo("$pluginId.$id", title, "Plugin", pluginId, mapOf("path" to "aktive Datei"))
+            ) { args -> handler.run(CommandArgs(args["path"])); null }
+            commandHandles[key] = Disposable { own.dispose(); mirrored?.dispose() }
             republish()
         }
     }
@@ -139,6 +148,7 @@ class PluginHooks @Inject constructor(
     fun unregisterAll(pluginId: String) {
         synchronized(lock) {
             registry.unregisterAll(pluginId)
+            commandHandles.filterKeys { it.first == pluginId }.values.forEach { runCatching { it.dispose() } }
             commandHandles.keys.removeAll { it.first == pluginId }
             menuHandles.keys.removeAll { it.first == pluginId }
             republish()
@@ -161,6 +171,7 @@ class PluginHooks @Inject constructor(
             else -> Unit
         }
         beforePublish?.let { hook -> runCatching { hook(event) } }
+        bus?.publish(event.toIdeEvent())
         val targets = registry.contributions(LISTENER_POINT)
             .filter { PluginPermissionPolicy.isAllowed(it.value.granted, event.permission) }
         if (targets.isEmpty()) return
@@ -203,6 +214,25 @@ class PluginHooks @Inject constructor(
         const val MAX_COMMANDS = 100
         const val MAX_MESSAGE = 500
         const val COMMAND_TIMEOUT_MS = 60_000L
+
+        /** Thema und Nutzdaten auf dem Ereignisbus der API 5. */
+        fun HostEvent.toIdeEvent(): com.codeforge.core.domain.extension.ide.IdeEvent {
+            val (topic, payload) = when (this) {
+                is HostEvent.FileOpened -> IdeTopics.FILE_OPENED to mapOf("path" to path)
+                is HostEvent.FileSaved -> IdeTopics.FILE_SAVED to mapOf("path" to path)
+                is HostEvent.FileClosed -> IdeTopics.FILE_CLOSED to mapOf("path" to path)
+                is HostEvent.GitCommitted -> IdeTopics.GIT_COMMITTED to mapOf("repo" to repoPath, "message" to message)
+                is HostEvent.GitBranchChanged -> IdeTopics.GIT_BRANCH_CHANGED to mapOf("repo" to repoPath, "branch" to branch)
+                is HostEvent.EditorActivated -> IdeTopics.EDITOR_ACTIVATED to mapOf("path" to path)
+                is HostEvent.DiagnosticsChanged -> IdeTopics.DIAGNOSTICS_CHANGED to
+                    mapOf("path" to path, "errors" to errors.toString(), "warnings" to warnings.toString())
+                is HostEvent.BuildStarted -> IdeTopics.BUILD_STARTED to mapOf("task" to task)
+                is HostEvent.BuildFinished -> IdeTopics.BUILD_FINISHED to mapOf("task" to task, "success" to success.toString())
+                is HostEvent.ProjectOpened -> IdeTopics.PROJECT_OPENED to mapOf("root" to rootPath)
+                is HostEvent.ProjectClosed -> IdeTopics.PROJECT_CLOSED to mapOf("root" to rootPath)
+            }
+            return com.codeforge.core.domain.extension.ide.IdeEvent(topic, payload)
+        }
 
         fun HostEvent.toSdk(): PluginEvent = when (this) {
             is HostEvent.FileOpened -> PluginEvent.FileOpened(path)

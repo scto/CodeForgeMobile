@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -153,4 +154,5 @@ private fun PaletteCategory.icon(): ImageVector = when (this) {
     PaletteCategory.EDITOR -> Icons.Default.Tune
     PaletteCategory.SERVER -> Icons.Default.Dns
     PaletteCategory.PLUGIN -> Icons.Default.Extension
+    PaletteCategory.IDE -> Icons.Default.Terminal
 }

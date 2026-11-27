@@ -45,6 +45,6 @@ class CodePluginsValidTest {
         assertEquals(listOf("languages/jvm/kotlin"), ok.categories)
         assertTrue(PluginManifestParser.parse("""{"id":"a.b","name":"A","version":"1","categories":["Sprachen"]}""").isFailure)
         assertTrue(PluginManifestParser.parse("""{"id":"a.b","name":"A","version":"1","activationEvents":["onBoot"]}""").isFailure)
-        assertTrue(PluginManifestParser.parse("""{"id":"a.b","name":"A","version":"1","apiVersion":5}""").isFailure)
+        assertTrue(PluginManifestParser.parse("""{"id":"a.b","name":"A","version":"1","apiVersion":6}""").isFailure)
     }
 }

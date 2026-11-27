@@ -56,6 +56,10 @@ private data class SettingsEntry(
 
 private data class SettingsSection(@StringRes val titleRes: Int, val entries: List<SettingsEntry>)
 
+/** Plugin mit eigenen Einstellungen (Plugin-API 5) für den Abschnitt „Plugin-Einstellungen“. */
+@androidx.compose.runtime.Immutable
+data class PluginSettingsLink(val pluginId: String, val title: String, val summary: String?)
+
 /** Route der Einstellungsübersicht, gegliedert in Abschnitte wie in CodeAssist. */
 @Suppress("LongParameterList")
 @Composable
@@ -85,7 +89,9 @@ fun SettingsHubRoute(
     onNavigateToSnippets: () -> Unit = {},
     onNavigateToUseWithClaude: () -> Unit = {},
     onNavigateToStorage: () -> Unit = {},
-    onNavigateToDataPrivacy: () -> Unit = {}
+    onNavigateToDataPrivacy: () -> Unit = {},
+    pluginSettings: List<PluginSettingsLink> = emptyList(),
+    onOpenPluginSettings: (pluginId: String) -> Unit = {}
 ) {
     val sections = listOf(
         SettingsSection(
@@ -161,7 +167,25 @@ fun SettingsHubRoute(
                     }
                 }
             }
+            pluginSettingsSection(pluginSettings, onOpenPluginSettings)
             item { Spacer(Modifier.height(24.dp)) }
+        }
+    }
+}
+
+// Abschnitt „Plugin-Einstellungen“ (Plugin-API 5), nur wenn es Plugins mit Einstellungen gibt.
+private fun androidx.compose.foundation.lazy.LazyListScope.pluginSettingsSection(
+    links: List<PluginSettingsLink>,
+    onOpen: (String) -> Unit
+) {
+    if (links.isEmpty()) return
+    item(key = "plugin-settings") {
+        SettingsSectionLabel(stringRes(R.string.settings_section_plugin_settings))
+        SettingsGroup {
+            links.forEachIndexed { index, link ->
+                if (index > 0) SettingsDivider()
+                SettingsLinkRow(title = link.title, summary = link.summary, icon = Icons.Filled.Extension, onClick = { onOpen(link.pluginId) })
+            }
         }
     }
 }

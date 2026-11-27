@@ -18,6 +18,7 @@ Referenz aller Felder: `docs/extensions.md`. Lauffähige Vorlagen: `templates/` 
 | Werkzeug im PT-Menü des Dateibaums (Skript im Projekt ausführen) | `tool-plugins/scripts` (Beispiele) | deklarativ + Skript, Berechtigung `shell` | nur Sideload |
 | Mehrere Plugins bündeln | `extension-pack` | deklarativ | `bundle` |
 | Befehle, Menüs, Ereignisse, eigene Logik | `code-plugin` | Code | nur Sideload (`plugin`) |
+| CodeForge Mobile vollständig steuern (Befehle, Ereignisbus, Einstellungen, Editor, Dateien, Git, Werkzeugfenster) | `code-plugin` mit `apiVersion` 5, siehe [plugin-api-v5.md](plugin-api-v5.md) | Code | nur Sideload |
 
 Deklarativ = nur Dateien, kein ausführbarer Code. Der Store installiert ausschließlich solche Pakete; Archive mit
 `entryPointClass`, `.dex/.jar/.so/.apk/.sh` oder ohne Beiträge werden abgelehnt.

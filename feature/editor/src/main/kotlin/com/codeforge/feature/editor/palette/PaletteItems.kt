@@ -46,6 +46,7 @@ fun PaletteCategory.titleRes(): Int = when (this) {
     PaletteCategory.EDITOR -> R.string.palette_cat_editor
     PaletteCategory.SERVER -> R.string.palette_cat_server
     PaletteCategory.PLUGIN -> R.string.palette_cat_plugin
+    PaletteCategory.IDE -> R.string.palette_cat_ide
 }
 
 /** Alle Einträge für [context]; [title] übersetzt eine String-Ressource. */

@@ -3065,4 +3065,8 @@
     <string name="composepreview_gradle_none_in_file">Keine gerenderten Vorschauen für diese Datei – nach dem Speichern erneut rendern.</string>
     <string name="composepreview_gradle_not_rendered">Nicht gerendert</string>
     <string name="composepreview_gradle_no_project">Diese Datei gehört zu keinem Gradle-Projekt.</string>
+    <string name="palette_cat_ide">Befehle</string>
+    <string name="plugin_ui_missing_title">Plugin</string>
+    <string name="plugin_ui_missing">Diese Plugin-Ansicht ist nicht mehr verfügbar (Plugin deaktiviert oder entfernt).</string>
+    <string name="settings_section_plugin_settings">Plugin-Einstellungen</string>
 </resources>

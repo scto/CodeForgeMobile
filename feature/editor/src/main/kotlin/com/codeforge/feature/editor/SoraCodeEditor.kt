@@ -162,6 +162,7 @@ fun SoraCodeEditor(
     onTestTargetClick: (TestTarget) -> Unit = {},
     pluginTests: List<TestTarget> = emptyList(),
     previewTargets: List<com.codeforge.feature.editor.overlay.PreviewGutterTarget> = emptyList(),
+    onCaretChanged: (CaretSnapshot) -> Unit = {},
     onPreviewGutterClick: (String) -> Unit = {},
     textActions: List<EditorTextAction> = emptyList(),
     onTextAction: (String) -> Unit = {},
@@ -228,6 +229,7 @@ fun SoraCodeEditor(
     val currentOnTestTargetClick by androidx.compose.runtime.rememberUpdatedState(onTestTargetClick)
     // Test-Symbole in der Randspalte (sora-Symbolspalte), Tipp öffnet die Test-Aktionen.
     val currentOnPreviewClick by androidx.compose.runtime.rememberUpdatedState(onPreviewGutterClick)
+    val currentOnCaretChanged by androidx.compose.runtime.rememberUpdatedState(onCaretChanged)
     val gutterIcons = remember(path) {
         com.codeforge.feature.editor.overlay.TestGutterIcons(
             context,
@@ -308,6 +310,10 @@ fun SoraCodeEditor(
                     overlayTick++
                 }
                 subscribeEvent<ScrollEvent> { _, _ -> overlayTick++ }
+                subscribeEvent<io.github.rosemoe.sora.event.SelectionChangeEvent> { event, _ ->
+                    val cursor = event.editor.cursor
+                    currentOnCaretChanged(CaretSnapshot(cursor.left, cursor.left, cursor.right))
+                }
 
                 // --- Snippet-Variablen-Resolver ($TM_FILENAME, $PACKAGE, $CLASSNAME, $CURRENT_YEAR, $CLIPBOARD) ---
                 runCatching {

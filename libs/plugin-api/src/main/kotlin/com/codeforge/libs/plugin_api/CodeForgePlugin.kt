@@ -76,6 +76,13 @@ interface PluginContext {
      * Rückfragen brauchen keine Berechtigung, Benachrichtigungen `notifications`.
      */
     fun feedback(): PluginUi
+
+    /**
+     * Seit API 5: voller Zugriff auf CodeForge Mobile (Befehle, Ereignisse, Einstellungen, Editor, Dateien, Git,
+     * Navigation, Statusleiste), je Bereich mit eigener Berechtigung (siehe [IdeApi], [IdePermissions]).
+     * Nur für Plugins im App-Prozess; in der Sandbox nicht verfügbar.
+     */
+    fun ide(): IdeApi = throw PluginPermissionException(pluginId, "ide (erst ab API 5, nicht in der Sandbox)")
 }
 
 /** Seit API 3: Rückmeldungen eines Plugins an den Nutzer (siehe [PluginContext.feedback]). */

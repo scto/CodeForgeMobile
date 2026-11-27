@@ -65,7 +65,9 @@ class PluginRepositoryImpl @Inject constructor(
     extensionRegistry: ExtensionRegistry,
     logs: PluginLogRepository,
     private val pluginSettings: PluginSettingsRepository,
-    gradleBuild: javax.inject.Provider<com.codeforge.core.domain.repository.GradleBuildRepository>
+    gradleBuild: javax.inject.Provider<com.codeforge.core.domain.repository.GradleBuildRepository>,
+    ideHost: javax.inject.Provider<com.codeforge.libs.plugin_impl.ide.IdeHost>,
+    ideBuiltins: javax.inject.Provider<com.codeforge.libs.plugin_impl.ide.IdeBuiltinCommands>
 ) : PluginRepository, ContributionRepository {
 
     override val hostVersion: String = runCatching {
@@ -77,6 +79,7 @@ class PluginRepositoryImpl @Inject constructor(
     private val runtime = PluginRuntime(
         context, lspClientRepository, hooks, extensionRegistry, logs, pluginSettings,
         gradleBuild = { runCatching { gradleBuild.get() }.getOrNull() },
+        ideHost = { runCatching { ideHost.get() }.getOrNull() },
         sandbox = com.codeforge.libs.plugin_sandbox.SandboxRuntime(
             com.codeforge.libs.plugin_sandbox.ServiceSandboxTransport(context), extensionRegistry
         )
@@ -92,6 +95,8 @@ class PluginRepositoryImpl @Inject constructor(
     override val contributions: StateFlow<ActiveContributions> = _contributions.asStateFlow()
 
     init {
+        // API 5: IDE-Befehle (Git, Build, Terminal, Einstellungen …) im Befehlsverzeichnis anmelden.
+        runCatching { ideBuiltins.get().install() }
         pluginsDir.mkdirs()
         val plugins = registry.loadAll()
         _installedPlugins.value = plugins

@@ -66,6 +66,8 @@ internal class PluginRuntime(
     private val logs: PluginLogRepository,
     private val settingsRepository: PluginSettingsRepository,
     private val gradleBuild: () -> GradleBuildRepository? = { null },
+    /** API 5 (`PluginContext.ide()`); `null` = nicht verfügbar (Tests). */
+    private val ideHost: () -> com.codeforge.libs.plugin_impl.ide.IdeHost? = { null },
     /** Sandbox für Plugins mit `"sandbox": true` (isolierter Prozess); `null` = Sandbox-Plugins laden nicht. */
     private val sandbox: SandboxRuntime? = null
 ) {
@@ -106,7 +108,10 @@ internal class PluginRuntime(
         registry,
         logs,
         HostPluginSettings(plugin.id, settingItemsOf(pluginDir), settingsRepository),
-        HostPluginUi(plugin.id, plugin.name, plugin.apiVersion, plugin.permissions, notifier)
+        HostPluginUi(plugin.id, plugin.name, plugin.apiVersion, plugin.permissions, notifier),
+        ide = ideHost()?.takeIf { plugin.apiVersion >= IDE_API }?.let { host ->
+            com.codeforge.libs.plugin_impl.ide.HostIdeApi(plugin.id, plugin.permissions, host) { hooks.activeProjectRoot }
+        }
     )
 
     private fun settingItemsOf(pluginDir: File): List<PluginSettingItem> = runCatching {
@@ -230,8 +235,10 @@ internal class PluginRuntime(
         private val registry: ExtensionRegistry,
         private val logs: PluginLogRepository,
         private val settings: HostPluginSettings,
-        private val ui: HostPluginUi
+        private val ui: HostPluginUi,
+        private val ide: com.codeforge.libs.plugin_impl.ide.HostIdeApi? = null
     ) : PluginContext {
+
         override val pluginId: String get() = plugin.id
 
         override fun settings(): PluginSettings = settings
@@ -240,10 +247,14 @@ internal class PluginRuntime(
 
         override fun feedback(): PluginUi = ui
 
+        override fun ide(): com.codeforge.libs.plugin_api.IdeApi =
+            ide ?: throw PluginPermissionException(plugin.id, "ide (braucht apiVersion 5)")
+
         /** Beendet Beobachter (Einstellungs-Listener), offene Rückfragen und Fortschrittsanzeigen beim Entladen. */
         fun close() {
             settings.close()
             ui.close()
+            ide?.close()
         }
 
         override fun logger(tag: String): PluginLogger = HostPluginLogger(plugin.id, tag.ifBlank { "main" }, logs)
@@ -318,6 +329,9 @@ internal class PluginRuntime(
     }
 
     private companion object {
+        /** Ab dieser API-Version gibt es `PluginContext.ide()`. */
+        const val IDE_API = 5
+
         val EVENT_PERMISSIONS = listOf(
             PluginPermissions.FILE_EVENTS,
             PluginPermissions.GIT_EVENTS,
