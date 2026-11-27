@@ -2,7 +2,7 @@
 
 Plugins (`com.codeforge.plugin.<name>.formatter|lsp|tool`, Publisher `codeforge`), erzeugt von `generate.py`.
 
-* **Formatierer** (6): Prettier, shfmt, Ruff Format, gofmt, rustfmt, Taplo Format. Bundle: `com.codeforge.plugin.all-formatters.bundle`.
+* **Formatierer** (8): Prettier, shfmt, Ruff Format, gofmt, rustfmt, Taplo Format sowie google-java-format und ktfmt (JAR-Download aus Maven Central, Einstellungsseite über `contributes.settings` und bedingte Platzhalter `${setting:key=WERT?--flag}`, ab App 3.6.3). Bundle: `com.codeforge.plugin.all-formatters.bundle`.
 * **Language Server** (16 Plugins, 18 Server): clangd, rust-analyzer, Taplo, gopls, Ruff, neocmakelsp, Dart, Bash, TypeScript/JavaScript, Pyright, HTML/CSS/JSON, YAML, Kotlin Language Server, Eclipse JDT LS, LemMinX, kmp-lsp. Bundle: `com.codeforge.plugin.all-lsp-servers.bundle`.
 * **Sprachpakete** (8 Bundles wie die „Extension Packs“ von VS Code): Python, Rust, Go, Web, C/C++, Shell, Konfiguration (YAML/TOML/XML), Kotlin/Java – `com.codeforge.plugin.<sprache>-pack.bundle`.
 * **Werkzeuge** (10, erscheinen im **PT**-Menü des Dateibaums, Store-Kategorie „Code-Tools“ oder Sideload, Berechtigung `shell`, Skripte in Python):

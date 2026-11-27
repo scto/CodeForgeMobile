@@ -48,9 +48,25 @@ private fun PluginSettingItem.clampNumber(value: String): String? =
 fun List<PluginSettingItem>.effectiveValues(stored: Map<String, String>): Map<String, String> =
     associate { it.key to it.normalize(stored[it.key]) }
 
-/** Ersetzt `${setting:key}` in [text] durch den Wert aus [values] (unbekannte Schlüssel → leer). */
+/**
+ * Ersetzt `${setting:key}` in [text] durch den Wert aus [values] (unbekannte Schlüssel → leer). Bedingt:
+ * `${setting:key?TEXT}` wird zu TEXT, wenn der Wert `true` ist, `${setting:key=WERT?TEXT}`, wenn er WERT ist – sonst leer.
+ */
 fun resolveSettingPlaceholders(text: String, values: Map<String, String>): String =
-    PluginSettingsRules.PLACEHOLDER.replace(text) { values[it.groupValues[1]].orEmpty() }
+    PluginSettingsRules.CONDITIONAL.replace(text) { m ->
+        val (key, expected, emit) = m.destructured
+        val value = values[key].orEmpty()
+        if (value == expected.ifEmpty { "true" }) emit else ""
+    }.let { resolved -> PluginSettingsRules.PLACEHOLDER.replace(resolved) { values[it.groupValues[1]].orEmpty() } }
+
+/**
+ * Setzt die Einstellungen in die Argumente [args] eines Kommandos ein. Elemente mit einer Bedingung
+ * (`${setting:key?--flag}`), die leer ergeben, entfallen – so werden Schalter nur bei Bedarf übergeben.
+ */
+fun resolveSettingArgs(args: List<String>, values: Map<String, String>): List<String> = args.mapNotNull { arg ->
+    val resolved = resolveSettingPlaceholders(arg, values)
+    resolved.takeUnless { it.isEmpty() && PluginSettingsRules.CONDITIONAL.containsMatchIn(arg) }
+}
 
 /** Grenzen und Platzhalter der Plugin-Einstellungen. */
 object PluginSettingsRules {
@@ -65,6 +81,9 @@ object PluginSettingsRules {
 
     /** Platzhalter in Kommandos und Umgebung deklarativer Beiträge. */
     val PLACEHOLDER: Regex = Regex("""\$\{setting:([A-Za-z][A-Za-z0-9_.-]{0,63})\}""")
+
+    /** Bedingter Platzhalter `${setting:key?TEXT}` bzw. `${setting:key=WERT?TEXT}`. */
+    val CONDITIONAL: Regex = Regex("""\$\{setting:([A-Za-z][A-Za-z0-9_.-]{0,63})(?:=([^?}]*))?\?([^}]*)\}""")
 }
 
 /** Gespeicherte Werte der Plugin-Einstellungen (nur vom Nutzer geänderte; Vorgaben kommen aus dem Manifest). */

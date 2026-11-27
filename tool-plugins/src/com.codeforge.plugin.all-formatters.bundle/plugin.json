@@ -13,7 +13,9 @@
       "com.codeforge.plugin.ruff-format.formatter",
       "com.codeforge.plugin.gofmt.formatter",
       "com.codeforge.plugin.rustfmt.formatter",
-      "com.codeforge.plugin.taplo-format.formatter"
+      "com.codeforge.plugin.taplo-format.formatter",
+      "com.codeforge.plugin.google-java-format.formatter",
+      "com.codeforge.plugin.ktfmt.formatter"
     ]
   }
 }

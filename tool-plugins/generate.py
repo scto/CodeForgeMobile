@@ -102,7 +102,7 @@ REQUIRES = {
     "dart": [_r("pkg", "dart")],
     "bash-language-server": [NODE, _r("npm", "bash-language-server")],
     "typescript-language-server": [NODE, _r("npm", "typescript", "tsc"), _r("npm", "typescript-language-server")],
-    "pyright": [NODE, _r("npm", "pyright", "pyright-langserver")],
+    "pyright": [_r("pkg", "python", "python3"), NODE, _r("npm", "pyright", "pyright-langserver")],
     "web-langservers": [NODE, _r("npm", "vscode-langservers-extracted", "vscode-html-language-server")],
     "yaml-language-server": [NODE, _r("npm", "yaml-language-server")],
     "kotlin-language-server": [JDK, _dl(
@@ -122,6 +122,60 @@ REQUIRES = {
         "lemminx", "https://download.eclipse.org/lemminx/releases/0.31.2/org.eclipse.lemminx-uber.jar",
         "f4fde164e785c635e5f86361dbf4b993bfe2c5f83fdb52891d058b7dfc9bcfc8", "file", "org.eclipse.lemminx-uber.jar")],
 }
+
+MAVEN = "https://repo1.maven.org/maven2"
+GJF_VERSION, KTFMT_VERSION = "1.36.1", "0.64"
+
+
+def _bool(key, title, desc, default=True):
+    return {"key": key, "type": "boolean", "title": title, "description": desc, "default": str(default).lower()}
+
+
+def _heap(default):
+    return {"key": "heapMb", "type": "number", "title": "JVM-Heap (MB)", "description": "Obergrenze für -Xmx.",
+            "default": str(default), "min": 128, "max": 2048}
+
+
+# JVM-Formatierer mit Einstellungsseite: Schalter über bedingte Platzhalter `${setting:key=WERT?--flag}` (Element entfällt,
+# wenn die Bedingung nicht zutrifft). JARs kommen als geprüfter Download aus Maven Central nach ${deps}/<name>.
+JVM_FAST = ["-Xmx${setting:heapMb}m", "-XX:+UseSerialGC", "-XX:TieredStopAtLevel=1"]
+GJF_EXPORTS = [f"--add-exports=jdk.compiler/com.sun.tools.javac.{p}=ALL-UNNAMED" for p in ("api", "code", "file", "parser", "tree", "util")]
+# (name, label, extensions, command, settings, requires, beschreibung)
+JVM_FORMATTERS = [
+    ("google-java-format", "google-java-format", ["java"],
+     ["java", *JVM_FAST, *GJF_EXPORTS, "-jar", "${deps}/google-java-format/google-java-format.jar",
+      "${setting:style=aosp?--aosp}", "${setting:sortImports=false?--skip-sorting-imports}",
+      "${setting:removeUnused=false?--skip-removing-unused-imports}", "${setting:reflowStrings=false?--skip-reflowing-long-strings}",
+      "${setting:formatJavadoc=false?--skip-javadoc-formatting}", "${setting:reorderModifiers=false?--skip-reordering-modifiers}",
+      "${setting:importsOnly?--fix-imports-only}", "--assume-filename", "${fileName}", "-"],
+     [{"key": "style", "type": "choice", "title": "Stil", "default": "google",
+       "description": "Google Java Style (2 Leerzeichen) oder AOSP (4 Leerzeichen, Android).",
+       "options": [{"value": "google", "label": "Google Java Style"}, {"value": "aosp", "label": "AOSP (Android)"}]},
+      _bool("sortImports", "Importe sortieren", "Aus: --skip-sorting-imports"),
+      _bool("removeUnused", "Unbenutzte Importe entfernen", "Aus: --skip-removing-unused-imports"),
+      _bool("reflowStrings", "Lange Strings umbrechen", "Aus: --skip-reflowing-long-strings"),
+      _bool("formatJavadoc", "Javadoc formatieren", "Aus: --skip-javadoc-formatting"),
+      _bool("reorderModifiers", "Modifier ordnen", "JLS-Reihenfolge; aus: --skip-reordering-modifiers"),
+      _bool("importsOnly", "Nur Importe korrigieren", "--fix-imports-only: sonst nichts umformatieren", False),
+      _heap(256)],
+     [JDK, _dl("google-java-format", f"{MAVEN}/com/google/googlejavaformat/google-java-format/{GJF_VERSION}/google-java-format-{GJF_VERSION}-all-deps.jar",
+               "25b400f003089d23cc5320cdaf1a16cabee19b8aa3434d0ff021b3d9f42154b4", "file", "google-java-format.jar")],
+     f"Formatiert Java mit google-java-format {GJF_VERSION} (Google- oder AOSP-Stil). Einstellungsseite für alle Optionen der Kommandozeile."),
+    ("ktfmt", "ktfmt", ["kt", "kts"],
+     ["java", *JVM_FAST, "-jar", "${deps}/ktfmt/ktfmt.jar",
+      "${setting:style=kotlinlang?--kotlinlang-style}", "${setting:style=google?--google-style}", "${setting:style=meta?--meta-style}",
+      "${setting:removeUnused=false?--do-not-remove-unused-imports}", "--quiet", "--stdin-name=${fileName}", "-"],
+     [{"key": "style", "type": "choice", "title": "Stil", "default": "kotlinlang",
+       "description": "Kotlinlang: 4 Leerzeichen (offizielle Konventionen). Google/Meta: 2 Leerzeichen. Zeilenbreite jeweils 100.",
+       "options": [{"value": "kotlinlang", "label": "Kotlinlang (4 Leerzeichen)"}, {"value": "google", "label": "Google (2 Leerzeichen)"},
+                   {"value": "meta", "label": "Meta (2 Leerzeichen)"}]},
+      _bool("removeUnused", "Unbenutzte Importe entfernen", "Aus: --do-not-remove-unused-imports"),
+      _heap(512)],
+     [JDK, _dl("ktfmt", f"{MAVEN}/com/facebook/ktfmt/{KTFMT_VERSION}/ktfmt-{KTFMT_VERSION}-with-dependencies.jar",
+               "5b3d5286fd2defcc7dc8e28c21ddf156cc6b2d8682bdcd929ce4333e7a6201f2", "file", "ktfmt.jar")],
+     f"Formatiert Kotlin mit ktfmt {KTFMT_VERSION} (Kotlinlang-, Google- oder Meta-Stil). Einstellungsseite für Stil, Importe und Speicher."),
+]
+JVM_FORMATTER_HOST = "3.6.3"  # repo1.maven.org, ${deps} und bedingte Platzhalter in Formatierern
 
 PY = _r("pkg", "python", "python3")
 SCRIPT = ["python3", "${pluginDir}/tool.py", "${projectDir}", "${input}"]
@@ -192,7 +246,7 @@ FEATURE_PLUGINS = [
 
 
 # Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
-VERSIONS = {"com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
+VERSIONS = {"com.codeforge.plugin.pyright.lsp": "1.0.1", "com.codeforge.plugin.jvm-pack.bundle": "1.1.0", "com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
 
 
 def manifest(pid, name, desc, contributes):
@@ -216,6 +270,16 @@ def main(out):
         dump(folder / "plugin.json", manifest(pid, f"{label} (Formatierer)",
              f"Formatiert {', '.join(exts[:6])}{' …' if len(exts) > 6 else ''} mit {label}. Fehlende Programme installiert die App nach Bestätigung (sonst: {install}).",
              {"formatters": [item], "requires": REQUIRES[name]}))
+        pack(out, pid, folder)
+    for name, label, exts, command, settings, req, desc in JVM_FORMATTERS:
+        pid = f"com.codeforge.plugin.{name}.formatter"
+        fmt_ids.append(pid)
+        folder = ROOT / "src" / pid
+        item = {"id": name, "label": label, "extensions": exts, "command": command, "timeoutSeconds": 60}
+        m = manifest(pid, f"{label} (Formatierer)", desc,
+                     {"formatters": [item], "requires": req, "settings": {"title": label, "items": settings}})
+        m["minHostVersion"] = JVM_FORMATTER_HOST
+        dump(folder / "plugin.json", m)
         pack(out, pid, folder)
     for name, label, servers, install in LSP:
         pid = f"com.codeforge.plugin.{name}.lsp"
@@ -286,8 +350,9 @@ LANGUAGE_PACKS = [
      ["com.codeforge.plugin.bash-language-server.lsp", "com.codeforge.plugin.shfmt.formatter"]),
     ("config-pack", "Konfigurationsdateien (YAML, TOML, XML)", "YAML-, TOML- (Taplo) und XML-Server (LemMinX) samt Taplo-Formatierer.",
      ["com.codeforge.plugin.yaml-language-server.lsp", "com.codeforge.plugin.taplo.lsp", "com.codeforge.plugin.lemminx.lsp", "com.codeforge.plugin.taplo-format.formatter"]),
-    ("jvm-pack", "Kotlin und Java", "Kotlin Language Server, Eclipse JDT LS (Java) und LemMinX für Android-XML.",
-     ["com.codeforge.plugin.kotlin-language-server.lsp", "com.codeforge.plugin.jdtls.lsp", "com.codeforge.plugin.lemminx.lsp"]),
+    ("jvm-pack", "Kotlin und Java", "Kotlin Language Server, Eclipse JDT LS (Java), LemMinX für Android-XML sowie ktfmt und google-java-format.",
+     ["com.codeforge.plugin.kotlin-language-server.lsp", "com.codeforge.plugin.jdtls.lsp", "com.codeforge.plugin.lemminx.lsp",
+      "com.codeforge.plugin.ktfmt.formatter", "com.codeforge.plugin.google-java-format.formatter"]),
 ]
 
 

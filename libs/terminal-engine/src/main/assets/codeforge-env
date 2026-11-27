@@ -16,7 +16,8 @@
 #   pkglist                      alle Repo-Pakete mit Version, Größe und Status (für den Paketmanager der App)
 #   search <begriff>             sucht Pakete im Repo
 #   remove <paket> [paket …]     entfernt Repo-Pakete
-#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 4.1.2] [--no-web]   (Standard: JDK 21, CMake 4.1.2, Python, Node.js/npm, TypeScript)
+#   setup [--jdk 17|21] [--sdk 37.0.0] [--platform 36] [--ndk r29] [--cmake 4.1.2] [--web]   (Standard: JDK 21, CMake 4.1.2; Python/Node.js/TypeScript nur mit --web –
+#         sonst installieren sie die Store-Pakete python-pack/web-pack bei Bedarf)
 #         [--no-ndk] [--no-cmake] [--no-gradle] [--no-kotlin] [--no-extras] [--minimal]
 #                                Basis-Setup für Android-Entwicklung (ohne Optionen alles):
 #                                JDK, cmdline-tools, build-tools, platform-tools, Plattform, NDK, CMake/Ninja,
@@ -1293,7 +1294,7 @@ do_setup() {
   local setup_args="$*"
   local retry_cmd="codeforge-env setup${setup_args:+ $setup_args}"
   CURRENT_SETUP_RETRY_CMD="$retry_cmd"
-  local jdk=21 ndk=r29 cmake=4.1.2 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=1 want_kotlin=1 want_extras=1 want_web=1
+  local jdk=21 ndk=r29 cmake=4.1.2 sdk=37.0.0 platform=36 want_ndk=1 want_cmake=1 want_gradle=1 want_kotlin=1 want_extras=1 want_web=0
   while [ $# -gt 0 ]; do
     case "$1" in
       --jdk) jdk=$2; shift 2 ;; --ndk) ndk=$2; shift 2 ;; --cmake) cmake=$2; shift 2 ;;

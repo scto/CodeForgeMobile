@@ -318,7 +318,9 @@ fun LspServerContribution.expand(
 /**
  * Externer Code-Formatierer: Der Editor startet [command], schreibt den Dateiinhalt auf stdin und ersetzt ihn durch stdout.
  * Zuordnung über [extensions] (ohne Punkt, case-insensitiv) oder exakte [fileNames]. Platzhalter im Kommando:
- * `${file}` (absoluter Pfad der Datei), `${fileName}`, `${pluginDir}`, `${home}`. Das Programm muss bereits installiert sein.
+ * `${file}` (absoluter Pfad der Datei), `${fileName}`, `${pluginDir}`, `${home}`, `${deps}` (Download-Voraussetzungen) sowie
+ * `${setting:key}` und bedingt `${setting:key=WERT?--flag}` (Element entfällt, wenn die Bedingung nicht zutrifft).
+ * Das Programm muss bereits installiert sein.
  */
 data class FormatterContribution(
     val id: String,

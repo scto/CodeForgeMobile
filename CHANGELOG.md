@@ -17,11 +17,25 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   `apksigner`, die nativen Programme statisch für Android gebaut. Sie haben im SDK-Manager Vorrang vor den bisherigen
   Quellen. Die Lzhiyong-Pakete (nur Binaries, keine Jars) werden nicht mehr angeboten. / Complete build-tools and
   platform-tools 28.0.0–37.0.3; Lzhiyong packages removed.
+- **Formatierer google-java-format 1.36.1 und ktfmt 0.64 im Store**, je mit Einstellungsseite (GJF: Google/AOSP,
+  Importe sortieren/entfernen, Strings umbrechen, Javadoc, Modifier, nur Importe, Heap; ktfmt: Kotlinlang/Google/Meta,
+  unbenutzte Importe, Heap). Die JARs kommen als SHA-256-geprüfter Download aus Maven Central; beide sind auch im
+  Bundle „Kotlin und Java“. / google-java-format and ktfmt formatter plugins with settings pages.
+- **Plugins: bedingte Einstellungs-Platzhalter** `${setting:key?--flag}` und `${setting:key=WERT?--flag}` – das
+  Argument entfällt, wenn die Bedingung nicht zutrifft; Formatierer kennen jetzt auch `${deps}`. `repo1.maven.org` ist
+  als Download-Quelle für Store-Plugins erlaubt. / Conditional setting placeholders, `${deps}` for formatters, Maven
+  Central as download host.
+- **8 neue Sprachpakete:** Dänisch, Schwedisch, Norwegisch (Bokmål), Finnisch, Tschechisch, Ungarisch, Ukrainisch,
+  Koreanisch (Teilübersetzung wie die bisherigen 10 Pakete). / 8 new language packs (da, sv, nb, fi, cs, hu, uk, ko).
 
 ### Geändert / Changed
 - **SDK-Manager startet schneller:** Die Paketliste kommt aus `catalog.json` des Mirrors (eine kleine Datei vom CDN)
   statt aus mehreren Seiten der GitHub-API; ohne Netz aus einer Fassung, die die App mitbringt (wie beim
   Plugin-Store). / SDK manager loads its package list from a compact catalog instead of the GitHub API.
+- **Ersteinrichtung ohne Python, Node.js und TypeScript:** `codeforge-env setup` installiert sie nur noch mit `--web`;
+  sonst kommen sie bei Bedarf über die Store-Pakete „Python“ und „Web“ (deren `requires`). Pyright fordert jetzt
+  zusätzlich Python an. / First-run setup no longer installs Python/Node.js/TypeScript; the Python and Web store
+  bundles install them on demand.
 
 ## [3.6.2] - 2026-11-27
 

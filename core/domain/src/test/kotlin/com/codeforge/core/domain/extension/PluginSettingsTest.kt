@@ -51,4 +51,15 @@ class PluginSettingsTest {
         assertEquals(mapOf("n" to "2", "b" to "false"), values)
         assertEquals("--n=2 --x=", resolveSettingPlaceholders("--n=\${setting:n} --x=\${setting:x}", values))
     }
+
+    @Test
+    fun conditionalPlaceholders() {
+        val values = mapOf("style" to "aosp", "sort" to "false", "only" to "true")
+        val args = listOf(
+            "\${setting:style=aosp?--aosp}", "\${setting:style=google?--google}", "\${setting:sort=false?--skip-sort}",
+            "\${setting:only?--only}", "\${setting:missing?--x}", "-Xmx\${setting:style}"
+        )
+        assertEquals(listOf("--aosp", "--skip-sort", "--only", "-Xmxaosp"), resolveSettingArgs(args, values))
+        assertEquals("a  b", resolveSettingPlaceholders("a \${setting:sort?--s} b", values))
+    }
 }

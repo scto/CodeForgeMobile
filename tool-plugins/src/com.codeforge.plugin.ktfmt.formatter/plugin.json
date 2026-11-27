@@ -1,0 +1,95 @@
+{
+  "id": "com.codeforge.plugin.ktfmt.formatter",
+  "name": "ktfmt (Formatierer)",
+  "version": "1.0.0",
+  "apiVersion": 2,
+  "publisher": "codeforge",
+  "description": "Formatiert Kotlin mit ktfmt 0.64 (Kotlinlang-, Google- oder Meta-Stil). Einstellungsseite für Stil, Importe und Speicher.",
+  "permissions": [],
+  "contributes": {
+    "formatters": [
+      {
+        "id": "ktfmt",
+        "label": "ktfmt",
+        "extensions": [
+          "kt",
+          "kts"
+        ],
+        "command": [
+          "java",
+          "-Xmx${setting:heapMb}m",
+          "-XX:+UseSerialGC",
+          "-XX:TieredStopAtLevel=1",
+          "-jar",
+          "${deps}/ktfmt/ktfmt.jar",
+          "${setting:style=kotlinlang?--kotlinlang-style}",
+          "${setting:style=google?--google-style}",
+          "${setting:style=meta?--meta-style}",
+          "${setting:removeUnused=false?--do-not-remove-unused-imports}",
+          "--quiet",
+          "--stdin-name=${fileName}",
+          "-"
+        ],
+        "timeoutSeconds": 60
+      }
+    ],
+    "requires": [
+      {
+        "manager": "pkg",
+        "name": "openjdk-17",
+        "check": "java"
+      },
+      {
+        "manager": "download",
+        "name": "ktfmt",
+        "url": "https://repo1.maven.org/maven2/com/facebook/ktfmt/0.64/ktfmt-0.64-with-dependencies.jar",
+        "sha256": "5b3d5286fd2defcc7dc8e28c21ddf156cc6b2d8682bdcd929ce4333e7a6201f2",
+        "archive": "file",
+        "check": "ktfmt.jar"
+      }
+    ],
+    "settings": {
+      "title": "ktfmt",
+      "items": [
+        {
+          "key": "style",
+          "type": "choice",
+          "title": "Stil",
+          "default": "kotlinlang",
+          "description": "Kotlinlang: 4 Leerzeichen (offizielle Konventionen). Google/Meta: 2 Leerzeichen. Zeilenbreite jeweils 100.",
+          "options": [
+            {
+              "value": "kotlinlang",
+              "label": "Kotlinlang (4 Leerzeichen)"
+            },
+            {
+              "value": "google",
+              "label": "Google (2 Leerzeichen)"
+            },
+            {
+              "value": "meta",
+              "label": "Meta (2 Leerzeichen)"
+            }
+          ]
+        },
+        {
+          "key": "removeUnused",
+          "type": "boolean",
+          "title": "Unbenutzte Importe entfernen",
+          "description": "Aus: --do-not-remove-unused-imports",
+          "default": "true"
+        },
+        {
+          "key": "heapMb",
+          "type": "number",
+          "title": "JVM-Heap (MB)",
+          "description": "Obergrenze für -Xmx.",
+          "default": "512",
+          "min": 128,
+          "max": 2048
+        }
+      ]
+    }
+  },
+  "minHostVersion": "3.6.3"
+}

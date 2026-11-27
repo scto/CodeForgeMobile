@@ -38,7 +38,7 @@ object RequirementPolicy {
     val ARCHES: Set<String> = setOf(AARCH64, X86_64, ARM, I686)
 
     // Hosts, von denen Store-Plugins Dateien laden dürfen (immer mit SHA-256-Prüfung).
-    private val STORE_DOWNLOAD_HOSTS = setOf("github.com", "download.eclipse.org", "registry.npmjs.org")
+    private val STORE_DOWNLOAD_HOSTS = setOf("github.com", "download.eclipse.org", "registry.npmjs.org", "repo1.maven.org")
 
     /** Verhindert Optionen (`-g`, `--foo`) und Pfadtricks (`..`) als Paketnamen. */
     fun isValidName(name: String): Boolean = NAME.matches(name) && !name.contains("..")

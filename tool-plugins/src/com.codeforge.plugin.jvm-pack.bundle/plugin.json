@@ -1,16 +1,18 @@
 {
   "id": "com.codeforge.plugin.jvm-pack.bundle",
   "name": "Kotlin und Java (Bundle)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Kotlin Language Server, Eclipse JDT LS (Java) und LemMinX für Android-XML.",
+  "description": "Kotlin Language Server, Eclipse JDT LS (Java), LemMinX für Android-XML sowie ktfmt und google-java-format.",
   "permissions": [],
   "contributes": {
     "extensionPack": [
       "com.codeforge.plugin.kotlin-language-server.lsp",
       "com.codeforge.plugin.jdtls.lsp",
-      "com.codeforge.plugin.lemminx.lsp"
+      "com.codeforge.plugin.lemminx.lsp",
+      "com.codeforge.plugin.ktfmt.formatter",
+      "com.codeforge.plugin.google-java-format.formatter"
     ]
   }
 }

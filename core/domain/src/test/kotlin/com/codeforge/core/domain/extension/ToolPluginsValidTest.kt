@@ -17,7 +17,7 @@ class ToolPluginsValidTest {
 
     @Test
     fun `alle Tool-Plugins sind gueltig, deklarativ und haben Publisher codeforge`() {
-        assertEquals(43, manifests.size) // 35 + 8 Sprachpakete
+        assertEquals(45, manifests.size) // 37 + 8 Sprachpakete
         manifests.forEach { (dirName, m) ->
             assertEquals(dirName, m.id)
             assertEquals("codeforge", m.publisher)
@@ -38,7 +38,7 @@ class ToolPluginsValidTest {
     fun `Formatierer und Language Server verwenden keine Skripte oder Fremdpfade`() {
         val lsp = manifests.values.flatMap { it.contributes.lspServers }
         val fmt = manifests.values.flatMap { it.contributes.formatters }
-        assertEquals(6, fmt.size)
+        assertEquals(8, fmt.size)
         assertEquals(18, lsp.size)
         (lsp.map { it.command } + fmt.map { it.command }).forEach { c ->
             assertTrue(c.toString(), !c.first().startsWith("/") && !c.first().contains("sh -c"))
@@ -66,7 +66,7 @@ class ToolPluginsValidTest {
     @Test
     fun `Formatierer und Language Server deklarieren erlaubte Voraussetzungen`() {
         val withRequires = manifests.values.filter { it.id.endsWith(".formatter") || it.id.endsWith(".lsp") }
-        assertEquals(22, withRequires.size)
+        assertEquals(24, withRequires.size)
         withRequires.forEach { m ->
             assertTrue(m.id, m.contributes.requires.isNotEmpty())
             m.contributes.requires.forEach { assertTrue("${m.id}: ${it.name}", RequirementPolicy.isStoreAllowed(it)) }

@@ -899,6 +899,9 @@ PACKS = [
 ]
 
 
+from langs_extra import PACKS as _EXTRA  # noqa: E402  (da, sv, nb, fi, cs, hu, uk, ko)
+PACKS += _EXTRA
+
 def load_keys(strings_xml: Path):
     import re
     text = strings_xml.read_text(encoding="utf-8")

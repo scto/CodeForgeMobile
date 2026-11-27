@@ -101,13 +101,17 @@ fun ActiveContributions.formatterForPath(path: String): Resolved<FormatterContri
     }
 }
 
-/** Ersetzt die Platzhalter im Formatierer-Kommando; Datei- und Verzeichnisangaben kommen ausschließlich von der App. */
-fun FormatterContribution.expandCommand(file: String, pluginDir: String, home: String): List<String> =
+/**
+ * Ersetzt die Platzhalter im Formatierer-Kommando; Datei- und Verzeichnisangaben kommen ausschließlich von der App.
+ * `${'$'}{deps}` ist der Ordner der Download-Voraussetzungen (ohne Angabe bleibt der Platzhalter stehen).
+ */
+fun FormatterContribution.expandCommand(file: String, pluginDir: String, home: String, deps: String? = null): List<String> =
     command.map {
-        it.replace("${'$'}{file}", file)
+        val expanded = it.replace("${'$'}{file}", file)
             .replace("${'$'}{fileName}", file.substringAfterLast('/'))
             .replace("${'$'}{pluginDir}", pluginDir)
             .replace("${'$'}{home}", home)
+        if (deps != null) expanded.replace(LspServerContribution.DEPS, deps) else expanded
     }
 
 /** Lesezugriff der App-Module (Theme, Filetree, Editor, Git, …) auf die Contributions installierter Plugins. */
@@ -122,7 +126,8 @@ interface ContributionRepository {
 
 /** Ersetzt `${'$'}{setting:key}` in allen Elementen von [args] durch die Einstellungen von [pluginId]. */
 fun ContributionRepository.withSettings(pluginId: String, args: List<String>): List<String> {
-    if (args.none { PluginSettingsRules.PLACEHOLDER.containsMatchIn(it) }) return args
-    val values = settingValues(pluginId)
-    return args.map { resolveSettingPlaceholders(it, values) }
+    if (args.none { PluginSettingsRules.PLACEHOLDER.containsMatchIn(it) || PluginSettingsRules.CONDITIONAL.containsMatchIn(it) }) {
+        return args
+    }
+    return resolveSettingArgs(args, settingValues(pluginId))
 }
