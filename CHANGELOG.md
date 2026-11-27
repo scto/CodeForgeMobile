@@ -24,6 +24,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   / Agent ships Google's agp-9-upgrade skill; use_skill can load reference files.
 
 ### Geändert / Changed
+- **OpenRouter-Anmeldung: „Unable to resolve host openrouter.ai“ behoben.** Die Rückleitung erreichte die App,
+  während sie noch hinter dem Browser im Hintergrund lag; Android sperrt Hintergrund-Apps das Netz, der Schlüsseltausch
+  schlug sofort fehl. Netzfehler werden jetzt bis zu 3 Minuten wiederholt – sobald man zur App zurückwechselt, wird der
+  Schlüssel abgeholt; die Browserseite sagt das auch. / OpenRouter sign-in retries the key exchange until the app is back
+  in the foreground.
 - **SDK-Manager öffnet sofort:** zuletzt geladene Paketliste wird sofort gezeigt und im Hintergrund aktualisiert,
   5 Minuten im Speicher wiederverwendet (nach Installation/Deinstallation neu); das Skript speichert auch das
   entfernte Manifest 6 Stunden zwischen, „Aktualisieren“ umgeht alle Zwischenspeicher (`CFSDK_REFRESH=1`).

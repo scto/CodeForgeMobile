@@ -10,6 +10,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -28,6 +29,17 @@ object OpenRouterAccount {
     private const val KEYS_URL = "https://openrouter.ai/api/v1/auth/keys"
     private const val KEY_INFO_URL = "https://openrouter.ai/api/v1/key"
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
+    private const val RETRY_FOR_MS = 3 * 60_000L
+    private const val RETRY_DELAY_MS = 2_000L
+    private val SUCCESS_HTML = """
+        <html><head><meta name="viewport" content="width=device-width"></head>
+        <body style="font-family:sans-serif;text-align:center;margin-top:3em">
+        <h2>Anmeldung empfangen</h2><p>Wechsle jetzt zurück zu CodeForge Mobile – der Schlüssel wird dort abgeholt.</p>
+        <p style="color:#888">Sign-in received. Switch back to CodeForge Mobile to finish.</p></body></html>
+    """.trimIndent()
+
+    /** HTTP-Antwort von OpenRouter mit Fehlerstatus (kein Netzproblem, nicht wiederholen). */
+    class HttpStatusException(message: String) : IOException(message)
 
     /** Eine Anmeldung: [url] im Browser öffnen, [verifier] für [exchange] behalten. */
     data class Attempt(val url: String, val verifier: String, val state: String)
@@ -51,20 +63,45 @@ object OpenRouterAccount {
         val attempt = start(redirect.redirectUri)
         onWaiting?.invoke(redirect::deliver)
         openBrowser(attempt.url)
-        val params = redirect.await()
+        val params = redirect.await(successHtml = SUCCESS_HTML)
         params["error"]?.let { throw IOException("OpenRouter: $it") }
         if (params["state"] != null && params["state"] != attempt.state) throw IOException("OpenRouter: falscher state")
         val code = params["code"] ?: throw IOException("OpenRouter hat keinen Code geliefert")
-        exchange(code, attempt.verifier)
+        exchangeWhenOnline(code, attempt.verifier)
+    }
+
+    /**
+     * Wie [exchange], wiederholt aber Netzfehler bis zu [retryForMs]: Die Rückleitung kommt an, während die App noch
+     * hinter dem Browser im Hintergrund liegt, und Android sperrt Hintergrund-Apps das Netz („Unable to resolve host“).
+     * Sobald die App wieder vorn ist, gelingt der Tausch. Fehlerstatus von OpenRouter bricht sofort ab.
+     */
+    suspend fun exchangeWhenOnline(
+        code: String,
+        verifier: String,
+        retryForMs: Long = RETRY_FOR_MS,
+        retryDelayMs: Long = RETRY_DELAY_MS,
+        attempt: suspend () -> String = { exchange(code, verifier) }
+    ): String {
+        val until = System.currentTimeMillis() + retryForMs
+        while (true) {
+            try {
+                return attempt()
+            } catch (e: HttpStatusException) {
+                throw e
+            } catch (e: IOException) {
+                if (System.currentTimeMillis() + retryDelayMs > until) throw e
+                delay(retryDelayMs)
+            }
+        }
     }
 
     /** Tauscht den Code gegen den API-Schlüssel. */
     suspend fun exchange(code: String, verifier: String): String = withContext(Dispatchers.IO) {
         val body = buildJsonObject { put("code", code); put("code_verifier", verifier); put("code_challenge_method", "S256") }.toString()
         val (status, text) = http("POST", KEYS_URL, emptyMap(), body)
-        if (status !in 200..299) throw IOException("OpenRouter hat keinen Schlüssel ausgegeben (HTTP $status)")
+        if (status !in 200..299) throw HttpStatusException("OpenRouter hat keinen Schlüssel ausgegeben (HTTP $status)")
         (json.parseToJsonElement(text).jsonObject["key"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() }
-            ?: throw IOException("OpenRouter hat keinen Schlüssel ausgegeben")
+            ?: throw HttpStatusException("OpenRouter hat keinen Schlüssel ausgegeben")
     }
 
     /** Verbrauch des Schlüssels [key]. */
