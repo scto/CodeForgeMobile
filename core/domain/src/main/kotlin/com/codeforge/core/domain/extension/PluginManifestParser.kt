@@ -17,6 +17,7 @@ import kotlinx.serialization.json.intOrNull
 object PluginManifestParser {
 
     private const val VALUE = "value"
+    private const val TITLE = "title"
 
     private val LANGUAGE_CODE = Regex("[a-z]{2,3}(-[A-Z]{2})?")
 
@@ -164,6 +165,17 @@ object PluginManifestParser {
             },
             extensionPack = obj.stringList("extensionPack"),
             features = obj.stringList("features").filter { it in AppFeature.ALL }.distinct(),
+            commands = obj.objects("commands").map {
+                com.codeforge.core.domain.extension.ide.CommandContribution(it.req("id"), it.req(TITLE), it.string("category"))
+            },
+            menus = parseMenus(obj["menus"] as? JsonObject),
+            keybindings = obj.objects("keybindings").map {
+                val key = it.req("key")
+                require(!key.trim().endsWith("+") && com.codeforge.core.domain.editor.KeyChord.parse(key) != null) {
+                    "keybindings: ungültige Taste '$key'"
+                }
+                com.codeforge.core.domain.extension.ide.KeybindingContribution(it.req("command"), key, it.whenClause())
+            },
             formatters = obj.objects("formatters").map {
                 val command = it.stringList("command")
                 require(command.isNotEmpty()) { "formatters: 'command' darf nicht leer sein" }
@@ -255,7 +267,7 @@ object PluginManifestParser {
             "settings: 1 bis ${PluginSettingsRules.MAX_ITEMS} Einträge in 'items'"
         }
         require(items.map { it.key }.toSet().size == items.size) { "settings: doppelte Schlüssel" }
-        return PluginSettingsContribution(title = obj.string("title"), items = items)
+        return PluginSettingsContribution(title = obj.string(TITLE), items = items)
     }
 
     private fun parseSettingItem(obj: JsonObject): PluginSettingItem {
@@ -280,7 +292,7 @@ object PluginManifestParser {
         val item = PluginSettingItem(
             key = key,
             type = type,
-            title = obj.string("title") ?: key,
+            title = obj.string(TITLE) ?: key,
             description = obj.string("description").orEmpty(),
             default = default,
             options = options,
@@ -351,6 +363,21 @@ object PluginManifestParser {
             .toMap()
 
     private fun JsonObject.int(key: String): Int? = (this[key] as? JsonPrimitive)?.takeIf { !it.isString }?.intOrNull
+
+    // contributes.menus: { "<ort>": [ { "command", "title"?, "when"? } ] }
+    private fun parseMenus(obj: JsonObject?): List<com.codeforge.core.domain.extension.ide.MenuContribution> {
+        if (obj == null) return emptyList()
+        return obj.keys.flatMap { place ->
+            require(place in com.codeforge.core.domain.extension.ide.MenuPlaces.ALL) { "menus: unbekannter Ort '$place'" }
+            obj.objects(place).map {
+                com.codeforge.core.domain.extension.ide.MenuContribution(place, it.req("command"), it.string(TITLE), it.whenClause())
+            }
+        }
+    }
+
+    private fun JsonObject.whenClause(): String? = string("when")?.also {
+        require(com.codeforge.core.domain.extension.ide.WhenClause.isValid(it)) { "Ungültige when-Bedingung: $it" }
+    }
 
     private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
 

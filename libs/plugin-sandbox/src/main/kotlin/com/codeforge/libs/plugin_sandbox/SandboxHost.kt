@@ -25,7 +25,14 @@ import com.codeforge.libs.plugin_api.PluginLocation
 import com.codeforge.libs.plugin_api.QuickFixProvider
 import com.codeforge.libs.plugin_api.ReferenceProvider
 import com.codeforge.libs.plugin_api.RenameProvider
+import com.codeforge.libs.plugin_sandbox.SandboxCodec.obj
 import com.codeforge.libs.plugin_sandbox.SandboxCodec.s
+import com.codeforge.libs.plugin_sandbox.SandboxCodec.sn
+import com.codeforge.core.domain.extension.ide.IdeEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -45,13 +52,27 @@ interface SandboxTransport {
 /** Fehlerantwort der Sandbox. */
 class SandboxException(message: String) : Exception(message)
 
-class SandboxHost(private val transport: SandboxTransport, private val registry: ExtensionRegistry) {
+class SandboxHost(
+    private val transport: SandboxTransport,
+    private val registry: ExtensionRegistry,
+    private val ide: SandboxIdeSink? = null,
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+) {
 
     /** Lädt das Plugin in der Sandbox und meldet seine Beiträge an; liefert die Zahl der Beiträge. */
-    suspend fun load(pluginId: String, entryPointClass: String, code: ByteArray, settings: Map<String, String>): Int {
-        val reply = transport.send(
+    suspend fun load(
+        pluginId: String,
+        entryPointClass: String,
+        code: ByteArray,
+        settings: Map<String, String>,
+        permissions: Set<String> = emptySet(),
+        apiVersion: Int = 0,
+    ): Int {
+        ide?.bind(pluginId, permissions)
+        val reply = send(
             buildJsonObject {
                 put("op", "load"); put("pluginId", pluginId); put("entryPointClass", entryPointClass)
+                put("apiVersion", apiVersion)
                 put("settings", JsonObject(settings.mapValues { JsonPrimitive(it.value) }))
             },
             code
@@ -76,7 +97,52 @@ class SandboxHost(private val transport: SandboxTransport, private val registry:
     /** Entlädt das Plugin in der Sandbox und entfernt alle Stellvertreter. */
     suspend fun unload(pluginId: String) {
         registry.unregisterAll(pluginId)
+        ide?.release(pluginId)
         runCatching { transport.send(buildJsonObject { put("op", "unload"); put("pluginId", pluginId) }) }
+    }
+
+    /** Holt die Ausgangspost der Sandbox ab (API 5: Befehle, Ereignisse, Statusleiste). */
+    suspend fun flush() {
+        runCatching { send(buildJsonObject { put("op", "flush") }) }
+    }
+
+    private suspend fun send(request: JsonObject, code: ByteArray? = null): JsonObject {
+        val reply = transport.send(request, code)
+        (reply["outbox"] as? JsonArray)?.let { post -> ide?.let { sink -> post.forEach { deliver(sink, it.jsonObject) } } }
+        return reply
+    }
+
+    @Suppress("CyclomaticComplexMethod")
+    private fun deliver(sink: SandboxIdeSink, m: JsonObject) {
+        val pluginId = m.s("pluginId")
+        runCatching {
+            when (m.s("kind")) {
+                "registerCommand" -> sink.registerCommand(pluginId, m.s("id"), m.s("title")) { args -> command(pluginId, m.s("id"), args) }
+                "unregisterCommand" -> sink.unregisterCommand(pluginId, m.s("id"))
+                "publish" -> sink.publish(pluginId, m.s("name"), m.obj("payload").mapValues { (it.value as? JsonPrimitive)?.contentOrNull.orEmpty() })
+                "subscribe" -> sink.subscribe(pluginId, m.s("prefix")) { event -> scope.launch { sendEvent(pluginId, event) } }
+                "status" -> sink.setStatus(
+                    pluginId, m.s("id"), m.s("text"), m.sn("tooltip"), m.sn("command"),
+                    (m["priority"] as? JsonPrimitive)?.contentOrNull?.toIntOrNull() ?: 0
+                )
+                "statusRemove" -> sink.removeStatus(pluginId, m.s("id"))
+            }
+        }
+    }
+
+    private suspend fun command(pluginId: String, id: String, args: Map<String, String>): String? =
+        (result(send(buildJsonObject {
+            put("op", "command"); put("pluginId", pluginId); put("id", id)
+            put("args", JsonObject(args.mapValues { JsonPrimitive(it.value) }))
+        })) as? JsonPrimitive)?.contentOrNull
+
+    private suspend fun sendEvent(pluginId: String, event: IdeEvent) {
+        runCatching {
+            send(buildJsonObject {
+                put("op", "event"); put("pluginId", pluginId); put("topic", event.topic); put("source", event.source)
+                put("payload", JsonObject(event.payload.mapValues { JsonPrimitive(it.value) }))
+            })
+        }
     }
 
     private fun <T : Any> reg(point: ExtensionPoint<T>, value: T, pluginId: String) {
@@ -124,7 +190,7 @@ class SandboxHost(private val transport: SandboxTransport, private val registry:
         ctx: EditorContext,
         extra: kotlinx.serialization.json.JsonObjectBuilder.() -> Unit = {},
     ): JsonElement? = result(
-        transport.send(buildJsonObject {
+        send(buildJsonObject {
             put("op", "call"); put("pluginId", pluginId); put("handle", handle); put("method", method)
             put("context", SandboxCodec.context(ctx)); extra()
         })

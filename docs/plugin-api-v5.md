@@ -1,6 +1,6 @@
 # Plugin-API 5 – CodeForge Mobile vollständig ansteuern
 
-Stand: 2026-11-27 · Status: Etappen 1–4 umgesetzt, Etappe 5 offen (siehe Abschnitt 9)
+Stand: 2026-11-27 · Status: Etappen 1–5 umgesetzt (siehe Abschnitt 9)
 
 API 5 erweitert die bestehende Plugin-API (1–4) um Zugriff auf die ganze IDE:
 - Befehle, Ereignisbus und App-Einstellungen
@@ -20,7 +20,7 @@ Bisherige bleibt gültig, API 5 kommt nur dazu.
 
 Die volle API 5 gibt es nur in der dritten Stufe. Dort laufen Plugins mit den Rechten der App, deshalb nur
 aus vertrauenswürdiger Quelle. Die Plugin-Ansicht zeigt dazu die Signatur (`signer`) und alle Berechtigungen an. Die
-Sandbox erhält Teile von API 5 (Befehle, Ereignisse, Statusleiste) später über IPC, siehe Abschnitt 9.
+Sandbox erhält einen Teil von API 5 (Befehle, Ereignisse, Statusleiste), siehe Abschnitt 6.1.
 
 ## 2. Einstieg
 
@@ -177,10 +177,10 @@ Eigenes SDK-Modul, damit Plugins ohne Oberfläche kein Compose brauchen. Angemel
 gemerkte `context.ide()`. Die Oberflächen verwenden das Material-3-Theme der App mit. Compose-Laufzeit und
 -Compiler müssen zur App passen.
 
-## 6. Menüs, Tastenkürzel, Bedingungen (`plugin.json` → `contributes`) – geplant (Etappe 5)
+## 6. Menüs, Tastenkürzel, Bedingungen (`plugin.json` → `contributes`)
 
-Heute gibt es Menüs über `hostServices.registerMenuItem` (Editor-Menü, Dateibaum-Kontextmenü) und Befehle in der
-Palette. Geplant ist die deklarative Form:
+Neben `hostServices.registerMenuItem` (Code) gibt es die deklarative Form. Sie gilt für alle Stufen, auch für
+deklarative und Sandbox-Plugins:
 
 ```json
 "contributes": {
@@ -188,14 +188,38 @@ Palette. Geplant ist die deklarative Form:
   "menus": {
     "editor/context": [{ "command": "hello", "when": "editorLangId == kotlin" }],
     "fileTree/context": [{ "command": "hello", "when": "resourceExtname == .md" }],
-    "commandPalette": [{ "command": "hello" }]
+    "commandPalette": [{ "command": "hello", "when": "projectOpen" }]
   },
-  "keybindings": [{ "command": "hello", "key": "ctrl+alt+h" }],
-  "toolWindows": [{ "id": "notes", "title": "Notizen", "icon": "note" }]
+  "keybindings": [{ "command": "hello", "key": "ctrl+alt+h", "when": "editorHasSelection" }]
 }
 ```
 
-`when` kennt `editorLangId`, `resourceExtname`, `resourcePath`, `projectOpen`, `gitRepo` sowie `!`, `&&` und `||`.
+- Befehls-IDs ohne Punkt werden zu `<pluginId>.<id>` (der Befehl, den das Plugin mit `ide.commands.register`
+  anmeldet). IDs mit Punkt (z. B. `cfm.git.commit`) bleiben unverändert, so lassen sich auch IDE-Befehle einhängen.
+- `editor/context` erscheint im Editor-Menü (Werkzeugleiste), `fileTree/context` im Kontextmenü des Dateibaums (der
+  Befehl bekommt `path` als Argument). `commandPalette` mit `when` blendet den Befehl in der Palette aus, solange die
+  Bedingung nicht gilt.
+- Tastenkürzel: `ctrl`, `alt`, `shift`, `meta` plus Taste, z. B. `ctrl+shift+k`. Ungültige Kürzel lehnt die
+  Installation ab. Bei Konflikten gewinnt das zuerst geladene Plugin.
+- `when` ist eine Teilmenge der VS-Code-Syntax: `!`, `==`, `!=`, `=~` (regulärer Ausdruck), `&&`, `||`, Klammern.
+  Schlüssel: `editorLangId`, `resourceExtname`, `resourceFilename`, `resourcePath`, `projectOpen`, `gitRepo`,
+  `editorHasSelection`. Ungültige Ausdrücke lehnt die Installation ab.
+
+### 6.1 API 5 in der Sandbox
+
+Sandbox-Plugins mit `apiVersion` 5 bekommen über `context.ide()` einen eingeschränkten Teil der API:
+
+| Bereich | in der Sandbox |
+|---|---|
+| `commands.register` | ✅ (Berechtigung `commands`) |
+| `events.subscribe` / `publish` | ✅ (Berechtigung `events`) |
+| `statusBar.set` / `remove` | ✅ (Berechtigung `ui`) |
+| alles andere (`commands.execute`, Einstellungen, Editor, Dateien, Git, Navigation) | `PluginPermissionException` |
+
+Technik: Der Sandbox-Prozess kann die App nicht selbst aufrufen. Was das Plugin anmeldet, landet in einer
+Ausgangspost, die jede Antwort an die App mitnimmt; zusätzlich holt die App sie alle 3 Sekunden ab. Befehle und
+Ereignisse ruft die App per Anfrage in der Sandbox auf. Die App prüft jede Meldung mit denselben Regeln wie bei
+In-Process-Plugins, Berechtigungen über die Sandbox-Liste hinaus werden ignoriert.
 
 ## 7. Lebenszyklus und Grenzen
 - Alles über `ide()` Angemeldete (Befehle, Abos, Einstellungs-Beobachter, Statuseinträge) wird beim Deaktivieren oder
@@ -205,7 +229,7 @@ Palette. Geplant ist die deklarative Form:
 
 ## 8. Kompatibilität
 - Plugins mit `apiVersion` 2–4 laufen unverändert.
-- `context.ide()` wirft dort und in der Sandbox `PluginPermissionException`.
+- `context.ide()` wirft dort `PluginPermissionException`; in der Sandbox gilt Abschnitt 6.1.
 - `PluginHostServices.registerCommand` und `addEventListener` (API 2) bleiben bestehen. Ihre Befehle und Ereignisse
   erscheinen zusätzlich im Befehlsverzeichnis bzw. auf dem Bus.
 
@@ -217,8 +241,10 @@ Palette. Geplant ist die deklarative Form:
 | 2 | App-Einstellungen (feste Tabelle), Abschnitt „Plugin-Einstellungen“ | ✅ |
 | 3 | Editor, Dateien, Git, Navigation, Statusleiste | ✅ |
 | 4 | Werkzeugfenster, Bildschirme, Einstellungsseiten (`PluginUiPoints`) | ✅ |
-| 5 | `contributes.menus`/`keybindings`/`when`, Sandbox-Anbindung per IPC | offen |
+| 5 | `contributes.menus`/`keybindings`/`when`, Sandbox-Anbindung per IPC | ✅ |
 
 Code: `core/domain/.../extension/ide/IdeHost.kt` (Verträge), `libs/plugin-api/.../IdeApi.kt` (SDK),
 `libs/plugin-impl/.../ide/` (Host), `libs/plugin-ui-api/.../PluginWindows.kt` (Oberflächen),
+`core/domain/.../extension/ide/IdeMenus.kt` (Menüs, `when`),
+`libs/plugin-sandbox/.../SandboxIde.kt` + `libs/plugin-impl/.../ide/HostSandboxIdeSink.kt` (Sandbox),
 `feature/editor/.../plugin/EditorIdeConnector.kt`, `app/.../PluginUiHost.kt`, `app/.../IdeNavigationViewModel.kt`.

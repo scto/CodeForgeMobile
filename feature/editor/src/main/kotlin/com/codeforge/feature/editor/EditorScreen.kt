@@ -137,6 +137,7 @@ import com.codeforge.core.domain.editor.KeyChord
 import com.codeforge.core.domain.editor.Keymap
 import com.codeforge.core.domain.editor.KeymapAction
 import com.codeforge.core.domain.editor.SymbolBarAction
+import com.codeforge.core.domain.editor.serialize
 import com.codeforge.core.ui.keyName
 import android.os.SystemClock
 import androidx.compose.runtime.mutableLongStateOf
@@ -170,8 +171,10 @@ fun EditorRoute(
     val debuggerEnabled by viewModel.debuggerEnabled.collectAsState()
     val pluginCommands by viewModel.pluginCommands.collectAsState()
     val pluginMenuEntries by viewModel.pluginMenuEntries.collectAsState()
-    val pluginToolbarItems = remember(pluginCommands, pluginMenuEntries) {
-        buildPluginToolbarItems(pluginCommands, pluginMenuEntries)
+    val pluginToolbarItems = remember(pluginCommands, pluginMenuEntries, uiState.pluginMenuItems) {
+        // API 5: Einträge aus contributes.menus zuerst (pluginId leer = Befehl aus dem Befehlsverzeichnis).
+        uiState.pluginMenuItems.map { PluginToolbarItem("", it.commandId, it.title) } +
+            buildPluginToolbarItems(pluginCommands, pluginMenuEntries)
     }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -214,7 +217,7 @@ fun EditorRoute(
     }
 
     fun openPalette() {
-        val plugins = pluginToolbarItems.map { PalettePluginCommand(it.pluginId, it.commandId, it.title) }
+        val plugins = pluginToolbarItems.filter { it.pluginId.isNotEmpty() }.map { PalettePluginCommand(it.pluginId, it.commandId, it.title) }
         viewModel.onEvent(EditorUiEvent.OpenCommandPalette(plugins, caret()))
     }
 
@@ -428,6 +431,11 @@ fun EditorRoute(
                 lastShiftAt = 0L
                 val chord = KeyChord(name, event.isCtrlPressed, event.isShiftPressed, event.isAltPressed, event.isMetaPressed)
                 if (chord.producesText || !uiState.displaySettings.desktopShortcutsEnabled) return@onPreviewKeyEvent false
+                // API 5: Tastenkürzel aus contributes.keybindings (vor der Keymap der App).
+                uiState.pluginKeybindings[chord.serialize()]?.let { command ->
+                    viewModel.onEvent(EditorUiEvent.RunIdeCommand(command))
+                    return@onPreviewKeyEvent true
+                }
                 val action = keymap.actionFor(chord) ?: return@onPreviewKeyEvent false
                 runKeymapAction(action)
             },
@@ -548,7 +556,13 @@ fun EditorRoute(
                 onOpenAiAssistant = { viewModel.onEvent(EditorUiEvent.ToggleAiAssistant(true)) },
                 onOpenAiQuickActions = { viewModel.onEvent(EditorUiEvent.ToggleAiQuickActions(true)) },
                 pluginItems = pluginToolbarItems,
-                onPluginCommand = { viewModel.onEvent(EditorUiEvent.RunPluginCommand(it.pluginId, it.commandId)) }
+                onPluginCommand = {
+                    if (it.pluginId.isEmpty()) {
+                        viewModel.onEvent(EditorUiEvent.RunIdeCommand(it.commandId))
+                    } else {
+                        viewModel.onEvent(EditorUiEvent.RunPluginCommand(it.pluginId, it.commandId))
+                    }
+                }
             )
 
             if (uiState.isSearchBarVisible) {

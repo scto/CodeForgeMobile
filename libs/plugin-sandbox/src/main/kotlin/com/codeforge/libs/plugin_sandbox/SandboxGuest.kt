@@ -14,6 +14,7 @@ import com.codeforge.libs.plugin_api.CompletionProvider
 import com.codeforge.libs.plugin_api.DefinitionProvider
 import com.codeforge.libs.plugin_api.EditorAction
 import com.codeforge.libs.plugin_api.HoverProvider
+import com.codeforge.libs.plugin_api.IdeApi
 import com.codeforge.libs.plugin_api.PluginContext
 import com.codeforge.libs.plugin_api.PluginExtensionPoints
 import com.codeforge.libs.plugin_api.PluginHostServices
@@ -62,18 +63,35 @@ class SandboxGuest(private val instantiator: PluginInstantiator) {
 
     private val plugins = ConcurrentHashMap<String, Loaded>()
     private val counter = AtomicInteger()
+    private val outbox = SandboxOutbox()
 
-    /** Bearbeitet eine Anfrage der App; Fehler werden als `{"ok":false,"error":…}` beantwortet, nie geworfen. */
-    suspend fun handle(request: JsonObject, code: ByteArray? = null): JsonObject = try {
-        when (request.s("op")) {
-            "load" -> load(request, code ?: error("Kein Plugin-Code übergeben"))
-            "unload" -> { unload(request.s("pluginId")); ok(JsonNull) }
-            "call" -> call(request)
-            "ping" -> ok(JsonPrimitive(plugins.size))
-            else -> error("Unbekannte Operation")
+    /**
+     * Bearbeitet eine Anfrage der App; Fehler werden als `{"ok":false,"error":…}` beantwortet, nie geworfen.
+     * Jede Antwort nimmt die Ausgangspost (`"outbox"`, API 5) mit.
+     */
+    suspend fun handle(request: JsonObject, code: ByteArray? = null): JsonObject {
+        val reply = try {
+            when (request.s("op")) {
+                "load" -> load(request, code ?: error("Kein Plugin-Code übergeben"))
+                "unload" -> { unload(request.s("pluginId")); ok(JsonNull) }
+                "call" -> call(request)
+                "command" -> command(request)
+                "event" -> { plugins[request.s("pluginId")]?.context?.ideApi?.deliver(SandboxIdeApi.eventOf(request)); ok(JsonNull) }
+                "flush", "ping" -> ok(JsonPrimitive(plugins.size))
+                else -> error("Unbekannte Operation")
+            }
+        } catch (t: Throwable) {
+            buildJsonObject { put("ok", false); put("error", (t.message ?: t.javaClass.simpleName).take(500)) }
         }
-    } catch (t: Throwable) {
-        buildJsonObject { put("ok", false); put("error", (t.message ?: t.javaClass.simpleName).take(500)) }
+        val post = outbox.drain()
+        return if (post.isEmpty()) reply else JsonObject(reply + ("outbox" to post))
+    }
+
+    private suspend fun command(req: JsonObject): JsonObject {
+        val api = plugins[req.s("pluginId")]?.context?.ideApi ?: error("Plugin nicht geladen")
+        val handler = api.commandHandlers[req.s("id")] ?: error("Unbekannter Befehl")
+        val args = req.obj("args").mapValues { (_, v) -> (v as? JsonPrimitive)?.contentOrNull.orEmpty() }
+        return ok(handler.run(args)?.let { JsonPrimitive(it.take(MAX_RESULT)) } ?: JsonNull)
     }
 
     private fun ok(result: JsonElement) = buildJsonObject { put("ok", true); put("result", result) }
@@ -84,7 +102,9 @@ class SandboxGuest(private val instantiator: PluginInstantiator) {
         val settings = req.obj("settings").mapValues { (_, v) -> (v as? JsonPrimitive)?.contentOrNull.orEmpty() }
         val handles = ConcurrentHashMap<String, Any>()
         val registrations = mutableListOf<JsonObject>()
-        val context = GuestContext(id, settings) { point, value ->
+        val apiVersion = (req["apiVersion"] as? JsonPrimitive)?.contentOrNull?.toIntOrNull() ?: 0
+        val ideApi = if (apiVersion >= IDE_API) SandboxIdeApi(id, outbox) else null
+        val context = GuestContext(id, settings, ideApi) { point, value ->
             require(point.id in SandboxPoints.SUPPORTED) { "In der Sandbox nicht verfügbar: ${point.id}" }
             val handle = "h" + counter.incrementAndGet()
             handles[handle] = value
@@ -139,9 +159,13 @@ class SandboxGuest(private val instantiator: PluginInstantiator) {
     private class GuestContext(
         override val pluginId: String,
         private val values: Map<String, String>,
+        val ideApi: SandboxIdeApi?,
         private val onRegister: (ExtensionPoint<*>, Any) -> Disposable,
     ) : PluginContext {
         override val hostServices: PluginHostServices get() = denied("hostServices")
+
+        /** API 5 (eingeschränkt): Befehle, Ereignisse, Statusleiste. */
+        override fun ide(): IdeApi = ideApi ?: denied("ide (erst ab API 5)")
         override fun logger(tag: String): PluginLogger = object : PluginLogger {
             override fun debug(message: String) = Unit
             override fun info(message: String) = println("[$pluginId/$tag] $message")
@@ -169,5 +193,10 @@ class SandboxGuest(private val instantiator: PluginInstantiator) {
         }
 
         private fun denied(what: String): Nothing = throw PluginPermissionException(pluginId, "$what (in der Sandbox nicht verfügbar)")
+    }
+
+    private companion object {
+        const val IDE_API = 5
+        const val MAX_RESULT = 20_000
     }
 }

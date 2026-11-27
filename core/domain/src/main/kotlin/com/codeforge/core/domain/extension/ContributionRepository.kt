@@ -30,7 +30,11 @@ data class ActiveContributions(
     val projectTemplates: List<Resolved<ProjectTemplateContribution>> = emptyList(),
     val settings: List<Resolved<PluginSettingsContribution>> = emptyList(),
     /** Freigeschaltete App-Funktionen ([AppFeature]). */
-    val features: List<Resolved<String>> = emptyList()
+    val features: List<Resolved<String>> = emptyList(),
+    /** Seit API 5: Befehls-Titel, Menüeinträge und Tastenkürzel aktiver Plugins. */
+    val commands: List<Resolved<com.codeforge.core.domain.extension.ide.CommandContribution>> = emptyList(),
+    val menus: List<Resolved<com.codeforge.core.domain.extension.ide.MenuContribution>> = emptyList(),
+    val keybindings: List<Resolved<com.codeforge.core.domain.extension.ide.KeybindingContribution>> = emptyList()
 ) {
 
     companion object {
@@ -60,7 +64,10 @@ data class ActiveContributions(
                 // Vorlagen-IDs sind nur je Plugin eindeutig.
                 projectTemplates = entries.flatMap { (m, dir) -> m.contributes.projectTemplates.map { Resolved(m.id, dir, it) } },
                 settings = entries.mapNotNull { (m, dir) -> m.contributes.settings?.let { Resolved(m.id, dir, it) } },
-                features = collect({ it.features }, { it })
+                features = collect({ it.features }, { it }),
+                commands = entries.flatMap { (m, dir) -> m.contributes.commands.map { Resolved(m.id, dir, it) } },
+                menus = entries.flatMap { (m, dir) -> m.contributes.menus.map { Resolved(m.id, dir, it) } },
+                keybindings = entries.flatMap { (m, dir) -> m.contributes.keybindings.map { Resolved(m.id, dir, it) } }
             )
         }
     }

@@ -21,6 +21,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Befehle stehen auch in der Befehlspalette („Befehle“). Nur für Plugins im App-Prozess (Sideload); alles
   Angemeldete wird beim Deaktivieren entfernt. / Plugin API 5: full IDE control (commands, event bus, settings,
   editor, files, git, navigation, status bar, tool windows, screens, settings pages).
+- **Plugin-Menüs, Tastenkürzel und `when`-Bedingungen** in `plugin.json` (`contributes.commands`, `menus` für
+  `editor/context`, `fileTree/context`, `commandPalette`, `keybindings`), Bedingungen in VS-Code-Syntax
+  (`editorLangId == kotlin && !editorHasSelection`). **Sandbox-Plugins mit API 5** dürfen eigene Befehle anmelden,
+  Ereignisse abonnieren/senden und die Statusleiste nutzen. / Plugin menus, keybindings and `when` clauses in
+  `plugin.json`; sandboxed plugins get commands, events and the status bar from API 5.
 - **Compose-Vorschau „Genau (Gradle)“:** zweiter Modus neben der Live-Vorschau. Rendert die `@Preview`s des Moduls
   mit dem Gradle-Plugin von compose-ai-tools (`ee.schimke.composeai.preview` 2.104.0, Apache-2.0, Robolectric) über
   ein mitgeliefertes Init-Skript – ohne Änderung am Projekt, mit echten Abhängigkeiten, Ressourcen und Theme. Der Lauf

@@ -199,6 +199,26 @@ class EditorViewModel @Inject constructor(
             }
         }
         ideStatusBar?.let { bar -> viewModelScope.launch { bar.items.collect { items -> _uiState.update { it.copy(statusItems = items) } } } }
+        // contributes.menus/keybindings: je aktive Datei und Auswahl nach `when` filtern.
+        contributionRepository?.let { repo ->
+            viewModelScope.launch {
+                kotlinx.coroutines.flow.combine(
+                    repo.contributions,
+                    _uiState.map { it.activeFile?.path }.distinctUntilChanged(),
+                    caretFlow.map { it != null && it.selectionStart != it.selectionEnd }.distinctUntilChanged()
+                ) { c, path, hasSelection ->
+                    val root = projectRoot.value
+                    val ctx = com.codeforge.core.domain.extension.ide.IdeMenus.fileContext(
+                        path, projectOpen = root != null, gitRepo = root != null && File(root, ".git").exists(), hasSelection = hasSelection
+                    )
+                    val items = com.codeforge.core.domain.extension.ide.IdeMenus.items(
+                        com.codeforge.core.domain.extension.ide.MenuPlaces.EDITOR_CONTEXT, c.menus, c.commands
+                    )
+                    com.codeforge.core.domain.extension.ide.IdeMenus.visible(items, ctx) to
+                        com.codeforge.core.domain.extension.ide.IdeMenus.keybindings(c.keybindings, ctx)
+                }.collect { (menu, keys) -> _uiState.update { it.copy(pluginMenuItems = menu, pluginKeybindings = keys) } }
+            }
+        }
     }
 
     private var syncWorkspaceJob: Job? = null
@@ -1655,11 +1675,26 @@ class EditorViewModel @Inject constructor(
             fileTestsItem(state)
         // Befehle der API 5: `cfm.*` und von Plugins neu angemeldete (API-2-Befehle stehen schon oben).
         val legacy = pluginCommands.mapTo(HashSet()) { "${it.pluginId}.${it.commandId}" }
-        val ideItems = ideCommands?.commands?.value.orEmpty().filter { it.id !in legacy }.map {
+        val hidden = paletteHidden(state)
+        val ideItems = ideCommands?.commands?.value.orEmpty().filter { it.id !in legacy && it.id !in hidden }.map {
             PaletteItem(PaletteAction.IdeCommand(it.id), it.title, PaletteCategory.IDE, detail = "${it.category} · ${it.id}")
         }
         val items = buildPaletteItems(context) { id -> Res.string(id) } + registryItems + ideItems
         _uiState.update { it.copy(commandPalette = CommandPaletteState(allItems = items)) }
+    }
+
+    // Befehle mit `contributes.menus.commandPalette`, deren `when` für die aktive Datei nicht gilt.
+    private fun paletteHidden(state: EditorUiState): Set<String> {
+        val c = contributionRepository?.contributions?.value ?: return emptySet()
+        val items = com.codeforge.core.domain.extension.ide.IdeMenus.items(
+            com.codeforge.core.domain.extension.ide.MenuPlaces.COMMAND_PALETTE, c.menus, c.commands
+        )
+        val root = projectRoot.value
+        val ctx = com.codeforge.core.domain.extension.ide.IdeMenus.fileContext(
+            state.activeFile?.path, projectOpen = root != null, gitRepo = root != null && File(root, ".git").exists()
+        )
+        val visible = com.codeforge.core.domain.extension.ide.IdeMenus.visible(items, ctx).mapTo(HashSet()) { it.commandId }
+        return items.map { it.commandId }.filterTo(HashSet()) { it !in visible }
     }
 
     private fun runIdeCommand(id: String) = viewModelScope.launch {

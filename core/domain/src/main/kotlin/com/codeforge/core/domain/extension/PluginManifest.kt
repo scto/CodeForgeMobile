@@ -150,14 +150,21 @@ data class Contributes(
     /** Einstellungsseite des Plugins (Plugins-Bildschirm → „Einstellungen“). */
     val settings: PluginSettingsContribution? = null,
     /** Eingebaute App-Funktionen, die dieses Plugin freischaltet (siehe [AppFeature], z. B. `debugger`). */
-    val features: List<String> = emptyList()
+    val features: List<String> = emptyList(),
+    /** Seit API 5: Titel/Kategorien von Befehlen (Menüs, Palette). */
+    val commands: List<com.codeforge.core.domain.extension.ide.CommandContribution> = emptyList(),
+    /** Seit API 5: Menüeinträge je Ort (siehe `MenuPlaces`) mit `when`. */
+    val menus: List<com.codeforge.core.domain.extension.ide.MenuContribution> = emptyList(),
+    /** Seit API 5: Tastenkürzel mit `when`. */
+    val keybindings: List<com.codeforge.core.domain.extension.ide.KeybindingContribution> = emptyList()
 ) {
     /** Ob das Plugin keinerlei Contributions enthält. */
     val isEmpty: Boolean
         get() = colorThemes.isEmpty() && iconThemes.isEmpty() && terminalThemes.isEmpty() && languagePacks.isEmpty() &&
             grammars.isEmpty() && snippets.isEmpty() && lspServers.isEmpty() && extensionPack.isEmpty() &&
             formatters.isEmpty() && tools.isEmpty() && requires.isEmpty() &&
-            agentTools.isEmpty() && mcpServers.isEmpty() && projectTemplates.isEmpty() && features.isEmpty()
+            agentTools.isEmpty() && mcpServers.isEmpty() && projectTemplates.isEmpty() && features.isEmpty() &&
+            commands.isEmpty() && menus.isEmpty() && keybindings.isEmpty()
 }
 
 /**

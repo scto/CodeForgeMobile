@@ -10,8 +10,12 @@
 package com.codeforge.core.domain.extension
 
 object SandboxPolicy {
-    /** Berechtigungen, die in der Sandbox Sinn ergeben. */
-    val PERMISSIONS: Set<String> = setOf(PluginPermissions.EDITOR)
+    /**
+     * Berechtigungen, die in der Sandbox Sinn ergeben. Seit API 5 auch eigene Befehle (`commands`), Ereignisse
+     * (`events`) und die Statusleiste (`ui`, in der Sandbox nur diese). Bewusst nicht `commands.execute`: fremde
+     * Befehle wie `cfm.terminal.run` würden aus der Sandbox herausführen.
+     */
+    val PERMISSIONS: Set<String> = setOf(PluginPermissions.EDITOR, PluginPermissions.COMMANDS, PluginPermissions.EVENTS, PluginPermissions.UI)
 
     /** Größte erlaubte `classes.dex` (geht per Binder in den Sandbox-Prozess). */
     const val MAX_DEX_BYTES: Long = 900L * 1024

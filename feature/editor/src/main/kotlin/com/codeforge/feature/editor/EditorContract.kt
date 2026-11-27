@@ -109,6 +109,10 @@ data class EditorUiState(
     val outlineFilter: String = "",
     val isLoadingOutline: Boolean = false,
     val isReferencesSheetVisible: Boolean = false,
+    /** Menüeinträge `editor/context` der Plugins (API 5), schon nach `when` gefiltert. */
+    val pluginMenuItems: List<com.codeforge.core.domain.extension.ide.IdeMenuItem> = emptyList(),
+    /** Tastenkürzel der Plugins (Speicherform → Befehl), schon nach `when` gefiltert. */
+    val pluginKeybindings: Map<String, String> = emptyMap(),
     /** Einträge der Statusleiste von Plugins (API 5). */
     val statusItems: List<com.codeforge.core.domain.extension.ide.IdeStatusItem> = emptyList(),
     /** `@Preview`-Funktionen der aktiven Datei für das Randsymbol (Auge). */

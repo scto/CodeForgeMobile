@@ -46,8 +46,12 @@ class FileTreeViewModel @Inject constructor(
     private val pluginUi: com.codeforge.core.domain.extension.PluginUiRepository? = null,
     private val contributionRepository: com.codeforge.core.domain.extension.ContributionRepository? = null,
     private val toolRunner: com.codeforge.core.domain.extension.PluginToolRunner? = null,
-    private val renameRefactoring: RenameRefactoringService? = null
+    private val renameRefactoring: RenameRefactoringService? = null,
+    private val ideCommands: com.codeforge.core.domain.extension.ide.IdeCommandRegistry? = null
 ) : ViewModel() {
+
+    // Einträge der Plugins mit `registerMenuItem` (API 2); dazu kommen je Ziel die aus contributes.menus (API 5).
+    private var legacyMenuEntries: List<com.codeforge.core.domain.extension.PluginMenuEntry> = emptyList()
 
     private val _uiState = MutableStateFlow(FileTreeUiState())
     /** UI-Zustand. */
@@ -84,6 +88,7 @@ class FileTreeViewModel @Inject constructor(
             viewModelScope.launch {
                 ui.menuEntries.collect { all ->
                     val entries = all.filter { it.target == com.codeforge.core.domain.extension.PluginMenuTarget.FILE_CONTEXT_MENU }
+                    legacyMenuEntries = entries
                     _uiState.update { it.copy(pluginMenuEntries = entries) }
                 }
             }
@@ -93,6 +98,23 @@ class FileTreeViewModel @Inject constructor(
         viewModelScope.launch {
             @OptIn(kotlinx.coroutines.FlowPreview::class)
             fileSyncBridge?.savedFiles?.debounce(500)?.collect { refreshGitStatus() }
+        }
+    }
+
+    // contributes.menus.fileTree/context, deren `when` für [path] gilt (pluginId leer = Befehlsverzeichnis).
+    private fun contributedEntries(path: String): List<com.codeforge.core.domain.extension.PluginMenuEntry> {
+        val c = contributionRepository?.contributions?.value ?: return emptyList()
+        val root = _uiState.value.rootPath.takeIf { it.isNotEmpty() }
+        val ctx = com.codeforge.core.domain.extension.ide.IdeMenus.fileContext(
+            path, projectOpen = root != null, gitRepo = root != null && java.io.File(root, ".git").exists()
+        )
+        val items = com.codeforge.core.domain.extension.ide.IdeMenus.items(
+            com.codeforge.core.domain.extension.ide.MenuPlaces.FILE_TREE_CONTEXT, c.menus, c.commands
+        )
+        return com.codeforge.core.domain.extension.ide.IdeMenus.visible(items, ctx).map {
+            com.codeforge.core.domain.extension.PluginMenuEntry(
+                "", it.commandId, it.title, com.codeforge.core.domain.extension.PluginMenuTarget.FILE_CONTEXT_MENU, it.commandId
+            )
         }
     }
 
@@ -169,19 +191,15 @@ class FileTreeViewModel @Inject constructor(
             is FileTreeUiEvent.ViewChanged -> updateOptions { it.copy(view = event.value) }
             is FileTreeUiEvent.ShowHiddenChanged -> updateOptions { it.copy(showHidden = event.value) }
             is FileTreeUiEvent.FileOpened -> openFile(event.path)
-            is FileTreeUiEvent.ContextMenuRequested ->
-                _uiState.update { it.copy(contextTarget = FileTreeContextTarget(event.path, event.isDirectory)) }
+            is FileTreeUiEvent.ContextMenuRequested -> _uiState.update {
+                it.copy(
+                    contextTarget = FileTreeContextTarget(event.path, event.isDirectory),
+                    pluginMenuEntries = contributedEntries(event.path) + legacyMenuEntries
+                )
+            }
 
             FileTreeUiEvent.DismissContextMenu -> _uiState.update { it.copy(contextTarget = null) }
-            is FileTreeUiEvent.RunPluginEntry -> {
-                val path = _uiState.value.contextTarget?.path
-                _uiState.update { it.copy(contextTarget = null) }
-                viewModelScope.launch {
-                    pluginUi?.runCommand(event.pluginId, event.commandId, path)?.onFailure {
-                        _effect.emit(FileTreeUiEffect.ShowSnackbar(com.codeforge.core.resources.Res.string(com.codeforge.core.resources.R.string.editor_plugin_befehl_fehlgeschlagen, it.message.orEmpty())))
-                    }
-                }
-            }
+            is FileTreeUiEvent.RunPluginEntry -> runPluginEntry(event.pluginId, event.commandId)
             FileTreeUiEvent.CreateFileClicked -> startAction(FileTreeActionType.CREATE_FILE)
             FileTreeUiEvent.CreateDirectoryClicked -> startAction(FileTreeActionType.CREATE_DIRECTORY)
             FileTreeUiEvent.RenameClicked -> startActionOnContextTarget(FileTreeActionType.RENAME)
@@ -198,6 +216,22 @@ class FileTreeViewModel @Inject constructor(
             is FileTreeUiEvent.ConfirmRenamePlan -> confirmRenamePlan(event.adjustReferences)
             FileTreeUiEvent.CancelRenamePlan -> _uiState.update { it.copy(renamePlan = null) }
             FileTreeUiEvent.Refresh -> bumpRefreshToken()
+        }
+    }
+
+    private fun runPluginEntry(pluginId: String, commandId: String) {
+        val path = _uiState.value.contextTarget?.path
+        _uiState.update { it.copy(contextTarget = null) }
+        viewModelScope.launch {
+            val result = if (pluginId.isEmpty()) {
+                // API 5: Befehl aus dem Befehlsverzeichnis mit dem Pfad des Eintrags.
+                ideCommands?.execute(commandId, path?.let { mapOf("path" to it) }.orEmpty())?.map { }
+            } else {
+                pluginUi?.runCommand(pluginId, commandId, path)
+            }
+            result?.onFailure {
+                _effect.emit(FileTreeUiEffect.ShowSnackbar(com.codeforge.core.resources.Res.string(com.codeforge.core.resources.R.string.editor_plugin_befehl_fehlgeschlagen, it.message.orEmpty())))
+            }
         }
     }
 

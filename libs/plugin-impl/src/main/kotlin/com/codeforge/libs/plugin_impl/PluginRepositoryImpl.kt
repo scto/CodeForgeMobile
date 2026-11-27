@@ -81,7 +81,8 @@ class PluginRepositoryImpl @Inject constructor(
         gradleBuild = { runCatching { gradleBuild.get() }.getOrNull() },
         ideHost = { runCatching { ideHost.get() }.getOrNull() },
         sandbox = com.codeforge.libs.plugin_sandbox.SandboxRuntime(
-            com.codeforge.libs.plugin_sandbox.ServiceSandboxTransport(context), extensionRegistry
+            com.codeforge.libs.plugin_sandbox.ServiceSandboxTransport(context), extensionRegistry,
+            ide = com.codeforge.libs.plugin_impl.ide.HostSandboxIdeSink { runCatching { ideHost.get() }.getOrNull() }
         )
     )
 

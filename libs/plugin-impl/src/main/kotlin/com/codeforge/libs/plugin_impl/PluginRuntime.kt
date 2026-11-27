@@ -222,7 +222,8 @@ internal class PluginRuntime(
         val settings = HostPluginSettings(plugin.id, items, settingsRepository)
         val snapshot = items.associate { it.key to settings.getString(it.key) }
         val log = HostPluginLogger(plugin.id, "sandbox", logs)
-        runtime.load(SandboxRuntime.Spec(plugin.id, entryPointClassName, dex.readBytes(), snapshot)) { result ->
+        val spec = SandboxRuntime.Spec(plugin.id, entryPointClassName, dex.readBytes(), snapshot, plugin.permissions, plugin.apiVersion)
+        runtime.load(spec) { result ->
             result.onSuccess { n -> log.info("In der Sandbox geladen: $n Beiträge") }
                 .onFailure { log.error("Laden in der Sandbox fehlgeschlagen", it) }
         }
