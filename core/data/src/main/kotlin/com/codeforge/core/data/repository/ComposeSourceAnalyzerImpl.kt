@@ -21,10 +21,17 @@ import javax.inject.Singleton
 @Singleton
 class ComposeSourceAnalyzerImpl @Inject constructor() : ComposeSourceAnalyzer {
 
+    private val nonPreviewAnnotations = setOf("PreviewTest", "PreviewParameter")
     private val functionRegex = Regex("""^(?:public\s+|private\s+|internal\s+)?fun\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(""")
     private val annotationRegex = Regex("""^@(\w+)""")
 
-    override fun findComposables(sourceCode: String): List<ComposableCandidate> {
+    // @Preview und Multi-Previews (@PreviewLightDark, @PreviewScreenSizes, eigene @…Preview(s)); nicht @PreviewTest
+    // (Screenshot-Test) und @PreviewParameter (Parameter-Annotation).
+    private fun isPreviewAnnotation(name: String): Boolean =
+        name == "Preview" ||
+            (name !in nonPreviewAnnotations && (name.startsWith("Preview") || name.endsWith("Preview") || name.endsWith("Previews")))
+
+        override fun findComposables(sourceCode: String): List<ComposableCandidate> {
         val pendingAnnotations = mutableSetOf<String>()
         var pendingPreviewArgs = ""
         val results = mutableListOf<ComposableCandidate>()
@@ -61,7 +68,7 @@ class ComposeSourceAnalyzerImpl @Inject constructor() : ComposeSourceAnalyzer {
                     results.add(
                         ComposableCandidate(
                             functionName = functionMatch.groupValues[1],
-                            hasPreviewAnnotation = "Preview" in pendingAnnotations,
+                            hasPreviewAnnotation = pendingAnnotations.any(::isPreviewAnnotation),
                             startLine = index,
                             // Nach "(" folgt direkt ")" → parameterlos; sonst (auch bei Zeilenumbruch) hat sie Parameter.
                             hasParameters = !line.substring(functionMatch.range.last + 1).trimStart().startsWith(")"),

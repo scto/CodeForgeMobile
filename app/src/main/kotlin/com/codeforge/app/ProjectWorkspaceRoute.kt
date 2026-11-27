@@ -296,7 +296,8 @@ fun ProjectWorkspaceRoute(
                             if (!permanentDrawer) coroutineScope.launch { drawerState.open() }
                         },
                     ) },
-                previewContent = { ComposePreviewRoute() }
+                previewContent = { ComposePreviewRoute() },
+                showPreviewRequests = bridgeViewModel.showRequests
             )
         }
     }

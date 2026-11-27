@@ -22,4 +22,7 @@ class ComposablePreviewBridgeViewModel @Inject constructor(
 ) : ViewModel() {
     /** Aktive Datei mit Composables. */
     val activeFile: StateFlow<ActiveComposableFile?> = bridge.activeFile
+
+    /** Vorschau aus dem Editor angefordert (Randsymbol): Vorschau-Tab zeigen. */
+    val showRequests: kotlinx.coroutines.flow.Flow<String> = bridge.showRequests
 }

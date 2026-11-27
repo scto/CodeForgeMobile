@@ -30,6 +30,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
+import com.codeforge.core.navigation.OpenFileRequestBridge
+import com.codeforge.core.navigation.TestRunRequestBridge
+import com.codeforge.feature.composepreview.gradle.GradlePreviewInitScript
+import com.codeforge.feature.composepreview.gradle.GradlePreviews
 
 /** ViewModel der Compose-Vorschau. */
 @HiltViewModel
@@ -38,8 +46,14 @@ class ComposePreviewViewModel @Inject constructor(
     private val composeSourceAnalyzer: ComposeSourceAnalyzer,
     private val composePreviewRenderer: ComposePreviewRenderer,
     private val logger: CfmLogger,
-    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository
+    private val settingsRepository: com.codeforge.core.datastore.SettingsRepository,
+    private val gradleInitScript: GradlePreviewInitScript,
+    private val testRunBridge: TestRunRequestBridge,
+    private val openFileBridge: OpenFileRequestBridge
 ) : ViewModel() {
+
+    // Beobachtet im Gradle-Modus das Manifest des Moduls.
+    private var gradlePollJob: Job? = null
 
     private val _uiState = MutableStateFlow(ComposePreviewUiState())
     /** UI-Zustand. */
@@ -67,6 +81,14 @@ class ComposePreviewViewModel @Inject constructor(
             .drop(1)
             .onEach { _uiState.value.selectedFunctionName?.let(::renderSelected) }
             .launchIn(viewModelScope)
+        // Randsymbol neben @Preview im Editor: diese Funktion wählen.
+        previewBridge.showRequests
+            .onEach { name ->
+                if (_uiState.value.availableComposables.any { it.functionName == name }) {
+                    onEvent(ComposePreviewUiEvent.FunctionSelected(name))
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     /** Verarbeitet eine Aktion des Nutzers. */
@@ -74,11 +96,16 @@ class ComposePreviewViewModel @Inject constructor(
         when (event) {
             is ComposePreviewUiEvent.FunctionSelected -> {
                 _uiState.update { it.copy(selectedFunctionName = event.functionName) }
-                renderSelected(event.functionName)
+                if (_uiState.value.mode == PreviewMode.LIVE) renderSelected(event.functionName)
             }
 
-            ComposePreviewUiEvent.Rerender -> {
-                _uiState.value.selectedFunctionName?.let { renderSelected(it, forceRefresh = true) }
+            is ComposePreviewUiEvent.ModeChanged -> changeMode(event.mode)
+            is ComposePreviewUiEvent.GradleRender -> gradleRender(event.full)
+            is ComposePreviewUiEvent.OpenImage -> viewModelScope.launch { openFileBridge.requestOpen(event.path) }
+
+            ComposePreviewUiEvent.Rerender -> when (_uiState.value.mode) {
+                PreviewMode.LIVE -> _uiState.value.selectedFunctionName?.let { renderSelected(it, forceRefresh = true) }
+                PreviewMode.GRADLE -> gradleRender(full = false)
             }
 
             is ComposePreviewUiEvent.ThemeModeChanged -> {
@@ -98,7 +125,7 @@ class ComposePreviewViewModel @Inject constructor(
         lastActiveFile = file
 
         if (file == null || file.composableFunctionNames.isEmpty()) {
-            _uiState.update { ComposePreviewUiState() }
+            _uiState.update { ComposePreviewUiState(mode = it.mode) }
             return
         }
 
@@ -120,7 +147,68 @@ class ComposePreviewViewModel @Inject constructor(
             )
         }
 
-        selected?.let(::renderSelected)
+        if (_uiState.value.mode == PreviewMode.GRADLE) {
+            if (!sameFile) watchGradle()
+        } else {
+            selected?.let(::renderSelected)
+        }
+    }
+
+    private fun changeMode(mode: PreviewMode) {
+        if (mode == _uiState.value.mode) return
+        _uiState.update { it.copy(mode = mode) }
+        if (mode == PreviewMode.GRADLE) {
+            renderJob?.cancel()
+            watchGradle()
+        } else {
+            gradlePollJob?.cancel()
+            _uiState.value.selectedFunctionName?.let(::renderSelected)
+        }
+    }
+
+    // Liest das Manifest des Moduls neu, sobald es sich ändert (ein Lauf im Build-Panel schreibt es).
+    private fun watchGradle() {
+        gradlePollJob?.cancel()
+        val file = lastActiveFile ?: return
+        gradlePollJob = viewModelScope.launch {
+            val module = withContext(Dispatchers.IO) { GradlePreviews.locate(file.path) }
+            if (module == null) {
+                _uiState.update { it.copy(gradle = GradlePreviewState()) }
+                return@launch
+            }
+            val packageName = GradlePreviews.packageOf(file.content)
+            var seen = -1L
+            while (isActive) {
+                val stamp = withContext(Dispatchers.IO) { GradlePreviews.manifestFile(module).lastModified() }
+                if (stamp != seen) {
+                    seen = stamp
+                    val previews = withContext(Dispatchers.IO) { GradlePreviews.previewsFor(module, file.path, packageName) }
+                    _uiState.update {
+                        it.copy(
+                            gradle = GradlePreviewState(
+                                module = module.gradlePath,
+                                previews = previews,
+                                hasManifest = stamp > 0L,
+                                updatedAt = stamp,
+                                waiting = it.gradle.waiting && it.gradle.updatedAt == stamp
+                            )
+                        )
+                    }
+                }
+                delay(GRADLE_POLL_MS)
+            }
+        }
+    }
+
+    private fun gradleRender(full: Boolean) {
+        val file = lastActiveFile ?: return
+        viewModelScope.launch {
+            val module = withContext(Dispatchers.IO) {
+                GradlePreviews.locate(file.path)?.also { gradleInitScript.install(it.root) }
+            } ?: return@launch
+            _uiState.update { it.copy(gradle = it.gradle.copy(waiting = true)) }
+            testRunBridge.requestRunTest(gradleCommand = GradlePreviews.renderCommand(module, full))
+        }
     }
 
     private fun renderSelected(functionName: String, forceRefresh: Boolean = false) {
@@ -190,6 +278,7 @@ class ComposePreviewViewModel @Inject constructor(
     private companion object {
         /** Wartezeit nach der letzten Tippänderung, bevor neu gerendert wird. */
         const val TYPING_DEBOUNCE_MS = 250L
+        const val GRADLE_POLL_MS = 2_000L
         const val LOG_TAG = "ComposePreview"
     }
 }

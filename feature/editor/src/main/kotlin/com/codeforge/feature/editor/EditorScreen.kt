@@ -612,6 +612,8 @@ fun EditorRoute(
                                 onEditBreakpoint = { viewModel.onEvent(EditorUiEvent.EditBreakpoint(it)) },
                                 onUpdateChipClick = { viewModel.onEvent(EditorUiEvent.UpdateChipClicked(it)) },
                                 onTestTargetClick = { viewModel.onEvent(EditorUiEvent.RunTestTarget(it)) },
+                                previewTargets = uiState.previewGutter,
+                                onPreviewGutterClick = { viewModel.onEvent(EditorUiEvent.ShowComposePreview(it)) },
                                 pluginTests = uiState.activePluginTests,
                                 textActions = textActions,
                                 onTextAction = { id ->

@@ -109,6 +109,8 @@ data class EditorUiState(
     val outlineFilter: String = "",
     val isLoadingOutline: Boolean = false,
     val isReferencesSheetVisible: Boolean = false,
+    /** `@Preview`-Funktionen der aktiven Datei für das Randsymbol (Auge). */
+    val previewGutter: List<com.codeforge.feature.editor.overlay.PreviewGutterTarget> = emptyList(),
     /** Aktionsblatt eines Tests aus der Randspalte, sonst `null`. */
     val testActions: com.codeforge.feature.editor.overlay.TestActionsState? = null,
     val referencesList: List<LspLocation> = emptyList(),
@@ -356,6 +358,8 @@ sealed interface EditorUiEvent {
     data class SelectLocation(val location: LspLocation) : EditorUiEvent
     /** Test-Symbol in der Randspalte angetippt: Unit-Tests laufen sofort, Screenshot-Tests öffnen das Aktionsblatt. */
     data class RunTestTarget(val target: com.codeforge.feature.editor.overlay.TestTarget) : EditorUiEvent
+    /** Randsymbol neben `@Preview`: Vorschau-Tab mit dieser Funktion zeigen. */
+    data class ShowComposePreview(val functionName: String) : EditorUiEvent
     /** Aktion im Test-Aktionsblatt gewählt. */
     data class TestActionChosen(val action: com.codeforge.feature.editor.overlay.TestGutterAction) : EditorUiEvent
     /** Test-Aktionsblatt schließen. */

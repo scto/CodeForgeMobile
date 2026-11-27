@@ -161,6 +161,8 @@ fun SoraCodeEditor(
     onUpdateChipClick: (DependencyUpdate) -> Unit = {},
     onTestTargetClick: (TestTarget) -> Unit = {},
     pluginTests: List<TestTarget> = emptyList(),
+    previewTargets: List<com.codeforge.feature.editor.overlay.PreviewGutterTarget> = emptyList(),
+    onPreviewGutterClick: (String) -> Unit = {},
     textActions: List<EditorTextAction> = emptyList(),
     onTextAction: (String) -> Unit = {},
     onContentChanged: (String) -> Unit,
@@ -225,8 +227,13 @@ fun SoraCodeEditor(
     val testTargets = remember(scannedTests, pluginTests) { scannedTests + pluginTests }
     val currentOnTestTargetClick by androidx.compose.runtime.rememberUpdatedState(onTestTargetClick)
     // Test-Symbole in der Randspalte (sora-Symbolspalte), Tipp öffnet die Test-Aktionen.
+    val currentOnPreviewClick by androidx.compose.runtime.rememberUpdatedState(onPreviewGutterClick)
     val gutterIcons = remember(path) {
-        com.codeforge.feature.editor.overlay.TestGutterIcons(context) { currentOnTestTargetClick(it) }
+        com.codeforge.feature.editor.overlay.TestGutterIcons(
+            context,
+            onClick = { currentOnTestTargetClick(it) },
+            onPreviewClick = { currentOnPreviewClick(it) }
+        )
     }
     // Farbmarken zeichnet sora selbst (ColorInlayHint), Tests stehen in der Randspalte; das Overlay trägt Update-Chips.
     val lineOverlays = remember(updateAnnotations) {
@@ -384,7 +391,7 @@ fun SoraCodeEditor(
                 appliedDiagnostics.set(diagnostics)
             }
             inlaySource.update(editor, if (settings.inlayHints) inlayHints else emptyList(), colorMatches)
-            gutterIcons.update(editor, testTargets)
+            gutterIcons.update(editor, testTargets, previewTargets)
         }
     )
 
@@ -426,9 +433,7 @@ fun SoraCodeEditor(
         breakpointsEnabled = breakpointsEnabled,
         onToggleBreakpoint = onToggleBreakpoint,
         onEditBreakpoint = onEditBreakpoint,
-        onSideIconTap = { line ->
-            testTargets.firstOrNull { it.line == line }?.let { currentOnTestTargetClick(it); true } ?: false
-        }
+        onSideIconTap = { line -> gutterIcons.handleTap(line) }
     )
     }
 

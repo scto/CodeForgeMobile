@@ -12,6 +12,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Neu / Added
+- **Compose-Vorschau „Genau (Gradle)“:** zweiter Modus neben der Live-Vorschau. Rendert die `@Preview`s des Moduls
+  mit dem Gradle-Plugin von compose-ai-tools (`ee.schimke.composeai.preview` 2.104.0, Apache-2.0, Robolectric) über
+  ein mitgeliefertes Init-Skript – ohne Änderung am Projekt, mit echten Abhängigkeiten, Ressourcen und Theme. Der Lauf
+  erscheint im Build-Panel, die Bilder der Datei (`previews.json`) direkt im Vorschau-Tab; Tipp öffnet das PNG.
+  **Randsymbol (Auge) neben `@Preview`** öffnet den Vorschau-Tab mit dieser Funktion; Multi-Previews
+  (`@PreviewLightDark`, eigene `@…Previews`) zählen jetzt als Vorschau.
+  / Exact Gradle-based Compose preview mode and preview gutter icons.
 - **Test-Symbole in der Randspalte des Editors (wie in Android Studio):** neben Testklassen, `@Test`- und
   `@PreviewTest`-Funktionen steht ein Symbol in der Symbolspalte; Unit-Tests laufen per Tipp im richtigen Modul,
   Screenshot-Tests (Roborazzi, Compose-Screenshot-Plugin, AGP-Test-Suites) öffnen ein Blatt: mit Referenzbildern
@@ -24,6 +31,9 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   / Agent ships Google's agp-9-upgrade skill; use_skill can load reference files.
 
 ### Geändert / Changed
+- **Gefilterte Testläufe griffen nie:** Gradle-Aufrufe wurden stur an Leerzeichen zerlegt, `--tests "Klasse"` kam
+  mit Anführungszeichen bei Gradle an. Aufrufe werden jetzt wie in einer Shell zerlegt (betraf Einzeltests aus dem
+  Editor und „Fehlgeschlagene wiederholen“). / Filtered test runs now work (shell-like argument splitting).
 - **OpenRouter-Anmeldung: „Unable to resolve host openrouter.ai“ behoben.** Die Rückleitung erreichte die App,
   während sie noch hinter dem Browser im Hintergrund lag; Android sperrt Hintergrund-Apps das Netz, der Schlüsseltausch
   schlug sofort fehl. Netzfehler werden jetzt bis zu 3 Minuten wiederholt – sobald man zur App zurückwechselt, wird der

@@ -154,7 +154,7 @@ class ProcessGradleBuildRepository(
         val parserSession = outputParser.createSession()
         outputBuffer.clear()
 
-        val taskArgs = taskName.trim().split("\\s+".toRegex()).filter { it.isNotEmpty() }
+        val taskArgs = GradleCommandLine.split(taskName)
         val command = buildList {
             add(TermuxEnvironment.bashPath)
             add(gradlewFile.absolutePath)

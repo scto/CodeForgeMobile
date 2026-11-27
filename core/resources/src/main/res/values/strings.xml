@@ -3056,4 +3056,13 @@
     <string name="test_gutter_tool_unit">Unit test</string>
     <string name="test_gutter_no_module">No Gradle module found for this file.</string>
     <string name="test_gutter_report_open_failed">Cannot open the report with another app: %1$s</string>
+    <string name="composepreview_mode_live">Live (on device)</string>
+    <string name="composepreview_mode_gradle">Exact (Gradle)</string>
+    <string name="composepreview_gradle_render">Render</string>
+    <string name="composepreview_gradle_render_full">Render all (incl. GIFs)</string>
+    <string name="composepreview_gradle_status">Module %1$s · rendered at %2$s</string>
+    <string name="composepreview_gradle_first_run">Module %1$s: not rendered yet. Rendering runs in the build panel with the compose-ai-tools Gradle plugin (Robolectric). The first run downloads the plugin and Android libraries and needs network, JDK 17 and Gradle 9.4.1 or newer.</string>
+    <string name="composepreview_gradle_none_in_file">No rendered previews for this file – render again after saving.</string>
+    <string name="composepreview_gradle_not_rendered">Not rendered</string>
+    <string name="composepreview_gradle_no_project">This file is not part of a Gradle project.</string>
 </resources>

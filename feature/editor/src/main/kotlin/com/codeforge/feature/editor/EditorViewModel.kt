@@ -839,6 +839,7 @@ class EditorViewModel @Inject constructor(
                 if (ref != null) runPluginTests(ref, listOf(event.target)) else openTestActions(event.target)
             }
             is EditorUiEvent.TestActionChosen -> onTestAction(event.action)
+            is EditorUiEvent.ShowComposePreview -> previewBridge.requestShow(event.functionName)
             EditorUiEvent.DismissTestActions -> _uiState.update { it.copy(testActions = null) }
             is EditorUiEvent.OpenTestResultImage -> {
                 _uiState.update { it.copy(testActions = null) }
@@ -2162,10 +2163,14 @@ class EditorViewModel @Inject constructor(
         val active = _uiState.value.activeFile
         if (active == null || !active.path.endsWith(".kt")) {
             previewBridge.publish(null)
+            _uiState.update { if (it.previewGutter.isEmpty()) it else it.copy(previewGutter = emptyList()) }
             return
         }
 
         val composables = composeSourceAnalyzer.findComposables(active.content)
+        val gutter = composables.filter { it.hasPreviewAnnotation }
+            .map { com.codeforge.feature.editor.overlay.PreviewGutterTarget(it.startLine, it.functionName) }
+        _uiState.update { if (it.previewGutter == gutter) it else it.copy(previewGutter = gutter) }
         previewBridge.publish(
             if (composables.isEmpty()) {
                 null

@@ -100,4 +100,28 @@ class ComposeSourceAnalyzerImplTest {
         assertEquals(500, b.widthDp)
         assertEquals(800, b.heightDp)
     }
+
+    @Test
+    fun `Multi-Previews zaehlen`() {
+        val src = """
+            @PreviewLightDark
+            @Composable
+            fun A() {
+            }
+
+            @DevicePreviews
+            @Composable
+            fun B() {
+            }
+
+            @PreviewTest
+            @Composable
+            fun C() {
+            }
+        """.trimIndent()
+        val by = analyzer.findComposables(src).associateBy { it.functionName }
+        assertTrue(by.getValue("A").hasPreviewAnnotation)
+        assertTrue(by.getValue("B").hasPreviewAnnotation)
+        assertFalse(by.getValue("C").hasPreviewAnnotation)
+    }
 }

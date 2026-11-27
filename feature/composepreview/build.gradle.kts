@@ -78,6 +78,8 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
+    // Genaue Vorschau über Gradle: previews.json des compose-ai-tools-Plugins lesen
+    implementation(libs.kotlinx.serialization.json)
     implementation(project(":libs:terminal-engine"))
 
     implementation(platform(libs.androidx.compose.bom))

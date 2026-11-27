@@ -89,11 +89,24 @@ private fun ComposePreviewScreen(modifier: Modifier = Modifier, uiState: Compose
                 return@Scaffold
             }
 
+            ModeRow(selected = uiState.mode, onSelected = { onEvent(ComposePreviewUiEvent.ModeChanged(it)) })
+
             ComposableChipRow(
                 candidates = uiState.availableComposables,
                 selected = uiState.selectedFunctionName,
                 onSelected = { name -> onEvent(ComposePreviewUiEvent.FunctionSelected(name)) }
             )
+
+            if (uiState.mode == PreviewMode.GRADLE) {
+                com.codeforge.feature.composepreview.gradle.GradlePreviewPane(
+                    state = uiState.gradle,
+                    selectedFunction = uiState.selectedFunctionName,
+                    onRender = { onEvent(ComposePreviewUiEvent.GradleRender(it)) },
+                    onOpenImage = { onEvent(ComposePreviewUiEvent.OpenImage(it)) },
+                    modifier = Modifier.weight(1f)
+                )
+                return@Scaffold
+            }
 
             ThemeModeRow(selected = uiState.themeMode, onSelected = { onEvent(ComposePreviewUiEvent.ThemeModeChanged(it)) })
 
@@ -169,6 +182,28 @@ private fun ZoomBar(zoom: Float, onZoomOut: () -> Unit, onZoomIn: () -> Unit, on
             IconButton(onClick = onZoomIn, enabled = zoom < PreviewZoom.STEPS.last()) {
                 Icon(Icons.Filled.ZoomIn, contentDescription = stringRes(R.string.composepreview_vergroessern))
             }
+        }
+    }
+}
+
+@Composable
+private fun ModeRow(selected: PreviewMode, onSelected: (PreviewMode) -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)
+    ) {
+        PreviewMode.entries.forEach { mode ->
+            FilterChip(
+                selected = mode == selected,
+                onClick = { onSelected(mode) },
+                label = {
+                    Text(
+                        stringRes(
+                            if (mode == PreviewMode.LIVE) R.string.composepreview_mode_live else R.string.composepreview_mode_gradle
+                        )
+                    )
+                }
+            )
         }
     }
 }

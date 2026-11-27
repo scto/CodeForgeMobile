@@ -5,9 +5,14 @@
 package com.codeforge.core.navigation
 
 import dagger.hilt.android.scopes.ActivityRetainedScoped
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /** Aktive Datei mit Composables (Pfad, Inhalt, Funktionsnamen). */
@@ -27,8 +32,14 @@ data class ActiveComposableFile(
 interface ActiveComposablePreviewBridge {
     /** Aktive Datei oder `null`. */
     val activeFile: StateFlow<ActiveComposableFile?>
+    /** Vorschau einer Funktion angefordert (Randsymbol neben `@Preview` im Editor): Tab zeigen, Funktion wählen. */
+    val showRequests: Flow<String> get() = emptyFlow()
+
     /** Meldet die aktive Datei. */
     fun publish(file: ActiveComposableFile?)
+
+    /** Fordert die Vorschau von [functionName] an. */
+    fun requestShow(functionName: String) = Unit
 }
 
 /** Standardimplementierung. */
@@ -37,7 +48,14 @@ class ActiveComposablePreviewBridgeImpl @Inject constructor() : ActiveComposable
     private val _activeFile = MutableStateFlow<ActiveComposableFile?>(null)
     override val activeFile: StateFlow<ActiveComposableFile?> = _activeFile.asStateFlow()
 
+    private val _showRequests = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    override val showRequests: SharedFlow<String> = _showRequests.asSharedFlow()
+
     override fun publish(file: ActiveComposableFile?) {
         _activeFile.value = file
+    }
+
+    override fun requestShow(functionName: String) {
+        _showRequests.tryEmit(functionName)
     }
 }

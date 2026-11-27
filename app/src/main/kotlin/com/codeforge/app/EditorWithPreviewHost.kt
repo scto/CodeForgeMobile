@@ -29,9 +29,15 @@ fun EditorWithPreviewHost(
     modifier: Modifier = Modifier,
     hasComposables: Boolean,
     editorContent: @Composable () -> Unit,
-    previewContent: @Composable () -> Unit
+    previewContent: @Composable () -> Unit,
+    showPreviewRequests: kotlinx.coroutines.flow.Flow<String> = kotlinx.coroutines.flow.emptyFlow()
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
+
+    // Randsymbol neben @Preview im Editor: zum Vorschau-Tab wechseln.
+    LaunchedEffect(showPreviewRequests) {
+        showPreviewRequests.collect { selectedTab = 1 }
+    }
 
     LaunchedEffect(hasComposables) {
         if (!hasComposables) selectedTab = 0

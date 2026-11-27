@@ -32,6 +32,29 @@ sealed interface PreviewRenderState {
     data class Failed(val message: String) : PreviewRenderState
 }
 
+/** Wie die Vorschau entsteht. */
+enum class PreviewMode {
+    /** Schnell auf dem Gerät (kotlinc bzw. Interpreter, Ressourcen als Stubs). */
+    LIVE,
+
+    /** Genau über Gradle (compose-ai-tools-Plugin, Robolectric, echte Abhängigkeiten und Ressourcen). */
+    GRADLE
+}
+
+/** Zustand der genauen Vorschau über Gradle. */
+@Immutable
+data class GradlePreviewState(
+    /** Gradle-Pfad des Moduls (z. B. `:app`); `null` außerhalb eines Gradle-Projekts. */
+    val module: String? = null,
+    val previews: List<com.codeforge.feature.composepreview.gradle.GradlePreviewImage> = emptyList(),
+    /** Es gibt schon ein `previews.json` (mindestens ein Lauf). */
+    val hasManifest: Boolean = false,
+    /** Zeitpunkt des letzten Manifests (ms). */
+    val updatedAt: Long = 0L,
+    /** Ein Lauf wurde angestoßen, das Ergebnis steht noch aus. */
+    val waiting: Boolean = false
+)
+
 /** Zustand der Compose-Vorschau. */
 @Immutable
 data class ComposePreviewUiState(
@@ -43,7 +66,9 @@ data class ComposePreviewUiState(
     /** Vergrößerung der Vorschau samt Texten (1.0 = 100 %). */
     val zoom: Float = PreviewZoom.DEFAULT,
     /** Ein neues Bild wird erzeugt; das bisherige bleibt so lange sichtbar. */
-    val isRefreshing: Boolean = false
+    val isRefreshing: Boolean = false,
+    val mode: PreviewMode = PreviewMode.LIVE,
+    val gradle: GradlePreviewState = GradlePreviewState()
 )
 
 /** Zoomstufen der Vorschau. */
@@ -70,4 +95,10 @@ sealed interface ComposePreviewUiEvent {
     data object ZoomOut : ComposePreviewUiEvent
     /** Auf 100 % zurück. */
     data object ZoomReset : ComposePreviewUiEvent
+    /** Live- oder Gradle-Vorschau gewählt. */
+    data class ModeChanged(val mode: PreviewMode) : ComposePreviewUiEvent
+    /** Über Gradle rendern ([full] auch teure Aufnahmen wie GIFs). */
+    data class GradleRender(val full: Boolean) : ComposePreviewUiEvent
+    /** Gerendertes Bild im Bildbetrachter öffnen. */
+    data class OpenImage(val path: String) : ComposePreviewUiEvent
 }
