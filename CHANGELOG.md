@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.6.1] - 2026-11-27
+
 ### Neu / Added
 - **String-Editor (Plugin):** visueller Editor für `strings.xml`, portiert aus StringEditor (raredeveloperofc,
   GPL-3.0) nach Kotlin/Jetpack Compose. Symbol „Strings“ in der Seitenleiste des Projekts (neben Layouts und Themes)
