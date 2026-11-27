@@ -59,7 +59,7 @@ fun ApkInstallSection(
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
-        visible = state.installStatus !is ApkInstallStatus.Idle,
+        visible = state.installStatus !is ApkInstallStatus.Idle && state.installStatus !is ApkInstallStatus.Building,
         enter = fadeIn(),
         exit = fadeOut(),
         modifier = modifier

@@ -20,14 +20,11 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Transform
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,7 +47,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -60,6 +56,7 @@ import com.codeforge.core.resources.stringRes
 import com.codeforge.core.ui.TooltipIconButton
 import com.codeforge.core.ui.rememberIsExpandedWidth
 import com.codeforge.feature.build.BuildBottomSheet
+import com.codeforge.feature.build.BuildToolbarActions
 import com.codeforge.feature.build.BuildTab
 import com.codeforge.feature.build.BuildUiEffect
 import com.codeforge.feature.build.BuildUiIntent
@@ -285,20 +282,12 @@ fun ProjectWorkspaceRoute(
                                 )
                             }
                         }
-                        TooltipIconButton(onClick = { showBuildSheet = true }, label = stringRes(R.string.build_bauen)) {
-                            if (buildState.isBuilding) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    strokeWidth = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Build,
-                                    contentDescription = stringRes(R.string.build_bauen)
-                                )
-                            }
-                        }
+                        // Start (Variante bauen, installieren, starten), Tasks, Ausgabe – kein Platz im Editor nötig.
+                        BuildToolbarActions(
+                            state = buildState,
+                            onIntent = buildViewModel::handleIntent,
+                            onOpenOutput = { showBuildSheet = true }
+                        )
                     }
                 )
             }

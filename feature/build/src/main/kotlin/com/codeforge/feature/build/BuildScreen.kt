@@ -4,7 +4,9 @@
  */
 package com.codeforge.feature.build
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,30 +17,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.automirrored.filled.Launch
+import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -46,25 +53,187 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.codeforge.core.domain.model.BuildStatus
 import com.codeforge.core.resources.R
 import com.codeforge.core.resources.stringRes
+import com.codeforge.core.ui.TooltipIconButton
 import com.codeforge.feature.build.testrunner.TestDetailSheet
 import com.codeforge.feature.build.testrunner.TestsTab
 
-/** Bottom Sheet mit dem Build-Panel. */
+private val SuccessGreen = Color(0xFF2E7D32)
+private val RunGreen = Color(0xFF43A047)
+private val WarningOrange = Color(0xFFF57C00)
+
+/**
+ * Build-Knöpfe für die Symbolleiste des Editors (statt eines eigenen Panels):
+ * - **Start** (grün): baut die projektweite Variante (`assemble<Variante>`), installiert und startet sie; gedrückt
+ *   halten wählt die Variante. Während eines Builds wird daraus „Stoppen“ mit Fortschrittsring.
+ * - **Tasks**: Blatt mit durchsuchbarer Mehrfachauswahl der Gradle-Tasks.
+ * - **Ausgabe**: öffnet das Build-Blatt; ein Punkt/Zähler zeigt Ergebnis, Fehler und Warnungen.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun BuildToolbarActions(
+    state: BuildUiState,
+    onIntent: (BuildUiIntent) -> Unit,
+    onOpenOutput: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var variantMenu by remember { mutableStateOf(false) }
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Box {
+            RunStopButton(
+                isBuilding = state.isBuilding,
+                variant = state.buildVariant,
+                onRun = { onIntent(BuildUiIntent.RunVariant) },
+                onStop = { onIntent(BuildUiIntent.CancelBuild) },
+                onLongClick = { variantMenu = true }
+            )
+            VariantMenu(
+                expanded = variantMenu,
+                variants = state.buildVariants,
+                selected = state.buildVariant,
+                onSelect = {
+                    variantMenu = false
+                    onIntent(BuildUiIntent.SetBuildVariant(it))
+                },
+                onDismiss = { variantMenu = false }
+            )
+        }
+        TooltipIconButton(
+            onClick = { onIntent(BuildUiIntent.ShowTaskSelector(true)) },
+            label = stringRes(R.string.build_tasks_titel)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.PlaylistPlay, contentDescription = stringRes(R.string.build_tasks_titel))
+        }
+        TooltipIconButton(onClick = onOpenOutput, label = stringRes(R.string.build_ausgabe_oeffnen)) {
+            OutputIcon(state)
+        }
+    }
+
+    if (state.isTaskSelectorVisible) {
+        TaskRunnerSheet(
+            tasks = state.availableTaskInfos.ifEmpty { state.availableTasks.map { GradleTaskInfo(it) } },
+            variants = state.buildVariants,
+            selectedVariant = state.buildVariant,
+            isLoading = state.isBuilding && state.availableTaskInfos.isEmpty(),
+            onVariantSelected = { onIntent(BuildUiIntent.SetBuildVariant(it)) },
+            onRun = { onIntent(BuildUiIntent.RunTasks(it)) },
+            onDismiss = { onIntent(BuildUiIntent.ShowTaskSelector(false)) }
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun RunStopButton(
+    isBuilding: Boolean,
+    variant: String,
+    onRun: () -> Unit,
+    onStop: () -> Unit,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val label = if (isBuilding) {
+        stringRes(R.string.build_stoppen)
+    } else {
+        stringRes(R.string.build_starten_variante, variant)
+    }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .combinedClickable(
+                role = Role.Button,
+                onClick = if (isBuilding) onStop else onRun,
+                onLongClick = onLongClick
+            )
+            .semantics { contentDescription = label }
+    ) {
+        if (isBuilding) {
+            CircularProgressIndicator(modifier = Modifier.size(30.dp), strokeWidth = 2.dp)
+            Icon(Icons.Filled.Stop, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+        } else {
+            Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = RunGreen, modifier = Modifier.size(30.dp))
+        }
+    }
+}
+
+@Composable
+private fun VariantMenu(
+    expanded: Boolean,
+    variants: List<String>,
+    selected: String,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        Text(
+            text = stringRes(R.string.build_variante),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+        variants.forEach { variant ->
+            DropdownMenuItem(
+                text = { Text(variant) },
+                leadingIcon = { RadioButton(selected = variant == selected, onClick = null) },
+                onClick = { onSelect(variant) }
+            )
+        }
+        HorizontalDivider()
+        Text(
+            text = stringRes(R.string.build_variante_hinweis),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
+// Ausgabe-Symbol mit Zustand: Fehler (rot, Anzahl), Warnungen (orange), Erfolg (grüner Punkt).
+@Composable
+private fun OutputIcon(state: BuildUiState) {
+    val status = state.currentSession?.status
+    val description = stringRes(R.string.build_ausgabe_oeffnen)
+    when {
+        state.errorCount > 0 || status == BuildStatus.FAILED -> BadgedBox(badge = {
+            Badge(containerColor = MaterialTheme.colorScheme.error) {
+                if (state.errorCount > 0) Text("${state.errorCount}")
+            }
+        }) { Icon(Icons.Filled.Terminal, contentDescription = description) }
+        state.warningCount > 0 -> BadgedBox(badge = {
+            Badge(containerColor = WarningOrange) { Text("${state.warningCount}") }
+        }) { Icon(Icons.Filled.Terminal, contentDescription = description) }
+        status == BuildStatus.SUCCEEDED -> BadgedBox(badge = { Badge(containerColor = SuccessGreen) }) {
+            Icon(Icons.Filled.Terminal, contentDescription = description)
+        }
+        else -> Icon(Icons.Filled.Terminal, contentDescription = description)
+    }
+}
+
+/** Bottom Sheet mit dem Build-Panel: öffnet halb hoch, nach oben ziehen zeigt mehr. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuildBottomSheet(
@@ -82,23 +251,13 @@ fun BuildBottomSheet(
         sheetState = sheetState,
         modifier = modifier
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(end = 4.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-            IconButton(onClick = onDismissRequest) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringRes(R.string.build_sheet_schliessen)
-                )
-            }
-        }
         BuildPanel(
             state = state,
             onIntent = viewModel::handleIntent,
+            onClose = onDismissRequest,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.85f)
+                .fillMaxHeight(0.9f)
                 // Restscroll der Logs (Listenanfang/-ende) darf das Sheet nicht verschieben;
                 // geschlossen wird über Schließen-Taste, Zurück, Griff oder Tippen neben das Sheet.
                 .nestedScroll(ConsumeRemainingScroll)
@@ -112,148 +271,25 @@ private val ConsumeRemainingScroll = object : NestedScrollConnection {
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity = available
 }
 
-/** Build-Panel mit Reitern für Ausgabe, Probleme, Logcat und Tests. */
+/**
+ * Build-Panel: eine Kopfzeile (Status, Start/Stopp, Sync, Tasks, Mehr, Schließen), schmale Reiter für Ausgabe,
+ * Probleme, Logcat und Tests, darunter der Inhalt. Kopieren/Teilen/Speichern liegen im Menü „Mehr“.
+ */
 @Composable
 fun BuildPanel(
     state: BuildUiState,
     onIntent: (BuildUiIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClose: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Statusleiste & Aktionen
-        BuildStatusBar(
-            state = state,
-            onIntent = onIntent,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-        )
-
-        // APK-Installationsbereich (Task 29)
-        ApkInstallSection(
-            state = state,
-            onIntent = onIntent
-        )
-
-        // Reiter: Ausgabe, Probleme, Logcat & Tests
-        val selectedIndex = when (state.activeTab) {
-            BuildTab.OUTPUT -> 0
-            BuildTab.PROBLEMS -> 1
-            BuildTab.LOGCAT -> 2
-            BuildTab.TESTS -> 3
-        }
-
-        TabRow(
-            selectedTabIndex = selectedIndex,
-            containerColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Tab(
-                selected = state.activeTab == BuildTab.OUTPUT,
-                onClick = { onIntent(BuildUiIntent.SelectTab(BuildTab.OUTPUT)) },
-                text = {
-                    Text(
-                        text = stringRes(R.string.build_ausgabe),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
-            )
-            Tab(
-                selected = state.activeTab == BuildTab.PROBLEMS,
-                onClick = { onIntent(BuildUiIntent.SelectTab(BuildTab.PROBLEMS)) },
-                text = {
-                    val totalIssues = state.errorCount + state.warningCount
-                    if (totalIssues > 0) {
-                        BadgedBox(
-                            badge = {
-                                Badge(
-                                    containerColor = if (state.errorCount > 0) MaterialTheme.colorScheme.error else Color(0xFFF57C00)
-                                ) {
-                                    Text("$totalIssues")
-                                }
-                            }
-                        ) {
-                            Text(
-                                text = stringRes(R.string.build_probleme),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    } else {
-                        Text(
-                            text = stringRes(R.string.build_probleme),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                }
-            )
-            Tab(
-                selected = state.activeTab == BuildTab.LOGCAT,
-                onClick = { onIntent(BuildUiIntent.SelectTab(BuildTab.LOGCAT)) },
-                text = {
-                    if (state.crashCount > 0) {
-                        BadgedBox(
-                            badge = {
-                                Badge(
-                                    containerColor = MaterialTheme.colorScheme.error
-                                ) {
-                                    Text("${state.crashCount}")
-                                }
-                            }
-                        ) {
-                            Text(
-                                text = stringRes(R.string.logcat_titel),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    } else {
-                        Text(
-                            text = stringRes(R.string.logcat_titel),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                }
-            )
-            Tab(
-                selected = state.activeTab == BuildTab.TESTS,
-                onClick = { onIntent(BuildUiIntent.SelectTab(BuildTab.TESTS)) },
-                text = {
-                    if (state.testFailedCount > 0) {
-                        BadgedBox(
-                            badge = {
-                                Badge(
-                                    containerColor = MaterialTheme.colorScheme.error
-                                ) {
-                                    Text("${state.testFailedCount}")
-                                }
-                            }
-                        ) {
-                            Text(
-                                text = stringRes(R.string.test_runner_tab_titel),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    } else {
-                        Text(
-                            text = stringRes(R.string.test_runner_tab_titel),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                }
-            )
-        }
-
-        TabActionsBar(
-            hasContent = state.textFor(state.activeTab).isNotBlank(),
-            onCopy = { onIntent(BuildUiIntent.CopyTab(state.activeTab)) },
-            onShare = { onIntent(BuildUiIntent.ShareTab(state.activeTab)) },
-            onSave = { onIntent(BuildUiIntent.SaveTab(state.activeTab)) }
-        )
-
-        // Tab Content
+        BuildHeader(state = state, onIntent = onIntent, onClose = onClose)
+        ApkInstallSection(state = state, onIntent = onIntent)
+        BuildTabs(state = state, onIntent = onIntent)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -268,7 +304,6 @@ fun BuildPanel(
         }
     }
 
-    // Detailansicht für ausgewählten Test
     state.selectedTestCase?.let { testCase ->
         TestDetailSheet(
             testCase = testCase,
@@ -276,198 +311,185 @@ fun BuildPanel(
             onStackFrameClick = { onIntent(BuildUiIntent.ClickTestStackFrame(it)) }
         )
     }
+}
 
-    // Task-Auswahl-Dialog
-    if (state.isTaskSelectorVisible) {
-        TaskSelectorDialog(
-            currentTask = state.selectedTask,
-            availableTasks = state.availableTasks,
-            taskInfos = state.availableTaskInfos,
-            isLoading = state.isBuilding && state.availableTaskInfos.isEmpty(),
-            onDismiss = { onIntent(BuildUiIntent.ShowTaskSelector(false)) },
-            onTaskSelected = { task ->
-                onIntent(BuildUiIntent.SetSelectedTask(task))
-                onIntent(BuildUiIntent.StartBuild(task))
+@Composable
+private fun BuildHeader(
+    state: BuildUiState,
+    onIntent: (BuildUiIntent) -> Unit,
+    onClose: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        StatusLabel(state = state, modifier = Modifier.weight(1f))
+        if (state.isBuilding) {
+            TooltipIconButton(onClick = { onIntent(BuildUiIntent.CancelBuild) }, label = stringRes(R.string.build_stoppen)) {
+                Icon(Icons.Filled.Stop, contentDescription = stringRes(R.string.build_stoppen), tint = MaterialTheme.colorScheme.error)
             }
+        } else {
+            TooltipIconButton(
+                onClick = { onIntent(BuildUiIntent.StartBuild(state.selectedTask)) },
+                label = stringRes(R.string.build_bauen)
+            ) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = stringRes(R.string.build_bauen), tint = RunGreen)
+            }
+            TooltipIconButton(onClick = { onIntent(BuildUiIntent.SyncGradle) }, label = stringRes(R.string.build_gradle_sync)) {
+                Icon(Icons.Filled.Sync, contentDescription = stringRes(R.string.build_gradle_sync))
+            }
+        }
+        TooltipIconButton(
+            onClick = { onIntent(BuildUiIntent.ShowTaskSelector(true)) },
+            label = stringRes(R.string.build_tasks_titel)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.PlaylistPlay, contentDescription = stringRes(R.string.build_tasks_titel))
+        }
+        MoreMenu(state = state, onIntent = onIntent)
+        if (onClose != null) {
+            TooltipIconButton(onClick = onClose, label = stringRes(R.string.build_sheet_schliessen)) {
+                Icon(Icons.Filled.Close, contentDescription = stringRes(R.string.build_sheet_schliessen))
+            }
+        }
+    }
+}
+
+// Status in einer Zeile: Symbol + Task bzw. Ergebnis mit Dauer, gekürzt statt umbrochen.
+@Composable
+private fun StatusLabel(state: BuildUiState, modifier: Modifier = Modifier) {
+    val session = state.currentSession
+    val (text, color) = when {
+        state.isBuilding -> {
+            stringRes(R.string.build_laeuft, state.selectedTask) to MaterialTheme.colorScheme.onSurface
+        }
+        session?.status == BuildStatus.SUCCEEDED -> {
+            val seconds = (session.durationMillis / 1000).toInt()
+            "${state.selectedTask} · ${stringRes(R.string.build_dauer, seconds)}" to SuccessGreen
+        }
+        session?.status == BuildStatus.FAILED -> {
+            stringRes(R.string.build_fehlgeschlagen) to MaterialTheme.colorScheme.error
+        }
+        session?.status == BuildStatus.CANCELLED -> {
+            stringRes(R.string.build_abgebrochen) to MaterialTheme.colorScheme.onSurfaceVariant
+        }
+        else -> {
+            stringRes(R.string.build_variante_aktiv, state.buildVariant) to MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        StatusIcon(state)
+        Text(
+            text = text,
+            color = color,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(start = 8.dp)
         )
     }
 }
 
 @Composable
-private fun BuildStatusBar(
-    state: BuildUiState,
-    onIntent: (BuildUiIntent) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Column statt Row: bei schmalen Displays/großer Schrift bekam der Status 0 dp Breite
-    // und der Text brach Buchstabe für Buchstabe um.
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        // Statusanzeige
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            when {
-                state.isBuilding -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = stringRes(R.string.build_laeuft, state.selectedTask),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                state.currentSession?.status == BuildStatus.SUCCEEDED -> {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = Color(0xFF2E7D32),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    val durationSeconds = (state.currentSession.durationMillis / 1000).toInt()
-                    Text(
-                        text = "${stringRes(R.string.build_erfolgreich)} (${stringRes(R.string.build_dauer, durationSeconds)})",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF2E7D32),
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                state.currentSession?.status == BuildStatus.FAILED -> {
-                    Icon(
-                        imageVector = Icons.Default.Error,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = stringRes(R.string.build_fehlgeschlagen),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                state.currentSession?.status == BuildStatus.CANCELLED -> {
-                    Icon(
-                        imageVector = Icons.Default.Cancel,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = stringRes(R.string.build_abgebrochen),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                else -> {
-                    Text(
-                        text = state.selectedTask,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-        }
-
-        // Aktionsschaltflächen
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End)
-        ) {
-            if (state.isBuilding) {
-                OutlinedButton(
-                    onClick = { onIntent(BuildUiIntent.CancelBuild) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Stop,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = stringRes(R.string.build_abbrechen),
-                        modifier = Modifier.padding(start = 4.dp),
-                        fontSize = 12.sp
-                    )
-                }
-            } else {
-                FilledTonalButton(
-                    onClick = { onIntent(BuildUiIntent.StartBuildAndRun(state.selectedTask)) }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Launch,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = stringRes(R.string.build_bauen_und_starten),
-                        modifier = Modifier.padding(start = 4.dp),
-                        fontSize = 12.sp
-                    )
-                }
-                Button(
-                    onClick = { onIntent(BuildUiIntent.StartBuild(state.selectedTask)) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = stringRes(R.string.build_bauen),
-                        modifier = Modifier.padding(start = 4.dp),
-                        fontSize = 12.sp
-                    )
-                }
-                IconButton(onClick = { onIntent(BuildUiIntent.SyncGradle) }) {
-                    Icon(
-                        imageVector = Icons.Default.Sync,
-                        contentDescription = stringRes(R.string.build_gradle_sync)
-                    )
-                }
-                IconButton(onClick = { onIntent(BuildUiIntent.ShowTaskSelector(true)) }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = stringRes(R.string.build_task_auswaehlen)
-                    )
-                }
-            }
-        }
+private fun StatusIcon(state: BuildUiState) {
+    val icon: ImageVector? = when (state.currentSession?.status) {
+        BuildStatus.SUCCEEDED -> Icons.Filled.CheckCircle
+        BuildStatus.FAILED -> Icons.Filled.Error
+        BuildStatus.CANCELLED -> Icons.Filled.Cancel
+        else -> null
+    }
+    val tint = when (state.currentSession?.status) {
+        BuildStatus.SUCCEEDED -> SuccessGreen
+        BuildStatus.FAILED -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    when {
+        state.isBuilding -> CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+        icon != null -> Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
+        else -> Icon(Icons.Filled.Terminal, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
     }
 }
 
-/** Kopieren, Teilen, Speichern für den aktiven Reiter (gefilterter Inhalt). */
 @Composable
-private fun TabActionsBar(
-    hasContent: Boolean,
-    onCopy: () -> Unit,
-    onShare: () -> Unit,
-    onSave: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onCopy, enabled = hasContent) {
-            Icon(Icons.Default.ContentCopy, contentDescription = stringRes(R.string.build_tab_kopieren))
+private fun MoreMenu(state: BuildUiState, onIntent: (BuildUiIntent) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val hasContent = state.textFor(state.activeTab).isNotBlank()
+    Box {
+        TooltipIconButton(onClick = { open = true }, label = stringRes(R.string.build_mehr)) {
+            Icon(Icons.Filled.MoreVert, contentDescription = stringRes(R.string.build_mehr))
         }
-        IconButton(onClick = onShare, enabled = hasContent) {
-            Icon(Icons.Default.Share, contentDescription = stringRes(R.string.build_tab_teilen))
-        }
-        IconButton(onClick = onSave, enabled = hasContent) {
-            Icon(Icons.Default.Save, contentDescription = stringRes(R.string.build_tab_speichern))
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            val pick: (BuildUiIntent) -> Unit = {
+                open = false
+                onIntent(it)
+            }
+            if (!state.isBuilding) {
+                MenuEntry(R.string.build_bauen_und_starten, Icons.AutoMirrored.Filled.Launch) {
+                    pick(BuildUiIntent.StartBuildAndRun(state.selectedTask))
+                }
+            }
+            MenuEntry(R.string.build_tab_kopieren, Icons.Filled.ContentCopy, hasContent) { pick(BuildUiIntent.CopyTab(state.activeTab)) }
+            MenuEntry(R.string.build_tab_teilen, Icons.Filled.Share, hasContent) { pick(BuildUiIntent.ShareTab(state.activeTab)) }
+            MenuEntry(R.string.build_tab_speichern, Icons.Filled.Save, hasContent) { pick(BuildUiIntent.SaveTab(state.activeTab)) }
+            if (state.activeTab == BuildTab.OUTPUT) {
+                MenuEntry(R.string.build_log_loeschen, Icons.Filled.DeleteSweep, state.outputLines.isNotEmpty()) {
+                    pick(BuildUiIntent.ClearOutput)
+                }
+            }
         }
     }
 }
+
+@Composable
+private fun MenuEntry(label: Int, icon: ImageVector, enabled: Boolean = true, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(stringRes(label)) },
+        leadingIcon = { Icon(icon, contentDescription = null) },
+        enabled = enabled,
+        onClick = onClick
+    )
+}
+
+// Schmale Reiter (36 dp) mit Zählern statt großer Badges.
+@Composable
+private fun BuildTabs(state: BuildUiState, onIntent: (BuildUiIntent) -> Unit) {
+    val tabs = listOf(
+        TabSpec(BuildTab.OUTPUT, stringRes(R.string.build_ausgabe), 0, null),
+        TabSpec(
+            BuildTab.PROBLEMS,
+            stringRes(R.string.build_probleme),
+            state.errorCount + state.warningCount,
+            if (state.errorCount > 0) MaterialTheme.colorScheme.error else WarningOrange
+        ),
+        TabSpec(BuildTab.LOGCAT, stringRes(R.string.logcat_titel), state.crashCount, MaterialTheme.colorScheme.error),
+        TabSpec(BuildTab.TESTS, stringRes(R.string.test_runner_tab_titel), state.testFailedCount, MaterialTheme.colorScheme.error),
+    )
+    TabRow(
+        selectedTabIndex = tabs.indexOfFirst { it.tab == state.activeTab }.coerceAtLeast(0),
+        containerColor = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        tabs.forEach { spec ->
+            Tab(
+                selected = state.activeTab == spec.tab,
+                onClick = { onIntent(BuildUiIntent.SelectTab(spec.tab)) },
+                modifier = Modifier.height(36.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(text = spec.label, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (spec.count > 0 && spec.color != null) {
+                        Badge(containerColor = spec.color) { Text("${spec.count}") }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private data class TabSpec(val tab: BuildTab, val label: String, val count: Int, val color: Color?)

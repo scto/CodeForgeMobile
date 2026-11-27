@@ -27,6 +27,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -161,6 +162,7 @@ class BuildViewModel internal constructor(
     fun connectProject(rootPath: String) {
         val root = File(rootPath)
         currentProjectRoot = root
+        BuildVariants.load(root)?.let { variant -> _uiState.update { it.copy(buildVariant = variant) } }
         scope.launch {
             gradleBuildRepository.connect(rootPath)
             testRunnerRepository?.loadLastResults(root)
@@ -254,6 +256,21 @@ class BuildViewModel internal constructor(
             }
             is BuildUiIntent.ClickProblem -> {
                 onProblemClicked(intent.problem)
+            }
+            is BuildUiIntent.SetBuildVariant -> {
+                _uiState.update { it.copy(buildVariant = intent.variant) }
+                currentProjectRoot?.let { root -> scope.launch(Dispatchers.IO) { BuildVariants.save(root, intent.variant) } }
+            }
+            is BuildUiIntent.RunVariant -> {
+                startBuild(_uiState.value.variantTask, autoRunOnSuccess = true)
+            }
+            is BuildUiIntent.RunTasks -> {
+                val tasks = intent.tasks.map { it.trim() }.filter { it.isNotEmpty() }
+                if (tasks.isNotEmpty()) {
+                    _uiState.update { it.copy(isTaskSelectorVisible = false) }
+                    val joined = tasks.joinToString(" ")
+                    startBuild(joined, autoRunOnSuccess = false, isSync = tasks.size == 1 && isTaskListing(joined))
+                }
             }
             is BuildUiIntent.ShowTaskSelector -> {
                 _uiState.update { it.copy(isTaskSelectorVisible = intent.show) }
@@ -477,7 +494,7 @@ class BuildViewModel internal constructor(
     private fun onBuildSucceeded(taskName: String, autoRun: Boolean) {
         // Bei erfolgreichem Build nach APK suchen
         val projectRoot = currentProjectRoot ?: return
-        val preferredVariant = when {
+        val preferredVariant = BuildVariants.variantOf(taskName) ?: when {
             taskName.contains("Release", ignoreCase = true) -> "release"
             else -> "debug"
         }

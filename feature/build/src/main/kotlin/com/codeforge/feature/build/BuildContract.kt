@@ -46,6 +46,8 @@ data class BuildUiState(
     val problems: List<BuildProblem> = emptyList(),
     val problemFilter: ProblemFilter = ProblemFilter.ALL,
     val selectedTask: String = "assembleDebug",
+    /** Projektweite Build-Variante: der Start-Knopf baut `assemble<Variante>`, installiert und startet. */
+    val buildVariant: String = "debug",
     val availableTasks: List<String> = listOf("assembleDebug", "assembleRelease", "clean", "test", "lint", GradleTaskListParser.LIST_ALL_TASK),
     /** Tasks mit Gruppe/Beschreibung (aus `tasks --all`); leer, bis das Projekt geladen wurde. */
     val availableTaskInfos: List<GradleTaskInfo> = emptyList(),
@@ -87,6 +89,16 @@ data class BuildUiState(
     val errorCount: Int by lazy { problems.count { it.severity == ProblemSeverity.ERROR } }
     /** Anzahl Warnungen. */
     val warningCount: Int by lazy { problems.count { it.severity == ProblemSeverity.WARNING } }
+    /** Varianten aus den bekannten Tasks (ohne Task-Liste: debug, release). */
+    val buildVariants: List<String> by lazy {
+        BuildVariants.fromTasks(availableTaskInfos.map { it.name }.ifEmpty { availableTasks }).let { list ->
+            if (buildVariant in list) list else list + buildVariant
+        }
+    }
+
+    /** Task des Start-Knopfs. */
+    val variantTask: String get() = BuildVariants.assembleTask(buildVariant)
+
     /** Anzahl Abstürze im Logcat. */
     val crashCount: Int by lazy { logcatEntries.count { it.isCrash } }
 
@@ -181,6 +193,12 @@ sealed interface BuildUiIntent {
     data class SelectProblemFilter(val filter: ProblemFilter) : BuildUiIntent
     /** Problem antippen (öffnet die Stelle). */
     data class ClickProblem(val problem: BuildProblem) : BuildUiIntent
+    /** Projektweite Build-Variante setzen (wird im Projekt gespeichert). */
+    data class SetBuildVariant(val variant: String) : BuildUiIntent
+    /** Gewählte Variante bauen, installieren und starten (Start-Knopf). */
+    data object RunVariant : BuildUiIntent
+    /** Mehrere Tasks in der angegebenen Reihenfolge in einem Gradle-Lauf ausführen. */
+    data class RunTasks(val tasks: List<String>) : BuildUiIntent
     /** Task-Auswahl ein-/ausblenden. */
     data class ShowTaskSelector(val show: Boolean) : BuildUiIntent
     /** Task wählen. */

@@ -3073,4 +3073,15 @@
     <string name="palette_cat_file_tree">Dateibaum</string>
     <string name="palette_cat_build_run">Build &amp; Ausführen</string>
     <string name="palette_cat_agent_ai">Agent &amp; KI</string>
+    <string name="build_variante">Build-Variante</string>
+    <string name="build_variante_aktiv">Variante: %1$s</string>
+    <string name="build_variante_hinweis">Der Start-Knopf baut, installiert und startet diese Variante.</string>
+    <string name="build_starten_variante">%1$s starten (gedrückt halten: Variante)</string>
+    <string name="build_stoppen">Build stoppen</string>
+    <string name="build_tasks_titel">Gradle-Tasks</string>
+    <string name="build_tasks_ausfuehren">Ausführen (%1$d)</string>
+    <string name="build_tasks_auswahl_leeren">Auswahl leeren</string>
+    <string name="build_tasks_reihenfolge">Läuft in dieser Reihenfolge: %1$s</string>
+    <string name="build_ausgabe_oeffnen">Build-Ausgabe</string>
+    <string name="build_mehr">Mehr</string>
 </resources>

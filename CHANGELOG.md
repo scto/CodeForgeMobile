@@ -29,6 +29,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Koreanisch (Teilübersetzung wie die bisherigen 10 Pakete). / 8 new language packs (da, sv, nb, fi, cs, hu, uk, ko).
 
 ### Geändert / Changed
+- **Build kompakt wie in Android Code Studio:** In der Editor-Leiste sitzen jetzt drei Knöpfe statt des großen Panels:
+  grüner **Start** baut die projektweite Build-Variante (`assemble<Variante>`), installiert und startet sie – gedrückt
+  halten wählt die Variante (aus den `assemble…`-Tasks, gespeichert in `.codeforge/build-variant`); während des Builds
+  wird daraus **Stopp** mit Fortschrittsring. **Tasks** öffnet eine durchsuchbare Liste mit Häkchen – mehrere Tasks
+  laufen in der angetippten Reihenfolge in einem Gradle-Lauf. **Ausgabe** öffnet das Build-Blatt; ein Zähler zeigt
+  Fehler/Warnungen, ein grüner Punkt den Erfolg. Das Blatt selbst hat nur noch eine Kopfzeile (Status, Start/Stopp,
+  Sync, Tasks, Mehr, Schließen) und schmale Reiter; Kopieren/Teilen/Speichern/Leeren liegen unter „Mehr“. /
+  Compact build UI: run button with project-wide build variant, multi-select task sheet, output sheet with a single
+  header row.
 - **SDK-Manager startet schneller:** Die Paketliste kommt aus `catalog.json` des Mirrors (eine kleine Datei vom CDN)
   statt aus mehreren Seiten der GitHub-API; ohne Netz aus einer Fassung, die die App mitbringt (wie beim
   Plugin-Store). / SDK manager loads its package list from a compact catalog instead of the GitHub API.

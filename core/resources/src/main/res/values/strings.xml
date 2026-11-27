@@ -3073,4 +3073,15 @@
     <string name="palette_cat_file_tree">File tree</string>
     <string name="palette_cat_build_run">Build &amp; Run</string>
     <string name="palette_cat_agent_ai">Agent &amp; AI</string>
+    <string name="build_variante">Build variant</string>
+    <string name="build_variante_aktiv">Variant: %1$s</string>
+    <string name="build_variante_hinweis">The run button builds, installs and starts this variant.</string>
+    <string name="build_starten_variante">Run %1$s (hold: variant)</string>
+    <string name="build_stoppen">Stop build</string>
+    <string name="build_tasks_titel">Gradle tasks</string>
+    <string name="build_tasks_ausfuehren">Run (%1$d)</string>
+    <string name="build_tasks_auswahl_leeren">Clear selection</string>
+    <string name="build_tasks_reihenfolge">Runs in this order: %1$s</string>
+    <string name="build_ausgabe_oeffnen">Build output</string>
+    <string name="build_mehr">More</string>
 </resources>

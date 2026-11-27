@@ -113,6 +113,26 @@ class BuildViewModelTest {
     }
 
     @Test
+    fun runVariantBuildsChosenVariant() = runBlocking {
+        com.codeforge.core.testing.TestRes.install()
+        fakeRepository.taskFlow = flowOf(BuildEvent.BuildFinished(success = false))
+        viewModel.handleIntent(BuildUiIntent.SetBuildVariant("freeRelease"))
+        viewModel.handleIntent(BuildUiIntent.RunVariant)
+        delay(300)
+        assertEquals("assembleFreeRelease", fakeRepository.lastTask)
+    }
+
+    @Test
+    fun runTasksJoinsInOrder() = runBlocking {
+        com.codeforge.core.testing.TestRes.install()
+        fakeRepository.taskFlow = flowOf(BuildEvent.BuildFinished(success = false))
+        viewModel.handleIntent(BuildUiIntent.RunTasks(listOf("clean", " ", "assembleDebug")))
+        delay(300)
+        assertEquals("clean assembleDebug", fakeRepository.lastTask)
+        assertFalse(viewModel.uiState.value.isTaskSelectorVisible)
+    }
+
+    @Test
     fun syncGradleRunsHelpTaskAndKeepsSelectedTask() = runBlocking {
         com.codeforge.core.testing.TestRes.install()
         fakeRepository.taskFlow = flowOf(BuildEvent.BuildFinished(success = true))

@@ -7,6 +7,9 @@ package com.codeforge.feature.build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,23 +23,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,85 +83,132 @@ internal fun filterTasks(tasks: List<GradleTaskInfo>, query: String): List<Gradl
     }
 }
 
-/** Dialog zur Auswahl des Gradle-Tasks. */
+/**
+ * Gradle-Tasks als Blatt: Suche, Mehrfachauswahl per Häkchen (Reihenfolge = Reihenfolge des Antippens), Build-Variante
+ * des Start-Knopfs und „Ausführen (n)“. Kompakt für Smartphones: eine Zeile je Task, Gruppen aufklappbar.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun TaskSelectorDialog(
-    currentTask: String,
-    availableTasks: List<String>,
+fun TaskRunnerSheet(
+    tasks: List<GradleTaskInfo>,
+    variants: List<String>,
+    selectedVariant: String,
+    isLoading: Boolean,
+    onVariantSelected: (String) -> Unit,
+    onRun: (List<String>) -> Unit,
     onDismiss: () -> Unit,
-    onTaskSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
-    taskInfos: List<GradleTaskInfo> = emptyList(),
-    isLoading: Boolean = false,
 ) {
-    val tasks = remember(taskInfos, availableTasks) {
-        taskInfos.ifEmpty { availableTasks.map { GradleTaskInfo(it) } }
-    }
     var query by remember { mutableStateOf("") }
-    var selected by remember { mutableStateOf(currentTask) }
+    var checked by remember { mutableStateOf(emptyList<String>()) }
     val filtered = remember(query, tasks) { filterTasks(tasks, query) }
     val sections = remember(filtered) { GradleTaskListParser.grouped(filtered) }
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = stringRes(R.string.build_projekt_tasks, tasks.size),
-                style = MaterialTheme.typography.titleMedium
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SheetHeader(
+                checkedCount = checked.size,
+                onClear = { checked = emptyList() },
+                onRun = { onRun(checked) }
             )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    placeholder = { Text(stringRes(R.string.build_tasks_suchen)) },
-                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (isLoading) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                        Text(
-                            stringRes(R.string.build_tasks_laden),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-                if (filtered.isEmpty() && !isLoading) {
-                    Text(
-                        stringRes(R.string.build_tasks_keine_treffer),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(vertical = 8.dp)
+            Text(
+                text = stringRes(R.string.build_variante),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                variants.forEach { variant ->
+                    FilterChip(
+                        selected = variant == selectedVariant,
+                        onClick = { onVariantSelected(variant) },
+                        label = { Text(variant) }
                     )
                 }
-                TaskSections(
-                    sections = sections,
-                    searching = query.isNotBlank(),
-                    selected = selected,
-                    onSelect = { selected = it }
-                )
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onTaskSelected(selected.trim().ifEmpty { currentTask }) },
-                enabled = selected.isNotBlank()
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                placeholder = { Text(stringRes(R.string.build_tasks_suchen)) },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            SelectionInfo(checked = checked, isLoading = isLoading, isEmpty = filtered.isEmpty())
+            TaskSections(
+                sections = sections,
+                searching = query.isNotBlank(),
+                checked = checked,
+                onToggle = { name -> checked = if (name in checked) checked - name else checked + name }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SheetHeader(checkedCount: Int, onClear: () -> Unit, onRun: () -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = stringRes(R.string.build_tasks_titel),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f)
+        )
+        if (checkedCount > 0) {
+            TextButton(onClick = onClear) {
+                Text(stringRes(R.string.build_tasks_auswahl_leeren))
+            }
+        }
+        Button(
+            onClick = onRun,
+            enabled = checkedCount > 0,
+            contentPadding = PaddingValues(horizontal = 14.dp)
+        ) {
+            Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(stringRes(R.string.build_tasks_ausfuehren, checkedCount))
+        }
+    }
+}
+
+// Reihenfolge der Auswahl, Ladeanzeige und „keine Treffer“.
+@Composable
+private fun SelectionInfo(checked: List<String>, isLoading: Boolean, isEmpty: Boolean, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (checked.size > 1) {
+            Text(
+                text = stringRes(R.string.build_tasks_reihenfolge, checked.joinToString(" → ")),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        if (isLoading) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(stringRes(R.string.build_starten))
+                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                Text(stringRes(R.string.build_tasks_laden), style = MaterialTheme.typography.bodySmall)
             }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text(stringRes(R.string.common_abbrechen))
-            }
-        },
-        modifier = modifier
-    )
+        }
+        if (isEmpty && !isLoading) {
+            Text(
+                stringRes(R.string.build_tasks_keine_treffer),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+    }
 }
 
 // Abschnitte mit aufklappbaren Überschriften; „Häufig“ und Suchtreffer sind immer offen.
@@ -162,14 +216,14 @@ fun TaskSelectorDialog(
 private fun TaskSections(
     sections: List<Pair<String, List<GradleTaskInfo>>>,
     searching: Boolean,
-    selected: String,
-    onSelect: (String) -> Unit,
+    checked: List<String>,
+    onToggle: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val otherLabel = stringRes(R.string.build_tasks_sonstige)
     val commonLabel = stringRes(R.string.build_tasks_haeufig)
     var expanded by remember { mutableStateOf(emptySet<String>()) }
-    LazyColumn(modifier = modifier.heightIn(max = 360.dp)) {
+    LazyColumn(modifier = modifier.heightIn(max = 420.dp)) {
         sections.forEach { (group, groupTasks) ->
             val isCommon = GradleTaskListParser.isCommonGroup(group)
             val open = isCommon || searching || sections.size == 1 || group in expanded
@@ -183,7 +237,12 @@ private fun TaskSections(
             }
             if (open) {
                 items(groupTasks, key = { "$group/${it.name}" }) { task ->
-                    TaskRow(task = task, otherLabel = otherLabel, isSelected = task.name == selected, onClick = { onSelect(task.name) })
+                    TaskRow(
+                        task = task,
+                        otherLabel = otherLabel,
+                        order = checked.indexOf(task.name) + 1,
+                        onClick = { onToggle(task.name) }
+                    )
                 }
             }
         }
@@ -202,7 +261,7 @@ private fun TaskGroupHeader(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -219,11 +278,12 @@ private fun TaskGroupHeader(
     }
 }
 
+// [order] > 0: Task ist ausgewählt und läuft an dieser Stelle.
 @Composable
 private fun TaskRow(
     task: GradleTaskInfo,
     otherLabel: String,
-    isSelected: Boolean,
+    order: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -231,21 +291,22 @@ private fun TaskRow(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = 8.dp),
+            .padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Checkbox(checked = order > 0, onCheckedChange = { onClick() })
         Icon(
             imageVector = taskIcon(task),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(20.dp)
         )
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = task.name,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 2,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
@@ -256,11 +317,12 @@ private fun TaskRow(
                 overflow = TextOverflow.Ellipsis
             )
         }
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+        if (order > 0) {
+            Text(
+                text = "$order",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
         }
     }
