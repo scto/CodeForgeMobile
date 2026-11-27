@@ -11,6 +11,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-11-27
+
 ### Neu / Added
 - **Plugin-API 5 – CodeForge Mobile aus Plugins vollständig ansteuern** (`docs/plugin-api-v5.md`):
   `PluginContext.ide()` mit Befehlsverzeichnis (IDE-Befehle `cfm.editor.*`, `cfm.git.*`, `cfm.build.run`,
