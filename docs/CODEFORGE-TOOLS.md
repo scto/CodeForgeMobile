@@ -12,7 +12,7 @@ der README des Mirror-Repos; hier steht nur die Anbindung an CodeForgeMobile.
 | `android-ndk-<name>` | HomuHomu833/android-ndk-custom | `ndk;<name>` |
 | `cmake-<v>` | HomuHomu833/cmake-custom | `cmake;<v>` |
 | `androidide-tools-v<v>` | AndroidIDEOfficial/androidide-tools (archiviert, GPL-3.0) | `build-tools;<v>`, `platform-tools;<v>` (33.x/34.x) |
-| `lzhiyong-sdk-tools-<v>` | Lzhiyong/android-sdk-tools | `build-tools;<v>` (nur Versionen, die AndroidIDE nicht hat, z. B. 35.0.2) |
+| `msmt-platform-tools-<v>` | msmt2018/android-sdk-tools (Apache 2.0) | `platform-tools;<v>`, `build-tools;<Version im Asset>` (28.0.0 … 37.0.3, vollständige Google-Pakete mit statischen Binaries; Vorrang) |
 
 Nicht gespiegelt: Releases mit `beta`/`rc` im Namen oder Tag, glibc-Builds (laufen in Termux nicht), und bei HomuHomu833 die Releases
 ohne Android-Variante (35.0.2, 36.0.0: nur musl).
@@ -21,7 +21,7 @@ ohne Android-Variante (35.0.2, 36.0.0: nur musl).
 
 - `TOOLS_REPO` (Standard `scto/codeforge-tools`; überschreibbar über `CODEFORGE_TOOLS_REPO` oder `sdk.conf`; leer schaltet den Mirror ab).
 - Je Komponente: Mirror → HomuHomu833 direkt → feste Rückfallliste. Der Mirror-Tag-Präfix steht im Manifest-Feld `extra` (`tagprefix=…`).
-- Neue Typen im Manifest: `ghaidebt` und `ghaidept` (androidide-tools); `lzhiyong-sdk-tools-*` läuft über `ghsdk` (Binaries über Googles build-tools).
+- Neue Typen im Manifest: `ghaidebt` und `ghaidept` (androidide-tools und msmt2018; bei msmt nennt `rel=` im Feld `extra` das Release, weil die build-tools-Version abweichen kann). Die früheren Lzhiyong-Pakete (`lzhiyong-sdk-tools-*`, nur Binaries ohne Jars) werden seit 2026-11-27 nicht mehr angeboten.
 - Releases aus `nullij/sclrepo`: `v<ver>` (Assets `buildtools_<ver>_<arch>.tar.xz`, `platformtools_<arch>.tar.xz`, arch = arm64-v8a/armeabi-v7a; flache Archive, laufen über `ghaidebt`/`ghaidept`) und `android-sdk-<ver>` mit `android-sdk.tar.gz` (xz-komprimiertes vollständiges SDK, nur aarch64; Typen `ghsdkfull` für `build-tools;<ver>` und `ghptfull` für `platform-tools;<ver>`). Das Archiv enthält `lib/d8.jar` und `apksigner.jar`, Googles sdkmanager ist dafür nicht nötig. Test: `libs/terminal-engine/snippets/manifest-sources.test.sh`.
 - Prüfsumme: `digest` von GitHub, sonst die `<asset>.sha256` des Mirror-Releases.
 - Die Version ist der Tag ohne Präfix (`android-ndk-r29` → `ndk;r29`).

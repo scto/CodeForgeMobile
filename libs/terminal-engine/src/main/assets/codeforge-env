@@ -46,7 +46,6 @@
 #       android-ndk-<name>       ndk;<name>                               (HomuHomu833/android-ndk-custom)
 #       cmake-<v>                cmake;<v>                                (HomuHomu833/cmake-custom)
 #       androidide-tools-v<v>    build-tools;<v>, platform-tools;<v>      (AndroidIDEOfficial/androidide-tools, 33.x/34.x, statisch)
-#       lzhiyong-sdk-tools-<v>   build-tools;<v> (nur Binaries, Überlagerung der Google-build-tools; Lzhiyong/android-sdk-tools)
 #       msmt-platform-tools-<v>  platform-tools;<v>, build-tools;<Version aus dem Asset> – vollständige Google-Pakete mit
 #                                statischen Android-Binaries (msmt2018/android-sdk-tools, 28.0.0 …); haben Vorrang
 #     Gibt der Mirror für eine Komponente nichts her (nicht erreichbar, noch leer), gelten die Upstream-Repos
@@ -117,14 +116,14 @@ CMDLINE_TOOLS_URL="${CODEFORGE_CMDLINE_TOOLS_URL:-${CMDLINE_TOOLS_URL-__mirror__
 CMDLINE_TOOLS_SHA256="${CODEFORGE_CMDLINE_TOOLS_SHA256:-${CMDLINE_TOOLS_SHA256:-}}"
 
 # Architektur des Geräts -> Asset-Variante (HomuHomu833/Mirror: *-aarch64-linux-android bzw. *-armv7a-linux-androideabi,
-# androidide-tools/Lzhiyong: aarch64 bzw. arm). 32-bit-Userland (armv7l/armv8l) bekommt die armv7a-Builds.
+# androidide-tools: aarch64 bzw. arm). 32-bit-Userland (armv7l/armv8l) bekommt die armv7a-Builds.
 case "$(uname -m)" in
   aarch64|arm64)      GH_VARIANT_DEFAULT=aarch64-linux-android;     AIDE_VARIANT_DEFAULT=aarch64; CF_ARCH=aarch64 ;;
   armv7l|armv8l|arm*) GH_VARIANT_DEFAULT=armv7a-linux-androideabi;  AIDE_VARIANT_DEFAULT=arm;     CF_ARCH=arm ;;
   *)                  GH_VARIANT_DEFAULT=aarch64-linux-android;     AIDE_VARIANT_DEFAULT=aarch64; CF_ARCH=aarch64 ;;
 esac
 GH_VARIANT="${ASSET_VARIANT:-$GH_VARIANT_DEFAULT}"
-# Eigener Mirror (Releases android-sdk-*, android-ndk-*, cmake-*, androidide-tools-v*, lzhiyong-sdk-tools-*)
+# Eigener Mirror (Releases android-sdk-*, android-ndk-*, cmake-*, androidide-tools-v*, msmt-platform-tools-*)
 TOOLS_REPO="${CODEFORGE_TOOLS_REPO:-${TOOLS_REPO-scto/codeforge-tools}}"
 # Release-Liste des Mirrors als kleine Datei vom CDN statt über die GitHub-API (schneller erster Start, kein
 # Rate-Limit). Leer = immer die API. Die App legt beim Installieren eine eingebaute Fassung nach BUNDLED_CATALOG.
@@ -521,7 +520,6 @@ asset_re_for() { # tagprefix kind version
         ghaidebt) printf '^build-tools-%s-%s\\.tar\\.xz$' "$v" "$AIDE_VARIANT" ;;
         ghaidept) printf '^platform-tools-%s-%s\\.tar\\.xz$' "$v" "$AIDE_VARIANT" ;;
       esac ;;
-    lzhiyong-sdk-tools-) printf '^android-sdk-tools-static-%s\\.zip$' "$AIDE_VARIANT" ;;
     msmt-platform-tools-)
       case "$2" in
         ghaidebt) printf '^build-tools-%s-%s\\.zip$' "$v" "$NU_VARIANT" ;;
@@ -539,7 +537,6 @@ asset_re_for() { # tagprefix kind version
 probe_re_for() { # tagprefix
   case "$1" in
     androidide-tools-v) printf -- '-%s\\.tar\\.xz$' "$AIDE_VARIANT" ;;
-    lzhiyong-sdk-tools-) printf '^android-sdk-tools-static-%s\\.zip$' "$AIDE_VARIANT" ;;
     msmt-platform-tools-) printf -- '-%s\\.(zip|tar\\.gz)$' "$NU_VARIANT" ;;
     v) printf '^(buildtools_[0-9.]+|platformtools)_%s\\.tar\\.xz$' "$NU_VARIANT" ;;
     *) printf -- '-%s\\.(tar\\.xz|tar\\.gz|zip|7z)$' "$GH_VARIANT" ;;
@@ -676,8 +673,8 @@ mirror_fullsdk() {
 # Pro Komponente: Mirror, sonst Upstream, sonst feste Rückfallliste
 build_manifest() {
   local m="$DEFAULT_MANIFEST" remote="" dyn d
-  # build-tools / platform-tools: HomuHomu833-SDK (ab 36.0.2), danach androidide-tools (33.x/34.x), danach Lzhiyong (35.x).
-  # Doppelte IDs: die erste Quelle gewinnt (androidide-tools ist vollständiger als Lzhiyong).
+  # build-tools / platform-tools: msmt2018 (vollständig, 28.0.0 …), HomuHomu833-SDK (ab 36.0.2), androidide-tools (33.x/34.x).
+  # Doppelte IDs: die erste Quelle gewinnt.
   dyn=$(mirror_dynamic android-sdk- build-tools ghsdk platform-tools ghpt)
   # Vollständiges SDK-Archiv (android-sdk.tar.gz) hat Vorrang vor den Binär-Archiven gleicher Version
   d=$(mirror_fullsdk); [ -n "$d" ] && dyn="$d"$'\n'"$dyn"
@@ -686,7 +683,6 @@ build_manifest() {
   [ -n "$dyn" ] || dyn=$(gh_dynamic "$SDK_CUSTOM_REPO" build-tools ghsdk platform-tools ghpt)
   [ -n "$dyn" ] || dyn=$FALLBACK_SDK
   d=$(mirror_dynamic androidide-tools-v build-tools ghaidebt platform-tools ghaidept); [ -n "$d" ] && dyn="$dyn"$'\n'"$d"
-  d=$(mirror_dynamic lzhiyong-sdk-tools- build-tools ghsdk); [ -n "$d" ] && dyn="$dyn"$'\n'"$d"
   d=$(mirror_dynamic v build-tools ghaidebt platform-tools ghaidept); [ -n "$d" ] && dyn="$dyn"$'\n'"$d"
   m="$m"$'\n'"$(printf '%s\n' "$dyn" | awk -F'|' 'NF && !seen[$1]++')"
   dyn=$(mirror_dynamic android-ndk- ndk ghndk)

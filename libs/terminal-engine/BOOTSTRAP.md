@@ -31,7 +31,7 @@ entfernt. Es gibt genau eine Umgebung: den Termux-Bootstrap unter
     `CODEFORGE_CMDLINE_REV`, `CODEFORGE_CMDLINE_TOOLS_URL/_SHA256` (oder `sdk.conf`). `platforms;android-N` kommen weiterhin per `sdkmanager` von Google.
   * Die Android-Binaries (build-tools, platform-tools, NDK, CMake) kommen aus dem eigenen Mirror
     **`scto/codeforge-tools`** (Standard, überschreibbar über `CODEFORGE_TOOLS_REPO` bzw. `TOOLS_REPO` in `sdk.conf`;
-    leer = Mirror aus). Der Mirror kopiert Releases von HomuHomu833, AndroidIDEOfficial und Lzhiyong, siehe `docs/CODEFORGE-TOOLS.md`:
+    leer = Mirror aus). Der Mirror kopiert Releases von HomuHomu833, AndroidIDEOfficial und msmt2018, siehe `docs/CODEFORGE-TOOLS.md`:
 
     | Tag im Mirror | liefert | Upstream |
     |---|---|---|
@@ -39,11 +39,11 @@ entfernt. Es gibt genau eine Umgebung: den Termux-Bootstrap unter
     | `android-ndk-<name>` | `ndk;<name>` (r29, r28c, r27d, r26d …) | HomuHomu833/android-ndk-custom |
     | `cmake-<v>` | `cmake;<v>` (3.6.0 … 4.1.2, u. a. 3.22.1 als AGP-Standard) | HomuHomu833/cmake-custom |
     | `androidide-tools-v<v>` | `build-tools;<v>`, `platform-tools;<v>` (33.x/34.x, statisch, vollständig mit Jars) | AndroidIDEOfficial/androidide-tools |
-    | `lzhiyong-sdk-tools-<v>` | `build-tools;<v>` (nur dort, wo AndroidIDE keine Version hat, z. B. 35.0.2; nur Binaries über Googles build-tools) | Lzhiyong/android-sdk-tools |
+    | `msmt-platform-tools-<v>` | `platform-tools;<v>`, `build-tools;<Version im Asset>` (28.0.0 … 37.0.3, vollständig mit Jars, Vorrang) | msmt2018/android-sdk-tools |
 
     `cmake;termux` ist das Termux-Paket als Alternative.
-  * Reihenfolge je Komponente: Mirror → Upstream-Repos HomuHomu833 direkt → feste Rückfallliste. Doppelte IDs: AndroidIDE
-    vor Lzhiyong. Beta-/RC-Releases (`beta`/`rc` im Namen oder Tag) werden nie angeboten.
+  * Reihenfolge je Komponente: Mirror → Upstream-Repos HomuHomu833 direkt → feste Rückfallliste. Doppelte IDs: msmt2018 vor
+    allen anderen. Beta-/RC-Releases (`beta`/`rc` im Namen oder Tag) werden nie angeboten.
   * Prüfsumme: GitHubs `digest` des Assets, sonst die `<asset>.sha256` aus dem Mirror-Release; fehlt beides, gibt es eine Warnung.
   * `platform-tools` gibt es im SDK nur einmal: Die installierte Version steht in `platform-tools/.cf-version`, eine neue Installation
     ersetzt den Ordner. In der Oberfläche gilt also nur die zuletzt installierte Version als installiert.
