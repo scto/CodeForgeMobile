@@ -29,7 +29,7 @@ SUBMIT = "https://github.com/scto/codeforge-store/issues/new?template=submit.yml
 # Dateien, die die Store-Prüfung als Code ablehnt, liegen mit `.tpl` in der Vorlage; der Assistent entfernt die Endung.
 CODE_SUFFIXES = (".dex", ".jar", ".so", ".apk", ".class", ".aar", ".sh")
 PLACEHOLDERS = ("projectName", "packageName", "packagePath", "packageJni", "minSdk")
-VERSION = "1.1.1"  # 1.1.1: Plugin-SDK mit contributes.features
+VERSION = "1.2.0"  # 1.2.0: Plugin-SDK API 5, Sandbox-Vorlage mit Befehl, Menüs, Tastenkürzel, Statusleiste
 
 # slug, Quelle (templates/<ordner>), Art, Label DE/EN, Beschreibung DE/EN, Farbe, Kürzel, Store-fähig, Hinweise DE
 SPECS = [
@@ -88,10 +88,12 @@ SPECS = [
      (217, 70, 239), "AI", False,
      "Skripte unter `plugin/`; `kind` `read` oder `write`. Der Store nimmt Agent-Werkzeuge nicht an – nur Sideload."),
     ("code-sandbox", None, "sandbox", "Plugin · Code (Sandbox)", "Plugin · Code (sandbox)",
-     "Kotlin-Plugin mit Editor-Aktion, läuft isoliert – Store-fähig", "Kotlin plugin with an editor action, runs isolated – store-ready",
+     "Kotlin-Plugin (API 5) mit Editor-Aktion, Befehl, Menüs, Tastenkürzel und Statusleiste, läuft isoliert – Store-fähig",
+     "Kotlin plugin (API 5) with editor action, command, menus, keybinding and status bar, runs isolated – store-ready",
      (124, 58, 237), "K", True,
      "Läuft mit `\"sandbox\": true` im isolierten Prozess: sieht nur den Text, den die App schickt, und liefert Änderungen "
-     "zurück. Kein Datei-, Netz- oder Prozesszugriff."),
+     "zurück. Kein Datei-, Netz- oder Prozesszugriff. Befehle hängen über `contributes.menus` (Editor, Dateibaum, Palette) "
+     "und `contributes.keybindings` mit `when`-Bedingungen in der IDE; `context.ide()` bietet Befehle, Ereignisse und Statusleiste."),
     ("code-plugin", None, "code", "Plugin · Code (voll)", "Plugin · Code (full)",
      "Kotlin-Plugin mit Befehl, Menü und Ereignissen (nur Sideload)", "Kotlin plugin with command, menu and events (sideload only)",
      (71, 85, 105), "K+", False,
@@ -293,8 +295,19 @@ junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 '''
 
+SANDBOX_CONTRIBUTES = {
+    "commands": [{"id": "hello", "title": "Hallo aus der Sandbox", "category": "Mein Plugin"}],
+    "menus": {
+        "editor/context": [{"command": "hello", "when": "editorLangId == kotlin"}],
+        "fileTree/context": [{"command": "hello", "when": "resourceExtname == .md"}],
+        "commandPalette": [{"command": "hello", "when": "projectOpen"}],
+    },
+    "keybindings": [{"command": "hello", "key": "ctrl+alt+h"}],
+}
+
 SANDBOX_PLUGIN = '''package {{packageName}}
 
+import com.codeforge.core.domain.extension.ide.IdeCommandHandler
 import com.codeforge.libs.plugin_api.CodeForgePlugin
 import com.codeforge.libs.plugin_api.EditorAction
 import com.codeforge.libs.plugin_api.EditorContext
@@ -304,13 +317,28 @@ import com.codeforge.libs.plugin_api.PluginExtensionPoints
 import com.codeforge.libs.plugin_api.TextEdit
 
 /**
- * Sandbox-Plugin: registriert Editor-Aktionen (Editor → Erweiterungs-Schaltfläche). Läuft im isolierten Prozess,
- * bekommt den Text vom Editor und liefert Änderungen zurück, die die App anwendet.
+ * Sandbox-Plugin (API 5). Läuft im isolierten Prozess.
+ * - Editor-Aktionen (Editor → Erweiterungs-Schaltfläche): bekommen den Text und liefern Änderungen zurück.
+ * - Befehl `hello`: über `contributes.menus` im Editor-Menü, Dateibaum und in der Palette, Tastenkürzel Strg+Alt+H.
+ * - Ereignisse und Statusleiste: zählt Speichervorgänge.
  */
 class MyPlugin : CodeForgePlugin {
+    private var saves = 0
+
     override fun onLoad(context: PluginContext) {
         context.register(PluginExtensionPoints.EDITOR_ACTION, Reverse)
         context.register(PluginExtensionPoints.EDITOR_ACTION, CountWords)
+
+        val ide = context.ide()
+        // Rückgabe erscheint als Hinweis; `path` kommt aus Editor bzw. Dateibaum.
+        ide.commands.register("hello", "Hallo aus der Sandbox", IdeCommandHandler { args ->
+            "Hallo! Datei: ${args["path"]?.substringAfterLast('/') ?: "–"}, $saves× gespeichert"
+        })
+        ide.statusBar.set("saves", "💾 0", "Speichervorgänge seit dem Start", "${context.pluginId}.hello")
+        ide.events.subscribe("file.saved") {
+            saves++
+            ide.statusBar.set("saves", "💾 $saves", "Speichervorgänge seit dem Start", "${context.pluginId}.hello")
+        }
     }
 
     override fun onUnload() = Unit
@@ -383,8 +411,10 @@ def code_files(spec, dst):
     pkg = common / "src/main/kotlin/{{packagePath}}"
     if slug == "code-sandbox":
         base = json.loads((REPO / "code-plugins/text-tools/plugin.json").read_text(encoding="utf-8"))
-        base.update(description="Editor-Aktionen: Auswahl umkehren, Wörter zählen. Läuft in der Sandbox.",
-                    permissions=["editor"], categories=["tools/text"], tags=["text", "sandbox"])
+        base.update(description="Editor-Aktionen (Auswahl umkehren, Wörter zählen), Befehl mit Menüs und Tastenkürzel, "
+                                "Speicherzähler in der Statusleiste. Läuft in der Sandbox.",
+                    apiVersion=5, permissions=["editor", "commands", "events", "ui"], categories=["tools/text"],
+                    tags=["text", "sandbox"], minHostVersion="3.5.3", contributes=SANDBOX_CONTRIBUTES)
         write(common / "plugin.json", own_manifest(base, "{{packageName}}.MyPlugin"))
         write(pkg / "MyPlugin.kt", SANDBOX_PLUGIN)
         write(common / "src/test/kotlin/{{packagePath}}/TextTest.kt", SANDBOX_TEST)

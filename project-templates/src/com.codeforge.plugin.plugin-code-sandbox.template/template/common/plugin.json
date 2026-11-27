@@ -2,13 +2,16 @@
   "id": "{{packageName}}",
   "name": "{{projectName}}",
   "version": "1.0.0",
-  "apiVersion": 4,
+  "apiVersion": 5,
   "publisher": "me",
-  "description": "Editor-Aktionen: Auswahl umkehren, Wörter zählen. Läuft in der Sandbox.",
+  "description": "Editor-Aktionen (Auswahl umkehren, Wörter zählen), Befehl mit Menüs und Tastenkürzel, Speicherzähler in der Statusleiste. Läuft in der Sandbox.",
   "entryPointClass": "{{packageName}}.MyPlugin",
   "sandbox": true,
   "permissions": [
-    "editor"
+    "editor",
+    "commands",
+    "events",
+    "ui"
   ],
   "categories": [
     "tools/text"
@@ -16,5 +19,41 @@
   "tags": [
     "text",
     "sandbox"
-  ]
+  ],
+  "minHostVersion": "3.5.3",
+  "contributes": {
+    "commands": [
+      {
+        "id": "hello",
+        "title": "Hallo aus der Sandbox",
+        "category": "Mein Plugin"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "hello",
+          "when": "editorLangId == kotlin"
+        }
+      ],
+      "fileTree/context": [
+        {
+          "command": "hello",
+          "when": "resourceExtname == .md"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "hello",
+          "when": "projectOpen"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "hello",
+        "key": "ctrl+alt+h"
+      }
+    ]
+  }
 }

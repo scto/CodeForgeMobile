@@ -26,6 +26,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   (`editorLangId == kotlin && !editorHasSelection`). **Sandbox-Plugins mit API 5** dürfen eigene Befehle anmelden,
   Ereignisse abonnieren/senden und die Statusleiste nutzen. / Plugin menus, keybindings and `when` clauses in
   `plugin.json`; sandboxed plugins get commands, events and the status bar from API 5.
+- **Beispiel-Plugins für API 5 im Store:** „Sitzungsstatistik (Sandbox)“ (Statusleiste, Befehle, Menüs,
+  Tastenkürzel, Ereignisse, Einstellungen; direkt installierbar) und „IDE-Werkzeugkasten (API 5)“ (Projektbaum mit
+  Git-Status, Übersicht für Editor/Git/Befehle/Ereignisse/App-Einstellungen/Navigation, eigene Einstellungsseite;
+  Sideload). Projektvorlage „Plugin · Code (Sandbox)“ 1.2.0 mit Befehl, Menüs und Tastenkürzel. Neu in der API:
+  `PluginSettings.set` für eigene Einstellungsseiten. / API 5 sample plugins in the store (session stats in the
+  sandbox, full IDE showcase), sandbox template 1.2.0, `PluginSettings.set`.
 - **Compose-Vorschau „Genau (Gradle)“:** zweiter Modus neben der Live-Vorschau. Rendert die `@Preview`s des Moduls
   mit dem Gradle-Plugin von compose-ai-tools (`ee.schimke.composeai.preview` 2.104.0, Apache-2.0, Robolectric) über
   ein mitgeliefertes Init-Skript – ohne Änderung am Projekt, mit echten Abhängigkeiten, Ressourcen und Theme. Der Lauf

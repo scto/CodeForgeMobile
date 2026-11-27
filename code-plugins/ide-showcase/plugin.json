@@ -1,0 +1,58 @@
+{
+  "id": "com.codeforge.plugin.ide-showcase.code",
+  "name": "IDE-Werkzeugkasten (API 5)",
+  "version": "1.0.0",
+  "apiVersion": 5,
+  "publisher": "codeforge",
+  "description": "Referenz-Plugin für die komplette Plugin-API 5: Projektbaum mit Git-Status als Werkzeugfenster, Übersicht als eigener Bildschirm (Editor, Git, Befehle, Ereignisse, App-Einstellungen, Navigation), eigene Einstellungsseite, Statusleiste, Befehle mit Menüs, Tastenkürzeln und when-Bedingungen. Läuft im App-Prozess (nur Sideload).",
+  "entryPointClass": "com.codeforge.plugin.showcase.ShowcasePlugin",
+  "permissions": [
+    "ui", "commands", "commands.execute", "events", "settings.read", "settings.write",
+    "editor", "files.read", "files.write", "git.read", "git.write", "notifications"
+  ],
+  "minHostVersion": "3.5.3",
+  "categories": ["samples/api", "tools/project"],
+  "tags": ["api", "sample", "tree", "git", "commands", "events", "settings", "statusbar", "keybindings"],
+  "contributes": {
+    "commands": [
+      { "id": "dashboard", "title": "Werkzeugkasten öffnen", "category": "Werkzeugkasten" },
+      { "id": "tree", "title": "Projektbaum öffnen", "category": "Werkzeugkasten" },
+      { "id": "upper", "title": "Auswahl in Großbuchstaben", "category": "Werkzeugkasten" },
+      { "id": "todo", "title": "TODO einfügen", "category": "Werkzeugkasten" },
+      { "id": "reveal", "title": "Im Editor öffnen", "category": "Werkzeugkasten" },
+      { "id": "gitSummary", "title": "Git-Zustand", "category": "Werkzeugkasten" },
+      { "id": "note", "title": "Notiz in NOTES.md", "category": "Werkzeugkasten" },
+      { "id": "minimap", "title": "Minimap umschalten", "category": "Werkzeugkasten" }
+    ],
+    "menus": {
+      "editor/context": [
+        { "command": "upper", "when": "editorHasSelection" },
+        { "command": "todo", "when": "editorLangId =~ '^(kotlin|java|python|xml|markdown)$'" },
+        { "command": "dashboard" }
+      ],
+      "fileTree/context": [
+        { "command": "reveal", "when": "resourceExtname" },
+        { "command": "gitSummary", "when": "gitRepo" }
+      ],
+      "commandPalette": [
+        { "command": "gitSummary", "when": "gitRepo" },
+        { "command": "note", "when": "projectOpen" }
+      ]
+    },
+    "keybindings": [
+      { "command": "dashboard", "key": "ctrl+alt+d" },
+      { "command": "tree", "key": "ctrl+alt+t", "when": "projectOpen" },
+      { "command": "upper", "key": "ctrl+alt+u", "when": "editorHasSelection" }
+    ],
+    "settings": {
+      "title": "IDE-Werkzeugkasten",
+      "items": [
+        { "key": "author", "type": "text", "title": "Name für TODOs", "default": "ich" },
+        { "key": "statusBar", "type": "boolean", "title": "Git-Zustand in der Statusleiste", "default": "true" },
+        { "key": "eventFilter", "type": "choice", "title": "Ereignisprotokoll", "default": "all",
+          "options": [{ "value": "all", "label": "Alle Ereignisse" }, { "value": "file", "label": "Nur Dateien" }, { "value": "git", "label": "Nur Git" }] },
+        { "key": "treeLimit", "type": "number", "title": "Max. Zeilen im Projektbaum", "default": "1000", "min": 100, "max": 5000 }
+      ]
+    }
+  }
+}

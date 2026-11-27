@@ -6,7 +6,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Die Code-Plugins unter `code-plugins/` müssen mit dem echten Parser gültig sein und API 4 nutzen. */
+/** Die Code-Plugins unter `code-plugins/` müssen mit dem echten Parser gültig sein und API 4 oder 5 nutzen. */
 class CodePluginsValidTest {
     private val dir: File = generateSequence(File("").absoluteFile) { it.parentFile }
         .map { File(it, "code-plugins") }.first { it.isDirectory }
@@ -16,9 +16,9 @@ class CodePluginsValidTest {
 
     @Test
     fun `alle Manifeste sind gültig`() {
-        assertEquals(8, manifests.size)
+        assertEquals(10, manifests.size)
         manifests.forEach { (name, m) ->
-            assertEquals(name, 4, m.apiVersion)
+            assertTrue(name, m.apiVersion in 4..5)
             assertNotNull(name, m.entryPointClass)
             assertTrue(name, m.id.startsWith("com.codeforge.plugin.$name"))
             assertTrue(name, m.categories.isNotEmpty() && m.tags.isNotEmpty())

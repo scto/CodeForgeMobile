@@ -80,9 +80,9 @@ interface PluginContext {
     /**
      * Seit API 5: voller Zugriff auf CodeForge Mobile (Befehle, Ereignisse, Einstellungen, Editor, Dateien, Git,
      * Navigation, Statusleiste), je Bereich mit eigener Berechtigung (siehe [IdeApi], [IdePermissions]).
-     * Nur für Plugins im App-Prozess; in der Sandbox nicht verfügbar.
+     * In der Sandbox nur Befehle, Ereignisse und Statusleiste (siehe `docs/plugin-api-v5.md`, Abschnitt 6.1).
      */
-    fun ide(): IdeApi = throw PluginPermissionException(pluginId, "ide (erst ab API 5, nicht in der Sandbox)")
+    fun ide(): IdeApi = throw PluginPermissionException(pluginId, "ide (erst ab API 5)")
 }
 
 /** Seit API 3: Rückmeldungen eines Plugins an den Nutzer (siehe [PluginContext.feedback]). */
@@ -136,6 +136,15 @@ interface PluginSettings {
 
     /** Benachrichtigt bei jeder Änderung durch den Nutzer mit dem geänderten Schlüssel; wird beim Entladen entfernt. */
     fun addChangeListener(listener: (key: String) -> Unit): Disposable
+
+    /**
+     * Seit API 5: speichert [value] für [key] (nur Schlüssel aus `contributes.settings`; `null` = Vorgabe), z. B. für
+     * eine eigene Einstellungsseite (`PluginUiPoints.SETTINGS_PAGE`). Ungültige Werte werden wie in der App
+     * angepasst (Zahlenbereich, Auswahl).
+     *
+     * @return `false` bei unbekanntem Schlüssel oder in der Sandbox.
+     */
+    suspend fun set(key: String, value: String?): Boolean = false
 }
 
 /** Seit API 3: Protokoll eines Plugins (siehe [PluginContext.logger]). */

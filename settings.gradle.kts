@@ -111,6 +111,8 @@ include(
     ":code-plugins:gradle-tasks",
     ":code-plugins:python-tests",
     ":code-plugins:text-tools",
+    ":code-plugins:session-stats",
+    ":code-plugins:ide-showcase",
 )
 
 // Beispiel-Plugin aus dem Plugin-Leitfaden (docs/dev/PluginDevelopment.md) liegt unter examples/guide/

@@ -167,8 +167,12 @@ object WhenClause {
             return when (peek()) {
                 "==" -> { next(); actual == literal(next()) }
                 "!=" -> { next(); actual != literal(next()) }
-                "=~" -> { next(); actual != null && Regex(literal(next()).trim('/')).containsMatchIn(actual) }
-                else -> !actual.isNullOrEmpty() && actual != "false"
+                "=~" -> {
+                    next()
+                    val pattern = Regex(literal(next()).trim('/'))
+                    actual != null && pattern.containsMatchIn(actual)
+                }
+                else -> { !actual.isNullOrEmpty() && actual != "false" }
             }
         }
 

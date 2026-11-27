@@ -1,5 +1,6 @@
 package {{packageName}}
 
+import com.codeforge.core.domain.extension.ide.IdeCommandHandler
 import com.codeforge.libs.plugin_api.CodeForgePlugin
 import com.codeforge.libs.plugin_api.EditorAction
 import com.codeforge.libs.plugin_api.EditorContext
@@ -9,13 +10,28 @@ import com.codeforge.libs.plugin_api.PluginExtensionPoints
 import com.codeforge.libs.plugin_api.TextEdit
 
 /**
- * Sandbox-Plugin: registriert Editor-Aktionen (Editor → Erweiterungs-Schaltfläche). Läuft im isolierten Prozess,
- * bekommt den Text vom Editor und liefert Änderungen zurück, die die App anwendet.
+ * Sandbox-Plugin (API 5). Läuft im isolierten Prozess.
+ * - Editor-Aktionen (Editor → Erweiterungs-Schaltfläche): bekommen den Text und liefern Änderungen zurück.
+ * - Befehl `hello`: über `contributes.menus` im Editor-Menü, Dateibaum und in der Palette, Tastenkürzel Strg+Alt+H.
+ * - Ereignisse und Statusleiste: zählt Speichervorgänge.
  */
 class MyPlugin : CodeForgePlugin {
+    private var saves = 0
+
     override fun onLoad(context: PluginContext) {
         context.register(PluginExtensionPoints.EDITOR_ACTION, Reverse)
         context.register(PluginExtensionPoints.EDITOR_ACTION, CountWords)
+
+        val ide = context.ide()
+        // Rückgabe erscheint als Hinweis; `path` kommt aus Editor bzw. Dateibaum.
+        ide.commands.register("hello", "Hallo aus der Sandbox", IdeCommandHandler { args ->
+            "Hallo! Datei: ${args["path"]?.substringAfterLast('/') ?: "–"}, $saves× gespeichert"
+        })
+        ide.statusBar.set("saves", "💾 0", "Speichervorgänge seit dem Start", "${context.pluginId}.hello")
+        ide.events.subscribe("file.saved") {
+            saves++
+            ide.statusBar.set("saves", "💾 $saves", "Speichervorgänge seit dem Start", "${context.pluginId}.hello")
+        }
     }
 
     override fun onUnload() = Unit

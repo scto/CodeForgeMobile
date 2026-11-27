@@ -44,6 +44,15 @@ class IdeMenusTest {
     }
 
     @Test
+    fun regexWithoutKey() {
+        val expr = "editorLangId =~ '^(kotlin|java)$'"
+        assertTrue(WhenClause.isValid(expr))
+        assertTrue(WhenClause.evaluate(expr, mapOf("editorLangId" to "java")))
+        assertTrue(!WhenClause.evaluate(expr, emptyMap()))
+        assertTrue(!WhenClause.isValid("editorLangId =~ '('"))
+    }
+
+    @Test
     fun manifestParsing() {
         val manifest = PluginManifestParser.parse(
             """

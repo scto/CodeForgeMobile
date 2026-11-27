@@ -1,0 +1,38 @@
+{
+  "id": "com.codeforge.plugin.session-stats.code",
+  "name": "Sitzungsstatistik (Sandbox)",
+  "version": "1.0.0",
+  "apiVersion": 5,
+  "publisher": "codeforge",
+  "description": "Zählt in der Statusleiste, wie oft du in dieser Sitzung gespeichert, Dateien geöffnet, gebaut und committet hast. Beispiel für API 5 in der Sandbox: eigene Befehle, Ereignisse, Statusleiste, Menüs (Editor, Dateibaum, Palette), Tastenkürzel, when-Bedingungen und Einstellungen. Läuft im isolierten Prozess ohne Zugriff auf Dateien, Netz oder Programme.",
+  "entryPointClass": "com.codeforge.plugin.session.SessionStatsPlugin",
+  "sandbox": true,
+  "permissions": ["editor", "commands", "events", "ui"],
+  "minHostVersion": "3.5.3",
+  "categories": ["tools/productivity", "samples/api"],
+  "tags": ["statistics", "statusbar", "commands", "events", "keybindings", "sandbox", "sample"],
+  "contributes": {
+    "commands": [
+      { "id": "show", "title": "Sitzungsstatistik anzeigen", "category": "Statistik" },
+      { "id": "reset", "title": "Sitzungsstatistik zurücksetzen", "category": "Statistik" },
+      { "id": "file", "title": "Wie oft gespeichert?", "category": "Statistik" }
+    ],
+    "menus": {
+      "editor/context": [{ "command": "show", "when": "projectOpen" }],
+      "fileTree/context": [{ "command": "file", "when": "resourceExtname" }],
+      "commandPalette": [{ "command": "reset", "when": "projectOpen" }]
+    },
+    "keybindings": [
+      { "command": "show", "key": "ctrl+alt+i" },
+      { "command": "reset", "key": "ctrl+alt+shift+i", "when": "projectOpen" }
+    ],
+    "settings": {
+      "title": "Sitzungsstatistik",
+      "items": [
+        { "key": "statusBar", "type": "boolean", "title": "In der Statusleiste anzeigen", "default": "true" },
+        { "key": "format", "type": "choice", "title": "Darstellung", "default": "short",
+          "options": [{ "value": "short", "label": "Kurz (Symbole)" }, { "value": "long", "label": "Ausführlich" }] }
+      ]
+    }
+  }
+}

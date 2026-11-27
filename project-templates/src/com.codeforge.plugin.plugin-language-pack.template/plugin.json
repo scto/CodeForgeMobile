@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.plugin-language-pack.template",
   "name": "Plugin · Sprachpaket (Projektvorlage)",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Projektvorlage für Plugin-Autoren: Übersetzung der App-Oberfläche. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",

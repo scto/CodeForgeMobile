@@ -1,7 +1,7 @@
 {
   "id": "com.codeforge.plugin.plugin-project-template.template",
   "name": "Plugin · Projektvorlage (Projektvorlage)",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "apiVersion": 2,
   "publisher": "codeforge",
   "description": "Projektvorlage für Plugin-Autoren: Eigene Vorlage für den Projekt-Assistenten. Anpassen, mit ./gradlew packagePlugin bauen, installieren und im Store einreichen.",

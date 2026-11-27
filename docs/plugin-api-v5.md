@@ -123,6 +123,8 @@ Eigene Einstellungen eines Plugins gibt es seit API 3 (`contributes.settings` un
 Jedes Plugin mit Einstellungen steht in der Einstellungsübersicht im Abschnitt **Plugin-Einstellungen**:
 - Hat es eine eigene Seite (`PluginUiPoints.SETTINGS_PAGE`, Abschnitt 5), öffnet sich diese.
 - Sonst führt der Eintrag zur Plugin-Ansicht mit den Einstellungen aus `contributes.settings`.
+- Eine eigene Seite speichert die Werte aus `contributes.settings` mit `context.settings().set(key, value)`
+  (`suspend`, `null` = Vorgabe; in der Sandbox nicht verfügbar).
 
 ### 4.4 Editor (`ide.editor`)
 
@@ -220,6 +222,14 @@ Technik: Der Sandbox-Prozess kann die App nicht selbst aufrufen. Was das Plugin 
 Ausgangspost, die jede Antwort an die App mitnimmt; zusätzlich holt die App sie alle 3 Sekunden ab. Befehle und
 Ereignisse ruft die App per Anfrage in der Sandbox auf. Die App prüft jede Meldung mit denselben Regeln wie bei
 In-Process-Plugins, Berechtigungen über die Sandbox-Liste hinaus werden ignoriert.
+
+### 6.2 Beispiele
+
+- `code-plugins/session-stats` – Sandbox: Befehle, Menüs, Tastenkürzel, `when`, Ereignisse, Statusleiste,
+  Einstellungen, Editor-Aktion. Im Store direkt installierbar.
+- `code-plugins/ide-showcase` – App-Prozess: alle Bereiche von `context.ide()`, Werkzeugfenster (Projektbaum mit
+  Git-Status), Bildschirm, eigene Einstellungsseite (`settings().set`, neu in API 5). Im Store als Sideload-Download.
+- Projektvorlage „Plugin · Code (Sandbox)“ (ab Vorlagen-Version 1.2.0) mit Befehl, Menüs und Tastenkürzel.
 
 ## 7. Lebenszyklus und Grenzen
 - Alles über `ide()` Angemeldete (Befehle, Abos, Einstellungs-Beobachter, Statuseinträge) wird beim Deaktivieren oder

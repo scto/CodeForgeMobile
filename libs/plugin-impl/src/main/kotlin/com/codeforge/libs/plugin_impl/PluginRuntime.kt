@@ -293,6 +293,12 @@ internal class PluginRuntime(
             return Disposable { job.cancel() }
         }
 
+        override suspend fun set(key: String, value: String?): Boolean {
+            val item = items.firstOrNull { it.key == key } ?: return false
+            repository.set(pluginId, key, value?.let { item.normalize(it) })
+            return true
+        }
+
         fun close() = scope.cancel()
     }
 
