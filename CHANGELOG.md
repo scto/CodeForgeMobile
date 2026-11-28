@@ -17,6 +17,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   `apksigner`, die nativen Programme statisch für Android gebaut. Sie haben im SDK-Manager Vorrang vor den bisherigen
   Quellen. Die Lzhiyong-Pakete (nur Binaries, keine Jars) werden nicht mehr angeboten. / Complete build-tools and
   platform-tools 28.0.0–37.0.3; Lzhiyong packages removed.
+- **Flutter und Rust im SDK-Manager** (neuer Reiter „Flutter & Rust“, `codeforge-env install flutter;3.47.8` bzw.
+  `rust;1.99.1`): Flutter 3.47.8 / Dart für Android-arm64 (nullij/flutter-sdk-android-arm64) und Rust 1.99.1 mit
+  cargo, rustfmt und rust-analyzer (nullij/android-rust-toolchain, arm64/armv7/x86_64). Download aus dem Spiegel
+  scto/codeforge-tools (sonst Upstream), SHA-256 fest hinterlegt, Installation nach `$PREFIX/opt`, Programme als Links in
+  `$PREFIX/bin`; Rust installiert bei Bedarf clang als Linker, Flutter trägt das Android-SDK ein.
+  `codeforge-env pkg rust|rustfmt|rust-analyzer` nimmt jetzt die Toolchain – das behebt „Package 'rust' has no
+  installation candidate“ (auch für die Store-Plugins rust-analyzer und rustfmt). / Flutter and Rust toolchains in the
+  SDK manager; `pkg rust` uses the Rust toolchain.
 - **Formatierer google-java-format 1.37.0 und ktfmt 0.65 im Store**, je mit Einstellungsseite (GJF: Google/AOSP, maximale Zeilenlänge,
   Importe sortieren/entfernen, Strings umbrechen, Javadoc, Modifier, nur Importe, Heap; ktfmt: Kotlinlang/Google/Meta,
   unbenutzte Importe, .editorconfig für Breite und Einzüge, Heap). Die JARs kommen SHA-256-geprüft aus Maven Central

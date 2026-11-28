@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.DataObject
@@ -107,6 +108,7 @@ private val TABS = listOf(
     CategoryTab(R.string.sdkmanager_category_platform_tools, ToolType.PLATFORM_TOOLS, Icons.Filled.Usb),
     CategoryTab(R.string.sdkmanager_category_cmdline_tools, ToolType.CMDLINE_TOOLS, Icons.Filled.Terminal),
     CategoryTab(R.string.sdkmanager_category_jdk, ToolType.JDK, Icons.Filled.Coffee),
+    CategoryTab(R.string.sdkmanager_category_toolchains, ToolType.TOOLCHAINS, Icons.Filled.Code),
 )
 
 @Composable

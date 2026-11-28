@@ -24,14 +24,14 @@ FORMATTERS = [
     ("shfmt", "shfmt", ["sh", "bash", "zsh"], [], ["shfmt", "-filename", F], "pkg install shfmt"),
     ("ruff-format", "Ruff Format", ["py", "pyi"], [], ["ruff", "format", "--stdin-filename", F, "-"], "pkg install ruff"),
     ("gofmt", "gofmt", ["go"], [], ["gofmt"], "pkg install golang"),
-    ("rustfmt", "rustfmt", ["rs"], [], ["rustfmt", "--edition", "2021"], "pkg install rust"),
+    ("rustfmt", "rustfmt", ["rs"], [], ["rustfmt", "--edition", "2021"], "codeforge-env install rust;1.99.1"),
     ("taplo-format", "Taplo Format", ["toml"], [], ["taplo", "format", "-"], "pkg install taplo"),
 ]
 
 # (name, label, languages, command, install) – `languages` = Sprach-IDs des Editors; mehrere Server je Plugin möglich
 LSP = [
     ("clangd", "clangd (C/C++)", [("clangd", ["c", "cpp"], ["clangd", "--background-index"])], "pkg install clang"),
-    ("rust-analyzer", "rust-analyzer (Rust)", [("rust-analyzer", ["rust"], ["rust-analyzer"])], "pkg install rust-analyzer"),
+    ("rust-analyzer", "rust-analyzer (Rust)", [("rust-analyzer", ["rust"], ["rust-analyzer"])], "codeforge-env install rust;1.99.1"),
     ("taplo", "Taplo (TOML)", [("taplo", ["toml"], ["taplo", "lsp", "stdio"])], "pkg install taplo"),
     ("gopls", "gopls (Go)", [("gopls", ["go"], ["gopls"])], "pkg install gopls"),
     ("ruff", "Ruff (Python-Linting)", [("ruff", ["python"], ["ruff", "server"])], "pkg install ruff"),
@@ -94,7 +94,7 @@ REQUIRES = {
     "rustfmt": [_r("pkg", "rust", "rustfmt")],
     "taplo-format": [_r("pkg", "taplo")],
     "clangd": [_r("pkg", "clang", "clangd")],
-    "rust-analyzer": [_r("pkg", "rust-analyzer")],
+    "rust-analyzer": [_r("pkg", "rust", "rust-analyzer")],
     "taplo": [_r("pkg", "taplo")],
     "gopls": [_r("pkg", "gopls")],
     "ruff": [_r("pkg", "ruff")],
@@ -252,7 +252,7 @@ FEATURE_PLUGINS = [
 
 
 # Plugins mit geänderter Fassung (Store erkennt Updates an der Version); alle anderen 1.0.0.
-VERSIONS = {"com.codeforge.plugin.pyright.lsp": "1.0.1", "com.codeforge.plugin.jvm-pack.bundle": "1.1.0", "com.codeforge.plugin.all-formatters.bundle": "1.1.0", "com.codeforge.plugin.ktfmt.formatter": "1.0.1", "com.codeforge.plugin.google-java-format.formatter": "1.0.1", "com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
+VERSIONS = {"com.codeforge.plugin.pyright.lsp": "1.0.1", "com.codeforge.plugin.rust-analyzer.lsp": "1.0.1", "com.codeforge.plugin.rustfmt.formatter": "1.0.1", "com.codeforge.plugin.jvm-pack.bundle": "1.1.0", "com.codeforge.plugin.all-formatters.bundle": "1.1.0", "com.codeforge.plugin.ktfmt.formatter": "1.0.1", "com.codeforge.plugin.google-java-format.formatter": "1.0.1", "com.codeforge.plugin.kmp-lsp.lsp": "1.0.2", "com.codeforge.plugin.vscode-import.tool": "1.1.0"}  # 1.0.1: JVM-Optionen für kmp-jar-indexer; 1.0.2: termux-2 (keine falschen Argument-Warnungen bei Bibliotheks-Klassen)
 
 
 def manifest(pid, name, desc, contributes):

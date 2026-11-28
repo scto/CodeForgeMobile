@@ -5,7 +5,8 @@
 package com.codeforge.core.domain.model
 
 /** Art eines installierbaren SDK-Werkzeugs. */
-enum class ToolType { JDK, CMDLINE_TOOLS, PLATFORM_TOOLS, BUILD_TOOLS, PLATFORM, NDK, CMAKE }
+/** [TOOLCHAINS]: Flutter- und Rust-Toolchains (`flutter;…`, `rust;…`) unter `$PREFIX/opt`. */
+enum class ToolType { JDK, CMDLINE_TOOLS, PLATFORM_TOOLS, BUILD_TOOLS, PLATFORM, NDK, CMAKE, TOOLCHAINS }
 
 /** Ein Werkzeug mit Version, Installationsstatus und Pfad. */
 data class ToolItem(

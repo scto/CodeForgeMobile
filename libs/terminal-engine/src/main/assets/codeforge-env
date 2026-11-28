@@ -9,6 +9,7 @@
 # Aufruf:  codeforge-env [--machine] <befehl> [argumente]
 #   list                         alle bekannten Komponenten mit Installationsstatus
 #   install <id|paket>           z. B. jdk;21  ndk;r29  cmake;3.22.1  build-tools;37.0.0  platform-tools;37.0.0  platforms;android-36  gradle
+#                                Toolchains: flutter;3.47.8 (nur arm64)  rust;1.99.1 – nach $PREFIX/opt, Programme als Links in $PREFIX/bin
 #   uninstall <id>
 #   pkg <paket> [paket …]        installiert Repo-Pakete (große Pakete > 30 MiB über large-packages.txt, sonst per pkg)
 #   update                       aktualisiert die Paketlisten des CodeForgeMobile-APT-Repos
@@ -67,6 +68,8 @@
 #                    extra z. B. "strip=1"
 #   kind=sdkmanager  source=Paketpfad für Googles sdkmanager (z. B. platforms;android-35)
 #   kind=pkg         source=Termux-Paketname (wird per pkg installiert)
+#   kind=toolchain   source=URL, dest relativ zu $PREFIX/opt, extra: strip=N bin=<pfad> links=a:b:c up=<Ausweich-URL>
+#                    (Flutter: nullij/flutter-sdk-android-arm64, Rust: nullij/android-rust-toolchain – gespiegelt in $TOOLS_REPO)
 
 set -u
 
@@ -157,6 +160,33 @@ if [ -n "$CMDLINE_TOOLS_URL" ]; then
   DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n''platforms;android-36|36|sdkmanager|platforms;android-36|||'
 fi
 
+# ---------- Toolchains (Flutter, Rust) ----------
+# Gespiegelt in $TOOLS_REPO (SHA-256 fest hinterlegt = GitHubs digest), Ausweich-URL beim Upstream.
+OPT_DIR="$PREFIX/opt"
+FLUTTER_VER=3.47.8
+FLUTTER_TAG="flutter-$FLUTTER_VER-android-arm64-r1"
+FLUTTER_SHA=10062fb7fd7b54aed888e2104d4afeeb91436b3d33e1658ac7e1bc65a7d80f78
+RUST_VER=1.99.1
+toolchain_manifest() {
+  # Ohne Mirror (TOOLS_REPO leer) direkt vom Upstream-Spiegel scto/codeforge-tools
+  local mirror="https://github.com/${TOOLS_REPO:-scto/codeforge-tools}/releases/download" target rsha
+  case "$(uname -m)" in
+    aarch64|arm64)
+      printf 'flutter;%s|%s|toolchain|%s/%s/%s.tar.xz|%s|flutter-%s|strip=1 bin=bin links=flutter:dart up=https://github.com/nullij/flutter-sdk-android-arm64/releases/download/%s/%s.tar.xz\n' \
+        "$FLUTTER_VER" "$FLUTTER_VER" "$mirror" "$FLUTTER_TAG" "$FLUTTER_TAG" "$FLUTTER_SHA" "$FLUTTER_VER" "$FLUTTER_TAG" "$FLUTTER_TAG"
+      target=aarch64-linux-android; rsha=9cda1637db83c5ca1a17f06a6d0f100316ebc4440a290682315579d8ad622a4d ;;
+    armv7l|armv8l|arm*) target=armv7-linux-androideabi; rsha=9bdd8d01fede26cc948073204399cc680b293d63c0484e6e25ec67ea25f511ca ;;
+    x86_64) target=x86_64-linux-android; rsha=38120f80985a386cb956ae7c3aa8aae0c2566fe28724b7d027a915d8a6255c65 ;;
+    *) return 0 ;;
+  esac
+  printf 'rust;%s|%s|toolchain|%s/rust-toolchain-%s/rust-toolchain-%s.tar.gz|%s|rust-%s|strip=1 bin=rust/bin links=rustc:cargo:rustdoc:rustfmt:cargo-fmt:rust-analyzer up=https://github.com/nullij/android-rust-toolchain/releases/download/v%s/rust-toolchain-%s.tar.gz\n' \
+    "$RUST_VER" "$RUST_VER" "$mirror" "$RUST_VER" "$target" "$rsha" "$RUST_VER" "$RUST_VER" "$target"
+}
+DEFAULT_MANIFEST="$DEFAULT_MANIFEST"$'\n'"$(toolchain_manifest)"
+
+# xval <extra> <schlüssel>: Wert aus "a=1 b=2"
+xval() { printf '%s\n' "$1" | tr ' ' '\n' | sed -n "s/^$2=//p" | head -n1; }
+
 # Rückfall, wenn die GitHub-API nicht erreichbar ist
 FALLBACK_SDK="build-tools;37.0.0|37.0.0|ghsdk|$SDK_CUSTOM_REPO|||
 platform-tools;37.0.0|37.0.0|ghpt|$SDK_CUSTOM_REPO|||"
@@ -233,6 +263,9 @@ installed_path() { # id
       if [ -f "$mk" ]; then rev=$(cat "$mk"); [ -f "$SDK_ROOT/ndk/$rev/source.properties" ] && printf '%s' "$SDK_ROOT/ndk/$rev"; fi ;;
     archive)
       [ -n "$dest" ] && [ -d "$SDK_ROOT/$dest" ] && printf '%s' "$SDK_ROOT/$dest" ;;
+    toolchain)
+      local tx tb tl; tx=$(entry_field "$id" 7); tb=$(xval "$tx" bin); tl=$(xval "$tx" links); tl=${tl%%:*}
+      [ -n "$dest" ] && [ -x "$OPT_DIR/$dest/$tb/$tl" ] && printf '%s' "$OPT_DIR/$dest" ;;
     sdkmanager)
       # Platform nur mit android.jar als installiert werten: ein abgebrochener/paralleler sdkmanager-Lauf
       # hinterlässt sonst einen leeren Ordner (Compose-Vorschau: "Android-Plattform fehlt").
@@ -1018,10 +1051,60 @@ _do_install() { # id
       rm -rf "$qx"
       "$SDK_ROOT/platform-tools/adb" version >/dev/null 2>&1 || say "Warnung: adb startet nicht – Quelle/Variante prüfen"
       ;;
+    toolchain)
+      install_toolchain "$id" "$src" "$sha" "$dest" "$extra" "$strip"
+      ;;
     *) die "Unbekannter Typ '$kind' im Manifest für $id" ;;
   esac
   progress 100 "Fertig"
   ok "$id"
+}
+
+# install_toolchain <id> <url> <sha> <dest> <extra> <strip>: lädt (Mirror, sonst Upstream), prüft SHA-256, entpackt nach
+# $OPT_DIR/<dest> und legt die Programme als Links in $PREFIX/bin an.
+install_toolchain() {
+  local id=$1 url=$2 sha=$3 dest=$4 extra=$5 strip=$6 up bin links file l name
+  up=$(xval "$extra" up); bin=$(xval "$extra" bin); links=$(xval "$extra" links)
+  need_tools
+  case "$url" in *.tar.xz) command -v xz >/dev/null 2>&1 || pkg_install xz-utils || die "xz fehlt (pkg install xz-utils)" ;; esac
+  file="$TMP/cfsdk-$$-${url##*/}"
+  progress 2 "Lade $(format_component_id "$id") (mehrere hundert MB) …"
+  if ! download "$url" "$file" 2 70; then
+    rm -f "$file"
+    [ -n "$up" ] || die "Download fehlgeschlagen: $url"
+    say "Mirror nicht erreichbar – lade vom Upstream"
+    download "$up" "$file" 2 70 || { rm -f "$file"; die "Download fehlgeschlagen: $up"; }
+  fi
+  progress 74 "Prüfe Prüfsumme …"
+  file_sha256 "$file" || { rm -f "$file"; exit 1; }
+  [ "$GOT_SHA" = "$sha" ] || { rm -f "$file"; die "Prüfsumme stimmt nicht für $id (erwartet $sha, erhalten $GOT_SHA)"; }
+  progress 78 "Entpacke (kann mehrere Minuten dauern) …"
+  mkdir -p "$OPT_DIR"
+  extract "$file" "$OPT_DIR/$dest" "$strip" || { rm -f "$file"; die "Entpacken fehlgeschlagen für $id"; }
+  rm -f "$file"
+  progress 92 "Lege Programme an …"
+  for l in $(printf '%s' "$links" | tr ':' ' '); do
+    [ -e "$OPT_DIR/$dest/$bin/$l" ] || continue
+    chmod +x "$OPT_DIR/$dest/$bin/$l" 2>/dev/null
+    ln -sfn "$OPT_DIR/$dest/$bin/$l" "$PREFIX/bin/$l"
+  done
+  name=${id%%;*}
+  case "$name" in
+    rust)
+      # Linken braucht einen C-Compiler (cc) – in Termux clang
+      command -v cc >/dev/null 2>&1 || command -v clang >/dev/null 2>&1 || {
+        progress 94 "Installiere clang (Linker für Rust) …"
+        pkg_install clang || say "Warnung: clang fehlt – 'cargo build' braucht einen Linker (pkg install clang)"
+      }
+      "$PREFIX/bin/rustc" --version >/dev/null 2>&1 || say "Warnung: rustc startet nicht – Architektur/Variante prüfen"
+      ;;
+    flutter)
+      command -v git >/dev/null 2>&1 || pkg_install git || say "Warnung: git fehlt – flutter braucht git"
+      "$PREFIX/bin/flutter" config --no-analytics >/dev/null 2>&1 || true
+      [ -d "$SDK_ROOT" ] && "$PREFIX/bin/flutter" config --android-sdk "$SDK_ROOT" >/dev/null 2>&1 || true
+      "$OPT_DIR/$dest/bin/cache/dart-sdk/bin/dart" --version >/dev/null 2>&1 || say "Warnung: dart startet nicht – Architektur prüfen"
+      ;;
+  esac
 }
 
 do_uninstall() { # id
@@ -1033,6 +1116,9 @@ do_uninstall() { # id
   case "$kind" in
     pkg) pkg uninstall -y "$src" >/dev/null 2>&1 || die "Deinstallation von $src fehlgeschlagen" ;;
     archive) rm -rf "$p" ;;
+    toolchain)
+      local q; for q in "$PREFIX"/bin/*; do [ -L "$q" ] && case "$(readlink "$q")" in "$p"/*) rm -f "$q" ;; esac; done
+      rm -rf "$p" ;;
     sdkmanager) rm -rf "$p" ;;
     cmake) rm -rf "$p" "$SDK_ROOT/cmake/.cf-termux" ;;   # Symlinks; die Termux-Pakete cmake/ninja bleiben installiert
     ghcmake) rm -rf "$p" ;;
@@ -1513,7 +1599,18 @@ case "$cmd" in
   pkglist) do_pkglist ;;
   install) [ $# -ge 1 ] || die "install braucht eine ID"; do_install "$1" ;;
   uninstall) [ $# -ge 1 ] || die "uninstall braucht eine ID"; do_uninstall "$1" ;;
-  pkg) [ $# -ge 1 ] || die "pkg braucht mindestens einen Paketnamen"; check_dpkg_consistency; pkg_install "$@" || exit 1; ok "$*" ;;
+  pkg) [ $# -ge 1 ] || die "pkg braucht mindestens einen Paketnamen"
+       # Rust gibt es im Repo nicht als Paket (nur rust-src): rust/rustfmt/rust-analyzer kommen aus der Toolchain
+       # rust;<Version> (nullij/android-rust-toolchain). So funktionieren auch die requires der Store-Plugins.
+       cf_rest=(); cf_rust=0
+       for cf_p in "$@"; do
+         case "$cf_p" in rust|rustc|cargo|rustfmt|rust-analyzer|rust-src) cf_rust=1 ;; *) cf_rest+=("$cf_p") ;; esac
+       done
+       if [ "$cf_rust" = 1 ] && [ -z "$(installed_path "rust;$RUST_VER")" ]; then
+         say "Rust kommt als Toolchain rust;$RUST_VER (statt Paket)"; ( do_install "rust;$RUST_VER" ) || exit 1
+       fi
+       if [ ${#cf_rest[@]} -gt 0 ]; then check_dpkg_consistency; pkg_install "${cf_rest[@]}" || exit 1; fi
+       ok "$*" ;;
   update) check_dpkg_consistency; do_update ;;
   upgrade) check_dpkg_consistency; do_upgrade ;;
   search) do_search "$@" ;;

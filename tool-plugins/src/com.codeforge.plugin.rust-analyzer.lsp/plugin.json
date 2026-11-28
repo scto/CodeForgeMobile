@@ -1,10 +1,10 @@
 {
   "id": "com.codeforge.plugin.rust-analyzer.lsp",
   "name": "rust-analyzer (Rust) (Language Server)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Bindet rust-analyzer (Rust) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install rust-analyzer).",
+  "description": "Bindet rust-analyzer (Rust) ein. Fehlende Programme installiert die App nach Bestätigung (sonst: codeforge-env install rust;1.99.1).",
   "permissions": [],
   "contributes": {
     "lspServers": [
@@ -22,7 +22,8 @@
     "requires": [
       {
         "manager": "pkg",
-        "name": "rust-analyzer"
+        "name": "rust",
+        "check": "rust-analyzer"
       }
     ]
   }

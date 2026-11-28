@@ -1,10 +1,10 @@
 {
   "id": "com.codeforge.plugin.rustfmt.formatter",
   "name": "rustfmt (Formatierer)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "apiVersion": 2,
   "publisher": "codeforge",
-  "description": "Formatiert rs mit rustfmt. Fehlende Programme installiert die App nach Bestätigung (sonst: pkg install rust).",
+  "description": "Formatiert rs mit rustfmt. Fehlende Programme installiert die App nach Bestätigung (sonst: codeforge-env install rust;1.99.1).",
   "permissions": [],
   "contributes": {
     "formatters": [

@@ -18,6 +18,8 @@ data class SdkManagerState(
     val platformVersions: List<ToolItem> = emptyList(),
     val ndkVersions: List<ToolItem> = emptyList(),
     val cmakeVersions: List<ToolItem> = emptyList(),
+    /** Flutter und Rust. */
+    val toolchainVersions: List<ToolItem> = emptyList(),
     val activeDownloads: Map<String, Int> = emptyMap(),
     val isLoading: Boolean = false,
     /** Gewählter Reiter. */
@@ -36,6 +38,7 @@ data class SdkManagerState(
         ToolType.PLATFORM -> platformVersions
         ToolType.NDK -> ndkVersions
         ToolType.CMAKE -> cmakeVersions
+        ToolType.TOOLCHAINS -> toolchainVersions
     }
 
     /** Gewählter Eintrag des aktuellen Reiters. */

@@ -83,7 +83,8 @@ class SdkManagerViewModel @Inject constructor(
                 buildToolsVersions = grouped[ToolType.BUILD_TOOLS].orEmpty().sortedByVersionDescending(),
                 platformVersions = grouped[ToolType.PLATFORM].orEmpty().sortedByVersionDescending(),
                 ndkVersions = grouped[ToolType.NDK].orEmpty().sortedByVersionDescending(),
-                cmakeVersions = grouped[ToolType.CMAKE].orEmpty().sortedByVersionDescending()
+                cmakeVersions = grouped[ToolType.CMAKE].orEmpty().sortedByVersionDescending(),
+                toolchainVersions = grouped[ToolType.TOOLCHAINS].orEmpty().sortedBy { it.id }
             )
         }
     }
@@ -135,6 +136,7 @@ class SdkManagerViewModel @Inject constructor(
         id.startsWith("ndk;") -> ToolType.NDK
         id.startsWith("cmake;") -> ToolType.CMAKE
         id.startsWith("build-tools;") -> ToolType.BUILD_TOOLS
+        id.startsWith("flutter;") || id.startsWith("rust;") -> ToolType.TOOLCHAINS
         else -> ToolType.PLATFORM
     }
 

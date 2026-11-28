@@ -3084,4 +3084,5 @@
     <string name="build_tasks_reihenfolge">Läuft in dieser Reihenfolge: %1$s</string>
     <string name="build_ausgabe_oeffnen">Build-Ausgabe</string>
     <string name="build_mehr">Mehr</string>
+    <string name="sdkmanager_category_toolchains">Flutter &amp; Rust</string>
 </resources>
